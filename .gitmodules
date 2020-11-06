@@ -1,0 +1,28 @@
+[submodule "soc/deps/migen"]
+	path = soc/deps/migen
+	url = https://github.com/m-labs/migen.git
+[submodule "soc/deps/litex"]
+	path = soc/deps/litex
+	url = https://github.com/enjoy-digital/litex.git
+[submodule "soc/deps/litedram"]
+	path = soc/deps/litedram
+	url = https://github.com/enjoy-digital/litedram.git
+[submodule "soc/deps/litex_boards"]
+	path = soc/deps/litex_boards
+	url = https://github.com/litex-hub/litex-boards.git
+[submodule "soc/deps/liteeth"]
+	path = soc/deps/liteeth
+	url = https://github.com/enjoy-digital/liteeth.git
+[submodule "soc/deps/liteiclink"]
+	path = soc/deps/liteiclink
+	url = https://github.com/enjoy-digital/liteiclink.git
+[submodule "soc/deps/pyserial"]
+	path = soc/deps/pyserial
+	url = https://github.com/pyserial/pyserial.git
+[submodule "soc/deps/pythondata_software_compiler_rt"]
+	path = soc/deps/pythondata_software_compiler_rt
+	url = https://github.com/litex-hub/pythondata-software-compiler_rt.git
+[submodule "soc/deps/pythondata_cpu_vexriscv"]
+	path = soc/deps/pythondata_cpu_vexriscv
+	url = https://github.com/tcal-x/pythondata-cpu-vexriscv.git
+	branch = dev
