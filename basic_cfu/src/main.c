@@ -7,6 +7,7 @@
 
 #include "cfu.h"
 #include "perf.h"
+#include "riscv.h"
 
 
 void isr(void)
@@ -57,9 +58,16 @@ void __attribute__ ((noinline)) run_demo()
         puts("Enter second operand value (in hexadecimal, no leading '0x'):");
         unsigned int v1 = readval();
 
+#if 0
         int r0 = RunCustomInstruction0(v0, v1);       // byte sum
         int r1 = RunCustomInstruction1(v0, v1);       // byte swap
         int r2 = RunCustomInstruction2(v0, v1);       // bit reverse
+#else
+        //   r = opcode_R(opcode, funct3, funct7, s1, s2)
+        int r0 = opcode_R(CUSTOM0, 0, 0, v0, v1);       // byte sum
+        int r1 = opcode_R(CUSTOM0, 1, 0, v0, v1);       // byte swap
+        int r2 = opcode_R(CUSTOM0, 2, 0, v0, v1);       // bit reverse
+#endif
         puts("arg0        arg1        bytesum     byteswap    bitrev");
         printf("0x%08x, 0x%08x: 0x%08x, 0x%08x, 0x%08x\n", v0, v1, r0, r1, r2);
         printf("  %08d,   %08d:   %08d,   %08d,   %08d\n", v0, v1, r0, r1, r2);
@@ -71,9 +79,16 @@ void __attribute__ ((noinline)) run_cfu()
         puts("\n\nCFU TEST:");
         puts("arg0        arg1        bytesum     byteswap    bitrev");
         for (int i=0; i<0x50505; i+=0x8103) {
+#if 0
             int v0 = RunCustomInstruction0(i, i);       // byte sum
             int v1 = RunCustomInstruction1(i, i);       // byte swap
             int v2 = RunCustomInstruction2(i, i);       // bit reverse
+#else
+            //   r = opcode_R(opcode, funct3, funct7, s1, s2)
+            int v0 = opcode_R(CUSTOM0, 0, 0, i, i);       // byte sum
+            int v1 = opcode_R(CUSTOM0, 1, 0, i, i);       // byte swap
+            int v2 = opcode_R(CUSTOM0, 2, 0, i, i);       // bit reverse
+#endif
             printf("0x%08x, 0x%08x: 0x%08x, 0x%08x, 0x%08x\n", i, i, v0, v1, v2);
         }
         puts("\n");
