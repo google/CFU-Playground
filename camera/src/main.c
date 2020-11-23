@@ -9,6 +9,7 @@
 #include <i2c.h>
 
 #include "tflite.h"
+#include "perf.h"
 
 void isr(void)
 {
@@ -23,6 +24,8 @@ void isr(void)
 }
 
 #if 1
+
+// #define ONCE_AND_QUIT 
 
 #define HM01B0_PIXEL_X_NUM 96
 #define HM01B0_PIXEL_Y_NUM 96
@@ -99,15 +102,25 @@ int main(void) {
     // Tflm init
     puts("initTfLite()");
     initTfLite();
-    
+
+#ifdef ONCE_AND_QUIT
+    load_person();
+    puts("Running one inference");
+    set_mcycle(0);
+    detect();
+    unsigned int cyc = get_mcycle();
+    printf("%d cycles\n", cyc);
+    puts("Done");
+#else
     while (1) {
 
         // Mirror the bytes back
         puts("\n\nMenu");
         puts("----");
-        puts("4. Load Person example");
-        puts("5. Load No Person example");
-        puts("6. Detect");
+        puts("p. Load Person example");
+        puts("n. Load No Person example");
+        puts("z. Load all zeros");
+        puts("d. Detect");
         puts("> ");
 
         int c = readchar();
@@ -115,12 +128,20 @@ int main(void) {
         putchar('\n');
 
         switch (c) {
-            case '4': load_person(); break;
-            case '5': load_no_person(); break;
-            case '6': detect(); break;
+            case 'p': load_person(); break;
+            case 'n': load_no_person(); break;
+            case 'z': load_zeros(); break;
+            case 'd': {
+                set_mcycle(0);
+                detect(); 
+                unsigned int cyc = get_mcycle();
+                printf("%d cycles\n", cyc);
+                break;
+            }
             default: puts("???\n");
         }
     }
+#endif
 }
 
 #endif

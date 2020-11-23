@@ -43,7 +43,6 @@ void initTfLite() {
   // Set up logging. Google style is to avoid globals or statics because of
   // lifetime uncertainty, but since this has a trivial destructor it's okay.
   // NOLINTNEXTLINE(runtime-global-variables)
-  puts("1");
   static tflite::MicroErrorReporter micro_error_reporter;
   error_reporter = &micro_error_reporter;
 
@@ -60,7 +59,6 @@ void initTfLite() {
                          model->version(), TFLITE_SCHEMA_VERSION);
     return;
   }
-  puts("2");
 
   // Pull in only the operation implementations we need.
   // This relies on a complete list of all the ops needed by this graph.
@@ -79,12 +77,10 @@ void initTfLite() {
 
   // Build an interpreter to run the model with.
   // NOLINTNEXTLINE(runtime-global-variables)
-  puts("3");
   static tflite::MicroInterpreter static_interpreter(
       model, micro_op_resolver, tensor_arena, kTensorArenaSize, error_reporter);
   interpreter = &static_interpreter;
 
-  puts("4");
   // Allocate memory from the tensor_arena for the model's tensors.
   TfLiteStatus allocate_status = interpreter->AllocateTensors();
   if (allocate_status != kTfLiteOk) {
@@ -94,7 +90,12 @@ void initTfLite() {
 
   // Get information about the memory area to use for the model's input.
   input = interpreter->input(0);
-  puts("5");
+  auto dims = input->dims;
+  printf("Input ?, %d bytes, %d dims:", input->bytes, dims->size);
+  for (int ii=0; ii<dims->size; ++ii) {
+    printf(" %d", dims->data[ii]);
+  }
+  puts("\n");
 }
 
 int8_t *get_input() {
@@ -102,23 +103,20 @@ int8_t *get_input() {
 }
 
 void load_person() {
-//
-// FIXME why are g_person_data_size and g_no_person_data_size zero?
-//
-  memcpy(input->data.int8, g_person_data, /*g_person_data_size*/ kMaxImageSize);
-  printf("&g_person_data_size %p, %d\n", &g_person_data_size, g_person_data_size);
-  printf("&g_no_person_data_size %p, %d\n", &g_no_person_data_size, g_no_person_data_size);
-  printf("Copy %x (now %x) bytes from %p to %p\n", g_person_data_size, kMaxImageSize, g_person_data, input->data.int8);
+  memcpy(input->data.int8, g_person_data, g_person_data_size);
+  printf("Copy %x bytes from %p to %p\n", g_person_data_size, g_person_data, input->data.int8);
   printf("kNumCols %d, kNumRows %d, kNumChannels %d, kMaxImageSize %d\n", kNumCols, kNumRows, kNumChannels, kMaxImageSize);
 }
 
 void load_no_person() {
-//
-// FIXME why are g_person_data_size and g_no_person_data_size zero?
-//
-  memcpy(input->data.int8, g_no_person_data, /*g_no_person_data_size*/ kMaxImageSize);
-  printf("Copy %x (now %x) bytes from %p to %p\n", g_no_person_data_size, kMaxImageSize, g_no_person_data, input->data.int8);
+  memcpy(input->data.int8, g_no_person_data, g_no_person_data_size);
+  printf("Copy %x bytes from %p to %p\n", g_no_person_data_size,g_no_person_data, input->data.int8);
   printf("kNumCols %d, kNumRows %d, kNumChannels %d, kMaxImageSize %d\n", kNumCols, kNumRows, kNumChannels, kMaxImageSize);
+}
+
+void load_zeros() {
+  memset(input->data.int8, 0, kMaxImageSize);
+  printf("Zero %x bytes at %p\n", kMaxImageSize, input->data.int8);
 }
 
 void classify(int8_t *person_score, int8_t *no_person_score) {

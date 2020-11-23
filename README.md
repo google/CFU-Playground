@@ -9,7 +9,7 @@ git submodule update
 ```
 ### Use
 
-Build the SoC, optionally with Etherbone, and load it onto Arty:
+Build the SoC in the `soc/` subdir, optionally with Etherbone, and load it onto Arty:
 ```
 pushd soc
 python3.7 ./soc.py --build --csr-csv csr.csv --cfu cfu/Cfu.v [--with-etherbone] --load
@@ -22,7 +22,8 @@ cd basic_cfu
 make
 lxterm --speed 115200 --kernel basic_cfu.bin /dev/ttyUSB*
 ```
-(maybe you don't have `lxterm` in your path, but 
+
+TODO: make sure `lxterm` or `litex_term` are available on the user's path.
 
 ### Licensed under Apache-2.0 license
 

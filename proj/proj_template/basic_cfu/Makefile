@@ -1,13 +1,15 @@
 # Makefile reusing as much from the LiteX gateware and software builds as possible.
 
+PLATFORM   := arty_etherbone_vexriscv.full+debug
 PLATFORM   := arty
 
 # These are found in the PATH
 RV64       := riscv64-unknown-elf-
+# RV64       := riscv64-elf-
 CC         := $(RV64)gcc
 CXX        := $(RV64)g++
-OBJDUMP    := $(RV64)objdump
 OBJCOPY    := $(RV64)objcopy
+OBJDUMP    := $(RV64)objdump
 
 RM         := rm -rf
 COPY       := cp -a
@@ -15,7 +17,8 @@ PATH_SEP   := /
 
 # Assumes current directory is the one containing the makefile
 BASE_DIR   := .
-SOC_DIR    := $(BASE_DIR)/../soc
+CFU_DIR    := $(BASE_DIR)/../../..
+SOC_DIR    := $(CFU_DIR)/soc
 BUILD_DIR  := $(SOC_DIR)/build/$(PLATFORM)/software
 LITEX_DIR  := $(SOC_DIR)/deps/litex/litex
 VEX_SRC_DIR  := $(LITEX_DIR)/soc/cores/cpu/vexriscv
@@ -26,68 +29,41 @@ LDSCRIPT   := $(LD_DIR)/linker.ld
 LDSCRIPTS  := $(LDSCRIPT) $(GEN_LD_DIR)/output_format.ld $(GEN_LD_DIR)/regions.ld
 
 SRC_DIR    := $(BASE_DIR)/src
-EXTRA_SRC_DIR  := $(BASE_DIR)/extra_src
-THIRD_PARTY := $(BASE_DIR)/../third_party
-TFLM_DIR   := $(THIRD_PARTY)/tflm_gen
-TFLM_LIB   := $(TFLM_DIR)/libtensorflow-microlite.a
+THIRD_PARTY := $(CFU_DIR)/third_party
 
 # TODO: always do or always don't debug build
 DBG_CFLAGS := -ggdb -g -DDEBUG -Wall
 DBG_LFLAGS := -ggdb -g -Wall
+DBG_LFLAGS := 
 
-PACKAGE    := camera
+PACKAGE    := basic
 
 
-SHARED_FLAGS := \
-	-march=rv32im  -mabi=ilp32 \
-	-I$(BASE_DIR)/include -D__vexriscv__ \
-	-I$(TFLM_DIR) \
-	-I$(TFLM_DIR)/third_party/gemmlowp \
-	-I$(TFLM_DIR)/third_party/flatbuffers/include \
-	-I$(TFLM_DIR)/third_party/ruy \
+CFLAGS     := \
+	-ggdb -g -DDEBUG -Wall \
+	-I$(BASE_DIR)/include -D__vexriscv__ -march=rv32im  -mabi=ilp32 \
 	-I$(BUILD_DIR)/include \
-	-ffunction-sections -fdata-sections -fno-common \
-	-fomit-frame-pointer \
-	-Werror\
-	-Wsign-compare\
-	-Wdouble-promotion\
-	-Wshadow\
-	-Wunused-variable\
-	-Wmissing-field-initializers\
-	-Wunused-function\
-	-Wswitch\
-	-Wvla\
-	-DNDEBUG\
-	-DTF_LITE_STATIC_MEMORY\
-	-DTF_LITE_USE_GLOBAL_CMATH_FUNCTIONS\
-	-DTF_LITE_USE_GLOBAL_MIN\
-	-DTF_LITE_USE_GLOBAL_MAX \
-	-DTF_LITE_DISABLE_X86_NEON\
-	-O2 
-
-CFLAGS  := \
-	$(SHARED_FLAGS)\
+	-I$(THIRD_PARTY)/include \
+	-I$(BASE_DIR)/.. \
 	-I$(LITEX_DIR)/soc/software/include/base \
 	-I$(LITEX_DIR)/soc/software/include \
 	-I$(VEX_SRC_DIR) \
-	-fno-builtin 
-
-
-CXXFLAGS   := \
-	$(SHARED_FLAGS) \
-	-std=c++11 \
-	-fstrict-aliasing \
-	-fno-rtti \
-	-fno-exceptions \
-	-fno-threadsafe-statics
+	-fno-builtin -nostdinc \
+	-Wall -Wextra \
+	-ffunction-sections -fdata-sections -fno-common \
+	-fomit-frame-pointer \
+	-march=rv32im \
+	-std=gnu11 \
+	-O2 
+	# -Os 
+CXXFLAGS   := $(CFLAGS) -std=c++11 -fno-rtti -fno-exceptions
 
 LFLAGS     := $(CFLAGS) \
 	-L$(LD_DIR) \
 	-L$(GEN_LD_DIR) \
 	-L$(BUILD_DIR)/libbase -lbase-nofloat \
 	-L$(BUILD_DIR)/libcompiler_rt -lcompiler_rt \
-	-L$(TFLM_DIR) -ltensorflow-microlite \
-	-lm \
+	-nostdlib -nodefaultlibs \
 	-nostartfiles \
 	-Wl,--gc-sections \
 	-Wl,--no-warn-mismatch \
@@ -96,14 +72,14 @@ LFLAGS     := $(CFLAGS) \
 
 OBJ_DIR    := .obj
 
-CSOURCES   := $(wildcard $(SRC_DIR)/*.c   $(EXTRA_SRC_DIR)/*.c  )
-CPPSOURCES := $(wildcard $(SRC_DIR)/*.cpp $(EXTRA_SRC_DIR)/*.cpp )
+CSOURCES   := $(wildcard $(SRC_DIR)/*.c)
+CPPSOURCES := $(wildcard $(SRC_DIR)/*.cpp)
 ASOURCES   := $(wildcard $(SRC_DIR)/*.S)
 
 # All the object files go in OBJ_DIR, but putting them there causes us to lose
 # the path to the source files. Setting VPATH allows Make to search for the
 # source files based on the object file name. #hack
-VPATH      := $(SRC_DIR):$(EXTRA_SRC_DIR)
+VPATH      := $(SRC_DIR)
 COBJS      := $(addprefix $(OBJ_DIR)/, $(notdir $(CSOURCES:.c=.o)))
 CXXOBJS    := $(addprefix $(OBJ_DIR)/, $(notdir $(CPPSOURCES:.cpp=.o)))
 AOBJS      := $(addprefix $(OBJ_DIR)/, $(notdir $(ASOURCES:.S=.o)))
@@ -122,20 +98,18 @@ CLEAN      := clean
 
 all: $(TARGET) $(PACKAGE).bin $(PACKAGE).ihex
 
+info:
+	echo Dir:
+	ls -lstr $(LITEX_DIR)/soc/software/include/base
+
 $(OBJECTS): | $(OBJ_DIR)
 
-$(TFLM_LIB):
-	$(QUIET) echo "  MAKE     $@"
-	$(QUIET) $(MAKE) -j -C $(TFLM_DIR) $(notdir $(TFLM_LIB))
-
-$(TARGET): $(OBJECTS) $(TFLM_LIB) $(LDSCRIPTS)
+$(TARGET): $(OBJECTS) $(LDSCRIPTS)
 	$(QUIET) echo "  LD       $@"
 	$(QUIET) $(CC) $(OBJECTS) $(LFLAGS) -o $@
-	$(QUIET) echo "  OBJDUMP  $@.dis"
-	$(QUIET) $(OBJDUMP) -d $(TARGET) > $(TARGET).dis
-	$(QUIET) echo "  OBJDUMP  $@.sym"
-	$(QUIET) $(OBJDUMP) -s $(TARGET) > $(TARGET).sym
-
+	$(QUIET) echo "  OBJDUMP  $@"
+	$(QUIET) $(OBJDUMP) -d $@ > $@.dis
+	$(QUIET) $(OBJDUMP) -t $@ > $@.sym
 
 $(PACKAGE).bin: $(TARGET)
 	$(QUIET) echo "  OBJCOPY  $@"
@@ -166,22 +140,18 @@ $(AOBJS) : $(OBJ_DIR)/%.o : %.S
 	$(QUIET) echo "  AS       $<	$(notdir $@)"
 	$(QUIET) $(CC) -x assembler-with-cpp -c $< $(CFLAGS) -o $@ -MMD
 
-renode:
-	renode -e "i @litex-vexriscv-tflite.resc"
-
-
 clean:
 	$(QUIET) echo "  RM      $(subst /,$(PATH_SEP),$(wildcard $(OBJ_DIR)/*.d))"
 	-$(QUIET) $(RM) $(subst /,$(PATH_SEP),$(wildcard $(OBJ_DIR)/*.d))
-	$(QUIET) echo "  RM      $(subst /,$(PATH_SEP),$(wildcard $(OBJ_DIR)/*.d))"
+	$(QUIET) echo "  RM      $(subst /,$(PATH_SEP),$(wildcard $(OBJ_DIR)/*.o))"
 	-$(QUIET) $(RM) $(subst /,$(PATH_SEP),$(wildcard $(OBJ_DIR)/*.o))
-	$(QUIET) echo "  RM      $(TARGET) $(PACKAGE).bin $(PACKAGE).symbol $(PACKAGE).ihex $(TARGET).dis $(TARGET).sym"
-	-$(QUIET) $(RM) $(TARGET) $(PACKAGE).bin $(PACKAGE).symbol $(PACKAGE).ihex $(TARGET).dis $(TARGET).sym
-	$(QUIET) $(MAKE) -C $(TFLM_DIR) clean
-
-prog: $(PACKAGE).bin
-	ecpprog -k 4 -o 2M $(PACKAGE).bin
+	$(QUIET) echo "  RM      $(TARGET) $(PACKAGE).bin $(PACKAGE).symbol $(PACKAGE).ihex $(TARGET).sym $(TARGET).dis"
+	-$(QUIET) $(RM) $(TARGET) $(PACKAGE).bin $(PACKAGE).symbol $(PACKAGE).ihex $(TARGET).sym $(TARGET).dis
 
 include $(wildcard $(OBJ_DIR)/*.d)
+
+run:
+	litex_term --speed 115200 --kernel basic.bin /dev/ttyUSB?
+
 
 .PHONY: clean prog 
