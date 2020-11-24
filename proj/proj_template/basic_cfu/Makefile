@@ -22,6 +22,7 @@ SOC_DIR    := $(CFU_DIR)/soc
 BUILD_DIR  := $(SOC_DIR)/build/$(PLATFORM)/software
 LITEX_DIR  := $(SOC_DIR)/deps/litex/litex
 VEX_SRC_DIR  := $(LITEX_DIR)/soc/cores/cpu/vexriscv
+LXTERM     := $(SOC_DIR)/bin/litex_term
 
 LD_DIR     := $(BASE_DIR)/ld
 GEN_LD_DIR := $(BUILD_DIR)/include/generated
@@ -151,7 +152,7 @@ clean:
 include $(wildcard $(OBJ_DIR)/*.d)
 
 run:
-	litex_term --speed 115200 --kernel basic.bin /dev/ttyUSB?
+	$(LXTERM) --speed 115200 --kernel basic.bin /dev/ttyUSB?
 
 
 .PHONY: clean prog 

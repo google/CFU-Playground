@@ -86,8 +86,8 @@ void __attribute__ ((noinline)) compare_against_sw()
         puts("\n\nCFU:SW TEST:");
         puts("arg0        arg1            bytesum           byteswap         bitrev");
         unsigned count = 0;
-        for (unsigned i=0; i<0x5050505; i+=0x105) {
-          for (unsigned j=0; j<0x5050505; j+=0x103) {
+        for (unsigned i=0; i<0x5050505; i+=0x7105) {
+          for (unsigned j=0; j<0x5050505; j+=0xb103) {
             unsigned v0 = cfu_byte_sum_hw(i, j);
             unsigned v1 = cfu_byte_swap_hw(i, j);
             unsigned v2 = cfu_bit_reverse_hw(i, j);
