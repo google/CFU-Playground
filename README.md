@@ -29,7 +29,7 @@ Build the program and execute it:
 ```
 cd basic_cfu
 make
-lxterm --speed 115200 --kernel basic_cfu.bin /dev/ttyUSB*
+../soc/bin/litex_term --speed 115200 --kernel basic.bin /dev/ttyUSB*
 ```
 
 TODO: make sure `lxterm` or `litex_term` are available on the user's path.
