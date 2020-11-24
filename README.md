@@ -2,7 +2,7 @@
 
 ### Assumed Software
 
-* RISC-V toolchain (riscv64-unknown-elf-*) tested w/ v9.1.0.   v7.x is too old.
+* RISC-V toolchain (riscv64-unknown-elf-*) tested w/ v9.1.0.   gcc v8.3 also works.  gcc v7.x is too old.
 
 * openocd
 
