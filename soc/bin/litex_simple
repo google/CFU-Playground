@@ -1,0 +1,14 @@
+#!/usr/bin/env python3
+
+import sys
+import os
+
+# This script lives in the "bin" directory, but uses a helper script in the parent
+# directory.  Obtain the current path so we can get the absolute parent path.
+script_path = os.path.dirname(os.path.realpath(
+    __file__)) + os.path.sep + os.path.pardir + os.path.sep
+sys.path.insert(0, script_path)
+import lxbuildenv
+
+from litex.boards.targets.simple import main
+main()

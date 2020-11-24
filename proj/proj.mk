@@ -27,6 +27,7 @@ CAM_BASES   := src ld Makefile
 CAM_SRC_DIR := $(CFU_ROOT)/camera
 CAM_FILES   := $(addprefix $(CAM_SRC_DIR)/, $(CAM_BASES))
 
+LXTERM      := $(CFU_ROOT)/soc/bin/litex_term
 
 soc: $(BITSTREAM)
 
@@ -63,10 +64,10 @@ sw:
 	pushd $(SOFTWARE)/camera; make CFU_ROOT=$(CFU_REAL_ROOT); popd
 
 load:
-	lxterm --speed 115200 --kernel $(SOFTWARE)/camera/camera.bin /dev/ttyUSB1
+	$(LXTERM) --speed 115200 --kernel $(SOFTWARE)/camera/camera.bin /dev/ttyUSB1
 
 load0:
-	lxterm --speed 115200 --kernel $(SOFTWARE)/camera/camera.bin /dev/ttyUSB0
+	$(LXTERM) --speed 115200 --kernel $(SOFTWARE)/camera/camera.bin /dev/ttyUSB0
 
 
 ls:
