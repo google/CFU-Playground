@@ -1,5 +1,14 @@
 # CFU Playground
 
+### Assumed Software
+
+* RISC-V toolchain (riscv64-unknown-elf-*) tested w/ v9.1.0.   v7.x is too old.
+
+* openocd
+
+
+
+
 ### Setup
 
 Clone this repo, `cd` into it, then get the first level of submodules (don't do `--recursive`):

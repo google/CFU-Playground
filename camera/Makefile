@@ -15,7 +15,8 @@ PATH_SEP   := /
 
 # Assumes current directory is the one containing the makefile
 BASE_DIR   := .
-SOC_DIR    := $(BASE_DIR)/../soc
+CFU_ROOT   := ..
+SOC_DIR    := $(CFU_ROOT)/soc
 BUILD_DIR  := $(SOC_DIR)/build/$(PLATFORM)/software
 LITEX_DIR  := $(SOC_DIR)/deps/litex/litex
 VEX_SRC_DIR  := $(LITEX_DIR)/soc/cores/cpu/vexriscv
@@ -27,7 +28,7 @@ LDSCRIPTS  := $(LDSCRIPT) $(GEN_LD_DIR)/output_format.ld $(GEN_LD_DIR)/regions.l
 
 SRC_DIR    := $(BASE_DIR)/src
 EXTRA_SRC_DIR  := $(BASE_DIR)/extra_src
-THIRD_PARTY := $(BASE_DIR)/../third_party
+THIRD_PARTY := $(CFU_ROOT)/third_party
 TFLM_DIR   := $(THIRD_PARTY)/tflm_gen
 TFLM_LIB   := $(TFLM_DIR)/libtensorflow-microlite.a
 

@@ -81,6 +81,30 @@ void __attribute__ ((noinline)) run_cfu()
         puts("\n");
 }
 
+void __attribute__ ((noinline)) compare_against_sw()
+{
+        puts("\n\nCFU:SW TEST:");
+        puts("arg0        arg1            bytesum           byteswap         bitrev");
+        unsigned count = 0;
+        for (unsigned i=0; i<0x5050505; i+=0x105) {
+          for (unsigned j=0; j<0x5050505; j+=0x103) {
+            unsigned v0 = cfu_byte_sum_hw(i, j);
+            unsigned v1 = cfu_byte_swap_hw(i, j);
+            unsigned v2 = cfu_bit_reverse_hw(i, j);
+            unsigned sw0 = cfu_byte_sum_sw(i, j);
+            unsigned sw1 = cfu_byte_swap_sw(i, j);
+            unsigned sw2 = cfu_bit_reverse_sw(i, j);
+            if (v0!=sw0 || v1!=sw1 || v2!=sw2) {
+                printf("0x%08x, 0x%08x: 0x%08x:0x%08x, 0x%08x:0x%08x, 0x%08x:0x%08x <<=== MISMATCH!\n", 
+                        i, j, v0, sw0, v1, sw1, v2, sw2);
+            }
+            ++count;
+            if ((count & 0xffff) == 0) printf("Ran %d comparisons....\n", count);
+          }
+        }
+        printf("Ran %d comparisons.\n", count);
+}
+
 
 int main(void) 
 {
@@ -143,6 +167,10 @@ int main(void)
         if (c == 'p') {
             printf("ause perf counter %d\n", counter_num);
             set_counter_enable(counter_num, 0);
+        }
+        if (c == 's') {
+            printf("oftware comparison\n");
+            compare_against_sw();
         }
         leds_val += 1;
         leds_out_write(leds_val);
