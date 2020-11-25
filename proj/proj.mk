@@ -17,6 +17,7 @@ SOC_BASES := mem.init mem_1.init mem_2.init arty.v arty.tcl arty.xdc build_arty.
 SOC_FILES := $(addprefix $(GEN_SOC)/, $(SOC_BASES))
 
 PROJ_DIR    := .
+CFU_NMIGEN  := $(PROJ_DIR)/cfu_gen.py
 CFU_VERILOG := $(PROJ_DIR)/cfu.v
 REAL_CFU_VERILOG := $(realpath $(CFU_VERILOG))
 SED_CFU_VERILOG := $(subst /,\/,$(REAL_CFU_VERILOG))
@@ -29,8 +30,10 @@ CAM_FILES   := $(addprefix $(CAM_SRC_DIR)/, $(CAM_BASES))
 
 LXTERM      := $(CFU_ROOT)/soc/bin/litex_term
 
-soc: $(BITSTREAM)
 
+
+
+soc: $(BITSTREAM)
 
 #
 # Copy necessary files from generic gateware build,
@@ -39,13 +42,15 @@ soc: $(BITSTREAM)
 #
 $(BITSTREAM): $(SOC_FILES) $(CFU_VERILOG)
 	@echo building SoC
-	sleep 2
 	mkdir -p $(GATEWARE)
 	/bin/cp $(SOC_FILES) $(GATEWARE)
 	sed -e 's/read_verilog {.*Cfu.v}/read_verilog {$(SED_CFU_VERILOG)}/' $(GATEWARE)/arty.tcl > /tmp/arty.tcl
 	/bin/mv /tmp/arty.tcl $(GATEWARE)/arty.tcl
 	pushd $(GATEWARE); source $(VIVADO_SETTINGS); source build_arty.sh; popd
-	
+
+$(CFU_VERILOG): $(CFU_NMIGEN)
+	python3 $(CFU_NMIGEN)
+
 
 prog: $(BITSTREAM)
 	openocd -f $(CFU_REAL_ROOT)/prog/openocd_xc7_ft2232.cfg -c "init ; pld load 0 $(BITSTREAM) ; exit"
