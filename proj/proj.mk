@@ -17,7 +17,8 @@ SOC_BASES := mem.init mem_1.init mem_2.init arty.v arty.tcl arty.xdc build_arty.
 SOC_FILES := $(addprefix $(GEN_SOC)/, $(SOC_BASES))
 
 PROJ_DIR    := .
-CFU_NMIGEN  := $(PROJ_DIR)/cfu_gen.py
+CFU_NMIGEN      := $(PROJ_DIR)/cfu.py
+CFU_NMIGEN_GEN  := $(PROJ_DIR)/cfu_gen.py
 CFU_VERILOG := $(PROJ_DIR)/cfu.v
 REAL_CFU_VERILOG := $(realpath $(CFU_VERILOG))
 SED_CFU_VERILOG := $(subst /,\/,$(REAL_CFU_VERILOG))
@@ -48,8 +49,8 @@ $(BITSTREAM): $(SOC_FILES) $(CFU_VERILOG)
 	/bin/mv /tmp/arty.tcl $(GATEWARE)/arty.tcl
 	pushd $(GATEWARE); source $(VIVADO_SETTINGS); source build_arty.sh; popd
 
-$(CFU_VERILOG): $(CFU_NMIGEN)
-	python3 $(CFU_NMIGEN)
+$(CFU_VERILOG): $(CFU_NMIGEN) $(CFU_NMIGEN_GEN)
+	python3 $(CFU_NMIGEN_GEN)
 
 
 prog: $(BITSTREAM)
