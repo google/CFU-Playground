@@ -1,14 +1,17 @@
 SHELL := /bin/bash
 
 CFU_ARGS=   --cfu cfu/Cfu.v
-LITEX_ARGS= --with-etherbone --csr-csv csr.csv $(CFU_ARGS)
+UART_ARGS=  --uart-baudrate 460800
+UART_ARGS=  --uart-baudrate 115200
+LITEX_ARGS= --with-etherbone --csr-csv csr.csv $(CFU_ARGS) $(UART_ARGS)
 
+.PHONY: build prog run0 run1
 
 build:
-	cd soc; python3 ./soc.py $(LITEX_ARGS) --build; cd ..
+	pushd soc; python3 ./soc.py $(LITEX_ARGS) --build; popd
 
 prog:
-	cd soc; python3 ./soc.py $(LITEX_ARGS) --load; cd ..
+	pushd soc; python3 ./soc.py $(LITEX_ARGS) --load; popd
 
 camera/camera.bin:
 	pushd camera; make; popd
