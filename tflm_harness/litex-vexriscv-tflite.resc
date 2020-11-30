@@ -1,0 +1,26 @@
+using sysbus
+
+mach create
+machine LoadPlatformDescription $ORIGIN/litex-vexriscv-tflite.repl
+showAnalyzer uart
+
+sysbus LoadELF $ORIGIN/generic-tflm.elf
+
+# machine StartGdbServer 3333
+
+peripherals
+echo
+echo -n "RAM Size:    "
+sysbus.ram Size
+
+# Examine some memory locations
+#echo -n "RAM 0x6b758: "
+#sysbus.ram ReadDoubleWord 0x6b758
+#echo -n "RAM 0x6b75c: "
+#sysbus.ram ReadDoubleWord 0x6b75c
+#echo -n "RAM 0x6b760: "
+#sysbus.ram ReadDoubleWord 0x6b760
+
+echo "sysbus.cpu LogFunctionNames True"
+echo "machine StartGdbServer 3333"
+#machine StartGdbServer 3333

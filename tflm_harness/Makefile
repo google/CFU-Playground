@@ -42,7 +42,7 @@ TFLM_LIB   := $(TFLM_DIR)/libtensorflow-microlite.a
 DBG_CFLAGS := -ggdb -g -DDEBUG -Wall
 DBG_LFLAGS := -ggdb -g -Wall
 
-PACKAGE    := generic-tflm
+PACKAGE    := tflm_harness
 
 
 SHARED_FLAGS := \

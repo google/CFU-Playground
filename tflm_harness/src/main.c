@@ -60,7 +60,7 @@ int main(void) {
     set_mcycle(0);
     detect();
     unsigned int cyc = get_mcycle();
-    printf("%d cycles\n", cyc);
+    printf("%u cycles\n", cyc);
     puts("Done");
 }
 

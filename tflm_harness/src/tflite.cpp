@@ -10,6 +10,8 @@
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
 
+extern unsigned char model_tflite[];
+
 
 // For e
 void * __dso_handle = &__dso_handle;
@@ -32,7 +34,8 @@ TfLiteTensor* input = nullptr;
 // signed value.
 
 // An area of memory to use for input, output, and intermediate arrays.
-constexpr int kTensorArenaSize = 136 * 1024;
+// constexpr int kTensorArenaSize = 136 * 1024;
+constexpr int kTensorArenaSize = 800 * 1024;
 static uint8_t tensor_arena[kTensorArenaSize];
 }  // namespace
 
@@ -46,7 +49,7 @@ void initTfLite() {
 
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
-  model = tflite::GetModel(g_person_detect_model_data);
+  model = tflite::GetModel(model_tflite);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     TF_LITE_REPORT_ERROR(error_reporter,
                          "Model provided is schema version %d not equal "
@@ -63,12 +66,17 @@ void initTfLite() {
   //
   // tflite::AllOpsResolver resolver;
   // NOLINTNEXTLINE(runtime-global-variables)
-  static tflite::MicroMutableOpResolver<5> micro_op_resolver;
+  static tflite::MicroMutableOpResolver<8> micro_op_resolver;
   micro_op_resolver.AddAveragePool2D();
   micro_op_resolver.AddConv2D();
   micro_op_resolver.AddDepthwiseConv2D();
   micro_op_resolver.AddReshape();
   micro_op_resolver.AddSoftmax();
+
+  // needed for jon's model conv2d/relu, maxpool2d, reshape, fullyconnected, logistic
+  micro_op_resolver.AddMaxPool2D();
+  micro_op_resolver.AddFullyConnected();
+  micro_op_resolver.AddLogistic();
 
   // Build an interpreter to run the model with.
   // NOLINTNEXTLINE(runtime-global-variables)
@@ -119,4 +127,7 @@ void classify(int8_t *person_score, int8_t *no_person_score) {
   // Process the inference results.
   *person_score = output->data.int8[kPersonIndex];
   *no_person_score = output->data.int8[kNotAPersonIndex];
+
+  // Uncomment to see how large the arena needs to be.
+  printf("Arena used bytes: %llu\n", (long long unsigned)(interpreter->arena_used_bytes()));
 }

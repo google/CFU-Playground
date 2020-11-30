@@ -11,3 +11,9 @@ basic types used in tflm:
 
 ../third_party/tflm_gen/tensorflow/lite/micro/micro_interpreter.h
 
+
+
+
+Cycles:
+pdti8  -- arty ---  255880326
+keras  -- arty --- 4229359310
