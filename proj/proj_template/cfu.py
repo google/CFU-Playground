@@ -1,12 +1,12 @@
 #!/bin/env python
 # Copyright 2020 Google LLC
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,126 +14,188 @@
 # limitations under the License.
 
 from nmigen import *
-from nmigen.sim import Simulator, Delay, Settle
 
 import unittest
-
 import util
 
 
-class Cfu(util.SimpleElaboratable):
-    """Custom function unit interface.
-
-    Parameters
-    ----------
-    -
-
-    Attributes
-    ----------
-        input               io_bus_cmd_valid,
-        output              io_bus_cmd_ready,
-        input      [2:0]    io_bus_cmd_payload_function_id,
-        input      [31:0]   io_bus_cmd_payload_inputs_0,
-        input      [31:0]   io_bus_cmd_payload_inputs_1,
-        output              io_bus_rsp_valid,
-        input               io_bus_rsp_ready,
-        output              io_bus_rsp_payload_response_ok,
-        output     [31:0]   io_bus_rsp_payload_outputs_0,
-        input clk
-    """
-    def __init__(self):
-        self.cmd_valid = Signal(name='io_bus_cmd_valid')
-        self.cmd_ready = Signal(name='io_bus_cmd_ready')
-        self.cmd_payload_function_id = Signal(3,
-                name='io_bus_cmd_payload_function_id')
-        self.cmd_payload_inputs_0 = Signal(32,
-                name='io_bus_cmd_payload_inputs_0')
-        self.cmd_payload_inputs_1 = Signal(32,
-                name='io_bus_cmd_payload_inputs_1' )
-        self.rsp_valid = Signal(
-                name='io_bus_rsp_valid')
-        self.rsp_ready = Signal(
-                name='io_bus_rsp_ready')
-        self.rsp_payload_response_ok = Signal(
-                name='io_bus_rsp_payload_response_ok')
-        self.rsp_payload_outputs_0 = Signal(32,
-                name = 'io_bus_rsp_payload_outputs_0')
-        self.clock = Signal(name = 'clk')
-        self.ports = [
-            self.cmd_valid,
-            self.cmd_ready,
-            self.cmd_payload_function_id,
-            self.cmd_payload_inputs_0,
-            self.cmd_payload_inputs_1,
-            self.rsp_valid,
-            self.rsp_ready,
-            self.rsp_payload_response_ok,
-            self.rsp_payload_outputs_0,
-            self.clock,
-        ]
+class FibInstruction(util.InstructionBase):
+    """Sample fibonacci instrucion
+    
+    This implementation uses a state machine."""
 
     def elab(self, m):
-        # All instructions complete in single cycle, so we can respond immediately
-        m.d.comb += [
-            self.rsp_valid.eq(self.cmd_valid),
-            self.cmd_ready.eq(self.rsp_ready),
-            self.rsp_payload_response_ok.eq(1),
-        ]
-
-        with m.Switch(self.cmd_payload_function_id):
-            with m.Case(0):
-                # byte sum
-                m.d.comb += self.rsp_payload_outputs_0.eq(
-                            self.cmd_payload_inputs_0.word_select(0, 8) +
-                            self.cmd_payload_inputs_0.word_select(1, 8) +
-                            self.cmd_payload_inputs_0.word_select(2, 8) +
-                            self.cmd_payload_inputs_0.word_select(3, 8) +
-                            self.cmd_payload_inputs_1.word_select(0, 8) +
-                            self.cmd_payload_inputs_1.word_select(1, 8) +
-                            self.cmd_payload_inputs_1.word_select(2, 8) +
-                            self.cmd_payload_inputs_1.word_select(3, 8))
-            with m.Case(1):
-                # byte swap
-                for n in range(4):
-                    m.d.comb += self.rsp_payload_outputs_0.word_select(3-n, 8).eq(
-                            self.cmd_payload_inputs_0.word_select(n, 8))
-
-            with m.Case(2):
-                # bit swap
-                for n in range(32):
-                    m.d.comb += self.rsp_payload_outputs_0[31-n].eq(
-                            self.cmd_payload_inputs_0[n])
+        s1 = Signal(32)
+        s2 = Signal(32)
+        count = Signal(32)
+        with m.FSM():
+            with m.State("WAIT"):
+                m.d.sync += [
+                    s1.eq(0),
+                    s2.eq(1)
+                ]
+                with m.If(self.start):
+                    m.next = "RUN"
+                    m.d.sync += count.eq(self.in0)
+            with m.State("RUN"):
+                m.d.sync += [
+                    count.eq(count - 1),
+                    s1.eq(s2),
+                    s2.eq(s1 + s2),
+                ]
+                with m.If(count == 0):
+                    m.d.comb += self.done.eq(1)
+                    m.next = "WAIT"
+        m.d.comb += self.output.eq(s1)
 
 
-class Cfu_Test(util.CombTest):
+class FibInstruction2(util.InstructionBase):
+    """An alternative sample fibonacci instrucion
+
+    This implementation avoids using an explicit state machine and just uses a
+    counter, with 0 being the idle state."""
+
+    def elab(self, m):
+        s1 = Signal(32)
+        s2 = Signal(32)
+        count = Signal(32)
+        with m.If(self.start):
+            m.d.sync += [
+                s1.eq(0),
+                s2.eq(1),
+                count.eq(self.in0 + 1)
+            ]
+        with m.If(count == 1):
+            m.d.comb += self.done.eq(1)
+            m.d.sync += count.eq(0)
+        with m.Elif(count == 0):
+            pass
+        with m.Else():
+            m.d.sync += [
+                count.eq(count - 1),
+                s1.eq(s2),
+                s2.eq(s1 + s2),
+            ]
+        m.d.comb += self.output.eq(s1)
+
+
+class SumBytesInstruction(util.InstructionBase):
+    """Adds all bytes of in0 and in1
+    """
+
+    def elab(self, m):
+        m.d.comb += self.output.eq(
+            self.in0.word_select(0, 8) +
+            self.in0.word_select(1, 8) +
+            self.in0.word_select(2, 8) +
+            self.in0.word_select(3, 8) +
+            self.in1.word_select(0, 8) +
+            self.in1.word_select(1, 8) +
+            self.in1.word_select(2, 8) +
+            self.in1.word_select(3, 8)
+        )
+        m.d.comb += self.done.eq(1)
+
+
+class SumBytesInstructionTest(util.InstructionTestBase):
     def create_dut(self):
-        return Cfu()
+        return SumBytesInstruction()
 
-    def test_cfu(self):
-        DATA = [
-                # byte add
-                ((0, 0, 0), (0,)),
-                ((0, 0x01020304, 0x01020304), (20,)),
-                ((0, 0x01010101, 0xffffffff), (1024,)),
-                # byte swap
-                ((1, 0x01020304, 0xffffffff), (0x04030201,)),
-                ((1, 0x0102ff00, 0xffffffff), (0x00ff0201,)),
-                # bit swap
-                ((2, 0x01020304, 0xffffffff), (0x20c04080,)),
-                ((2, 0xffffffff, 0xffffffff), (0xffffffff,)),
-                ((2, 0x10203040, 0xffffffff), (0x020c0408,)),
-        ]
-        def process():
-            for n, (inputs, outputs) in enumerate(DATA):
-                func, i0, i1 = inputs
-                yield self.dut.cmd_payload_function_id.eq(func)
-                yield self.dut.cmd_payload_inputs_0.eq(i0)
-                yield self.dut.cmd_payload_inputs_1.eq(i1)
-                yield Delay(1)
-                o, = outputs
-                self.assertEqual(o, (yield self.dut.rsp_payload_outputs_0))
-        self.run_sim(process, True)
+    def test_sum_bytes(self):
+        def sum_bytes(a, b):
+            total = 0
+            for x in range(4):
+                total += (a >> (8 * x)) & 0xff
+                total += (b >> (8 * x)) & 0xff
+            return total
+        self.verify_against_reference(
+            [(0x01010101, 0x02020202), (0x12345678, 0xabcdef01)], sum_bytes)
+
+
+class ReverseBytesInstruction(util.InstructionBase):
+    """Reverses bytes in in0
+    """
+
+    def elab(self, m):
+        for n in range(4):
+            m.d.comb += self.output.word_select(3-n, 8).eq(
+                self.in0.word_select(n, 8))
+        m.d.comb += self.done.eq(1)
+
+
+class ReverseBytesInstructionTest(util.InstructionTestBase):
+    def create_dut(self):
+        return ReverseBytesInstruction()
+
+    def test_reverse_bytes(self):
+        def reverse_bytes(a):
+            out = 0
+            for x in range(4):
+                out = (out << 8) | (a & 0xff)
+                a = a >> 8
+            return out
+        self.verify_against_reference(
+            [0, 100, 0x12345678, 0xabcdef01], reverse_bytes)
+
+
+class ReverseBitsInstruction(util.InstructionBase):
+    """Reverses bits in in0
+    """
+
+    def elab(self, m):
+        for n in range(32):
+            m.d.comb += self.output[31-n].eq(self.in0[n])
+        m.d.comb += self.done.eq(1)
+
+
+class ReverseBitsInstructionTest(util.InstructionTestBase):
+    def create_dut(self):
+        return ReverseBitsInstruction()
+
+    def test_reverse_bits(self):
+        def reverse_bits(a):
+            out = 0
+            for x in range(32):
+                out = (out << 1) | ((a >> x) & 1)
+            return out
+        self.verify_against_reference(
+            [0, 100, 0x12345678, 0xabcdef01], reverse_bits)
+
+
+def python_fib(n):
+    s1 = 0
+    s2 = 1
+    for _ in range(n):
+        next = s1 + s2
+        s1 = s2
+        s2 = next
+    return s1
+
+
+class FibInstructionTest(util.InstructionTestBase):
+    def create_dut(self):
+        return FibInstruction()
+
+    def test_fib(self):
+        self.verify_against_reference(range(8), python_fib)
+
+
+class FibInstruction2Test(util.InstructionTestBase):
+    def create_dut(self):
+        return FibInstruction2()
+
+    def test_fib(self):
+        self.verify_against_reference(range(8), python_fib)
+
+
+def make_cfu():
+    return util.Cfu({
+        0: SumBytesInstruction(),
+        1: ReverseBytesInstruction(),
+        2: ReverseBitsInstruction(),
+        3: FibInstruction(),
+    })
+
 
 if __name__ == '__main__':
     unittest.main()
-
