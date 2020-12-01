@@ -23,8 +23,8 @@ BUILD_DIR  := $(SOC_DIR)/build/$(PLATFORM)/software
 LITEX_DIR  := $(SOC_DIR)/deps/litex/litex
 VEX_SRC_DIR  := $(LITEX_DIR)/soc/cores/cpu/vexriscv
 
-MODEL_DIR  := $(CFU_ROOT)/models
-MODEL_FB   := $(MODEL_DIR)/$(MODEL).tflite
+MODELS_DIR := $(CFU_ROOT)/models
+MODEL_FB   := $(MODELS_DIR)/$(MODEL)/$(MODEL).tflite
 MODEL_LN   := model.tflite
 MODEL_C    := $(BASE_DIR)/$(MODEL)_tflite.c
 
@@ -131,6 +131,9 @@ all: $(TARGET) $(PACKAGE).bin $(PACKAGE).ihex
 
 $(OBJECTS): | $(OBJ_DIR)
 
+#
+# Use a symbolic link to get consistent variable names
+#
 $(MODEL_C): $(MODEL_FB)
 	-$(QUIET) /bin/rm -f $(MODEL_LN)
 	$(QUIET) ln -s $< $(MODEL_LN)
