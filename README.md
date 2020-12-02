@@ -7,6 +7,7 @@
 
 * openocd
 
+* expect: `sudo apt install expect`
 
 
 
