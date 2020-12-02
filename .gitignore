@@ -50,3 +50,16 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Python temps
+**/__pycache__
+
+# Project build directories
+proj/*/build
+
+# SoC build directories
+soc/csr.csv
+soc/build
+
+# cfu.v, if present, must be added explicitly
+proj/*/cfu.v
