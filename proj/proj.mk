@@ -57,7 +57,7 @@ soc: $(BITSTREAM)
 #
 $(BITSTREAM): $(CFU_VERILOG)
 	@echo Building SoC
-	pushd $(CFU_ROOT); make PROJ=$(PROJ) soc; popd
+	make -C $(CFU_ROOT) PROJ=$(PROJ) soc
 
 $(CFU_VERILOG): $(CFU_NMIGEN) $(CFU_NMIGEN_GEN)
 	python3 $(CFU_NMIGEN_GEN)
@@ -75,10 +75,11 @@ $(HARNESS_BIN):
 	@echo Building TFLM harness app, under build/, for model $(MODEL)
 	mkdir -p $(HARNESS_DIR)
 	/bin/cp -r $(HARNESS_FILES) $(HARNESS_DIR)
-	pushd $(HARNESS_DIR); make TFLM_DIR=$(TFLM_DIR) CFU_ROOT=$(CFU_REAL_ROOT) MODEL=$(MODEL); popd
+	make -C $(HARNESS_DIR) TFLM_DIR=$(TFLM_DIR) CFU_ROOT=$(CFU_REAL_ROOT) PLATFORM=$(PLATFORM) MODEL=$(MODEL)
 
 #
 # Copy program sources and Makefile
+# TODO(avg): cam will will fail now
 #
 cam:
 	@echo building tflm harness app, under build/, for model $(MODEL)

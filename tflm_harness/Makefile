@@ -1,7 +1,22 @@
 # Makefile reusing as much from the LiteX gateware and software builds as possible.
 
+ifndef CFU_ROOT
+$(error CFU_ROOT not set)
+endif
+
+ifndef TFLM_DIR
+$(error TFLM_DIR not set)
+endif
+
+ifndef PROJ
+$(error PROJ not set)
+endif
+
+ifndef MODEL
+$(error MODEL not set)
+endif
+
 PLATFORM   := arty
-MODEL      ?= pdti8
 
 # These are found in the PATH
 RV64       := riscv64-unknown-elf-
@@ -17,7 +32,6 @@ PATH_SEP   := /
 
 # Assumes current directory is the one containing the makefile
 BASE_DIR   := .
-CFU_ROOT   := ..
 SOC_DIR    := $(CFU_ROOT)/soc
 BUILD_DIR  := $(SOC_DIR)/build/$(PLATFORM)/software
 LITEX_DIR  := $(SOC_DIR)/deps/litex/litex
@@ -35,7 +49,6 @@ LDSCRIPTS  := $(LDSCRIPT) $(GEN_LD_DIR)/output_format.ld $(GEN_LD_DIR)/regions.l
 
 SRC_DIR    := $(BASE_DIR)/src
 THIRD_PARTY := $(CFU_ROOT)/third_party
-TFLM_DIR   := $(THIRD_PARTY)/tflm_gen
 TFLM_LIB   := $(TFLM_DIR)/libtensorflow-microlite.a
 
 # TODO: always do or always don't debug build
