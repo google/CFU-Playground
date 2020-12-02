@@ -126,7 +126,7 @@ int main(void)
         char c = readchar();
         putchar(c);
         // double up if odd
-        if (c & 0x1) putchar(c);
+        if (c & 0x1 && c != '1') putchar(c);
         if (c == 'c') {
             run_cfu();
         }
