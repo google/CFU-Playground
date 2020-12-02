@@ -10,6 +10,7 @@
 
 * expect: `sudo apt install expect`
 
+* Vivado
 
 
 ### Setup
@@ -21,7 +22,7 @@ git submodule update
 ```
 ### Use
 
-Build the SoC in the `soc/` subdir and load it onto Arty:
+Build the SoC and load the bitstream onto Arty:
 ```
 make PROJ=proj_template soc
 make PROJ=proj_template prog
@@ -36,12 +37,18 @@ make
 ../soc/bin/litex_term --speed 115200 --kernel basic.bin /dev/ttyUSB*
 ```
 
-Build a TensorFlow Lite/Micro test harness and execute it (`cd` to the repo root directory):
+Build a TensorFlow Lite/Micro test harness executable and execute it on the Arty board (first `cd` to the repo root directory):
 
 ```
 make PROJ=proj_template MODEL=pdti8 harness
 make PROJ=proj_template MODEL=pdti8 run
 ```
+
+
+### Underlying technology
+
+* [LiteX](https://github.com/enjoy-digital/litex): Open-source framework for assembling the SoC (CPU + peripherals)
+* [VexRiscv](https://github.com/SpinalHDL/VexRiscv): Open-source RISC-V soft CPU optimized for FPGAs
 
 
 ### Licensed under Apache-2.0 license
