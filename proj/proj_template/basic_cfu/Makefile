@@ -1,7 +1,8 @@
 # Makefile reusing as much from the LiteX gateware and software builds as possible.
 
-PLATFORM   := arty_etherbone_vexriscv.full+debug
-PLATFORM   := arty
+PROJ_DIR   := $(abspath ..)
+PROJ       := $(lastword $(subst /, ,$(PROJ_DIR)))
+PLATFORM   := arty.$(PROJ)
 
 # These are found in the PATH
 RV64       := riscv64-unknown-elf-
@@ -29,8 +30,8 @@ GEN_LD_DIR := $(BUILD_DIR)/include/generated
 LDSCRIPT   := $(LD_DIR)/linker.ld
 LDSCRIPTS  := $(LDSCRIPT) $(GEN_LD_DIR)/output_format.ld $(GEN_LD_DIR)/regions.ld
 
-SRC_DIR    := $(BASE_DIR)/src
-THIRD_PARTY := $(CFU_DIR)/third_party
+SRC_DIR     := $(BASE_DIR)/src
+THIRD_PARTY := $(PROJ_DIR)/third_party
 
 # TODO: always do or always don't debug build
 DBG_CFLAGS := -ggdb -g -DDEBUG -Wall

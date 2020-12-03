@@ -105,6 +105,24 @@ void __attribute__ ((noinline)) compare_against_sw()
         printf("Ran %d comparisons.\n", count);
 }
 
+void show_menu(void)
+{
+    puts("\n\n");
+    puts("0: switch to perf counter 0 and show value");
+    puts("1: switch to perf counter 1 and show value");
+    puts("e: enable current perf counter");
+    puts("p: pause current perf counter");
+    puts("z: zero-out current perf counter, and also zero-out mcycle");
+    puts("m: show current value of mcycle (mcycle is not pausable)");
+    puts("");
+    puts("c: run preset CFU test (run fixed values through funct0, funct1, and funct2)");
+    puts("d: interactive CFU test -- you supply the operands");
+    puts("s: run test of CFU against software emulation");
+    puts("");
+    puts("?: show menu again");
+    puts("\n");
+}
+
 
 int main(void) 
 {
@@ -132,11 +150,15 @@ int main(void)
 
     
     int counter_num = 0;
+    show_menu();
     while (1) {
         char c = readchar();
         putchar(c);
         // double up if odd
         if (c & 0x1) putchar(c);
+        if (c == '?') {
+            show_menu();
+        }
         if (c == 'c') {
             run_cfu();
         }
@@ -147,7 +169,7 @@ int main(void)
             set_mcycle(0);
             set_counter_enable(counter_num, 0);
             set_counter(counter_num, 0);
-            printf("\nzero-out mcycle and counter %d\n", counter_num);
+            printf("\nzero-out mcycle and counter-%d\n", counter_num);
         }
         if (c == 'm') {
             printf("cycle: %u\n", get_mcycle());
