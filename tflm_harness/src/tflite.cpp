@@ -5,6 +5,7 @@
 #include "tensorflow/lite/micro/examples/person_detection_experimental/model_settings.h"
 #include "tensorflow/lite/micro/examples/person_detection_experimental/person_detect_model_data.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
+#include "tensorflow/lite/micro/micro_profiler.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/schema/schema_generated.h"
@@ -78,10 +79,13 @@ void initTfLite() {
   micro_op_resolver.AddFullyConnected();
   micro_op_resolver.AddLogistic();
 
+  // profiler
+  static tflite::MicroProfiler profiler(error_reporter);
+
   // Build an interpreter to run the model with.
   // NOLINTNEXTLINE(runtime-global-variables)
   static tflite::MicroInterpreter static_interpreter(
-      model, micro_op_resolver, tensor_arena, kTensorArenaSize, error_reporter);
+      model, micro_op_resolver, tensor_arena, kTensorArenaSize, error_reporter, &profiler);
   interpreter = &static_interpreter;
 
   // Allocate memory from the tensor_arena for the model's tensors.

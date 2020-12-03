@@ -33,7 +33,8 @@ int MicroErrorReporter::Report(const char* format, va_list args) {
   char log_buffer[kMaxLogLen];
   MicroVsnprintf(log_buffer, kMaxLogLen, format, args);
   DebugLog(log_buffer);
-  DebugLog("\r\n");
+  // DebugLog() now uses puts(), so it adds the cr/newline itself
+  //DebugLog("\r\n");
 #endif
   return 0;
 }
