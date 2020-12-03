@@ -58,9 +58,9 @@ void __attribute__ ((noinline)) run_demo()
         puts("Enter second operand value (in hexadecimal, no leading '0x'):");
         unsigned int v1 = readval();
 
-        int r0 = cfu_byte_sum(v0, v1);       // byte sum
-        int r1 = cfu_byte_swap(v0, v1);      // byte swap
-        int r2 = cfu_bit_reverse(v0, v1);    // bit reverse
+        int r0 = cfu_op0_hw(v0, v1);    // byte sum
+        int r1 = cfu_op1_hw(v0, v1);    // byte swap
+        int r2 = cfu_op2_hw(v0, v1);    // bit reverse
 
         puts("arg0        arg1        bytesum     byteswap    bitrev");
         printf("0x%08x, 0x%08x: 0x%08x, 0x%08x, 0x%08x\n", v0, v1, r0, r1, r2);
@@ -73,9 +73,9 @@ void __attribute__ ((noinline)) run_cfu()
         puts("\n\nCFU TEST:");
         puts("arg0        arg1        bytesum     byteswap    bitrev");
         for (int i=0; i<0x50505; i+=0x8103) {
-            int v0 = cfu_byte_sum(i, i);       // byte sum
-            int v1 = cfu_byte_swap(i, i);      // byte swap
-            int v2 = cfu_bit_reverse(i, i);    // bit reverse
+            int v0 = cfu_op0_hw(i, i);    // byte sum
+            int v1 = cfu_op1_hw(i, i);    // byte swap
+            int v2 = cfu_op2_hw(i, i);    // bit reverse
             printf("0x%08x, 0x%08x: 0x%08x, 0x%08x, 0x%08x\n", i, i, v0, v1, v2);
         }
         puts("\n");
@@ -88,12 +88,12 @@ void __attribute__ ((noinline)) compare_against_sw()
         unsigned count = 0;
         for (unsigned i=0; i<0x5050505; i+=0x7105) {
           for (unsigned j=0; j<0x5050505; j+=0xb103) {
-            unsigned v0 = cfu_byte_sum_hw(i, j);
-            unsigned v1 = cfu_byte_swap_hw(i, j);
-            unsigned v2 = cfu_bit_reverse_hw(i, j);
-            unsigned sw0 = cfu_byte_sum_sw(i, j);
-            unsigned sw1 = cfu_byte_swap_sw(i, j);
-            unsigned sw2 = cfu_bit_reverse_sw(i, j);
+            unsigned v0 = cfu_op0_hw(i, j);
+            unsigned v1 = cfu_op1_hw(i, j);
+            unsigned v2 = cfu_op2_hw(i, j);
+            unsigned sw0 = cfu_op0_sw(i, j);
+            unsigned sw1 = cfu_op1_sw(i, j);
+            unsigned sw2 = cfu_op2_sw(i, j);
             if (v0!=sw0 || v1!=sw1 || v2!=sw2) {
                 printf("0x%08x, 0x%08x: 0x%08x:0x%08x, 0x%08x:0x%08x, 0x%08x:0x%08x <<=== MISMATCH!\n", 
                         i, j, v0, sw0, v1, sw1, v2, sw2);
