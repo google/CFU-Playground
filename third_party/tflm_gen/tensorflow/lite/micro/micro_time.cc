@@ -27,18 +27,36 @@ limitations under the License.
 
 #include "tensorflow/lite/micro/micro_time.h"
 
+static inline unsigned get_mcycle()
+{
+        unsigned result;
+        asm volatile ("csrr %0, mcycle" : "=r"(result));
+        return result;
+}
+
+static inline void set_mcycle(unsigned cyc)
+{
+        asm volatile ("csrw mcycle, %0" :: "r"(cyc));
+}
+
+
+
 namespace tflite {
 
 // Reference implementation of the ticks_per_second() function that's required
 // for a platform to support Tensorflow Lite for Microcontrollers profiling.
 // This returns 0 by default because timing is an optional feature that builds
 // without errors on platforms that do not need it.
-int32_t ticks_per_second() { return 0; }
+int32_t ticks_per_second() { return 100000000; }
 
 // Reference implementation of the GetCurrentTimeTicks() function that's
 // required for a platform to support Tensorflow Lite for Microcontrollers
 // profiling. This returns 0 by default because timing is an optional feature
 // that builds without errors on platforms that do not need it.
-int32_t GetCurrentTimeTicks() { return 0; }
+//
+// WARNING (from tcal) -- very susceptible to wrap-around (happens every 40s)
+//   --> need to get mcycleh, and shift/divide down
+//
+int32_t GetCurrentTimeTicks() { return (int32_t)get_mcycle(); }
 
 }  // namespace tflite
