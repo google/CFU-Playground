@@ -42,6 +42,22 @@ Once running, the program will flash the LEDs for a couple of seconds, and then 
 
 Options 'c', 'd', and 's' attempt to access the CFU.   If the CFU is not handling the CFU-CPU handshaking correctly, the application will hang here.  At that point, you can press the 'PROG' button, or ctrl-C out of `litex_term` and rerun.
 
+This is the full menu:
+
+```
+0: switch to perf counter 0 and show value
+1: switch to perf counter 1 and show value
+e: enable current perf counter
+p: pause current perf counter
+z: zero-out current perf counter, and also zero-out mcycle
+m: show current value of mcycle (mcycle is not pausable)
+
+c: run preset CFU test (run fixed values through funct0, funct1, and funct2)
+d: interactive CFU test -- you supply the operands
+s: run test of CFU against software emulation
+
+?: show menu again
+```
 
 
 
