@@ -75,7 +75,7 @@ $(HARNESS_BIN):
 	@echo Building TFLM harness app, under build/, for model $(MODEL)
 	mkdir -p $(HARNESS_DIR)
 	/bin/cp -r $(HARNESS_FILES) $(HARNESS_DIR)
-	make -C $(HARNESS_DIR) TFLM_DIR=$(TFLM_DIR) CFU_ROOT=$(CFU_REAL_ROOT) PLATFORM=$(PLATFORM) MODEL=$(MODEL)
+	make -C $(HARNESS_DIR) TFLM_DIR=$(TFLM_DIR) CFU_ROOT=$(CFU_REAL_ROOT) PLATFORM=$(PLATFORM) MODEL=$(MODEL) PROJ=$(PROJ)
 
 #
 # Copy program sources and Makefile
