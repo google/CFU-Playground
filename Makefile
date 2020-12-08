@@ -22,17 +22,17 @@ BITSTREAM:= soc/$(OUT_DIR)/gateware/arty.bit
 soc: $(BITSTREAM)
 
 $(CFU_V):
-	pushd $(PROJ_DIR); make cfu.v; popd
+	pushd $(PROJ_DIR) && make cfu.v && popd
 
 
 $(BITSTREAM): $(CFU_V) $(CFU_SRCS)
 	@echo CFU option: $(CFU_ARGS)
-	pushd $(PROJ_DIR); make cfu.v; popd
-	pushd soc; python3 ./soc.py $(LITEX_ARGS) --build; popd
+	pushd $(PROJ_DIR) && make cfu.v && popd
+	pushd soc && python3 ./soc.py $(LITEX_ARGS) --build && popd
 
 
 prog: $(BITSTREAM)
-	pushd soc; python3 ./soc.py $(LITEX_ARGS) --load; popd
+	pushd soc && python3 ./soc.py $(LITEX_ARGS) --load && popd
 
 
 harness: $(BITSTREAM)
@@ -43,18 +43,18 @@ run: $(BITSTREAM) prog
 
 
 camera/camera.bin:
-	pushd camera; make; popd
+	pushd camera && make && popd
 
 run0: camera/camera.bin
-	pushd camera; litex_term --kernel camera.bin /dev/ttyUSB0; popd
+	pushd camera && litex_term --kernel camera.bin /dev/ttyUSB0 && popd
 
 b:
 	ls -lstr $(BITSTREAM)
 
 models:
-	@pushd models > /dev/null; ls; popd > /dev/null
+	@pushd models > /dev/null && ls && popd > /dev/null
 
 projects:
-	@pushd proj > /dev/null; ls -d proj_*; popd > /dev/null
+	@pushd proj > /dev/null && ls -d proj_* && popd > /dev/null
 
 
