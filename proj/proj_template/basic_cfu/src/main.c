@@ -85,7 +85,6 @@ void __attribute__ ((noinline)) run_cfu()
 void __attribute__ ((noinline)) compare_against_sw()
 {
         puts("\n\nCFU:SW TEST:");
-        puts("arg0        arg1            fn0               fn1              fn2");
         unsigned count = 0;
         for (unsigned i=0; i<0x5050505; i+=0x7105) {
           for (unsigned j=0; j<0x5050505; j+=0xb103) {
@@ -96,6 +95,7 @@ void __attribute__ ((noinline)) compare_against_sw()
             unsigned sw1 = cfu_op1_sw(i, j);
             unsigned sw2 = cfu_op2_sw(i, j);
             if (v0!=sw0 || v1!=sw1 || v2!=sw2) {
+                puts("arg0        arg1            fn0               fn1              fn2");
                 printf("0x%08x, 0x%08x: 0x%08x:0x%08x, 0x%08x:0x%08x, 0x%08x:0x%08x <<=== MISMATCH!\n", 
                         i, j, v0, sw0, v1, sw1, v2, sw2);
             }
@@ -128,7 +128,6 @@ void show_menu(void)
 int main(void) 
 {
     const char hell[] = "Hello, World!";
-    const char gibb[] = "Type some gibberish, watch the LEDs";
 
     leds_out_write(0xf);
     int leds_val = 0x0;
@@ -146,7 +145,6 @@ int main(void)
     }
 
     puts(hell);
-    puts(gibb);
     putchar('\n');
 
     
@@ -155,8 +153,6 @@ int main(void)
     while (1) {
         char c = readchar();
         putchar(c);
-        // double up if odd
-        if (c & 0x1) putchar(c);
         if (c == '?') {
             show_menu();
         }
@@ -194,6 +190,8 @@ int main(void)
         if (c == 's') {
             printf("oftware comparison\n");
             compare_against_sw();
+            printf("Done\n\n");
+            show_menu();
         }
         leds_val += 1;
         leds_out_write(leds_val);
