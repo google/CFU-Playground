@@ -26,3 +26,6 @@
 	path = soc/deps/pythondata_cpu_vexriscv
 	url = https://github.com/tcal-x/pythondata-cpu-vexriscv.git
 	branch = dev
+[submodule "third_party/python/nmigen"]
+	path = third_party/python/nmigen
+	url = https://github.com/nmigen/nmigen

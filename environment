@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if [ "${BASH_SOURCE-}" = "$0" ]; then
+    echo -e "This script should be sourced, not run:\nsource $0" >&2
+    exit 1
+fi
+
+# Exports environment variables needed by parts of this project.
+#   PYTHONPATH
+#   PATH
+
+CFU_ROOT=$(dirname $(realpath ${BASH_SOURCE[0]}))
+# We deliberately clear anything that may have already been in PYTHONPATH to
+# prevent accidentally pulling in anything outside this project.
+PYTHONPATH="${CFU_ROOT}/python"
+for i in "${CFU_ROOT}/third_party/python"/*; do
+    PYTHONPATH="${PYTHONPATH}:${i}"
+done
+export PYTHONPATH
+

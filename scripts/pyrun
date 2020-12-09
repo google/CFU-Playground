@@ -1,0 +1,5 @@
+#!/bin/bash
+set -e
+CFU_ROOT=$(realpath $(dirname ${BASH_SOURCE[0]})/..)
+source "${CFU_ROOT}/environment"
+python3 "$@"

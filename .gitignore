@@ -35,12 +35,16 @@
 *.i*86
 *.x86_64
 *.hex
+*.bin
 
 # Debug files
 *.dSYM/
 *.su
 *.idb
 *.pdb
+*.sym
+*.dis
+*.ihex
 
 # Kernel Module Compile Results
 *.mod*
@@ -60,6 +64,7 @@ proj/*/build
 # SoC build directories
 soc/csr.csv
 soc/build
+soc/prog
 
 # cfu.v, if present, must be added explicitly
 proj/*/cfu.v

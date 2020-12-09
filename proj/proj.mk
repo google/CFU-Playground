@@ -60,7 +60,7 @@ $(BITSTREAM): $(CFU_VERILOG)
 	make -C $(CFU_ROOT) PROJ=$(PROJ) soc
 
 $(CFU_VERILOG): $(CFU_NMIGEN) $(CFU_NMIGEN_GEN)
-	python3 $(CFU_NMIGEN_GEN)
+	$(CFU_ROOT)/scripts/pyrun $(CFU_NMIGEN_GEN)
 
 prog: $(BITSTREAM)
 	openocd -f $(CFU_REAL_ROOT)/prog/openocd_xc7_ft2232.cfg -c "init ; pld load 0 $(BITSTREAM) ; exit"
