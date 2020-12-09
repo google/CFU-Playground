@@ -82,6 +82,9 @@ void initTfLite() {
   micro_op_resolver.AddFullyConnected();
   micro_op_resolver.AddLogistic();
 
+  // needed for MODEL=magic_wand_full_i8
+  // micro_op_resolver.AddQuantize();
+
   // profiler
   static tflite::MicroProfiler profiler(error_reporter);
 
