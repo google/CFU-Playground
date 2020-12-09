@@ -58,11 +58,11 @@ void __attribute__ ((noinline)) run_demo()
         puts("Enter second operand value (in hexadecimal, no leading '0x'):");
         unsigned int v1 = readval();
 
-        int r0 = cfu_op0_hw(v0, v1);    // byte sum
-        int r1 = cfu_op1_hw(v0, v1);    // byte swap
-        int r2 = cfu_op2_hw(v0, v1);    // bit reverse
+        int r0 = cfu_op0_hw(v0, v1);
+        int r1 = cfu_op1_hw(v0, v1);
+        int r2 = cfu_op2_hw(v0, v1);
 
-        puts("arg0        arg1        bytesum     byteswap    bitrev");
+        puts("arg0        arg1        fn0         fn1         fn2   ");
         printf("0x%08x, 0x%08x: 0x%08x, 0x%08x, 0x%08x\n", v0, v1, r0, r1, r2);
         printf("  %08d,   %08d:   %08d,   %08d,   %08d\n", v0, v1, r0, r1, r2);
         puts("\n");
@@ -71,12 +71,12 @@ void __attribute__ ((noinline)) run_demo()
 void __attribute__ ((noinline)) run_cfu()
 {
         puts("\n\nCFU TEST:");
-        puts("arg0        arg1        bytesum     byteswap    bitrev");
+        puts("arg0        arg1        fn0         fn1         fn2rev");
         for (int i=0; i<0x50505; i+=0x8103) {
             int j = i ^ 0xffff;
-            int v0 = cfu_op0_hw(i, j);    // byte sum
-            int v1 = cfu_op1_hw(i, j);    // byte swap
-            int v2 = cfu_op2_hw(i, j);    // bit reverse
+            int v0 = cfu_op0_hw(i, j);
+            int v1 = cfu_op1_hw(i, j);
+            int v2 = cfu_op2_hw(i, j);
             printf("0x%08x, 0x%08x: 0x%08x, 0x%08x, 0x%08x\n", i, j, v0, v1, v2);
         }
         puts("\n");
@@ -85,7 +85,7 @@ void __attribute__ ((noinline)) run_cfu()
 void __attribute__ ((noinline)) compare_against_sw()
 {
         puts("\n\nCFU:SW TEST:");
-        puts("arg0        arg1            bytesum           byteswap         bitrev");
+        puts("arg0        arg1            fn0               fn1              fn2");
         unsigned count = 0;
         for (unsigned i=0; i<0x5050505; i+=0x7105) {
           for (unsigned j=0; j<0x5050505; j+=0xb103) {
