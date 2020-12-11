@@ -34,7 +34,7 @@ PATH_SEP   := /
 BASE_DIR   := .
 SOC_DIR    := $(CFU_ROOT)/soc
 BUILD_DIR  := $(SOC_DIR)/build/$(PLATFORM)/software
-LITEX_DIR  := $(SOC_DIR)/deps/litex/litex
+LITEX_DIR  := $(BASE_DIR)/../third_party/python/litex/litex
 VEX_SRC_DIR  := $(LITEX_DIR)/soc/cores/cpu/vexriscv
 
 MODELS_DIR := $(CFU_ROOT)/models

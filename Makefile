@@ -9,6 +9,8 @@ CFU_SRCS:=  $(wildcard $(PROJ_DIR)/cfu.*)
 CFU_ARGS:=  --cfu $(CFU_V)
 SOC_NAME:=  arty.$(PROJ)
 OUT_DIR:=   build/$(SOC_NAME)
+CFU_ROOT:=  $(PWD)
+PYRUN:=     $(CFU_ROOT)/scripts/pyrun
 
 UART_ARGS=  --uart-baudrate 460800
 UART_ARGS=  --uart-baudrate 115200
@@ -28,11 +30,11 @@ $(CFU_V):
 $(BITSTREAM): $(CFU_V) $(CFU_SRCS)
 	@echo CFU option: $(CFU_ARGS)
 	pushd $(PROJ_DIR) && make cfu.v && popd
-	pushd soc && python3 ./soc.py $(LITEX_ARGS) --build && popd
+	pushd soc && $(PYRUN) ./soc.py $(LITEX_ARGS) --build && popd
 
 
 prog: $(BITSTREAM)
-	pushd soc && python3 ./soc.py $(LITEX_ARGS) --load && popd
+	pushd soc && $(PYRUN) ./soc.py $(LITEX_ARGS) --load && popd
 
 
 harness: $(BITSTREAM)
