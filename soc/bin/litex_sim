@@ -2,13 +2,15 @@
 
 import sys
 import os
+from pathlib import Path
 
-# This script lives in the "bin" directory, but uses a helper script in the parent
-# directory.  Obtain the current path so we can get the absolute parent path.
-script_path = os.path.dirname(os.path.realpath(
-    __file__)) + os.path.sep + os.path.pardir + os.path.sep
-sys.path.insert(0, script_path)
-import lxbuildenv
+# Build our python path as ../../third_party/python/*
+py_third_party = os.path.realpath(os.path.dirname(
+    __file__) + os.path.sep + os.path.pardir + os.path.sep + os.path.pardir + os.path.sep +
+    'third_party' + os.path.sep + 'python')
+for f in Path(py_third_party).glob("*"):
+    if not f.is_file():
+        sys.path.insert(0, f.as_posix())
 
 from litex.tools.litex_sim import main
 main()

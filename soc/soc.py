@@ -1,12 +1,4 @@
 #!/usr/bin/env python3
-# This variable defines all the external programs that this module
-# relies on.  lxbuildenv reads this variable in order to ensure
-# the build will finish without exiting due to missing third-party
-# programs.
-LX_DEPENDENCIES = ["riscv", "vivado"]
-
-# Import lxbuildenv to integrate the deps/ directory
-import lxbuildenv
 
 # Disable pylint's E1101, which breaks completely on migen
 #pylint:disable=E1101
@@ -77,9 +69,10 @@ def main():
     if args.cfu:
         assert 'full' in args.cpu_variant
         var = "FullCfuDebug" if ('debug' in args.cpu_variant) else "FullCfu"
-        soc.cpu.use_external_variant("deps/pythondata_cpu_vexriscv/pythondata_cpu_vexriscv/verilog/VexRiscv_"+var+".v")
+        vexriscv = "../third_party/python/pythondata_cpu_vexriscv/pythondata_cpu_vexriscv"
+        soc.cpu.use_external_variant(f"{vexriscv}/verilog/VexRiscv_{var}.v")
         soc.platform.add_source(args.cfu)
-        soc.platform.add_source("deps/pythondata_cpu_vexriscv/pythondata_cpu_vexriscv/verilog/wrapVexRiscv_"+var+".v")
+        soc.platform.add_source(f"{vexriscv}/verilog/wrapVexRiscv_{var}.v")
 
     builder = Builder(soc, **builder_argdict(args))
     builder.build(**vivado_build_argdict(args), run=args.build)
