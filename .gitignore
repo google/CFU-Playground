@@ -45,6 +45,8 @@
 *.sym
 *.dis
 *.ihex
+*.vcd
+*.gtkw
 
 # Kernel Module Compile Results
 *.mod*
