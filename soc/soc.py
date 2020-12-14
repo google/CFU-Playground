@@ -9,12 +9,17 @@ from litex_boards.targets.arty import BaseSoC
 
 from litex.build.generic_platform import *
 from litex.build.xilinx.vivado import vivado_build_args, vivado_build_argdict
+from litex.build.sim.config import SimConfig
 
 from litex.soc.integration.builder import *
 from litex.soc.integration.soc_sdram import *
+from litex.soc.integration.common import get_mem_data
 
 from litex.soc.cores.led import LedChaser
 from litex.soc.cores.uart import UARTWishboneBridge
+from litex.soc.cores.cpu import CPUS
+
+from litex.tools.litex_sim import SimSoC
 
 import argparse
 import os
@@ -51,6 +56,13 @@ def main():
     parser.add_argument("--with-ethernet",  action="store_true", help="Enable Ethernet support")
     parser.add_argument("--with-etherbone", action="store_true", help="Enable Etherbone support")
     parser.add_argument("--cfu", default=None, help="Specify file containing CFU Verilog module")
+    parser.add_argument("--sim-ram-init", default=None,
+        help="Simulate the FPGA on the local machine, RAM is initialized with the supplied file.")
+    parser.add_argument("--sim-rom-init", default=None,
+        help="Simulate the FPGA on the local machine, ROM is initialized with the supplied file.")
+    parser.add_argument("--sim-trace",  action="store_true", help="Whether to enable tracing of simulation")
+    parser.add_argument("--sim-trace-start", default=0, help="Start tracing at this time in picoseconds")
+    parser.add_argument("--sim-trace-end", default=-1, help="Stop tracing at this time in picoseconds")
     parser.set_defaults(
             csr_csv='csr.csv',
             uart_name='serial',
@@ -61,8 +73,26 @@ def main():
     args = parser.parse_args()
 
     assert not (args.with_ethernet and args.with_etherbone)
-    soc = CustomSoC(with_ethernet=args.with_ethernet, with_etherbone=args.with_etherbone,
-        **soc_sdram_argdict(args))
+    cpu = CPUS["vexriscv"]
+    soc_kwargs = soc_sdram_argdict(args)
+    sim_config = None
+    sim_active = args.sim_rom_init != None or args.sim_ram_init != None
+    if sim_active:
+        soc_kwargs["uart_name"] = "sim"
+        if args.sim_rom_init:
+            soc_kwargs["integrated_rom_init"] = get_mem_data(args.sim_rom_init, cpu.endianness)
+        if args.sim_ram_init:
+            soc_kwargs["integrated_main_ram_init"] = get_mem_data(args.sim_ram_init, cpu.endianness)
+        soc = SimSoC(
+            integrated_main_ram_size=32 * 1024 * 1024,
+            **soc_kwargs)
+        sim_config = SimConfig()
+        sim_config.add_clocker("sys_clk", freq_hz=soc.clk_freq)
+        sim_config.add_module("serial2console", "serial")
+        soc.add_constant("ROM_BOOT_ADDRESS", 0x40000000)
+    else:
+        soc = CustomSoC(with_ethernet=args.with_ethernet, with_etherbone=args.with_etherbone,
+            **soc_sdram_argdict(args))
 
     # get the CFU version, plus the CFU itself and a wrapper 
     # ...since we're using stock litex, it doesn't know about the Cfu variants, so we need to use "external_variant"
@@ -75,7 +105,17 @@ def main():
         soc.platform.add_source(f"{vexriscv}/verilog/wrapVexRiscv_{var}.v")
 
     builder = Builder(soc, **builder_argdict(args))
-    builder.build(**vivado_build_argdict(args), run=args.build)
+    if sim_active:
+        builder.build(
+            build=True,
+            run=True,
+            sim_config=sim_config,
+            trace=args.sim_trace,
+            trace_fst=True,
+            trace_start=int(float(args.sim_trace_start)),
+            trace_end=int(float(args.sim_trace_end)))
+    else:
+        builder.build(**vivado_build_argdict(args), run=args.build)
 
     if args.load:
         prog = soc.platform.create_programmer()
