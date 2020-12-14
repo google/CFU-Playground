@@ -70,3 +70,6 @@ soc/prog
 
 # cfu.v, if present, must be added explicitly
 proj/*/cfu.v
+
+build
+csr.csv
