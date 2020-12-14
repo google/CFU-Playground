@@ -218,6 +218,7 @@ class Cfu(SimpleElaboratable):
         is_cmd_transfer = self.cmd_valid & self.cmd_ready
         current_function_done = Signal()
         stored_output = Signal(32)
+        m.d.comb += self.rsp_payload_response_ok.eq(1)
 
         instruction_outputs = Array(Signal(32) for _ in range(8))
         instruction_dones = Array(Signal() for _ in range(8))
@@ -483,6 +484,10 @@ class _CfuTest(TestBase):
                     self.assertEqual((yield self.dut.rsp_payload_outputs_0), exp_result)
                 if exp_rsp_valid is not None:
                     self.assertEqual((yield self.dut.rsp_valid), exp_rsp_valid)
+                    # We don't currently support returning non-OK responses, so
+                    # if our response is valid, it must be OK.
+                    if exp_rsp_valid:
+                        self.assertTrue((yield self.dut.rsp_payload_response_ok))
                 if exp_cmd_ready is not None:
                     self.assertEqual((yield self.dut.cmd_ready), exp_cmd_ready)
                 yield
