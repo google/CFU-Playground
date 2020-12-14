@@ -32,3 +32,9 @@
 [submodule "third_party/python/pyvcd"]
 	path = third_party/python/pyvcd
 	url = https://github.com/SanDisk-Open-Source/pyvcd.git
+[submodule "third_party/python/litescope"]
+	path = third_party/python/litescope
+	url = https://github.com/enjoy-digital/litescope.git
+[submodule "third_party/python/pythondata-misc-tapcfg"]
+	path = third_party/python/pythondata-misc-tapcfg
+	url = https://github.com/litex-hub/pythondata-misc-tapcfg.git
