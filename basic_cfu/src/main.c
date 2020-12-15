@@ -98,9 +98,6 @@ void __attribute__ ((noinline)) run_cfu()
 
 int main(void) 
 {
-    const char hell[] = "Hello, World!";
-    const char gibb[] = "Type some gibberish, watch the LEDs";
-
     leds_out_write(0xf);
     int leds_val = 0x0;
 
@@ -109,16 +106,15 @@ int main(void)
     irq_setie(1);
     uart_init();
 
-    for (int i=0; i<20 * 1000000; ++i) {
-        if ((i & 0xfffff ) == 0) {
-            leds_val += 0x1;
-            leds_out_write(leds_val);
-        }
-    }
-
-    puts(hell);
-    puts(gibb);
-    putchar('\n');
+    puts("Press the following keys to test CFU functions:\n"
+        "c - Test instructions 0-2 with various inputs\n"
+        "d - Test instructions on user supplied inputs\n"
+        "z - Zero cycle timer\n"
+        "m - Print current timer value\n"
+        "e - Enable perf counter\n"
+        "0 - Select perf counter 0\n"
+        "1 - Select perf counter 1\n"
+        "p - Pause perf counter\n");
 
     
     int counter_num = 0;
