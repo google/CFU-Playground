@@ -2,23 +2,16 @@
 
 ### Assumed Software
 
-* RISC-V toolchain (riscv64-unknown-elf-*) tested w/ v8.3.0.  gcc v7.x is too old.   Also, header file incompatibilities have been seen with gcc v9.1.  So v8.3.0 is strongly recommended.
-  * v8.3.0 is available at https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-8.3.0-2019.08.0-x86_64-linux-ubuntu14.tar.gz
-  * Download the tar, ungzip and untar it, and put the `bin/` subdirectory in your PATH.
+* [Vivado](https://www.xilinx.com/support/download.html) must be manually installed.
 
-* `openocd`
-
-* expect: `sudo apt install expect`
-
-* Vivado
-
+Other required packages will be checked for and, if on a Debian-based system,
+automatically installed by the setup script below.
 
 ### Setup
 
-Clone this repo, `cd` into it, then get the first level of submodules (don't do `--recursive`):
-```
-git submodule init
-git submodule update
+Clone this repo, `cd` into it, then get run:
+```sh
+scripts/setup
 ```
 ### Use
 
