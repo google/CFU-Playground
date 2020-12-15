@@ -15,13 +15,12 @@
 
 from nmigen import *
 from nmigen.sim import Simulator, Delay, Settle
+from nmigen_cfu import SimpleElaboratable, TestBase
 
 import unittest
 
-import util
 
-
-class Cfu(util.SimpleElaboratable):
+class Cfu(SimpleElaboratable):
     """Custom function unit interface.
 
     Parameters
@@ -94,7 +93,7 @@ class Cfu(util.SimpleElaboratable):
                 m.d.comb += self.rsp_payload_outputs_0.eq(self.cmd_payload_inputs_0)
 
 
-class Cfu_Test(util.CombTest):
+class Cfu_Test(TestBase):
     def create_dut(self):
         return Cfu()
 

@@ -14,14 +14,14 @@
 # limitations under the License.
 
 from nmigen import *
+from nmigen_cfu import InstructionBase, InstructionTestBase, Cfu
 
 import unittest
-import util
 
 
-class FibInstruction(util.InstructionBase):
+class FibInstruction(InstructionBase):
     """Sample fibonacci instrucion
-    
+
     This implementation uses a state machine."""
 
     def elab(self, m):
@@ -49,7 +49,7 @@ class FibInstruction(util.InstructionBase):
         m.d.comb += self.output.eq(s1)
 
 
-class FibInstruction2(util.InstructionBase):
+class FibInstruction2(InstructionBase):
     """An alternative sample fibonacci instrucion
 
     This implementation avoids using an explicit state machine and just uses a
@@ -79,7 +79,7 @@ class FibInstruction2(util.InstructionBase):
         m.d.comb += self.output.eq(s1)
 
 
-class SumBytesInstruction(util.InstructionBase):
+class SumBytesInstruction(InstructionBase):
     """Adds all bytes of in0 and in1
     """
 
@@ -97,7 +97,7 @@ class SumBytesInstruction(util.InstructionBase):
         m.d.comb += self.done.eq(1)
 
 
-class SumBytesInstructionTest(util.InstructionTestBase):
+class SumBytesInstructionTest(InstructionTestBase):
     def create_dut(self):
         return SumBytesInstruction()
 
@@ -112,7 +112,7 @@ class SumBytesInstructionTest(util.InstructionTestBase):
             [(0x01010101, 0x02020202), (0x12345678, 0xabcdef01)], sum_bytes)
 
 
-class ReverseBytesInstruction(util.InstructionBase):
+class ReverseBytesInstruction(InstructionBase):
     """Reverses bytes in in0
     """
 
@@ -123,7 +123,7 @@ class ReverseBytesInstruction(util.InstructionBase):
         m.d.comb += self.done.eq(1)
 
 
-class ReverseBytesInstructionTest(util.InstructionTestBase):
+class ReverseBytesInstructionTest(InstructionTestBase):
     def create_dut(self):
         return ReverseBytesInstruction()
 
@@ -138,7 +138,7 @@ class ReverseBytesInstructionTest(util.InstructionTestBase):
             [0, 100, 0x12345678, 0xabcdef01], reverse_bytes)
 
 
-class ReverseBitsInstruction(util.InstructionBase):
+class ReverseBitsInstruction(InstructionBase):
     """Reverses bits in in0
     """
 
@@ -148,7 +148,7 @@ class ReverseBitsInstruction(util.InstructionBase):
         m.d.comb += self.done.eq(1)
 
 
-class ReverseBitsInstructionTest(util.InstructionTestBase):
+class ReverseBitsInstructionTest(InstructionTestBase):
     def create_dut(self):
         return ReverseBitsInstruction()
 
@@ -172,7 +172,7 @@ def python_fib(n):
     return s1
 
 
-class FibInstructionTest(util.InstructionTestBase):
+class FibInstructionTest(InstructionTestBase):
     def create_dut(self):
         return FibInstruction()
 
@@ -180,7 +180,7 @@ class FibInstructionTest(util.InstructionTestBase):
         self.verify_against_reference(range(8), python_fib)
 
 
-class FibInstruction2Test(util.InstructionTestBase):
+class FibInstruction2Test(InstructionTestBase):
     def create_dut(self):
         return FibInstruction2()
 
@@ -189,7 +189,7 @@ class FibInstruction2Test(util.InstructionTestBase):
 
 
 def make_cfu():
-    return util.Cfu({
+    return Cfu({
         0: SumBytesInstruction(),
         1: ReverseBytesInstruction(),
         2: ReverseBitsInstruction(),
