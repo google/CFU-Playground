@@ -44,6 +44,9 @@ run: $(BITSTREAM) prog
 	make -C $(PROJ_DIR) PROJ=$(PROJ) MODEL=$(MODEL) run
 
 
+sim-basic:
+	pushd $(PROJ_DIR) && make sim-basic && popd
+
 camera/camera.bin:
 	pushd camera && make && popd
 

@@ -24,12 +24,15 @@ BITSTREAM := $(GATEWARE)/arty.bit
 
 
 PROJ_DIR        := .
+PROJ_REAL_DIR   := $(realpath $(PROJ_DIR))
 CFU_NMIGEN      := $(PROJ_DIR)/cfu.py
 CFU_NMIGEN_GEN  := $(PROJ_DIR)/cfu_gen.py
 CFU_VERILOG     := $(PROJ_DIR)/cfu.v
 BUILD           := $(PROJ_DIR)/build
 THIRD_PARTY     := $(abspath $(PROJ_DIR)/third_party)
 TFLM_DIR        := $(THIRD_PARTY)/tflm_gen
+PYRUN           := $(CFU_REAL_ROOT)/scripts/pyrun
+BASIC_BIN       := $(CFU_REAL_ROOT)/basic_cfu/basic.bin
 
 CAM_BASES   := src ld Makefile
 CAM_SRC_DIR := $(CFU_ROOT)/camera
@@ -60,10 +63,16 @@ $(BITSTREAM): $(CFU_VERILOG)
 	make -C $(CFU_ROOT) PROJ=$(PROJ) soc
 
 $(CFU_VERILOG): $(CFU_NMIGEN) $(CFU_NMIGEN_GEN)
-	$(CFU_ROOT)/scripts/pyrun $(CFU_NMIGEN_GEN)
+	$(PYRUN) $(CFU_NMIGEN_GEN)
 
 prog: $(BITSTREAM)
 	openocd -f $(CFU_REAL_ROOT)/prog/openocd_xc7_ft2232.cfg -c "init ; pld load 0 $(BITSTREAM) ; exit"
+
+basic:
+	pushd $(CFU_REAL_ROOT)/basic_cfu && make && popd
+
+sim-basic: $(CFU_VERILOG) basic
+	pushd $(SOC_DIR) && $(PYRUN) ./soc.py --cfu $(PROJ_REAL_DIR)/$(CFU_VERILOG) --sim-ram-init $(BASIC_BIN) && popd
 
 #
 # Copy TFLM harness sources and Makefile.

@@ -37,13 +37,19 @@ make
 ../soc/bin/litex_term --speed 115200 --kernel basic.bin /dev/ttyUSB*
 ```
 
+To run this basic program on a simulation of the SoC on your local machine,
+execute:
+
+```bash
+make PROJ=proj_example sim-basic
+```
+
 Build a TensorFlow Lite/Micro test harness executable and execute it on the Arty board (first `cd` to the repo root directory):
 
 ```
 make PROJ=proj_template MODEL=pdti8 harness
 make PROJ=proj_template MODEL=pdti8 run
 ```
-
 
 ### Underlying technology
 
