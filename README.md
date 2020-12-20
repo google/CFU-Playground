@@ -26,7 +26,7 @@ This builds the SoC with the default CFU from `proj/proj_template`.   Later you'
 Build a basic program and execute it on the Arty board:
 ```
 cd basic_cfu
-make
+make PLATFORM=arty.proj_template
 ../soc/bin/litex_term --speed 115200 --kernel basic.bin /dev/ttyUSB*
 ```
 
