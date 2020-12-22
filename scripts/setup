@@ -17,6 +17,9 @@ fi
 if ! which expect >/dev/null; then
     missing+=(expect)
 fi
+if ! which ccache >/dev/null; then
+    missing+=(ccache)
+fi
 
 if [ ${#missing[@]} -gt 0 ]; then
     echo "Missing packages: ${missing[@]}" >&2

@@ -15,8 +15,7 @@ RM         := rm -rf
 COPY       := cp -a
 PATH_SEP   := /
 
-# Assumes current directory is the one containing the makefile
-BASE_DIR   := .
+BASE_DIR   := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 SOC_DIR    := $(BASE_DIR)/../soc
 BUILD_DIR  := $(SOC_DIR)/build/$(PLATFORM)/software
 LITEX_DIR  := $(BASE_DIR)/../third_party/python/litex/litex
@@ -25,7 +24,8 @@ VEX_SRC_DIR  := $(LITEX_DIR)/soc/cores/cpu/vexriscv
 LD_DIR     := $(BASE_DIR)/ld
 GEN_LD_DIR := $(BUILD_DIR)/include/generated
 LDSCRIPT   := $(LD_DIR)/linker.ld
-LDSCRIPTS  := $(LDSCRIPT) $(GEN_LD_DIR)/output_format.ld $(GEN_LD_DIR)/regions.ld
+ROM_LDSCRIPT := $(LD_DIR)/rom.ld
+LDSCRIPTS  := $(LDSCRIPT) $(ROM_LDSCRIPT) $(GEN_LD_DIR)/output_format.ld $(GEN_LD_DIR)/regions.ld
 
 SRC_DIR    := $(BASE_DIR)/src
 THIRD_PARTY := $(BASE_DIR)/../third_party
@@ -64,7 +64,6 @@ LFLAGS     := $(CFLAGS) \
 	-nostartfiles \
 	-Wl,--gc-sections \
 	-Wl,--no-warn-mismatch \
-	-Wl,--script=$(LDSCRIPT) \
 	-Wl,--build-id=none
 
 OBJ_DIR    := .obj
@@ -103,14 +102,22 @@ $(OBJECTS): | $(OBJ_DIR)
 
 $(TARGET): $(OBJECTS) $(LDSCRIPTS)
 	$(QUIET) echo "  LD       $@"
-	$(QUIET) $(CC) $(OBJECTS) $(LFLAGS) -o $@
+	$(QUIET) $(CC) $(OBJECTS) $(LFLAGS) -Wl,--script=$(LDSCRIPT) -o $@
 	$(QUIET) echo "  OBJDUMP  $@"
 	$(QUIET) $(OBJDUMP) -d $@ > $@.dis
 	$(QUIET) $(OBJDUMP) -t $@ > $@.sym
 
-$(PACKAGE).bin: $(TARGET)
+# As for TARGET, but intended to load into ROM at address 0.
+bios.elf: $(OBJECTS) $(LDSCRIPTS)
+	$(QUIET) echo "  LD       $@"
+	$(QUIET) $(CC) $(OBJECTS) $(LFLAGS) -Wl,--script=$(ROM_LDSCRIPT) -o $@
+	$(QUIET) echo "  OBJDUMP  $@"
+	$(QUIET) $(OBJDUMP) -d $@ > $@.dis
+	$(QUIET) $(OBJDUMP) -t $@ > $@.sym
+
+%.bin: %.elf
 	$(QUIET) echo "  OBJCOPY  $@"
-	$(QUIET) $(OBJCOPY) -O binary $(TARGET) $@
+	$(QUIET) $(OBJCOPY) -O binary $< $@
 
 $(PACKAGE).ihex: $(TARGET)
 	$(QUIET) echo "  IHEX     $(PACKAGE).ihex"

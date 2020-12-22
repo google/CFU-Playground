@@ -19,7 +19,9 @@ void isr(void)
 
 	if(irqs & (1 << UART_INTERRUPT)) {
 		uart_isr();
+#ifdef CSR_LEDS_BASE
                 leds_out_write(leds_out_read() ^ 0x8);
+#endif
         }
 }
 
@@ -98,8 +100,10 @@ void __attribute__ ((noinline)) run_cfu()
 
 int main(void) 
 {
+#ifdef CSR_LEDS_BASE
     leds_out_write(0xf);
     int leds_val = 0x0;
+#endif
 
 
     irq_setmask(0);
@@ -154,7 +158,9 @@ int main(void)
             printf("ause perf counter %d\n", counter_num);
             set_counter_enable(counter_num, 0);
         }
+#ifdef CSR_LEDS_BASE
         leds_val += 1;
         leds_out_write(leds_val);
+#endif
     }
 }
