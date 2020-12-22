@@ -1,13 +1,19 @@
 #!/bin/bash
 
+# Exports environment variables needed by parts of this project.
+#   PYTHONPATH
+#   PATH
+
 if [ "${BASH_SOURCE-}" = "$0" ]; then
     echo -e "This script should be sourced, not run:\nsource $0" >&2
     exit 1
 fi
 
-# Exports environment variables needed by parts of this project.
-#   PYTHONPATH
-#   PATH
+# Using ccache speeds up verilator simulation when not much has changed.
+if which ccache >/dev/null; then
+    export OBJCACHE="ccache"
+    export CC="ccache gcc"
+fi
 
 CFU_ROOT=$(dirname $(realpath ${BASH_SOURCE[0]}))
 # We deliberately clear anything that may have already been in PYTHONPATH to

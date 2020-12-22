@@ -46,6 +46,20 @@ class CustomSoC(BaseSoC):
         if 'debug' in kwargs['cpu_variant']:
             self.register_mem("vexriscv_debug", 0xf00f0000, self.cpu.debug_bus, 0x100)
 
+def configure_sim_builder(builder: Builder, args):
+    required_packages = {"libcompiler_rt", "libbase"}
+    # Remove unwanted packages that we don't need. Of most importance to remove
+    # is the "bios" package, which is LiteX's BIOS, since we're using our own.
+    builder.software_packages = [
+        (name, dir) for (name, dir) in builder.software_packages if name in required_packages ]
+    bios_dir = f"{builder.output_dir}/software/bios"
+    os.makedirs(bios_dir, exist_ok=True)
+    with open(f"{bios_dir}/Makefile", "w") as f:
+        f.write(f"all:\n\tmake PLATFORM=sim -f {args.sim_rom_dir}/Makefile bios.bin")
+    # "bios" gets loaded automatically by the builder.
+    builder.add_software_package("bios", bios_dir)
+
+
 def main():
     parser = argparse.ArgumentParser(description="LiteX SoC on Arty A7")
     parser.add_argument("--build", action="store_true", help="Build bitstream")
@@ -56,10 +70,8 @@ def main():
     parser.add_argument("--with-ethernet",  action="store_true", help="Enable Ethernet support")
     parser.add_argument("--with-etherbone", action="store_true", help="Enable Etherbone support")
     parser.add_argument("--cfu", default=None, help="Specify file containing CFU Verilog module")
-    parser.add_argument("--sim-ram-init", default=None,
-        help="Simulate the FPGA on the local machine, RAM is initialized with the supplied file.")
-    parser.add_argument("--sim-rom-init", default=None,
-        help="Simulate the FPGA on the local machine, ROM is initialized with the supplied file.")
+    parser.add_argument("--sim-rom-dir", default=None,
+        help="Simulate the FPGA on the local machine. Directory must support `make bios.bin`.")
     parser.add_argument("--sim-trace",  action="store_true", help="Whether to enable tracing of simulation")
     parser.add_argument("--sim-trace-start", default=0, help="Start tracing at this time in picoseconds")
     parser.add_argument("--sim-trace-end", default=-1, help="Stop tracing at this time in picoseconds")
@@ -76,13 +88,9 @@ def main():
     cpu = CPUS["vexriscv"]
     soc_kwargs = soc_sdram_argdict(args)
     sim_config = None
-    sim_active = args.sim_rom_init != None or args.sim_ram_init != None
+    sim_active = args.sim_rom_dir != None
     if sim_active:
         soc_kwargs["uart_name"] = "sim"
-        if args.sim_rom_init:
-            soc_kwargs["integrated_rom_init"] = get_mem_data(args.sim_rom_init, cpu.endianness)
-        if args.sim_ram_init:
-            soc_kwargs["integrated_main_ram_init"] = get_mem_data(args.sim_ram_init, cpu.endianness)
         soc = SimSoC(
             integrated_main_ram_size=32 * 1024 * 1024,
             **soc_kwargs)
@@ -105,7 +113,9 @@ def main():
         soc.platform.add_source(f"{vexriscv}/verilog/wrapVexRiscv_{var}.v")
 
     builder = Builder(soc, **builder_argdict(args))
+
     if sim_active:
+        configure_sim_builder(builder, args)
         builder.build(
             build=True,
             run=True,
