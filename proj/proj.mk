@@ -47,7 +47,7 @@ HARNESS_LOG     := $(BUILD)/tflm_harness_$(MODEL)/$(MODEL).LOG
 LXTERM      := $(CFU_ROOT)/soc/bin/litex_term
 
 
-.PHONY:	proj
+.PHONY:	proj harness-clean
 
 
 soc: $(BITSTREAM)
@@ -81,6 +81,11 @@ $(HARNESS_BIN):
 	mkdir -p $(HARNESS_DIR)
 	/bin/cp -r $(HARNESS_FILES) $(HARNESS_DIR)
 	make -C $(HARNESS_DIR) TFLM_DIR=$(TFLM_DIR) CFU_ROOT=$(CFU_REAL_ROOT) PLATFORM=$(PLATFORM) MODEL=$(MODEL) PROJ=$(PROJ)
+
+harness-clean:
+	/bin/rm -rf $(HARNESS_DIR)
+	make -C $(TFLM_DIR) clean
+
 
 #
 # Copy program sources and Makefile
