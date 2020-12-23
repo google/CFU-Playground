@@ -19,7 +19,7 @@ LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv csr.csv $(CFU_ARGS) $(UART_ARGS)
 
 BITSTREAM:= soc/$(OUT_DIR)/gateware/arty.bit
 
-.PHONY: soc prog harness run0 run1 b models projects
+.PHONY: soc prog harness run0 run1 b models projects harness-clean
 
 soc: $(BITSTREAM)
 
@@ -39,6 +39,9 @@ prog: $(BITSTREAM)
 
 harness: $(BITSTREAM)
 	make -C $(PROJ_DIR) PROJ=$(PROJ) MODEL=$(MODEL) harness
+
+harness-clean:
+	make -C $(PROJ_DIR) PROJ=$(PROJ) MODEL=$(MODEL) harness-clean
 
 run: $(BITSTREAM) prog
 	make -C $(PROJ_DIR) PROJ=$(PROJ) MODEL=$(MODEL) run
