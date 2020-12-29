@@ -11,7 +11,7 @@ lines = sys.stdin.readlines()
 
 for i in range(len(lines)):
     lin = lines[i]
-    # print(lin)
+    lin = lin.replace('\r','')
     m = re.match(r"(\S+) took (\d+) cyc", lin)
     if m:
         tfop = m.group(1)
