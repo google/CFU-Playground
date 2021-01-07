@@ -1,4 +1,5 @@
 #include "tflite.h"
+#include "perf.h"
 
 #include "tensorflow/lite/micro/examples/person_detection_experimental/detection_responder.h"
 #include "tensorflow/lite/micro/examples/person_detection_experimental/image_provider.h"
@@ -122,15 +123,35 @@ void load_zeros() {
   printf("Zero 0x%x bytes at 0x%p\n", input->bytes, input->data.int8);
 }
 
+void init_perf_counters() {
+  for (int i=0; i<NUM_PERF_COUNTERS; ++i) {
+    disable_counter(i);
+    set_counter(i, 0);
+  }
+}
+
+void print_perf_counters() {
+  for (int i=0; i<NUM_PERF_COUNTERS; ++i) {
+    disable_counter(i);
+  }
+  for (int i=0; i<NUM_PERF_COUNTERS; ++i) {
+    printf("PERF COUNTER %d: %d\n", i, get_counter(i));
+  }
+}
+
 
 void classify(int8_t *person_score, int8_t *no_person_score) {
+
   // image ought to be loaded already
   printf(">>%d\n", input->data.int8[0]);
 
+
   // Run the model on this input and make sure it succeeds.
+  init_perf_counters();
   if (kTfLiteOk != interpreter->Invoke()) {
     TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed.");
   }
+  print_perf_counters();
 
   TfLiteTensor* output = interpreter->output(0);
 
