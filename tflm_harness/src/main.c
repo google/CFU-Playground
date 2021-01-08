@@ -62,5 +62,6 @@ int main(void) {
     unsigned int cyc = get_mcycle();
     printf("%u cycles\n", cyc);
     puts("Done");
+    return(0);
 }
 
