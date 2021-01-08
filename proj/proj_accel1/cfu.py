@@ -120,7 +120,10 @@ class DoubleCompareInstructionTest(TestBase):
         self.run_sim(process, True)
 
 def make_cfu():
-    return Cfu({0: DoubleCompareInstruction()})
+    return Cfu({
+        0: DoubleCompareInstruction(),
+        1: InitInstruction(),
+    })
 
 if __name__ == '__main__':
     unittest.main()
