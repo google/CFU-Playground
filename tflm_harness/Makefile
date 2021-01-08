@@ -68,6 +68,7 @@ SHARED_FLAGS := \
 	-I$(BUILD_DIR)/include \
 	-ffunction-sections -fdata-sections -fno-common \
 	-fomit-frame-pointer \
+        -ffreestanding \
 	-Werror\
 	-Wsign-compare\
 	-Wdouble-promotion\
