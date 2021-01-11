@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from nmigen import *
-from nmigen_cfu import InstructionBase, InstructionTestBase, Cfu
+from nmigen_cfu import InstructionBase, InstructionTestBase, Cfu, CfuTestBase
 
 import unittest
 
@@ -195,6 +195,21 @@ def make_cfu():
         2: ReverseBitsInstruction(),
         3: FibInstruction(),
     })
+
+
+class CfuTest(CfuTestBase):
+    def create_dut(self):
+        return make_cfu()
+
+    def test(self):
+        DATA = [
+            ((0, 0x01020304, 0x0a0b0c0d), 56),
+            ((1, 0x01020304, 0),          0x04030201),
+            ((2, 0x01020304, 0),          0x20c04080),
+            ((3, 0x05,       0),          5),
+            ((3, 0x06,       0),          8),
+        ]
+        return self.run_ops(DATA)
 
 
 if __name__ == '__main__':
