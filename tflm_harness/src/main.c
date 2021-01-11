@@ -57,10 +57,7 @@ int main(void) {
     // ONCE_AND_QUIT
     load_zeros();
     puts("Running one inference");
-    set_mcycle(0);
     detect();
-    unsigned int cyc = get_mcycle();
-    printf("%u cycles\n", cyc);
     puts("Done");
     return(0);
 }

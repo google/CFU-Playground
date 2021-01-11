@@ -148,10 +148,13 @@ void classify(int8_t *person_score, int8_t *no_person_score) {
 
   // Run the model on this input and make sure it succeeds.
   init_perf_counters();
+  set_mcycle(0);
   if (kTfLiteOk != interpreter->Invoke()) {
     TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed.");
   }
+  unsigned int cyc = get_mcycle();
   print_perf_counters();
+  printf("%u cycles\n", cyc);
 
   TfLiteTensor* output = interpreter->output(0);
 
