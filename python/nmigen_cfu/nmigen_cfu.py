@@ -494,5 +494,44 @@ class _CfuTest(TestBase):
         self.run_sim(process, True)
 
 
+class CfuTestBase(TestBase):
+    """Tests CFU ops independent of timing and handshaking."""
+    def run_ops(self, data):
+        """Runs the given ops through the CFU, checking results.
+
+        Arguments:
+            data: [((function_id, in0, in1), expected_output)...]
+                  if expected_output is None, it is ignored.
+        """
+        def process():
+            for n, (inputs, expected) in enumerate(data):
+                function_id, in0, in1 = inputs
+                # Set inputs and cmd_valid
+                yield self.dut.cmd_payload_function_id.eq(function_id)
+                yield self.dut.cmd_payload_inputs_0.eq(in0)
+                yield self.dut.cmd_payload_inputs_1.eq(in1)
+                yield self.dut.cmd_valid.eq(1)
+                yield self.dut.rsp_ready.eq(1)
+                yield
+                # Wait until command accepted and response available
+                while not (yield self.dut.cmd_ready):
+                    yield
+                yield self.dut.cmd_valid.eq(0)
+                while not (yield self.dut.rsp_valid):
+                    yield
+                yield self.dut.rsp_ready.eq(0)
+
+                # Ensure no errors, and output as expected
+                ok = (yield self.dut.rsp_payload_response_ok)
+                self.assertTrue(ok, f"op{n} response ok")
+                if expected is not None:
+                    actual = (yield self.dut.rsp_payload_outputs_0)
+                    self.assertEqual(actual, expected, 
+                            f"op {n} output {hex(actual)} != {hex(expected)}")
+                yield
+
+        self.run_sim(process, True)
+
+
 if __name__ == '__main__':
     unittest.main()
