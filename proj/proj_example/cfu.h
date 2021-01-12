@@ -25,11 +25,13 @@
 #define cfu_op0_hw(rs1, rs2)  opcode_R(CUSTOM0, 0, 0, (rs1), (rs2))
 #define cfu_op1_hw(rs1, rs2)  opcode_R(CUSTOM0, 1, 0, (rs1), (rs2))
 #define cfu_op2_hw(rs1, rs2)  opcode_R(CUSTOM0, 2, 0, (rs1), (rs2))
+#define cfu_op3_hw(rs1, rs2)  opcode_R(CUSTOM0, 3, 0, (rs1), (rs2))
 
 // useful name for each custom instruction
 #define cfu_byte_sum_hw(rs1, rs2)  opcode_R(CUSTOM0, 0, 0, (rs1), (rs2))
 #define cfu_byte_swap_hw(rs1, rs2)  opcode_R(CUSTOM0, 1, 0, (rs1), (rs2))
 #define cfu_bit_reverse_hw(rs1, rs2)  opcode_R(CUSTOM0, 2, 0, (rs1), (rs2))
+#define cfu_fib_hw(rs1, rs2)  opcode_R(CUSTOM0, 3, 0, (rs1), (rs2))
 
 
 
@@ -42,11 +44,13 @@ uint32_t Cfu(uint32_t functionid, uint32_t rs1, uint32_t rs2);
 #define cfu_op0_sw(rs1, rs2)  Cfu(0, rs1, rs2)
 #define cfu_op1_sw(rs1, rs2)  Cfu(1, rs1, rs2)
 #define cfu_op2_sw(rs1, rs2)  Cfu(2, rs1, rs2)
+#define cfu_op3_sw(rs1, rs2)  Cfu(3, rs1, rs2)
 
 // useful name for each custom instruction
 #define cfu_byte_sum_sw(rs1, rs2)    Cfu(0, rs1, rs2)
 #define cfu_byte_swap_sw(rs1, rs2)   Cfu(1, rs1, rs2)
 #define cfu_bit_reverse_sw(rs1, rs2) Cfu(2, rs1, rs2)
+#define cfu_fib_sw(rs1, rs2) Cfu(3, rs1, rs2)
 
 
 
@@ -56,17 +60,21 @@ uint32_t Cfu(uint32_t functionid, uint32_t rs1, uint32_t rs2);
 #define cfu_op0(rs1, rs2)       cfu_op0_sw(rs1, rs2)
 #define cfu_op1(rs1, rs2)       cfu_op1_sw(rs1, rs2)
 #define cfu_op2(rs1, rs2)       cfu_op2_sw(rs1, rs2)
+#define cfu_op3(rs1, rs2)       cfu_op3_sw(rs1, rs2)
 #define cfu_byte_sum(rs1, rs2)    cfu_byte_sum_sw(rs1, rs2)
 #define cfu_byte_swap(rs1, rs2)   cfu_byte_swap_sw(rs1, rs2)
 #define cfu_bit_reverse(rs1, rs2) cfu_bit_reverse_sw(rs1, rs2)
+#define cfu_fib(rs1, rs2) cfu_fib_sw(rs1, rs2)
 
 #else
 
 #define cfu_op0(rs1, rs2)       cfu_op0_hw((rs1), (rs2))
 #define cfu_op1(rs1, rs2)       cfu_op1_hw((rs1), (rs2))
 #define cfu_op2(rs1, rs2)       cfu_op2_hw((rs1), (rs2))
+#define cfu_op3(rs1, rs2)       cfu_op3_hw((rs1), (rs2))
 #define cfu_byte_sum(rs1, rs2)    cfu_byte_sum_hw((rs1), (rs2))
 #define cfu_byte_swap(rs1, rs2)   cfu_byte_swap_hw((rs1), (rs2))
 #define cfu_bit_reverse(rs1, rs2) cfu_bit_reverse_hw((rs1), (rs2))
+#define cfu_fib(rs1, rs2) cfu_fib_hw((rs1), (rs2))
 
 #endif

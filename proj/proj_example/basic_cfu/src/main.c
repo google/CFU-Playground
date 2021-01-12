@@ -61,10 +61,11 @@ void __attribute__ ((noinline)) run_demo()
         int r0 = cfu_op0_hw(v0, v1);    // byte sum
         int r1 = cfu_op1_hw(v0, v1);    // byte swap
         int r2 = cfu_op2_hw(v0, v1);    // bit reverse
+        int r3 = cfu_op3_hw(v0, v1);    // fib
 
-        puts("arg0        arg1        bytesum     byteswap    bitrev");
-        printf("0x%08x, 0x%08x: 0x%08x, 0x%08x, 0x%08x\n", v0, v1, r0, r1, r2);
-        printf("  %08d,   %08d:   %08d,   %08d,   %08d\n", v0, v1, r0, r1, r2);
+        puts("arg0        arg1        bytesum     byteswap    bitrev    fib");
+        printf("0x%08x, 0x%08x: 0x%08x, 0x%08x, 0x%08x, 0x%08x\n", v0, v1, r0, r1, r2, r3);
+        printf("  %08d,   %08d:   %08d,   %08d,   %08d,   %08d\n", v0, v1, r0, r1, r2, r3);
         puts("\n");
 }
 
@@ -76,7 +77,8 @@ void __attribute__ ((noinline)) run_cfu()
             int v0 = cfu_op0_hw(i, i);    // byte sum
             int v1 = cfu_op1_hw(i, i);    // byte swap
             int v2 = cfu_op2_hw(i, i);    // bit reverse
-            printf("0x%08x, 0x%08x: 0x%08x, 0x%08x, 0x%08x\n", i, i, v0, v1, v2);
+            int v3 = cfu_op3_hw(i&63, i&63);    // fib
+            printf("0x%08x, 0x%08x: 0x%08x, 0x%08x, 0x%08x, 0x%08x\n", i, i, v0, v1, v2, v3);
         }
         puts("\n");
 }
@@ -91,12 +93,14 @@ void __attribute__ ((noinline)) compare_against_sw()
             unsigned v0 = cfu_op0_hw(i, j);
             unsigned v1 = cfu_op1_hw(i, j);
             unsigned v2 = cfu_op2_hw(i, j);
+            unsigned v3 = cfu_op3_hw(i&15, j&15);
             unsigned sw0 = cfu_op0_sw(i, j);
             unsigned sw1 = cfu_op1_sw(i, j);
             unsigned sw2 = cfu_op2_sw(i, j);
-            if (v0!=sw0 || v1!=sw1 || v2!=sw2) {
-                printf("0x%08x, 0x%08x: 0x%08x:0x%08x, 0x%08x:0x%08x, 0x%08x:0x%08x <<=== MISMATCH!\n", 
-                        i, j, v0, sw0, v1, sw1, v2, sw2);
+            unsigned sw3 = cfu_op3_sw(i&15, j&15);
+            if (v0!=sw0 || v1!=sw1 || v2!=sw2 || v3!=sw3) {
+                printf("0x%08x, 0x%08x: 0x%08x:0x%08x, 0x%08x:0x%08x, 0x%08x:0x%08x, 0x%08x:0x%08x <<=== MISMATCH!\n", 
+                        i, j, v0, sw0, v1, sw1, v2, sw2, v3, sw3);
             }
             ++count;
             if ((count & 0xffff) == 0) printf("Ran %d comparisons....\n", count);
