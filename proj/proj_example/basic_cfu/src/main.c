@@ -48,6 +48,33 @@ unsigned int readval()
 }
 
 
+void __attribute__ ((noinline)) run_one_opcode()
+{
+        puts("\n\nOPCODE TEST:");
+
+        puts("Enter opcode 0-3:");
+        char c = readchar();
+        putchar(c);
+        int opcode = get_char_val(c);
+
+        puts("\nEnter first operand value (in hexadecimal, no leading '0x'):");
+        unsigned int v0 = readval();
+
+        puts("Enter second operand value (in hexadecimal, no leading '0x'):");
+        unsigned int v1 = readval();
+
+        int r = 0; 
+        switch (opcode) {
+            case 0: r = cfu_op0_hw(v0, v1); break;    // byte sum
+            case 1: r = cfu_op1_hw(v0, v1); break;    // byte swap
+            case 2: r = cfu_op2_hw(v0, v1); break;    // bit reverse
+            case 3: r = cfu_op3_hw(v0, v1); break;    // fib
+            default: r = 0;
+        }
+
+        printf("Result: 0x%08x\n", r);
+        puts("\n");
+}
 void __attribute__ ((noinline)) run_demo()
 {
         puts("\n\nCFU TEST:");
@@ -119,6 +146,7 @@ void show_menu(void)
     puts("z: zero-out current perf counter, and also zero-out mcycle");
     puts("m: show current value of mcycle (mcycle is not pausable)");
     puts("");
+    puts("o: run one-opcode test");
     puts("c: run preset CFU test (run fixed values through funct0, funct1, and funct2)");
     puts("d: interactive CFU test -- you supply the operands");
     puts("s: run test of CFU against software emulation");
@@ -168,6 +196,9 @@ int main(void)
         }
         if (c == 'd') {
             run_demo();
+        }
+        if (c == 'o') {
+            run_one_opcode();
         }
         if (c == 'z') {
             set_mcycle(0);
