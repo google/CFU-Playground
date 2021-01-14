@@ -5,7 +5,7 @@
 
 set timeout 500
 
-spawn ../../soc/bin/litex_term --kernel [lindex $argv 0] --no-crc [lindex $argv 1]
+spawn ../../soc/bin/litex_term --speed 921600 --kernel [lindex $argv 0] --no-crc [lindex $argv 1]
 
 expect "Running one inference"
 

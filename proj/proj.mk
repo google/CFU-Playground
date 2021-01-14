@@ -5,7 +5,7 @@ PROJ            := $(lastword $(subst /, ,${CURDIR}))
 MODEL           ?= pdti8
 
 TTY             := $(wildcard /dev/ttyUSB?)
-UART_SPEED      := 115200
+UART_SPEED      := 921600
 CRC             := --no-crc
 
 #

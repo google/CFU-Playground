@@ -12,8 +12,9 @@ OUT_DIR:=   build/$(SOC_NAME)
 CFU_ROOT:=  $(PWD)
 PYRUN:=     $(CFU_ROOT)/scripts/pyrun
 
-UART_ARGS=  --uart-baudrate 460800
-UART_ARGS=  --uart-baudrate 115200
+#UART_ARGS=  --uart-baudrate 115200
+#UART_ARGS=  --uart-baudrate 460800
+UART_ARGS=  --uart-baudrate 921600
 LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv csr.csv $(CFU_ARGS) $(UART_ARGS)
 
 
