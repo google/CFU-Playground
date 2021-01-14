@@ -35,8 +35,12 @@ class FibInstruction(InstructionBase):
                     s2.eq(1)
                 ]
                 with m.If(self.start):
-                    m.next = "RUN"
-                    m.d.sync += count.eq(self.in0)
+                    with m.If(self.in0 > 46):
+                        # fib > 46 is too large
+                        m.d.comb += self.done.eq(1)
+                    with m.Else():
+                        m.next = "RUN"
+                        m.d.sync += count.eq(self.in0)
             with m.State("RUN"):
                 m.d.sync += [
                     count.eq(count - 1),
@@ -208,6 +212,8 @@ class CfuTest(CfuTestBase):
             ((2, 0x01020304, 0),          0x20c04080),
             ((3, 0x05,       0),          5),
             ((3, 0x06,       0),          8),
+            ((3, 46,         0),          1836311903), # Max input
+            ((3, 47,         0),          0),          # Input too large
         ]
         return self.run_ops(DATA)
 

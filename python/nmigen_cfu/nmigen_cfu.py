@@ -198,7 +198,6 @@ class Cfu(SimpleElaboratable):
             name='io_bus_rsp_payload_response_ok')
         self.rsp_payload_outputs_0 = Signal(32,
                                             name='io_bus_rsp_payload_outputs_0')
-        self.clock = Signal(name='clk')
         self.ports = [
             self.cmd_valid,
             self.cmd_ready,
@@ -209,7 +208,6 @@ class Cfu(SimpleElaboratable):
             self.rsp_ready,
             self.rsp_payload_response_ok,
             self.rsp_payload_outputs_0,
-            self.clock,
         ]
 
     def elab(self, m):
