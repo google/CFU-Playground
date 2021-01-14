@@ -152,7 +152,7 @@ clean:
 include $(wildcard $(OBJ_DIR)/*.d)
 
 run:
-	$(LXTERM) --speed 115200 --kernel basic.bin /dev/ttyUSB?
+	$(LXTERM) --speed 921600 --kernel basic.bin /dev/ttyUSB?
 
 
 .PHONY: clean prog 

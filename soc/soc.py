@@ -78,7 +78,7 @@ def main():
     parser.set_defaults(
             csr_csv='csr.csv',
             uart_name='serial',
-            uart_baudrate=115200,
+            uart_baudrate=921600,
             cpu_variant='full+debug',    # don't specify 'cfu' here
             with_etherbone=False)
 
@@ -87,6 +87,7 @@ def main():
     assert not (args.with_ethernet and args.with_etherbone)
     cpu = CPUS["vexriscv"]
     soc_kwargs = soc_sdram_argdict(args)
+    soc_kwargs["l2_size"] = 8 * 1024
     sim_config = None
     sim_active = args.sim_rom_dir != None
     if sim_active:
@@ -100,7 +101,7 @@ def main():
         soc.add_constant("ROM_BOOT_ADDRESS", 0x40000000)
     else:
         soc = CustomSoC(with_ethernet=args.with_ethernet, with_etherbone=args.with_etherbone,
-            **soc_sdram_argdict(args))
+            **soc_kwargs)
 
     # get the CFU version, plus the CFU itself and a wrapper 
     # ...since we're using stock litex, it doesn't know about the Cfu variants, so we need to use "external_variant"
