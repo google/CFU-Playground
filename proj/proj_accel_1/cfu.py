@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from nmigen import *
-from nmigen_cfu import SimpleElaboratable, InstructionBase, TestBase, InstructionTestBase, Cfu
+from nmigen_cfu import SimpleElaboratable, InstructionBase, TestBase, InstructionTestBase, Cfu, CfuTestBase
 
 import unittest
 class WidthHeight(SimpleElaboratable):
@@ -86,7 +86,7 @@ class DoubleCompareInstruction(InstructionBase):
 
     def elab(self, m):
         m.d.comb += [
-            self.output.eq((self.in0 > 0) & (self.in0 < self.max_width) & (self.in1 > 0) & (self.in1 < self.max_height)),
+            self.output.eq((self.in0 >= 0) & (self.in0 < self.max_width) & (self.in1 >= 0) & (self.in1 < self.max_height)),
             self.done.eq(1)
         ]
 
@@ -113,17 +113,53 @@ class DoubleCompareInstructionTest(TestBase):
                 yield self.dut.max_width.eq(width)
                 yield self.dut.max_height.eq(height)
                 yield
-                if ((in0 > 0) & (in0 < width) & (in1 > 0) & (in1 < height)):
+                if ((in0 >= 0) & (in0 < width) & (in1 >= 0) & (in1 < height)):
                     self.assertEqual((yield self.dut.output),1)
                 else:
                     self.assertEqual((yield self.dut.output),0)
         self.run_sim(process, True)
 
+class DoubleCompareCfu(Cfu):
+    def __init__(self):
+        self.dc = DoubleCompareInstruction()
+        self.init = InitInstruction()
+        super().__init__({
+            0: self.dc,
+            1: self.init,
+        })
+
+    def elab(self,m):
+        super().elab(m)
+        m.d.comb += [
+            self.dc.max_height.eq(self.init.max_height),
+            self.dc.max_width.eq(self.init.max_width),
+        ]
+
+class DoubleCompareCfuTest(CfuTestBase):
+    def create_dut(self):
+        return DoubleCompareCfu()
+
+    def test_double_compare_cfu(self):
+        DATA = [
+            ((1,5,6),None),
+            ((0,1,1),1),
+            ((0,4,5),1),
+            ((0,5,6),0),
+            ((0,6,5),0),
+            ((0,5,7),0),
+            ((0,10,10),0),
+            ((0,0,0),1),
+            ((1,2,2),None),
+            ((0,1,1),1),
+            ((0,4,5),0),
+            ((1,3,10),None),
+            ((0,1,1),1),
+            ((0,4,5),0),
+        ]
+        return self.run_ops(DATA)
+
 def make_cfu():
-    return Cfu({
-        0: DoubleCompareInstruction(),
-        1: InitInstruction(),
-    })
+    return DoubleCompareCfu()
 
 if __name__ == '__main__':
     unittest.main()
