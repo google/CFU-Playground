@@ -104,6 +104,10 @@ class InstructionBase(SimpleElaboratable):
         The first operand. Only available when `start` is signalled.
     in1: Signal(32) input
         The second operand. Only available when `start` is signalled.
+    in0s: Signal(signed(32)) input
+        in0 as a signed value. Use in0s rather than in0 if the input is signed.
+    in1s: Signal(32) input
+        in1 as a signed value. Use in1s rather than in1 if the input is signed.
     done: Signal() output
         Single cycle signal to indicate that processing has finished.
     output: Signal(32) output
@@ -113,12 +117,22 @@ class InstructionBase(SimpleElaboratable):
     def __init__(self):
         self.in0 = Signal(32)
         self.in1 = Signal(32)
+        self.in0s = Signal(signed(32))
+        self.in1s = Signal(signed(32))
         self.output = Signal(32)
         self.start = Signal()
         self.done = Signal()
 
     def signal_done(self, m):
         m.d.comb += self.done.eq(1)
+
+    def elaborate(self, platform):
+        m = super().elaborate(platform)
+        m.d.comb += [
+                self.in0s.eq(self.in0),
+                self.in1s.eq(self.in1),
+        ]
+        return m
 
 
 class InstructionTestBase(TestBase):

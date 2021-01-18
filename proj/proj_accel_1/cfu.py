@@ -34,8 +34,8 @@ class InitInstruction(InstructionBase):
     def elab(self, m):
         with m.If(self.start):
             m.d.sync += [
-                self.max_width.eq(self.in0),
-                self.max_height.eq(self.in1),
+                self.max_width.eq(self.in0s),
+                self.max_height.eq(self.in1s),
             ]
             m.d.comb += [
                 self.done.eq(1),
@@ -86,7 +86,7 @@ class DoubleCompareInstruction(InstructionBase):
 
     def elab(self, m):
         m.d.comb += [
-            self.output.eq((self.in0 >= 0) & (self.in0 < self.max_width) & (self.in1 >= 0) & (self.in1 < self.max_height)),
+            self.output.eq((self.in0s >= 0) & (self.in0s < self.max_width) & (self.in1s >= 0) & (self.in1s < self.max_height)),
             self.done.eq(1)
         ]
 
