@@ -17,13 +17,6 @@ from nmigen import *
 from nmigen_cfu import SimpleElaboratable, InstructionBase, TestBase, InstructionTestBase, Cfu, CfuTestBase
 
 import unittest
-class WidthHeight(SimpleElaboratable):
-    def __init__(self):
-        self.max_width = Signal(signed(32))
-        self.max_height = Signal(signed(32))
-
-    def elab(self, m):
-        pass
 
 class InitInstruction(InstructionBase):
     def __init__(self):
