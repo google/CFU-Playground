@@ -16,6 +16,8 @@ limitations under the License.
 #define TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_DEPTHWISE_CONV_H_
 
 #include "tensorflow/lite/kernels/internal/common.h"
+#include "perf.h"
+#include "cfu.h"
 
 namespace tflite {
 namespace reference_integer_ops {
@@ -58,6 +60,9 @@ inline void DepthwiseConvPerChannel(
   TFLITE_DCHECK_EQ(output_depth, input_depth * depth_multiplier);
   TFLITE_DCHECK_EQ(bias_shape.FlatSize(), output_depth);
 
+  // This is the InitInstruction CFU
+  cfu_op1(input_width, input_height);
+
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
       for (int out_x = 0; out_x < output_width; ++out_x) {
@@ -73,9 +78,10 @@ inline void DepthwiseConvPerChannel(
                 const int in_y =
                     in_y_origin + dilation_height_factor * filter_y;
                 // Zero padding by omitting the areas outside the image.
-                const bool is_point_inside_image =
-                    (in_x >= 0) && (in_x < input_width) && (in_y >= 0) &&
-                    (in_y < input_height);
+                // This is the DoubleCompareInstruction CFU
+                const bool is_point_inside_image = cfu_op0(in_x, in_y);
+                    //(in_x >= 0) && (in_x < input_width) && (in_y >= 0) &&
+                    //(in_y < input_height);
                 if (is_point_inside_image) {
                   int32_t input_val = input_data[Offset(
                       input_shape, batch, in_y, in_x, in_channel)];
