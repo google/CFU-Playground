@@ -17,13 +17,6 @@ from nmigen import *
 from nmigen_cfu import SimpleElaboratable, InstructionBase, TestBase, InstructionTestBase, Cfu, CfuTestBase
 
 import unittest
-class WidthHeight(SimpleElaboratable):
-    def __init__(self):
-        self.max_width = Signal(signed(32))
-        self.max_height = Signal(signed(32))
-
-    def elab(self, m):
-        pass
 
 class InitInstruction(InstructionBase):
     def __init__(self):
@@ -96,27 +89,23 @@ class DoubleCompareInstructionTest(TestBase):
 
     def test_double_compare(self):
         DATA = [
-            ((0,0),(1,2,2,1)),
-            ((4,5),(1,4,5,1)),
-            ((19,20),(1,10,10,0)),
-            ((11,13),(1,11,12,0)),
-            ((18,20),(1,19,21,1)),
-            ((-3,1),(1,5,6,0)),
-            ((-2,-2),(1,5,6,0)),
+            ((0,0,2,2),1),
+            ((4,5,4,5),0),
+            ((19,20,10,10),0),
+            ((11,13,11,12),0),
+            ((18,20,19,21),1),
+            ((-3,1,5,6),0),
+            ((-2,-2,5,6),0),
         ]
         def process():
-            for n,(inputs,outputs) in enumerate(DATA):
-                in0,in1 = inputs
-                done,width,height,output = outputs
+            for n,(inputs,expected_output) in enumerate(DATA):
+                in0,in1,width,height = inputs
                 yield self.dut.in0.eq(in0)
                 yield self.dut.in1.eq(in1)
                 yield self.dut.max_width.eq(width)
                 yield self.dut.max_height.eq(height)
                 yield
-                if ((in0 >= 0) & (in0 < width) & (in1 >= 0) & (in1 < height)):
-                    self.assertEqual((yield self.dut.output),1)
-                else:
-                    self.assertEqual((yield self.dut.output),0)
+                self.assertEqual((yield self.dut.output),expected_output)
         self.run_sim(process, True)
 
 class DoubleCompareCfu(Cfu):
