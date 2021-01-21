@@ -18,7 +18,7 @@ from nmigen_cfu import SimpleElaboratable, InstructionBase, TestBase, Instructio
 
 import unittest
 
-class InitInstruction(InstructionBase):
+class StoreInstruction(InstructionBase):
     def __init__(self):
         super().__init__()
         self.max_width = Signal(signed(32))
@@ -26,39 +26,38 @@ class InitInstruction(InstructionBase):
 
     def elab(self, m):
         with m.If(self.start):
-            m.d.sync += [
-                self.max_width.eq(self.in0s),
-                self.max_height.eq(self.in1s),
-            ]
+            with m.If(self.in0s == 10):
+                m.d.sync += self.max_width.eq(self.in1s)
+            with m.Elif(self.in0s == 11):
+                m.d.sync += self.max_height.eq(self.in1s)
             m.d.comb += [
                 self.done.eq(1),
                 self.output.eq(1),
             ]
         return m
 
-class InitInstructionTest(TestBase):
+class StoreInstructionTest(TestBase):
     def create_dut(self):
-        return InitInstruction()
+        return StoreInstruction()
 
-    def test_init(self):
+    def test_start(self):
         DATA = [
-            ((1,0,0),(1,1,0,0)),
-            ((0,1,1),(0,0,0,0)),
-            ((0,5,6),(0,0,0,0)),
-            ((1,1,1),(1,1,1,1)),
-            ((0,1,1),(0,0,1,1)),
-            ((0,0,0),(0,0,1,1)),
-            ((0,2,3),(0,0,1,1)),
-            ((1,2,3),(1,1,2,3)),
-            ((0,1,1),(0,0,2,3)),
+            ((1,10,5),(1,1,5,0)),
+            ((0,1,1),(0,0,5,0)),
+            ((1,11,6),(1,1,5,6)),
+            ((0,1,1),(0,0,5,6)),
+            ((1,10,7),(1,1,7,6)),
+            ((0,0,0),(0,0,7,6)),
+            ((1,11,9),(1,1,7,9)),
+            ((0,2,3),(0,0,7,9)),
         ]
         def process():
             for n,(inputs,outputs) in enumerate(DATA):
-                start,in0,in1 = inputs
-                done, output,width,height = outputs
+                start,in0s,in1s = inputs
+                done,output,width,height = outputs
                 yield self.dut.start.eq(start)
-                yield self.dut.in0.eq(in0)
-                yield self.dut.in1.eq(in1)
+                yield self.dut.in0.eq(in0s)
+                yield self.dut.in1.eq(in1s)
                 yield
                 # Width and height will change in the next yield
                 if (start == 1):
@@ -111,17 +110,17 @@ class DoubleCompareInstructionTest(TestBase):
 class DoubleCompareCfu(Cfu):
     def __init__(self):
         self.dc = DoubleCompareInstruction()
-        self.init = InitInstruction()
+        self.store = StoreInstruction()
         super().__init__({
             0: self.dc,
-            1: self.init,
+            1: self.store,
         })
 
     def elab(self,m):
         super().elab(m)
         m.d.comb += [
-            self.dc.max_height.eq(self.init.max_height),
-            self.dc.max_width.eq(self.init.max_width),
+            self.dc.max_height.eq(self.store.max_height),
+            self.dc.max_width.eq(self.store.max_width),
         ]
 
 class DoubleCompareCfuTest(CfuTestBase):
@@ -130,20 +129,20 @@ class DoubleCompareCfuTest(CfuTestBase):
 
     def test_double_compare_cfu(self):
         DATA = [
-            ((1,5,6),None),
+            ((1,10,6),None),
+            ((1,11,7),None),
             ((0,1,1),1),
-            ((0,4,5),1),
-            ((0,5,6),0),
-            ((0,6,5),0),
+            ((0,5,6),1),
             ((0,5,7),0),
+            ((0,6,7),0),
             ((0,10,10),0),
-            ((0,0,0),1),
-            ((1,2,2),None),
-            ((0,1,1),1),
-            ((0,4,5),0),
-            ((1,3,10),None),
-            ((0,1,1),1),
-            ((0,4,5),0),
+            ((1,10,20),None),
+            ((1,11,18),None),
+            ((0,10,12),1),
+            ((0,3,10),1),
+            ((0,19,17),1),
+            ((0,20,20),0),
+            ((0,24,25),0),
         ]
         return self.run_ops(DATA)
 
