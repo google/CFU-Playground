@@ -47,8 +47,16 @@ HARNESS_LOG     := $(BUILD)/tflm_harness_$(MODEL)/$(MODEL).LOG
 
 LXTERM      := $(CFU_ROOT)/soc/bin/litex_term
 
+#
+# We maybe shouldn't ignore WIDTH errors
+#   -- these can be fixed in the user nMigen code
+#
+VERILATOR_MAIN := verilator_main.cpp
+VERILATOR_DIR  := verilator_sim
+VERILATOR_LINT := -Wno-CASEINCOMPLETE -Wno-CASEOVERLAP -Wno-WIDTH
 
-.PHONY:	proj harness-clean renode
+
+.PHONY:	proj harness-clean renode veri-clean
 
 
 soc: $(BITSTREAM)
@@ -123,7 +131,15 @@ run:
 
 endif
 
-        
+
+verilate: cfu.v $(VERILATOR_MAIN)
+	verilator $(VERILATOR_LINT) -cc cfu.v --exe verilator_main.cpp --Mdir $(VERILATOR_DIR) --trace && \
+	cp verilator_main.cpp $(VERILATOR_DIR) && \
+	make TRACE=1 -C $(VERILATOR_DIR) -f Vcfu.mk && \
+	./$(VERILATOR_DIR)/Vcfu
+
+veri-clean:
+	/bin/rm -rf ./$(VERILATOR_DIR) ./cfu.vcd
 
 ls:
 	ls -sAFC
