@@ -42,12 +42,13 @@ HARNESS_SRC_DIR := $(CFU_ROOT)/tflm_harness
 HARNESS_FILES   := $(addprefix $(HARNESS_SRC_DIR)/, $(HARNESS_BASES))
 HARNESS_DIR     := $(BUILD)/tflm_harness_$(MODEL)
 HARNESS_BIN     := $(BUILD)/tflm_harness_$(MODEL)/tflm_harness.bin
+HARNESS_ELF     := $(BUILD)/tflm_harness_$(MODEL)/tflm_harness.elf
 HARNESS_LOG     := $(BUILD)/tflm_harness_$(MODEL)/$(MODEL).LOG
 
 LXTERM      := $(CFU_ROOT)/soc/bin/litex_term
 
 
-.PHONY:	proj harness-clean
+.PHONY:	proj harness-clean renode
 
 
 soc: $(BITSTREAM)
@@ -85,6 +86,10 @@ $(HARNESS_BIN):
 harness-clean:
 	/bin/rm -rf $(HARNESS_DIR)
 	make -C $(TFLM_DIR) clean
+
+renode: $(HARNESS_BIN)
+	/bin/cp $(HARNESS_ELF) $(PROJ_DIR)/renode/
+	pushd $(PROJ_DIR)/renode/ && renode -e "s @litex-vexriscv-cfu.resc" && popd
 
 
 #

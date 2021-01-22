@@ -15,7 +15,7 @@ PYRUN:=     $(CFU_ROOT)/scripts/pyrun
 #UART_ARGS=  --uart-baudrate 115200
 #UART_ARGS=  --uart-baudrate 460800
 UART_ARGS=  --uart-baudrate 921600
-LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv csr.csv $(CFU_ARGS) $(UART_ARGS)
+LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv $(OUT_DIR)/csr.csv $(CFU_ARGS) $(UART_ARGS)
 
 
 BITSTREAM:= soc/$(OUT_DIR)/gateware/arty.bit
@@ -46,6 +46,9 @@ harness-clean:
 
 run: $(BITSTREAM) prog
 	make -C $(PROJ_DIR) PROJ=$(PROJ) MODEL=$(MODEL) run
+
+renode: $(BITSTREAM)
+	make -C $(PROJ_DIR) PROJ=$(PROJ) MODEL=$(MODEL) renode
 
 
 sim-basic:
