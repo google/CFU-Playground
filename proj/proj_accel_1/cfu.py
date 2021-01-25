@@ -150,7 +150,7 @@ class DoubleCompareInstructionTest(TestBase):
                 self.assertEqual((yield self.dut.output),expected_output)
         self.run_sim(process, True)
 
-class DoubleCompareCfu(Cfu):
+class ProjAccel1Cfu(Cfu):
     def __init__(self):
         self.dc = DoubleCompareInstruction()
         self.store = StoreInstruction()
@@ -166,11 +166,11 @@ class DoubleCompareCfu(Cfu):
             self.dc.max_width.eq(self.store.max_width),
         ]
 
-class DoubleCompareCfuTest(CfuTestBase):
+class ProjAccel1CfuTest(CfuTestBase):
     def create_dut(self):
-        return DoubleCompareCfu()
+        return ProjAccel1Cfu()
 
-    def test_double_compare_cfu(self):
+    def test_proj_accel1_cfu(self):
         DATA = [
             # Set the max_width and max_height values.
             ((1,10,6),None),
@@ -198,7 +198,7 @@ class DoubleCompareCfuTest(CfuTestBase):
         return self.run_ops(DATA)
 
 def make_cfu():
-    return DoubleCompareCfu()
+    return ProjAccel1Cfu()
 
 if __name__ == '__main__':
     unittest.main()
