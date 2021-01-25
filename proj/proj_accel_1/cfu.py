@@ -80,15 +80,14 @@ class ReadInstruction(InstructionBase):
         self.max_height = Signal(signed(32))
 
     def elab(self, m):
+        m.d.comb += self.done.eq(1)
         with m.If(self.in0 == 10):
             m.d.comb += [
                 self.output.eq(self.max_width),
-                self.done.eq(1)
             ]
         with m.Elif(self.in0 == 11):
             m.d.comb += [
                 self.output.eq(self.max_height),
-                self.done.eq(1)
             ]
         return m
 
@@ -100,14 +99,15 @@ class ReadInstructionTest(TestBase):
         def process():
             width = 1234
             height = 5678
-            yield self.dut.done.eq(1)
             yield self.dut.max_width.eq(width)
             yield self.dut.max_height.eq(height)
             yield self.dut.in0.eq(10)
             yield
+            self.assertEqual((yield self.dut.done),1)
             self.assertEqual((yield self.dut.output),width)
             yield self.dut.in0.eq(11)
             yield
+            self.assertEqual((yield self.dut.done),1)
             self.assertEqual((yield self.dut.output),height)
         self.run_sim(process, True)
 
