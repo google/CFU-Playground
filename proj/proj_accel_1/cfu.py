@@ -73,6 +73,44 @@ class StoreInstructionTest(TestBase):
                 self.assertEqual((yield self.dut.max_height),height)
         self.run_sim(process, True)
 
+class ReadInstruction(InstructionBase):
+    def __init__(self):
+        super().__init__()
+        self.max_width = Signal(signed(32))
+        self.max_height = Signal(signed(32))
+
+    def elab(self, m):
+        with m.If(self.in0 == 10):
+            m.d.comb += [
+                self.output.eq(self.max_width),
+                self.done.eq(1)
+            ]
+        with m.Elif(self.in0 == 11):
+            m.d.comb += [
+                self.output.eq(self.max_height),
+                self.done.eq(1)
+            ]
+        return m
+
+class ReadInstructionTest(TestBase):
+    def create_dut(self):
+        return ReadInstruction()
+
+    def test_start(self):
+        def process():
+            width = 1234
+            height = 5678
+            yield self.dut.done.eq(1)
+            yield self.dut.max_width.eq(width)
+            yield self.dut.max_height.eq(height)
+            yield self.dut.in0.eq(10)
+            yield
+            self.assertEqual((yield self.dut.output),width)
+            yield self.dut.in0.eq(11)
+            yield
+            self.assertEqual((yield self.dut.output),height)
+        self.run_sim(process, True)
+
 class DoubleCompareInstruction(InstructionBase):
     """The 4 comparisons will be performed in parallel
     """
