@@ -154,16 +154,19 @@ class ProjAccel1Cfu(Cfu):
     def __init__(self):
         self.dc = DoubleCompareInstruction()
         self.store = StoreInstruction()
+        self.read = ReadInstruction()
         super().__init__({
             0: self.dc,
             1: self.store,
+            2: self.read,
         })
-
     def elab(self,m):
         super().elab(m)
         m.d.comb += [
             self.dc.max_height.eq(self.store.max_height),
             self.dc.max_width.eq(self.store.max_width),
+            self.read.max_height.eq(self.store.max_height),
+            self.read.max_width.eq(self.store.max_width),
         ]
 
 class ProjAccel1CfuTest(CfuTestBase):
@@ -172,9 +175,14 @@ class ProjAccel1CfuTest(CfuTestBase):
 
     def test_proj_accel1_cfu(self):
         DATA = [
-            # Set the max_width and max_height values.
+            # Store the max_width and max_height values.
             ((1,10,6),None),
             ((1,11,7),None),
+            # Output the max_width and max_height values.
+            ((2,10,0),6),
+            ((2,11,0),7),
+            ((2,1,0),0),
+            ((2,2,0),0),
             # Start the compare of in_x and in_y.
             ((0,1,1),1),
             ((0,5,6),1),
@@ -185,9 +193,12 @@ class ProjAccel1CfuTest(CfuTestBase):
             # Test that negative values of in_x or in_y are not in range.
             ((0,-7,7),0),
             ((0,-10,-10),0),
-            # Set the max_width and max_height values.
+            # Store the max_width and max_height values.
             ((1,10,20),None),
             ((1,11,18),None),
+            # Output the max_width and max_height values.
+            ((2,10,0),20),
+            ((2,11,0),18),
             # Start the compare of in_x and in_y.
             ((0,10,12),1),
             ((0,3,10),1),
