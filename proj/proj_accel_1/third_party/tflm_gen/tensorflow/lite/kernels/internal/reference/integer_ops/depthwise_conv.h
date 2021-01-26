@@ -60,8 +60,9 @@ inline void DepthwiseConvPerChannel(
   TFLITE_DCHECK_EQ(output_depth, input_depth * depth_multiplier);
   TFLITE_DCHECK_EQ(bias_shape.FlatSize(), output_depth);
 
-  // This is the InitInstruction CFU
-  cfu_op1(input_width, input_height);
+  // This is the StoreInstruction CFU
+  cfu_op1(10, input_width);
+  cfu_op1(11, input_height);
 
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {

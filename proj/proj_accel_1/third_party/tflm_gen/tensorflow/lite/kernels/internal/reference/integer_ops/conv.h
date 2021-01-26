@@ -63,8 +63,9 @@ inline void ConvPerChannel(
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
   
-  // This is the InitInstruction CFU
-  cfu_op1(input_width, input_height);
+  // This is the StoreInstruction CFU
+  cfu_op1(10, input_width);
+  cfu_op1(11, input_height);
 
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {

@@ -18,7 +18,7 @@ from nmigen_cfu import SimpleElaboratable, InstructionBase, TestBase, Instructio
 
 import unittest
 
-class InitInstruction(InstructionBase):
+class StoreInstruction(InstructionBase):
     def __init__(self):
         super().__init__()
         self.max_width = Signal(signed(32))
@@ -26,47 +26,89 @@ class InitInstruction(InstructionBase):
 
     def elab(self, m):
         with m.If(self.start):
-            m.d.sync += [
-                self.max_width.eq(self.in0s),
-                self.max_height.eq(self.in1s),
-            ]
+            with m.If(self.in0 == 10):
+                m.d.sync += self.max_width.eq(self.in1s)
+            with m.Elif(self.in0 == 11):
+                m.d.sync += self.max_height.eq(self.in1s)
             m.d.comb += [
                 self.done.eq(1),
                 self.output.eq(1),
             ]
         return m
 
-class InitInstructionTest(TestBase):
+class StoreInstructionTest(TestBase):
     def create_dut(self):
-        return InitInstruction()
+        return StoreInstruction()
 
-    def test_init(self):
+    def test_start(self):
         DATA = [
-            ((1,0,0),(1,1,0,0)),
-            ((0,1,1),(0,0,0,0)),
-            ((0,5,6),(0,0,0,0)),
-            ((1,1,1),(1,1,1,1)),
-            ((0,1,1),(0,0,1,1)),
-            ((0,0,0),(0,0,1,1)),
-            ((0,2,3),(0,0,1,1)),
-            ((1,2,3),(1,1,2,3)),
-            ((0,1,1),(0,0,2,3)),
+            # Only set max_width and max_height when start is 1.
+            ((1,10,5),(1,1,0,0)),
+            ((1,11,6),(1,1,5,0)),
+            # Check that when start is 0, max_width and max_height remains the same.
+            ((0,5,7),(0,0,5,6)),
+            ((0,1,1),(0,0,5,6)),
+            ((1,10,7),(1,1,5,6)),
+            ((0,0,0),(0,0,7,6)),
+            ((1,11,9),(1,1,7,6)),
+            ((0,2,3),(0,0,7,9)),
+            ((1,9,19),(1,1,7,9)),
+            ((0,4,3),(0,0,7,9)),
+            ((1,10,-3),(1,1,7,9)),
+            ((0,1,6),(0,0,-3,9)),
+            ((1,11,-4),(1,1,-3,9)),
+            ((0,1,3),(0,0,-3,-4)),
         ]
         def process():
             for n,(inputs,outputs) in enumerate(DATA):
-                start,in0,in1 = inputs
-                done, output,width,height = outputs
+                start,in0,in1s = inputs
+                done,output,width,height = outputs
                 yield self.dut.start.eq(start)
                 yield self.dut.in0.eq(in0)
-                yield self.dut.in1.eq(in1)
+                yield self.dut.in1.eq(in1s)
                 yield
-                # Width and height will change in the next yield
-                if (start == 1):
-                    yield
-                self.assertEqual((yield self.dut.done),start)
-                self.assertEqual((yield self.dut.output),start)
+                self.assertEqual((yield self.dut.done),done)
+                self.assertEqual((yield self.dut.output),output)
                 self.assertEqual((yield self.dut.max_width),width)
                 self.assertEqual((yield self.dut.max_height),height)
+        self.run_sim(process, True)
+
+class ReadInstruction(InstructionBase):
+    def __init__(self):
+        super().__init__()
+        self.max_width = Signal(signed(32))
+        self.max_height = Signal(signed(32))
+
+    def elab(self, m):
+        m.d.comb += self.done.eq(1)
+        with m.If(self.in0 == 10):
+            m.d.comb += [
+                self.output.eq(self.max_width),
+            ]
+        with m.Elif(self.in0 == 11):
+            m.d.comb += [
+                self.output.eq(self.max_height),
+            ]
+        return m
+
+class ReadInstructionTest(TestBase):
+    def create_dut(self):
+        return ReadInstruction()
+
+    def test_start(self):
+        def process():
+            width = 1234
+            height = 5678
+            yield self.dut.max_width.eq(width)
+            yield self.dut.max_height.eq(height)
+            yield self.dut.in0.eq(10)
+            yield
+            self.assertEqual((yield self.dut.done),1)
+            self.assertEqual((yield self.dut.output),width)
+            yield self.dut.in0.eq(11)
+            yield
+            self.assertEqual((yield self.dut.done),1)
+            self.assertEqual((yield self.dut.output),height)
         self.run_sim(process, True)
 
 class DoubleCompareInstruction(InstructionBase):
@@ -108,47 +150,55 @@ class DoubleCompareInstructionTest(TestBase):
                 self.assertEqual((yield self.dut.output),expected_output)
         self.run_sim(process, True)
 
-class DoubleCompareCfu(Cfu):
+class ProjAccel1Cfu(Cfu):
     def __init__(self):
         self.dc = DoubleCompareInstruction()
-        self.init = InitInstruction()
+        self.store = StoreInstruction()
         super().__init__({
             0: self.dc,
-            1: self.init,
+            1: self.store,
         })
 
     def elab(self,m):
         super().elab(m)
         m.d.comb += [
-            self.dc.max_height.eq(self.init.max_height),
-            self.dc.max_width.eq(self.init.max_width),
+            self.dc.max_height.eq(self.store.max_height),
+            self.dc.max_width.eq(self.store.max_width),
         ]
 
-class DoubleCompareCfuTest(CfuTestBase):
+class ProjAccel1CfuTest(CfuTestBase):
     def create_dut(self):
-        return DoubleCompareCfu()
+        return ProjAccel1Cfu()
 
-    def test_double_compare_cfu(self):
+    def test_proj_accel1_cfu(self):
         DATA = [
-            ((1,5,6),None),
+            # Set the max_width and max_height values.
+            ((1,10,6),None),
+            ((1,11,7),None),
+            # Start the compare of in_x and in_y.
             ((0,1,1),1),
-            ((0,4,5),1),
-            ((0,5,6),0),
-            ((0,6,5),0),
-            ((0,5,7),0),
-            ((0,10,10),0),
+            ((0,5,6),1),
             ((0,0,0),1),
-            ((1,2,2),None),
-            ((0,1,1),1),
-            ((0,4,5),0),
-            ((1,3,10),None),
-            ((0,1,1),1),
-            ((0,4,5),0),
+            ((0,5,7),0),
+            ((0,6,7),0),
+            ((0,10,10),0),
+            # Test that negative values of in_x or in_y are not in range.
+            ((0,-7,7),0),
+            ((0,-10,-10),0),
+            # Set the max_width and max_height values.
+            ((1,10,20),None),
+            ((1,11,18),None),
+            # Start the compare of in_x and in_y.
+            ((0,10,12),1),
+            ((0,3,10),1),
+            ((0,19,17),1),
+            ((0,20,20),0),
+            ((0,24,25),0),
         ]
         return self.run_ops(DATA)
 
 def make_cfu():
-    return DoubleCompareCfu()
+    return ProjAccel1Cfu()
 
 if __name__ == '__main__':
     unittest.main()
