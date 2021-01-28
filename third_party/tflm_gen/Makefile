@@ -23,10 +23,53 @@ OBJS := \
 $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(SRCS)))
 
 LIBRARY_OBJS := $(filter-out tensorflow/lite/micro/examples/%, $(OBJS))
-# LIBRARY_OBJS   := $(filter-out tensorflow/lite/micro/tools/make/downloads/%, $(LIBRARY_OBJS_P))
 
-CXXFLAGS += -march=rv32im  -mabi=ilp32 -std=c++11 -fno-rtti -fno-exceptions -fno-threadsafe-statics -fno-unwind-tables -ffunction-sections -fdata-sections -fmessage-length=0 -DTF_LITE_STATIC_MEMORY -DTF_LITE_DISABLE_X86_NEON -O3 -Werror -Wsign-compare -Wdouble-promotion -Wshadow -Wunused-variable -Wmissing-field-initializers -Wunused-function -Wswitch -Wvla -Wall -Wextra -Wstrict-aliasing -Wno-unused-parameter   -I. -I./third_party/gemmlowp -I./third_party/flatbuffers/include -I./third_party/ruy -I./third_party/kissfft
-CCFLAGS +=  -march=rv32im  -mabi=ilp32 -std=c11 -fno-unwind-tables -ffunction-sections -fdata-sections -fmessage-length=0 -DTF_LITE_STATIC_MEMORY -DTF_LITE_DISABLE_X86_NEON -O3 -I. -I./third_party/gemmlowp -I./third_party/flatbuffers/include -I./third_party/ruy -I./third_party/kissfft
+C_SHARED_FLAGS = \
+	-march=rv32im \
+	-mabi=ilp32 \
+	-fno-unwind-tables \
+	-ffunction-sections \
+	-fdata-sections \
+	-DTF_LITE_STATIC_MEMORY \
+	-DTF_LITE_DISABLE_X86_NEON \
+	-g \
+	-O3 \
+	-I. \
+	-I./third_party/gemmlowp \
+	-I./third_party/flatbuffers/include \
+	-I./third_party/ruy \
+	-I./third_party/kissfft
+
+ifndef DEBUG
+C_SHARED_FLAGS += -DNDEBUG
+endif
+
+
+CXXFLAGS += \
+	-std=c++11 \
+	-fno-rtti \
+	-fno-exceptions \
+	-fno-threadsafe-statics \
+	-fmessage-length=0 \
+	-Werror \
+	-Wsign-compare \
+	-Wdouble-promotion \
+	-Wshadow \
+	-Wunused-variable \
+	-Wmissing-field-initializers \
+	-Wunused-function \
+	-Wswitch \
+	-Wvla \
+	-Wall \
+	-Wextra \
+	-Wstrict-aliasing \
+	-Wno-unused-parameter \
+	$(C_SHARED_FLAGS)
+
+CCFLAGS += \
+	-std=c11 \
+	-fno-unwind-tables \
+	$(C_SHARED_FLAGS)
 
 LDFLAGS += -march=rv32im -mabi=ilp32 -Wl,--fatal-warnings -Wl,--gc-sections -lm -lprofiler
 
