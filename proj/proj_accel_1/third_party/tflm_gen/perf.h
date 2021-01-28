@@ -4,6 +4,19 @@
 
 #define NUM_PERF_COUNTERS 8
 
+extern unsigned CFU_start_counts[NUM_PERF_COUNTERS];
+
+inline void zero_start_counts()
+{
+        for (int i=0; i<NUM_PERF_COUNTERS; ++i) {
+            CFU_start_counts[i] = 0;
+        }
+}
+
+inline unsigned get_start_count(int counter_num)
+{
+        return CFU_start_counts[counter_num];
+}
 
 inline unsigned get_mcycle()
 {
@@ -69,6 +82,9 @@ inline void set_counter(int counter_num, unsigned count)
 
 inline void set_counter_enable(int counter_num, unsigned en)
 {
+        if (en) {
+            CFU_start_counts[counter_num]++;
+        }
         switch (counter_num) {
             case 0: asm volatile ("csrw 0xB05, %0" :: "r"(en)); break;
             case 1: asm volatile ("csrw 0xB07, %0" :: "r"(en)); break;
