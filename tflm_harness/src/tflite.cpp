@@ -128,6 +128,7 @@ void init_perf_counters() {
     disable_counter(i);
     set_counter(i, 0);
   }
+  zero_start_counts();
 }
 
 void print_perf_counters() {
@@ -135,7 +136,7 @@ void print_perf_counters() {
     disable_counter(i);
   }
   for (int i=0; i<NUM_PERF_COUNTERS; ++i) {
-    printf("PERF COUNTER %d: %d\n", i, get_counter(i));
+    printf("PERF COUNTER %d: %12d, started %d times\n", i, get_counter(i), get_start_count(i));
   }
 }
 
