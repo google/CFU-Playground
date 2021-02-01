@@ -83,12 +83,7 @@ tensorflow/lite/micro/simple_memory_allocator.cc\
 	tensorflow/lite/micro/kernels/comparisons.cc\
 	tensorflow/lite/micro/kernels/depthwise_conv.cc\
 	tensorflow/lite/micro/kernels/split.cc\
-	tensorflow/lite/micro/kernels/prelu.cc\
-	tensorflow/lite/micro/examples/person_detection_experimental/person_detection_test.cc\
-	tensorflow/lite/micro/tools/make/downloads/person_model_int8/no_person_image_data.cc\
-	tensorflow/lite/micro/tools/make/downloads/person_model_int8/person_image_data.cc\
-	tensorflow/lite/micro/examples/person_detection_experimental/model_settings.cc\
-	tensorflow/lite/micro/tools/make/downloads/person_model_int8/person_detect_model_data.cc
+	tensorflow/lite/micro/kernels/prelu.cc
 
 OBJS := \
 $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(SRCS)))
