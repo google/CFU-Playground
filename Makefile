@@ -54,12 +54,6 @@ renode: $(BITSTREAM)
 sim-basic:
 	pushd $(PROJ_DIR) && make sim-basic && popd
 
-camera/camera.bin:
-	pushd camera && make && popd
-
-run0: camera/camera.bin
-	pushd camera && litex_term --kernel camera.bin /dev/ttyUSB0 && popd
-
 b:
 	ls -lstr $(BITSTREAM)
 
