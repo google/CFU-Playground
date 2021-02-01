@@ -23,6 +23,8 @@ class StoreInstruction(InstructionBase):
         super().__init__()
         self.max_width = Signal(signed(32))
         self.max_height = Signal(signed(32))
+        self.reset_acc = Signal(1)
+        self.input_offset = Signal(signed(32))
 
     def elab(self, m):
         with m.If(self.start):
@@ -30,6 +32,10 @@ class StoreInstruction(InstructionBase):
                 m.d.sync += self.max_width.eq(self.in1s)
             with m.Elif(self.in0 == 11):
                 m.d.sync += self.max_height.eq(self.in1s)
+            with m.Elif(self.in0 == 12):
+                m.d.comb += self.reset_acc.eq(1)
+            with m.Elif(self.in0 == 13):
+                m.d.sync += self.input_offset.eq(self.in1s)
             m.d.comb += [
                 self.done.eq(1),
                 self.output.eq(1),
@@ -78,6 +84,8 @@ class ReadInstruction(InstructionBase):
         super().__init__()
         self.max_width = Signal(signed(32))
         self.max_height = Signal(signed(32))
+        self.acc = Signal(signed(32))
+        self.input_offset = Signal(signed(32))
 
     def elab(self, m):
         m.d.comb += self.done.eq(1)
@@ -88,6 +96,14 @@ class ReadInstruction(InstructionBase):
         with m.Elif(self.in0 == 11):
             m.d.comb += [
                 self.output.eq(self.max_height),
+            ]
+        with m.Elif(self.in0 == 12):
+            m.d.comb += [
+                self.output.eq(self.acc),
+            ]
+        with m.Elif(self.in0 == 13):
+            m.d.comb += [
+                self.output.eq(self.input_offset),
             ]
         return m
 
@@ -150,15 +166,76 @@ class DoubleCompareInstructionTest(TestBase):
                 self.assertEqual((yield self.dut.output),expected_output)
         self.run_sim(process, True)
 
+class MultiplyAccumulateInstruction(InstructionBase):
+    def __init__(self):
+        super().__init__()
+        self.reset_acc = Signal(1) # input
+        self.acc = Signal(signed(32)) # output
+        self.input_offset = Signal(signed(32)) #input
+
+    def elab(self, m):
+        filter_val = Signal(32) 
+        input_val = Signal(32)
+        m.d.comb += [
+            filter_val.eq(self.in0s),
+            input_val.eq(self.in1s),
+        ]
+        with m.If(self.reset_acc):
+            m.d.sync += self.acc.eq(0)
+        with m.If(self.start):
+            m.d.sync += [
+                self.acc.eq(self.acc + (filter_val * (input_val + self.input_offset))),
+                self.done.eq(1),
+            ]
+
+class MultiplyAccumulateInstructionTest(TestBase):
+    def create_dut(self):
+        return MultiplyAccumulateInstruction()
+
+    def test_multiply_accumulate(self):
+        DATA = [
+            # start, reset_acc, filter_val, input_val, input_offset
+            # When start or reset_acc is set, calculations or reset happens next cycle
+            ((0,1,2,3,4),0),
+            ((0,0,2,3,4),0),
+            ((1,0,2,3,4),0),
+            ((1,0,2,3,4),14),
+            ((0,1,2,3,4),28),
+            ((1,0,2,3,4),0),
+            ((0,1,2,3,4),14),
+            ((0,0,2,3,4),0),
+            ((1,0,4,2,6),0),
+            ((0,0,4,2,6),32),
+            ((1,0,4,2,6),32),
+            ((1,0,4,2,6),64),
+            ((1,0,0,2,6),96),
+            ((1,0,-12,2,6),96),
+            ((1,0,-4,2,6),0),
+            ((1,0,-16,2,6),-32),
+        ]
+        def process():
+            for n,(inputs,expected_output) in enumerate(DATA):
+                start,reset_acc,filter_val,input_val,input_offset = inputs
+                yield self.dut.start.eq(start)
+                yield self.dut.reset_acc.eq(reset_acc)
+                yield self.dut.in0.eq(filter_val)
+                yield self.dut.in1.eq(input_val)
+                yield self.dut.input_offset.eq(input_offset)
+                yield
+                self.assertEqual((yield self.dut.acc),expected_output)
+        self.run_sim(process, True)
+
 class ProjAccel1Cfu(Cfu):
     def __init__(self):
         self.dc = DoubleCompareInstruction()
         self.store = StoreInstruction()
         self.read = ReadInstruction()
+        self.macc = MultiplyAccumulateInstruction()
         super().__init__({
             0: self.dc,
             1: self.store,
             2: self.read,
+            3: self.macc
         })
     def elab(self,m):
         super().elab(m)
@@ -167,6 +244,10 @@ class ProjAccel1Cfu(Cfu):
             self.dc.max_width.eq(self.store.max_width),
             self.read.max_height.eq(self.store.max_height),
             self.read.max_width.eq(self.store.max_width),
+            self.macc.input_offset.eq(self.store.input_offset),
+            self.macc.reset_acc.eq(self.store.reset_acc),
+            self.read.acc.eq(self.macc.acc),
+            self.read.input_offset.eq(self.store.input_offset),
         ]
 
 class ProjAccel1CfuTest(CfuTestBase):
@@ -178,7 +259,7 @@ class ProjAccel1CfuTest(CfuTestBase):
             # Store the max_width and max_height values.
             ((1,10,6),None),
             ((1,11,7),None),
-            # Output the max_width and max_height values.
+            # Read the max_width and max_height values.
             ((2,10,0),6),
             ((2,11,0),7),
             ((2,1,0),0),
@@ -196,7 +277,7 @@ class ProjAccel1CfuTest(CfuTestBase):
             # Store the max_width and max_height values.
             ((1,10,20),None),
             ((1,11,18),None),
-            # Output the max_width and max_height values.
+            # Read the max_width and max_height values.
             ((2,10,0),20),
             ((2,11,0),18),
             # Start the compare of in_x and in_y.
@@ -205,6 +286,36 @@ class ProjAccel1CfuTest(CfuTestBase):
             ((0,19,17),1),
             ((0,20,20),0),
             ((0,24,25),0),
+            # Store the input_offset value.
+            ((1,13,4),None),
+            # Read the input_offset value.
+            ((2,13,0),4),
+            # Reset accumulate to 1.
+            ((1,12,1),None),
+            # Perform the macc calculation. 0 + 2 * (30 + 4) = 68
+            ((3,2,30),0),
+            # Read the accumulate result.
+            ((2,12,0),68),
+            # 68 + 4 * (3 + 4) = 96
+            ((3,4,3),0),
+            ((2,12,0),96),
+            # 96 + (-7) * (3 + 4) = 47
+            ((3,-7,3),0),
+            ((2,12,0),47),
+            # Store the input_offset value.
+            ((1,13,12),None),
+            # Read the input_offset value.
+            ((2,13,0),12),
+            # Reset accumulate to 1.
+            ((1,12,1),None),
+            # Perform the macc calculation. 0 + (-6) * (5 + 12) = 18
+            ((3,-6,5),0),
+            # Read the accumulate result. # 2**32-102 due to rsp_payload_outputs_0 being unsigned. 
+            # This is to test for -ve acc values
+            ((2,12,0), 2**32-102),
+            # 2**32 - 102 + (-1000) * (14 + 12)
+            ((3,-1000,14),0),
+            ((2,12,0),4294941194),
         ]
         return self.run_ops(DATA)
 
