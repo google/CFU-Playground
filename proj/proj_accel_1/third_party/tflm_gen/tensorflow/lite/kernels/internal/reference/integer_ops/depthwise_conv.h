@@ -60,9 +60,10 @@ inline void DepthwiseConvPerChannel(
   TFLITE_DCHECK_EQ(output_depth, input_depth * depth_multiplier);
   TFLITE_DCHECK_EQ(bias_shape.FlatSize(), output_depth);
 
-  // This is the StoreInstruction CFU
+  // This is the StoreInstruction CFU to store these const values into the CFU.
   cfu_op1(10, input_width);
   cfu_op1(11, input_height);
+  cfu_op1(13, input_offset);
 
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
@@ -72,7 +73,8 @@ inline void DepthwiseConvPerChannel(
             const int output_channel = m + in_channel * depth_multiplier;
             const int in_x_origin = (out_x * stride_width) - pad_width;
             const int in_y_origin = (out_y * stride_height) - pad_height;
-            int32_t acc = 0;
+            // reset accumulate to have acc = 0.
+            cfu_op1(12, 1);
             for (int filter_y = 0; filter_y < filter_height; ++filter_y) {
               for (int filter_x = 0; filter_x < filter_width; ++filter_x) {
                 const int in_x = in_x_origin + dilation_width_factor * filter_x;
@@ -104,10 +106,14 @@ inline void DepthwiseConvPerChannel(
                   // we have seen so far.
                   // TODO(jianlijianli): Add a check to make sure the
                   // accumulator depth is smaller than 2^16.
-                  acc += filter_val * (input_val + input_offset);
+                  // The MultiplyAccumulateInstruction CFU to perform the 3 parallel calculations,
+                  // replacing acc += filter_val * (input_val + input_offset);
+                  cfu_op3(filter_val, input_val);
                 }
               }
             }
+            // Read the acc value with the ReadInstruction and put it into a C++ variable.
+            int32_t acc = cfu_op2(12,0);
             if (bias_data) {
               acc += bias_data[output_channel];
             }
