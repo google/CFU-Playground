@@ -175,6 +175,12 @@ void MicroInterpreter::Init(tflite::Profiler* profiler) {
   context_.profiler = profiler;
 
   initialization_status_ = kTfLiteOk;
+
+#ifdef NDEBUG
+  puts("Compiled with NDEBUG.  Debugging checks are turned OFF.");
+#else
+  puts("Compiled without NDEBUG.  Debugging checks are turned ON.");
+#endif
 }
 
 void MicroInterpreter::CorrectTensorEndianness(TfLiteEvalTensor* tensorCorr) {
