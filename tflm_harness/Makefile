@@ -126,7 +126,7 @@ ASOURCES   := $(wildcard $(SRC_DIR)/*.S)
 # source files based on the object file name. #hack
 VPATH      := $(SRC_DIR)
 COBJS      := $(addprefix $(OBJ_DIR)/, $(notdir $(CSOURCES:.c=.o)))
-CXXOBJS    := $(addprefix $(OBJ_DIR)/, $(notdir $(CPPSOURCES:.cpp=.o)))
+CXXOBJS    := $(addprefix $(OBJ_DIR)/, $(notdir $(CPPSOURCES:.cpp=.o) $(CCSOURCES:.cc=.o) ))
 AOBJS      := $(addprefix $(OBJ_DIR)/, $(notdir $(ASOURCES:.S=.o)))
 OBJECTS    := $(COBJS) $(CXXOBJS) $(AOBJS)
 
@@ -189,6 +189,10 @@ $(COBJS) : $(OBJ_DIR)/%.o : %.c $(BASE_DIR)/Makefile
 	$(QUIET) $(CC) -c $< $(CFLAGS) -o $@ -MMD
 
 $(OBJ_DIR)/%.o: %.cpp
+	$(QUIET) echo "  CXX      $<	$(notdir $@)"
+	$(QUIET) $(CXX) -c $< $(CXXFLAGS) -o $@ -MMD
+
+$(OBJ_DIR)/%.o: %.cc
 	$(QUIET) echo "  CXX      $<	$(notdir $@)"
 	$(QUIET) $(CXX) -c $< $(CXXFLAGS) -o $@ -MMD
 
