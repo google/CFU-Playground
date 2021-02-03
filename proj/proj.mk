@@ -35,7 +35,6 @@ PYRUN           := $(CFU_REAL_ROOT)/scripts/pyrun
 TFLM_SRC_DIR    := $(CFU_REAL_ROOT)/third_party/tflm_gen
 TFLM_BLD_DIR    := $(abspath $(BUILD)/third_party/tflm_gen)
 TFLM_OVERLAY_DIR:= $(abspath $(PROJ_DIR)/tflm_overlays)
-TFLM_OVERLAYS   := $(shell cd tflm_overlays && find tensorflow -name "*.[hc]*")
 
 
 CAM_BASES   := src ld Makefile
@@ -80,10 +79,6 @@ sim-basic: $(CFU_VERILOG)
 	pushd $(SOC_DIR) && $(PYRUN) ./soc.py --cfu $(PROJ_REAL_DIR)/$(CFU_VERILOG) --sim-rom-dir $(CFU_REAL_ROOT)/basic_cfu && popd
 
 
-o:
-	@echo TFLM OVERLAYS: $(TFLM_OVERLAYS)
-	for i in $(TFLM_OVERLAYS); do echo $$i; done
-
 #
 # Copy TFLM harness sources and Makefile.
 # They will use this proj's tflm library.
@@ -103,13 +98,9 @@ $(HARNESS_DIR):
 	/bin/rm -rf $(TFLM_BLD_DIR)
 	/bin/cp -r $(TFLM_SRC_DIR) $(TFLM_BLD_DIR)
 	/bin/cp -r $(TFLM_SRC_DIR)/../include/riscv.h $(TFLM_BLD_DIR)
-	#/bin/cp -r $(TFLM_OVERLAY_DIR)/tensorflow $(TFLM_BLD_DIR)
-	for i in $(TFLM_OVERLAYS);                           \
-        do                                                   \
-          echo "$$i";                                        \
-          /bin/rm $(TFLM_BLD_DIR)/$$i;                       \
-          ln -s $(TFLM_OVERLAY_DIR)/$$i $(TFLM_BLD_DIR)/$$i; \
-        done
+	if [ -d $(TFLM_OVERLAY_DIR) ] ; \
+	  then /bin/cp -r $(TFLM_OVERLAY_DIR)/tensorflow $(TFLM_BLD_DIR); fi
+
 
 harness-clean:
 	/bin/rm -rf $(HARNESS_DIR)
