@@ -150,7 +150,6 @@ MICROLITE_LIB = libtensorflow-microlite.a
 
 %.o: %.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -D__REPLACE_NAME__=$(notdir $*) -c $< -o $@
-	#$(CXX) $(CXXFLAGS) $(INCLUDES) -D__REPLACE_NAME__=`basename $*` -c $< -o $@
 
 %.o: %.c
 	$(CC) $(CCFLAGS) $(INCLUDES) -c $< -o $@
