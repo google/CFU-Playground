@@ -111,7 +111,7 @@ clean-all:
 
 renode: $(HARNESS_BIN)
 	/bin/cp $(HARNESS_ELF) $(PROJ_DIR)/renode/
-	pushd $(PROJ_DIR)/renode/ && renode -e "s @litex-vexriscv-cfu.resc" && popd
+	pushd $(PROJ_DIR)/renode/ && renode -e "s @litex-vexriscv-tflite.resc" && popd
 
 
 #

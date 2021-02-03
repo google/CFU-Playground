@@ -43,7 +43,7 @@ cpu.SetRegisterUnsafe(dst_reg, res)
 using sysbus
 
 mach create
-machine LoadPlatformDescription $ORIGIN/litex-vexriscv-cfu.repl
+machine LoadPlatformDescription $ORIGIN/litex-vexriscv-tflite.repl
 showAnalyzer uart
 
 logLevel 0 sysbus.cpu
