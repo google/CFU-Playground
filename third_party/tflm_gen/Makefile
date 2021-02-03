@@ -83,7 +83,8 @@ tensorflow/lite/micro/simple_memory_allocator.cc\
 	tensorflow/lite/micro/kernels/comparisons.cc\
 	tensorflow/lite/micro/kernels/depthwise_conv.cc\
 	tensorflow/lite/micro/kernels/split.cc\
-	tensorflow/lite/micro/kernels/prelu.cc
+	tensorflow/lite/micro/kernels/prelu.cc\
+        perf.cc
 
 OBJS := \
 $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(SRCS)))
