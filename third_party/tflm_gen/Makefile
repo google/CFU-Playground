@@ -84,6 +84,10 @@ tensorflow/lite/micro/simple_memory_allocator.cc\
 	tensorflow/lite/micro/kernels/depthwise_conv.cc\
 	tensorflow/lite/micro/kernels/split.cc\
 	tensorflow/lite/micro/kernels/prelu.cc\
+	tensorflow/lite/micro/kernels/depthwise_conv_test.cc\
+	tensorflow/lite/micro/kernels/conv_test.cc\
+	tensorflow/lite/micro/kernels/conv_test_common.cc\
+	tensorflow/lite/micro/testing/micro_test.cc\
         perf.cc
 
 OBJS := \
@@ -145,7 +149,8 @@ LDFLAGS += -march=rv32im -mabi=ilp32 -Wl,--fatal-warnings -Wl,--gc-sections -lm 
 MICROLITE_LIB = libtensorflow-microlite.a
 
 %.o: %.cc
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -D__REPLACE_NAME__=$(notdir $*) -c $< -o $@
+	#$(CXX) $(CXXFLAGS) $(INCLUDES) -D__REPLACE_NAME__=`basename $*` -c $< -o $@
 
 %.o: %.c
 	$(CC) $(CCFLAGS) $(INCLUDES) -c $< -o $@
