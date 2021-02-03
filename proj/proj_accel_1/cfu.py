@@ -1,12 +1,12 @@
 #!/bin/env python
 # Copyright 2020 Google LLC
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     https://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +17,7 @@ from nmigen import *
 from nmigen_cfu import SimpleElaboratable, InstructionBase, TestBase, InstructionTestBase, Cfu, CfuTestBase
 
 import unittest
+
 
 class StoreInstruction(InstructionBase):
     def __init__(self):
@@ -42,6 +43,7 @@ class StoreInstruction(InstructionBase):
             ]
         return m
 
+
 class StoreInstructionTest(TestBase):
     def create_dut(self):
         return StoreInstruction()
@@ -49,35 +51,37 @@ class StoreInstructionTest(TestBase):
     def test_start(self):
         DATA = [
             # Only set max_width and max_height when start is 1.
-            ((1,10,5),(1,1,0,0)),
-            ((1,11,6),(1,1,5,0)),
+            ((1, 10, 5), (1, 1, 0, 0)),
+            ((1, 11, 6), (1, 1, 5, 0)),
             # Check that when start is 0, max_width and max_height remains the same.
-            ((0,5,7),(0,0,5,6)),
-            ((0,1,1),(0,0,5,6)),
-            ((1,10,7),(1,1,5,6)),
-            ((0,0,0),(0,0,7,6)),
-            ((1,11,9),(1,1,7,6)),
-            ((0,2,3),(0,0,7,9)),
-            ((1,9,19),(1,1,7,9)),
-            ((0,4,3),(0,0,7,9)),
-            ((1,10,-3),(1,1,7,9)),
-            ((0,1,6),(0,0,-3,9)),
-            ((1,11,-4),(1,1,-3,9)),
-            ((0,1,3),(0,0,-3,-4)),
+            ((0, 5, 7), (0, 0, 5, 6)),
+            ((0, 1, 1), (0, 0, 5, 6)),
+            ((1, 10, 7), (1, 1, 5, 6)),
+            ((0, 0, 0), (0, 0, 7, 6)),
+            ((1, 11, 9), (1, 1, 7, 6)),
+            ((0, 2, 3), (0, 0, 7, 9)),
+            ((1, 9, 19), (1, 1, 7, 9)),
+            ((0, 4, 3), (0, 0, 7, 9)),
+            ((1, 10, -3), (1, 1, 7, 9)),
+            ((0, 1, 6), (0, 0, -3, 9)),
+            ((1, 11, -4), (1, 1, -3, 9)),
+            ((0, 1, 3), (0, 0, -3, -4)),
         ]
+
         def process():
-            for n,(inputs,outputs) in enumerate(DATA):
-                start,in0,in1s = inputs
-                done,output,width,height = outputs
+            for n, (inputs, outputs) in enumerate(DATA):
+                start, in0, in1s = inputs
+                done, output, width, height = outputs
                 yield self.dut.start.eq(start)
                 yield self.dut.in0.eq(in0)
                 yield self.dut.in1.eq(in1s)
                 yield
-                self.assertEqual((yield self.dut.done),done)
-                self.assertEqual((yield self.dut.output),output)
-                self.assertEqual((yield self.dut.max_width),width)
-                self.assertEqual((yield self.dut.max_height),height)
+                self.assertEqual((yield self.dut.done), done)
+                self.assertEqual((yield self.dut.output), output)
+                self.assertEqual((yield self.dut.max_width), width)
+                self.assertEqual((yield self.dut.max_height), height)
         self.run_sim(process, True)
+
 
 class ReadInstruction(InstructionBase):
     def __init__(self):
@@ -107,6 +111,7 @@ class ReadInstruction(InstructionBase):
             ]
         return m
 
+
 class ReadInstructionTest(TestBase):
     def create_dut(self):
         return ReadInstruction()
@@ -119,17 +124,19 @@ class ReadInstructionTest(TestBase):
             yield self.dut.max_height.eq(height)
             yield self.dut.in0.eq(10)
             yield
-            self.assertEqual((yield self.dut.done),1)
-            self.assertEqual((yield self.dut.output),width)
+            self.assertEqual((yield self.dut.done), 1)
+            self.assertEqual((yield self.dut.output), width)
             yield self.dut.in0.eq(11)
             yield
-            self.assertEqual((yield self.dut.done),1)
-            self.assertEqual((yield self.dut.output),height)
+            self.assertEqual((yield self.dut.done), 1)
+            self.assertEqual((yield self.dut.output), height)
         self.run_sim(process, True)
+
 
 class DoubleCompareInstruction(InstructionBase):
     """The 4 comparisons will be performed in parallel
     """
+
     def __init__(self):
         super().__init__()
         self.max_width = Signal(signed(32))
@@ -137,9 +144,11 @@ class DoubleCompareInstruction(InstructionBase):
 
     def elab(self, m):
         m.d.comb += [
-            self.output.eq((self.in0s >= 0) & (self.in0s < self.max_width) & (self.in1s >= 0) & (self.in1s < self.max_height)),
+            self.output.eq((self.in0s >= 0) & (self.in0s < self.max_width) & (
+                self.in1s >= 0) & (self.in1s < self.max_height)),
             self.done.eq(1)
         ]
+
 
 class DoubleCompareInstructionTest(TestBase):
     def create_dut(self):
@@ -147,34 +156,36 @@ class DoubleCompareInstructionTest(TestBase):
 
     def test_double_compare(self):
         DATA = [
-            ((0,0,2,2),1),
-            ((4,5,4,5),0),
-            ((19,20,10,10),0),
-            ((11,13,11,12),0),
-            ((18,20,19,21),1),
-            ((-3,1,5,6),0),
-            ((-2,-2,5,6),0),
+            ((0, 0, 2, 2), 1),
+            ((4, 5, 4, 5), 0),
+            ((19, 20, 10, 10), 0),
+            ((11, 13, 11, 12), 0),
+            ((18, 20, 19, 21), 1),
+            ((-3, 1, 5, 6), 0),
+            ((-2, -2, 5, 6), 0),
         ]
+
         def process():
-            for n,(inputs,expected_output) in enumerate(DATA):
-                in0,in1,width,height = inputs
+            for n, (inputs, expected_output) in enumerate(DATA):
+                in0, in1, width, height = inputs
                 yield self.dut.in0.eq(in0)
                 yield self.dut.in1.eq(in1)
                 yield self.dut.max_width.eq(width)
                 yield self.dut.max_height.eq(height)
                 yield
-                self.assertEqual((yield self.dut.output),expected_output)
+                self.assertEqual((yield self.dut.output), expected_output)
         self.run_sim(process, True)
+
 
 class MultiplyAccumulateInstruction(InstructionBase):
     def __init__(self):
         super().__init__()
-        self.reset_acc = Signal(1) # input
-        self.acc = Signal(signed(32)) # output
-        self.input_offset = Signal(signed(32)) #input
+        self.reset_acc = Signal(1)  # input
+        self.acc = Signal(signed(32))  # output
+        self.input_offset = Signal(signed(32))  # input
 
     def elab(self, m):
-        filter_val = Signal(32) 
+        filter_val = Signal(32)
         input_val = Signal(32)
         m.d.comb += [
             filter_val.eq(self.in0s),
@@ -184,9 +195,11 @@ class MultiplyAccumulateInstruction(InstructionBase):
             m.d.sync += self.acc.eq(0)
         with m.If(self.start):
             m.d.sync += [
-                self.acc.eq(self.acc + (filter_val * (input_val + self.input_offset))),
+                self.acc.eq(self.acc + (filter_val *
+                                        (input_val + self.input_offset))),
                 self.done.eq(1),
             ]
+
 
 class MultiplyAccumulateInstructionTest(TestBase):
     def create_dut(self):
@@ -196,34 +209,36 @@ class MultiplyAccumulateInstructionTest(TestBase):
         DATA = [
             # start, reset_acc, filter_val, input_val, input_offset
             # When start or reset_acc is set, calculations or reset happens next cycle
-            ((0,1,2,3,4),0),
-            ((0,0,2,3,4),0),
-            ((1,0,2,3,4),0),
-            ((1,0,2,3,4),14),
-            ((0,1,2,3,4),28),
-            ((1,0,2,3,4),0),
-            ((0,1,2,3,4),14),
-            ((0,0,2,3,4),0),
-            ((1,0,4,2,6),0),
-            ((0,0,4,2,6),32),
-            ((1,0,4,2,6),32),
-            ((1,0,4,2,6),64),
-            ((1,0,0,2,6),96),
-            ((1,0,-12,2,6),96),
-            ((1,0,-4,2,6),0),
-            ((1,0,-16,2,6),-32),
+            ((0, 1, 2, 3, 4), 0),
+            ((0, 0, 2, 3, 4), 0),
+            ((1, 0, 2, 3, 4), 0),
+            ((1, 0, 2, 3, 4), 14),
+            ((0, 1, 2, 3, 4), 28),
+            ((1, 0, 2, 3, 4), 0),
+            ((0, 1, 2, 3, 4), 14),
+            ((0, 0, 2, 3, 4), 0),
+            ((1, 0, 4, 2, 6), 0),
+            ((0, 0, 4, 2, 6), 32),
+            ((1, 0, 4, 2, 6), 32),
+            ((1, 0, 4, 2, 6), 64),
+            ((1, 0, 0, 2, 6), 96),
+            ((1, 0, -12, 2, 6), 96),
+            ((1, 0, -4, 2, 6), 0),
+            ((1, 0, -16, 2, 6), -32),
         ]
+
         def process():
-            for n,(inputs,expected_output) in enumerate(DATA):
-                start,reset_acc,filter_val,input_val,input_offset = inputs
+            for n, (inputs, expected_output) in enumerate(DATA):
+                start, reset_acc, filter_val, input_val, input_offset = inputs
                 yield self.dut.start.eq(start)
                 yield self.dut.reset_acc.eq(reset_acc)
                 yield self.dut.in0.eq(filter_val)
                 yield self.dut.in1.eq(input_val)
                 yield self.dut.input_offset.eq(input_offset)
                 yield
-                self.assertEqual((yield self.dut.acc),expected_output)
+                self.assertEqual((yield self.dut.acc), expected_output)
         self.run_sim(process, True)
+
 
 class ProjAccel1Cfu(Cfu):
     def __init__(self):
@@ -237,7 +252,8 @@ class ProjAccel1Cfu(Cfu):
             2: self.read,
             3: self.macc
         })
-    def elab(self,m):
+
+    def elab(self, m):
         super().elab(m)
         m.d.comb += [
             self.dc.max_height.eq(self.store.max_height),
@@ -250,6 +266,7 @@ class ProjAccel1Cfu(Cfu):
             self.read.input_offset.eq(self.store.input_offset),
         ]
 
+
 class ProjAccel1CfuTest(CfuTestBase):
     def create_dut(self):
         return ProjAccel1Cfu()
@@ -257,70 +274,72 @@ class ProjAccel1CfuTest(CfuTestBase):
     def test_proj_accel1_cfu(self):
         DATA = [
             # Store the max_width and max_height values.
-            ((1,10,6),None),
-            ((1,11,7),None),
+            ((1, 10, 6), None),
+            ((1, 11, 7), None),
             # Read the max_width and max_height values.
-            ((2,10,0),6),
-            ((2,11,0),7),
-            ((2,1,0),0),
-            ((2,2,0),0),
+            ((2, 10, 0), 6),
+            ((2, 11, 0), 7),
+            ((2, 1, 0), 0),
+            ((2, 2, 0), 0),
             # Start the compare of in_x and in_y.
-            ((0,1,1),1),
-            ((0,5,6),1),
-            ((0,0,0),1),
-            ((0,5,7),0),
-            ((0,6,7),0),
-            ((0,10,10),0),
+            ((0, 1, 1), 1),
+            ((0, 5, 6), 1),
+            ((0, 0, 0), 1),
+            ((0, 5, 7), 0),
+            ((0, 6, 7), 0),
+            ((0, 10, 10), 0),
             # Test that negative values of in_x or in_y are not in range.
-            ((0,-7,7),0),
-            ((0,-10,-10),0),
+            ((0, -7, 7), 0),
+            ((0, -10, -10), 0),
             # Store the max_width and max_height values.
-            ((1,10,20),None),
-            ((1,11,18),None),
+            ((1, 10, 20), None),
+            ((1, 11, 18), None),
             # Read the max_width and max_height values.
-            ((2,10,0),20),
-            ((2,11,0),18),
+            ((2, 10, 0), 20),
+            ((2, 11, 0), 18),
             # Start the compare of in_x and in_y.
-            ((0,10,12),1),
-            ((0,3,10),1),
-            ((0,19,17),1),
-            ((0,20,20),0),
-            ((0,24,25),0),
+            ((0, 10, 12), 1),
+            ((0, 3, 10), 1),
+            ((0, 19, 17), 1),
+            ((0, 20, 20), 0),
+            ((0, 24, 25), 0),
             # Store the input_offset value.
-            ((1,13,4),None),
+            ((1, 13, 4), None),
             # Read the input_offset value.
-            ((2,13,0),4),
+            ((2, 13, 0), 4),
             # Reset accumulate to 1.
-            ((1,12,1),None),
+            ((1, 12, 1), None),
             # Perform the macc calculation. 0 + 2 * (30 + 4) = 68
-            ((3,2,30),0),
+            ((3, 2, 30), 0),
             # Read the accumulate result.
-            ((2,12,0),68),
+            ((2, 12, 0), 68),
             # 68 + 4 * (3 + 4) = 96
-            ((3,4,3),0),
-            ((2,12,0),96),
+            ((3, 4, 3), 0),
+            ((2, 12, 0), 96),
             # 96 + (-7) * (3 + 4) = 47
-            ((3,-7,3),0),
-            ((2,12,0),47),
+            ((3, -7, 3), 0),
+            ((2, 12, 0), 47),
             # Store the input_offset value.
-            ((1,13,12),None),
+            ((1, 13, 12), None),
             # Read the input_offset value.
-            ((2,13,0),12),
+            ((2, 13, 0), 12),
             # Reset accumulate to 1.
-            ((1,12,1),None),
+            ((1, 12, 1), None),
             # Perform the macc calculation. 0 + (-6) * (5 + 12) = 18
-            ((3,-6,5),0),
-            # Read the accumulate result. # 2**32-102 due to rsp_payload_outputs_0 being unsigned. 
+            ((3, -6, 5), 0),
+            # Read the accumulate result. # 2**32-102 due to rsp_payload_outputs_0 being unsigned.
             # This is to test for -ve acc values
-            ((2,12,0), 2**32-102),
+            ((2, 12, 0), 2**32-102),
             # 2**32 - 102 + (-1000) * (14 + 12)
-            ((3,-1000,14),0),
-            ((2,12,0),4294941194),
+            ((3, -1000, 14), 0),
+            ((2, 12, 0), 4294941194),
         ]
         return self.run_ops(DATA)
 
+
 def make_cfu():
     return ProjAccel1Cfu()
+
 
 if __name__ == '__main__':
     unittest.main()
