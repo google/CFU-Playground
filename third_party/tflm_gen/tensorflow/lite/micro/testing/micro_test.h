@@ -66,7 +66,7 @@ extern tflite::ErrorReporter* reporter;
 }  // namespace micro_test
 
 #define TF_LITE_MICRO_TESTS_BEGIN              \
-  int __REPLACE_NAME__(int argc, char** argv) {\
+  int REPLACE_NAME_(int argc, char** argv) {\
     micro_test::tests_passed = 0;              \
     micro_test::tests_failed = 0;              \
     tflite::MicroErrorReporter error_reporter; \

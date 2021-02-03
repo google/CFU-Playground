@@ -59,7 +59,7 @@ void initTfLite() {
   TF_LITE_REPORT_ERROR(error_reporter, "...error_reporter OK!");
 
   // conv test from conv_test.cc
-  puts("CONV TEST:");
+  puts("\nCONV TEST:");
   conv_test(0, NULL);
   // depthwise conv test from depthwise_conv_test.cc
   puts("DEPTHWISE_CONV TEST:");

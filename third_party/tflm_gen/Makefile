@@ -149,7 +149,7 @@ LDFLAGS += -march=rv32im -mabi=ilp32 -Wl,--fatal-warnings -Wl,--gc-sections -lm 
 MICROLITE_LIB = libtensorflow-microlite.a
 
 %.o: %.cc
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -D__REPLACE_NAME__=$(notdir $*) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -DREPLACE_NAME_=$(notdir $*) -c $< -o $@
 
 %.o: %.c
 	$(CC) $(CCFLAGS) $(INCLUDES) -c $< -o $@
