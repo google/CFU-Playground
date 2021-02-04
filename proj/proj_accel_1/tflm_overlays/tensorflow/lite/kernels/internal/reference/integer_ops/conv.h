@@ -66,7 +66,6 @@ inline void ConvPerChannelSpecialized(
   cfu_op1(10, input_width);
   cfu_op1(11, input_height);
   cfu_op1(13, input_offset);
-
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
       const int in_y_origin = (out_y * stride_height) - pad_height;
@@ -179,7 +178,7 @@ inline void ConvPerChannel(
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
 
-  if ((filter_height == 1) && (filter_width == 1)) {
+  if ((filter_height == 1) && (filter_width == 1) && (batches == 1)) {
     ConvPerChannelSpecialized(
         params, output_multiplier,
         output_shift, input_shape,
