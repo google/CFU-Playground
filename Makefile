@@ -19,10 +19,13 @@ LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv $(OUT_DIR)/csr.csv $(CFU_ARGS) $(U
 
 
 BITSTREAM:= soc/$(OUT_DIR)/gateware/arty.bit
+LITEX_SW:=  soc/$(OUT_DIR)/software/include/generated/csr.h
 
-.PHONY: soc prog harness run0 run1 b models projects harness-clean
+.PHONY: soc prog harness run0 run1 b models projects harness-clean lsw
 
 soc: $(BITSTREAM)
+
+lsw: $(LITEX_SW)
 
 $(CFU_V):
 	pushd $(PROJ_DIR) && make cfu.v && popd
@@ -33,12 +36,14 @@ $(BITSTREAM): $(CFU_V) $(CFU_SRCS)
 	pushd $(PROJ_DIR) && make cfu.v && popd
 	pushd soc && $(PYRUN) ./soc.py $(LITEX_ARGS) --build && popd
 
+$(LITEX_SW):
+	pushd soc && $(PYRUN) ./soc.py $(LITEX_ARGS) && popd
 
 prog: $(BITSTREAM)
 	pushd soc && $(PYRUN) ./soc.py $(LITEX_ARGS) --load && popd
 
 
-harness: $(BITSTREAM)
+harness: $(LITEX_SW)
 	make -C $(PROJ_DIR) PROJ=$(PROJ) MODEL=$(MODEL) harness
 
 harness-clean:
@@ -47,7 +52,7 @@ harness-clean:
 run: $(BITSTREAM) prog
 	make -C $(PROJ_DIR) PROJ=$(PROJ) MODEL=$(MODEL) run
 
-renode: $(BITSTREAM)
+renode: $(LITEX_SW)
 	make -C $(PROJ_DIR) PROJ=$(PROJ) MODEL=$(MODEL) renode
 
 
