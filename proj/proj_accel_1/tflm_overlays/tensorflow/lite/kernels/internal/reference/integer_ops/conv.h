@@ -76,9 +76,9 @@ inline void ConvPerChannelSpecialized(
           // reset accumulate to have acc = 0.
           cfu_op1(12, 1);
           for (int filter_y = 0; filter_y < filter_height; ++filter_y) {
-            const int in_y = in_y_origin + dilation_height_factor * filter_y;
+            const int in_y = in_y_origin + dilation_height_factor * 0;
             for (int filter_x = 0; filter_x < filter_width; ++filter_x) {
-              const int in_x = in_x_origin + dilation_width_factor * filter_x;
+              const int in_x = in_x_origin + dilation_width_factor * 0;
 
               // Zero padding by omitting the areas outside the image.
               // This is the DoubleCompareInstruction CFU
@@ -94,7 +94,7 @@ inline void ConvPerChannelSpecialized(
                 int32_t input_val = input_data[Offset(input_shape, batch, in_y,
                                                       in_x, in_channel)];
                 int32_t filter_val = filter_data[Offset(
-                    filter_shape, out_channel, filter_y, filter_x, in_channel)];
+                    filter_shape, out_channel, 0, 0, in_channel)];
                 // Accumulate with 32 bits accumulator.
                 // In the nudging process during model quantization, we force
                 // real value of 0.0 be represented by a quantized value. This
