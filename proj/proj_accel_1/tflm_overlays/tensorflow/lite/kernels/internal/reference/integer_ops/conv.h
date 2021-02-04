@@ -57,8 +57,8 @@ inline void ConvPerChannelSpecialized(
   // Check dimensions of the tensors.
   const int input_height = input_shape.Dims(1);
   const int input_width = input_shape.Dims(2);
-  const int filter_height = filter_shape.Dims(1);
-  const int filter_width = filter_shape.Dims(2);
+  //const int filter_height = filter_shape.Dims(1);
+  //const int filter_width = filter_shape.Dims(2);
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
   
@@ -75,9 +75,9 @@ inline void ConvPerChannelSpecialized(
         for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
           // reset accumulate to have acc = 0.
           cfu_op1(12, 1);
-          for (int filter_y = 0; filter_y < filter_height; ++filter_y) {
+          //for (int filter_y = 0; filter_y < filter_height; ++filter_y) {
             const int in_y = in_y_origin + dilation_height_factor * 0;
-            for (int filter_x = 0; filter_x < filter_width; ++filter_x) {
+            //for (int filter_x = 0; filter_x < filter_width; ++filter_x) {
               const int in_x = in_x_origin + dilation_width_factor * 0;
 
               // Zero padding by omitting the areas outside the image.
@@ -115,8 +115,8 @@ inline void ConvPerChannelSpecialized(
                 // replacing acc += filter_val * (input_val + input_offset);
                 cfu_op3(filter_val, input_val);
               }
-            }
-          }
+            //}
+          //}
           // Read the acc value with the ReadInstruction and put it into a C++ variable.
           int32_t acc = cfu_op2(12,0);
           if (bias_data) {
