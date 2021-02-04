@@ -35,6 +35,7 @@ PYRUN           := $(CFU_REAL_ROOT)/scripts/pyrun
 TFLM_SRC_DIR    := $(CFU_REAL_ROOT)/third_party/tflm_gen
 TFLM_BLD_DIR    := $(abspath $(BUILD)/third_party/tflm_gen)
 TFLM_OVERLAY_DIR:= $(abspath $(PROJ_DIR)/tflm_overlays)
+TFLM_OVERLAYS   := $(shell find $(TFLM_OVERLAY_DIR) -name "*")
 
 
 CAM_BASES   := src ld Makefile
@@ -85,9 +86,15 @@ sim-basic: $(CFU_VERILOG)
 #
 harness: $(HARNESS_BIN)
 
-$(HARNESS_BIN): $(HARNESS_DIR)
+# If an overlay is new, then copy all overlays into the tflm build dir, 
+#   do a make there, and then make the harness again.
+$(HARNESS_BIN): $(TFLM_OVERLAYS) | $(HARNESS_DIR)
 	@echo Building TFLM harness app, under build/, for model $(MODEL)
-	make -C $(HARNESS_DIR) TFLM_DIR=$(TFLM_BLD_DIR) CFU_ROOT=$(CFU_REAL_ROOT) PLATFORM=$(PLATFORM) MODEL=$(MODEL) PROJ=$(PROJ)
+	if [ -d $(TFLM_OVERLAY_DIR) ] ; \
+	  then /bin/cp -r $(TFLM_OVERLAY_DIR)/tensorflow $(TFLM_BLD_DIR); fi
+	make -C $(TFLM_BLD_DIR) -j lib
+	make -C $(HARNESS_DIR) TFLM_DIR=$(TFLM_BLD_DIR) CFU_ROOT=$(CFU_REAL_ROOT) \
+	                       PLATFORM=$(PLATFORM) MODEL=$(MODEL) PROJ=$(PROJ)
 
 $(HARNESS_DIR):
 	@echo Building TFLM harness app, under build/, for model $(MODEL)

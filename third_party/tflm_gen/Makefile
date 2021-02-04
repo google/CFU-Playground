@@ -90,6 +90,8 @@ tensorflow/lite/micro/simple_memory_allocator.cc\
 	tensorflow/lite/micro/testing/micro_test.cc\
         perf.cc
 
+ALL_HEADERS := $(shell find . -name "*.h")
+
 OBJS := \
 $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(SRCS)))
 
@@ -148,10 +150,10 @@ LDFLAGS += -march=rv32im -mabi=ilp32 -Wl,--fatal-warnings -Wl,--gc-sections -lm 
 # library to be generated
 MICROLITE_LIB = libtensorflow-microlite.a
 
-%.o: %.cc
+%.o: %.cc $(ALL_HEADERS)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -DREPLACE_NAME_=$(notdir $*) -c $< -o $@
 
-%.o: %.c
+%.o: %.c $(ALL_HEADERS)
 	$(CC) $(CCFLAGS) $(INCLUDES) -c $< -o $@
 
 person_detection_test_int8 : $(OBJS)
