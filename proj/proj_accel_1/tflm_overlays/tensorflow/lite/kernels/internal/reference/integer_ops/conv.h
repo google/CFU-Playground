@@ -47,7 +47,7 @@ inline void ConvPerChannelSpecialized(
   TFLITE_DCHECK_EQ(input_shape.DimensionsCount(), 4);
   TFLITE_DCHECK_EQ(filter_shape.DimensionsCount(), 4);
   TFLITE_DCHECK_EQ(output_shape.DimensionsCount(), 4);
-  const int batches = MatchingDim(input_shape, 0, output_shape, 0);
+  //const int batches = MatchingDim(input_shape, 0, output_shape, 0);
   const int input_depth = MatchingDim(input_shape, 3, filter_shape, 3);
   const int output_depth = MatchingDim(filter_shape, 0, output_shape, 3);
   if (bias_data) {
@@ -66,7 +66,7 @@ inline void ConvPerChannelSpecialized(
   cfu_op1(10, input_width);
   cfu_op1(11, input_height);
   cfu_op1(13, input_offset);
-  for (int batch = 0; batch < batches; ++batch) {
+  //for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
       const int in_y_origin = (out_y * stride_height) - pad_height;
       for (int out_x = 0; out_x < output_width; ++out_x) {
@@ -92,7 +92,7 @@ inline void ConvPerChannelSpecialized(
               }
 
               for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-                int32_t input_val = input_data[Offset(input_shape, batch, in_y,
+                int32_t input_val = input_data[Offset(input_shape, 0, in_y,
                                                       in_x, in_channel)];
                 int32_t filter_val = filter_data[Offset(
                     filter_shape, out_channel, 0, 0, in_channel)];
@@ -128,12 +128,12 @@ inline void ConvPerChannelSpecialized(
           acc += output_offset;
           acc = std::max(acc, output_activation_min);
           acc = std::min(acc, output_activation_max);
-          output_data[Offset(output_shape, batch, out_y, out_x, out_channel)] =
+          output_data[Offset(output_shape, 0, out_y, out_x, out_channel)] =
               static_cast<int8_t>(acc);
         }
       }
     }
-  }
+  //}
 }
 
 // Fixed-point per-channel-quantization convolution reference kernel.
