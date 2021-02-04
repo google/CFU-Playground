@@ -20,6 +20,7 @@ CFU_REAL_ROOT := $(realpath $(CFU_ROOT))
 SOC_DIR   := $(CFU_ROOT)/soc
 PLATFORM  := arty.$(PROJ)
 GATEWARE  := $(SOC_DIR)/build/$(PLATFORM)/gateware
+LITEX_SW  := $(SOC_DIR)/build/$(PLATFORM)/software
 BITSTREAM := $(GATEWARE)/arty.bit
 
 
@@ -68,7 +69,11 @@ soc: $(BITSTREAM)
 
 $(BITSTREAM): $(CFU_VERILOG)
 	@echo Building SoC
-	make -C $(CFU_ROOT) PROJ=$(PROJ) soc
+	pushd $(CFU_ROOT) && make PROJ=$(PROJ) soc
+
+$(LITEX_SW):
+	@echo Building SoC Software
+	pushd $(CFU_ROOT) && make PROJ=$(PROJ) lsw
 
 $(CFU_VERILOG): $(CFU_NMIGEN) $(CFU_NMIGEN_GEN)
 	$(PYRUN) $(CFU_NMIGEN_GEN)
@@ -88,7 +93,7 @@ harness: $(HARNESS_BIN)
 
 # If an overlay is new, then copy all overlays into the tflm build dir, 
 #   do a make there, and then make the harness again.
-$(HARNESS_BIN): $(TFLM_OVERLAYS) | $(HARNESS_DIR)
+$(HARNESS_BIN): $(TFLM_OVERLAYS) $(LITEX_SW) | $(HARNESS_DIR)
 	@echo Building TFLM harness app, under build/, for model $(MODEL)
 	if [ -d $(TFLM_OVERLAY_DIR) ] ; \
 	  then /bin/cp -r $(TFLM_OVERLAY_DIR)/tensorflow $(TFLM_BLD_DIR); fi
@@ -116,7 +121,7 @@ harness-clean:
 clean-all:
 	/bin/rm -rf $(BUILD)
 
-renode: $(HARNESS_BIN)
+renode: $(HARNESS_BIN) $(LITEX_SW)
 	/bin/cp $(HARNESS_ELF) $(PROJ_DIR)/renode/
 	pushd $(PROJ_DIR)/renode/ && renode -e "s @litex-vexriscv-tflite.resc" && popd
 
