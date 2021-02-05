@@ -30,12 +30,12 @@ inline void ConvPerChannelSpecialized(
     int8_t* output_data) {
   // Get parameters.
   const int32_t input_offset = params.input_offset;  // r = s(q - Z)
-  const int stride_width = params.stride_width;
-  const int stride_height = params.stride_height;
+  //const int stride_width = params.stride_width;
+  //const int stride_height = params.stride_height;
   //const int dilation_width_factor = params.dilation_width_factor;
   //const int dilation_height_factor = params.dilation_height_factor;
-  const int pad_width = params.padding_values.width;
-  const int pad_height = params.padding_values.height;
+  //const int pad_width = params.padding_values.width;
+  //const int pad_height = params.padding_values.height;
   const int32_t output_offset = params.output_offset;
 
   // Set min and max value of the output.
@@ -67,9 +67,11 @@ inline void ConvPerChannelSpecialized(
   cfu_op1(13, input_offset);
   //for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
-      const int in_y_origin = (out_y * stride_height) - pad_height;
+      const int in_y_origin = out_y;
+      // * stride_height) - pad_height;
       for (int out_x = 0; out_x < output_width; ++out_x) {
-        const int in_x_origin = (out_x * stride_width) - pad_width;
+        const int in_x_origin = out_x;
+        // * stride_width) - pad_width;
         for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
           // reset accumulate to have acc = 0.
           cfu_op1(12, 1);
