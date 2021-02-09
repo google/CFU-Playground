@@ -34,6 +34,7 @@ THIRD_PARTY     := $(abspath $(PROJ_DIR)/third_party)
 PYRUN           := $(CFU_REAL_ROOT)/scripts/pyrun
 
 TFLM_SRC_DIR    := $(CFU_REAL_ROOT)/third_party/tflm_gen
+SAXON_SRC_DIR   := $(CFU_REAL_ROOT)/third_party/SaxonSoc
 TFLM_BLD_DIR    := $(abspath $(BUILD)/third_party/tflm_gen)
 TFLM_OVERLAY_DIR:= $(abspath $(PROJ_DIR)/tflm_overlays)
 TFLM_OVERLAYS   := $(shell find $(TFLM_OVERLAY_DIR) -name "*")
@@ -109,7 +110,7 @@ $(HARNESS_DIR):
 	mkdir -p $(BUILD)/third_party
 	/bin/rm -rf $(TFLM_BLD_DIR)
 	/bin/cp -r $(TFLM_SRC_DIR) $(TFLM_BLD_DIR)
-	/bin/cp -r $(TFLM_SRC_DIR)/../include/riscv.h $(TFLM_BLD_DIR)
+	/bin/cp -r $(SAXON_SRC_DIR)/riscv.h $(TFLM_BLD_DIR)
 	if [ -d $(TFLM_OVERLAY_DIR) ] ; \
 	  then /bin/cp -r $(TFLM_OVERLAY_DIR)/tensorflow $(TFLM_BLD_DIR); fi
 
