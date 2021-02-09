@@ -31,7 +31,7 @@ LDSCRIPT   := $(LD_DIR)/linker.ld
 LDSCRIPTS  := $(LDSCRIPT) $(GEN_LD_DIR)/output_format.ld $(GEN_LD_DIR)/regions.ld
 
 SRC_DIR     := $(BASE_DIR)/src
-THIRD_PARTY := $(PROJ_DIR)/third_party
+THIRD_PARTY := $(CFU_DIR)/third_party
 
 # TODO: always do or always don't debug build
 DBG_CFLAGS := -ggdb -g -DDEBUG -Wall
@@ -45,7 +45,7 @@ CFLAGS     := \
 	-ggdb -g -DDEBUG -Wall \
 	-I$(BASE_DIR)/include -D__vexriscv__ -march=rv32im  -mabi=ilp32 \
 	-I$(BUILD_DIR)/include \
-	-I$(THIRD_PARTY)/include \
+	-I$(THIRD_PARTY)/SaxonSoc \
 	-I$(BASE_DIR)/.. \
 	-I$(LITEX_DIR)/soc/software/include/base \
 	-I$(LITEX_DIR)/soc/software/include \
