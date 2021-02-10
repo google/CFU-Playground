@@ -59,11 +59,40 @@ inline void ConvPerChannelSpecialized(
           cfu_op1(12, 1);
           const int in_y = in_y_origin;
           const int in_x = in_x_origin;
-          for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
+          for (int in_channel = 0; in_channel < input_depth; in_channel += 8) {
             int32_t input_val = input_data[Offset(input_shape, 0, in_y,
                                                   in_x, in_channel)];
+            int32_t input_val_1 = input_data[Offset(input_shape, 0, in_y,
+                                                  in_x, in_channel + 1)];
+            int32_t input_val_2 = input_data[Offset(input_shape, 0, in_y,
+                                                  in_x, in_channel + 2)];
+            int32_t input_val_3 = input_data[Offset(input_shape, 0, in_y,
+                                                  in_x, in_channel + 3)];                                                                          
+            int32_t input_val_4 = input_data[Offset(input_shape, 0, in_y,
+                                                  in_x, in_channel + 4)];
+            int32_t input_val_5 = input_data[Offset(input_shape, 0, in_y,
+                                                  in_x, in_channel + 5)];  
+            int32_t input_val_6 = input_data[Offset(input_shape, 0, in_y,
+                                                  in_x, in_channel + 6)];      
+            int32_t input_val_7 = input_data[Offset(input_shape, 0, in_y,
+                                                  in_x, in_channel + 7)];   
+
             int32_t filter_val = filter_data[Offset(
                 filter_shape, out_channel, 0, 0, in_channel)];
+            int32_t filter_val_1 = filter_data[Offset(
+                filter_shape, out_channel, 0, 0, in_channel + 1)];
+            int32_t filter_val_2 = filter_data[Offset(
+                filter_shape, out_channel, 0, 0, in_channel + 2)];
+            int32_t filter_val_3 = filter_data[Offset(
+                filter_shape, out_channel, 0, 0, in_channel + 3)];
+            int32_t filter_val_4 = filter_data[Offset(
+                filter_shape, out_channel, 0, 0, in_channel + 4)];
+            int32_t filter_val_5 = filter_data[Offset(
+                filter_shape, out_channel, 0, 0, in_channel + 5)];
+            int32_t filter_val_6 = filter_data[Offset(
+                filter_shape, out_channel, 0, 0, in_channel + 6)];
+            int32_t filter_val_7 = filter_data[Offset(
+                filter_shape, out_channel, 0, 0, in_channel + 7)];
                 // Accumulate with 32 bits accumulator.
                 // In the nudging process during model quantization, we force
                 // real value of 0.0 be represented by a quantized value. This
@@ -83,7 +112,15 @@ inline void ConvPerChannelSpecialized(
                 // The MultiplyAccumulateInstruction CFU to perform the 3 parallel calculations,
                 // replacing acc += filter_val * (input_val + input_offset);
                 cfu_op3(filter_val, input_val);
-              }
+                cfu_op3(filter_val_1, input_val_1);
+                cfu_op3(filter_val_2, input_val_2);
+                cfu_op3(filter_val_3, input_val_3);
+                cfu_op3(filter_val_4, input_val_4);
+                cfu_op3(filter_val_5, input_val_5);
+                cfu_op3(filter_val_6, input_val_6);
+                cfu_op3(filter_val_7, input_val_7);
+
+          }
           // Read the acc value with the ReadInstruction and put it into a C++ variable.
           int32_t acc = cfu_op2(12,0);
           if (bias_data) {
@@ -96,9 +133,9 @@ inline void ConvPerChannelSpecialized(
           acc = std::min(acc, output_activation_max);
           output_data[Offset(output_shape, 0, out_y, out_x, out_channel)] =
               static_cast<int8_t>(acc);
+        }
       }
     }
-  }
 }
 
 // Fixed-point per-channel-quantization convolution reference kernel.
