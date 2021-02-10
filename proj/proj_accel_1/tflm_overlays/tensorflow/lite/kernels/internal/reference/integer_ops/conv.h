@@ -56,6 +56,7 @@ inline void ConvPerChannelSpecialized(
       for (int out_x = 0; out_x < output_width; ++out_x) {
         const int in_x_origin = out_x;
         for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
+          // reset accumulate to have acc = 0.
           cfu_op1(12, 1);
           const int in_y = in_y_origin;
           const int in_x = in_x_origin;
@@ -180,7 +181,8 @@ inline void ConvPerChannel(
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
 
-  if ((filter_height == 1) && (filter_width == 1) && (batches == 1)) {
+  if ((filter_height == 1) && (filter_width == 1) && (batches == 1) && (stride_height == 1) &&
+    (stride_width == 1) && (pad_height == 0) && (pad_width == 0)) {
     ConvPerChannelSpecialized(
         params, output_multiplier,
         output_shift, input_shape,
