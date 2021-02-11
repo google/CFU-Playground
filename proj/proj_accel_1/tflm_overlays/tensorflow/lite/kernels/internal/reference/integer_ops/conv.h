@@ -63,64 +63,53 @@ inline void ConvPerChannelSpecialized(
           for (int in_channel = 0; in_channel < input_depth; in_channel += 8) {
             int32_t input_val = input_data[Offset(input_shape, 0, in_y,
                                                   in_x, in_channel)];
-            int32_t input_val_1 = input_data[Offset(input_shape, 0, in_y,
-                                                  in_x, in_channel + 1)];
-            int32_t input_val_2 = input_data[Offset(input_shape, 0, in_y,
-                                                  in_x, in_channel + 2)];
-            int32_t input_val_3 = input_data[Offset(input_shape, 0, in_y,
-                                                  in_x, in_channel + 3)];                                                                          
-            int32_t input_val_4 = input_data[Offset(input_shape, 0, in_y,
-                                                  in_x, in_channel + 4)];
-            int32_t input_val_5 = input_data[Offset(input_shape, 0, in_y,
-                                                  in_x, in_channel + 5)];  
-            int32_t input_val_6 = input_data[Offset(input_shape, 0, in_y,
-                                                  in_x, in_channel + 6)];      
-            int32_t input_val_7 = input_data[Offset(input_shape, 0, in_y,
-                                                  in_x, in_channel + 7)];   
-
             int32_t filter_val = filter_data[Offset(
                 filter_shape, out_channel, 0, 0, in_channel)];
+            // The MultiplyAccumulateInstruction CFU to perform the 3 parallel calculations,
+            // replacing acc += filter_val * (input_val + input_offset);
+            cfu_op3(filter_val, input_val);
+
+            int32_t input_val_1 = input_data[Offset(input_shape, 0, in_y,
+                                                  in_x, in_channel + 1)];
             int32_t filter_val_1 = filter_data[Offset(
                 filter_shape, out_channel, 0, 0, in_channel + 1)];
+            cfu_op3(filter_val_1, input_val_1);
+
+            int32_t input_val_2 = input_data[Offset(input_shape, 0, in_y,
+                                                  in_x, in_channel + 2)];
             int32_t filter_val_2 = filter_data[Offset(
                 filter_shape, out_channel, 0, 0, in_channel + 2)];
+            cfu_op3(filter_val_2, input_val_2);
+
+            int32_t input_val_3 = input_data[Offset(input_shape, 0, in_y,
+                                                  in_x, in_channel + 3)];
             int32_t filter_val_3 = filter_data[Offset(
                 filter_shape, out_channel, 0, 0, in_channel + 3)];
+            cfu_op3(filter_val_3, input_val_3);
+
+            int32_t input_val_4 = input_data[Offset(input_shape, 0, in_y,
+                                                  in_x, in_channel + 4)];
             int32_t filter_val_4 = filter_data[Offset(
                 filter_shape, out_channel, 0, 0, in_channel + 4)];
+            cfu_op3(filter_val_4, input_val_4);
+
+            int32_t input_val_5 = input_data[Offset(input_shape, 0, in_y,
+                                                  in_x, in_channel + 5)];
             int32_t filter_val_5 = filter_data[Offset(
                 filter_shape, out_channel, 0, 0, in_channel + 5)];
+            cfu_op3(filter_val_5, input_val_5);
+
+            int32_t input_val_6 = input_data[Offset(input_shape, 0, in_y,
+                                                  in_x, in_channel + 6)];
             int32_t filter_val_6 = filter_data[Offset(
                 filter_shape, out_channel, 0, 0, in_channel + 6)];
+            cfu_op3(filter_val_6, input_val_6);
+
+            int32_t input_val_7 = input_data[Offset(input_shape, 0, in_y,
+                                                  in_x, in_channel + 7)];
             int32_t filter_val_7 = filter_data[Offset(
                 filter_shape, out_channel, 0, 0, in_channel + 7)];
-                // Accumulate with 32 bits accumulator.
-                // In the nudging process during model quantization, we force
-                // real value of 0.0 be represented by a quantized value. This
-                // guarantees that the input_offset is a int8_t, even though
-                // it is represented using int32_t. int32_t += int8_t *
-                // (int8_t - int8_t) so the highest value we can get from each
-                // accumulation is [-127, 127] * ([-128, 127] -
-                // [-128, 127]), which is [-32512, 32512]. log2(32512)
-                // = 14.98, which means we can accumulate at least 2^16
-                // multiplications without overflow. The accumulator is
-                // applied to a filter so the accumulation logic will hold as
-                // long as the filter size (filter_y * filter_x * in_channel)
-                // does not exceed 2^16, which is the case in all the models
-                // we have seen so far.
-                // TODO(jianlijianli): Add a check to make sure the
-                // accumulator depth is smaller than 2^16.
-                // The MultiplyAccumulateInstruction CFU to perform the 3 parallel calculations,
-                // replacing acc += filter_val * (input_val + input_offset);
-                cfu_op3(filter_val, input_val);
-                cfu_op3(filter_val_1, input_val_1);
-                cfu_op3(filter_val_2, input_val_2);
-                cfu_op3(filter_val_3, input_val_3);
-                cfu_op3(filter_val_4, input_val_4);
-                cfu_op3(filter_val_5, input_val_5);
-                cfu_op3(filter_val_6, input_val_6);
-                cfu_op3(filter_val_7, input_val_7);
-
+            cfu_op3(filter_val_7, input_val_7);
           }
           // Read the acc value with the ReadInstruction and put it into a C++ variable.
           int32_t acc = cfu_op2(12,0);
