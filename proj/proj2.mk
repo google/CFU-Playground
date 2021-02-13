@@ -44,8 +44,7 @@ GATEWARE_DIR := $(SOC_DIR)/build/$(PLATFORM)/gateware
 BITSTREAM    := $(GATEWARE_DIR)/arty.bit
 
 PROJ_DIR        := $(realpath .)
-CFU_NMIGEN      := $(PROJ_DIR)/cfu.py
-CFU_NMIGEN_GEN  := $(PROJ_DIR)/cfu_gen.py
+CFU_GEN         := $(PROJ_DIR)/cfu_gen.py
 CFU_VERILOG     := $(PROJ_DIR)/cfu.v
 BUILD_DIR       := $(PROJ_DIR)/build
 PYRUN           := $(CFU_ROOT)/scripts/pyrun
@@ -84,7 +83,18 @@ software: $(SOFTWARE_BIN)
 $(SOFTWARE_BIN) $(SOFTWARE_ELF): litex-software build-dir
 	$(MAKE) -C build all
 
-# Note that the common Makefile overwrites the TfLM Makefile
+# Always run cfu_gen when it exists
+# cfu_gen should not update cfu.v unless it has changed
+ifneq (,$(wildcard $(CFU_GEN)))
+$(CFU_VERILOG): generate_cfu
+
+.PHONY: generate_cfu
+generate_cfu:
+	$(PYRUN) $(CFU_GEN)
+
+endif
+
+# Note that the common Makefile is used in preference to the TfLM Makefile
 .PHONY: build-dir
 build-dir:
 	@echo Making BUILD_DIR
@@ -96,13 +106,12 @@ build-dir:
 	$(COPY) $(SRC_DIR)/*             $(BUILD_DIR)/src
 
 .PHONY: litex-software
-litex-software:
+litex-software: $(CFU_VERILOG)
 	$(SOC_MK) litex-software
 
 .PHONY: bitstream
-bitstream: 
+bitstream: $(CFU_VERILOG)
 	$(SOC_MK) bitstream
-	
 
 .PHONY: load run
 ifeq '1' '$(words $(TTY))'
