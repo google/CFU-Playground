@@ -16,7 +16,7 @@ import os.path
 from nmigen import *
 from nmigen.back import rtlil, verilog
 
-from cfu import Cfu
+from cfu import make_cfu
 
 VERILOG_FILENAME = "cfu.v"
 
@@ -27,7 +27,7 @@ def read_file():
     return None
 
 def main():
-    cfu = Cfu()
+    cfu = make_cfu()
     new_verilog = verilog.convert(cfu, name='Cfu', ports=cfu.ports)
     old_verilog = read_file()
     if new_verilog != old_verilog:
