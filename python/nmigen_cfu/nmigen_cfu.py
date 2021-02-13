@@ -136,6 +136,31 @@ class InstructionBase(SimpleElaboratable):
 
 
 class InstructionTestBase(TestBase):
+    """Base test class, suitable for testing simple instructions."""
+    def verify(self, data):
+        """Verifies instruction given explicit lists of inputs and outputs
+
+        Parameters
+        ----------
+        data: list of tuples (in0, in1, out).
+        """
+        def process():
+            for n, (in0, in1, expected) in enumerate(data):
+                yield self.dut.in0.eq(in0)
+                yield self.dut.in1.eq(in1)
+                yield self.dut.start.eq(1)
+                yield
+                yield self.dut.start.eq(0)
+                while not (yield self.dut.done):
+                    yield
+                actual = (yield self.dut.output)
+                self.assertEqual(
+                    actual, expected,
+                    f"\n  case {n}:  " +
+                    f" in0={in0:08x}, in1={in1:08x}, expected={expected:08x}, actual={actual:08x}")
+                yield
+        self.run_sim(process, True)
+        
     def verify_against_reference(self, inputs, reference_fn):
         """Verifies that our instruction behaves the same as a reference
         implementation.
