@@ -22,24 +22,8 @@
 #include <irq.h>
 #include <uart.h>
 
-#include <i2c.h>
-
 #include "tflite.h"
-#include "perf.h"
-
-void isr(void)
-{
-        __attribute__((unused)) unsigned int irqs;
-
-        irqs = irq_pending() & irq_getmask();
-
-        if(irqs & (1 << UART_INTERRUPT)) {
-                uart_isr();
-                leds_out_write(leds_out_read() ^ 0x100);
-        }
-}
-
-
+#include "init.h"
 
 void detect() {
   int8_t person, no_person;
@@ -57,24 +41,19 @@ void detect() {
   }
 }
 
-
-
 int main(void) {
-    irq_setmask(0);
-    irq_setie(1);
-    uart_init();
+  init_runtime();
+  printf("Hello, %s!\n", "World");
 
-    printf("Hello, %s!\n", "World");
+  // Tflm init
+  puts("initTfLite()");
+  initTfLite();
 
-    // Tflm init
-    puts("initTfLite()");
-    initTfLite();
-
-    // ONCE_AND_QUIT
-    load_zeros();
-    puts("Running one inference");
-    detect();
-    puts("Done");
-    return(0);
+  // ONCE_AND_QUIT
+  load_zeros();
+  puts("Running one inference");
+  detect();
+  puts("Done");
+  return(0);
 }
 
