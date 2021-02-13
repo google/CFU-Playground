@@ -1,0 +1,71 @@
+#!/usr/bin/env python3
+# Copyright 2021 The CFU-Playground Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.SHELL := /bin/bash
+
+# This Makefile builds the LiteX SoC.
+#
+# Typically, you would run 'make' in a project directory, which would use this Makefile recursively.
+#
+
+HELP_MESSAGE:= Run make from your project directory instead of using this file directly.
+
+ifndef PROJ
+  $(error PROJ must be set. $(HELP_MESSAGE))
+endif
+
+ifndef UART_SPEED
+  $(error UART_SPEED must be set. $(HELP_MESSAGE))
+endif
+
+ifndef CFU_ROOT
+  $(error CFU_ROOT must be set. $(HELP_MESSAGE))
+endif
+
+PROJ_DIR:=  $(CFU_ROOT)/proj/$(PROJ)
+CFU_V:=     $(PROJ_DIR)/cfu.v
+CFU_ARGS:=  --cfu $(CFU_V)
+
+SOC_NAME:=  arty.$(PROJ)
+OUT_DIR:=   build/$(SOC_NAME)
+UART_ARGS=  --uart-baudrate $(UART_SPEED)
+LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv $(OUT_DIR)/csr.csv $(CFU_ARGS) $(UART_ARGS)
+
+PYRUN:=     $(CFU_ROOT)/scripts/pyrun
+
+BIOS_BIN := $(OUT_DIR)/software/bios/bios.bin
+BITSTREAM:= $(OUT_DIR)/gateware/arty.bit
+
+.PHONY: bitstream litex-software prog clean
+
+bitstream: $(BITSTREAM)
+
+litex-software: $(BIOS_BIN)
+
+prog: $(BITSTREAM)
+	@echo Loading bitstream onto Arty
+	$(PYRUN) ./soc.py $(LITEX_ARGS) --no-compile-software --prog
+	
+clean:
+	@echo Removing $(OUT_DIR)
+	rm -rf $(OUT_DIR)
+
+$(CFU_V):
+	$(error $(CFU_V) not found. $(HELP_MESSAGE))
+
+$(BIOS_BIN): $(CFU_V)
+	$(PYRUN) ./soc.py $(LITEX_ARGS) 
+
+$(BITSTREAM): $(CFU_V)
+	@echo Building bitstream. CFU option: $(CFU_ARGS)
+	$(PYRUN) ./soc.py $(LITEX_ARGS) --build
