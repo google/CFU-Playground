@@ -54,7 +54,7 @@ litex-software: $(BIOS_BIN)
 
 prog: $(BITSTREAM)
 	@echo Loading bitstream onto Arty
-	$(PYRUN) ./soc.py $(LITEX_ARGS) --no-compile-software --prog
+	$(PYRUN) ./soc.py $(LITEX_ARGS) --no-compile-software --load
 	
 clean:
 	@echo Removing $(OUT_DIR)

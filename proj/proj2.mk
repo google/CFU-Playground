@@ -113,6 +113,10 @@ litex-software: $(CFU_VERILOG)
 bitstream: $(CFU_VERILOG)
 	$(SOC_MK) bitstream
 
+.PHONY: prog
+bitstream: $(CFU_VERILOG)
+	$(SOC_MK) prog
+
 .PHONY: load run
 ifeq '1' '$(words $(TTY))'
 run: $(SOFTWARE_BIN)
