@@ -40,6 +40,7 @@ MKDIR := /bin/mkdir
 # Directory where we build the project-specific gateware
 SOC_DIR      := $(CFU_ROOT)/soc
 SOC_MK       := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/soc.mk
+LXTERM       := $(SOC_DIR)/bin/litex_term
 GATEWARE_DIR := $(SOC_DIR)/build/$(PLATFORM)/gateware
 BITSTREAM    := $(GATEWARE_DIR)/arty.bit
 
@@ -64,6 +65,7 @@ SRC_DIR         := $(abspath $(PROJ_DIR)/src)
 
 SOFTWARE_BIN     := $(BUILD_DIR)/software.bin
 SOFTWARE_ELF     := $(BUILD_DIR)/software.elf
+SOFTWARE_LOG     := $(BUILD_DIR)/software.log
 
 .PHONY:	renode 
 renode: $(SOFTWARE_ELF) 
@@ -81,7 +83,7 @@ clean:
 software: $(SOFTWARE_BIN)
 
 $(SOFTWARE_BIN) $(SOFTWARE_ELF): litex-software build-dir
-	$(MAKE) -C build all
+	$(MAKE) -C $(BUILD_DIR) all
 
 # Always run cfu_gen when it exists
 # cfu_gen should not update cfu.v unless it has changed
@@ -121,11 +123,11 @@ bitstream: $(CFU_VERILOG)
 ifeq '1' '$(words $(TTY))'
 run: $(SOFTWARE_BIN)
 	@echo Running automated test on Arty Board
-	$(HARNESS_DIR)/interact.expect $(HARNESS_BIN) $(TTY) |& tee $(HARNESS_LOG)
+	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) |& tee $(SOFTWARE_LOG)
 
 load: $(SOFTWARE_BIN)
 	@echo Running interactively on Arty Board
-	$(LXTERM) --speed $(UART_SPEED) $(CRC) --kernel $(HARNESS_BIN) $(TTY)
+	$(LXTERM) --speed $(UART_SPEED) $(CRC) --kernel $(SOFTWARE_BIN) $(TTY)
 
 else
 run load:
