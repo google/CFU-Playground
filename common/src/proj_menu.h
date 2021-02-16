@@ -14,33 +14,10 @@
  * limitations under the License.
  */
 
+#ifndef PROJ_MENU_H
+#define PROJ_MENU_H
 
-#ifndef MENU_H
-#define MENU_H
-#include <stdbool.h>
+// Project-specific menu
+void do_proj_menu();
 
-struct MenuItem {
-    const char selection;
-    const char *description;
-    const void (*fn)(void);
-    const bool exit;
-};
-
-struct Menu {
-    const char *title;
-    const char *prompt;
-    struct MenuItem items[];
-};
-
-#define MENU_ITEM(selection, description, fn) {selection, description, fn, false}
-
-// Last item in a non-top level menu
-#define MENU_END {'x', "eXit to previous menu", NULL, true}, MENU_SENTINEL
-
-// Last item in a top level menu
-#define MENU_SENTINEL {'\0', NULL, NULL, false}
-
-// Run a menu
-void menu_run(struct Menu *menu);
-
-#endif // MENU_H
+#endif // !_PROJ_MENU_H

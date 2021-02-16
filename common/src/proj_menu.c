@@ -14,33 +14,26 @@
  * limitations under the License.
  */
 
+#include <stdio.h>
+#include "menu.h"
+#include "proj_menu.h"
 
-#ifndef MENU_H
-#define MENU_H
-#include <stdbool.h>
+// Each project should make their own proj_menu.c, which will replace this one.
 
-struct MenuItem {
-    const char selection;
-    const char *description;
-    const void (*fn)(void);
-    const bool exit;
+static void do_hello_world(void) {
+    puts("Hello, World!\n");
+}
+
+static struct Menu MENU = {
+    "Project Menu",
+    "project",
+    {
+        MENU_ITEM('h', "say Hello", do_hello_world),
+        MENU_END,
+    },
 };
 
-struct Menu {
-    const char *title;
-    const char *prompt;
-    struct MenuItem items[];
-};
-
-#define MENU_ITEM(selection, description, fn) {selection, description, fn, false}
-
-// Last item in a non-top level menu
-#define MENU_END {'x', "eXit to previous menu", NULL, true}, MENU_SENTINEL
-
-// Last item in a top level menu
-#define MENU_SENTINEL {'\0', NULL, NULL, false}
-
-// Run a menu
-void menu_run(struct Menu *menu);
-
-#endif // MENU_H
+void do_proj_menu()
+{
+  menu_run(&MENU);
+}

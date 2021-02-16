@@ -24,6 +24,7 @@
 
 #include "tflite.h"
 #include "menu.h"
+#include "proj_menu.h"
 #include "init.h"
 
 void do_person_detect()
@@ -59,7 +60,8 @@ static struct Menu MENU = {
     "CFU Playground",
     "main",
     {
-        MENU_ITEM('p', "Run Person Detection", do_person_detect),
+        MENU_ITEM('p', "Project menu", do_proj_menu),
+        MENU_ITEM('d', "person Detection", do_person_detect),
         MENU_SENTINEL,
     },
 };
