@@ -14,5 +14,15 @@
  * limitations under the License.
  */
 
+#ifndef BASE_H
+#define BASE_H
+#include <stdint.h>
+
 /** Initializes the runtime. */
 void init_runtime();
+
+// Read value from console
+// Uses strtol. Can accept values in hex or decimal. Also allows negative values.
+uint32_t read_val(const char *prompt);
+
+#endif // !BASE_H
