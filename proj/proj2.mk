@@ -98,13 +98,15 @@ generate_cfu:
 endif
 
 # Note that the common Makefile is used in preference to the TfLM Makefile
+# TODO(avg): consider using rsync instead of cp
 .PHONY: build-dir
 build-dir:
 	@echo Making BUILD_DIR
 	mkdir -p $(BUILD_DIR)/src
-	# TODO(avg): consider using rsync instead of cp
-	$(COPY) $(COMMON_DIR)/*          $(BUILD_DIR)
+	@# TFLM copied first due it having old/outdated copies of cfu.h etc
+	@# that need to be overwritten
 	$(COPY) $(TFLM_SRC_DIR)/*        $(BUILD_DIR)/src
+	$(COPY) $(COMMON_DIR)/*          $(BUILD_DIR)
 	$(COPY) $(SAXON_SRC_DIR)/riscv.h $(BUILD_DIR)/src
 	$(COPY) $(SRC_DIR)/*             $(BUILD_DIR)/src
 

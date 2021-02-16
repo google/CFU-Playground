@@ -1,5 +1,24 @@
+/*
+ * Copyright 2021 The CFU-Playground Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef CFU_H
+#define CFU_H
 
 #include "riscv.h"
+#include <stdint.h>
 
 /* riscv.h defines a macro:
 
@@ -28,23 +47,23 @@
 
 // =============== Software (C implementation of custom instructions)
 
-uint32_t Cfu(uint32_t functionid, uint32_t rs1, uint32_t rs2);
+uint32_t software_cfu(uint32_t functionid, uint32_t rs1, uint32_t rs2);
 
 // generic name for each custom instruction
-#define cfu_op0_sw(rs1, rs2)  Cfu(0, rs1, rs2)
-#define cfu_op1_sw(rs1, rs2)  Cfu(1, rs1, rs2)
-#define cfu_op2_sw(rs1, rs2)  Cfu(2, rs1, rs2)
-#define cfu_op3_sw(rs1, rs2)  Cfu(3, rs1, rs2)
-#define cfu_op4_sw(rs1, rs2)  Cfu(4, rs1, rs2)
-#define cfu_op5_sw(rs1, rs2)  Cfu(5, rs1, rs2)
-#define cfu_op6_sw(rs1, rs2)  Cfu(6, rs1, rs2)
-#define cfu_op7_sw(rs1, rs2)  Cfu(7, rs1, rs2)
+#define cfu_op0_sw(rs1, rs2)  software_cfu(0, rs1, rs2)
+#define cfu_op1_sw(rs1, rs2)  software_cfu(1, rs1, rs2)
+#define cfu_op2_sw(rs1, rs2)  software_cfu(2, rs1, rs2)
+#define cfu_op3_sw(rs1, rs2)  software_cfu(3, rs1, rs2)
+#define cfu_op4_sw(rs1, rs2)  software_cfu(4, rs1, rs2)
+#define cfu_op5_sw(rs1, rs2)  software_cfu(5, rs1, rs2)
+#define cfu_op6_sw(rs1, rs2)  software_cfu(6, rs1, rs2)
+#define cfu_op7_sw(rs1, rs2)  software_cfu(7, rs1, rs2)
 
 
 
 // =============== Switch HW vs SW
 
-#ifdef CFU_FORCE_SW
+#ifdef CFU_SOFTWARE_DEFINED
 #define cfu_op0(rs1, rs2)       cfu_op0_sw(rs1, rs2)
 #define cfu_op1(rs1, rs2)       cfu_op1_sw(rs1, rs2)
 #define cfu_op2(rs1, rs2)       cfu_op2_sw(rs1, rs2)
@@ -66,3 +85,5 @@ uint32_t Cfu(uint32_t functionid, uint32_t rs1, uint32_t rs2);
 #define cfu_op7(rs1, rs2)       cfu_op7_hw((rs1), (rs2))
 
 #endif
+
+#endif // CFU_H
