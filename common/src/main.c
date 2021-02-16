@@ -25,7 +25,7 @@
 #include "tflite.h"
 #include "menu.h"
 #include "proj_menu.h"
-#include "init.h"
+#include "base.h"
 
 void do_person_detect()
 {
