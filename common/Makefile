@@ -1,0 +1,178 @@
+# Makefile reusing as much from the LiteX gateware and software builds as possible.
+ifndef CFU_ROOT
+$(error CFU_ROOT not set)
+endif
+
+ifndef PROJ
+$(error PROJ not set)
+endif
+
+ifndef PLATFORM
+$(error PLATFORM not set)
+endif
+
+# These are found in the PATH
+RV64       := riscv64-unknown-elf-
+CC         := $(RV64)gcc
+CXX        := $(RV64)g++
+OBJDUMP    := $(RV64)objdump
+OBJCOPY    := $(RV64)objcopy
+
+RM         := rm -rf
+COPY       := cp -a
+XXD        := xxd -i
+PATH_SEP   := /
+
+# Assumes current directory is the one containing the makefile
+BUILD_DIR      := $(abspath .)
+SOC_BUILD_DIR  := $(CFU_ROOT)/soc/build/$(PLATFORM)/software
+LIBBASE_DIR    := $(SOC_BUILD_DIR)/software/libbase
+LITEX_DIR      := $(CFU_ROOT)/third_party/python/litex/litex
+VEX_SRC_DIR    := $(LITEX_DIR)/soc/cores/cpu/vexriscv
+
+LD_DIR     := $(BUILD_DIR)/ld
+GEN_LD_DIR := $(SOC_BUILD_DIR)/include/generated
+LDSCRIPT   := $(LD_DIR)/linker.ld
+LDSCRIPTS  := $(LDSCRIPT) $(GEN_LD_DIR)/output_format.ld $(GEN_LD_DIR)/regions.ld
+
+SRC_DIR    := $(BUILD_DIR)/src
+
+PACKAGE    := software
+
+SHARED_FLAGS := \
+	-march=rv32im  \
+	-mabi=ilp32 \
+	-D__vexriscv__ \
+	-I$(SRC_DIR) \
+	-I$(SRC_DIR)/third_party/gemmlowp \
+	-I$(SRC_DIR)/third_party/flatbuffers/include \
+	-I$(SRC_DIR)/third_party/ruy \
+	-I$(SRC_DIR)/third_party/kissfft \
+	-ffunction-sections \
+	-fdata-sections \
+	-fno-common \
+	-fomit-frame-pointer \
+    -ffreestanding \
+	-Werror\
+	-Wsign-compare\
+	-Wdouble-promotion\
+	-Wshadow\
+	-Wunused-variable\
+	-Wmissing-field-initializers\
+	-Wunused-function\
+	-Wswitch\
+	-Wvla\
+	-DNDEBUG\
+	-DTF_LITE_STATIC_MEMORY\
+	-DTF_LITE_USE_GLOBAL_CMATH_FUNCTIONS\
+	-DTF_LITE_USE_GLOBAL_MIN\
+	-DTF_LITE_USE_GLOBAL_MAX \
+	-DTF_LITE_DISABLE_X86_NEON\
+	-g \
+	-O3 \
+	-fno-builtin 
+	
+CFLAGS  := \
+	$(SHARED_FLAGS)\
+	-I$(SOC_BUILD_DIR)/include \
+	-I$(LITEX_DIR)/soc/software/include/base \
+	-I$(LITEX_DIR)/soc/software/include \
+	-I$(VEX_SRC_DIR) 
+
+CXXFLAGS   := \
+	$(SHARED_FLAGS) \
+	-std=c++11 \
+	-fstrict-aliasing \
+	-fno-rtti \
+	-fno-exceptions \
+	-fno-threadsafe-statics\
+	-fmessage-length=0 \
+	-Wall \
+	-Wextra \
+	-Wstrict-aliasing \
+	-Wno-unused-parameter
+
+LFLAGS     := \
+	$(CXXFLAGS) \
+	-L$(LD_DIR) \
+	-L$(GEN_LD_DIR) \
+	-L$(SOC_BUILD_DIR)/libbase -lbase-nofloat \
+	-L$(SOC_BUILD_DIR)/libcompiler_rt -lcompiler_rt \
+	-lm \
+	-nostartfiles \
+	-Wl,--gc-sections \
+	-Wl,--fatal-warnings \
+	-Wl,--no-warn-mismatch \
+	-Wl,--script=$(LDSCRIPT) \
+	-Wl,--build-id=none 
+	
+
+find_srcs = $(shell find $(SRC_DIR) -name \*.$(1))
+CSOURCES   := $(call find_srcs,c) 
+CPPSOURCES := $(call find_srcs,cpp)
+CCSOURCES  := $(call find_srcs,cc) 
+ASOURCES   := $(call find_srcs,S) 
+MODEL_SRCS := $(call find_srcs,tflite)
+
+COBJS      := $(CSOURCES:.c=.o)
+CXXOBJS    := $(CPPSOURCES:.cpp=.o) $(CCSOURCES:.cc=.o) 
+AOBJS      := $(ASOURCES:.S=.o)
+OBJECTS    := $(COBJS) $(CXXOBJS) $(AOBJS)
+MODEL_INCS := $(MODEL_SRCS:.tflite=.h)
+
+ifdef V
+QUIET      :=
+else
+QUIET      := @
+endif
+
+TARGET := $(PACKAGE).elf
+
+.PHONY: all
+all: $(TARGET) $(PACKAGE).bin $(PACKAGE).ihex
+
+$(PACKAGE).bin: $(TARGET)	
+	$(QUIET) echo "  OBJCOPY  $@"
+	$(QUIET) $(OBJCOPY) -O binary $(TARGET) $@
+
+$(PACKAGE).ihex: $(TARGET)
+	$(QUIET) echo "  IHEX     $(PACKAGE).ihex"
+	$(QUIET) $(OBJCOPY) -O ihex $(TARGET) $@
+
+$(TARGET): $(OBJECTS) $(LDSCRIPTS)
+	$(QUIET) echo "  LD       $@"
+	$(QUIET) $(CXX) $(OBJECTS) $(LFLAGS) -o $@
+	$(QUIET) echo "  OBJDUMP  $@.dis"
+	$(QUIET) $(OBJDUMP) -d $(TARGET) > $(TARGET).dis
+	$(QUIET) echo "  OBJDUMP  $@.sym"
+	$(QUIET) $(OBJDUMP) -s $(TARGET) > $(TARGET).sym
+
+# Uses a symbolic link with xxd to choose a better variable name
+%.h : %.tflite
+	$(QUIET) echo "  XXD  $(notdir $<)  $(notdir $@)"
+	$(QUIET) ln -s $< model_$(notdir $*)
+	$(QUIET) $(XXD) model_$(notdir $*) > $@
+	$(QUIET) $(RM)  model_$(notdir $*)
+
+.PRECIOUS: %.h
+
+# Force model include files to be generated first
+$(OBJECTS): | $(MODEL_INCS)
+
+%.o : %.c
+	$(QUIET) echo "  CC  $(notdir $<)	$(notdir $@)"
+	$(QUIET) $(CC) -c $< $(CFLAGS) -o $@ -MMD
+
+%.o: %.cpp
+	$(QUIET) echo "  CXX $(notdir $<)	$(notdir $@)"
+	$(QUIET) $(CXX) -DREPLACE_NAME_=$(notdir $*) -c $< $(CXXFLAGS) -o $@ -MMD
+
+%.o: %.cc
+	$(QUIET) echo "  CXX $(notdir $<)	$(notdir $@)"
+	$(QUIET) $(CXX) -DREPLACE_NAME_=$(notdir $*) -c $< $(CXXFLAGS) -o $@ -MMD
+
+%.o : %.S
+	$(QUIET) echo "  AS  $(notdir $<)	$(notdir $@)"
+	$(QUIET) $(CC) -x assembler-with-cpp -c $< $(CFLAGS) -o $@ -MMD
+
+include $(wildcard $(OBJ_DIR)/*.d)

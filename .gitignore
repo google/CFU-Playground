@@ -73,3 +73,6 @@ proj/*/cfu.v
 
 build
 csr.csv
+
+# VSCode files
+*.code-workspace

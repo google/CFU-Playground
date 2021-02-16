@@ -1,0 +1,23 @@
+#!/usr/bin/expect -f
+
+# first arg:  path to binary (kernel)
+# second arg: path to tty device (e.g. /dev/ttyUSB1)
+
+set timeout 500
+
+spawn ../../soc/bin/litex_term --speed 921600 --kernel [lindex $argv 0] --no-crc [lindex $argv 1]
+
+expect "Running one inference"
+
+set timeout 20
+
+# send_user "Starting inference\n"
+
+expect "Done"
+
+send_user "\nFinished inference\n"
+
+send_user "\nDisconnecting...\n"
+
+close
+
