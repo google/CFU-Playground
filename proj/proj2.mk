@@ -119,7 +119,7 @@ bitstream: $(CFU_VERILOG)
 	$(SOC_MK) bitstream
 
 .PHONY: prog
-bitstream: $(CFU_VERILOG)
+prog: $(CFU_VERILOG)
 	$(SOC_MK) prog
 
 .PHONY: load run
