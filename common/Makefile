@@ -11,6 +11,10 @@ ifndef PLATFORM
 $(error PLATFORM not set)
 endif
 
+ifndef DEFINES
+$(error DEFINES not set)
+endif
+
 # These are found in the PATH
 RV64       := riscv64-unknown-elf-
 CC         := $(RV64)gcc
@@ -39,10 +43,13 @@ SRC_DIR    := $(BUILD_DIR)/src
 
 PACKAGE    := software
 
+DEFINE_FLAGS := $(DEFINES:%=-D %)
+
 SHARED_FLAGS := \
 	-march=rv32im  \
 	-mabi=ilp32 \
 	-D__vexriscv__ \
+	$(DEFINE_FLAGS) \
 	-I$(SRC_DIR) \
 	-I$(SRC_DIR)/third_party/gemmlowp \
 	-I$(SRC_DIR)/third_party/flatbuffers/include \
@@ -156,23 +163,32 @@ $(TARGET): $(OBJECTS) $(LDSCRIPTS)
 
 .PRECIOUS: %.h
 
+
+# Some shenanigans to create a file whose name depends on compiler DEFINEs
+# We use this to cause a rebuild when DEFINEs change. See
+# https://stackoverflow.com/questions/11647859/make-targets-depend-on-variables
+DEFINE_FILE = DEFINES.$(firstword $(shell echo $(DEFINES) | md5sum))
+$(DEFINE_FILE):
+	$(QUIET) $(RM) DEFINES.*
+	echo $(DEFINES) > $(DEFINE_FILE)
+
 # Force model include files to be generated first
 $(OBJECTS): | $(MODEL_INCS)
 
-%.o : %.c
+%.o : %.c $(DEFINE_FILE)
 	$(QUIET) echo "  CC  $(notdir $<)	$(notdir $@)"
 	$(QUIET) $(CC) -c $< $(CFLAGS) -o $@ -MMD
 
-%.o: %.cpp
+%.o: %.cpp $(DEFINE_FILE)
 	$(QUIET) echo "  CXX $(notdir $<)	$(notdir $@)"
 	$(QUIET) $(CXX) -DREPLACE_NAME_=$(notdir $*) -c $< $(CXXFLAGS) -o $@ -MMD
 
-%.o: %.cc
+%.o: %.cc $(DEFINE_FILE)
 	$(QUIET) echo "  CXX $(notdir $<)	$(notdir $@)"
 	$(QUIET) $(CXX) -DREPLACE_NAME_=$(notdir $*) -c $< $(CXXFLAGS) -o $@ -MMD
 
-%.o : %.S
+%.o : %.S $(DEFINE_FILE)
 	$(QUIET) echo "  AS  $(notdir $<)	$(notdir $@)"
 	$(QUIET) $(CC) -x assembler-with-cpp -c $< $(CFLAGS) -o $@ -MMD
 
-include $(wildcard $(OBJ_DIR)/*.d)
+include $(shell find src -name *.d)

@@ -14,17 +14,10 @@
  * limitations under the License.
  */
 
-#include <stdint.h>
+#ifndef PROJ_MENU_H
+#define PROJ_MENU_H
 
-uint32_t Cfu(uint32_t functionid, uint32_t rs1, uint32_t rs2)
-{
-  (void)functionid;
-  (void)rs2;
-  if (functionid == 0x1) {
-    return rs2;
-  }
-  return rs1;
-}
+// Project-specific menu
+void do_proj_menu();
 
-
-
+#endif // !_PROJ_MENU_H

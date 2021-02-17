@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#
-# Do not edit this Makefile
-# 
+# This variable lists symbols to define to the C preprocessor
+export DEFINES := PLACEHOLDER
+
+# Uncomment this line to use software defined CFU
+DEFINES += CFU_SOFTWARE_DEFINED
 
 include ../proj2.mk
