@@ -17,6 +17,9 @@
 #ifndef CFU_PLAYGROUND_PERF_H_
 #define CFU_PLAYGROUND_PERF_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define NUM_PERF_COUNTERS 8
 
@@ -124,5 +127,10 @@ inline void disable_counter(int counter_num)
         set_counter_enable(counter_num, 0);
 }
 
+// Test menu
+void do_performance_counter_tests(void);
 
+#ifdef __cplusplus
+}
+#endif
 #endif  // CFU_PLAYGROUND_PERF_H_

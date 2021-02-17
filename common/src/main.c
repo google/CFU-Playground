@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-#include <generated/csr.h>
-#include <hw/common.h>
 #include <console.h>
 #include <stdio.h>
-#include <string.h>
-#include <irq.h>
-#include <uart.h>
 
 #include "tflite.h"
 #include "menu.h"
+#include "functional_cfu_tests.h"
 #include "proj_menu.h"
-#include "init.h"
+#include "perf.h"
+#include "base.h"
 
 void do_person_detect()
 {
@@ -60,8 +57,10 @@ static struct Menu MENU = {
     "CFU Playground",
     "main",
     {
-        MENU_ITEM('p', "Project menu", do_proj_menu),
-        MENU_ITEM('d', "person Detection", do_person_detect),
+        MENU_ITEM('1', "Person Detection", do_person_detect),
+        MENU_ITEM('2', "Functional CFU Tests", do_functional_cfu_tests),
+        MENU_ITEM('3', "Project menu", do_proj_menu),
+        MENU_ITEM('4', "Performance Counter Tests", do_performance_counter_tests),
         MENU_SENTINEL,
     },
 };
