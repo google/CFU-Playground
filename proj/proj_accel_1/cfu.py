@@ -304,7 +304,17 @@ class MultiplyAccumulateFourInstructionTest(TestBase):
             ((1, 0, 0x02020202, 0x01010101, 6), -39),
             # load in 4 bytes with -ve filter_val
             ((1, 0, 0xFCFCFCFC, 0x01010101, 6), 17),
-            ((1, 0, 0xFCFCFCFC, 0x01010101, 6), -95),
+            # -95 + 5 * ( -10 + 6) = -115
+            ((1, 0, 0x00000005, 0x000000F6, 6), -95),
+            # -115 + (-7) * (-11 + 6) = -80
+            ((1, 0, 0x000000F9, 0x000000F5, 6), -115),
+            # load in lower 2 bytes
+            ((1, 0, 0x0000F9F9, 0x000000F5, 6), -80),
+            # load in 2 bytes with different values
+            ((1, 0, 0x050000F9, 0xF60000F5, 6), -87),
+            # load in all bytes with different values
+            ((1, 0, 0x05F801F9, 0xF60309F3, 6), -72),
+            ((1, 0, 0, 0, 6), -100),
         ]
 
         def process():
