@@ -240,6 +240,86 @@ class MultiplyAccumulateInstructionTest(TestBase):
         self.run_sim(process, True)
 
 
+class MultiplyAccumulateFourInstruction(InstructionBase):
+    def __init__(self):
+        super().__init__()
+        self.reset_acc = Signal(1)  # input
+        self.acc = Signal(signed(32))  # output
+        self.input_offset = Signal(signed(32))  # input
+
+    def elab(self, m):
+        filter_val = Signal(32)
+        input_val = Signal(32)
+
+        m.d.comb += [
+            filter_val.eq(self.in0),
+            input_val.eq(self.in1),
+        ]
+
+        temp = [Signal(signed(32)), Signal(signed(32)),
+                Signal(signed(32)), Signal(signed(32))]
+        for i in range(len(temp)):
+            m.d.comb += temp[i].eq((filter_val.word_select(i, 8).as_signed() * (
+                input_val.word_select(i, 8).as_signed() + self.input_offset)))
+        with m.If(self.reset_acc):
+            m.d.sync += self.acc.eq(0)
+        with m.If(self.start):
+            m.d.sync += [
+                self.acc.eq(
+                    self.acc + (temp[0] + temp[1] + temp[2] + temp[3])),
+                self.done.eq(1),
+            ]
+
+
+class MultiplyAccumulateFourInstructionTest(TestBase):
+    def create_dut(self):
+        return MultiplyAccumulateFourInstruction()
+
+    def test_multiply_accumulate_four(self):
+        DATA = [
+            # start, reset_acc, filter_val, input_val, input_offset
+            # When start or reset_acc is set, calculations or reset happens next cycle
+            ((0, 1, 2, 3, 4), 0),
+            ((0, 0, 2, 3, 4), 0),
+            ((1, 0, 2, 3, 4), 0),
+            ((1, 0, 2, 3, 4), 14),
+            ((0, 1, 2, 3, 4), 28),
+            ((1, 0, 2, 3, 4), 0),
+            ((0, 1, 2, 3, 4), 14),
+            ((0, 0, 2, 3, 4), 0),
+            ((1, 0, 4, 2, 6), 0),
+            ((0, 0, 4, 2, 6), 32),
+            ((1, 0, 4, 2, 6), 32),
+            ((1, 0, 4, 2, 6), 64),
+            ((1, 0, 0, 2, 6), 96),
+            # filter_val is set to a -ve value. filter_val = -12
+            ((1, 0, 0x000000F4, 0x00000002, 6), 96),
+            # filter_val = -4
+            ((1, 0, 0x000000FC, 0x00000002, 6), 0),
+            # input_val = -2
+            ((1, 0, 0x00000002, 0x000000FE, 6), -32),
+            # filter_val = -3, input_val = -1
+            ((1, 0, 0x000000FD, 0x000000FF, 6), -24),
+            # load in 4 bytes
+            ((1, 0, 0x02020202, 0x01010101, 6), -39),
+            # load in 4 bytes with -ve filter_val
+            ((1, 0, 0xFCFCFCFC, 0x01010101, 6), 17),
+            ((1, 0, 0xFCFCFCFC, 0x01010101, 6), -95),
+        ]
+
+        def process():
+            for n, (inputs, expected_output) in enumerate(DATA):
+                start, reset_acc, filter_val, input_val, input_offset = inputs
+                yield self.dut.start.eq(start)
+                yield self.dut.reset_acc.eq(reset_acc)
+                yield self.dut.in0.eq(filter_val)
+                yield self.dut.in1.eq(input_val)
+                yield self.dut.input_offset.eq(input_offset)
+                yield
+                self.assertEqual((yield self.dut.acc), expected_output)
+        self.run_sim(process, True)
+
+
 class ProjAccel1Cfu(Cfu):
     def __init__(self):
         self.dc = DoubleCompareInstruction()
