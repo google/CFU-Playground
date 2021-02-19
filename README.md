@@ -52,4 +52,14 @@ make PROJ=proj_template MODEL=pdti8 run
 
 ### Licensed under Apache-2.0 license
 
-See the file `LICENSE`.
+See the file [LICENSE](LICENSE).
+
+### Contribution guidelines
+
+**If you want to contribute to CFU Playground, be sure to review the
+[contribution guidelines](CONTRIBUTING.md).  This project adheres to Google's
+[code of conduct](CODE_OF_CONDUCT.md).   By participating, you are expected to
+uphold this code.**
+
+
+
