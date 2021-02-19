@@ -51,7 +51,7 @@ logLevel 0 sysbus.cpu
 #sysbus.cpu InstallCustomInstructionHandlerFromString "0000000yyyyyxxxxx000ddddd0001011" $in_image_run
 #                                                         function id--^^^
 
-sysbus LoadELF $ORIGIN/tflm_harness.elf
+sysbus LoadELF $ORIGIN/software.elf
 
 # machine StartGdbServer 3333
 
