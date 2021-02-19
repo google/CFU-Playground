@@ -11,10 +11,6 @@ ifndef PLATFORM
 $(error PLATFORM not set)
 endif
 
-ifndef DEFINES
-$(error DEFINES not set)
-endif
-
 # These are found in the PATH
 RV64       := riscv64-unknown-elf-
 CC         := $(RV64)gcc
@@ -69,7 +65,6 @@ SHARED_FLAGS := \
 	-Wunused-function\
 	-Wswitch\
 	-Wvla\
-	-DNDEBUG\
 	-DTF_LITE_STATIC_MEMORY\
 	-DTF_LITE_USE_GLOBAL_CMATH_FUNCTIONS\
 	-DTF_LITE_USE_GLOBAL_MIN\
