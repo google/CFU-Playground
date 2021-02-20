@@ -83,7 +83,6 @@ clean:
 software: $(SOFTWARE_BIN)
 
 $(SOFTWARE_BIN) $(SOFTWARE_ELF): litex-software build-dir
-	echo $(DEFINES)
 	$(MAKE) -C $(BUILD_DIR) all
 
 # Always run cfu_gen when it exists
