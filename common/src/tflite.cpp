@@ -26,7 +26,7 @@
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
 
-#include "models/pdti8.h"
+#include "models/pdti8/pdti8.h"
 
 
 //
