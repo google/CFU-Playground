@@ -65,19 +65,25 @@ static void do_compare_tests(void)
     printf("Ran %d comparisons.\n", count);
 }
 
+static void print_result(int op, uint32_t v0, uint32_t v1, uint32_t r) {
+    printf("cfu_op%1d(%08x, %08x) = %08x (hex), %d (signed), %u (unsigned)\n", op, v0, v1, r, r, r);
+
+}
+
 static void do_interactive_tests(void)
 {
     puts("CFU Interactive Test:");
 
     uint32_t v0 = read_val("  First operand value  ");
     uint32_t v1 = read_val("  Second operand value ");
-
-    uint32_t r0 = cfu_op0(v0, v1);
-    printf("cfu_op0(%08x, %08x) = %08x (hex), %d (signed), %u (unsigned)\n", v0, v1, r0, r0, r0);
-    uint32_t r1 = cfu_op1(v0, v1);
-    printf("cfu_op1(%08x, %08x) = %08x (hex), %d (signed), %u (unsigned)\n", v0, v1, r1, r1, r1);
-    uint32_t r2 = cfu_op2(v0, v1);
-    printf("cfu_op2(%08x, %08x) = %08x (hex), %d (signed), %u (unsigned)\n", v0, v1, r2, r2, r2);
+    print_result(0, v0, v1, cfu_op0(v0, v1));
+    print_result(1, v0, v1, cfu_op1(v0, v1));
+    print_result(2, v0, v1, cfu_op2(v0, v1));
+    print_result(3, v0, v1, cfu_op3(v0, v1));
+    print_result(4, v0, v1, cfu_op4(v0, v1));
+    print_result(5, v0, v1, cfu_op5(v0, v1));
+    print_result(6, v0, v1, cfu_op6(v0, v1));
+    print_result(7, v0, v1, cfu_op7(v0, v1));
 }
 
 static struct Menu MENU = {

@@ -212,8 +212,8 @@ class CfuTest(CfuTestBase):
             ((2, 0x01020304, 0),          0x20c04080),
             ((3, 0x05,       0),          5),
             ((3, 0x06,       0),          8),
-            ((3, 46,         0),          1836311903), # Max input
-            ((3, 47,         0),          0),          # Input too large
+            ((3, 46,         0),          1836311903),  # Max input
+            ((3, 47,         0),          0),           # Input too large
         ]
         return self.run_ops(DATA)
 
