@@ -26,6 +26,7 @@
 extern "C" {
 #endif
 
+void tflite_do_tests();
 void initTfLite();
 
 int8_t *get_input();

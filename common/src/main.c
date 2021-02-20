@@ -26,7 +26,7 @@
 
 void do_person_detect()
 {
-
+  initTfLite();
   // ONCE_AND_QUIT
   load_zeros();
   puts("Running one inference");
@@ -61,6 +61,7 @@ static struct Menu MENU = {
         MENU_ITEM('2', "Functional CFU Tests", do_functional_cfu_tests),
         MENU_ITEM('3', "Project menu", do_proj_menu),
         MENU_ITEM('4', "Performance Counter Tests", do_performance_counter_tests),
+        MENU_ITEM('5', "TFLite Unit Tests", tflite_do_tests),
         MENU_SENTINEL,
     },
 };
@@ -71,7 +72,6 @@ int main(void)
   printf("Hello, %s!\n", "World");
 
   puts("initTfLite()");
-  initTfLite();
 
   menu_run(&MENU);
 

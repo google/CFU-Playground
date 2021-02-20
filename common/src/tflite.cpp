@@ -28,10 +28,24 @@
 
 #include "models/pdti8.h"
 
-// this is originally "main" from conv_test.cc
+
+//
+// Unit test prototypes. Because of the way these names are generated, they are 
+// not defined in any include file. The actual tests are in test_name.cc - e.g 
+// conv_test is defined in conv_test.cc.
 extern int conv_test(int argc, char** argv);
-// this is originally "main" from depthwise_conv_test.cc
 extern int depthwise_conv_test(int argc, char** argv);
+
+
+// Run tflite unit tests
+void tflite_do_tests() {
+// conv test from conv_test.cc
+  puts("\nCONV TEST:");
+  conv_test(0, NULL);
+  // depthwise conv test from depthwise_conv_test.cc
+  puts("DEPTHWISE_CONV TEST:");
+  depthwise_conv_test(0, NULL);
+}
 
 
 
@@ -71,14 +85,6 @@ void initTfLite() {
 
   puts("Test error_reporter...");
   TF_LITE_REPORT_ERROR(error_reporter, "...error_reporter OK!");
-
-  // conv test from conv_test.cc
-  puts("\nCONV TEST:");
-  conv_test(0, NULL);
-  // depthwise conv test from depthwise_conv_test.cc
-  puts("DEPTHWISE_CONV TEST:");
-  depthwise_conv_test(0, NULL);
-
 
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
