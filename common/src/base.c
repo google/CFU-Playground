@@ -50,7 +50,7 @@ uint32_t read_val(const char *prompt)
         char buf[81];
         char c = readchar();
         int i = 0;
-        while (i < 80 && c != '\r')
+        while (i < 80 && c != '\r' && c != '\n')
         {
                 buf[i++] = c;
                 putchar(c);
