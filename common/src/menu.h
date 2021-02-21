@@ -17,6 +17,7 @@
 #ifndef MENU_H
 #define MENU_H
 #include <stdbool.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
