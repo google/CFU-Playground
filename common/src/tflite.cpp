@@ -174,42 +174,20 @@ void load_zeros()
   printf("Zero 0x%x bytes at 0x%p\n", input->bytes, input->data.int8);
 }
 
-void init_perf_counters()
-{
-  for (int i = 0; i < NUM_PERF_COUNTERS; ++i)
-  {
-    perf_disable_counter(i);
-    perf_set_counter(i, 0);
-  }
-  perf_zero_start_counts();
-}
-
-void print_perf_counters()
-{
-  for (int i = 0; i < NUM_PERF_COUNTERS; ++i)
-  {
-    perf_disable_counter(i);
-  }
-  for (int i = 0; i < NUM_PERF_COUNTERS; ++i)
-  {
-    printf("PERF COUNTER %d: %12d, started %d times\n", i, perf_get_counter(i), perf_get_start_count(i));
-  }
-}
-
 void classify(int8_t *person_score, int8_t *no_person_score)
 {
   // image ought to be loaded already
   printf(">>%d\n", interpreter->input(0)->data.int8[0]);
 
   // Run the model on this input and make sure it succeeds.
-  init_perf_counters();
+  perf_reset_all_counters();
   perf_set_mcycle(0);
   if (kTfLiteOk != interpreter->Invoke())
   {
     TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed.");
   }
   unsigned int cyc = perf_get_mcycle();
-  print_perf_counters();
+  perf_print_all_counters();
   printf("%u cycles\n", cyc);
 
   TfLiteTensor *output = interpreter->output(0);

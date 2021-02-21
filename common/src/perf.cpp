@@ -18,6 +18,30 @@
 
 unsigned CFU_start_counts[NUM_PERF_COUNTERS];
 
+// Set each individual perf counter to zero
+void perf_reset_all_counters()
+{
+    for (int i = 0; i < NUM_PERF_COUNTERS; ++i)
+    {
+        perf_disable_counter(i);
+        perf_set_counter(i, 0);
+    }
+    perf_zero_start_counts();
+}
+
+// Prints cycle and enable counts for every perf coutner
+void perf_print_all_counters()
+{
+    for (int i = 0; i < NUM_PERF_COUNTERS; ++i)
+    {
+        perf_disable_counter(i);
+    }
+    for (int i = 0; i < NUM_PERF_COUNTERS; ++i)
+    {
+        printf("PERF COUNTER %d: %12d, started %d times\n", i, perf_get_counter(i), perf_get_start_count(i));
+    }
+}
+
 // Counter Tests
 static int counter_num = 0;
 

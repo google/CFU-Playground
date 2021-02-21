@@ -127,6 +127,12 @@ inline void perf_disable_counter(int counter_num)
         perf_set_counter_enable(counter_num, 0);
 }
 
+// Set each individual perf counter to zero
+void perf_reset_all_counters();
+
+// Prints cycle and enable counts for every perf coutner
+void perf_print_all_counters();
+
 // Test menu
 void perf_test_menu(void);
 
