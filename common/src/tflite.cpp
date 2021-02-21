@@ -178,21 +178,21 @@ void init_perf_counters()
 {
   for (int i = 0; i < NUM_PERF_COUNTERS; ++i)
   {
-    disable_counter(i);
-    set_counter(i, 0);
+    perf_disable_counter(i);
+    perf_set_counter(i, 0);
   }
-  zero_start_counts();
+  perf_zero_start_counts();
 }
 
 void print_perf_counters()
 {
   for (int i = 0; i < NUM_PERF_COUNTERS; ++i)
   {
-    disable_counter(i);
+    perf_disable_counter(i);
   }
   for (int i = 0; i < NUM_PERF_COUNTERS; ++i)
   {
-    printf("PERF COUNTER %d: %12d, started %d times\n", i, get_counter(i), get_start_count(i));
+    printf("PERF COUNTER %d: %12d, started %d times\n", i, perf_get_counter(i), perf_get_start_count(i));
   }
 }
 
@@ -203,12 +203,12 @@ void classify(int8_t *person_score, int8_t *no_person_score)
 
   // Run the model on this input and make sure it succeeds.
   init_perf_counters();
-  set_mcycle(0);
+  perf_set_mcycle(0);
   if (kTfLiteOk != interpreter->Invoke())
   {
     TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed.");
   }
-  unsigned int cyc = get_mcycle();
+  unsigned int cyc = perf_get_mcycle();
   print_perf_counters();
   printf("%u cycles\n", cyc);
 

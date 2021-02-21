@@ -60,7 +60,7 @@ static struct Menu MENU = {
         MENU_ITEM('1', "Person Detection", do_person_detect),
         MENU_ITEM('2', "Functional CFU Tests", do_functional_cfu_tests),
         MENU_ITEM('3', "Project menu", do_proj_menu),
-        MENU_ITEM('4', "Performance Counter Tests", do_performance_counter_tests),
+        MENU_ITEM('4', "Performance Counter Tests", perf_test_menu),
         MENU_ITEM('5', "TFLite Unit Tests", tflite_do_tests),
         MENU_SENTINEL,
     },

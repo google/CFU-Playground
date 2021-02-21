@@ -25,32 +25,32 @@ extern "C" {
 
 extern unsigned CFU_start_counts[NUM_PERF_COUNTERS];
 
-inline void zero_start_counts()
+inline void perf_zero_start_counts()
 {
         for (int i=0; i<NUM_PERF_COUNTERS; ++i) {
             CFU_start_counts[i] = 0;
         }
 }
 
-inline unsigned get_start_count(int counter_num)
+inline unsigned perf_get_start_count(int counter_num)
 {
         return CFU_start_counts[counter_num];
 }
 
-inline unsigned get_mcycle()
+inline unsigned perf_get_mcycle()
 {
         unsigned result;
         asm volatile ("csrr %0, mcycle" : "=r"(result));
         return result;
 }
 
-inline void set_mcycle(unsigned cyc)
+inline void perf_set_mcycle(unsigned cyc)
 {
         asm volatile ("csrw mcycle, %0" :: "r"(cyc));
 }
 
 
-inline unsigned get_counter(int counter_num)
+inline unsigned perf_get_counter(int counter_num)
 {
         unsigned count=0;
         switch (counter_num) {
@@ -67,7 +67,7 @@ inline unsigned get_counter(int counter_num)
         return count;
 }
 
-inline unsigned get_counter_enable(int counter_num)
+inline unsigned perf_get_counter_enable(int counter_num)
 {
         unsigned en=0;
         switch (counter_num) {
@@ -84,7 +84,7 @@ inline unsigned get_counter_enable(int counter_num)
         return en;
 }
 
-inline void set_counter(int counter_num, unsigned count)
+inline void perf_set_counter(int counter_num, unsigned count)
 {
         switch (counter_num) {
             case 0: asm volatile ("csrw 0xB04, %0" :: "r"(count)); break;
@@ -99,7 +99,7 @@ inline void set_counter(int counter_num, unsigned count)
         }
 }
 
-inline void set_counter_enable(int counter_num, unsigned en)
+inline void perf_set_counter_enable(int counter_num, unsigned en)
 {
         if (en) {
             CFU_start_counts[counter_num]++;
@@ -117,18 +117,18 @@ inline void set_counter_enable(int counter_num, unsigned en)
         }
 }
 
-inline void enable_counter(int counter_num)
+inline void perf_enable_counter(int counter_num)
 {
-        set_counter_enable(counter_num, 1);
+        perf_set_counter_enable(counter_num, 1);
 }
 
-inline void disable_counter(int counter_num)
+inline void perf_disable_counter(int counter_num)
 {
-        set_counter_enable(counter_num, 0);
+        perf_set_counter_enable(counter_num, 0);
 }
 
 // Test menu
-void do_performance_counter_tests(void);
+void perf_test_menu(void);
 
 #ifdef __cplusplus
 }
