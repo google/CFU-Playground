@@ -174,7 +174,8 @@ void tflite_classify()
   }
   unsigned int cyc = perf_get_mcycle();
   perf_print_all_counters();
-  printf("%u cycles\n", cyc);
+  perf_print_value(cyc);
+  printf(" cycles total\n");
 
   // Uncomment to see how large the arena needs to be.
   printf("Arena used bytes: %llu\n", (long long unsigned)(interpreter->arena_used_bytes()));
