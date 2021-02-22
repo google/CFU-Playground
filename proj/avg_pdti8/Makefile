@@ -23,6 +23,11 @@ export DEFINES :=
 DEFINES += NDEBUG
 
 # Uncomment this line to skip individual profiling output (has minor effect on performance).
-#DEFINES += NPROFILE
+DEFINES += NPROFILE
+
+# output parameters
+DEFINES += SHOW_CONV_PARAMS
+
+export UART_SPEED := 3686400
 
 include ../proj.mk

@@ -16,6 +16,7 @@ limitations under the License.
 #define TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_CONV_H_
 
 #include "tensorflow/lite/kernels/internal/common.h"
+#include <stdio.h>
 
 namespace tflite {
 namespace reference_integer_ops {
@@ -61,6 +62,33 @@ inline void ConvPerChannel(
   const int filter_width = filter_shape.Dims(2);
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
+
+#if SHOW_CONV_PARAMS
+  static bool header_done = false;
+  if (! header_done) {
+    printf("input_offset, stride_width, stride_height, dilation_width_factor, "
+          "dilation_height_factor, pad_width, pad_height, output_offset, "
+          "input_height, input_width, filter_height, filter_width, "
+          "output_height, output_width\n");
+    header_done = true;
+  }
+  printf("%ld, ", input_offset);
+  printf("%u, ", stride_width);
+  printf("%u, ", stride_height);
+  printf("%u, ", dilation_width_factor);
+  printf("%u, ", dilation_height_factor);
+  printf("%u, ", pad_width);
+  printf("%u, ", pad_height);
+  printf("%4ld, ", output_offset);
+  printf("%d, ", input_height);
+  printf("%d, ", input_width);
+  printf("%d, ", filter_height);
+  printf("%d, ", filter_width);
+  printf("%d, ", output_height);
+  printf("%d", output_width);
+  printf("\n");
+#endif
+
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
       const int in_y_origin = (out_y * stride_height) - pad_height;
