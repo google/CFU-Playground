@@ -25,6 +25,8 @@ limitations under the License.
 #include "tensorflow/lite/kernels/padding.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
 
+#include "perf.h"
+
 namespace tflite {
 namespace {
 
@@ -238,6 +240,7 @@ void EvalQuantizedPerChannel(TfLiteContext* context, TfLiteNode* node,
   op_params.quantized_activation_min = data.output_activation_min;
   op_params.quantized_activation_max = data.output_activation_max;
 
+  perf_enable_counter(0);
   reference_integer_ops::ConvPerChannel(
       op_params, data.per_channel_output_multiplier,
       data.per_channel_output_shift, tflite::micro::GetTensorShape(input),
@@ -248,6 +251,7 @@ void EvalQuantizedPerChannel(TfLiteContext* context, TfLiteNode* node,
       tflite::micro::GetTensorData<int32_t>(bias),
       tflite::micro::GetTensorShape(output),
       tflite::micro::GetTensorData<int8_t>(output));
+  perf_disable_counter(0);
 }
 
 void EvalFloat(TfLiteContext* context, TfLiteNode* node,
