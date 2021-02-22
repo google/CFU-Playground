@@ -17,16 +17,12 @@
 
 #include "tensorflow/lite/micro/examples/person_detection_experimental/detection_responder.h"
 #include "tensorflow/lite/micro/examples/person_detection_experimental/image_provider.h"
-#include "tensorflow/lite/micro/examples/person_detection_experimental/model_settings.h"
-#include "tensorflow/lite/micro/examples/person_detection_experimental/person_detect_model_data.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_profiler.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
-
-#include "models/pdti8/model_pdti8.h"
 
 //
 // Unit test prototypes. Because of the way these names are generated, they are
@@ -66,7 +62,7 @@ namespace
   static uint8_t tensor_arena[kTensorArenaSize];
 } // namespace
 
-void tflite_init()
+static void tflite_init()
 {
   static bool initialized = false;
   if (initialized)
@@ -111,6 +107,7 @@ void tflite_init()
 
 void tflite_load_model(unsigned char *model_data)
 {
+  tflite_init();
   if (interpreter)
   {
     interpreter->~MicroInterpreter();
@@ -119,7 +116,7 @@ void tflite_load_model(unsigned char *model_data)
 
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
-  model = tflite::GetModel(model_pdti8);
+  model = tflite::GetModel(model_data);
   if (model->version() != TFLITE_SCHEMA_VERSION)
   {
     TF_LITE_REPORT_ERROR(error_reporter,
@@ -154,31 +151,20 @@ void tflite_load_model(unsigned char *model_data)
   puts("\n");
 }
 
-// The name of this function is important for Arduino compatibility.
-void initTfLite()
-{
-
-  tflite_init();
-  tflite_load_model(model_pdti8);
-}
-
-int8_t *get_input()
-{
-  return interpreter->input(0)->data.int8;
-}
-
-void load_zeros()
+void tflite_set_input_zeros()
 {
   auto input = interpreter->input(0);
   memset(input->data.int8, 0, input->bytes);
   printf("Zero 0x%x bytes at 0x%p\n", input->bytes, input->data.int8);
 }
 
-void classify(int8_t *person_score, int8_t *no_person_score)
-{
-  // image ought to be loaded already
-  printf(">>%d\n", interpreter->input(0)->data.int8[0]);
+int8_t *tflite_get_output() {
+  return interpreter->output(0)->data.int8;
+}
 
+
+void tflite_classify()
+{
   // Run the model on this input and make sure it succeeds.
   perf_reset_all_counters();
   perf_set_mcycle(0);
@@ -190,12 +176,14 @@ void classify(int8_t *person_score, int8_t *no_person_score)
   perf_print_all_counters();
   printf("%u cycles\n", cyc);
 
-  TfLiteTensor *output = interpreter->output(0);
-
-  // Process the inference results.
-  *person_score = output->data.int8[kPersonIndex];
-  *no_person_score = output->data.int8[kNotAPersonIndex];
-
   // Uncomment to see how large the arena needs to be.
   printf("Arena used bytes: %llu\n", (long long unsigned)(interpreter->arena_used_bytes()));
+}
+
+
+
+
+int8_t *get_input()
+{
+  return interpreter->input(0)->data.int8;
 }

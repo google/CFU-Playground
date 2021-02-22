@@ -14,32 +14,20 @@
  * limitations under the License.
  */
 
-/*
- * Defines tflite functions for evaluating models
- */
-#include <stdint.h>
-
-#ifndef _TFLITE_H
-#define _TFLITE_H
+#ifndef _PDTI8_H
+#define _PDTI8_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Runs tflite operation unit tests
-void tflite_do_tests();
-
-// Sets up TfLite with a given model
-void tflite_load_model(unsigned char *model_data);
-void tflite_set_input_zeros();
-
-// Run classification with data already set into input.
-void tflite_classify();
-
-// Obtain the result vector
-int8_t *tflite_get_output();
+// For integration into menu system
+void pdti8_menu();
 
 #ifdef __cplusplus
 }
 #endif
-#endif // _TFLITE_H
+
+
+#endif   // _PDTI8_H
+
