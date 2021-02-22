@@ -68,8 +68,8 @@ inline void ConvPerChannel(
   if (! header_done) {
     printf("input_offset, stride_width, stride_height, dilation_width_factor, "
           "dilation_height_factor, pad_width, pad_height, output_offset, "
-          "input_height, input_width, filter_height, filter_width, "
-          "output_height, output_width\n");
+          "input_height, input_width, input_depth, filter_height, filter_width, "
+          "output_height, output_width, output_depth\n");
     header_done = true;
   }
   printf("%ld, ", input_offset);
@@ -82,10 +82,12 @@ inline void ConvPerChannel(
   printf("%4ld, ", output_offset);
   printf("%d, ", input_height);
   printf("%d, ", input_width);
+  printf("%d, ", input_depth);
   printf("%d, ", filter_height);
   printf("%d, ", filter_width);
   printf("%d, ", output_height);
-  printf("%d", output_width);
+  printf("%d, ", output_width);
+  printf("%d", output_depth);
   printf("\n");
 #endif
 
