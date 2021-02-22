@@ -7,6 +7,8 @@
 Other required packages will be checked for and, if on a Debian-based system,
 automatically installed by the setup script below.
 
+TODO: describe how to install renode.
+
 ### Setup
 
 Clone this repo, `cd` into it, then get run:
@@ -16,32 +18,22 @@ scripts/setup
 ### Use
 
 Build the SoC and load the bitstream onto Arty:
-```
-make PROJ=proj_template soc
-make PROJ=proj_template prog
+```sh
+cd proj/proj_template
+make prog
 ```
 This builds the SoC with the default CFU from `proj/proj_template`.   Later you'll make your own project, and rerun those make commands with a modified `PROJ=proj_myproj` definition.
 
 
-Build a basic program and execute it on the Arty board:
-```
-cd proj/proj_template/basic_cfu/
-make
-make run
+Build a program and execute it on the SoC you just loaded onto the Arty
+```sh
+make load
 ```
 
-To run this basic program on a simulation of the SoC on your local machine,
-execute:
+To use renode to execute on a simulator on your own machine, execute:
 
-```bash
-make PROJ=proj_example sim-basic
-```
-
-Build a TensorFlow Lite/Micro test harness executable and execute it on the Arty board (first `cd` to the repo root directory):
-
-```
-make PROJ=proj_template MODEL=pdti8 harness
-make PROJ=proj_template MODEL=pdti8 run
+```sh
+make renode
 ```
 
 ### Underlying technology
