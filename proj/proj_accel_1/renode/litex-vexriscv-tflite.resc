@@ -105,7 +105,7 @@ sysbus.cpu InstallCustomInstructionHandlerFromString "0000000yyyyyxxxxx010ddddd0
 sysbus.cpu InstallCustomInstructionHandlerFromString "0000000yyyyyxxxxx011ddddd0001011" $cfu_macc
 #                                                         function id--^^^
 
-sysbus LoadELF $ORIGIN/tflm_harness.elf
+sysbus LoadELF $ORIGIN/software.elf
 
 # machine StartGdbServer 3333
 
