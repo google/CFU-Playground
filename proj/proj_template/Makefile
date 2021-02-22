@@ -25,4 +25,4 @@ DEFINES += NDEBUG
 # Uncomment this line to skip individual profiling output (has minor effect on performance).
 #DEFINES += NPROFILE
 
-include ../proj2.mk
+include ../proj.mk
