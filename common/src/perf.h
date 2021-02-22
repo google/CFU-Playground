@@ -127,6 +127,12 @@ inline void perf_disable_counter(int counter_num)
         perf_set_counter_enable(counter_num, 0);
 }
 
+// Print a human readable number (useful for perf counters)
+void perf_print_human(unsigned n);
+
+// Print a value in both human readable and precise forms (also useful for perf counters)
+void perf_print_value(unsigned n);
+
 // Set each individual perf counter to zero
 void perf_reset_all_counters();
 

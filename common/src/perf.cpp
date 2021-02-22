@@ -18,6 +18,28 @@
 
 unsigned CFU_start_counts[NUM_PERF_COUNTERS];
 
+void perf_print_human(unsigned n)
+{
+    if (n > 9999999)
+    {
+        printf("%6uM", (n + 500000) / 1000000);
+    }
+    else if (n > 9999)
+    {
+        printf("%6uk", (n + 500) / 1000);
+    }
+    else
+    {
+        printf("%6u ", n);
+    }
+}
+
+void perf_print_value(unsigned n)
+{
+    perf_print_human(n);
+    printf(" (%12u)", n);
+}
+
 // Set each individual perf counter to zero
 void perf_reset_all_counters()
 {
@@ -36,9 +58,25 @@ void perf_print_all_counters()
     {
         perf_disable_counter(i);
     }
+    printf(" Counter |  Total | Starts | Average |     Raw\n");
+    printf("---------+--------+--------+---------+--------------\n");
     for (int i = 0; i < NUM_PERF_COUNTERS; ++i)
     {
-        printf("PERF COUNTER %d: %12d, started %d times\n", i, perf_get_counter(i), perf_get_start_count(i));
+        unsigned total = perf_get_counter(i);
+        unsigned starts = perf_get_start_count(i);
+
+        printf("  %3d    |", i);
+        perf_print_human(total);
+        printf(" | %5u  |", starts);
+        if (starts)
+        {
+            perf_print_human(total / starts);
+        }
+        else
+        {
+            printf("   n/a ");
+        }
+        printf("  | %12u\n", total);
     }
 }
 
