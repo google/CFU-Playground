@@ -1,8 +1,6 @@
 # CFU Playground
 
-CFU Playground 
-
-Customizable “soft” CPUs implemented on FPGAs provide an attractive platform for domain-specific applications, including machine learning.
+Want a faster ML processor?   Do it yourself!
 
 This project provides a framework that an engineer, intern, or student can use to design and evaluate **enhancements** to an FPGA-based “soft” processor, specifically to increase the performance of machine learning (ML) tasks.   The goal is to abstract away most infrastructure details so that the user can get up to speed quickly and focus solely on adding new processor instructions, exploiting them in the computation, and measuring the results.
 
