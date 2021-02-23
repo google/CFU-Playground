@@ -125,7 +125,11 @@ prog: $(CFU_VERILOG)
 ifeq '1' '$(words $(TTY))'
 run: $(SOFTWARE_BIN)
 	@echo Running automated test on Arty Board
-	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) |& tee $(SOFTWARE_LOG)
+	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) 1 0 |& tee $(SOFTWARE_LOG)
+
+unit: $(SOFTWARE_BIN)
+	@echo Running automated test on Arty Board
+	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) 5 |& tee $(SOFTWARE_LOG)
 
 load: $(SOFTWARE_BIN)
 	@echo Running interactively on Arty Board

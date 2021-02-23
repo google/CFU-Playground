@@ -2,20 +2,31 @@
 
 # first arg:  path to binary (kernel)
 # second arg: path to tty device (e.g. /dev/ttyUSB1)
+# third arg: main menu choice [1...5]
 
 set timeout 500
 
 spawn ../../soc/bin/litex_term --speed 921600 --kernel [lindex $argv 0] --no-crc [lindex $argv 1]
 
-expect "Running one inference"
+expect "CFU Playground"
+set timeout 30
 
-set timeout 20
+set choices [lrange $argv 2 end]
 
-# send_user "Starting inference\n"
+foreach c $choices {
 
-expect "Done"
+  expect "============="
+  expect ">"
+  send_user "Sending $c...\n"
+  send $c
+  sleep 2
 
-send_user "\nFinished inference\n"
+}
+
+expect "============="
+expect ">"
+
+send_user "\nFinished interaction\n"
 
 send_user "\nDisconnecting...\n"
 
