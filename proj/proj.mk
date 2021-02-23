@@ -66,6 +66,7 @@ SRC_DIR         := $(abspath $(PROJ_DIR)/src)
 SOFTWARE_BIN     := $(BUILD_DIR)/software.bin
 SOFTWARE_ELF     := $(BUILD_DIR)/software.elf
 SOFTWARE_LOG     := $(BUILD_DIR)/software.log
+UNITTEST_LOG     := $(BUILD_DIR)/unittest.log
 
 .PHONY:	renode 
 renode: $(SOFTWARE_ELF) 
@@ -129,7 +130,7 @@ run: $(SOFTWARE_BIN)
 
 unit: $(SOFTWARE_BIN)
 	@echo Running automated test on Arty Board
-	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) 5 |& tee $(SOFTWARE_LOG)
+	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) 5 |& tee $(UNITTEST_LOG)
 
 load: $(SOFTWARE_BIN)
 	@echo Running interactively on Arty Board
