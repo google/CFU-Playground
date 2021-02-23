@@ -171,7 +171,7 @@ inline void ConvPerChannel(
   const int output_width = output_shape.Dims(2);
 
   if ((filter_height == 1) && (filter_width == 1) && (batches == 1) && (stride_height == 1) &&
-    (stride_width == 1) && (pad_height == 0) && (pad_width == 0)) {
+    (stride_width == 1) && (pad_height == 0) && (pad_width == 0) && ((input_depth % 8)==0)) {
     ConvPerChannelSpecialized(
         params, output_multiplier,
         output_shift, input_shape,
