@@ -33,12 +33,6 @@ namespace tflite
     {
       // Get parameters.
       const int32_t input_offset = 128;
-      const int stride_width = 1;
-      const int stride_height = 1;
-      const int dilation_width_factor = 1;
-      const int dilation_height_factor = 1;
-      const int pad_width = 0;
-      const int pad_height = 0;
       const int32_t output_offset = -128;
 
       // Set min and max value of the output.
@@ -50,7 +44,6 @@ namespace tflite
       TFLITE_DCHECK_EQ(input_shape.DimensionsCount(), 4);
       TFLITE_DCHECK_EQ(filter_shape.DimensionsCount(), 4);
       TFLITE_DCHECK_EQ(output_shape.DimensionsCount(), 4);
-      const int batches = 1;
       const int input_depth = MatchingDim(input_shape, 3, filter_shape, 3);
       const int output_depth = MatchingDim(filter_shape, 0, output_shape, 3);
       if (bias_data)
@@ -61,78 +54,38 @@ namespace tflite
       // Check dimensions of the tensors.
       const int input_height = input_shape.Dims(1);
       const int input_width = input_shape.Dims(2);
-      const int filter_height = 1;
-      const int filter_width = 1;
-      const int output_height = output_shape.Dims(1);
-      const int output_width = output_shape.Dims(2);
+      const int output_height = input_height;
+      const int output_width = input_width;
 
-      for (int batch = 0; batch < batches; ++batch)
+      for (int out_y = 0; out_y < output_height; ++out_y)
       {
-        for (int out_y = 0; out_y < output_height; ++out_y)
+        for (int out_x = 0; out_x < output_width; ++out_x)
         {
-          const int in_y_origin = (out_y * stride_height) - pad_height;
-          for (int out_x = 0; out_x < output_width; ++out_x)
+          for (int out_channel = 0; out_channel < output_depth; ++out_channel)
           {
-            const int in_x_origin = (out_x * stride_width) - pad_width;
-            for (int out_channel = 0; out_channel < output_depth; ++out_channel)
+            int32_t acc = 0;
+            const int in_y = out_y;
+            const int in_x = out_x;
+
+            // No need to check zero padding
+
+            for (int in_channel = 0; in_channel < input_depth; ++in_channel)
             {
-              int32_t acc = 0;
-              for (int filter_y = 0; filter_y < filter_height; ++filter_y)
-              {
-                const int in_y = in_y_origin + dilation_height_factor * filter_y;
-                for (int filter_x = 0; filter_x < filter_width; ++filter_x)
-                {
-                  const int in_x = in_x_origin + dilation_width_factor * filter_x;
-
-                  // Zero padding by omitting the areas outside the image.
-                  const bool is_point_inside_image =
-                      (in_x >= 0) && (in_x < input_width) && (in_y >= 0) &&
-                      (in_y < input_height);
-
-                  if (!is_point_inside_image)
-                  {
-                    continue;
-                  }
-
-                  for (int in_channel = 0; in_channel < input_depth; ++in_channel)
-                  {
-                    int32_t input_val = input_data[Offset(input_shape, batch, in_y,
-                                                          in_x, in_channel)];
-                    int32_t filter_val = filter_data[Offset(
-                        filter_shape, out_channel, filter_y, filter_x, in_channel)];
-                    // Accumulate with 32 bits accumulator.
-                    // In the nudging process during model quantization, we force
-                    // real value of 0.0 be represented by a quantized value. This
-                    // guarantees that the input_offset is a int8_t, even though
-                    // it is represented using int32_t. int32_t += int8_t *
-                    // (int8_t - int8_t) so the highest value we can get from each
-                    // accumulation is [-127, 127] * ([-128, 127] -
-                    // [-128, 127]), which is [-32512, 32512]. log2(32512)
-                    // = 14.98, which means we can accumulate at least 2^16
-                    // multiplications without overflow. The accumulator is
-                    // applied to a filter so the accumulation logic will hold as
-                    // long as the filter size (filter_y * filter_x * in_channel)
-                    // does not exceed 2^16, which is the case in all the models
-                    // we have seen so far.
-                    // TODO(jianlijianli): Add a check to make sure the
-                    // accumulator depth is smaller than 2^16.
-                    acc += filter_val * (input_val + input_offset);
-                  }
-                }
-              }
-
-              if (bias_data)
-              {
-                acc += bias_data[out_channel];
-              }
-              acc = MultiplyByQuantizedMultiplier(
-                  acc, output_multiplier[out_channel], output_shift[out_channel]);
-              acc += output_offset;
-              acc = std::max(acc, output_activation_min);
-              acc = std::min(acc, output_activation_max);
-              output_data[Offset(output_shape, batch, out_y, out_x, out_channel)] =
-                  static_cast<int8_t>(acc);
+              int32_t input_val = input_data[Offset(input_shape, 0, in_y,
+                                                    in_x, in_channel)];
+              int32_t filter_val = filter_data[Offset(
+                  filter_shape, out_channel, 0, 0, in_channel)];
+              acc += filter_val * (input_val + input_offset);
             }
+
+            acc += bias_data[out_channel];
+            acc = MultiplyByQuantizedMultiplier(
+                acc, output_multiplier[out_channel], output_shift[out_channel]);
+            acc += output_offset;
+            acc = std::max(acc, output_activation_min);
+            acc = std::min(acc, output_activation_max);
+            output_data[Offset(output_shape, 0, out_y, out_x, out_channel)] =
+                static_cast<int8_t>(acc);
           }
         }
       }
@@ -187,9 +140,9 @@ namespace tflite
       if (!header_done)
       {
         printf("input_offset, stride_width, stride_height, dilation_width_factor, "
-               "dilation_height_factor, pad_width, pad_height, output_offset, "
-               "input_height, input_width, input_depth, filter_height, filter_width, "
-               "output_height, output_width, output_depth, batches\n");
+               "dilation_height_factor, pad_width, pad_height, output_offset, ");
+        printf("input_height, input_width, input_depth, filter_height, filter_width, "
+               "output_height, output_width, output_depth, batches, has_bias_data\n");
         header_done = true;
       }
       printf("%ld, ", input_offset);
@@ -208,15 +161,17 @@ namespace tflite
       printf("%d, ", output_height);
       printf("%d, ", output_width);
       printf("%d, ", output_depth);
-      printf("%d", batches);
+      printf("%d, ", batches);
+      printf("%c", bias_data ? 'Y' : 'N');
       printf("\n");
 #endif
 
       if (batches == 1 && input_offset == 128 && output_offset == -128 &&
           stride_width == 1 && stride_height == 1 &&
           dilation_width_factor == 1 && dilation_height_factor == 1 &&
-          pad_width == 0 && pad_height == 0 &&
+          pad_width == 0 && pad_height == 0 && bias_data &&
           filter_height == 1 && filter_width == 1 &&
+          input_width == output_width && input_height == output_height &&
           (input_depth & 0x7) == 0 && (output_depth & 0xf) == 0)
       {
         ConvPerChannelPdti8(
