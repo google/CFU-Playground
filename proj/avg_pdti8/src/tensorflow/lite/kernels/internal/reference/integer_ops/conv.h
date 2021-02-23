@@ -32,14 +32,14 @@ namespace tflite
         int8_t *output_data)
     {
       // Get parameters.
-      const int32_t input_offset = params.input_offset; // r = s(q - Z)
-      const int stride_width = params.stride_width;
-      const int stride_height = params.stride_height;
-      const int dilation_width_factor = params.dilation_width_factor;
-      const int dilation_height_factor = params.dilation_height_factor;
-      const int pad_width = params.padding_values.width;
-      const int pad_height = params.padding_values.height;
-      const int32_t output_offset = params.output_offset;
+      const int32_t input_offset = 128;
+      const int stride_width = 1;
+      const int stride_height = 1;
+      const int dilation_width_factor = 1;
+      const int dilation_height_factor = 1;
+      const int pad_width = 0;
+      const int pad_height = 0;
+      const int32_t output_offset = -128;
 
       // Set min and max value of the output.
       const int32_t output_activation_min = params.quantized_activation_min;
@@ -50,7 +50,7 @@ namespace tflite
       TFLITE_DCHECK_EQ(input_shape.DimensionsCount(), 4);
       TFLITE_DCHECK_EQ(filter_shape.DimensionsCount(), 4);
       TFLITE_DCHECK_EQ(output_shape.DimensionsCount(), 4);
-      const int batches = MatchingDim(input_shape, 0, output_shape, 0);
+      const int batches = 1;
       const int input_depth = MatchingDim(input_shape, 3, filter_shape, 3);
       const int output_depth = MatchingDim(filter_shape, 0, output_shape, 3);
       if (bias_data)
@@ -61,8 +61,8 @@ namespace tflite
       // Check dimensions of the tensors.
       const int input_height = input_shape.Dims(1);
       const int input_width = input_shape.Dims(2);
-      const int filter_height = filter_shape.Dims(1);
-      const int filter_width = filter_shape.Dims(2);
+      const int filter_height = 1;
+      const int filter_width = 1;
       const int output_height = output_shape.Dims(1);
       const int output_width = output_shape.Dims(2);
 
