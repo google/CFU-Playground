@@ -11,10 +11,6 @@ ifndef PLATFORM
 $(error PLATFORM not set)
 endif
 
-ifndef DEFINES
-$(error DEFINES not set)
-endif
-
 # These are found in the PATH
 RV64       := riscv64-unknown-elf-
 CC         := $(RV64)gcc
@@ -33,6 +29,8 @@ SOC_BUILD_DIR  := $(CFU_ROOT)/soc/build/$(PLATFORM)/software
 LIBBASE_DIR    := $(SOC_BUILD_DIR)/software/libbase
 LITEX_DIR      := $(CFU_ROOT)/third_party/python/litex/litex
 VEX_SRC_DIR    := $(LITEX_DIR)/soc/cores/cpu/vexriscv
+PYRUN          := $(CFU_ROOT)/scripts/pyrun
+XXD            := $(PYRUN) $(CFU_ROOT)/scripts/xxd.py
 
 LD_DIR     := $(BUILD_DIR)/ld
 GEN_LD_DIR := $(SOC_BUILD_DIR)/include/generated
@@ -69,7 +67,6 @@ SHARED_FLAGS := \
 	-Wunused-function\
 	-Wswitch\
 	-Wvla\
-	-DNDEBUG\
 	-DTF_LITE_STATIC_MEMORY\
 	-DTF_LITE_USE_GLOBAL_CMATH_FUNCTIONS\
 	-DTF_LITE_USE_GLOBAL_MIN\
@@ -154,16 +151,11 @@ $(TARGET): $(OBJECTS) $(LDSCRIPTS)
 	$(QUIET) echo "  OBJDUMP  $@.sym"
 	$(QUIET) $(OBJDUMP) -s $(TARGET) > $(TARGET).sym
 
-# Uses a symbolic link with xxd to choose a better variable name
 %.h : %.tflite
-	$(QUIET) echo "  XXD  $(notdir $<)  $(notdir $@)"
-	$(QUIET) ln -s $< model_$(notdir $*)
-	$(QUIET) $(XXD) model_$(notdir $*) > $@
-	$(QUIET) $(RM)  model_$(notdir $*)
-
-.PRECIOUS: %.h
-
-
+	$(QUIET) echo "  XXD  $(notdir $<) $(notdir $@)"
+	$(QUIET) $(XXD) $< $@
+	
+ 
 # Some shenanigans to create a file whose name depends on compiler DEFINEs
 # We use this to cause a rebuild when DEFINEs change. See
 # https://stackoverflow.com/questions/11647859/make-targets-depend-on-variables

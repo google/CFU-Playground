@@ -19,24 +19,27 @@
  */
 #include <stdint.h>
 
-#ifndef __CAMERA_TFLITE_H
-#define __CAMERA_TFLITE_H
+#ifndef _TFLITE_H
+#define _TFLITE_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void initTfLite();
+// Runs tflite operation unit tests
+void tflite_do_tests();
 
-int8_t *get_input();
+// Sets up TfLite with a given model
+void tflite_load_model(unsigned char *model_data);
+void tflite_set_input_zeros();
 
-//void load_person();
-//void load_no_person();
-void load_zeros();
+// Run classification with data already set into input.
+void tflite_classify();
 
-void classify(int8_t *person_score, int8_t *no_person_score);
+// Obtain the result vector
+int8_t *tflite_get_output();
 
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif // _TFLITE_H

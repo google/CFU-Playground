@@ -20,47 +20,21 @@
 #include "tflite.h"
 #include "menu.h"
 #include "functional_cfu_tests.h"
+#include "models/pdti8/pdti8.h"
 #include "proj_menu.h"
 #include "perf.h"
 #include "base.h"
 
-void do_person_detect()
-{
-
-  // ONCE_AND_QUIT
-  load_zeros();
-  puts("Running one inference");
-  int8_t person, no_person;
-  printf("classifying");
-  classify(&person, &no_person);
-  printf("Person:    %d\nNot person: %d\n", person, no_person);
-  if (person <= -30)
-  {
-    puts("*** No person found");
-  }
-  else if (person <= 30)
-  {
-    puts("*** Image has person like attributes");
-  }
-  else if (person <= 60)
-  {
-    puts("*** Might be a person");
-  }
-  else
-  {
-    puts("*** PERSON");
-  }
-  puts("Done");
-}
 
 static struct Menu MENU = {
     "CFU Playground",
     "main",
     {
-        MENU_ITEM('1', "Person Detection", do_person_detect),
+        MENU_ITEM('1', "pdti8 model", pdti8_menu),
         MENU_ITEM('2', "Functional CFU Tests", do_functional_cfu_tests),
         MENU_ITEM('3', "Project menu", do_proj_menu),
-        MENU_ITEM('4', "Performance Counter Tests", do_performance_counter_tests),
+        MENU_ITEM('4', "Performance Counter Tests", perf_test_menu),
+        MENU_ITEM('5', "TFLite Unit Tests", tflite_do_tests),
         MENU_SENTINEL,
     },
 };
@@ -71,7 +45,6 @@ int main(void)
   printf("Hello, %s!\n", "World");
 
   puts("initTfLite()");
-  initTfLite();
 
   menu_run(&MENU);
 

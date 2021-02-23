@@ -18,47 +18,71 @@
 
 unsigned CFU_start_counts[NUM_PERF_COUNTERS];
 
+// Set each individual perf counter to zero
+void perf_reset_all_counters()
+{
+    for (int i = 0; i < NUM_PERF_COUNTERS; ++i)
+    {
+        perf_disable_counter(i);
+        perf_set_counter(i, 0);
+    }
+    perf_zero_start_counts();
+}
+
+// Prints cycle and enable counts for every perf coutner
+void perf_print_all_counters()
+{
+    for (int i = 0; i < NUM_PERF_COUNTERS; ++i)
+    {
+        perf_disable_counter(i);
+    }
+    for (int i = 0; i < NUM_PERF_COUNTERS; ++i)
+    {
+        printf("PERF COUNTER %d: %12d, started %d times\n", i, perf_get_counter(i), perf_get_start_count(i));
+    }
+}
+
 // Counter Tests
 static int counter_num = 0;
 
 static void do_perf_set_0(void)
 {
     counter_num = 0;
-    printf("-curr perf counter %d: %u\n", counter_num, get_counter(counter_num));
+    printf("-curr perf counter %d: %u\n", counter_num, perf_get_counter(counter_num));
 }
 
 static void do_perf_set_1(void)
 {
     counter_num = 1;
-    printf("-curr perf counter %d: %u\n", counter_num, get_counter(counter_num));
+    printf("-curr perf counter %d: %u\n", counter_num, perf_get_counter(counter_num));
 }
 
 static void do_perf_enable(void)
 {
     printf("enable perf counter %d\n", counter_num);
-    set_counter_enable(counter_num, 1);
+    perf_set_counter_enable(counter_num, 1);
 }
 
 static void do_perf_pause(void)
 {
     printf("pause perf counter %d\n", counter_num);
-    set_counter_enable(counter_num, 0);
+    perf_set_counter_enable(counter_num, 0);
 }
 
 static void do_perf_zero(void)
 {
     printf("zero perf counter %d and mcycle\n", counter_num);
-    set_mcycle(0);
-    set_counter_enable(counter_num, 0);
-    set_counter(counter_num, 0);
+    perf_set_mcycle(0);
+    perf_set_counter_enable(counter_num, 0);
+    perf_set_counter(counter_num, 0);
 }
 
 static void do_perf_show(void)
 {
     printf("Counters:\n");
-    printf("  0:      %8d\n", get_counter(0));
-    printf("  1:      %8d\n", get_counter(1));
-    printf("  mcycle: %8d\n", get_counter(1));
+    printf("  0:      %8d\n", perf_get_counter(0));
+    printf("  1:      %8d\n", perf_get_counter(1));
+    printf("  mcycle: %8d\n", perf_get_mcycle());
 }
 
 static struct Menu MENU = {
@@ -75,8 +99,7 @@ static struct Menu MENU = {
     },
 };
 
-void do_performance_counter_tests()
+void perf_test_menu()
 {
     menu_run(&MENU);
 }
-

@@ -17,8 +17,6 @@
 
 #include "tensorflow/lite/micro/examples/person_detection_experimental/detection_responder.h"
 #include "tensorflow/lite/micro/examples/person_detection_experimental/image_provider.h"
-#include "tensorflow/lite/micro/examples/person_detection_experimental/model_settings.h"
-#include "tensorflow/lite/micro/examples/person_detection_experimental/person_detect_model_data.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_profiler.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
@@ -26,70 +24,57 @@
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
 
-#include "models/pdti8.h"
-
-// this is originally "main" from conv_test.cc
-extern int conv_test(int argc, char** argv);
-// this is originally "main" from depthwise_conv_test.cc
-extern int depthwise_conv_test(int argc, char** argv);
-
-
-
-// For e
-void * __dso_handle = &__dso_handle;
-
-
 //
-// Setup TFLM
-// Globals, used for compatibility with Arduino-style sketches.
-namespace {
-tflite::ErrorReporter* error_reporter = nullptr;
-const tflite::Model* model = nullptr;
-tflite::MicroInterpreter* interpreter = nullptr;
-TfLiteTensor* input = nullptr;
+// Unit test prototypes. Because of the way these names are generated, they are
+// not defined in any include file. The actual tests are in test_name.cc - e.g
+// conv_test is defined in conv_test.cc.
+extern int conv_test(int argc, char **argv);
+extern int depthwise_conv_test(int argc, char **argv);
 
-// In order to use optimized tensorflow lite kernels, a signed int8_t quantized
-// model is preferred over the legacy unsigned model format. This means that
-// throughout this project, input images must be converted from unisgned to
-// signed format. The easiest and quickest way to convert from unsigned to
-// signed 8-bit integers is to subtract 128 from the unsigned value to get a
-// signed value.
-
-// An area of memory to use for input, output, and intermediate arrays.
-// constexpr int kTensorArenaSize = 136 * 1024;
-constexpr int kTensorArenaSize = 800 * 1024;
-static uint8_t tensor_arena[kTensorArenaSize];
-}  // namespace
-
-// The name of this function is important for Arduino compatibility.
-void initTfLite() {
-  // Set up logging. Google style is to avoid globals or statics because of
-  // lifetime uncertainty, but since this has a trivial destructor it's okay.
-  // NOLINTNEXTLINE(runtime-global-variables)
-  static tflite::MicroErrorReporter micro_error_reporter;
-  error_reporter = &micro_error_reporter;
-
-  puts("Test error_reporter...");
-  TF_LITE_REPORT_ERROR(error_reporter, "...error_reporter OK!");
-
+// Run tflite unit tests
+void tflite_do_tests()
+{
   // conv test from conv_test.cc
   puts("\nCONV TEST:");
   conv_test(0, NULL);
   // depthwise conv test from depthwise_conv_test.cc
   puts("DEPTHWISE_CONV TEST:");
   depthwise_conv_test(0, NULL);
+}
 
+// For C++ exceptions
+void *__dso_handle = &__dso_handle;
 
-  // Map the model into a usable data structure. This doesn't involve any
-  // copying or parsing, it's a very lightweight operation.
-  model = tflite::GetModel(model_pdti8);
-  if (model->version() != TFLITE_SCHEMA_VERSION) {
-    TF_LITE_REPORT_ERROR(error_reporter,
-                         "Model provided is schema version %d not equal "
-                         "to supported version %d.",
-                         model->version(), TFLITE_SCHEMA_VERSION);
+//
+// TfLM global objects
+namespace
+{
+  tflite::ErrorReporter *error_reporter = nullptr;
+  tflite::MicroOpResolver *op_resolver = nullptr;
+  tflite::MicroProfiler *profiler = nullptr;
+
+  const tflite::Model *model = nullptr;
+  tflite::MicroInterpreter *interpreter = nullptr;
+
+  // An area of memory to use for input, output, and intermediate arrays.
+  // constexpr int kTensorArenaSize = 136 * 1024;
+  constexpr int kTensorArenaSize = 800 * 1024;
+  static uint8_t tensor_arena[kTensorArenaSize];
+} // namespace
+
+static void tflite_init()
+{
+  static bool initialized = false;
+  if (initialized)
+  {
     return;
   }
+  initialized = true;
+
+  // Sets up error reporting etc
+  static tflite::MicroErrorReporter micro_error_reporter;
+  error_reporter = &micro_error_reporter;
+  TF_LITE_REPORT_ERROR(error_reporter, "Error_reporter OK!");
 
   // Pull in only the operation implementations we need.
   // This relies on a complete list of all the ops needed by this graph.
@@ -113,84 +98,92 @@ void initTfLite() {
 
   // needed for MODEL=magic_wand_full_i8
   // micro_op_resolver.AddQuantize();
+  op_resolver = &micro_op_resolver;
 
   // profiler
-  static tflite::MicroProfiler profiler(error_reporter);
+  static tflite::MicroProfiler micro_profiler(error_reporter);
+  profiler = &micro_profiler;
+}
+
+void tflite_load_model(unsigned char *model_data)
+{
+  tflite_init();
+  if (interpreter)
+  {
+    interpreter->~MicroInterpreter();
+    interpreter = nullptr;
+  }
+
+  // Map the model into a usable data structure. This doesn't involve any
+  // copying or parsing, it's a very lightweight operation.
+  model = tflite::GetModel(model_data);
+  if (model->version() != TFLITE_SCHEMA_VERSION)
+  {
+    TF_LITE_REPORT_ERROR(error_reporter,
+                         "Model provided is schema version %d not equal "
+                         "to supported version %d.",
+                         model->version(), TFLITE_SCHEMA_VERSION);
+    return;
+  }
 
   // Build an interpreter to run the model with.
   // NOLINTNEXTLINE(runtime-global-variables)
-  static tflite::MicroInterpreter static_interpreter(
-      model, micro_op_resolver, tensor_arena, kTensorArenaSize, error_reporter, &profiler);
-  interpreter = &static_interpreter;
+  static tflite::MicroInterpreter micro_interpreter(
+      model, *op_resolver, tensor_arena, kTensorArenaSize, error_reporter, profiler);
+  interpreter = &micro_interpreter;
 
   // Allocate memory from the tensor_arena for the model's tensors.
   TfLiteStatus allocate_status = interpreter->AllocateTensors();
-  if (allocate_status != kTfLiteOk) {
+  if (allocate_status != kTfLiteOk)
+  {
     TF_LITE_REPORT_ERROR(error_reporter, "AllocateTensors() failed");
     return;
   }
 
   // Get information about the memory area to use for the model's input.
-  input = interpreter->input(0);
+  auto input = interpreter->input(0);
   auto dims = input->dims;
   printf("Input: %d bytes, %d dims:", input->bytes, dims->size);
-  for (int ii=0; ii<dims->size; ++ii) {
+  for (int ii = 0; ii < dims->size; ++ii)
+  {
     printf(" %d", dims->data[ii]);
   }
   puts("\n");
 }
 
-int8_t *get_input() {
-  return input->data.int8;
-}
-
-
-
-void load_zeros() {
+void tflite_set_input_zeros()
+{
+  auto input = interpreter->input(0);
   memset(input->data.int8, 0, input->bytes);
   printf("Zero 0x%x bytes at 0x%p\n", input->bytes, input->data.int8);
 }
 
-void init_perf_counters() {
-  for (int i=0; i<NUM_PERF_COUNTERS; ++i) {
-    disable_counter(i);
-    set_counter(i, 0);
-  }
-  zero_start_counts();
-}
-
-void print_perf_counters() {
-  for (int i=0; i<NUM_PERF_COUNTERS; ++i) {
-    disable_counter(i);
-  }
-  for (int i=0; i<NUM_PERF_COUNTERS; ++i) {
-    printf("PERF COUNTER %d: %12d, started %d times\n", i, get_counter(i), get_start_count(i));
-  }
+int8_t *tflite_get_output() {
+  return interpreter->output(0)->data.int8;
 }
 
 
-void classify(int8_t *person_score, int8_t *no_person_score) {
-
-  // image ought to be loaded already
-  printf(">>%d\n", input->data.int8[0]);
-
-
+void tflite_classify()
+{
   // Run the model on this input and make sure it succeeds.
-  init_perf_counters();
-  set_mcycle(0);
-  if (kTfLiteOk != interpreter->Invoke()) {
+  perf_reset_all_counters();
+  perf_set_mcycle(0);
+  if (kTfLiteOk != interpreter->Invoke())
+  {
     TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed.");
   }
-  unsigned int cyc = get_mcycle();
-  print_perf_counters();
+  unsigned int cyc = perf_get_mcycle();
+  perf_print_all_counters();
   printf("%u cycles\n", cyc);
-
-  TfLiteTensor* output = interpreter->output(0);
-
-  // Process the inference results.
-  *person_score = output->data.int8[kPersonIndex];
-  *no_person_score = output->data.int8[kNotAPersonIndex];
 
   // Uncomment to see how large the arena needs to be.
   printf("Arena used bytes: %llu\n", (long long unsigned)(interpreter->arena_used_bytes()));
+}
+
+
+
+
+int8_t *get_input()
+{
+  return interpreter->input(0)->data.int8;
 }

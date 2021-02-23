@@ -12,16 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os.path
 from nmigen import *
 from nmigen.back import rtlil, verilog
 
 from cfu import make_cfu
 
+VERILOG_FILENAME = "cfu.v"
+
+def read_file():
+    if os.path.exists(VERILOG_FILENAME):
+        with open(VERILOG_FILENAME, "r") as f:
+            return f.read()
+    return None
 
 def main():
     cfu = make_cfu()
-    with open("cfu.v", "w") as f:
-        f.write(verilog.convert(cfu, name='Cfu', ports=cfu.ports))
+    new_verilog = verilog.convert(cfu, name='Cfu', ports=cfu.ports)
+    old_verilog = read_file()
+    if new_verilog != old_verilog:
+        with open(VERILOG_FILENAME, "w") as f:
+            f.write(new_verilog)
 
 if __name__ == '__main__':
     main()

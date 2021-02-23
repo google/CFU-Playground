@@ -19,4 +19,4 @@ export DEFINES := PLACEHOLDER
 # Uncomment this line to use software defined CFU
 DEFINES += CFU_SOFTWARE_DEFINED
 
-include ../proj2.mk
+include ../proj.mk
