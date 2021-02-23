@@ -16,6 +16,7 @@ limitations under the License.
 #define TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_CONV_H_
 
 #include "tensorflow/lite/kernels/internal/common.h"
+#include "perf.h"
 #include <stdio.h>
 
 namespace tflite
@@ -36,8 +37,8 @@ namespace tflite
       const int32_t output_offset = -128;
 
       // Set min and max value of the output.
-      const int32_t output_activation_min = params.quantized_activation_min;
-      const int32_t output_activation_max = params.quantized_activation_max;
+      const int32_t output_activation_min = -128;
+      const int32_t output_activation_max = 127;
 
       // Consistency check.
       TFLITE_DCHECK_LE(output_activation_min, output_activation_max);
@@ -63,6 +64,7 @@ namespace tflite
         {
           for (int out_channel = 0; out_channel < output_depth; ++out_channel)
           {
+            perf_enable_counter(6);
             int32_t acc = 0;
             const int in_y = out_y;
             const int in_x = out_x;
@@ -77,6 +79,8 @@ namespace tflite
                   filter_shape, out_channel, 0, 0, in_channel)];
               acc += filter_val * (input_val + input_offset);
             }
+            perf_disable_counter(6);
+            perf_enable_counter(7);
 
             acc += bias_data[out_channel];
             acc = MultiplyByQuantizedMultiplier(
@@ -86,6 +90,7 @@ namespace tflite
             acc = std::min(acc, output_activation_max);
             output_data[Offset(output_shape, 0, out_y, out_x, out_channel)] =
                 static_cast<int8_t>(acc);
+            perf_disable_counter(7);
           }
         }
       }
@@ -139,12 +144,15 @@ namespace tflite
       static bool header_done = false;
       if (!header_done)
       {
+        printf("output_activation_min, output_activation_max, ");
         printf("input_offset, stride_width, stride_height, dilation_width_factor, "
                "dilation_height_factor, pad_width, pad_height, output_offset, ");
         printf("input_height, input_width, input_depth, filter_height, filter_width, "
                "output_height, output_width, output_depth, batches, has_bias_data\n");
         header_done = true;
       }
+      printf("%ld, ", output_activation_min);
+      printf("%ld, ", output_activation_max);
       printf("%ld, ", input_offset);
       printf("%u, ", stride_width);
       printf("%u, ", stride_height);
@@ -166,7 +174,8 @@ namespace tflite
       printf("\n");
 #endif
 
-      if (batches == 1 && input_offset == 128 && output_offset == -128 &&
+      if (output_activation_max == 127 && output_activation_min == -128 &&
+          batches == 1 && input_offset == 128 && output_offset == -128 &&
           stride_width == 1 && stride_height == 1 &&
           dilation_width_factor == 1 && dilation_height_factor == 1 &&
           pad_width == 0 && pad_height == 0 && bias_data &&
