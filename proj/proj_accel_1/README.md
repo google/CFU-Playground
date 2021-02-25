@@ -8,4 +8,12 @@ Since completion of the project, there have been updates by others in order to w
 (d) changed name of binary used by renode
 (e) removing basic_cfu directory, as it was unused
 
+There was one bug fix:
+
+ *  Commit b2dac48dd09e0707d2aafd8b91f2e3beca2be13d: 
+    The specialized version of the routine unrolls the inner loop by a factor of 8,
+    and only works correctly when the number of iterations is a multiple of 8.
+    The check for meeting the specialization criteria failed to check for
+    this requirement.
+
 There have been no significant updates to other parts of the directory.
