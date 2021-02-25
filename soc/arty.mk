@@ -68,5 +68,5 @@ $(BIOS_BIN): $(CFU_V)
 	$(ARTY_RUN) $(LITEX_ARGS) 
 
 $(BITSTREAM): $(CFU_V)
-	@echo Building bitstream. CFU option: $(CFU_ARGS)
+	@echo Building bitstream for Arty. CFU option: $(CFU_ARGS)
 	$(ARTY_RUN) $(LITEX_ARGS) --build
