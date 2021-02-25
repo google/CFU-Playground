@@ -19,7 +19,7 @@ import unittest
 
 # See proj_example for further example instructions
 
-class TemplateInstruction(InstructionBase):
+class AddSyncInstruction(InstructionBase):
     """Template instruction
     """
     def elab(self, m):
@@ -30,22 +30,31 @@ class TemplateInstruction(InstructionBase):
             m.d.sync += self.done.eq(0)
 
 
-class TemplateInstructionTest(InstructionTestBase):
-    def create_dut(self):
-        return TemplateInstruction()
+class AddCombInstruction(InstructionBase):
+    """Template instruction
+    """
+    def elab(self, m):
+        m.d.comb += self.output.eq(self.in0 + self.in1)
+        m.d.comb += self.done.eq(1)
 
-    def test(self):
-        self.verify([
-            (0, 0, 0),
-            (4, 5, 9),
-            (0xffffffff, 0xffffffff, 0xfffffffe),
-        ])
+
+# class TemplateInstructionTest(InstructionTestBase):
+#     def create_dut(self):
+#         return TemplateInstruction()
+
+#     def test(self):
+#         self.verify([
+#             (0, 0, 0),
+#             (4, 5, 9),
+#             (0xffffffff, 0xffffffff, 0xfffffffe),
+#         ])
 
 
 def make_cfu():
     return Cfu({
         # Add instructions here...
-        0: TemplateInstruction(),
+        0: AddSyncInstruction(),
+        1: AddCombInstruction(),
     })
 
 

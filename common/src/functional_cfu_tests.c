@@ -23,6 +23,11 @@
 #include "functional_cfu_tests.h"
 #include "menu.h"
 
+
+static inline void nop() {
+    __asm__ __volatile__ ("add zero, zero, zero");
+}
+
 static void do_fixed_tests(void)
 {
     puts("CFU TEST for op0, 1 and 2:");
@@ -31,6 +36,7 @@ static void do_fixed_tests(void)
     {
         uint32_t j = i ^ 0xffff;
         uint32_t v0 = cfu_op0(i, j);
+        nop();
         uint32_t v1 = cfu_op1(i, j);
         uint32_t v2 = cfu_op2(i, j);
         printf("0x%08x, 0x%08x: 0x%08x, 0x%08x, 0x%08x\n", i, j, v0, v1, v2);

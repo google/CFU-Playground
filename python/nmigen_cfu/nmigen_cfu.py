@@ -197,6 +197,16 @@ class InstructionTestBase(TestBase):
         self.run_sim(process, True)
 
 
+class _FallbackInstruction(InstructionBase):
+    """Executed by CFU when no instruction explicitly defined for a given function id.
+
+    This does nothing useful, but it does ensure that the CFU does not hang on an unknown functionid.
+    """
+    def elab(self, m):
+        m.d.comb += self.output.eq(self.in0)
+        m.d.comb += self.done.eq(1)
+
+
 class Cfu(SimpleElaboratable):
     """Custom function unit interface.
 
@@ -221,6 +231,9 @@ class Cfu(SimpleElaboratable):
 
     def __init__(self, instructions):
         self.instructions = instructions
+        for i in range(8):
+            if i not in self.instructions:
+                self.instructions[i] = _FallbackInstruction()
         self.cmd_valid = Signal(name='io_bus_cmd_valid')
         self.cmd_ready = Signal(name='io_bus_cmd_ready')
         self.cmd_payload_function_id = Signal(3,
@@ -260,10 +273,10 @@ class Cfu(SimpleElaboratable):
         instruction_outputs = Array(Signal(32) for _ in range(8))
         instruction_dones = Array(Signal() for _ in range(8))
         instruction_starts = Array(Signal() for _ in range(8))
-        for (function_id, instruction) in self.instructions.items():
-            m.d.comb += instruction_outputs[function_id].eq(instruction.output)
-            m.d.comb += instruction_dones[function_id].eq(instruction.done)
-            m.d.comb += instruction.start.eq(instruction_starts[function_id])
+        for (i, instruction) in self.instructions.items():
+            m.d.comb += instruction_outputs[i].eq(instruction.output)
+            m.d.comb += instruction_dones[i].eq(instruction.done)
+            m.d.comb += instruction.start.eq(instruction_starts[i])
 
         def check_instruction_done():
             with m.If(current_function_done):
@@ -307,12 +320,12 @@ class Cfu(SimpleElaboratable):
                 with m.If(self.rsp_ready):
                     m.next = "WAIT_CMD"
 
-        for (function_id, instruction) in self.instructions.items():
+        for (i, instruction) in self.instructions.items():
             m.d.comb += [
                 instruction.in0.eq(self.cmd_payload_inputs_0),
                 instruction.in1.eq(self.cmd_payload_inputs_1),
             ]
-            m.submodules[f"fn{function_id}"] = instruction
+            m.submodules[f"fn{i}"] = instruction
 
 
 #############################################################################
@@ -414,6 +427,17 @@ class _ReverseBitsInstruction(InstructionBase):
             m.d.comb += self.output[31-n].eq(self.in0[n])
         m.d.comb += self.done.eq(1)
 
+class _SyncAddInstruction(InstructionBase):
+    """Does an Add, but synchronously
+    """
+    def elab(self, m):
+        with m.If(self.start):
+            m.d.sync += self.output.eq(self.in0 + self.in1)
+            m.d.sync += self.done.eq(1)
+        with m.Else():
+            m.d.sync += self.done.eq(0)
+
+
 
 class _CfuTest(TestBase):
     def create_dut(self):
@@ -422,6 +446,7 @@ class _CfuTest(TestBase):
             1: _ReverseBytesInstruction(),
             2: _ReverseBitsInstruction(),
             3: _FactorialInstruction(),
+            4: _SyncAddInstruction(),
         })
 
     def wait_response_valid(self):
@@ -505,6 +530,16 @@ class _CfuTest(TestBase):
             ((0, 0, 0, 0, 0), (X, 0, 0)),
             ((0, 0, 0, 0, 0), (2, 1, 0)),
             ((0, 0, 0, 0, 1), (2, 1, 0)),
+            # Multi-cycle instruction, but always ready next cycle
+            ((4, 3, 5, 1, 1), (X, 0, 1)),
+            ((0, 0, 0, 0, 1), (8, 1, 0)),
+            # CPU not ready
+            ((4, 3, 4, 1, 0), (X, 0, 1)),
+            ((0, 0, 0, 0, 0), (X, 1, 0)),
+            ((0, 0, 0, 0, 0), (X, 1, 0)),
+            ((0, 0, 0, 0, 1), (7, 1, 0)),
+            # Fallback instruction - same cycle, CPU ready
+            ((7, 0, 0, 1, 1), (X, 1, 1)),
         ]
 
         def process():
