@@ -42,6 +42,7 @@ UART_ARGS=  --uart-baudrate $(UART_SPEED)
 LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv $(OUT_DIR)/csr.csv $(CFU_ARGS) $(UART_ARGS)
 
 PYRUN:=     $(CFU_ROOT)/scripts/pyrun
+ARTY_RUN:=  $(PYRUN) ./arty.py $(LITEX_ARGS)
 
 BIOS_BIN := $(OUT_DIR)/software/bios/bios.bin
 BITSTREAM:= $(OUT_DIR)/gateware/arty.bit
@@ -54,7 +55,7 @@ litex-software: $(BIOS_BIN)
 
 prog: $(BITSTREAM)
 	@echo Loading bitstream onto Arty
-	$(PYRUN) ./soc.py $(LITEX_ARGS) --no-compile-software --load
+	$(ARTY_RUN) --no-compile-software --load
 	
 clean:
 	@echo Removing $(OUT_DIR)
@@ -64,8 +65,8 @@ $(CFU_V):
 	$(error $(CFU_V) not found. $(HELP_MESSAGE))
 
 $(BIOS_BIN): $(CFU_V)
-	$(PYRUN) ./soc.py $(LITEX_ARGS) 
+	$(ARTY_RUN) $(LITEX_ARGS) 
 
 $(BITSTREAM): $(CFU_V)
 	@echo Building bitstream. CFU option: $(CFU_ARGS)
-	$(PYRUN) ./soc.py $(LITEX_ARGS) --build
+	$(ARTY_RUN) $(LITEX_ARGS) --build

@@ -39,7 +39,7 @@ MKDIR := /bin/mkdir
 
 # Directory where we build the project-specific gateware
 SOC_DIR      := $(CFU_ROOT)/soc
-SOC_MK       := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/soc.mk
+ARTY_MK       := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/arty.mk
 LXTERM       := $(SOC_DIR)/bin/litex_term
 GATEWARE_DIR := $(SOC_DIR)/build/$(PLATFORM)/gateware
 BITSTREAM    := $(GATEWARE_DIR)/arty.bit
@@ -76,7 +76,7 @@ renode: $(SOFTWARE_ELF)
 
 .PHONY: clean
 clean:
-	$(SOC_MK) clean
+	$(ARTY_MK) clean
 	@echo Removing $(BUILD_DIR)
 	$(RM) $(BUILD_DIR)
 
@@ -112,15 +112,15 @@ build-dir:
 
 .PHONY: litex-software
 litex-software: $(CFU_VERILOG)
-	$(SOC_MK) litex-software
+	$(ARTY_MK) litex-software
 
 .PHONY: bitstream
 bitstream: $(CFU_VERILOG)
-	$(SOC_MK) bitstream
+	$(ARTY_MK) bitstream
 
 .PHONY: prog
 prog: $(CFU_VERILOG)
-	$(SOC_MK) prog
+	$(ARTY_MK) prog
 
 .PHONY: load run
 ifeq '1' '$(words $(TTY))'
