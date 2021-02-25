@@ -2,16 +2,17 @@
 
 # first arg:  path to binary (kernel)
 # second arg: path to tty device (e.g. /dev/ttyUSB1)
-# third arg: main menu choice [1...5]
+# third arg: UART SPEED
+# subsequent args: main menu choices
 
 set timeout 500
 
-spawn ../../soc/bin/litex_term --speed 921600 --kernel [lindex $argv 0] --no-crc [lindex $argv 1]
+spawn ../../soc/bin/litex_term --speed [lindex $argv 2] --kernel [lindex $argv 0] --no-crc [lindex $argv 1]
 
 expect "CFU Playground"
 set timeout 30
 
-set choices [lrange $argv 2 end]
+set choices [lrange $argv 3 end]
 
 foreach c $choices {
 
@@ -31,4 +32,3 @@ send_user "\nFinished interaction\n"
 send_user "\nDisconnecting...\n"
 
 close
-

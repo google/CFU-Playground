@@ -15,7 +15,7 @@
 
 # Common build rules for all projects. Included by project makefiles.
 
-export UART_SPEED ?= 921600
+export UART_SPEED ?= 3686400
 export PROJ       := $(lastword $(subst /, ,${CURDIR}))
 export CFU_ROOT   := $(realpath $(CURDIR)/../..)
 export PLATFORM   := arty.$(PROJ)
@@ -126,11 +126,11 @@ prog: $(CFU_VERILOG)
 ifeq '1' '$(words $(TTY))'
 run: $(SOFTWARE_BIN)
 	@echo Running automated test on Arty Board
-	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) 1 0 |& tee $(SOFTWARE_LOG)
+	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) $(UART_SPEED) 1 0 |& tee $(SOFTWARE_LOG)
 
 unit: $(SOFTWARE_BIN)
 	@echo Running automated test on Arty Board
-	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) 5 |& tee $(UNITTEST_LOG)
+	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) $(UART_SPEED) 5 |& tee $(UNITTEST_LOG)
 
 load: $(SOFTWARE_BIN)
 	@echo Running interactively on Arty Board
