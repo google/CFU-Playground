@@ -51,7 +51,6 @@ namespace tflite
       TFLITE_DCHECK_EQ(input_shape.DimensionsCount(), 4);
       TFLITE_DCHECK_EQ(filter_shape.DimensionsCount(), 4);
       TFLITE_DCHECK_EQ(output_shape.DimensionsCount(), 4);
-      const int batches = MatchingDim(input_shape, 0, output_shape, 0);
       const int input_depth = MatchingDim(input_shape, 3, filter_shape, 3);
       const int output_depth = MatchingDim(filter_shape, 0, output_shape, 3);
       if (bias_data)
@@ -62,22 +61,25 @@ namespace tflite
       const int output_height = output_shape.Dims(1);
       const int output_width = output_shape.Dims(2);
       OP_SET_INPUT_OFFSET(input_offset);
+
+      int32_t *input_data_yx_p = (int32_t *)input_data;
       for (int y = 0; y < output_height; ++y)
       {
         for (int x = 0; x < output_width; ++x)
         {
+          int32_t *filter_data_out_channel_p = (int32_t *)filter_data;
           for (int out_channel = 0; out_channel < output_depth; ++out_channel)
           {
             OP_RESET_ACC;
+            int32_t *input_data_p = input_data_yx_p;
+            int32_t *filter_data_p = filter_data_out_channel_p;
             for (int i = 0; i < input_depth; i += 8)
             {
-              int32_t in4 = *((int32_t *)(input_data + Offset(input_shape, 0, y, x, i)));
-              int32_t filt4 = *((int32_t *)(filter_data +
-                                            Offset(filter_shape, out_channel, 0, 0, i)));
+              int32_t in4 = *(input_data_p++);
+              int32_t filt4 = *(filter_data_p++);
               OP_4MACC(in4, filt4);
-              in4 = *((int32_t *)(input_data + Offset(input_shape, 0, y, x, i + 4)));
-              filt4 = *((int32_t *)(filter_data +
-                                    Offset(filter_shape, out_channel, 0, 0, i + 4)));
+              in4 = *(input_data_p++);
+              filt4 = *(filter_data_p++);
               OP_4MACC(in4, filt4);
             }
 
@@ -90,7 +92,12 @@ namespace tflite
             acc = std::min(acc, output_activation_max);
             output_data[Offset(output_shape, 0, y, x, out_channel)] =
                 static_cast<int8_t>(acc);
+
+            // Point to next channel of filter data
+            filter_data_out_channel_p += input_depth / 4;
           }
+          // Point to next "pixel" of input data
+          input_data_yx_p += input_depth / 4;
         }
       }
     }
