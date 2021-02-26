@@ -58,32 +58,27 @@ namespace tflite
       const int output_width = output_shape.Dims(2);
       for (int batch = 0; batch < batches; ++batch)
       {
-        for (int out_y = 0; out_y < output_height; ++out_y)
+        for (int y = 0; y < output_height; ++y)
         {
-          for (int out_x = 0; out_x < output_width; ++out_x)
+          for (int x = 0; x < output_width; ++x)
           {
             for (int out_channel = 0; out_channel < output_depth; ++out_channel)
             {
               int32_t acc = 0;
-              for (int in_channel = 0; in_channel < input_depth; ++in_channel)
+              for (int i = 0; i < input_depth; i++)
               {
-                int32_t input_val = input_data[Offset(input_shape, batch, out_y,
-                                                      out_x, in_channel)];
-                int32_t filter_val = filter_data[Offset(
-                    filter_shape, out_channel, 0, 0, in_channel)];
+                int32_t input_val = input_data[Offset(input_shape, batch, y, x, i)];
+                int32_t filter_val = filter_data[Offset(filter_shape, out_channel, 0, 0, i)];
                 acc += filter_val * (input_val + input_offset);
               }
 
-              if (bias_data)
-              {
-                acc += bias_data[out_channel];
-              }
+              acc += bias_data[out_channel];
               acc = MultiplyByQuantizedMultiplier(
                   acc, output_multiplier[out_channel], output_shift[out_channel]);
               acc += output_offset;
               acc = std::max(acc, output_activation_min);
               acc = std::min(acc, output_activation_max);
-              output_data[Offset(output_shape, batch, out_y, out_x, out_channel)] =
+              output_data[Offset(output_shape, batch, y, x, out_channel)] =
                   static_cast<int8_t>(acc);
             }
           }
