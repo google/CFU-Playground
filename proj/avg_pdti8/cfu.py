@@ -27,7 +27,7 @@ class WriteInstruction(InstructionBase):
     """
     def __init__(self):
         super().__init__()
-        self.input_offset = Signal(32)
+        self.input_offset = Signal(signed(32))
         self.reset_acc = Signal()
 
     def elab(self, m):
@@ -79,7 +79,7 @@ class ReadInstruction(InstructionBase):
     """
     def __init__(self):
         super().__init__()
-        self.input_offset = Signal(32)
+        self.input_offset = Signal(signed(32))
         self.accumulator = Signal(signed(32))
 
     def elab(self, m):
@@ -119,19 +119,105 @@ class ReadInstructionTest(TestBase):
         self.run_sim(process, True)
 
 
+class MaccInstruction(InstructionBase):
+    """Multiply accumulate x4
+
+    in0 contains 4 signed input values
+    in1 contains 4 signed filter values
+    """
+    def __init__(self):
+        super().__init__()
+        self.input_offset = Signal(signed(32))
+        self.accumulator = Signal(signed(32))
+        self.reset_acc = Signal()
+
+    def elab(self, m):
+        in_vals = [Signal(signed(8), name=f"in_val_{i}") for i in range(4)]
+        filter_vals = [Signal(signed(8), name=f"filter_val_{i}") for i in range(4)]
+        mults = [Signal(signed(19), name=f"mult_{i}") for i in range(4)]
+        for i in range(4):
+            m.d.comb += [
+                in_vals[i].eq(self.in0.word_select(i, 8).as_signed()),
+                filter_vals[i].eq(self.in1.word_select(i, 8).as_signed()),
+                mults[i].eq(
+                    (in_vals[i] + self.input_offset) * filter_vals[i]),
+            ]
+        m.d.sync += self.done.eq(0)
+        with m.If(self.start):
+            m.d.sync += self.accumulator.eq(self.accumulator + sum(mults))
+            # m.d.sync += self.accumulator.eq(self.accumulator + 72)
+            m.d.sync += self.done.eq(1)
+        with m.Elif(self.reset_acc):
+            m.d.sync += self.accumulator.eq(0)
+
+
+class MaccInstructionTest(TestBase):
+    def create_dut(self):
+        return MaccInstruction()
+
+    def test(self):
+        def x(a, b, c, d):
+            return ((a & 0xff) << 24) + ((b & 0xff) << 16) + ((c & 0xff) << 8) + (d & 0xff)
+
+        DATA = [
+            # Reset everything
+            (1, x(0, 0, 0, 0), x(0, 0, 0, 0), 0),
+            # = 1 * 128
+            (1, x(0, 0, 0, 0), x(1, 0, 0, 0), 128),
+            # + 1 * 1
+            (0, x(-127, 0, 0, 0), x(1, 0, 0, 0), 129),
+            # + 4 * 1 * 1
+            (0, x(-127, -127, -127, -127), x(1, 1, 1, 1), 133),
+            # = 37 * 23
+            (1, x(0, 0, 37-128, 0), x(0, 0, 23, 0), 37*23),
+            # = 4 * 255 * 127
+            (1, x(127, 127, 127, 127), x(127, 127, 127, 127), 4 * 255 * 127),
+            # = 4 * 255 * -128
+            (1, x(127, 127, 127, 127), x(-128, -128, -128, -128), 4 * 255 * -128),
+            # + 4 * 255 * -128
+            (0, x(127, 127, 127, 127), x(-128, -128, -128, -128), 8 * 255 * -128),
+        ]
+
+        def process():
+            yield self.dut.input_offset.eq(128)
+            yield
+            for reset_acc, inputs, filters, acc in DATA:
+                if reset_acc:
+                    yield self.dut.reset_acc.eq(1)
+                    yield
+                    yield self.dut.reset_acc.eq(0)
+                    yield
+                    yield
+                yield self.dut.in0.eq(inputs)
+                yield self.dut.in1.eq(filters)
+                yield self.dut.start.eq(1)
+                yield
+                yield self.dut.start.eq(0)
+                while not (yield self.dut.done):
+                    yield
+                self.assertEqual((yield self.dut.accumulator), acc)
+                yield
+        self.run_sim(process, True)
+
+
 class AvgPdti8Cfu(Cfu):
     def __init__(self):
         self.write = WriteInstruction()
         self.read = ReadInstruction()
+        self.macc = MaccInstruction()
         super().__init__({
             0: self.write,
             1: self.read,
+            2: self.macc,
         })
 
     def elab(self, m):
         super().elab(m)
         m.d.comb += [
             self.read.input_offset.eq(self.write.input_offset),
+            self.read.accumulator.eq(self.macc.accumulator),
+            self.macc.reset_acc.eq(self.write.reset_acc),
+            self.macc.input_offset.eq(self.write.input_offset),
         ]
 
 
