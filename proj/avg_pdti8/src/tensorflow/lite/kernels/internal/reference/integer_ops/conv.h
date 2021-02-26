@@ -63,6 +63,7 @@ namespace tflite
       OP_SET_INPUT_OFFSET(input_offset);
 
       int32_t *input_data_yx_p = (int32_t *)input_data;
+      int8_t *output_data_p = output_data;
       for (int y = 0; y < output_height; ++y)
       {
         for (int x = 0; x < output_width; ++x)
@@ -74,6 +75,8 @@ namespace tflite
             OP_RESET_ACC;
             int32_t *input_data_p = input_data_yx_p;
             int32_t *filter_data_p = filter_data_out_channel_p;
+            // For every output channel, multiply all the input channels by a unique
+            // filter value
             for (int i = 0; i < input_depth; i += 8)
             {
               int32_t in4 = *(input_data_p++);
@@ -93,7 +96,7 @@ namespace tflite
             acc += output_offset;
             acc = std::max(acc, output_activation_min);
             acc = std::min(acc, output_activation_max);
-            output_data[Offset(output_shape, 0, y, x, out_channel)] =
+            *(output_data_p++) =
                 static_cast<int8_t>(acc);
 
             // Point to next channel of filter data
