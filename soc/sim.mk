@@ -41,7 +41,8 @@ OUT_DIR:=   build/$(SOC_NAME)
 LITEX_ARGS= --output-dir $(OUT_DIR) \
 	--csr-csv $(OUT_DIR)/csr.csv \
 	$(CFU_ARGS) \
-	--bin $(SOFTWARE_BIN)
+	--bin $(SOFTWARE_BIN) \
+	--sim-trace
 
 PYRUN:=     $(CFU_ROOT)/scripts/pyrun
 SIM_RUN:=   $(PYRUN) ./sim.py $(LITEX_ARGS)
