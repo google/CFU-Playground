@@ -7,8 +7,8 @@ ifndef PROJ
 $(error PROJ not set)
 endif
 
-ifndef PLATFORM
-$(error PLATFORM not set)
+ifndef SOC_SOFTWARE_DIR
+$(error SOC_SOFTWARE_DIR not set)
 endif
 
 # These are found in the PATH
@@ -25,15 +25,14 @@ PATH_SEP   := /
 
 # Assumes current directory is the one containing the makefile
 BUILD_DIR      := $(abspath .)
-SOC_BUILD_DIR  := $(CFU_ROOT)/soc/build/$(PLATFORM)/software
-LIBBASE_DIR    := $(SOC_BUILD_DIR)/software/libbase
+LIBBASE_DIR    := $(SOC_SOFTWARE_DIR)/libbase
 LITEX_DIR      := $(CFU_ROOT)/third_party/python/litex/litex
 VEX_SRC_DIR    := $(LITEX_DIR)/soc/cores/cpu/vexriscv
 PYRUN          := $(CFU_ROOT)/scripts/pyrun
 XXD            := $(PYRUN) $(CFU_ROOT)/scripts/xxd.py
 
 LD_DIR     := $(BUILD_DIR)/ld
-GEN_LD_DIR := $(SOC_BUILD_DIR)/include/generated
+GEN_LD_DIR := $(SOC_SOFTWARE_DIR)/include/generated
 LDSCRIPT   := $(LD_DIR)/linker.ld
 LDSCRIPTS  := $(LDSCRIPT) $(GEN_LD_DIR)/output_format.ld $(GEN_LD_DIR)/regions.ld
 
@@ -78,7 +77,7 @@ SHARED_FLAGS := \
 	
 CFLAGS  := \
 	$(SHARED_FLAGS)\
-	-I$(SOC_BUILD_DIR)/include \
+	-I$(SOC_SOFTWARE_DIR)/include \
 	-I$(LITEX_DIR)/soc/software/include/base \
 	-I$(LITEX_DIR)/soc/software/include \
 	-I$(VEX_SRC_DIR) 
@@ -100,8 +99,8 @@ LFLAGS     := \
 	$(CXXFLAGS) \
 	-L$(LD_DIR) \
 	-L$(GEN_LD_DIR) \
-	-L$(SOC_BUILD_DIR)/libbase -lbase-nofloat \
-	-L$(SOC_BUILD_DIR)/libcompiler_rt -lcompiler_rt \
+	-L$(SOC_SOFTWARE_DIR)/libbase -lbase-nofloat \
+	-L$(SOC_SOFTWARE_DIR)/libcompiler_rt -lcompiler_rt \
 	-lm \
 	-nostartfiles \
 	-Wl,--gc-sections \

@@ -24,37 +24,36 @@ ifndef PROJ
   $(error PROJ must be set. $(HELP_MESSAGE))
 endif
 
-ifndef UART_SPEED
-  $(error UART_SPEED must be set. $(HELP_MESSAGE))
-endif
-
 ifndef CFU_ROOT
   $(error CFU_ROOT must be set. $(HELP_MESSAGE))
+endif
+
+ifndef SOFTWARE_BIN
+  $(error SOFTWARE_BIN must be set. $(HELP_MESSAGE))
 endif
 
 PROJ_DIR:=  $(CFU_ROOT)/proj/$(PROJ)
 CFU_V:=     $(PROJ_DIR)/cfu.v
 CFU_ARGS:=  --cfu $(CFU_V)
 
-SOC_NAME:=  arty.$(PROJ)
+SOC_NAME:=  sim.$(PROJ)
 OUT_DIR:=   build/$(SOC_NAME)
-UART_ARGS=  --uart-baudrate $(UART_SPEED)
-LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv $(OUT_DIR)/csr.csv $(CFU_ARGS) $(UART_ARGS)
+LITEX_ARGS= --output-dir $(OUT_DIR) \
+	--csr-csv $(OUT_DIR)/csr.csv \
+	$(CFU_ARGS) \
+	--bin $(SOFTWARE_BIN) \
+	--sim-trace
 
 PYRUN:=     $(CFU_ROOT)/scripts/pyrun
-
+SIM_RUN:=   $(PYRUN) ./sim.py $(LITEX_ARGS)
 BIOS_BIN := $(OUT_DIR)/software/bios/bios.bin
-BITSTREAM:= $(OUT_DIR)/gateware/arty.bit
 
-.PHONY: bitstream litex-software prog clean
-
-bitstream: $(BITSTREAM)
+.PHONY: run litex-software clean
 
 litex-software: $(BIOS_BIN)
 
-prog: $(BITSTREAM)
-	@echo Loading bitstream onto Arty
-	$(PYRUN) ./soc.py $(LITEX_ARGS) --no-compile-software --load
+run: $(BITSTREAM)
+	$(SIM_RUN) --run
 	
 clean:
 	@echo Removing $(OUT_DIR)
@@ -63,9 +62,7 @@ clean:
 $(CFU_V):
 	$(error $(CFU_V) not found. $(HELP_MESSAGE))
 
+# we don't actually use the BIOS, but we do use all the other bits
+# that are build along with it
 $(BIOS_BIN): $(CFU_V)
-	$(PYRUN) ./soc.py $(LITEX_ARGS) 
-
-$(BITSTREAM): $(CFU_V)
-	@echo Building bitstream. CFU option: $(CFU_ARGS)
-	$(PYRUN) ./soc.py $(LITEX_ARGS) --build
+	$(SIM_RUN) 
