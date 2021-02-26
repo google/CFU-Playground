@@ -23,6 +23,16 @@ namespace tflite
 {
   namespace reference_integer_ops
   {
+    inline void macc(const RuntimeShape &input_shape, const int8_t *input_data,
+                     const RuntimeShape &filter_shape, const int8_t *filter_data,
+                     int input_offset, int out_channel,
+                     int y, int x, int i, int32_t &acc)
+    {
+      int32_t input_val = input_data[Offset(input_shape, 0, y, x, i)];
+      int32_t filter_val = filter_data[Offset(filter_shape, out_channel, 0, 0, i)];
+      acc += filter_val * (input_val + input_offset);
+    }
+
     // Fixed-point per-channel-quantization convolution reference kernel.
     inline void ConvPerChannelPdti8(
         const ConvParams &params, const int32_t *output_multiplier,
@@ -65,11 +75,24 @@ namespace tflite
             for (int out_channel = 0; out_channel < output_depth; ++out_channel)
             {
               int32_t acc = 0;
-              for (int i = 0; i < input_depth; i++)
+              for (int i = 0; i < input_depth; i += 8)
               {
-                int32_t input_val = input_data[Offset(input_shape, batch, y, x, i)];
-                int32_t filter_val = filter_data[Offset(filter_shape, out_channel, 0, 0, i)];
-                acc += filter_val * (input_val + input_offset);
+                macc(input_shape, input_data, filter_shape, filter_data,
+                     input_offset, out_channel, y, x, i + 0, acc);
+                macc(input_shape, input_data, filter_shape, filter_data,
+                     input_offset, out_channel, y, x, i + 1, acc);
+                macc(input_shape, input_data, filter_shape, filter_data,
+                     input_offset, out_channel, y, x, i + 2, acc);
+                macc(input_shape, input_data, filter_shape, filter_data,
+                     input_offset, out_channel, y, x, i + 3, acc);
+                macc(input_shape, input_data, filter_shape, filter_data,
+                     input_offset, out_channel, y, x, i + 4, acc);
+                macc(input_shape, input_data, filter_shape, filter_data,
+                     input_offset, out_channel, y, x, i + 5, acc);
+                macc(input_shape, input_data, filter_shape, filter_data,
+                     input_offset, out_channel, y, x, i + 6, acc);
+                macc(input_shape, input_data, filter_shape, filter_data,
+                     input_offset, out_channel, y, x, i + 7, acc);
               }
 
               acc += bias_data[out_channel];
