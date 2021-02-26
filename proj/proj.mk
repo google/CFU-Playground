@@ -78,15 +78,6 @@ MKDIR := /bin/mkdir
 # ... or get CFU_ROOT from an env variable
 #
 
-# Directory where we build the project-specific gateware
-SOC_DIR      := $(CFU_ROOT)/soc
-ARTY_MK      := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/arty.mk
-SIM_MK       := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/sim.mk
-ifeq '$(PLATFORM)' 'arty'
-	SOC_MK   := $(ARTY_MK)
-else
-	SOC_MK   := $(SIM_MK)
-endif
 LXTERM       := $(SOC_DIR)/bin/litex_term
 GATEWARE_DIR = $(SOC_DIR)/build/$(PLATFORM)/gateware
 BITSTREAM    = $(GATEWARE_DIR)/$(PLATFORM).bit
@@ -114,6 +105,16 @@ SOFTWARE_BIN     := $(BUILD_DIR)/software.bin
 SOFTWARE_ELF     := $(BUILD_DIR)/software.elf
 SOFTWARE_LOG     := $(BUILD_DIR)/software.log
 UNITTEST_LOG     := $(BUILD_DIR)/unittest.log
+
+# Directory where we build the project-specific gateware
+SOC_DIR      := $(CFU_ROOT)/soc
+ARTY_MK      := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/arty.mk
+SIM_MK       := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/sim.mk SOFTWARE_BIN=$(SOFTWARE_BIN)
+ifeq '$(PLATFORM)' 'arty'
+	SOC_MK   := $(ARTY_MK)
+else
+	SOC_MK   := $(SIM_MK)
+endif
 
 .PHONY:	renode 
 renode: $(SOFTWARE_ELF) 
@@ -194,8 +195,7 @@ endif
 else
 # $(PLATFORM) == 'sim'
 load: $(CFU_VERILOG) $(SOFTWARE_BIN)
-	$(error sim not yet supported)
-	#$(SIM_MK) run
+	$(SIM_MK) run
 
 prog bitstream run unit:
 	@echo Target not supported when PLATFORM=sim
