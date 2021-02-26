@@ -17,22 +17,18 @@ limitations under the License.
 
 #include "tensorflow/lite/kernels/internal/common.h"
 #include "perf.h"
+#include "cfu.h"
 #include <stdio.h>
+
+#define OP_RESET_ACC cfu_op0(1, 1)
+#define OP_SET_INPUT_OFFSET(n) cfu_op0(0, n)
+#define OP_READ_ACC cfu_op1(1, 0)
+#define OP_4MACC(in, filt) cfu_op2(in, filt)
 
 namespace tflite
 {
   namespace reference_integer_ops
   {
-    inline void macc(const RuntimeShape &input_shape, const int8_t *input_data,
-                     const RuntimeShape &filter_shape, const int8_t *filter_data,
-                     int input_offset, int out_channel,
-                     int y, int x, int i, int32_t &acc)
-    {
-      int32_t input_val = input_data[Offset(input_shape, 0, y, x, i)];
-      int32_t filter_val = filter_data[Offset(filter_shape, out_channel, 0, 0, i)];
-      acc += filter_val * (input_val + input_offset);
-    }
-
     // Fixed-point per-channel-quantization convolution reference kernel.
     inline void ConvPerChannelPdti8(
         const ConvParams &params, const int32_t *output_multiplier,
@@ -63,47 +59,37 @@ namespace tflite
         TFLITE_DCHECK_EQ(bias_shape.FlatSize(), output_depth);
       }
 
-      // Check dimensions of the tensors.
       const int output_height = output_shape.Dims(1);
       const int output_width = output_shape.Dims(2);
-      for (int batch = 0; batch < batches; ++batch)
+      OP_SET_INPUT_OFFSET(input_offset);
+      for (int y = 0; y < output_height; ++y)
       {
-        for (int y = 0; y < output_height; ++y)
+        for (int x = 0; x < output_width; ++x)
         {
-          for (int x = 0; x < output_width; ++x)
+          for (int out_channel = 0; out_channel < output_depth; ++out_channel)
           {
-            for (int out_channel = 0; out_channel < output_depth; ++out_channel)
+            OP_RESET_ACC;
+            for (int i = 0; i < input_depth; i += 8)
             {
-              int32_t acc = 0;
-              for (int i = 0; i < input_depth; i += 8)
-              {
-                macc(input_shape, input_data, filter_shape, filter_data,
-                     input_offset, out_channel, y, x, i + 0, acc);
-                macc(input_shape, input_data, filter_shape, filter_data,
-                     input_offset, out_channel, y, x, i + 1, acc);
-                macc(input_shape, input_data, filter_shape, filter_data,
-                     input_offset, out_channel, y, x, i + 2, acc);
-                macc(input_shape, input_data, filter_shape, filter_data,
-                     input_offset, out_channel, y, x, i + 3, acc);
-                macc(input_shape, input_data, filter_shape, filter_data,
-                     input_offset, out_channel, y, x, i + 4, acc);
-                macc(input_shape, input_data, filter_shape, filter_data,
-                     input_offset, out_channel, y, x, i + 5, acc);
-                macc(input_shape, input_data, filter_shape, filter_data,
-                     input_offset, out_channel, y, x, i + 6, acc);
-                macc(input_shape, input_data, filter_shape, filter_data,
-                     input_offset, out_channel, y, x, i + 7, acc);
-              }
-
-              acc += bias_data[out_channel];
-              acc = MultiplyByQuantizedMultiplier(
-                  acc, output_multiplier[out_channel], output_shift[out_channel]);
-              acc += output_offset;
-              acc = std::max(acc, output_activation_min);
-              acc = std::min(acc, output_activation_max);
-              output_data[Offset(output_shape, batch, y, x, out_channel)] =
-                  static_cast<int8_t>(acc);
+              int32_t in4 = *((int32_t *)(input_data + Offset(input_shape, 0, y, x, i)));
+              int32_t filt4 = *((int32_t *)(filter_data +
+                                            Offset(filter_shape, out_channel, 0, 0, i)));
+              OP_4MACC(in4, filt4);
+              in4 = *((int32_t *)(input_data + Offset(input_shape, 0, y, x, i + 4)));
+              filt4 = *((int32_t *)(filter_data +
+                                    Offset(filter_shape, out_channel, 0, 0, i + 4)));
+              OP_4MACC(in4, filt4);
             }
+
+            int32_t acc = OP_READ_ACC;
+            acc += bias_data[out_channel];
+            acc = MultiplyByQuantizedMultiplier(
+                acc, output_multiplier[out_channel], output_shift[out_channel]);
+            acc += output_offset;
+            acc = std::max(acc, output_activation_min);
+            acc = std::min(acc, output_activation_max);
+            output_data[Offset(output_shape, 0, y, x, out_channel)] =
+                static_cast<int8_t>(acc);
           }
         }
       }
