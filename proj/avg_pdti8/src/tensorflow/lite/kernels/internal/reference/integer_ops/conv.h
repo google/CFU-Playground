@@ -25,6 +25,21 @@ limitations under the License.
 #define OP_READ_ACC cfu_op1(1, 0)
 #define OP_4MACC(in, filt) cfu_op2(in, filt)
 
+static inline int num_bits(int32_t n)
+{
+  int b = 32;
+  if (n >= 0)
+  {
+    n = -n;
+  }
+  while (n & (1 << 31))
+  {
+    n = n << 1;
+    b--;
+  }
+  return b + 1;
+}
+
 namespace tflite
 {
   namespace reference_integer_ops
@@ -57,6 +72,28 @@ namespace tflite
       {
         TFLITE_DCHECK_EQ(bias_shape.FlatSize(), output_depth);
       }
+
+#ifdef SHOW_CONV_OUT_WEIGHTS
+      // From this we learn
+      // -- bias is 17 bits, signed
+      // -- multiplier is 31 bits, unsigned / always positive
+      // -- -10 <= shift <= -5
+      int bbits = 0;
+      int ombits = 0;
+      int osbits = 0;
+      for (int c = 0; c < output_depth; c++)
+      {
+        bbits = std::max(bbits, num_bits(bias_data[c]));
+        ombits = std::max(ombits, num_bits(output_multiplier[c]));
+        osbits = std::max(osbits, num_bits(output_shift[c]));
+        printf("%12ld ", bias_data[c]);
+        // printf("%12ld ", output_multiplier[c]);
+        // if (output_shift[c] > -5 || output_shift[c] < -9)
+        //   printf("%12ld ", output_shift[c]);
+      }
+      puts("");
+      printf("Bias, mult, shift: %3d, %3d, %3d\n", bbits, ombits, osbits);
+#endif
 
       const int output_height = output_shape.Dims(1);
       const int output_width = output_shape.Dims(2);

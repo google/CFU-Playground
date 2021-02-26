@@ -25,8 +25,9 @@ DEFINES += NDEBUG
 # Uncomment this line to skip individual profiling output (has minor effect on performance).
 DEFINES += NPROFILE
 
-# output parameters
+# output model parameters and weights
 #DEFINES += SHOW_CONV_PARAMS
+#DEFINES += SHOW_CONV_OUT_WEIGHTS
 
 export UART_SPEED := 3686400
 
