@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import *
+from nmigen import Array, Elaboratable, Module, Signal, signed
 from nmigen.sim import Simulator, Delay
 
 import unittest
@@ -30,7 +30,7 @@ class SimpleElaboratable(Elaboratable):
 
     m: Module
         The resulting module
-    platform: 
+    platform:
         The platform for this elaboration
 
     """
@@ -72,7 +72,7 @@ class TestBase(unittest.TestCase):
 
     def create_dut(self):
         """Returns an instance of the device under test"""
-        raise NotImplemented()
+        raise NotImplementedError
 
     def add_process(self, process):
         """Add main test process to the simulator"""
@@ -129,8 +129,8 @@ class InstructionBase(SimpleElaboratable):
     def elaborate(self, platform):
         m = super().elaborate(platform)
         m.d.comb += [
-                self.in0s.eq(self.in0),
-                self.in1s.eq(self.in1),
+            self.in0s.eq(self.in0),
+            self.in1s.eq(self.in1),
         ]
         return m
 
@@ -160,7 +160,7 @@ class InstructionTestBase(TestBase):
                     f" in0={in0:08x}, in1={in1:08x}, expected={expected:08x}, actual={actual:08x}")
                 yield
         self.run_sim(process, True)
-        
+
     def verify_against_reference(self, inputs, reference_fn):
         """Verifies that our instruction behaves the same as a reference
         implementation.
@@ -265,7 +265,6 @@ class Cfu(SimpleElaboratable):
     def elab(self, m):
         stored_function_id = Signal(3)
         current_function_id = Signal(3)
-        is_cmd_transfer = self.cmd_valid & self.cmd_ready
         current_function_done = Signal()
         stored_output = Signal(32)
         m.d.comb += self.rsp_payload_response_ok.eq(1)
@@ -413,7 +412,7 @@ class _ReverseBytesInstruction(InstructionBase):
 
     def elab(self, m):
         for n in range(4):
-            m.d.comb += self.output.word_select(3-n, 8).eq(
+            m.d.comb += self.output.word_select(3 - n, 8).eq(
                 self.in0.word_select(n, 8))
         m.d.comb += self.done.eq(1)
 
@@ -424,8 +423,9 @@ class _ReverseBitsInstruction(InstructionBase):
 
     def elab(self, m):
         for n in range(32):
-            m.d.comb += self.output[31-n].eq(self.in0[n])
+            m.d.comb += self.output[31 - n].eq(self.in0[n])
         m.d.comb += self.done.eq(1)
+
 
 class _SyncAddInstruction(InstructionBase):
     """Does an Add, but synchronously
@@ -436,7 +436,6 @@ class _SyncAddInstruction(InstructionBase):
             m.d.sync += self.done.eq(1)
         with m.Else():
             m.d.sync += self.done.eq(0)
-
 
 
 class _CfuTest(TestBase):
@@ -499,8 +498,8 @@ class _CfuTest(TestBase):
                     "op{func}({i0:08X}, {i1:08X}) failed to complete")
                 actual_output = (yield self.dut.rsp_payload_outputs_0)
                 assert actual_output == expected_output, (
-                    f"\nHEX: op{func}(0x{i0:08X}, 0x{i1:08X}) expected: {expected:08X} got: {actual_output:08X}" +
-                    f"\nDEC: op{func}(0x{i0}, 0x{i1}) expected: {expected} got: {actual_output}")
+                    f"\nHEX: op{func}(0x{i0:08X}, 0x{i1:08X}) expected: {expected_output:08X} got: {actual_output:08X}" +
+                    f"\nDEC: op{func}(0x{i0}, 0x{i1}) expected: {expected_output} got: {actual_output}")
                 yield
         self.run_sim(process, True)
 
@@ -598,8 +597,8 @@ class CfuTestBase(TestBase):
                 self.assertTrue(ok, f"op{n} response ok")
                 if expected is not None:
                     actual = (yield self.dut.rsp_payload_outputs_0)
-                    self.assertEqual(actual, expected, 
-                            f"op {n} output {hex(actual)} != {hex(expected)}")
+                    self.assertEqual(actual, expected,
+                                     f"op {n} output {hex(actual)} != {hex(expected)}")
                 yield
 
         self.run_sim(process, True)

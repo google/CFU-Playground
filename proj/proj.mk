@@ -55,9 +55,12 @@ ifneq '' '$(fiter-out arty,sim,$(PLATFORM))'
 	$(error PLATFORM must be 'arty' or 'sim')
 endif
 
-# SoC paths are dependent on PLATFORM
-SOC_BUILD               := $(PLATFORM).$(PROJ)
-export SOC_SOFTWARE_DIR := $(CFU_ROOT)/soc/build/$(SOC_BUILD)/software
+SOC_DIR          := $(CFU_ROOT)/soc
+SOC_BUILD_NAME   := $(PLATFORM).$(PROJ)
+SOC_BUILD_DIR    := $(SOC_DIR)/build/$(SOC_BUILD_NAME)
+SOC_SOFTWARE_DIR := $(SOC_BUILD_DIR)/software
+export SOC_SOFTWARE_DIR
+SOC_GATEWARE_DIR := $(SOC_BUILD_DIR)/gateware
 
 # Make software build dependent on platform
 export DEFINES    += PLATFORM=$(PLATFORM)
@@ -79,8 +82,7 @@ MKDIR := /bin/mkdir
 #
 
 LXTERM       := $(SOC_DIR)/bin/litex_term
-GATEWARE_DIR = $(SOC_DIR)/build/$(PLATFORM)/gateware
-BITSTREAM    = $(GATEWARE_DIR)/$(PLATFORM).bit
+BITSTREAM    := $(SOC_GATEWARE_DIR)/$(PLATFORM).bit
 
 PROJ_DIR        := $(realpath .)
 CFU_GEN         := $(PROJ_DIR)/cfu_gen.py
@@ -167,7 +169,6 @@ RUN_TARGETS := load unit run
 .PHONY: $(RUN_TARGETS) prog bitstream
 
 ifeq 'arty' '$(PLATFORM)'
-ifeq '1' '$(words $(TTY))'
 # $(PLATFORM) == 'arty'
 prog: $(CFU_VERILOG)
 	$(ARTY_MK) prog
@@ -175,6 +176,7 @@ prog: $(CFU_VERILOG)
 bitstream: $(CFU_VERILOG)
 	$(ARTY_MK) bitstream
 
+ifeq '1' '$(words $(TTY))'
 run: $(SOFTWARE_BIN)
 	@echo Running automated model test on Arty Board
 	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) $(UART_SPEED) 1 0 |& tee $(SOFTWARE_LOG)

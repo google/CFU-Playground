@@ -17,7 +17,13 @@ limitations under the License.
 
 #include "tensorflow/lite/kernels/internal/common.h"
 #include "perf.h"
+#include "cfu.h"
 #include <stdio.h>
+
+#define OP_RESET_ACC cfu_op0(1, 1)
+#define OP_SET_INPUT_OFFSET(n) cfu_op0(0, n)
+#define OP_READ_ACC cfu_op1(1, 0)
+#define OP_4MACC(in, filt) cfu_op2(in, filt)
 
 namespace tflite
 {
@@ -33,12 +39,12 @@ namespace tflite
         int8_t *output_data)
     {
       // Get parameters.
-      const int32_t input_offset = 128;
-      const int32_t output_offset = -128;
+      const int32_t input_offset = params.input_offset; // r = s(q - Z)
+      const int32_t output_offset = params.output_offset;
 
       // Set min and max value of the output.
-      const int32_t output_activation_min = -128;
-      const int32_t output_activation_max = 127;
+      const int32_t output_activation_min = params.quantized_activation_min;
+      const int32_t output_activation_max = params.quantized_activation_max;
 
       // Consistency check.
       TFLITE_DCHECK_LE(output_activation_min, output_activation_max);
@@ -52,46 +58,53 @@ namespace tflite
         TFLITE_DCHECK_EQ(bias_shape.FlatSize(), output_depth);
       }
 
-      // Check dimensions of the tensors.
-      const int input_height = input_shape.Dims(1);
-      const int input_width = input_shape.Dims(2);
-      const int output_height = input_height;
-      const int output_width = input_width;
+      const int output_height = output_shape.Dims(1);
+      const int output_width = output_shape.Dims(2);
+      OP_SET_INPUT_OFFSET(input_offset);
 
-      for (int out_y = 0; out_y < output_height; ++out_y)
+      int32_t *input_data_yx_p = (int32_t *)input_data;
+      int8_t *output_data_p = output_data;
+      for (int y = 0; y < output_height; ++y)
       {
-        for (int out_x = 0; out_x < output_width; ++out_x)
+        for (int x = 0; x < output_width; ++x)
         {
+          int32_t *filter_data_out_channel_p = (int32_t *)filter_data;
           for (int out_channel = 0; out_channel < output_depth; ++out_channel)
           {
             perf_enable_counter(6);
-            int32_t acc = 0;
-            const int in_y = out_y;
-            const int in_x = out_x;
-
-            // No need to check zero padding
-
-            for (int in_channel = 0; in_channel < input_depth; ++in_channel)
+            OP_RESET_ACC;
+            int32_t *input_data_p = input_data_yx_p;
+            int32_t *filter_data_p = filter_data_out_channel_p;
+            // For every output channel, multiply all the input channels by a unique
+            // filter value
+            for (int i = 0; i < input_depth; i += 8)
             {
-              int32_t input_val = input_data[Offset(input_shape, 0, in_y,
-                                                    in_x, in_channel)];
-              int32_t filter_val = filter_data[Offset(
-                  filter_shape, out_channel, 0, 0, in_channel)];
-              acc += filter_val * (input_val + input_offset);
+              int32_t in4 = *(input_data_p++);
+              int32_t filt4 = *(filter_data_p++);
+              OP_4MACC(in4, filt4);
+              in4 = *(input_data_p++);
+              filt4 = *(filter_data_p++);
+              OP_4MACC(in4, filt4);
             }
             perf_disable_counter(6);
             perf_enable_counter(7);
 
+            int32_t acc = OP_READ_ACC;
             acc += bias_data[out_channel];
             acc = MultiplyByQuantizedMultiplier(
                 acc, output_multiplier[out_channel], output_shift[out_channel]);
             acc += output_offset;
             acc = std::max(acc, output_activation_min);
             acc = std::min(acc, output_activation_max);
-            output_data[Offset(output_shape, 0, out_y, out_x, out_channel)] =
+            *(output_data_p++) =
                 static_cast<int8_t>(acc);
+
+            // Point to next channel of filter data
+            filter_data_out_channel_p += input_depth / 4;
             perf_disable_counter(7);
           }
+          // Point to next "pixel" of input data
+          input_data_yx_p += input_depth / 4;
         }
       }
     }
