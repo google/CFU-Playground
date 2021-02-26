@@ -70,6 +70,7 @@ namespace tflite
           int32_t *filter_data_out_channel_p = (int32_t *)filter_data;
           for (int out_channel = 0; out_channel < output_depth; ++out_channel)
           {
+            perf_enable_counter(6);
             OP_RESET_ACC;
             int32_t *input_data_p = input_data_yx_p;
             int32_t *filter_data_p = filter_data_out_channel_p;
@@ -82,6 +83,8 @@ namespace tflite
               filt4 = *(filter_data_p++);
               OP_4MACC(in4, filt4);
             }
+            perf_disable_counter(6);
+            perf_enable_counter(7);
 
             int32_t acc = OP_READ_ACC;
             acc += bias_data[out_channel];
@@ -95,6 +98,7 @@ namespace tflite
 
             // Point to next channel of filter data
             filter_data_out_channel_p += input_depth / 4;
+            perf_disable_counter(7);
           }
           // Point to next "pixel" of input data
           input_data_yx_p += input_depth / 4;
