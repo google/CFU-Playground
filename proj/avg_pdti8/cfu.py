@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Signal, signed
-from nmigen_cfu import InstructionBase, TestBase, Cfu, CfuTestBase
+from nmigen import Mux, Signal, signed
+from nmigen_cfu import InstructionBase, SimpleElaboratable, TestBase, Cfu, CfuTestBase
 import unittest
 
 
@@ -200,6 +200,56 @@ class MaccInstructionTest(TestBase):
         self.run_sim(process, True)
 
 
+INT32_MIN = 0x8000_0000
+INT32_MAX = 0x7fff_ffff
+
+
+class SRDHM(SimpleElaboratable):
+    """Implements gemmlowp::SaturatingRoundingDoublingHighMul"""
+    def __init__(self):
+        self.a = Signal(signed(32))
+        self.b = Signal(signed(32))
+        self.start = Signal()
+        self.result = Signal(signed(32))
+        self.done = Signal()
+
+    def elab(self, m):
+        m.d.sync += self.done.eq(0)
+
+        ab = Signal(signed(64))
+        nudge = 1 << 30  # for some reason negative nudge is not used
+        with m.FSM():
+            with m.State("stage0"):
+                with m.If(self.start):
+                    with m.If((self.a == INT32_MIN) & (self.b == INT32_MIN)):
+                        m.d.sync += [
+                            self.result.eq(INT32_MAX),
+                            self.done.eq(1)
+                        ]
+                    with m.Else():
+                        m.d.sync += ab.eq(self.a * self.b)
+                        m.next = "stage1"
+            with m.State("stage1"):
+                m.d.sync += [
+                    self.result.eq((ab + nudge)[31:]),
+                    self.done.eq(1)
+                ]
+                m.next = "stage0"
+
+
+class SaturatingRoundingDoubleHighMulInstruction(InstructionBase):
+    def elab(self, m):
+        srdhm = SRDHM()
+        m.submodules['srdhm'] = srdhm
+        m.d.comb += [
+            srdhm.a.eq(self.in0s),
+            srdhm.b .eq(self.in1s),
+            srdhm.start.eq(self.start),
+            self.output.eq(srdhm.result),
+            self.done.eq(srdhm.done),
+        ]
+
+
 class AvgPdti8Cfu(Cfu):
     def __init__(self):
         self.write = WriteInstruction()
@@ -209,6 +259,7 @@ class AvgPdti8Cfu(Cfu):
             0: self.write,
             1: self.read,
             2: self.macc,
+            7: SaturatingRoundingDoubleHighMulInstruction(),
         })
 
     def elab(self, m):
@@ -232,8 +283,6 @@ class CfuTest(CfuTestBase):
     def test(self):
         DATA = [
             # Write and Read input offset
-            ((0, 0, 123), None),
-            ((1, 0, 0), 123),
             ((0, 0, -2), None),
             ((1, 0, 0), -2),
             # Read accumulator ==> 0
@@ -249,6 +298,10 @@ class CfuTest(CfuTestBase):
             ((0, 1, 0), None),
             ((2, (6 - 128) & 0xff, 10), None),
             ((1, 1, 0), 60),
+
+            # Saturating mult - simple tests. Detailed tests are in C code.
+            ((7, 0, 0), 0),
+            ((7, 0x10000, 0x10000), 0x2),
         ]
         return self.run_ops(DATA)
 
