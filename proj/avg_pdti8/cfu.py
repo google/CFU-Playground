@@ -234,6 +234,21 @@ class CfuTest(CfuTestBase):
             # Write and Read input offset
             ((0, 0, 123), None),
             ((1, 0, 0), 123),
+            ((0, 0, -2), None),
+            ((1, 0, 0), -2),
+            # Read accumulator ==> 0
+            ((1, 1, 0), 0),
+            # 2 x MACC = 128 + 5*8
+            ((0, 0, 128), None),
+            ((2, 0x0000_0000, 0x0000_0001), None),
+            ((1, 1, 0), 128),
+            ((2, 0x8500_0000, 0x0800_0000), None),
+            # Read accumulator
+            ((1, 1, 0), 128 + 40),
+            # Reset accumulator, then accumulate and read again
+            ((0, 1, 0), None),
+            ((2, (6 - 128) & 0xff, 10), None),
+            ((1, 1, 0), 60),
         ]
         return self.run_ops(DATA)
 
