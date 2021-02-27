@@ -42,6 +42,11 @@ class WriteInstruction(InstructionBase):
 
 
 class WriteInstructionTest(TestBase):
+    """Cursory test of WriteInstruction.
+
+    Important details can only be tested in concert with other modules.
+    """
+
     def create_dut(self):
         return WriteInstruction()
 
@@ -125,6 +130,7 @@ class MaccInstruction(InstructionBase):
     in0 contains 4 signed input values
     in1 contains 4 signed filter values
     """
+
     def __init__(self):
         super().__init__()
         self.input_offset = Signal(signed(32))
@@ -133,7 +139,10 @@ class MaccInstruction(InstructionBase):
 
     def elab(self, m):
         in_vals = [Signal(signed(8), name=f"in_val_{i}") for i in range(4)]
-        filter_vals = [Signal(signed(8), name=f"filter_val_{i}") for i in range(4)]
+        filter_vals = [
+            Signal(
+                signed(8),
+                name=f"filter_val_{i}") for i in range(4)]
         mults = [Signal(signed(19), name=f"mult_{i}") for i in range(4)]
         for i in range(4):
             m.d.comb += [
@@ -157,7 +166,8 @@ class MaccInstructionTest(TestBase):
 
     def test(self):
         def x(a, b, c, d):
-            return ((a & 0xff) << 24) + ((b & 0xff) << 16) + ((c & 0xff) << 8) + (d & 0xff)
+            return ((a & 0xff) << 24) + ((b & 0xff) << 16) + \
+                ((c & 0xff) << 8) + (d & 0xff)
 
         DATA = [
             # Reset everything
@@ -205,13 +215,18 @@ INT32_MAX = 0x7fff_ffff
 
 
 class RoundingDividebyPOT(SimpleElaboratable):
-    """Implements gemmlowp::RoundingDivideByPOT"""
+    """Implements gemmlowp::RoundingDivideByPOT
+
+    This divides by a power of two, rounding to the nearest whole number.
+    """
+
     def __init__(self):
         self.x = Signal(signed(32))
         self.exponent = Signal(5)
         self.result = Signal(signed(32))
 
     def elab(self, m):
+        # TODO: reimplement as a function that returns an expression
         mask = (1 << self.exponent) - 1
         remainder = self.x & mask
         threshold = (mask >> 1) + self.x[31]
@@ -232,7 +247,19 @@ class RoundingDividebyPOTInstruction(InstructionBase):
 
 
 class SRDHM(SimpleElaboratable):
-    """Implements gemmlowp::SaturatingRoundingDoublingHighMul"""
+    """Implements gemmlowp::SaturatingRoundingDoublingHighMul
+
+    It multiplies two 32 bit numbers, then returns bits 62 to 31 of the
+    64 bit result. This is 2x the high word (allowing for saturating and
+    rounding).
+
+    Note that there is a bug to investigated here. This implementation
+    matches the behavior of the compiled source, however, "nudge" may be
+    one of two values.
+
+    TODO: reimplement as a pipeline
+    """
+
     def __init__(self):
         self.a = Signal(signed(32))
         self.b = Signal(signed(32))
@@ -301,6 +328,7 @@ class AvgPdti8Cfu(Cfu):
 
 
 def make_cfu():
+    """Called by cfu_gen.py to obtain a CFU."""
     return AvgPdti8Cfu()
 
 
@@ -331,13 +359,14 @@ class CfuTest(CfuTestBase):
             ((7, 0, 0), 0),
             ((7, 0x10000, 0x10000), 0x2),
 
-            # Rounding Divide by POT instrurction - simple tests. Detailed tests are in C code
+            # Rounding Divide by POT instrurction - simple tests. Detailed
+            # tests are in C code
             ((6, 0x12345678, 0), 0x12345678),
             ((6, 0x12345678, 4), 0x1234568),
             ((6, 0x111f, 4), 0x112),
             ((6, 0x1117, 4), 0x111),
         ]
-        return self.run_ops(DATA)
+        self.run_ops(DATA)
 
 
 if __name__ == '__main__':
