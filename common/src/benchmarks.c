@@ -29,7 +29,7 @@ int * volatile p;
 // Each project should make their own proj_menu.c, which will replace this one.
 
 static void __attribute__ ((noinline)) do_loads_cached(void) {
-    puts("Hello, Load!\n");
+    puts("Hello, Cached Load!\n");
     int acc=0;
     for (int j=0; j<1024; ++j) {        // warmup
         acc += buf[j];
@@ -44,6 +44,22 @@ static void __attribute__ ((noinline)) do_loads_cached(void) {
     int end_time = perf_get_mcycle();
     printf("Val:%d  Cycles: %d   Cycles/load: %d\n\n\n",
         acc, end_time-start_time, (end_time-start_time) / (16*64*1024));
+}
+
+static void __attribute__ ((noinline)) do_loads_strided(void) {
+    puts("Hello, Strided Load!\n");
+    int acc=0;
+    int start_time = perf_get_mcycle();
+    for (int i=0; i<64; ++i) {
+        // 32 bytes per line
+        for (int j=0; j<128*1024; j+=8) {
+            acc += buf[j];
+        }
+        *p = acc;
+    }
+    int end_time = perf_get_mcycle();
+    printf("Val:%d  Cycles: %d   Cycles/load: %d\n\n\n",
+        acc, end_time-start_time, (end_time-start_time) / (64*128*1024/8));
 }
 
 static void __attribute__ ((noinline)) do_loads(void) {
@@ -97,6 +113,7 @@ static struct Menu MENU = {
     {
         MENU_ITEM('l', "sequential loads benchmark (expect one miss per cache line)", do_loads),
         MENU_ITEM('c', "cached loads benchmark (expect all hits)", do_loads_cached),
+        MENU_ITEM('x', "strided loads benchmark (expect all misses)", do_loads_strided),
         MENU_ITEM('s', "sequential stores benchmark", do_stores),
         MENU_ITEM('i', "load-increment-store benchmark (expect misses)", do_increment_mem),
         MENU_END,
