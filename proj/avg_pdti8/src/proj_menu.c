@@ -43,9 +43,34 @@ static void do_srdhm(void)
             trials++;
             int32_t gem = math_srdhm_gemmlowp(a, b);
             int32_t cfu = math_srdhm_cfu(a, b);
-            if (gem != cfu) {
+            if (gem != cfu)
+            {
                 mismatches++;
                 printf("mismatch: srdhm(%10ld, %10ld) = %10d, %10d\n", a, b, gem, cfu);
+            }
+        }
+    }
+    printf("Performed %d comparisons, %d failures", trials, mismatches);
+}
+
+// Test template instruction
+static void do_rdbypot(void)
+{
+    puts("\nTest RoundingDivideByPOT");
+    //sim_trace_enable_write(1);
+    int trials = 0;
+    int mismatches = 0;
+    for (int32_t x = -0x71234567; x < 0x68000000; x += 0x10012345)
+    {
+        for (int exponent = -5; exponent >= -10; exponent--)
+        {
+            trials++;
+            int32_t gem = math_rdbypot_gemmlowp(x, exponent);
+            int32_t cfu = math_rdbypot_cfu(x, exponent);
+            if (gem != cfu)
+            {
+                mismatches++;
+                printf("mismatch: srdhm(%10ld, %d) = %10d, %10d\n", x, exponent, gem, cfu);
             }
         }
     }
@@ -57,6 +82,7 @@ static struct Menu MENU = {
     "project",
     {
         MENU_ITEM('0', "SaturatingRoundingDoublingHighMul - local impl vs lib", do_srdhm),
+        MENU_ITEM('1', "RoundingDivideByPOT - local impl vs lib", do_rdbypot),
         MENU_ITEM('h', "say Hello", do_hello_world),
         MENU_END,
     },

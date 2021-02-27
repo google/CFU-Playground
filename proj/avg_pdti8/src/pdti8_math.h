@@ -25,6 +25,9 @@ extern "C" {
 int32_t math_srdhm_gemmlowp(int32_t a, int32_t b);
 int32_t math_srdhm_cfu(int32_t a, int32_t b);
 
+int32_t math_rdbypot_gemmlowp(int32_t x, int exponent);
+int32_t math_rdbypot_cfu(int32_t x, int exponent);
+
 #ifdef __cplusplus
 }
 #endif

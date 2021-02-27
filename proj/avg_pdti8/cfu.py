@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Mux, Signal, signed
+from nmigen import Const, Cat, Repl, Mux, Signal, signed
 from nmigen_cfu import InstructionBase, SimpleElaboratable, TestBase, Cfu, CfuTestBase
 import unittest
 
@@ -204,6 +204,33 @@ INT32_MIN = 0x8000_0000
 INT32_MAX = 0x7fff_ffff
 
 
+class RoundingDividebyPOT(SimpleElaboratable):
+    """Implements gemmlowp::RoundingDivideByPOT"""
+    def __init__(self):
+        self.x = Signal(signed(32))
+        self.exponent = Signal(5)
+        self.result = Signal(signed(32))
+
+    def elab(self, m):
+        mask = (1 << self.exponent) - 1
+        remainder = self.x & mask
+        threshold = (mask >> 1) + self.x[31]
+        rounding = Mux(remainder > threshold, 1, 0)
+        m.d.comb += self.result.eq((self.x >> self.exponent) + rounding)
+
+
+class RoundingDividebyPOTInstruction(InstructionBase):
+    def elab(self, m):
+        rdbypot = RoundingDividebyPOT()
+        m.submodules['RDByPOT'] = rdbypot
+        m.d.comb += [
+            rdbypot.x.eq(self.in0s),
+            rdbypot.exponent.eq(self.in1),
+            self.output.eq(rdbypot.result),
+            self.done.eq(1),
+        ]
+
+
 class SRDHM(SimpleElaboratable):
     """Implements gemmlowp::SaturatingRoundingDoublingHighMul"""
     def __init__(self):
@@ -259,6 +286,7 @@ class AvgPdti8Cfu(Cfu):
             0: self.write,
             1: self.read,
             2: self.macc,
+            6: RoundingDividebyPOTInstruction(),
             7: SaturatingRoundingDoubleHighMulInstruction(),
         })
 
@@ -302,6 +330,12 @@ class CfuTest(CfuTestBase):
             # Saturating mult - simple tests. Detailed tests are in C code.
             ((7, 0, 0), 0),
             ((7, 0x10000, 0x10000), 0x2),
+
+            # Rounding Divide by POT instrurction - simple tests. Detailed tests are in C code
+            ((6, 0x12345678, 0), 0x12345678),
+            ((6, 0x12345678, 4), 0x1234568),
+            ((6, 0x111f, 4), 0x112),
+            ((6, 0x1117, 4), 0x111),
         ]
         return self.run_ops(DATA)
 

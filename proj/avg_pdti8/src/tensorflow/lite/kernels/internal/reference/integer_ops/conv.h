@@ -108,7 +108,7 @@ namespace tflite
           int32_t *filter_data_out_channel_p = (int32_t *)filter_data;
           for (int out_channel = 0; out_channel < output_depth; ++out_channel)
           {
-            perf_enable_counter(6);
+            // perf_enable_counter(6);
             OP_RESET_ACC;
             int32_t *input_data_p = input_data_yx_p;
             int32_t *filter_data_p = filter_data_out_channel_p;
@@ -123,13 +123,21 @@ namespace tflite
               filt4 = *(filter_data_p++);
               OP_4MACC(in4, filt4);
             }
-            perf_disable_counter(6);
-            perf_enable_counter(7);
+            // perf_disable_counter(6);
+            // perf_enable_counter(7);
 
             int32_t acc = OP_READ_ACC;
             acc += bias_data[out_channel];
-            acc = MultiplyByQuantizedMultiplier(
-                acc, output_multiplier[out_channel], output_shift[out_channel]);
+            // acc = MultiplyByQuantizedMultiplier(
+            //     acc, output_multiplier[out_channel], output_shift[out_channel]);
+            // acc = MultiplyByQuantizedMultiplierSmallerThanOneExp(
+            //     acc, output_multiplier[out_channel], output_shift[out_channel]);
+
+            using gemmlowp::RoundingDivideByPOT;
+            using gemmlowp::SaturatingRoundingDoublingHighMul;
+            int32_t t = cfu_op7(acc, output_multiplier[out_channel]);
+            acc = cfu_op6(t, -output_shift[out_channel]);
+
             acc += output_offset;
             acc = std::max(acc, output_activation_min);
             acc = std::min(acc, output_activation_max);
@@ -138,7 +146,7 @@ namespace tflite
 
             // Point to next channel of filter data
             filter_data_out_channel_p += input_depth / 4;
-            perf_disable_counter(7);
+            // perf_disable_counter(7);
           }
           // Point to next "pixel" of input data
           input_data_yx_p += input_depth / 4;
