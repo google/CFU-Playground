@@ -597,8 +597,8 @@ class CfuTestBase(TestBase):
                 self.assertTrue(ok, f"op{n} response ok")
                 if expected is not None:
                     actual = (yield self.dut.rsp_payload_outputs_0)
-                    self.assertEqual(actual, expected,
-                                     f"op {n} output {hex(actual)} != {hex(expected)}")
+                    self.assertEqual(actual, expected & 0xffff_ffff,
+                                     f"op {n} output {hex(actual)} != {hex(expected & 0xffff_ffff)}")
                 yield
 
         self.run_sim(process, True)
