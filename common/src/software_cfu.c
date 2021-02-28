@@ -15,6 +15,7 @@
  */
 
 #include <stdint.h>
+#include "cfu.h"
 
 //
 // Create your own version of this function by copying this file to your

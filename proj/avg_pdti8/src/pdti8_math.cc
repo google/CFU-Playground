@@ -26,7 +26,7 @@ int32_t math_srdhm_gemmlowp(int32_t a, int32_t b) {
 }
 
 int32_t math_srdhm_cfu(int32_t a, int32_t b) {
-    return cfu_op7(a, b);
+    return cfu_op7(0, a, b);
 }
 
 int32_t math_rdbypot_gemmlowp(int32_t x, int exponent) {
@@ -34,5 +34,5 @@ int32_t math_rdbypot_gemmlowp(int32_t x, int exponent) {
 }
 
 int32_t math_rdbypot_cfu(int32_t x, int exponent) {
-    return cfu_op6(x, exponent);
+    return cfu_op6(0, x, exponent);
 }

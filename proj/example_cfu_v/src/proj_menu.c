@@ -35,7 +35,7 @@ static void do_exercise_cfu_op0(void)
 
         for (int b = -0x7edcba98; b < 0x68000000; b += 0x10770077)
         {
-            int cfu = cfu_op0(a, b);
+            int cfu = cfu_op0(0, a, b);
             printf("a: %08x b:%08x a+b=%08x cfu= %08x\n", a, b, a + b, cfu);
             if (cfu != a + b) 
             {

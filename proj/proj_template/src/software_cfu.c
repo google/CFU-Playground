@@ -15,14 +15,15 @@
  */
 
 #include <stdint.h>
+#include "cfu.h"
 
 //
 // In this function, place C code to emulate your CFU. You can switch between
 // hardware and emulated CFU by setting the CFU_SOFTWARE_DEFINED DEFINE in
 // the Makefile.
-uint32_t software_cfu(uint32_t functionid, uint32_t rs1, uint32_t rs2)
+uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2)
 {
-  if (functionid == 0)
+  if (funct3 == 0)
   {
     return rs1 + rs2;
   }

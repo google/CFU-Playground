@@ -19,6 +19,9 @@
 
 #include "riscv.h"
 #include <stdint.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* riscv.h defines a macro:
 
@@ -83,4 +86,7 @@ uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2);
 
 #endif
 
+#ifdef __cplusplus
+}
+#endif
 #endif // CFU_H

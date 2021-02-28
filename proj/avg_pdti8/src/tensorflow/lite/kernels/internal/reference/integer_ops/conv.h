@@ -20,10 +20,10 @@ limitations under the License.
 #include "cfu.h"
 #include <stdio.h>
 
-#define OP_RESET_ACC cfu_op0(1, 1)
-#define OP_SET_INPUT_OFFSET(n) cfu_op0(0, n)
-#define OP_READ_ACC cfu_op1(1, 0)
-#define OP_4MACC(in, filt) cfu_op2(in, filt)
+#define OP_RESET_ACC cfu_op0(0, 1, 1)
+#define OP_SET_INPUT_OFFSET(n) cfu_op0(0, 0, n)
+#define OP_READ_ACC cfu_op1(0, 1, 0)
+#define OP_4MACC(in, filt) cfu_op2(0, in, filt)
 
 static inline int num_bits(int32_t n)
 {
@@ -135,8 +135,8 @@ namespace tflite
 
             using gemmlowp::RoundingDivideByPOT;
             using gemmlowp::SaturatingRoundingDoublingHighMul;
-            int32_t t = cfu_op7(acc, output_multiplier[out_channel]);
-            acc = cfu_op6(t, -output_shift[out_channel]);
+            int32_t t = cfu_op7(0, acc, output_multiplier[out_channel]);
+            acc = cfu_op6(0, t, -output_shift[out_channel]);
 
             acc += output_offset;
             acc = std::max(acc, output_activation_min);

@@ -35,7 +35,7 @@ static void do_print_fib(void)
         printf("%2d:", i * 6);
         for (int j = 0; j < 6; j++)
         {
-            printf(" %11u", cfu_op3(i * 6 + j, 0));
+            printf(" %11u", cfu_op3(0, i * 6 + j, 0));
         }
         puts("");
     }
