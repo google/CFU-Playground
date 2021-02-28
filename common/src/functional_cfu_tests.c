@@ -46,9 +46,9 @@ static void do_compare_tests(void)
 {
     puts("CFU COMPARE TEST for op0, 1, and 2:");
     int count = 0;
-    for (uint32_t i = 0; i < 0x5050505; i += 0x7105)
+    for (uint32_t i = 0; i < 0xff000000u; i += 0x710005u)
     {
-        for (uint32_t j = 0; j < 0x5050505; j += 0xb103)
+        for (uint32_t j = 0; j < 0xff000000u; j += 0xb100233u)
         {
             uint32_t hw0 = cfu_op0_hw(0, i, j);
             uint32_t hw1 = cfu_op1_hw(0, i, j);
@@ -63,7 +63,7 @@ static void do_compare_tests(void)
                        i, j, hw0, sw0, hw1, sw1, hw2, sw2);
             }
             ++count;
-            if ((count & 0xfff) == 0)
+            if ((count & 0xffff) == 0)
                 printf("Ran %d comparisons....\n", count);
         }
     }
