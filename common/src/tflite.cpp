@@ -15,8 +15,6 @@
 #include "tflite.h"
 #include "perf.h"
 
-#include "tensorflow/lite/micro/examples/person_detection_experimental/detection_responder.h"
-#include "tensorflow/lite/micro/examples/person_detection_experimental/image_provider.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_profiler.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
@@ -156,6 +154,13 @@ void tflite_set_input_zeros()
   auto input = interpreter->input(0);
   memset(input->data.int8, 0, input->bytes);
   printf("Zero 0x%x bytes at 0x%p\n", input->bytes, input->data.int8);
+}
+
+void tflite_set_input(const void *data)
+{
+  auto input = interpreter->input(0);
+  memcpy(input->data.int8, data, input->bytes);
+  printf("Copied 0x%x bytes at 0x%p\n", input->bytes, input->data.int8);
 }
 
 int8_t *tflite_get_output() {
