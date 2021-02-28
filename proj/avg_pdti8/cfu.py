@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Const, Cat, Repl, Mux, Signal, signed
+from nmigen import Mux, Signal, signed
 from nmigen_cfu import InstructionBase, SimpleElaboratable, TestBase, Cfu, CfuTestBase
 import unittest
 
@@ -24,20 +24,65 @@ class WriteInstruction(InstructionBase):
     Not all of these are simple writes to a register - some may have other effects.
     in0 is the register to write.
     in1 is the value to write into it.
+
+    Interface:
+        input_offset: Signal(signed(32))
+            Output. Offset to apply for Macc instruction
+        reset_acc: Signal()
+            Output. Signal to cause accumulator to be reset
+        output_offset: Signal(signed(32))
+            Output. Final offset to apply to
+        out_depth_set: Signal()
+            Output. Indicates output channel depth value is valid
+        out_depth: Signal(32)
+            Output. Output channel depth
+        out_mult_set: Signal()
+            Output. Indicates output channel mult value is valid
+        out_mult: Signal(signed(32))
+            Output. Output channel multiplier
+        out_bias_shift_set: Signal()
+            Output. Indicates output channel bias_shfit value is valid
+        out_bias_shfit: Signal(32)
+            Output. Output channel bias and shift. Bias is in bits [0:17],
+            shift is in bits [24:32]
+
+    TODO: should be more modular with the ability to add small pieces of
+          independently testable functionality.
     """
+
     def __init__(self):
         super().__init__()
         self.input_offset = Signal(signed(32))
         self.reset_acc = Signal()
 
+        self.output_offset = Signal(signed(32))
+
+        self.out_depth_set = Signal()
+        self.out_depth = Signal(32)
+        self.out_mult_set = Signal()
+        self.out_mult = Signal(signed(32))
+        self.out_bias_shift_set = Signal()
+        self.out_bias_shift = Signal(32)
+
     def elab(self, m):
         with m.If(self.start):
-            # Just examine lower four bits
-            with m.Switch(self.in0[:4]):
+            # Just examine lower 8 bits
+            with m.Switch(self.in0[:8]):
                 with m.Case(0):
                     m.d.sync += self.input_offset.eq(self.in1)
                 with m.Case(1):
                     m.d.comb += self.reset_acc.eq(1)
+                with m.Case(0x10):
+                    m.d.sync += self.output_offset.eq(self.in1)
+                with m.Case(0x20):
+                    m.d.comb += self.out_depth_set.eq(1)
+                    m.d.comb += self.out_depth.eq(self.in1)
+                with m.Case(0x21):
+                    m.d.comb += self.out_mult_set.eq(1)
+                    m.d.comb += self.out_mult.eq(self.in1)
+                with m.Case(0x22):
+                    m.d.comb += self.out_bias_shift_set.eq(1)
+                    m.d.comb += self.out_bias_shift.eq(self.in1)
             m.d.comb += self.done.eq(1)
 
 
@@ -82,6 +127,7 @@ class ReadInstruction(InstructionBase):
     in0 is the register to read.
     out0 contains the read value.
     """
+
     def __init__(self):
         super().__init__()
         self.input_offset = Signal(signed(32))
