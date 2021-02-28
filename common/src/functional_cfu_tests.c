@@ -35,10 +35,9 @@ static void do_fixed_tests(void)
     for (uint32_t i = 0; i < 0x50505; i += 0x8103)
     {
         uint32_t j = i ^ 0xffff;
-        uint32_t v0 = cfu_op0(i, j);
-        nop();
-        uint32_t v1 = cfu_op1(i, j);
-        uint32_t v2 = cfu_op2(i, j);
+        uint32_t v0 = cfu_op0(0, i, j);
+        uint32_t v1 = cfu_op1(0, i, j);
+        uint32_t v2 = cfu_op2(0, i, j);
         printf("0x%08x, 0x%08x: 0x%08x, 0x%08x, 0x%08x\n", i, j, v0, v1, v2);
     }
 }
@@ -51,12 +50,12 @@ static void do_compare_tests(void)
     {
         for (uint32_t j = 0; j < 0x5050505; j += 0xb103)
         {
-            uint32_t hw0 = cfu_op0_hw(i, j);
-            uint32_t hw1 = cfu_op1_hw(i, j);
-            uint32_t hw2 = cfu_op2_hw(i, j);
-            uint32_t sw0 = cfu_op0_sw(i, j);
-            uint32_t sw1 = cfu_op1_sw(i, j);
-            uint32_t sw2 = cfu_op2_sw(i, j);
+            uint32_t hw0 = cfu_op0_hw(0, i, j);
+            uint32_t hw1 = cfu_op1_hw(0, i, j);
+            uint32_t hw2 = cfu_op2_hw(0, i, j);
+            uint32_t sw0 = cfu_op0_sw(0, i, j);
+            uint32_t sw1 = cfu_op1_sw(0, i, j);
+            uint32_t sw2 = cfu_op2_sw(0, i, j);
             if (hw0 != sw0 || hw1 != sw1 || hw2 != sw2)
             {
                 puts("arg0        arg1            fn0               fn1              fn2");
@@ -64,7 +63,7 @@ static void do_compare_tests(void)
                        i, j, hw0, sw0, hw1, sw1, hw2, sw2);
             }
             ++count;
-            if ((count & 0xffff) == 0)
+            if ((count & 0xfff) == 0)
                 printf("Ran %d comparisons....\n", count);
         }
     }
@@ -82,14 +81,14 @@ static void do_interactive_tests(void)
 
     uint32_t v0 = read_val("  First operand value  ");
     uint32_t v1 = read_val("  Second operand value ");
-    print_result(0, v0, v1, cfu_op0(v0, v1));
-    print_result(1, v0, v1, cfu_op1(v0, v1));
-    print_result(2, v0, v1, cfu_op2(v0, v1));
-    print_result(3, v0, v1, cfu_op3(v0, v1));
-    print_result(4, v0, v1, cfu_op4(v0, v1));
-    print_result(5, v0, v1, cfu_op5(v0, v1));
-    print_result(6, v0, v1, cfu_op6(v0, v1));
-    print_result(7, v0, v1, cfu_op7(v0, v1));
+    print_result(0, v0, v1, cfu_op0(0, v0, v1));
+    print_result(1, v0, v1, cfu_op1(0, v0, v1));
+    print_result(2, v0, v1, cfu_op2(0, v0, v1));
+    print_result(3, v0, v1, cfu_op3(0, v0, v1));
+    print_result(4, v0, v1, cfu_op4(0, v0, v1));
+    print_result(5, v0, v1, cfu_op5(0, v0, v1));
+    print_result(6, v0, v1, cfu_op6(0, v0, v1));
+    print_result(7, v0, v1, cfu_op7(0, v0, v1));
 }
 
 static struct Menu MENU = {

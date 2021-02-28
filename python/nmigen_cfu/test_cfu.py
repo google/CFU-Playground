@@ -13,7 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+#
+# This file contains tests and examples
+#
 __package__ = 'nmigen_cfu'
 
 import math
@@ -179,9 +181,9 @@ class _CfuTest(TestBase):
         def process():
             for n, (inputs, expected_output) in enumerate(DATA):
                 func, i0, i1 = inputs
-                yield self.dut.cmd_payload_function_id.eq(func)
-                yield self.dut.cmd_payload_inputs_0.eq(i0)
-                yield self.dut.cmd_payload_inputs_1.eq(i1)
+                yield self.dut.cmd_function_id.eq(func)
+                yield self.dut.cmd_in0.eq(i0)
+                yield self.dut.cmd_in1.eq(i1)
                 yield self.dut.cmd_valid.eq(1)
                 yield self.dut.rsp_ready.eq(0)
                 yield
@@ -190,7 +192,7 @@ class _CfuTest(TestBase):
                 yield Delay(0.1)
                 assert (yield from self.wait_response_valid()), (
                     "op{func}({i0:08X}, {i1:08X}) failed to complete")
-                actual_output = (yield self.dut.rsp_payload_outputs_0)
+                actual_output = (yield self.dut.rsp_out)
                 assert actual_output == expected_output, (
                     f"\nHEX: op{func}(0x{i0:08X}, 0x{i1:08X}) expected: {expected_output:08X} got: {actual_output:08X}" +
                     f"\nDEC: op{func}(0x{i0}, 0x{i1}) expected: {expected_output} got: {actual_output}")
@@ -239,20 +241,20 @@ class _CfuTest(TestBase):
             for n, (inputs, expected_outputs) in enumerate(DATA):
                 func, i0, i1, cmd_valid, rsp_ready = inputs
                 exp_result, exp_rsp_valid, exp_cmd_ready = expected_outputs
-                yield self.dut.cmd_payload_function_id.eq(func)
-                yield self.dut.cmd_payload_inputs_0.eq(i0)
-                yield self.dut.cmd_payload_inputs_1.eq(i1)
+                yield self.dut.cmd_function_id.eq(func)
+                yield self.dut.cmd_in0.eq(i0)
+                yield self.dut.cmd_in1.eq(i1)
                 yield self.dut.cmd_valid.eq(cmd_valid)
                 yield self.dut.rsp_ready.eq(rsp_ready)
                 yield Delay(0.1)
                 if exp_result is not None:
-                    self.assertEqual((yield self.dut.rsp_payload_outputs_0), exp_result)
+                    self.assertEqual((yield self.dut.rsp_out), exp_result)
                 if exp_rsp_valid is not None:
                     self.assertEqual((yield self.dut.rsp_valid), exp_rsp_valid)
                     # We don't currently support returning non-OK responses, so
                     # if our response is valid, it must be OK.
                     if exp_rsp_valid:
-                        self.assertTrue((yield self.dut.rsp_payload_response_ok))
+                        self.assertTrue((yield self.dut.rsp_ok))
                 if exp_cmd_ready is not None:
                     self.assertEqual((yield self.dut.cmd_ready), exp_cmd_ready)
                 yield
