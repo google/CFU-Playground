@@ -8,6 +8,8 @@ Since completion of the project, there have been updates by others in order to w
 (d) changed name of binary used by renode
 (e) removing basic_cfu directory, as it was unused
 
+Small further changes were required when the cfu_opX() macros was refactored to have 3 parameters rather than 2.
+
 There was one bug fix:
 
  *  Commit b2dac48dd09e0707d2aafd8b91f2e3beca2be13d: 

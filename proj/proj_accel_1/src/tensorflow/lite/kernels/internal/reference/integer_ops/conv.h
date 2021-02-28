@@ -50,14 +50,14 @@ inline void ConvPerChannelSpecialized(
   // Check dimensions of the tensors.
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
-  cfu_op1(13, input_offset);
+  cfu_op1(0, 13, input_offset);
     for (int out_y = 0; out_y < output_height; ++out_y) {
       const int in_y_origin = out_y;
       for (int out_x = 0; out_x < output_width; ++out_x) {
         const int in_x_origin = out_x;
         for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
           // reset accumulate to have acc = 0.
-          cfu_op1(12, 1);
+          cfu_op1(0, 12, 1);
           const int in_y = in_y_origin;
           const int in_x = in_x_origin;
           for (int in_channel = 0; in_channel < input_depth; in_channel += 8) {
@@ -67,52 +67,52 @@ inline void ConvPerChannelSpecialized(
                 filter_shape, out_channel, 0, 0, in_channel)];
             // The MultiplyAccumulateInstruction CFU to perform the 3 parallel calculations,
             // replacing acc += filter_val * (input_val + input_offset);
-            cfu_op3(filter_val, input_val);
+            cfu_op3(0, filter_val, input_val);
 
             int32_t input_val_1 = input_data[Offset(input_shape, 0, in_y,
                                                   in_x, in_channel + 1)];
             int32_t filter_val_1 = filter_data[Offset(
                 filter_shape, out_channel, 0, 0, in_channel + 1)];
-            cfu_op3(filter_val_1, input_val_1);
+            cfu_op3(0, filter_val_1, input_val_1);
 
             int32_t input_val_2 = input_data[Offset(input_shape, 0, in_y,
                                                   in_x, in_channel + 2)];
             int32_t filter_val_2 = filter_data[Offset(
                 filter_shape, out_channel, 0, 0, in_channel + 2)];
-            cfu_op3(filter_val_2, input_val_2);
+            cfu_op3(0, filter_val_2, input_val_2);
 
             int32_t input_val_3 = input_data[Offset(input_shape, 0, in_y,
                                                   in_x, in_channel + 3)];
             int32_t filter_val_3 = filter_data[Offset(
                 filter_shape, out_channel, 0, 0, in_channel + 3)];
-            cfu_op3(filter_val_3, input_val_3);
+            cfu_op3(0, filter_val_3, input_val_3);
 
             int32_t input_val_4 = input_data[Offset(input_shape, 0, in_y,
                                                   in_x, in_channel + 4)];
             int32_t filter_val_4 = filter_data[Offset(
                 filter_shape, out_channel, 0, 0, in_channel + 4)];
-            cfu_op3(filter_val_4, input_val_4);
+            cfu_op3(0, filter_val_4, input_val_4);
 
             int32_t input_val_5 = input_data[Offset(input_shape, 0, in_y,
                                                   in_x, in_channel + 5)];
             int32_t filter_val_5 = filter_data[Offset(
                 filter_shape, out_channel, 0, 0, in_channel + 5)];
-            cfu_op3(filter_val_5, input_val_5);
+            cfu_op3(0, filter_val_5, input_val_5);
 
             int32_t input_val_6 = input_data[Offset(input_shape, 0, in_y,
                                                   in_x, in_channel + 6)];
             int32_t filter_val_6 = filter_data[Offset(
                 filter_shape, out_channel, 0, 0, in_channel + 6)];
-            cfu_op3(filter_val_6, input_val_6);
+            cfu_op3(0, filter_val_6, input_val_6);
 
             int32_t input_val_7 = input_data[Offset(input_shape, 0, in_y,
                                                   in_x, in_channel + 7)];
             int32_t filter_val_7 = filter_data[Offset(
                 filter_shape, out_channel, 0, 0, in_channel + 7)];
-            cfu_op3(filter_val_7, input_val_7);
+            cfu_op3(0, filter_val_7, input_val_7);
           }
           // Read the acc value with the ReadInstruction and put it into a C++ variable.
-          int32_t acc = cfu_op2(12,0);
+          int32_t acc = cfu_op2(0, 12,0);
           if (bias_data) {
             acc += bias_data[out_channel];
           }
@@ -183,9 +183,9 @@ inline void ConvPerChannel(
   }
 
   // This is the StoreInstruction CFU to store these const values into the CFU.
-  cfu_op1(10, input_width);
-  cfu_op1(11, input_height);
-  cfu_op1(13, input_offset);
+  cfu_op1(0, 10, input_width);
+  cfu_op1(0, 11, input_height);
+  cfu_op1(0, 13, input_offset);
 
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
@@ -194,7 +194,7 @@ inline void ConvPerChannel(
         const int in_x_origin = (out_x * stride_width) - pad_width;
         for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
           // reset accumulate to have acc = 0.
-          cfu_op1(12, 1);
+          cfu_op1(0, 12, 1);
           for (int filter_y = 0; filter_y < filter_height; ++filter_y) {
             const int in_y = in_y_origin + dilation_height_factor * filter_y;
             for (int filter_x = 0; filter_x < filter_width; ++filter_x) {
@@ -202,7 +202,7 @@ inline void ConvPerChannel(
 
               // Zero padding by omitting the areas outside the image.
               // This is the DoubleCompareInstruction CFU
-              const bool is_point_inside_image = cfu_op0(in_x, in_y);
+              const bool is_point_inside_image = cfu_op0(0, in_x, in_y);
                   //(in_x >= 0) && (in_x < input_width) && (in_y >= 0) &&
                   //(in_y < input_height);
 
@@ -233,12 +233,12 @@ inline void ConvPerChannel(
                 // accumulator depth is smaller than 2^16.
                 // The MultiplyAccumulateInstruction CFU to perform the 3 parallel calculations,
                 // replacing acc += filter_val * (input_val + input_offset);
-                cfu_op3(filter_val, input_val);
+                cfu_op3(0, filter_val, input_val);
               }
             }
           }
           // Read the acc value with the ReadInstruction and put it into a C++ variable.
-          int32_t acc = cfu_op2(12,0);
+          int32_t acc = cfu_op2(0, 12,0);
           if (bias_data) {
             acc += bias_data[out_channel];
           }
