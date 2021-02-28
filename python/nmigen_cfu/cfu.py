@@ -30,24 +30,27 @@ class InstructionBase(SimpleElaboratable):
         The first operand. Only available when `start` is signalled.
     in1: Signal(32) input
         The second operand. Only available when `start` is signalled.
-    in0s: Signal(signed(32)) input
-        in0 as a signed value. Use in0s rather than in0 if the input is signed.
-    in1s: Signal(32) input
-        in1 as a signed value. Use in1s rather than in1 if the input is signed.
+    funct7: Signal(7) input
+        The funct(7) value from the instruction.
     done: Signal() output
         Single cycle signal to indicate that processing has finished.
     output: Signal(32) output
         The result. Must be valid when `done` is signalled.
+    in0s: Signal(signed(32)) output
+        in0 as a signed value. Use in0s rather than in0 if the input is signed.
+    in1s: Signal(32) output
+        in1 as a signed value. Use in1s rather than in1 if the input is signed.
     """
 
     def __init__(self):
         self.in0 = Signal(32)
         self.in1 = Signal(32)
-        self.in0s = Signal(signed(32))
-        self.in1s = Signal(signed(32))
+        self.funct7 = Signal(7)
         self.output = Signal(32)
         self.start = Signal()
         self.done = Signal()
+        self.in0s = Signal(signed(32))
+        self.in1s = Signal(signed(32))
 
     def signal_done(self, m):
         m.d.comb += self.done.eq(1)
@@ -138,6 +141,10 @@ class _FallbackInstruction(InstructionBase):
 class Cfu(SimpleElaboratable):
     """Custom function unit interface.
 
+    Implements RR instruction format instrunctions
+    We use funct3 bits of function ID to distinguish 8 separate "instructions".
+    funct7 is passed to the instruction.
+
     Parameters
     ----------
     instructions: A map from opcode (start from 0) to instructions (instances of
@@ -145,9 +152,11 @@ class Cfu(SimpleElaboratable):
 
     Attributes
     ----------
+    Attribute public names and types form the Verilog module interface:
+
         input               io_bus_cmd_valid,
         output              io_bus_cmd_ready,
-        input      [2:0]    io_bus_cmd_payload_function_id,
+        input      [19:0]   io_bus_cmd_payload_function_id,
         input      [31:0]   io_bus_cmd_payload_inputs_0,
         input      [31:0]   io_bus_cmd_payload_inputs_1,
         output              io_bus_rsp_valid,
@@ -164,38 +173,41 @@ class Cfu(SimpleElaboratable):
                 self.instructions[i] = _FallbackInstruction()
         self.cmd_valid = Signal(name='io_bus_cmd_valid')
         self.cmd_ready = Signal(name='io_bus_cmd_ready')
-        self.cmd_payload_function_id = Signal(3,
-                                              name='io_bus_cmd_payload_function_id')
-        self.cmd_payload_inputs_0 = Signal(32,
-                                           name='io_bus_cmd_payload_inputs_0')
-        self.cmd_payload_inputs_1 = Signal(32,
-                                           name='io_bus_cmd_payload_inputs_1')
-        self.rsp_valid = Signal(
-            name='io_bus_rsp_valid')
-        self.rsp_ready = Signal(
-            name='io_bus_rsp_ready')
-        self.rsp_payload_response_ok = Signal(
-            name='io_bus_rsp_payload_response_ok')
-        self.rsp_payload_outputs_0 = Signal(32,
-                                            name='io_bus_rsp_payload_outputs_0')
+        self.cmd_function_id = Signal(
+            20, name='io_bus_cmd_payload_function_id')
+        self.cmd_in0 = Signal(32, name='io_bus_cmd_payload_inputs_0')
+        self.cmd_in1 = Signal(32, name='io_bus_cmd_payload_inputs_1')
+        self.rsp_valid = Signal(name='io_bus_rsp_valid')
+        self.rsp_ready = Signal(name='io_bus_rsp_ready')
+        self.rsp_ok = Signal(name='io_bus_rsp_payload_response_ok')
+        self.rsp_out = Signal(32, name='io_bus_rsp_payload_outputs_0')
         self.ports = [
             self.cmd_valid,
             self.cmd_ready,
-            self.cmd_payload_function_id,
-            self.cmd_payload_inputs_0,
-            self.cmd_payload_inputs_1,
+            self.cmd_function_id,
+            self.cmd_in0,
+            self.cmd_in1,
             self.rsp_valid,
             self.rsp_ready,
-            self.rsp_payload_response_ok,
-            self.rsp_payload_outputs_0,
+            self.rsp_ok,
+            self.rsp_out,
         ]
 
     def elab(self, m):
+        # break out the functionid
+        funct3 = Signal(3)
+        funct7 = Signal(7)
+        m.d.comb += [
+            funct3.eq(self.cmd_function_id[:3]),
+            funct7.eq(self.cmd_function_id[-7:]),
+        ]
         stored_function_id = Signal(3)
         current_function_id = Signal(3)
         current_function_done = Signal()
         stored_output = Signal(32)
-        m.d.comb += self.rsp_payload_response_ok.eq(1)
+
+        # Response is always OK.
+        m.d.comb += self.rsp_ok.eq(1)
 
         instruction_outputs = Array(Signal(32) for _ in range(8))
         instruction_dones = Array(Signal() for _ in range(8))
@@ -208,7 +220,7 @@ class Cfu(SimpleElaboratable):
         def check_instruction_done():
             with m.If(current_function_done):
                 m.d.comb += self.rsp_valid.eq(1)
-                m.d.comb += self.rsp_payload_outputs_0.eq(
+                m.d.comb += self.rsp_out.eq(
                     instruction_outputs[current_function_id])
                 with m.If(self.rsp_ready):
                     m.next = "WAIT_CMD"
@@ -222,14 +234,13 @@ class Cfu(SimpleElaboratable):
         with m.FSM():
             with m.State("WAIT_CMD"):
                 # We're waiting for a command from the CPU.
-                m.d.comb += current_function_id.eq(
-                    self.cmd_payload_function_id)
+                m.d.comb += current_function_id.eq(funct3)
                 m.d.comb += current_function_done.eq(
                     instruction_dones[current_function_id])
                 m.d.comb += self.cmd_ready.eq(1)
                 with m.If(self.cmd_valid):
                     m.d.sync += stored_function_id.eq(
-                        self.cmd_payload_function_id)
+                        self.cmd_function_id[:3])
                     m.d.comb += instruction_starts[current_function_id].eq(1)
                     check_instruction_done()
             with m.State("WAIT_INSTRUCTION"):
@@ -243,14 +254,15 @@ class Cfu(SimpleElaboratable):
                 # Instruction has completed, but the CPU isn't ready to receive
                 # the result.
                 m.d.comb += self.rsp_valid.eq(1)
-                m.d.comb += self.rsp_payload_outputs_0.eq(stored_output)
+                m.d.comb += self.rsp_out.eq(stored_output)
                 with m.If(self.rsp_ready):
                     m.next = "WAIT_CMD"
 
         for (i, instruction) in self.instructions.items():
             m.d.comb += [
-                instruction.in0.eq(self.cmd_payload_inputs_0),
-                instruction.in1.eq(self.cmd_payload_inputs_1),
+                instruction.in0.eq(self.cmd_in0),
+                instruction.in1.eq(self.cmd_in1),
+                instruction.funct7.eq(funct7),
             ]
             m.submodules[f"fn{i}"] = instruction
 
