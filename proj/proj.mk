@@ -203,3 +203,7 @@ prog bitstream run unit:
 	@echo Target not supported when PLATFORM=sim
 
 endif
+
+.PHONY: pytest
+pytest:
+	$(PYRUN) -m unittest discover -p '*.py'
