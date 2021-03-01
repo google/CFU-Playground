@@ -128,9 +128,9 @@ void tflite_load_model(unsigned char *model_data)
 
   // Build an interpreter to run the model with.
   // NOLINTNEXTLINE(runtime-global-variables)
-  static tflite::MicroInterpreter micro_interpreter(
+  alignas(tflite::MicroInterpreter) static unsigned char buf[sizeof(tflite::MicroInterpreter)];
+  interpreter = new (buf) tflite::MicroInterpreter(
       model, *op_resolver, tensor_arena, kTensorArenaSize, error_reporter, profiler);
-  interpreter = &micro_interpreter;
 
   // Allocate memory from the tensor_arena for the model's tensors.
   TfLiteStatus allocate_status = interpreter->AllocateTensors();
@@ -165,10 +165,10 @@ void tflite_set_input(const void *data)
   printf("Copied 0x%x bytes at 0x%p\n", input->bytes, input->data.int8);
 }
 
-int8_t *tflite_get_output() {
+int8_t *tflite_get_output()
+{
   return interpreter->output(0)->data.int8;
 }
-
 
 void tflite_classify()
 {
@@ -187,9 +187,6 @@ void tflite_classify()
   // Uncomment to see how large the arena needs to be.
   printf("Arena used bytes: %llu\n", (long long unsigned)(interpreter->arena_used_bytes()));
 }
-
-
-
 
 int8_t *get_input()
 {
