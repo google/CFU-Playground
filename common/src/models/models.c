@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include "models/models.h"
 #include "models/pdti8/pdti8.h"
+#include "models/mnv2/mnv2.h"
 #include "menu.h"
 
 static struct Menu MENU = {
@@ -24,6 +25,9 @@ static struct Menu MENU = {
     "models",
     {
         MENU_ITEM('1', "Person Detection int8 model", pdti8_menu),
+#ifdef INCLUDE_MODEL_MNV2
+        MENU_ITEM('2', "Mobile Net v2 models", mnv2_menu),
+#endif
         MENU_END,
     },
 };

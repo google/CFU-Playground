@@ -15,6 +15,7 @@
 #include "tflite.h"
 #include "perf.h"
 
+#include "tensorflow/lite/micro/all_ops_resolver.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_profiler.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
@@ -80,23 +81,24 @@ static void tflite_init()
   // incur some penalty in code space for op implementations that are not
   // needed by this graph.
   //
-  // tflite::AllOpsResolver resolver;
-  // NOLINTNEXTLINE(runtime-global-variables)
-  static tflite::MicroMutableOpResolver<8> micro_op_resolver;
-  micro_op_resolver.AddAveragePool2D();
-  micro_op_resolver.AddConv2D();
-  micro_op_resolver.AddDepthwiseConv2D();
-  micro_op_resolver.AddReshape();
-  micro_op_resolver.AddSoftmax();
+  static tflite::AllOpsResolver resolver;
+  op_resolver = &resolver;
+  // // NOLINTNEXTLINE(runtime-global-variables)
+  // static tflite::MicroMutableOpResolver<8> micro_op_resolver;
+  // micro_op_resolver.AddAveragePool2D();
+  // micro_op_resolver.AddConv2D();
+  // micro_op_resolver.AddDepthwiseConv2D();
+  // micro_op_resolver.AddReshape();
+  // micro_op_resolver.AddSoftmax();
 
-  // needed for jon's model conv2d/relu, maxpool2d, reshape, fullyconnected, logistic
-  micro_op_resolver.AddMaxPool2D();
-  micro_op_resolver.AddFullyConnected();
-  micro_op_resolver.AddLogistic();
+  // // needed for jon's model conv2d/relu, maxpool2d, reshape, fullyconnected, logistic
+  // micro_op_resolver.AddMaxPool2D();
+  // micro_op_resolver.AddFullyConnected();
+  // micro_op_resolver.AddLogistic();
 
-  // needed for MODEL=magic_wand_full_i8
-  // micro_op_resolver.AddQuantize();
-  op_resolver = &micro_op_resolver;
+  // // needed for MODEL=magic_wand_full_i8
+  // // micro_op_resolver.AddQuantize();
+  // op_resolver = &micro_op_resolver;
 
   // profiler
   static tflite::MicroProfiler micro_profiler(error_reporter);
