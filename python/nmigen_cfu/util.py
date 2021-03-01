@@ -15,9 +15,9 @@
 
 __package__ = 'nmigen_cfu'
 
-from nmigen import Elaboratable, Module, Signal
+from nmigen import Elaboratable, Module, Mux, Signal
 from nmigen.build import Platform
-from nmigen.sim import Simulator
+from nmigen.sim import Settle, Simulator
 
 import unittest
 
@@ -95,3 +95,29 @@ class TestBase(unittest.TestCase):
             self.sim.run()
 
 
+class ValueBuffer(SimpleElaboratable):
+    """Buffers a signal.
+
+    Parameters:
+        inp: A Signal
+            The signal to buffer
+        capture: Signal(1)
+            Input.
+            When high, captures input while transparently placing on output.
+            When low, output is equal to last captured input.
+
+    Interface:
+        output: Signal(like inp)
+            Output. The last captured input.
+    """
+
+    def __init__(self, inp, capture):
+        self.input = inp
+        self.capture = capture
+        self.output = Signal.like(inp)
+
+    def elab(self, m):
+        captured = Signal.like(self.input)
+        with m.If(self.capture):
+            m.d.sync += captured.eq(self.input)
+        m.d.comb += self.output.eq(Mux(self.capture, self.input, captured))
