@@ -178,8 +178,8 @@ bitstream: $(CFU_VERILOG)
 
 ifeq '1' '$(words $(TTY))'
 run: $(SOFTWARE_BIN)
-	@echo Running automated model test on Arty Board
-	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) $(UART_SPEED) 1 0 |& tee $(SOFTWARE_LOG)
+	@echo Running automated pdti8 test on Arty Board
+	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) $(UART_SPEED) 1 1 1 |& tee $(SOFTWARE_LOG)
 
 unit: $(SOFTWARE_BIN)
 	@echo Running unit test on Arty Board

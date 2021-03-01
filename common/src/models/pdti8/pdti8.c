@@ -111,9 +111,9 @@ static struct Menu MENU = {
     "Tests for pdti8 model",
     "pdti8",
     {
-        MENU_ITEM('0', "Run with zeros input", do_classify_zeros),
-        MENU_ITEM('1', "Run with no-person input", do_classify_no_person),
-        MENU_ITEM('2', "Run with person input", do_classify_person),
+        MENU_ITEM('1', "Run with zeros input", do_classify_zeros),
+        MENU_ITEM('2', "Run with no-person input", do_classify_no_person),
+        MENU_ITEM('3', "Run with person input", do_classify_person),
         MENU_ITEM('g', "Run golden tests (check for expected outputs)", do_golden_tests),
         MENU_END,
     },

@@ -20,7 +20,7 @@
 #include "tflite.h"
 #include "menu.h"
 #include "functional_cfu_tests.h"
-#include "models/pdti8/pdti8.h"
+#include "models/models.h"
 #include "proj_menu.h"
 #include "perf.h"
 #include "base.h"
@@ -30,7 +30,7 @@ static struct Menu MENU = {
     "CFU Playground",
     "main",
     {
-        MENU_ITEM('1', "pdti8 model", pdti8_menu),
+        MENU_ITEM('1', "TfLM Models menu", models_menu),
         MENU_ITEM('2', "Functional CFU Tests", do_functional_cfu_tests),
         MENU_ITEM('3', "Project menu", do_proj_menu),
         MENU_ITEM('4', "Performance Counter Tests", perf_test_menu),
