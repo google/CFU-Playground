@@ -36,7 +36,7 @@ uint32_t MicroProfiler::BeginEvent(const char* tag, EventType event_type,
 void MicroProfiler::EndEvent(uint32_t event_handle) {
 #ifndef NPROFILE
   int32_t end_time = GetCurrentTimeTicks();
-  TF_LITE_REPORT_ERROR(reporter_, "%s took %d cycles\n", event_tag_,
+  TF_LITE_REPORT_ERROR(reporter_, "\"PROFILER\", \"%s\", %d", event_tag_,
                        end_time - start_time_);
 #endif
 }
