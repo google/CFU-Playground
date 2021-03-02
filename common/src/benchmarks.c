@@ -17,8 +17,10 @@
 #include <stdio.h>
 #include "menu.h"
 #include "perf.h"
+#include "assert.h"
 #include "benchmarks.h"
 
+#define BUF_SIZE (128*1024)     // must be at least 1024
 
 
 // Each project should make their own proj_menu.c, which will replace this one.
@@ -26,7 +28,8 @@
 static void __attribute__ ((noinline)) do_loads_cached(void) 
 {
     puts("Hello, Cached Load!\n");
-    int buf[128*1024];
+    assert(BUF_SIZE >= 1024);
+    int buf[BUF_SIZE];
     int acc=0;
     for (int j=0; j<1024; ++j) {        // warmup
         acc += buf[j];
@@ -48,18 +51,18 @@ static void __attribute__ ((noinline)) do_loads_cached(void)
 static void __attribute__ ((noinline)) do_loads_strided(void) 
 {
     puts("Hello, Strided Load!\n");
-    int buf[128*1024];
+    int buf[BUF_SIZE];
     int acc=0;
     int start_time = perf_get_mcycle();
     for (int i=0; i<64; ++i) {
         // 32 bytes per cache line, so stride by 8 4-byte ints
-        for (int j=0; j<128*1024; j+=8) {
+        for (int j=0; j<BUF_SIZE; j+=8) {
             acc += buf[j];
         }
         buf[i] = acc;                       // inhibit optimization
     }
     int end_time = perf_get_mcycle();
-    int total_iters = 64*128*1024/8;
+    int total_iters = 64*BUF_SIZE/8;
     printf("Val:%d  Cycles: %d   Cycles/load: %d\n\n\n",
         acc, end_time-start_time, (end_time-start_time) / total_iters);
 }
@@ -68,17 +71,17 @@ static void __attribute__ ((noinline)) do_loads_strided(void)
 static void __attribute__ ((noinline)) do_loads(void) 
 {
     puts("Hello, Load!\n");
-    int buf[128*1024];
+    int buf[BUF_SIZE];
     int acc=0;
     int start_time = perf_get_mcycle();
     for (int i=0; i<8; ++i) {
-        for (int j=0; j<128*1024; ++j) {
+        for (int j=0; j<BUF_SIZE; ++j) {
             acc += buf[j];
         }
         buf[i] = acc;                       // inhibit optimization
     }
     int end_time = perf_get_mcycle();
-    int total_iters = 8*128*1024;
+    int total_iters = 8*BUF_SIZE;
     printf("Val:%d  Cycles: %d   Cycles/load: %d\n\n\n",
         acc, end_time-start_time, (end_time-start_time) / total_iters);
 }
@@ -87,17 +90,17 @@ static void __attribute__ ((noinline)) do_loads(void)
 static void __attribute__ ((noinline)) do_stores(void) 
 {
     puts("Hello, Store!\n");
-    int buf[128*1024];
+    int buf[BUF_SIZE];
     int acc=0;
     int start_time = perf_get_mcycle();
     for (int i=0; i<8; ++i) {
-        for (int j=0; j<128*1024; ++j) {
+        for (int j=0; j<BUF_SIZE; ++j) {
             buf[j] = i;
         }
         acc += buf[i];                      // inhibit optimization
     }
     int end_time = perf_get_mcycle();
-    int total_iters = 8*128*1024;
+    int total_iters = 8*BUF_SIZE;
     printf("Val:%d  Cycles: %d   Cycles/store: %d\n\n\n",
         acc, end_time-start_time, (end_time-start_time) / (total_iters));
 }
@@ -106,17 +109,17 @@ static void __attribute__ ((noinline)) do_stores(void)
 static void __attribute__ ((noinline)) do_increment_mem(void) 
 {
     puts("Hello, Increment!\n");
-    int buf[128*1024];
+    int buf[BUF_SIZE];
     int acc=0;
     int start_time = perf_get_mcycle();
     for (int i=0; i<8; ++i) {
-        for (int j=0; j<128*1024; ++j) {
+        for (int j=0; j<BUF_SIZE; ++j) {
             buf[j] += i;
         }
         acc += buf[i];                      // inhibit optimization
     }
     int end_time = perf_get_mcycle();
-    int total_iters = 8*128*1024;
+    int total_iters = 8*BUF_SIZE;
     printf("Val:%d  Cycles: %d   Cycles/(load-add-store): %d\n\n\n",
         acc, end_time-start_time, (end_time-start_time) / total_iters);
 }
