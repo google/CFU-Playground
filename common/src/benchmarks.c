@@ -20,16 +20,13 @@
 #include "benchmarks.h"
 
 
-extern int buf[128*1024];
-
-int buf[128*1024];
-int * volatile p;
-
 
 // Each project should make their own proj_menu.c, which will replace this one.
 
-static void __attribute__ ((noinline)) do_loads_cached(void) {
+static void __attribute__ ((noinline)) do_loads_cached(void) 
+{
     puts("Hello, Cached Load!\n");
+    int buf[128*1024];
     int acc=0;
     for (int j=0; j<1024; ++j) {        // warmup
         acc += buf[j];
@@ -39,81 +36,99 @@ static void __attribute__ ((noinline)) do_loads_cached(void) {
         for (int j=0; j<1024; ++j) {
             acc += buf[j];
         }
-        *p = acc;
+        buf[i] = acc;                       // inhibit optimization
     }
     int end_time = perf_get_mcycle();
+    int total_iters = 1024*1024;
     printf("Val:%d  Cycles: %d   Cycles/load: %d\n\n\n",
-        acc, end_time-start_time, (end_time-start_time) / (16*64*1024));
+        acc, end_time-start_time, (end_time-start_time) / total_iters);
 }
 
-static void __attribute__ ((noinline)) do_loads_strided(void) {
+
+static void __attribute__ ((noinline)) do_loads_strided(void) 
+{
     puts("Hello, Strided Load!\n");
+    int buf[128*1024];
     int acc=0;
     int start_time = perf_get_mcycle();
     for (int i=0; i<64; ++i) {
-        // 32 bytes per line
+        // 32 bytes per cache line, so stride by 8 4-byte ints
         for (int j=0; j<128*1024; j+=8) {
             acc += buf[j];
         }
-        *p = acc;
+        buf[i] = acc;                       // inhibit optimization
     }
     int end_time = perf_get_mcycle();
+    int total_iters = 64*128*1024/8;
     printf("Val:%d  Cycles: %d   Cycles/load: %d\n\n\n",
-        acc, end_time-start_time, (end_time-start_time) / (64*128*1024/8));
+        acc, end_time-start_time, (end_time-start_time) / total_iters);
 }
 
-static void __attribute__ ((noinline)) do_loads(void) {
+
+static void __attribute__ ((noinline)) do_loads(void) 
+{
     puts("Hello, Load!\n");
+    int buf[128*1024];
     int acc=0;
     int start_time = perf_get_mcycle();
     for (int i=0; i<8; ++i) {
         for (int j=0; j<128*1024; ++j) {
             acc += buf[j];
         }
-        *p = acc;
+        buf[i] = acc;                       // inhibit optimization
     }
     int end_time = perf_get_mcycle();
+    int total_iters = 8*128*1024;
     printf("Val:%d  Cycles: %d   Cycles/load: %d\n\n\n",
-        acc, end_time-start_time, (end_time-start_time) / (16*64*1024));
+        acc, end_time-start_time, (end_time-start_time) / total_iters);
 }
 
-static void __attribute__ ((noinline)) do_stores(void) {
+
+static void __attribute__ ((noinline)) do_stores(void) 
+{
     puts("Hello, Store!\n");
+    int buf[128*1024];
     int acc=0;
     int start_time = perf_get_mcycle();
     for (int i=0; i<8; ++i) {
         for (int j=0; j<128*1024; ++j) {
             buf[j] = i;
         }
-        acc += *p;
+        acc += buf[i];                      // inhibit optimization
     }
     int end_time = perf_get_mcycle();
+    int total_iters = 8*128*1024;
     printf("Val:%d  Cycles: %d   Cycles/store: %d\n\n\n",
-        acc, end_time-start_time, (end_time-start_time) / (16*64*1024));
+        acc, end_time-start_time, (end_time-start_time) / (total_iters));
 }
 
-static void __attribute__ ((noinline)) do_increment_mem(void) {
+
+static void __attribute__ ((noinline)) do_increment_mem(void) 
+{
     puts("Hello, Increment!\n");
+    int buf[128*1024];
     int acc=0;
     int start_time = perf_get_mcycle();
     for (int i=0; i<8; ++i) {
         for (int j=0; j<128*1024; ++j) {
             buf[j] += i;
         }
-        acc += *p;
+        acc += buf[i];                      // inhibit optimization
     }
     int end_time = perf_get_mcycle();
+    int total_iters = 8*128*1024;
     printf("Val:%d  Cycles: %d   Cycles/(load-add-store): %d\n\n\n",
-        acc, end_time-start_time, (end_time-start_time) / (16*64*1024));
+        acc, end_time-start_time, (end_time-start_time) / total_iters);
 }
+
 
 static struct Menu MENU = {
     "Benchmarks Menu",
     "benchmark",
     {
-        MENU_ITEM('l', "sequential loads benchmark (expect one miss per cache line)", do_loads),
+        MENU_ITEM('l', "sequential loads benchmark (expect one miss per cache line, one every eight accesses)", do_loads),
         MENU_ITEM('c', "cached loads benchmark (expect all hits)", do_loads_cached),
-        MENU_ITEM('x', "strided loads benchmark (expect all misses)", do_loads_strided),
+        MENU_ITEM('8', "strided loads benchmark (expect all misses)", do_loads_strided),
         MENU_ITEM('s', "sequential stores benchmark", do_stores),
         MENU_ITEM('i', "load-increment-store benchmark (expect misses)", do_increment_mem),
         MENU_END,
@@ -122,6 +137,5 @@ static struct Menu MENU = {
 
 void do_benchmarks_menu()
 {
-  p = buf + 3;
   menu_run(&MENU);
 }
