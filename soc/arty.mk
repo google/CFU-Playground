@@ -41,6 +41,10 @@ OUT_DIR:=   build/$(SOC_NAME)
 UART_ARGS=  --uart-baudrate $(UART_SPEED)
 LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv $(OUT_DIR)/csr.csv $(CFU_ARGS) $(UART_ARGS)
 
+ifdef USE_SYMBIFLOW
+LITEX_ARGS += --toolchain symbiflow
+endif
+
 PYRUN:=     $(CFU_ROOT)/scripts/pyrun
 ARTY_RUN:=  $(PYRUN) ./arty.py $(LITEX_ARGS)
 

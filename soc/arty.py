@@ -66,6 +66,7 @@ def main():
     parser.add_argument("--with-ethernet",  action="store_true", help="Enable Ethernet support")
     parser.add_argument("--with-etherbone", action="store_true", help="Enable Etherbone support")
     parser.add_argument("--cfu", default=None, help="Specify file containing CFU Verilog module")
+    parser.add_argument("--toolchain", default="vivado", help="Specify toolchain for implementing gateware ('vivado' or 'symbiflow')")
     parser.set_defaults(
             csr_csv='csr.csv',
             uart_name='serial',
@@ -80,7 +81,7 @@ def main():
     soc_kwargs = soc_sdram_argdict(args)
     soc_kwargs["l2_size"] = 8 * 1024
     soc = CustomSoC(with_ethernet=args.with_ethernet, with_etherbone=args.with_etherbone,
-            **soc_kwargs)
+                    toolchain=args.toolchain, **soc_kwargs)
 
     # get the CFU version, plus the CFU itself and a wrapper 
     # ...since we're using stock litex, it doesn't know about the Cfu variants, so we need to use "external_variant"
@@ -94,7 +95,10 @@ def main():
 
     builder = Builder(soc, **builder_argdict(args))
 
-    builder.build(**vivado_build_argdict(args), run=args.build)
+    if args.toolchain == "vivado":
+        builder.build(**vivado_build_argdict(args), run=args.build)
+    else:
+        builder.build(**{}, run=args.build)
 
     if args.load:
         prog = soc.platform.create_programmer()
