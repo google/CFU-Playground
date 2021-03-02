@@ -16,15 +16,15 @@ set choices [lrange $argv 3 end]
 
 foreach c $choices {
 
-  expect "============="
+  expect "===="
   expect ">"
   send_user "Sending $c...\n"
   send $c
-  sleep 2
+  sleep 1
 
 }
 
-expect "============="
+expect "===="
 expect ">"
 
 send_user "\nFinished interaction\n"

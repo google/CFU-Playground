@@ -14,14 +14,25 @@
  * limitations under the License.
  */
 
-#include <stdint.h>
+#include "pdti8_math.h"
 #include "cfu.h"
+// GEMMLOWP
+#include "fixedpoint/fixedpoint.h"
 
-//
-// In this function, place C code to emulate your CFU. You can switch between
-// hardware and emulated CFU by setting the CFU_SOFTWARE_DEFINED DEFINE in
-// the Makefile.
-uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2)
-{
-  return (funct3 & 1) ? rs2 : rs1;
+
+
+int32_t math_srdhm_gemmlowp(int32_t a, int32_t b) {
+    return gemmlowp::SaturatingRoundingDoublingHighMul(a, b);
+}
+
+int32_t math_srdhm_cfu(int32_t a, int32_t b) {
+    return cfu_op7(0, a, b);
+}
+
+int32_t math_rdbypot_gemmlowp(int32_t x, int exponent) {
+    return gemmlowp::RoundingDivideByPOT(x, exponent);
+}
+
+int32_t math_rdbypot_cfu(int32_t x, int exponent) {
+    return cfu_op6(0, x, exponent);
 }

@@ -20,10 +20,25 @@ limitations under the License.
 #include "cfu.h"
 #include <stdio.h>
 
-#define OP_RESET_ACC cfu_op0(1, 1)
-#define OP_SET_INPUT_OFFSET(n) cfu_op0(0, n)
-#define OP_READ_ACC cfu_op1(1, 0)
-#define OP_4MACC(in, filt) cfu_op2(in, filt)
+#define OP_RESET_ACC cfu_op0(0, 1, 1)
+#define OP_SET_INPUT_OFFSET(n) cfu_op0(0, 0, n)
+#define OP_READ_ACC cfu_op1(0, 1, 0)
+#define OP_4MACC(in, filt) cfu_op2(0, in, filt)
+
+static inline int num_bits(int32_t n)
+{
+  int b = 32;
+  if (n >= 0)
+  {
+    n = -n;
+  }
+  while (n & (1 << 31))
+  {
+    n = n << 1;
+    b--;
+  }
+  return b + 1;
+}
 
 namespace tflite
 {
@@ -58,6 +73,28 @@ namespace tflite
         TFLITE_DCHECK_EQ(bias_shape.FlatSize(), output_depth);
       }
 
+#ifdef SHOW_CONV_OUT_WEIGHTS
+      // From this we learn
+      // -- bias is 17 bits, signed
+      // -- multiplier is 31 bits, unsigned / always positive
+      // -- -10 <= shift <= -5
+      int bbits = 0;
+      int ombits = 0;
+      int osbits = 0;
+      for (int c = 0; c < output_depth; c++)
+      {
+        bbits = std::max(bbits, num_bits(bias_data[c]));
+        ombits = std::max(ombits, num_bits(output_multiplier[c]));
+        osbits = std::max(osbits, num_bits(output_shift[c]));
+        printf("%12ld ", bias_data[c]);
+        // printf("%12ld ", output_multiplier[c]);
+        // if (output_shift[c] > -5 || output_shift[c] < -9)
+        //   printf("%12ld ", output_shift[c]);
+      }
+      puts("");
+      printf("Bias, mult, shift: %3d, %3d, %3d\n", bbits, ombits, osbits);
+#endif
+
       const int output_height = output_shape.Dims(1);
       const int output_width = output_shape.Dims(2);
       OP_SET_INPUT_OFFSET(input_offset);
@@ -71,7 +108,7 @@ namespace tflite
           int32_t *filter_data_out_channel_p = (int32_t *)filter_data;
           for (int out_channel = 0; out_channel < output_depth; ++out_channel)
           {
-            perf_enable_counter(6);
+            // perf_enable_counter(6);
             OP_RESET_ACC;
             int32_t *input_data_p = input_data_yx_p;
             int32_t *filter_data_p = filter_data_out_channel_p;
@@ -86,13 +123,21 @@ namespace tflite
               filt4 = *(filter_data_p++);
               OP_4MACC(in4, filt4);
             }
-            perf_disable_counter(6);
-            perf_enable_counter(7);
+            // perf_disable_counter(6);
+            // perf_enable_counter(7);
 
             int32_t acc = OP_READ_ACC;
             acc += bias_data[out_channel];
-            acc = MultiplyByQuantizedMultiplier(
-                acc, output_multiplier[out_channel], output_shift[out_channel]);
+            // acc = MultiplyByQuantizedMultiplier(
+            //     acc, output_multiplier[out_channel], output_shift[out_channel]);
+            // acc = MultiplyByQuantizedMultiplierSmallerThanOneExp(
+            //     acc, output_multiplier[out_channel], output_shift[out_channel]);
+
+            using gemmlowp::RoundingDivideByPOT;
+            using gemmlowp::SaturatingRoundingDoublingHighMul;
+            int32_t t = cfu_op7(0, acc, output_multiplier[out_channel]);
+            acc = cfu_op6(0, t, -output_shift[out_channel]);
+
             acc += output_offset;
             acc = std::max(acc, output_activation_min);
             acc = std::min(acc, output_activation_max);
@@ -101,7 +146,7 @@ namespace tflite
 
             // Point to next channel of filter data
             filter_data_out_channel_p += input_depth / 4;
-            perf_disable_counter(7);
+            // perf_disable_counter(7);
           }
           // Point to next "pixel" of input data
           input_data_yx_p += input_depth / 4;

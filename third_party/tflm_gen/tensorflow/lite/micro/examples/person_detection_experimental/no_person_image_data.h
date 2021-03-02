@@ -22,9 +22,15 @@ limitations under the License.
 #ifndef TENSORFLOW_LITE_MICRO_EXAMPLES_PERSON_DETECTION_EXPERIMENTAL_NO_PERSON_IMAGE_DATA_H_
 #define TENSORFLOW_LITE_MICRO_EXAMPLES_PERSON_DETECTION_EXPERIMENTAL_NO_PERSON_IMAGE_DATA_H_
 
-#include <cstdint>
+#include <stdint.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 extern const int g_no_person_data_size;
 extern const uint8_t g_no_person_data[];
 
+#ifdef __cplusplus
+}
+#endif
 #endif  // TENSORFLOW_LITE_MICRO_EXAMPLES_PERSON_DETECTION_EXPERIMENTAL_NO_PERSON_IMAGE_DATA_H_

@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-#include <stdint.h>
-#include "cfu.h"
+#ifndef _MNV2H
+#define _MNV2H
 
-//
-// In this function, place C code to emulate your CFU. You can switch between
-// hardware and emulated CFU by setting the CFU_SOFTWARE_DEFINED DEFINE in
-// the Makefile.
-uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2)
-{
-  return (funct3 & 1) ? rs2 : rs1;
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// Mobile Net v2 model processing menu
+void mnv2_menu();
+
+#ifdef __cplusplus
 }
+#endif
+#endif   // _MNV2H
+

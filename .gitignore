@@ -76,3 +76,4 @@ csr.csv
 
 # VSCode files
 *.code-workspace
+.vscode/*

@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Signal, signed
-from nmigen_cfu import InstructionBase, TestBase, Cfu, CfuTestBase
+from nmigen import Mux, Signal, signed
+from nmigen_cfu import InstructionBase, SimpleElaboratable, TestBase, Cfu, CfuTestBase
 import unittest
 
 
@@ -24,24 +24,74 @@ class WriteInstruction(InstructionBase):
     Not all of these are simple writes to a register - some may have other effects.
     in0 is the register to write.
     in1 is the value to write into it.
+
+    Interface:
+        input_offset: Signal(signed(32))
+            Output. Offset to apply for Macc instruction
+        reset_acc: Signal()
+            Output. Signal to cause accumulator to be reset
+        output_offset: Signal(signed(32))
+            Output. Final offset to apply to
+        out_depth_set: Signal()
+            Output. Indicates output channel depth value is valid
+        out_depth: Signal(32)
+            Output. Output channel depth
+        out_mult_set: Signal()
+            Output. Indicates output channel mult value is valid
+        out_mult: Signal(signed(32))
+            Output. Output channel multiplier
+        out_bias_shift_set: Signal()
+            Output. Indicates output channel bias_shfit value is valid
+        out_bias_shfit: Signal(32)
+            Output. Output channel bias and shift. Bias is in bits [0:17],
+            shift is in bits [24:32]
+
+    TODO: should be more modular with the ability to add small pieces of
+          independently testable functionality.
     """
+
     def __init__(self):
         super().__init__()
         self.input_offset = Signal(signed(32))
         self.reset_acc = Signal()
 
+        self.output_offset = Signal(signed(32))
+
+        self.out_depth_set = Signal()
+        self.out_depth = Signal(32)
+        self.out_mult_set = Signal()
+        self.out_mult = Signal(signed(32))
+        self.out_bias_shift_set = Signal()
+        self.out_bias_shift = Signal(32)
+
     def elab(self, m):
         with m.If(self.start):
-            # Just examine lower four bits
-            with m.Switch(self.in0[:4]):
+            # Just examine lower 8 bits
+            with m.Switch(self.in0[:8]):
                 with m.Case(0):
                     m.d.sync += self.input_offset.eq(self.in1)
                 with m.Case(1):
                     m.d.comb += self.reset_acc.eq(1)
+                with m.Case(0x10):
+                    m.d.sync += self.output_offset.eq(self.in1)
+                with m.Case(0x20):
+                    m.d.comb += self.out_depth_set.eq(1)
+                    m.d.comb += self.out_depth.eq(self.in1)
+                with m.Case(0x21):
+                    m.d.comb += self.out_mult_set.eq(1)
+                    m.d.comb += self.out_mult.eq(self.in1)
+                with m.Case(0x22):
+                    m.d.comb += self.out_bias_shift_set.eq(1)
+                    m.d.comb += self.out_bias_shift.eq(self.in1)
             m.d.comb += self.done.eq(1)
 
 
 class WriteInstructionTest(TestBase):
+    """Cursory test of WriteInstruction.
+
+    Important details can only be tested in concert with other modules.
+    """
+
     def create_dut(self):
         return WriteInstruction()
 
@@ -77,6 +127,7 @@ class ReadInstruction(InstructionBase):
     in0 is the register to read.
     out0 contains the read value.
     """
+
     def __init__(self):
         super().__init__()
         self.input_offset = Signal(signed(32))
@@ -125,6 +176,7 @@ class MaccInstruction(InstructionBase):
     in0 contains 4 signed input values
     in1 contains 4 signed filter values
     """
+
     def __init__(self):
         super().__init__()
         self.input_offset = Signal(signed(32))
@@ -133,7 +185,10 @@ class MaccInstruction(InstructionBase):
 
     def elab(self, m):
         in_vals = [Signal(signed(8), name=f"in_val_{i}") for i in range(4)]
-        filter_vals = [Signal(signed(8), name=f"filter_val_{i}") for i in range(4)]
+        filter_vals = [
+            Signal(
+                signed(8),
+                name=f"filter_val_{i}") for i in range(4)]
         mults = [Signal(signed(19), name=f"mult_{i}") for i in range(4)]
         for i in range(4):
             m.d.comb += [
@@ -157,7 +212,8 @@ class MaccInstructionTest(TestBase):
 
     def test(self):
         def x(a, b, c, d):
-            return ((a & 0xff) << 24) + ((b & 0xff) << 16) + ((c & 0xff) << 8) + (d & 0xff)
+            return ((a & 0xff) << 24) + ((b & 0xff) << 16) + \
+                ((c & 0xff) << 8) + (d & 0xff)
 
         DATA = [
             # Reset everything
@@ -200,6 +256,100 @@ class MaccInstructionTest(TestBase):
         self.run_sim(process, True)
 
 
+INT32_MIN = 0x8000_0000
+INT32_MAX = 0x7fff_ffff
+
+
+class RoundingDividebyPOT(SimpleElaboratable):
+    """Implements gemmlowp::RoundingDivideByPOT
+
+    This divides by a power of two, rounding to the nearest whole number.
+    """
+
+    def __init__(self):
+        self.x = Signal(signed(32))
+        self.exponent = Signal(5)
+        self.result = Signal(signed(32))
+
+    def elab(self, m):
+        # TODO: reimplement as a function that returns an expression
+        mask = (1 << self.exponent) - 1
+        remainder = self.x & mask
+        threshold = (mask >> 1) + self.x[31]
+        rounding = Mux(remainder > threshold, 1, 0)
+        m.d.comb += self.result.eq((self.x >> self.exponent) + rounding)
+
+
+class RoundingDividebyPOTInstruction(InstructionBase):
+    def elab(self, m):
+        rdbypot = RoundingDividebyPOT()
+        m.submodules['RDByPOT'] = rdbypot
+        m.d.comb += [
+            rdbypot.x.eq(self.in0s),
+            rdbypot.exponent.eq(self.in1),
+            self.output.eq(rdbypot.result),
+            self.done.eq(1),
+        ]
+
+
+class SRDHM(SimpleElaboratable):
+    """Implements gemmlowp::SaturatingRoundingDoublingHighMul
+
+    It multiplies two 32 bit numbers, then returns bits 62 to 31 of the
+    64 bit result. This is 2x the high word (allowing for saturating and
+    rounding).
+
+    Note that there is a bug to investigated here. This implementation
+    matches the behavior of the compiled source, however, "nudge" may be
+    one of two values.
+
+    TODO: reimplement as a pipeline
+    """
+
+    def __init__(self):
+        self.a = Signal(signed(32))
+        self.b = Signal(signed(32))
+        self.start = Signal()
+        self.result = Signal(signed(32))
+        self.done = Signal()
+
+    def elab(self, m):
+        m.d.sync += self.done.eq(0)
+
+        ab = Signal(signed(64))
+        nudge = 1 << 30  # for some reason negative nudge is not used
+        with m.FSM():
+            with m.State("stage0"):
+                with m.If(self.start):
+                    with m.If((self.a == INT32_MIN) & (self.b == INT32_MIN)):
+                        m.d.sync += [
+                            self.result.eq(INT32_MAX),
+                            self.done.eq(1)
+                        ]
+                    with m.Else():
+                        m.d.sync += ab.eq(self.a * self.b)
+                        m.next = "stage1"
+            with m.State("stage1"):
+                m.d.sync += [
+                    self.result.eq((ab + nudge)[31:]),
+                    self.done.eq(1)
+                ]
+                m.next = "stage0"
+
+
+class SaturatingRoundingDoubleHighMulInstruction(InstructionBase):
+    def elab(self, m):
+        srdhm = SRDHM()
+        m.submodules['srdhm'] = srdhm
+        m.d.comb += [
+            srdhm.a.eq(self.in0s),
+            srdhm.b .eq(self.in1s),
+            srdhm.start.eq(self.start),
+            self.output.eq(srdhm.result),
+            self.done.eq(srdhm.done),
+        ]
+
+
 class AvgPdti8Cfu(Cfu):
     def __init__(self):
         self.write = WriteInstruction()
@@ -209,6 +359,8 @@ class AvgPdti8Cfu(Cfu):
             0: self.write,
             1: self.read,
             2: self.macc,
+            6: RoundingDividebyPOTInstruction(),
+            7: SaturatingRoundingDoubleHighMulInstruction(),
         })
 
     def elab(self, m):
@@ -222,6 +374,7 @@ class AvgPdti8Cfu(Cfu):
 
 
 def make_cfu():
+    """Called by cfu_gen.py to obtain a CFU."""
     return AvgPdti8Cfu()
 
 
@@ -232,10 +385,34 @@ class CfuTest(CfuTestBase):
     def test(self):
         DATA = [
             # Write and Read input offset
-            ((0, 0, 123), None),
-            ((1, 0, 0), 123),
+            ((0, 0, -2), None),
+            ((1, 0, 0), -2),
+            # Read accumulator ==> 0
+            ((1, 1, 0), 0),
+            # 2 x MACC = 128 + 5*8
+            ((0, 0, 128), None),
+            ((2, 0x0000_0000, 0x0000_0001), None),
+            ((1, 1, 0), 128),
+            ((2, 0x8500_0000, 0x0800_0000), None),
+            # Read accumulator
+            ((1, 1, 0), 128 + 40),
+            # Reset accumulator, then accumulate and read again
+            ((0, 1, 0), None),
+            ((2, (6 - 128) & 0xff, 10), None),
+            ((1, 1, 0), 60),
+
+            # Saturating mult - simple tests. Detailed tests are in C code.
+            ((7, 0, 0), 0),
+            ((7, 0x10000, 0x10000), 0x2),
+
+            # Rounding Divide by POT instrurction - simple tests. Detailed
+            # tests are in C code
+            ((6, 0x12345678, 0), 0x12345678),
+            ((6, 0x12345678, 4), 0x1234568),
+            ((6, 0x111f, 4), 0x112),
+            ((6, 0x1117, 4), 0x111),
         ]
-        return self.run_ops(DATA)
+        self.run_ops(DATA)
 
 
 if __name__ == '__main__':

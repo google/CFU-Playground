@@ -15,9 +15,13 @@
  */
 
 #include <stdio.h>
+
 #include "cfu.h"
 #include "menu.h"
 #include "proj_menu.h"
+#include "pdti8_math.h"
+
+#include "generated/csr.h"
 
 // Template Fn
 static void do_hello_world(void)
@@ -26,33 +30,59 @@ static void do_hello_world(void)
 }
 
 // Test template instruction
-static void do_exercise_cfu_op0(void)
+static void do_srdhm(void)
 {
-    puts("\nExercise CFU Op0 aka ADD\n");
-    int count = 0;
-    for (int a = -0x71234567; a < 0x68000000; a += 0x10012345)
+    puts("\nTest SaturatingRoundingDoublingHighMul");
+    //sim_trace_enable_write(1);
+    int trials = 0;
+    int mismatches = 0;
+    for (int32_t a = -0x71234567; a < 0x68000000; a += 0x10012345)
     {
-
-        for (int b = -0x7edcba98; b < 0x68000000; b += 0x10770077)
+        for (int32_t b = -0x7edcba98; b < 0x68000000; b += 0x10770077)
         {
-            int cfu = cfu_op0(a, b);
-            printf("a: %08x b:%08x a+b=%08x cfu= %08x\n", a, b, a + b, cfu);
-            if (cfu != a + b) 
+            trials++;
+            int32_t gem = math_srdhm_gemmlowp(a, b);
+            int32_t cfu = math_srdhm_cfu(a, b);
+            if (gem != cfu)
             {
-                printf("\n***FAIL\n");
-                return;
+                mismatches++;
+                printf("mismatch: srdhm(%10ld, %10ld) = %10d, %10d\n", a, b, gem, cfu);
             }
-            count++;
         }
     }
-    printf("Performed %d comparisons", count);
+    printf("Performed %d comparisons, %d failures", trials, mismatches);
+}
+
+// Test template instruction
+static void do_rdbypot(void)
+{
+    puts("\nTest RoundingDivideByPOT");
+    //sim_trace_enable_write(1);
+    int trials = 0;
+    int mismatches = 0;
+    for (int32_t x = -0x71234567; x < 0x68000000; x += 0x10012345)
+    {
+        for (int exponent = -5; exponent >= -10; exponent--)
+        {
+            trials++;
+            int32_t gem = math_rdbypot_gemmlowp(x, exponent);
+            int32_t cfu = math_rdbypot_cfu(x, exponent);
+            if (gem != cfu)
+            {
+                mismatches++;
+                printf("mismatch: srdhm(%10ld, %d) = %10d, %10d\n", x, exponent, gem, cfu);
+            }
+        }
+    }
+    printf("Performed %d comparisons, %d failures", trials, mismatches);
 }
 
 static struct Menu MENU = {
     "Project Menu",
     "project",
     {
-        MENU_ITEM('0', "exercise cfu op0", do_exercise_cfu_op0),
+        MENU_ITEM('0', "SaturatingRoundingDoublingHighMul - local impl vs lib", do_srdhm),
+        MENU_ITEM('1', "RoundingDivideByPOT - local impl vs lib", do_rdbypot),
         MENU_ITEM('h', "say Hello", do_hello_world),
         MENU_END,
     },

@@ -62,9 +62,9 @@ inline void DepthwiseConvPerChannelSpecialized(
   TFLITE_DCHECK_EQ(bias_shape.FlatSize(), output_depth);
 
   // This is the StoreInstruction CFU to store these const values into the CFU.
-  cfu_op1(10, input_width);
-  cfu_op1(11, input_height);
-  cfu_op1(13, input_offset);
+  cfu_op1(0, 10, input_width);
+  cfu_op1(0, 11, input_height);
+  cfu_op1(0, 13, input_offset);
 
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
@@ -75,7 +75,7 @@ inline void DepthwiseConvPerChannelSpecialized(
             const int in_x_origin = (out_x * stride_width) - pad_width;
             const int in_y_origin = (out_y * stride_height) - pad_height;
             // reset accumulate to have acc = 0.
-            cfu_op1(12, 1);
+            cfu_op1(0, 12, 1);
             for (int filter_y = 0; filter_y < filter_height; ++filter_y) {
               for (int filter_x = 0; filter_x < filter_width; ++filter_x) {
                 const int in_x = in_x_origin + dilation_width_factor * filter_x;
@@ -83,7 +83,7 @@ inline void DepthwiseConvPerChannelSpecialized(
                     in_y_origin + dilation_height_factor * filter_y;
                 // Zero padding by omitting the areas outside the image.
                 // This is the DoubleCompareInstruction CFU
-                const bool is_point_inside_image = cfu_op0(in_x, in_y);
+                const bool is_point_inside_image = cfu_op0(0, in_x, in_y);
                     //(in_x >= 0) && (in_x < input_width) && (in_y >= 0) &&
                     //(in_y < input_height);
                 if (is_point_inside_image) {
@@ -109,12 +109,12 @@ inline void DepthwiseConvPerChannelSpecialized(
                   // accumulator depth is smaller than 2^16.
                   // The MultiplyAccumulateInstruction CFU to perform the 3 parallel calculations,
                   // replacing acc += filter_val * (input_val + input_offset);
-                  cfu_op3(filter_val, input_val);
+                  cfu_op3(0, filter_val, input_val);
                 }
               }
             }
             // Read the acc value with the ReadInstruction and put it into a C++ variable.
-            int32_t acc = cfu_op2(12,0);
+            int32_t acc = cfu_op2(0, 12,0);
             if (bias_data) {
               acc += bias_data[output_channel];
             }
@@ -184,9 +184,9 @@ inline void DepthwiseConvPerChannel(
   }
 
   // This is the StoreInstruction CFU to store these const values into the CFU.
-  cfu_op1(10, input_width);
-  cfu_op1(11, input_height);
-  cfu_op1(13, input_offset);
+  cfu_op1(0, 10, input_width);
+  cfu_op1(0, 11, input_height);
+  cfu_op1(0, 13, input_offset);
 
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
@@ -197,7 +197,7 @@ inline void DepthwiseConvPerChannel(
             const int in_x_origin = (out_x * stride_width) - pad_width;
             const int in_y_origin = (out_y * stride_height) - pad_height;
             // reset accumulate to have acc = 0.
-            cfu_op1(12, 1);
+            cfu_op1(0, 12, 1);
             for (int filter_y = 0; filter_y < filter_height; ++filter_y) {
               for (int filter_x = 0; filter_x < filter_width; ++filter_x) {
                 const int in_x = in_x_origin + dilation_width_factor * filter_x;
@@ -205,7 +205,7 @@ inline void DepthwiseConvPerChannel(
                     in_y_origin + dilation_height_factor * filter_y;
                 // Zero padding by omitting the areas outside the image.
                 // This is the DoubleCompareInstruction CFU
-                const bool is_point_inside_image = cfu_op0(in_x, in_y);
+                const bool is_point_inside_image = cfu_op0(0, in_x, in_y);
                     //(in_x >= 0) && (in_x < input_width) && (in_y >= 0) &&
                     //(in_y < input_height);
                 if (is_point_inside_image) {
@@ -231,12 +231,12 @@ inline void DepthwiseConvPerChannel(
                   // accumulator depth is smaller than 2^16.
                   // The MultiplyAccumulateInstruction CFU to perform the 3 parallel calculations,
                   // replacing acc += filter_val * (input_val + input_offset);
-                  cfu_op3(filter_val, input_val);
+                  cfu_op3(0, filter_val, input_val);
                 }
               }
             }
             // Read the acc value with the ReadInstruction and put it into a C++ variable.
-            int32_t acc = cfu_op2(12,0);
+            int32_t acc = cfu_op2(0, 12,0);
             if (bias_data) {
               acc += bias_data[output_channel];
             }

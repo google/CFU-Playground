@@ -13,15 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef PDTI8_MATH_H_
+#define PDTI8_MATH_H_
 
 #include <stdint.h>
-#include "cfu.h"
 
-//
-// In this function, place C code to emulate your CFU. You can switch between
-// hardware and emulated CFU by setting the CFU_SOFTWARE_DEFINED DEFINE in
-// the Makefile.
-uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2)
-{
-  return (funct3 & 1) ? rs2 : rs1;
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int32_t math_srdhm_gemmlowp(int32_t a, int32_t b);
+int32_t math_srdhm_cfu(int32_t a, int32_t b);
+
+int32_t math_rdbypot_gemmlowp(int32_t x, int exponent);
+int32_t math_rdbypot_cfu(int32_t x, int exponent);
+
+#ifdef __cplusplus
 }
+#endif
+#endif

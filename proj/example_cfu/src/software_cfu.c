@@ -15,6 +15,7 @@
  */
 
 #include <stdint.h>
+#include "cfu.h"
 
 static uint32_t byte_sum(uint32_t rs1, uint32_t rs2)
 {
@@ -70,9 +71,9 @@ static uint32_t fib(uint32_t rs1)
 // In this function, place C code to emulate your CFU. You can switch between
 // hardware and emulated CFU by setting the CFU_SOFTWARE_DEFINED DEFINE in
 // the Makefile.
-uint32_t software_cfu(uint32_t functionid, uint32_t rs1, uint32_t rs2)
+uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2)
 {
-  switch (functionid)
+  switch (funct3)
   {
   case 0:
     return byte_sum(rs1, rs2);

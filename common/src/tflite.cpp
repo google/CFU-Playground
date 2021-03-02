@@ -15,8 +15,7 @@
 #include "tflite.h"
 #include "perf.h"
 
-#include "tensorflow/lite/micro/examples/person_detection_experimental/detection_responder.h"
-#include "tensorflow/lite/micro/examples/person_detection_experimental/image_provider.h"
+#include "tensorflow/lite/micro/all_ops_resolver.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_profiler.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
@@ -82,23 +81,24 @@ static void tflite_init()
   // incur some penalty in code space for op implementations that are not
   // needed by this graph.
   //
-  // tflite::AllOpsResolver resolver;
-  // NOLINTNEXTLINE(runtime-global-variables)
-  static tflite::MicroMutableOpResolver<8> micro_op_resolver;
-  micro_op_resolver.AddAveragePool2D();
-  micro_op_resolver.AddConv2D();
-  micro_op_resolver.AddDepthwiseConv2D();
-  micro_op_resolver.AddReshape();
-  micro_op_resolver.AddSoftmax();
+  static tflite::AllOpsResolver resolver;
+  op_resolver = &resolver;
+  // // NOLINTNEXTLINE(runtime-global-variables)
+  // static tflite::MicroMutableOpResolver<8> micro_op_resolver;
+  // micro_op_resolver.AddAveragePool2D();
+  // micro_op_resolver.AddConv2D();
+  // micro_op_resolver.AddDepthwiseConv2D();
+  // micro_op_resolver.AddReshape();
+  // micro_op_resolver.AddSoftmax();
 
-  // needed for jon's model conv2d/relu, maxpool2d, reshape, fullyconnected, logistic
-  micro_op_resolver.AddMaxPool2D();
-  micro_op_resolver.AddFullyConnected();
-  micro_op_resolver.AddLogistic();
+  // // needed for jon's model conv2d/relu, maxpool2d, reshape, fullyconnected, logistic
+  // micro_op_resolver.AddMaxPool2D();
+  // micro_op_resolver.AddFullyConnected();
+  // micro_op_resolver.AddLogistic();
 
-  // needed for MODEL=magic_wand_full_i8
-  // micro_op_resolver.AddQuantize();
-  op_resolver = &micro_op_resolver;
+  // // needed for MODEL=magic_wand_full_i8
+  // // micro_op_resolver.AddQuantize();
+  // op_resolver = &micro_op_resolver;
 
   // profiler
   static tflite::MicroProfiler micro_profiler(error_reporter);
@@ -128,9 +128,9 @@ void tflite_load_model(unsigned char *model_data)
 
   // Build an interpreter to run the model with.
   // NOLINTNEXTLINE(runtime-global-variables)
-  static tflite::MicroInterpreter micro_interpreter(
+  alignas(tflite::MicroInterpreter) static unsigned char buf[sizeof(tflite::MicroInterpreter)];
+  interpreter = new (buf) tflite::MicroInterpreter(
       model, *op_resolver, tensor_arena, kTensorArenaSize, error_reporter, profiler);
-  interpreter = &micro_interpreter;
 
   // Allocate memory from the tensor_arena for the model's tensors.
   TfLiteStatus allocate_status = interpreter->AllocateTensors();
@@ -158,10 +158,17 @@ void tflite_set_input_zeros()
   printf("Zero 0x%x bytes at 0x%p\n", input->bytes, input->data.int8);
 }
 
-int8_t *tflite_get_output() {
-  return interpreter->output(0)->data.int8;
+void tflite_set_input(const void *data)
+{
+  auto input = interpreter->input(0);
+  memcpy(input->data.int8, data, input->bytes);
+  printf("Copied 0x%x bytes at 0x%p\n", input->bytes, input->data.int8);
 }
 
+int8_t *tflite_get_output()
+{
+  return interpreter->output(0)->data.int8;
+}
 
 void tflite_classify()
 {
@@ -180,9 +187,6 @@ void tflite_classify()
   // Uncomment to see how large the arena needs to be.
   printf("Arena used bytes: %llu\n", (long long unsigned)(interpreter->arena_used_bytes()));
 }
-
-
-
 
 int8_t *get_input()
 {
