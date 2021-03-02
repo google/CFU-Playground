@@ -16,6 +16,7 @@ limitations under the License.
 #define TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_CONV_H_
 
 #include "tensorflow/lite/kernels/internal/common.h"
+#include "tf_util/print_params.h"
 
 namespace tflite
 {
@@ -31,6 +32,10 @@ namespace tflite
         const int32_t *bias_data, const RuntimeShape &output_shape,
         int8_t *output_data)
     {
+      #ifdef SHOW_CONV_PARAMS
+      print_conv_params(params, input_shape, filter_shape, output_shape);
+      #endif
+
       // Get parameters.
       const int32_t input_offset = params.input_offset; // r = s(q - Z)
       const int stride_width = params.stride_width;

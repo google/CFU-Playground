@@ -23,9 +23,12 @@ export DEFINES :=
 DEFINES += NDEBUG
 
 # Uncomment this line to skip individual profiling output (has minor effect on performance).
-#DEFINES += NPROFILE
+DEFINES += NPROFILE
 
 # Uncomment to include mnv2 in built binary (adds ~500kB to binary)
-#DEFINES += INCLUDE_MODEL_MNV2
+DEFINES += INCLUDE_MODEL_MNV2
+RUN_MENU_ITEMS := 1 2 1
+
+DEFINES += SHOW_CONV_PARAMS
 
 include ../proj.mk
