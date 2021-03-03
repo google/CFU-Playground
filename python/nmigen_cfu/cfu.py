@@ -281,9 +281,9 @@ class CfuTestBase(TestBase):
             for n, (inputs, expected) in enumerate(data):
                 function_id, in0, in1 = inputs
                 # Set inputs and cmd_valid
-                yield self.dut.cmd_payload_function_id.eq(function_id)
-                yield self.dut.cmd_payload_inputs_0.eq(in0)
-                yield self.dut.cmd_payload_inputs_1.eq(in1)
+                yield self.dut.cmd_function_id.eq(function_id)
+                yield self.dut.cmd_in0.eq(in0)
+                yield self.dut.cmd_in1.eq(in1)
                 yield self.dut.cmd_valid.eq(1)
                 yield self.dut.rsp_ready.eq(1)
                 yield
@@ -296,10 +296,10 @@ class CfuTestBase(TestBase):
                 yield self.dut.rsp_ready.eq(0)
 
                 # Ensure no errors, and output as expected
-                ok = (yield self.dut.rsp_payload_response_ok)
+                ok = (yield self.dut.rsp_ok)
                 self.assertTrue(ok, f"op{n} response ok")
                 if expected is not None:
-                    actual = (yield self.dut.rsp_payload_outputs_0)
+                    actual = (yield self.dut.rsp_out)
                     self.assertEqual(actual, expected & 0xffff_ffff,
                                      f"op {n} output {hex(actual)} != {hex(expected & 0xffff_ffff)}")
                 yield
