@@ -29,7 +29,7 @@ def main():
     infile_name = args.infile.name
     outfile = args.outfile
 
-    array_name = os.path.basename(infile_name).replace('.tflite', '')
+    array_name = os.path.splitext(os.path.basename(infile_name))[0]
 
     def out(s):
         print(s, file=outfile, end='')

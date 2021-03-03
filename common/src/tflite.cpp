@@ -155,14 +155,23 @@ void tflite_set_input_zeros()
 {
   auto input = interpreter->input(0);
   memset(input->data.int8, 0, input->bytes);
-  printf("Zero 0x%x bytes at 0x%p\n", input->bytes, input->data.int8);
+  printf("Zeroed %d bytes at 0x%p\n", input->bytes, input->data.int8);
 }
 
 void tflite_set_input(const void *data)
 {
   auto input = interpreter->input(0);
   memcpy(input->data.int8, data, input->bytes);
-  printf("Copied 0x%x bytes at 0x%p\n", input->bytes, input->data.int8);
+  printf("Copied %d bytes at 0x%p\n", input->bytes, input->data.int8);
+}
+
+void tflite_set_input_unsigned(const unsigned char *data)
+{
+  auto input = interpreter->input(0);
+  for (size_t i = 0; i < input->bytes; i++) {
+    input->data.int8[i] = (int) data[i] - 127;
+  }
+  printf("Set %d bytes at 0x%p\n", input->bytes, input->data.int8);
 }
 
 int8_t *tflite_get_output()

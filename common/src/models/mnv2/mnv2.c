@@ -21,6 +21,27 @@
 
 #include "models/mnv2/model_mobilenetv2_160_035.h"
 
+#include "models/mnv2/input_00001_18027.h"
+#include "models/mnv2/input_00001_7281.h"
+#include "models/mnv2/input_00001_7425.h"
+#include "models/mnv2/input_00002_2532.h"
+#include "models/mnv2/input_00002_25869.h"
+#include "models/mnv2/input_00004_970.h"
+
+#define NUM_GOLDEN 5
+struct golden_test
+{
+    const unsigned char *data;
+    int32_t expected;
+};
+
+struct golden_test golden_tests[] = {
+    {input_00001_7281, -106},
+    {input_00001_7425, 66},
+    {input_00002_2532, -106},
+    {input_00002_25869, 144},
+    {input_00004_970, 110},
+};
 // Initialize everything once
 // deallocate tensors when done
 static void mnv2_init(void)
@@ -36,20 +57,69 @@ static int32_t mnv2_classify()
 
     // Process the inference results.
     int8_t *output = tflite_get_output();
-    return output[1] - output[0];
+    return (int32_t)output[1] - (int32_t)output[0];
 }
 
 static void do_classify_zeros()
 {
     tflite_set_input_zeros();
-    mnv2_classify();
+    int32_t result = mnv2_classify();
+    printf("Result is %ld\n", result);
 }
 
+static void do_classify_0()
+{
+    tflite_set_input_unsigned(golden_tests[0].data);
+    int32_t result = mnv2_classify();
+    printf("Result is %ld\n", result);
+}
+
+static void do_classify_1()
+{
+    tflite_set_input_unsigned(golden_tests[1].data);
+    int32_t result = mnv2_classify();
+    printf("Result is %ld\n", result);
+}
+
+static void do_classify_special()
+{
+    tflite_set_input_unsigned(input_00001_18027);
+    int32_t result = mnv2_classify();
+    printf("Result is %ld\n", result);
+}
+
+static void do_golden_tests()
+{
+    bool failed = false;
+    for (size_t i = 0; i < NUM_GOLDEN; i++)
+    {
+        tflite_set_input_unsigned(golden_tests[i].data);
+        int actual = mnv2_classify();
+        int expected = golden_tests[i].expected;
+        if (actual != expected)
+        {
+            failed = true;
+            printf("*** Golden test %d failed: %ld (actual) != %ld (expected))\n", i, actual, expected);
+        }
+    }
+
+    if (failed)
+    {
+        puts("FAIL Golden tests failed");
+    }
+    {
+        puts("OK   Golden tests passed");
+    }
+}
 static struct Menu MENU = {
     "Tests for mnv2 model",
     "mnv2",
     {
-        MENU_ITEM('1', "Run with zeros input", do_classify_zeros),
+        MENU_ITEM('0', "Run test 0", do_classify_0),
+        MENU_ITEM('1', "Run test 1", do_classify_1),
+        MENU_ITEM('s', "Run special test", do_classify_special),
+        MENU_ITEM('g', "Run golden tests (check for expected outputs)", do_golden_tests),
+        MENU_ITEM('z', "Run with zeros input", do_classify_zeros),
         MENU_END,
     },
 };
