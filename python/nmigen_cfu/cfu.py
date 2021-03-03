@@ -67,15 +67,17 @@ class InstructionBase(SimpleElaboratable):
 class InstructionTestBase(TestBase):
     """Base test class, suitable for testing simple instructions."""
 
-    def verify(self, data):
+    def verify(self, data, trace=False):
         """Verifies instruction given explicit lists of inputs and outputs
 
         Parameters
         ----------
-        data: list of tuples (in0, in1, out).
+        data: list of 3-tuples (in0, in1, out) or 4-tuples (funct7, in0, in1, out)
         """
         def process():
-            for n, (in0, in1, expected) in enumerate(data):
+            for n, values in enumerate(data):
+                funct7, in0, in1, expected = values if len(values) == 4 else (0,) + values
+                yield self.dut.funct7.eq(funct7)
                 yield self.dut.in0.eq(in0)
                 yield self.dut.in1.eq(in1)
                 yield self.dut.start.eq(1)
@@ -89,7 +91,7 @@ class InstructionTestBase(TestBase):
                     f"\n  case {n}:  " +
                     f" in0={in0:08x}, in1={in1:08x}, expected={expected:08x}, actual={actual:08x}")
                 yield
-        self.run_sim(process, False)
+        self.run_sim(process, trace)
 
     def verify_against_reference(self, inputs, reference_fn):
         """Verifies that our instruction behaves the same as a reference
