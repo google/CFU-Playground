@@ -51,6 +51,9 @@ export PROJ       := $(lastword $(subst /, ,${CURDIR}))
 export CFU_ROOT   := $(realpath $(CURDIR)/../..)
 export PLATFORM   ?= arty
 
+RUN_MENU_ITEMS    ?=1 1 1
+TEST_MENU_ITEMS   ?=5
+
 ifneq '' '$(fiter-out arty,sim,$(PLATFORM))'
 	$(error PLATFORM must be 'arty' or 'sim')
 endif
@@ -179,11 +182,11 @@ bitstream: $(CFU_VERILOG)
 ifeq '1' '$(words $(TTY))'
 run: $(SOFTWARE_BIN)
 	@echo Running automated pdti8 test on Arty Board
-	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) $(UART_SPEED) 1 1 1 |& tee $(SOFTWARE_LOG)
+	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) $(UART_SPEED) $(RUN_MENU_ITEMS) |& tee $(SOFTWARE_LOG)
 
 unit: $(SOFTWARE_BIN)
 	@echo Running unit test on Arty Board
-	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) $(UART_SPEED) 5 |& tee $(UNITTEST_LOG)
+	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) $(UART_SPEED) $(TEST_MENU_ITEMS) |& tee $(UNITTEST_LOG)
 
 load: $(SOFTWARE_BIN)
 	@echo Running interactively on Arty Board
