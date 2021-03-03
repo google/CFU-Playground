@@ -21,9 +21,6 @@
 
 #include "models/mnv2/model_mobilenetv2_160_035.h"
 
-static const int kHotdogIndex = 1;
-static const int kNotHotdogIndex = 0;
-
 // Initialize everything once
 // deallocate tensors when done
 static void mnv2_init(void)
@@ -32,26 +29,20 @@ static void mnv2_init(void)
 }
 
 // Run classification, after input has been loaded
-static void mnv2_classify(int8_t *results)
+static int32_t mnv2_classify()
 {
     printf("Running mnv2\n");
     tflite_classify();
 
     // Process the inference results.
     int8_t *output = tflite_get_output();
-    printf("Hotdog:     %4d\n", output[kHotdogIndex]);
-    printf("Not hotdog: %4d\n", output[kNotHotdogIndex]);
-    if (results)
-    {
-        results[0] = output[0];
-        results[1] = output[1];
-    }
+    return output[1] - output[0];
 }
 
 static void do_classify_zeros()
 {
     tflite_set_input_zeros();
-    mnv2_classify(NULL);
+    mnv2_classify();
 }
 
 static struct Menu MENU = {
