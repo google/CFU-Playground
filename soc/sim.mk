@@ -45,7 +45,7 @@ LITEX_ARGS= --output-dir $(OUT_DIR) \
 	--sim-trace
 
 PYRUN:=     $(CFU_ROOT)/scripts/pyrun
-SIM_RUN:=   $(PYRUN) ./sim.py $(LITEX_ARGS)
+SIM_RUN:=   MAKEFLAGS=-j8 $(PYRUN) ./sim.py $(LITEX_ARGS)
 BIOS_BIN := $(OUT_DIR)/software/bios/bios.bin
 
 .PHONY: run litex-software clean

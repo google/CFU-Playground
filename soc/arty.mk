@@ -46,7 +46,7 @@ LITEX_ARGS += --toolchain symbiflow
 endif
 
 PYRUN:=     $(CFU_ROOT)/scripts/pyrun
-ARTY_RUN:=  $(PYRUN) ./arty.py $(LITEX_ARGS)
+ARTY_RUN:=  MAKEFLAGS=-j8 $(PYRUN) ./arty.py $(LITEX_ARGS)
 
 BIOS_BIN := $(OUT_DIR)/software/bios/bios.bin
 BITSTREAM:= $(OUT_DIR)/gateware/arty.bit

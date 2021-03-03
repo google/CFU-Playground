@@ -116,12 +116,14 @@ CPPSOURCES := $(call find_srcs,cpp)
 CCSOURCES  := $(call find_srcs,cc) 
 ASOURCES   := $(call find_srcs,S) 
 MODEL_SRCS := $(call find_srcs,tflite)
+DATA_SRCS  := $(call find_srcs,dat)
 
 COBJS      := $(CSOURCES:.c=.o)
 CXXOBJS    := $(CPPSOURCES:.cpp=.o) $(CCSOURCES:.cc=.o) 
 AOBJS      := $(ASOURCES:.S=.o)
 OBJECTS    := $(COBJS) $(CXXOBJS) $(AOBJS)
 MODEL_INCS := $(MODEL_SRCS:.tflite=.h)
+DATA_INCS  := $(DATA_SRCS:.dat=.h)
 
 ifdef V
 QUIET      :=
@@ -153,6 +155,10 @@ $(TARGET): $(OBJECTS) $(LDSCRIPTS)
 %.h : %.tflite
 	$(QUIET) echo "  XXD  $(notdir $<) $(notdir $@)"
 	$(QUIET) $(XXD) $< $@
+
+%.h : %.dat
+	$(QUIET) echo "  XXD  $(notdir $<) $(notdir $@)"
+	$(QUIET) $(XXD) $< $@
 	
  
 # Some shenanigans to create a file whose name depends on compiler DEFINEs
@@ -164,7 +170,7 @@ $(DEFINE_FILE):
 	echo $(DEFINES) > $(DEFINE_FILE)
 
 # Force model include files to be generated first
-$(OBJECTS): | $(MODEL_INCS)
+$(OBJECTS): | $(MODEL_INCS) $(DATA_INCS)
 
 %.o : %.c $(DEFINE_FILE)
 	$(QUIET) echo "  CC  $(notdir $<)	$(notdir $@)"

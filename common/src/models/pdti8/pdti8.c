@@ -24,8 +24,6 @@
 #include "tensorflow/lite/micro/examples/person_detection_experimental/person_image_data.h"
 #include "tensorflow/lite/micro/examples/person_detection_experimental/no_person_image_data.h"
 
-static const int kPersonIndex = 1;
-static const int kNotAPersonIndex = 0;
 
 // Initialize everything once
 // deallocate tensors when done
@@ -35,66 +33,56 @@ static void pdti8_init(void)
 }
 
 // Run classification, after input has been loaded
-static void pdti8_classify(int8_t *results)
+static int32_t pdti8_classify()
 {
     printf("Running pdti8\n");
     tflite_classify();
 
     // Process the inference results.
     int8_t *output = tflite_get_output();
-    printf("Person:     %4d\n", output[kPersonIndex]);
-    printf("Not person: %4d\n", output[kNotAPersonIndex]);
-    if (results)
-    {
-        results[0] = output[0];
-        results[1] = output[1];
-    }
+    return output[1] - output[0];
 }
 
 static void do_classify_zeros()
 {
     tflite_set_input_zeros();
-    pdti8_classify(NULL);
+    pdti8_classify();
 }
 
 static void do_classify_no_person()
 {
     puts("Classify Not Person");
     tflite_set_input(g_no_person_data);
-    pdti8_classify(NULL);
+    pdti8_classify();
 }
 
 static void do_classify_person()
 {
     puts("Classify Person");
     tflite_set_input(g_person_data);
-    pdti8_classify(NULL);
+    pdti8_classify();
 }
 
 #define NUM_GOLDEN 3
-static int8_t golden_results[NUM_GOLDEN][2] = {
-    {72, -72},
-    {-25, 25},
-    {-113, 113},
-};
+static int32_t golden_results[NUM_GOLDEN] = {-144, 50, 226};
 
 static void do_golden_tests()
 {
-    int8_t actual[NUM_GOLDEN][2];
+    int32_t actual[NUM_GOLDEN];
     tflite_set_input_zeros();
-    pdti8_classify(actual[0]);
+    actual[0] = pdti8_classify();
     tflite_set_input(g_no_person_data);
-    pdti8_classify(actual[1]);
+    actual[1] = pdti8_classify();
     tflite_set_input(g_person_data);
-    pdti8_classify(actual[2]);
+    actual[2] = pdti8_classify();
 
     bool failed = false;
     for (size_t i = 0; i < NUM_GOLDEN; i++)
     {
-        if (actual[i][0] != golden_results[i][0] || actual[i][1] != golden_results[i][1])
+        if (actual[i] != golden_results[i])
         {
             failed = true;
-            printf("*** Golden test %d failed (%d, %d)\n", i, actual[i][0], actual[i][1]);
+            printf("*** Golden test %d failed: %ld (actual) != %ld (expected))\n", i, actual[i], golden_results[i]);
         }
     }
 
