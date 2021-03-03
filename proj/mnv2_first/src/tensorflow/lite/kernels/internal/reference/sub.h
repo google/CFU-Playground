@@ -25,6 +25,8 @@ limitations under the License.
 #include "tensorflow/lite/kernels/internal/compatibility.h"
 #include "tensorflow/lite/kernels/internal/types.h"
 
+#include "tf_util/print_params.h"
+
 namespace tflite
 {
 
@@ -224,6 +226,9 @@ namespace tflite
                                      const RuntimeShape &output_shape,
                                      int8_t *output_data)
         {
+#ifdef SHOW_ARITHMETIC_PARAMS
+            print_arithmetic_params("SUB", params, input1_shape, input2_shape, output_shape);
+#endif
             ruy::profiler::ScopeLabel label("BroadcastSubSlow/int8_t");
             NdArrayDesc<N> desc1;
             NdArrayDesc<N> desc2;

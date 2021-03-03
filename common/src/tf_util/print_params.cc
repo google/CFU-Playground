@@ -31,11 +31,35 @@ const char *to_string(tflite::PaddingType type)
   }
 }
 
+const char *to_string(tflite::BroadcastableOpCategory category)
+{
+  switch (category)
+  {
+  case (tflite::BroadcastableOpCategory::kNone):
+    return "kNone";
+  case (tflite::BroadcastableOpCategory::kNonBroadcast):
+    return "kNonBroadcast";
+  case (tflite::BroadcastableOpCategory::kFirstInputBroadcastsFast):
+    return "kFirstInputBroadcastsFast";
+  case (tflite::BroadcastableOpCategory::kSecondInputBroadcastsFast):
+    return "kSecondInputBroadcastsFast";
+  case (tflite::BroadcastableOpCategory::kGenericBroadcast):
+    return "kGenericBroadcast";
+  default:
+    return "UNKNOWN";
+  }
+}
+
 void print_shape(const tflite::RuntimeShape &shape)
 {
-  if (shape.DimensionsCount() != 4)
+  if (shape.DimensionsCount() == 0)
   {
-    puts("*ERR* shape dims should be 4");
+    printf("*, *, *, *, ");
+    return;
+  }
+  else if (shape.DimensionsCount() != 4)
+  {
+    printf("*ERR* shape dims should be 4, but are %ld\n", shape.DimensionsCount());
   }
   printf("%ld, %ld, %ld, %ld, ", shape.Dims(0), shape.Dims(1), shape.Dims(2), shape.Dims(3));
 }
@@ -44,7 +68,7 @@ void print_shape(const tflite::RuntimeShape &shape)
 // "padding_type", "padding_width", "padding_height", "padding_width_offset", "padding_height_offset",
 // "stride_width", "stride_height", "dilation_width_factor", "dilation_height_factor",
 // "input_offset", "weights_offset", "output_offset", "output_multiplier", "output_shift",
-// "quantized_activation_min", "quantized_activation_max"
+// "quantized_activation_min", "quantized_activation_max",
 // "input_batches", "input_height", "input_width", "input_depth",
 // "filter_output_depth", "filter_height", "filter_width", "filter_input_depth",
 // "output_batches", "output_height", "output_width", "output_depth",
@@ -77,9 +101,9 @@ void print_conv_params(
 
 // Format is:
 // "padding_type", "padding_width", "padding_height", "padding_width_offset", "padding_height_offset",
-// "stride_width", "stride_height", "dilation_width_factor", "dilation_height_factor", "depth_multiplier"
+// "stride_width", "stride_height", "dilation_width_factor", "dilation_height_factor", "depth_multiplier",
 // "input_offset", "weights_offset", "output_offset", "output_multiplier", "output_shift",
-// "quantized_activation_min", "quantized_activation_max"
+// "quantized_activation_min", "quantized_activation_max",
 // "input_batches", "input_height", "input_width", "input_depth",
 // "filter_output_depth", "filter_height", "filter_width", "filter_input_depth",
 // "output_batches", "output_height", "output_width", "output_depth",
@@ -107,6 +131,47 @@ void print_depthwise_params(
   printf("%ld, ", params.quantized_activation_max);
   print_shape(input_shape);
   print_shape(filter_shape);
+  print_shape(output_shape);
+  printf("\n");
+}
+
+// Format is:
+// "op_name", "broadcast_category", "input1_offset", "input2_offset",
+// "output_offset", "output_multiplier", "output_shift",
+// "left_shift",
+// "input1_multiplier", "input1_shift", "input2_multiplier", "input2_shift",
+// "quantized_activation_min", "quantized_activation_max",
+// "broadcast_shape0", "broadcast_shape1", "broadcast_shape2", "broadcast_shape3", "broadcast_shape4"
+// "input1_batches", "input1_height", "input1_width", "input1_depth",
+// "input2_batches", "input2_height", "input2_width", "input2_depth",
+// "output_batches", "output_height", "output_width", "output_depth",
+void print_arithmetic_params(const char *op_name,
+                             const tflite::ArithmeticParams &params,
+                             const tflite::RuntimeShape &input1_shape,
+                             const tflite::RuntimeShape &input2_shape,
+                             const tflite::RuntimeShape &output_shape)
+{
+  printf("%s, ", op_name);
+  printf("%s, ", to_string(params.broadcast_category));
+  printf("%ld, ", params.input1_offset);
+  printf("%ld, ", params.input2_offset);
+  printf("%ld, ", params.output_offset);
+  printf("%ld, ", params.output_multiplier);
+  printf("%d, ", params.output_shift);
+  printf("%d, ", params.left_shift);
+  printf("%ld, ", params.input1_multiplier);
+  printf("%d, ", params.input1_shift);
+  printf("%ld, ", params.input2_multiplier);
+  printf("%d, ", params.input2_shift);
+  printf("%ld, ", params.quantized_activation_min);
+  printf("%ld, ", params.quantized_activation_max);
+  printf("%d, ", params.broadcast_shape[0]);
+  printf("%d, ", params.broadcast_shape[1]);
+  printf("%d, ", params.broadcast_shape[2]);
+  printf("%d, ", params.broadcast_shape[3]);
+  printf("%d, ", params.broadcast_shape[4]);
+  print_shape(input1_shape);
+  print_shape(input2_shape);
   print_shape(output_shape);
   printf("\n");
 }

@@ -29,4 +29,11 @@ void print_depthwise_params(
     const tflite::RuntimeShape &filter_shape,
     const tflite::RuntimeShape &output_shape);
 
+void print_arithmetic_params(
+    const char *op_name,
+    const tflite::ArithmeticParams &params,
+    const tflite::RuntimeShape &input1_shape,
+    const tflite::RuntimeShape &input2_shape,
+    const tflite::RuntimeShape &output_shape);
+
 #endif // _PRINT_PARAMS_H

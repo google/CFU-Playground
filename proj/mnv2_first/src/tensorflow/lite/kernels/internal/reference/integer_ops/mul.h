@@ -19,6 +19,8 @@ limitations under the License.
 #include "ruy/profiler/instrumentation.h" // from @ruy
 #include "tensorflow/lite/kernels/internal/common.h"
 
+#include "tf_util/print_params.h"
+
 namespace tflite
 {
   namespace reference_integer_ops
@@ -98,6 +100,13 @@ namespace tflite
         const T *input1_data, const RuntimeShape &input2_shape,
         const T *input2_data, const RuntimeShape &output_shape, T *output_data)
     {
+#ifdef SHOW_ARITHMETIC_PARAMS
+      print_arithmetic_params("MUL", params, input1_shape, input2_shape, output_shape);
+      printf("input_1 = %lx\n", (uint32_t) (void *) input1_data);
+      printf("input_2 = %lx\n", (uint32_t) (void *) input2_data);
+      printf("output  = %lx\n", (uint32_t) (void *) output_data);
+#endif
+
       ruy::profiler::ScopeLabel label("BroadcastMul4DSlow");
 
       NdArrayDesc<4> desc1;

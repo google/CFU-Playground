@@ -20,6 +20,8 @@ limitations under the License.
 #include "tensorflow/lite/kernels/internal/common.h"
 #include "tensorflow/lite/kernels/internal/types.h"
 
+#include "tf_util/print_params.h"
+
 namespace tflite
 {
     namespace reference_integer_ops
@@ -74,6 +76,9 @@ namespace tflite
                         const RuntimeShape &input2_shape, const int8_t *input2_data,
                         const RuntimeShape &output_shape, int8_t *output_data)
         {
+#ifdef SHOW_ARITHMETIC_PARAMS
+      print_arithmetic_params("ADD", params, input1_shape, input2_shape, output_shape);
+#endif
             CheckArithmeticParams(params);
 
             const int flat_size =
