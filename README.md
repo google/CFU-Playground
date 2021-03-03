@@ -8,13 +8,15 @@ This project enables rapid iteration on processor improvements -- multiple itera
 
 This is how it works at the highest level:
 * Choose a TensorFlow Lite model; a quantized person detection model is provided
-* Execute the inference on the Arty board to get cycle counts per layer
-* Choose an TFLite operator to accelerate, and dig into the code
+* Execute the inference on the Arty FPGA board to get cycle counts per layer
+* Choose an TFLite operator to accelerate, and dig into that code
 * Design new instruction(s) that can replace multiple basic operations
-* Modify the TFLite/Micro library kernel to use the new instruction(s), which are available as intrinsics using function call syntax.
+* Build a custom function unit (a small amount of hardware) that performs the new instruction(s)
+* Modify the TFLite/Micro library kernel to use the new instruction(s), which are available as intrinsics with function call syntax.
 * Rebuild the FPGA Soc, recompile the TFLM library, and rerun to measure improvement (simple `make` targets are provided)
 
-The focus here is performance, not demos.  The inputs to the ML inference are canned/faked, and the only output is cycle counts.  It would be possible to export the improvements made here to an actual demo, but no pathway has been set up for doing so.
+The focus here is performance, not demos.  The inputs to the ML inference are canned/faked, and the only output is cycle counts.  
+It would be possible to export the improvements made here to an actual demo, but no pathway has been set up for doing so.
 
 **Disclaimer: This is not an officially supported Google project.   Support and/or new releases may be limited.**
 
@@ -24,10 +26,12 @@ With the exception of Vivado, everything used by this project is open source.
 ### Required Hardware/OS
 
 * Currently, the only supported target is the Arty 35T board from Digilent.
-* The only supported host OS is Linux.
+* The only supported host OS is Linux (Debian / Ubuntu).
 
 If you want to try things out using Renode simulation,
 then you don't need either the Arty board or Vivado software.
+You can also perform Verilog-level cycle-accurate simulation with Verilator,
+but this is much slower.
 
 ### Assumed Software
 
@@ -36,7 +40,6 @@ then you don't need either the Arty board or Vivado software.
 Other required packages will be checked for and, if on a Debian-based system,
 automatically installed by the setup script below.
 
-TODO: describe how to install renode.
 
 ### Setup
 
