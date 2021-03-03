@@ -23,4 +23,10 @@ void print_conv_params(
     const tflite::RuntimeShape &filter_shape,
     const tflite::RuntimeShape &output_shape);
 
+void print_depthwise_params(
+    const tflite::DepthwiseParams &params,
+    const tflite::RuntimeShape &input_shape,
+    const tflite::RuntimeShape &filter_shape,
+    const tflite::RuntimeShape &output_shape);
+
 #endif // _PRINT_PARAMS_H

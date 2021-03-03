@@ -16,6 +16,7 @@ limitations under the License.
 #define TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_DEPTHWISE_CONV_H_
 
 #include "tensorflow/lite/kernels/internal/common.h"
+#include "tf_util/print_params.h"
 
 namespace tflite
 {
@@ -29,6 +30,10 @@ namespace tflite
         const int32_t *bias_data, const RuntimeShape &output_shape,
         int8_t *output_data)
     {
+      #ifdef SHOW_DEPTHWISE_PARAMS
+      print_depthwise_params(params, input_shape, filter_shape, output_shape);
+      #endif
+
       // Get parameters.
       // TODO(b/141565753): Re-introduce ScopedProfilingLabel on Micro.
       const int stride_width = params.stride_width;
