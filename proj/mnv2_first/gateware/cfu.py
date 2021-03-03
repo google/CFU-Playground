@@ -17,11 +17,11 @@ from nmigen import *
 from nmigen_cfu import InstructionBase, InstructionTestBase, Cfu, CfuTestBase
 import unittest
 
-# See proj_example for further example instructions
 
 class TemplateInstruction(InstructionBase):
     """Template instruction
     """
+
     def elab(self, m):
         with m.If(self.start):
             m.d.sync += self.output.eq(self.in0 + self.in1)
@@ -40,6 +40,22 @@ class TemplateInstructionTest(InstructionTestBase):
             (4, 5, 9),
             (0xffffffff, 0xffffffff, 0xfffffffe),
         ])
+
+
+class Mnv2Cfu(Cfu):
+    def __init__(self):
+        super().__init__({
+            0: TemplateInstruction(),
+        })
+
+    def elab(self, m):
+        super().elab(m)
+        m.d.comb += [
+            # self.read.input_offset.eq(self.write.input_offset),
+            # self.read.accumulator.eq(self.macc.accumulator),
+            # self.macc.reset_acc.eq(self.write.reset_acc),
+            # self.macc.input_offset.eq(self.write.input_offset),
+        ]
 
 
 def make_cfu():
