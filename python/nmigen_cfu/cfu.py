@@ -89,7 +89,7 @@ class InstructionTestBase(TestBase):
                     f"\n  case {n}:  " +
                     f" in0={in0:08x}, in1={in1:08x}, expected={expected:08x}, actual={actual:08x}")
                 yield
-        self.run_sim(process, True)
+        self.run_sim(process, False)
 
     def verify_against_reference(self, inputs, reference_fn):
         """Verifies that our instruction behaves the same as a reference
@@ -304,4 +304,4 @@ class CfuTestBase(TestBase):
                                      f"op {n} output {hex(actual)} != {hex(expected & 0xffff_ffff)}")
                 yield
 
-        self.run_sim(process, True)
+        self.run_sim(process, False)
