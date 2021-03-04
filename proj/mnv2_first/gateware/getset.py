@@ -27,11 +27,6 @@ class Xetter(SimpleElaboratable):
 
     Unlike an instuction, Xetter does not have funct7 available.
 
-    Parameters
-    ----------
-    name: String
-        Name of this Xetter, for use in trace files
-
     Public Interface
     ----------------
     start: Signal input
@@ -46,8 +41,7 @@ class Xetter(SimpleElaboratable):
         The result. Must be valid when `done` is signalled.
     """
 
-    def __init__(self, name):
-        self.name = name
+    def __init__(self):
         self.start = Signal()
         self.done = Signal()
         self.in0 = Signal(32)
@@ -62,8 +56,6 @@ class RegisterSetter(Xetter):
 
     Parameters
     ----------
-    name: string
-        Name of this Xetter, for use in trace files
     width: int
         Number of bits in the Xetter value (1-32)
 
@@ -75,8 +67,8 @@ class RegisterSetter(Xetter):
         This signal is pulsed high for a single cycle when register is set.
     """
 
-    def __init__(self, name, width=32):
-        super().__init__(name)
+    def __init__(self, width=32):
+        super().__init__()
         self.value = Signal(width)
         self.set = Signal()
 

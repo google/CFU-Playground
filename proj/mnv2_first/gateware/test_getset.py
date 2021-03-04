@@ -21,10 +21,7 @@ from .getset import Xetter, RegisterSetter, GetSetInstruction
 
 class RegisterSetterTest(TestBase):
     def create_dut(self):
-        return RegisterSetter('mysetter')
-
-    def test_name(self):
-        self.assertEqual(self.dut.name, 'mysetter')
+        return RegisterSetter()
 
     def test_setget(self):
         DATA = [
@@ -57,8 +54,8 @@ class RegisterSetterTest(TestBase):
 class _AccumulateXetter(Xetter):
     """For unit tests"""
 
-    def __init__(self, name):
-        super().__init__(name)
+    def __init__(self):
+        super().__init__()
         self.value = Signal(32)
 
     def elab(self, m):
@@ -76,9 +73,9 @@ class _AccumulateXetter(Xetter):
 
 class GetSetInstructionTest(InstructionTestBase):
     def create_dut(self):
-        self.m.submodules['rs1'] = rs1 = RegisterSetter('rs1')
-        self.m.submodules['rs2'] = rs2 = RegisterSetter('rs2')
-        self.m.submodules['acc'] = adder = _AccumulateXetter('acc')
+        self.m.submodules['rs1'] = rs1 = RegisterSetter()
+        self.m.submodules['rs2'] = rs2 = RegisterSetter()
+        self.m.submodules['acc'] = adder = _AccumulateXetter()
         return GetSetInstruction({
             1: rs1,
             2: rs2,
