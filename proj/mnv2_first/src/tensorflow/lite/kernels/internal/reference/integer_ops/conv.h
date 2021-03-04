@@ -15,11 +15,11 @@ limitations under the License.
 #ifndef TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_CONV_H_
 #define TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_CONV_H_
 
+#include <stdio.h>
+
 #include "mnv2_conv.h"
 #include "tensorflow/lite/kernels/internal/common.h"
 #include "tf_util/print_params.h"
-
-#include <stdio.h>
 
 namespace tflite {
 namespace reference_integer_ops {
@@ -70,11 +70,13 @@ inline void ConvPerChannel(
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
 
-  if (pad_width == 0 && pad_height == 0 && stride_width == 1 &&
-      stride_height == 1 && dilation_width_factor == 1 &&
-      dilation_height_factor == 1 && // params.weights_offset == 0 &&
-      output_activation_min == -128 && output_activation_max == 127) {
-    if (filter_height == 1 && filter_width == 1) {
+  if (pad_width == 0 && pad_height == 0 && dilation_width_factor == 1 &&
+      dilation_height_factor == 1 &&  // params.weights_offset == 0 &&
+      output_activation_min == -128 && output_activation_max == 127 &&
+      batches == 1) {
+    if (params.stride_width == 1 && params.stride_height == 1 &&
+        input_height == output_height && input_width == output_width &&
+        filter_height == 1 && filter_width == 1) {
       Mnv2ConvPerChannel1x1(params, output_multiplier, output_shift,
                             input_shape, input_data, filter_shape, filter_data,
                             bias_shape, bias_data, output_shape, output_data);
