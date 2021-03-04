@@ -40,12 +40,12 @@ inline void Mnv2ConvPerChannel1x1(
 
   // Get parameters.
   const int32_t input_offset = params.input_offset;  // r = s(q - Z)
-  const int stride_width = params.stride_width;
-  const int stride_height = params.stride_height;
-  const int dilation_width_factor = params.dilation_width_factor;
-  const int dilation_height_factor = params.dilation_height_factor;
-  const int pad_width = params.padding_values.width;
-  const int pad_height = params.padding_values.height;
+  const int stride_width = 1;
+  const int stride_height = 1;
+  const int dilation_width_factor = 1;
+  const int dilation_height_factor = 1;
+  const int pad_width = 0;
+  const int pad_height = 0;
   const int32_t output_offset = params.output_offset;
 
   // Set min and max value of the output.
@@ -67,8 +67,8 @@ inline void Mnv2ConvPerChannel1x1(
   // Check dimensions of the tensors.
   const int input_height = input_shape.Dims(1);
   const int input_width = input_shape.Dims(2);
-  const int filter_height = filter_shape.Dims(1);
-  const int filter_width = filter_shape.Dims(2);
+  const int filter_height = 1;
+  const int filter_width = 1;
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
   for (int batch = 0; batch < batches; ++batch) {
