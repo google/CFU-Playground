@@ -93,13 +93,6 @@ CFU_VERILOG     := $(PROJ_DIR)/cfu.v
 BUILD_DIR       := $(PROJ_DIR)/build
 PYRUN           := $(CFU_ROOT)/scripts/pyrun
 
-TFLM_SRC_DIR    := $(CFU_ROOT)/third_party/tflm_gen
-SAXON_SRC_DIR   := $(CFU_ROOT)/third_party/SaxonSoc
-
-TFLM_BLD_DIR    := $(abspath $(BUILD)/third_party/tflm_gen)
-TFLM_OVERLAY_DIR:= $(abspath $(PROJ_DIR)/tflm_overlays)
-TFLM_OVERLAYS   := $(shell find $(TFLM_OVERLAY_DIR) -type f 2>&1)
-
 COMMON_DIR      := $(CFU_ROOT)/common
 COMMON_FILES	:= $(shell find $(COMMON_DIR) -type f)
 TFLM_SRC_DIR    := $(CFU_ROOT)/third_party/tflm_gen
@@ -152,7 +145,7 @@ generate_cfu:
 endif
 
 # Note that the common Makefile is used in preference to the TfLM Makefile
-# TODO(avg): consider using rsync instead of cp
+# TODO: consider using rsync instead of cp
 .PHONY: build-dir
 build-dir:
 	@echo Making BUILD_DIR
