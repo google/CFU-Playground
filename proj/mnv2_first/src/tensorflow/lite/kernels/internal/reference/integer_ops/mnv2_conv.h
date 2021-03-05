@@ -34,9 +34,7 @@ inline void Mnv2ConvPerChannel1x1(
     const int8_t* filter_data, const RuntimeShape& bias_shape,
     const int32_t* bias_data, const RuntimeShape& output_shape,
     int8_t* output_data) {
-#ifdef SHOW_CONV_PARAMS
-  print_conv_params(params, input_shape, filter_shape, output_shape);
-#endif
+  // printf("does %shave bias data\n", (bias_data ? "" : "not "));
 
   // Get parameters.
   const int32_t input_offset = params.input_offset;  // r = s(q - Z)
@@ -89,9 +87,7 @@ inline void Mnv2ConvPerChannel1x1(
           acc += filter_val * (input_val + input_offset);
         }
 
-        if (bias_data) {
-          acc += bias_data[out_channel];
-        }
+        acc += bias_data[out_channel];
         acc = MultiplyByQuantizedMultiplier(acc, output_multiplier[out_channel],
                                             output_shift[out_channel]);
         acc += output_offset;

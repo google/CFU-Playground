@@ -70,19 +70,22 @@ inline void ConvPerChannel(
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
 
+#ifdef ACCEL_CONV
   if (pad_width == 0 && pad_height == 0 && dilation_width_factor == 1 &&
       dilation_height_factor == 1 &&  // params.weights_offset == 0 &&
       output_activation_min == -128 && output_activation_max == 127 &&
       batches == 1) {
     if (params.stride_width == 1 && params.stride_height == 1 &&
         input_height == output_height && input_width == output_width &&
-        filter_height == 1 && filter_width == 1) {
+        filter_height == 1 && filter_width == 1 && bias_data &&
+        (input_depth % 8) == 0 && (output_depth % 8) == 0) {
       Mnv2ConvPerChannel1x1(params, output_multiplier, output_shift,
                             input_shape, input_data, filter_shape, filter_data,
                             bias_shape, bias_data, output_shape, output_data);
       return;
     }
   }
+#endif
 
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
