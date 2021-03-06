@@ -13,25 +13,69 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen_cfu import InstructionBase, Cfu
+from .post_process import SRDHMInstruction
+from .param_store import ParamStoreSetter
+from nmigen_cfu import Cfu
+from .getset import GetSetInstruction, RegisterSetter
+
+OUTPUT_CHANNEL_PARAM_DEPTH = 512
 
 
-class TemplateInstruction(InstructionBase):
-    """Template instruction
-    """
+class Mnv2RegisterInstruction(GetSetInstruction):
+    def __init__(self):
+        self.set_input_depth = RegisterSetter()
+        self.set_output_depth = RegisterSetter()
+        self.set_input_offset = RegisterSetter()
+        self.set_output_offset = RegisterSetter()
+        self.set_activation_min = RegisterSetter()
+        self.set_activation_max = RegisterSetter()
+        self.set_output_batch_size = RegisterSetter()
+        self.store_output_mutiplier = ParamStoreSetter(
+            width=32, depth=OUTPUT_CHANNEL_PARAM_DEPTH)
+        self.store_output_shift = ParamStoreSetter(
+            width=32, depth=OUTPUT_CHANNEL_PARAM_DEPTH)
+        self.store_output_bias = ParamStoreSetter(
+            width=32, depth=OUTPUT_CHANNEL_PARAM_DEPTH)
+        xetters = {
+            10: self.set_input_depth,
+            11: self.set_output_depth,
+            12: self.set_input_offset,
+            13: self.set_output_offset,
+            14: self.set_activation_min,
+            15: self.set_activation_max,
+            20: self.set_output_batch_size,
+            21: self.store_output_mutiplier,
+            22: self.store_output_shift,
+            23: self.store_output_bias,
+        }
+        super().__init__(xetters)
+
+    def register_xetters(self, m):
+        m.submodules['set_input_depth'] = self.set_input_depth
+        m.submodules['set_output_depth'] = self.set_output_depth
+        m.submodules['set_input_offset'] = self.set_input_offset
+        m.submodules['set_output_offset'] = self.set_output_offset
+        m.submodules['set_activation_min'] = self.set_activation_min
+        m.submodules['set_activation_max'] = self.set_activation_max
+        m.submodules['set_output_batch_size'] = self.set_output_batch_size
+        m.submodules['store_output_mutiplier'] = self.store_output_mutiplier
+        m.submodules['store_output_shift'] = self.store_output_shift
+        m.submodules['store_output_bias'] = self.store_output_bias
 
     def elab(self, m):
-        with m.If(self.start):
-            m.d.sync += self.output.eq(self.in0 + self.in1)
-            m.d.sync += self.done.eq(1)
-        with m.Else():
-            m.d.sync += self.done.eq(0)
+        self.register_xetters(m)
 
 
 class Mnv2Cfu(Cfu):
+    """Simple CFU for Mnv2.
+
+    Most functionality is provided through a single set of registers.
+    """
+
     def __init__(self):
         super().__init__({
-            0: TemplateInstruction(),
+            0: Mnv2RegisterInstruction(),
+            7: SRDHMInstruction(),
         })
 
     def elab(self, m):
@@ -39,7 +83,4 @@ class Mnv2Cfu(Cfu):
 
 
 def make_cfu():
-    return Cfu({
-        # Add instructions here...
-        0: TemplateInstruction(),
-    })
+    return Mnv2Cfu()
