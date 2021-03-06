@@ -16,6 +16,8 @@ limitations under the License.
 #ifndef TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_MNV2_CONV_H_
 #define TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_MNV2_CONV_H_
 
+#include "tensorflow/lite/kernels/internal/common.h"
+
 //
 // This file contains specialized conv 2D implementations to support
 // MobileNet v2 models
