@@ -15,9 +15,9 @@
 
 __package__ = 'nmigen_cfu'
 
-from nmigen import Elaboratable, Module, Mux, Signal
+from nmigen import Elaboratable, Module, Mux, Signal, Memory
 from nmigen.build import Platform
-from nmigen.sim import Settle, Simulator
+from nmigen.sim import Simulator
 
 import unittest
 
@@ -121,3 +121,51 @@ class ValueBuffer(SimpleElaboratable):
         with m.If(self.capture):
             m.d.sync += captured.eq(self.input)
         m.d.comb += self.output.eq(Mux(self.capture, self.input, captured))
+
+
+class DualPortMemory(SimpleElaboratable):
+    """A Dual port memory wrapper
+
+    Parameters
+    ----------
+    depth:
+        Maximum number of items stored in memory
+    width:
+        bits in each word of memory
+
+    Public Interface
+    ----------------
+    w_en: Signal input
+        Memory write enable
+    w_addr: Signal(range(depth)) input
+        Memory address to which to write
+    w_data: Signal(width) input
+        Data to write
+    r_addr: Signal(range(depth)) input
+        Address from which to read - data put on r_data at next cycle
+    r_data: Signal(width) output
+        Read data
+    """
+
+    def __init__(self, *, width, depth, is_sim):
+        self.width = width
+        self.depth = depth
+        self.is_sim = is_sim
+        self.w_en = Signal()
+        self.w_addr = Signal(range(depth))
+        self.w_data = Signal(width)
+        self.r_addr = Signal(range(depth))
+        self.r_data = Signal(width)
+
+    def elab(self, m):
+        mem = Memory(width=self.width, depth=self.depth, simulate=self.is_sim)
+        m.submodules['wp'] = wp = mem.write_port()
+        m.submodules['rp'] = rp = mem.read_port(transparent=False)
+        m.d.comb += [
+            wp.en.eq(self.w_en),
+            wp.addr.eq(self.w_addr),
+            wp.data.eq(self.w_data),
+            rp.en.eq(1),
+            rp.addr.eq(self.r_addr),
+            self.r_data.eq(rp.data),
+        ]

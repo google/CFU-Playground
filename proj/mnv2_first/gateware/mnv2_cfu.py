@@ -13,9 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import *
-from nmigen_cfu import InstructionBase, InstructionTestBase, Cfu, CfuTestBase
-import unittest
+from nmigen_cfu import InstructionBase, Cfu
 
 
 class TemplateInstruction(InstructionBase):
@@ -30,18 +28,6 @@ class TemplateInstruction(InstructionBase):
             m.d.sync += self.done.eq(0)
 
 
-class TemplateInstructionTest(InstructionTestBase):
-    def create_dut(self):
-        return TemplateInstruction()
-
-    def test(self):
-        self.verify([
-            (0, 0, 0),
-            (4, 5, 9),
-            (0xffffffff, 0xffffffff, 0xfffffffe),
-        ])
-
-
 class Mnv2Cfu(Cfu):
     def __init__(self):
         super().__init__({
@@ -50,12 +36,6 @@ class Mnv2Cfu(Cfu):
 
     def elab(self, m):
         super().elab(m)
-        m.d.comb += [
-            # self.read.input_offset.eq(self.write.input_offset),
-            # self.read.accumulator.eq(self.macc.accumulator),
-            # self.macc.reset_acc.eq(self.write.reset_acc),
-            # self.macc.input_offset.eq(self.write.input_offset),
-        ]
 
 
 def make_cfu():
@@ -63,19 +43,3 @@ def make_cfu():
         # Add instructions here...
         0: TemplateInstruction(),
     })
-
-
-class CfuTest(CfuTestBase):
-    def create_dut(self):
-        return make_cfu()
-
-    def test(self):
-        DATA = [
-            # Test CFU calls here...
-            ((0, 22, 22), 44),
-        ]
-        return self.run_ops(DATA)
-
-
-if __name__ == '__main__':
-    unittest.main()

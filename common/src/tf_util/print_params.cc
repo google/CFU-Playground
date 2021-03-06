@@ -16,7 +16,7 @@
 
 #include "print_params.h"
 
-const char *to_string(tflite::PaddingType type)
+static const char *to_string(tflite::PaddingType type)
 {
   switch (type)
   {
@@ -31,7 +31,7 @@ const char *to_string(tflite::PaddingType type)
   }
 }
 
-const char *to_string(tflite::BroadcastableOpCategory category)
+static const char *to_string(tflite::BroadcastableOpCategory category)
 {
   switch (category)
   {
@@ -50,7 +50,7 @@ const char *to_string(tflite::BroadcastableOpCategory category)
   }
 }
 
-void print_shape(const tflite::RuntimeShape &shape)
+static void print_shape(const tflite::RuntimeShape &shape)
 {
   if (shape.DimensionsCount() == 0)
   {

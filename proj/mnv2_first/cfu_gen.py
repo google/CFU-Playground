@@ -15,7 +15,7 @@
 import os.path
 from nmigen.back import verilog
 
-from gateware.cfu import make_cfu
+from gateware.mnv2_cfu import make_cfu
 
 VERILOG_FILENAME = "cfu.v"
 
