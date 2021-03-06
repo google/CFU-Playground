@@ -45,19 +45,6 @@ static inline int32_t accumulate(const int8_t* input_data,
   return acc;
 }
 
-static inline int32_t post_process(
-    int32_t acc, const int32_t* output_multiplier, const int32_t* output_shift,
-    const int32_t* bias_data, int out_channel, int32_t output_offset,
-    int32_t output_activation_min, int32_t output_activation_max) {
-  acc += bias_data[out_channel];
-  acc = MultiplyByQuantizedMultiplier(acc, output_multiplier[out_channel],
-                                      output_shift[out_channel]);
-  acc += output_offset;
-  acc = std::max(acc, output_activation_min);
-  acc = std::min(acc, output_activation_max);
-  return acc;
-}
-
 // Fixed-point per-channel-quantization convolution reference kernel.
 void Mnv2ConvPerChannel1x1(
     const ConvParams& params, const int32_t* output_multiplier,
@@ -88,9 +75,19 @@ void Mnv2ConvPerChannel1x1(
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
 
-  // Do the processing in batches. batch size is number of output channels
-  // processed per batch and it is chosen to avoid overflowing filter_data
-  // memory, and then rounded down to a multiple of 4.
+  // Set parameters for op
+  CFU_SET_INPUT_DEPTH(input_depth);
+  CFU_SET_OUTPUT_DEPTH(output_depth);
+  CFU_SET_INPUT_OFFSET(input_offset);
+  CFU_SET_OUTPUT_OFFSET(output_offset);
+  CFU_SET_ACTIVATION_MIN(output_activation_min);
+  CFU_SET_ACTIVATION_MAX(output_activation_max);
+
+  // Do the processing in batches, by output channel. batch size is number of
+  // output channels processed per batch and it is chosen to avoid overflowing
+  // filter_data memory, and then rounded down to a multiple of 4.
+  //
+  // For each batch, the entire input will be read once
   int channels_per_batch =
       std::min(output_depth, (NUM_FILTER_DATA_BYTES / input_depth) / 4 * 4);
   int num_pixels = output_height * output_width;
@@ -102,6 +99,14 @@ void Mnv2ConvPerChannel1x1(
     int batch_end = std::min(output_depth, batch_base + channels_per_batch);
     int batch_size = batch_end - batch_base;
 
+    // Load up parameters
+    CFU_SET_OUTPUT_BATCH_SIZE(batch_size);
+    for (int out_channel = batch_base; out_channel < batch_end; ++out_channel) {
+      CFU_STORE_OUTPUT_MULTIPLIER(output_multiplier[out_channel]);
+      CFU_STORE_OUTPUT_SHIFT(output_shift[out_channel]);
+      CFU_STORE_OUTPUT_BIAS(bias_data[out_channel]);
+    }
+
     // Reset input and output pointers
     const int8_t* input_ptr = input_data;
     int8_t* output_ptr = output_data + batch_base;
@@ -111,9 +116,7 @@ void Mnv2ConvPerChannel1x1(
         int32_t acc = accumulate(input_ptr, filter_data, out_channel,
                                  input_depth, input_offset);
 
-        int32_t out = post_process(
-            acc, output_multiplier, output_shift, bias_data, out_channel,
-            output_offset, output_activation_min, output_activation_max);
+        int32_t out = CFU_POST_PROCESS(acc);
         *(output_ptr++) = static_cast<int8_t>(out);
       }
       output_ptr += output_depth - batch_size;
