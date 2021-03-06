@@ -15,6 +15,7 @@ limitations under the License.
 ==============================================================================*/
 
 #include "mnv2_conv.h"
+
 #include "tf_util/print_params.h"
 
 //
@@ -32,7 +33,6 @@ void Mnv2ConvPerChannel1x1(
     const int8_t* filter_data, const RuntimeShape& bias_shape,
     const int32_t* bias_data, const RuntimeShape& output_shape,
     int8_t* output_data) {
-
   // Get parameters.
   const int32_t input_offset = params.input_offset;  // r = s(q - Z)
   const int32_t output_offset = params.output_offset;
@@ -41,7 +41,7 @@ void Mnv2ConvPerChannel1x1(
   const int32_t output_activation_min = params.quantized_activation_min;
   const int32_t output_activation_max = params.quantized_activation_max;
 
-  // Consistency check.
+  // Consistency check
   TFLITE_DCHECK_LE(output_activation_min, output_activation_max);
   TFLITE_DCHECK_EQ(input_shape.DimensionsCount(), 4);
   TFLITE_DCHECK_EQ(filter_shape.DimensionsCount(), 4);
@@ -54,28 +54,27 @@ void Mnv2ConvPerChannel1x1(
   // Check dimensions of the tensors.
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
-  for (int y = 0; y < output_height; ++y) {
-    for (int x = 0; x < output_width; ++x) {
-      for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
-        int32_t acc = 0;
+  int num_pixels = output_height * output_width;
+  for (int p = 0; p < num_pixels; p++) {
+    for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
+      int32_t acc = 0;
 
-        for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-          int32_t input_val =
-              input_data[Offset(input_shape, 0, y, x, in_channel)];
-          int32_t filter_val =
-              filter_data[Offset(filter_shape, out_channel, 0, 0, in_channel)];
-          acc += filter_val * (input_val + input_offset);
-        }
-
-        acc += bias_data[out_channel];
-        acc = MultiplyByQuantizedMultiplier(acc, output_multiplier[out_channel],
-                                            output_shift[out_channel]);
-        acc += output_offset;
-        acc = std::max(acc, output_activation_min);
-        acc = std::min(acc, output_activation_max);
-        output_data[Offset(output_shape, 0, y, x, out_channel)] =
-            static_cast<int8_t>(acc);
+      for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
+        int32_t input_val =
+            input_data[Offset(input_shape, 0, 0, p, in_channel)];
+        int32_t filter_val =
+            filter_data[Offset(filter_shape, out_channel, 0, 0, in_channel)];
+        acc += filter_val * (input_val + input_offset);
       }
+
+      acc += bias_data[out_channel];
+      acc = MultiplyByQuantizedMultiplier(acc, output_multiplier[out_channel],
+                                          output_shift[out_channel]);
+      acc += output_offset;
+      acc = std::max(acc, output_activation_min);
+      acc = std::min(acc, output_activation_max);
+      output_data[Offset(output_shape, 0, 0, p, out_channel)] =
+          static_cast<int8_t>(acc);
     }
   }
 }
