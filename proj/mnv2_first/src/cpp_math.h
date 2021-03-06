@@ -30,7 +30,13 @@ int32_t cpp_math_mul_by_quantized_mul_software(int32_t x, int32_t quantized_mult
 int32_t cpp_math_mul_by_quantized_mul_gateware1(int32_t x, int32_t quantized_multiplier,
                              int shift);
 
+int32_t cpp_math_mul_by_quantized_mul_gateware2(int32_t x, int32_t quantized_multiplier,
+                             int shift);
+
 int32_t cpp_math_srdhm_software(int32_t a, int32_t b);
+
+// Rounding divide by power of two
+int32_t cpp_math_rdbpot_software(int32_t value, int shift);
 
 #ifdef __cplusplus
 }
