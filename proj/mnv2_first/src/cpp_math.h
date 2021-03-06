@@ -13,12 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef _CPP_MATH_H
+#define _CPP_MATH_H
 
-#include "mnv2_cpp_shim.h"
+#include <stdint.h>
 
-#include "tensorflow/lite/kernels/internal/common.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-int32_t mul_by_quantized_mul(int32_t x, int32_t quantized_multiplier,
-                             int shift) {
-  return tflite::MultiplyByQuantizedMultiplier(x, quantized_multiplier, shift);
+// C++ (and other) math functions for C
+
+int32_t cpp_math_mul_by_quantized_mul_software(int32_t x, int32_t quantized_multiplier,
+                             int shift);
+
+int32_t cpp_math_mul_by_quantized_mul_gateware1(int32_t x, int32_t quantized_multiplier,
+                             int shift);
+
+int32_t cpp_math_srdhm_software(int32_t a, int32_t b);
+
+#ifdef __cplusplus
 }
+#endif
+#endif  // _CPP_MATH_H

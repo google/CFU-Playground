@@ -17,7 +17,7 @@
 #include <stdint.h>
 
 #include "cfu.h"
-#include "mnv2_cpp_shim.h"
+#include "cpp_math.h"
 
 static int32_t reg_input_depth;
 static int32_t reg_output_depth;
@@ -60,8 +60,9 @@ static int32_t param_store_read(struct ParamStore* ps) {
 
 static int32_t post_process(int32_t acc) {
   acc += param_store_read(&output_bias);
-  acc = mul_by_quantized_mul(acc, param_store_read(&output_multiplier),
-                             param_store_read(&output_shift));
+  acc = cpp_math_mul_by_quantized_mul_software(
+      acc, param_store_read(&output_multiplier),
+      param_store_read(&output_shift));
   acc += reg_output_offset;
   if (acc < reg_activation_min) {
     acc = reg_activation_min;
@@ -92,7 +93,7 @@ static uint32_t set_reg(int funct7, uint32_t in0, uint32_t in1) {
     case 15:
       reg_activation_max = in0;
       break;
-    case 20: // set size of output channel batch
+    case 20:  // set size of output channel batch
       reg_output_batch_size = in0;
       param_store_restart(&output_multiplier);
       param_store_restart(&output_shift);
