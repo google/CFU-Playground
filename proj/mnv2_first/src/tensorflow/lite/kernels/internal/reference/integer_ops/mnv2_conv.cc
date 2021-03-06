@@ -25,6 +25,14 @@ limitations under the License.
 namespace tflite {
 namespace reference_integer_ops {
 
+static inline int32_t macc(const int8_t* input_data, const int8_t* filter_data,
+                           int out_channel, int in_channel, int input_depth,
+                           int32_t input_offset) {
+  int32_t input_val = input_data[in_channel];
+  int32_t filter_val = filter_data[out_channel * input_depth + in_channel];
+  return filter_val * (input_val + input_offset);
+}
+
 // Fixed-point per-channel-quantization convolution reference kernel.
 void Mnv2ConvPerChannel1x1(
     const ConvParams& params, const int32_t* output_multiplier,
@@ -58,13 +66,9 @@ void Mnv2ConvPerChannel1x1(
   for (int p = 0; p < num_pixels; p++) {
     for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
       int32_t acc = 0;
-
       for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-        int32_t input_val =
-            input_data[Offset(input_shape, 0, 0, p, in_channel)];
-        int32_t filter_val =
-            filter_data[Offset(filter_shape, out_channel, 0, 0, in_channel)];
-        acc += filter_val * (input_val + input_offset);
+        acc += macc(input_data, filter_data, out_channel, in_channel,
+                    input_depth, input_offset);
       }
 
       acc += bias_data[out_channel];
@@ -73,9 +77,9 @@ void Mnv2ConvPerChannel1x1(
       acc += output_offset;
       acc = std::max(acc, output_activation_min);
       acc = std::min(acc, output_activation_max);
-      output_data[Offset(output_shape, 0, 0, p, out_channel)] =
-          static_cast<int8_t>(acc);
+      *(output_data++) = static_cast<int8_t>(acc);
     }
+    input_data += input_depth;
   }
 }
 
