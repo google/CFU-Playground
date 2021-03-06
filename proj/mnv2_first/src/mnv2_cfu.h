@@ -49,6 +49,15 @@ extern "C" {
 #define NUM_FILTER_DATA_EBRAMS 4
 #define NUM_FILTER_DATA_BYTES (NUM_FILTER_DATA_EBRAMS*EBRAM_DEPTH_WORDS)
 
+
+// Useful to slow down output when it is overflowing UART buffers
+static inline void delay() {
+  for (int i = 0; i < 10000; i++) {
+    // nop
+    __asm__ __volatile__("add zero, zero, zero");
+  }
+}
+
 #ifdef __cplusplus
 }
 #endif
