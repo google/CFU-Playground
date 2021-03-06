@@ -33,6 +33,32 @@ static inline int32_t macc(const int8_t* input_data, const int8_t* filter_data,
   return filter_val * (input_val + input_offset);
 }
 
+static inline int32_t accumulate(const int8_t* input_data,
+                                 const int8_t* filter_data, int out_channel,
+                                 int input_depth, int32_t input_offset) {
+  int32_t acc = 0;
+  for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
+    acc += macc(input_data, filter_data, out_channel, in_channel, input_depth,
+                input_offset);
+  }
+  return acc;
+}
+
+static inline int32_t post_process(int32_t acc, const int32_t* output_multiplier,
+                                   const int32_t* output_shift,
+                                   const int32_t* bias_data, int out_channel,
+                                   int32_t output_offset,
+                                   int32_t output_activation_min,
+                                   int32_t output_activation_max) {
+  acc += bias_data[out_channel];
+  acc = MultiplyByQuantizedMultiplier(acc, output_multiplier[out_channel],
+                                      output_shift[out_channel]);
+  acc += output_offset;
+  acc = std::max(acc, output_activation_min);
+  acc = std::min(acc, output_activation_max);
+  return acc;
+}
+
 // Fixed-point per-channel-quantization convolution reference kernel.
 void Mnv2ConvPerChannel1x1(
     const ConvParams& params, const int32_t* output_multiplier,
@@ -65,19 +91,13 @@ void Mnv2ConvPerChannel1x1(
   int num_pixels = output_height * output_width;
   for (int p = 0; p < num_pixels; p++) {
     for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
-      int32_t acc = 0;
-      for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-        acc += macc(input_data, filter_data, out_channel, in_channel,
-                    input_depth, input_offset);
-      }
+      int32_t acc = accumulate(input_data, filter_data, out_channel,
+                               input_depth, input_offset);
 
-      acc += bias_data[out_channel];
-      acc = MultiplyByQuantizedMultiplier(acc, output_multiplier[out_channel],
-                                          output_shift[out_channel]);
-      acc += output_offset;
-      acc = std::max(acc, output_activation_min);
-      acc = std::min(acc, output_activation_max);
-      *(output_data++) = static_cast<int8_t>(acc);
+      int32_t out = post_process(
+          acc, output_multiplier, output_shift, bias_data, out_channel,
+          output_offset, output_activation_min, output_activation_max);
+      *(output_data++) = static_cast<int8_t>(out);
     }
     input_data += input_depth;
   }
