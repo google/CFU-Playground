@@ -14,8 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#include "mnv2_conv.h"
+#include "tensorflow/lite/kernels/internal/reference/integer_ops/mnv2_conv.h"
 
+#include "mnv2_cfu.h"
 #include "tf_util/print_params.h"
 
 //
@@ -86,22 +87,38 @@ void Mnv2ConvPerChannel1x1(
   // Check dimensions of the tensors.
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
-  int num_pixels = output_height * output_width;
-  for (int p = 0; p < num_pixels; p++) {
-    for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
-      int32_t acc = accumulate(input_data, filter_data, out_channel,
-                               input_depth, input_offset);
 
-      int32_t out = post_process(acc, output_multiplier, output_shift,
-                                 bias_data, out_channel, output_offset,
-                                 output_activation_min, output_activation_max);
-      if (p == 0 || p == 1) {
-        printf("p=%d out=%2d, acc=%8ld, out=%4ld\n", p, out_channel, acc,
-               out);
+  // Do the processing in batches. batch size is number of output channels
+  // processed per batch and it is chosen to avoid overflowing filter_data
+  // memory, and then rounded down to a multiple of 4.
+  int channels_per_batch =
+      std::min(output_depth, (NUM_FILTER_DATA_BYTES / input_depth) / 4 * 4);
+  int num_pixels = output_height * output_width;
+  int num_batches =
+      (channels_per_batch - 1 + output_depth) / channels_per_batch;
+
+  for (int batch = 0; batch < num_batches; batch++) {
+    int batch_base = batch * channels_per_batch;
+    int batch_end = std::min(output_depth, batch_base + channels_per_batch);
+    int batch_size = batch_end - batch_base;
+
+    // Reset input and output pointers
+    const int8_t* input_ptr = input_data;
+    int8_t* output_ptr = output_data + batch_base;
+    for (int p = 0; p < num_pixels; p++) {
+      for (int out_channel = batch_base; out_channel < batch_end;
+           ++out_channel) {
+        int32_t acc = accumulate(input_ptr, filter_data, out_channel,
+                                 input_depth, input_offset);
+
+        int32_t out = post_process(
+            acc, output_multiplier, output_shift, bias_data, out_channel,
+            output_offset, output_activation_min, output_activation_max);
+        *(output_ptr++) = static_cast<int8_t>(out);
       }
-      *(output_data++) = static_cast<int8_t>(out);
+      output_ptr += output_depth - batch_size;
+      input_ptr += input_depth;
     }
-    input_data += input_depth;
   }
 }
 
