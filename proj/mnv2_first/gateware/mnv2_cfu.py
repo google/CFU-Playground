@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .post_process import SRDHMInstruction
+from .post_process import SRDHMInstruction, RoundingDividebyPOTInstruction
 from .param_store import ParamStoreSetter
 from nmigen_cfu import Cfu
 from .getset import GetSetInstruction, RegisterSetter
@@ -75,6 +75,7 @@ class Mnv2Cfu(Cfu):
     def __init__(self):
         super().__init__({
             0: Mnv2RegisterInstruction(),
+            6: RoundingDividebyPOTInstruction(),
             7: SRDHMInstruction(),
         })
 

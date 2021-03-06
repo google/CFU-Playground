@@ -92,3 +92,23 @@ class SRDHMInstruction(InstructionBase):
             m.d.sync += countdown.eq(2)
         with m.Else():
             m.d.sync += countdown.eq(Mux(countdown != -1, countdown - 1, -1))
+
+
+def rounding_divide_by_pot(x, exponent):
+    """Implements gemmlowp::RoundingDivideByPOT
+
+    This divides by a power of two, rounding to the nearest whole number.
+    """
+    mask = (1 << exponent) - 1
+    remainder = x & mask
+    threshold = (mask >> 1) + x[31]
+    rounding = Mux(remainder > threshold, 1, 0)
+    return (x >> exponent) + rounding
+
+
+class RoundingDividebyPOTInstruction(InstructionBase):
+    def elab(self, m):
+        m.d.comb += [
+            self.output.eq(rounding_divide_by_pot(self.in0s, self.in1[:5])),
+            self.done.eq(1),
+        ]
