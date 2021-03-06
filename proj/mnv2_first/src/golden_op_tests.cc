@@ -1329,14 +1329,18 @@ void golden_op_run_1x1conv(void) {
   puts("");
 
   // Check results are ok
-  bool ok = true;
+  int fails = 0;
   for (size_t i = 0; i < 2400; i++) {
     if (actual_output[i] != expected_output[i]) {
-      printf("FAIL - output tensor mismatch at %u\n", i);
-      ok = false;
+      if (!fails) {
+        printf("FAIL - first output tensor mismatch at %u\n", i);
+      }
+      fails++;
     }
   }
-  if (ok) {
+  if (fails) {
+    printf("FAIL - %d fails\n", fails);
+  } else {
     puts("OK - output tensor matches");
   }
 }
