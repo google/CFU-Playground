@@ -69,9 +69,9 @@ void menu_run(struct Menu *menu)
             }
             else
             {
-                puts("\n");
+                printf("\nRunning %s\n", item->description );
                 item->fn();
-                puts("\n---");
+                puts("---");
             }
         }
     }
