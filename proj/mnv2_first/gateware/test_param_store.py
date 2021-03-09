@@ -17,7 +17,7 @@ from nmigen import Signal
 from nmigen_cfu.cfu import InstructionTestBase
 from util import DualPortMemory
 from .param_store import CircularIncrementer, ParamStoreSetter
-from .getset import RegisterSetter, Xetter, GetSetInstruction
+from .registerfile import RegisterSetter, Xetter, RegisterFileInstruction
 
 
 class _CircularGetter(Xetter):
@@ -73,7 +73,7 @@ class GetSetInstructionTest(InstructionTestBase):
             dp.w_addr.eq(psset.w_addr),
             dp.w_data.eq(psset.w_data),
         ]
-        return GetSetInstruction({
+        return RegisterFileInstruction({
             1: psset,
             2: psget,
             9: reg,

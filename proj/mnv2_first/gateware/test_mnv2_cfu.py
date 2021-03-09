@@ -13,20 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen_cfu import InstructionTestBase, CfuTestBase
-from .mnv2_cfu import TemplateInstruction, make_cfu
-
-
-class TemplateInstructionTest(InstructionTestBase):
-    def create_dut(self):
-        return TemplateInstruction()
-
-    def test(self):
-        self.verify([
-            (0, 0, 0),
-            (4, 5, 9),
-            (0xffffffff, 0xffffffff, 0xfffffffe),
-        ])
+from nmigen_cfu import CfuTestBase
+from .mnv2_cfu import make_cfu
 
 
 class CfuTest(CfuTestBase):
@@ -36,6 +24,6 @@ class CfuTest(CfuTestBase):
     def test(self):
         DATA = [
             # Test CFU calls here...
-            ((0, 22, 22), 44),
+            ((6, 7, 1), 4),
         ]
-        return self.run_ops(DATA)
+        return self.run_ops(DATA, True)

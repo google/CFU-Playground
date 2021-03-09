@@ -272,7 +272,7 @@ class Cfu(SimpleElaboratable):
 class CfuTestBase(TestBase):
     """Tests CFU ops independent of timing and handshaking."""
 
-    def run_ops(self, data):
+    def run_ops(self, data, write_trace=False):
         """Runs the given ops through the CFU, checking results.
 
         Arguments:
@@ -306,4 +306,4 @@ class CfuTestBase(TestBase):
                                      f"op {n} output {hex(actual)} != {hex(expected & 0xffff_ffff)}")
                 yield
 
-        self.run_sim(process, False)
+        self.run_sim(process, write_trace)

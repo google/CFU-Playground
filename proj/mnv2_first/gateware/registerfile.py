@@ -81,7 +81,7 @@ class RegisterSetter(Xetter):
             m.d.comb += self.done.eq(1)
 
 
-class GetSetInstruction(InstructionBase):
+class RegisterFileInstruction(InstructionBase):
     """Aggregates a number instructions that allow a CPU to get and set values.
 
     The instruction uses funct7 to identify a "Xetter" to which to delegate.

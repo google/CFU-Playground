@@ -17,7 +17,7 @@
 from nmigen import Signal, Mux
 from nmigen_cfu import SimpleElaboratable
 
-from .getset import Xetter
+from .registerfile import Xetter
 
 
 class ParamStoreSetter(Xetter):

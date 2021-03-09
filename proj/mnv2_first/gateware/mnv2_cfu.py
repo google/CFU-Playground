@@ -15,13 +15,14 @@
 
 from .post_process import SRDHMInstruction, RoundingDividebyPOTInstruction
 from .param_store import ParamStoreSetter
+from .registerfile import RegisterFileInstruction, RegisterSetter
+
 from nmigen_cfu import Cfu
-from .getset import GetSetInstruction, RegisterSetter
 
 OUTPUT_CHANNEL_PARAM_DEPTH = 512
 
 
-class Mnv2RegisterInstruction(GetSetInstruction):
+class Mnv2RegisterInstruction(RegisterFileInstruction):
     def __init__(self):
         self.set_input_depth = RegisterSetter()
         self.set_output_depth = RegisterSetter()
