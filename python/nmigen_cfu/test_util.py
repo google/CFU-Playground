@@ -18,7 +18,7 @@ __package__ = 'nmigen_cfu'
 from nmigen import Signal
 from nmigen.sim import Settle
 
-from .util import TestBase, ValueBuffer
+from .util import TestBase, ValueBuffer, Sequencer
 
 import unittest
 
@@ -47,6 +47,35 @@ class ValueBufferTest(TestBase):
                 yield self.capture.eq(capture)
                 yield Settle()
                 self.assertEqual((yield self.dut.output), expected_output, f"cycle={n}")
+                yield
+        self.run_sim(process, True)
+
+
+class SequencerTest(TestBase):
+    def create_dut(self):
+        return Sequencer(4)
+
+    def test(self):
+        DATA = [
+            (0, 0b00000),
+            (1, 0b00001),
+            (0, 0b00010),
+            (0, 0b00100),
+            (1, 0b01001),
+            (1, 0b10011),
+            (0, 0b00110),
+            (0, 0b01100),
+            (0, 0b11000),
+            (0, 0b10000),
+            (0, 0b00000),
+            (0, 0b00000),
+        ]
+
+        def process():
+            for n, (inp, expected_output) in enumerate(DATA):
+                yield self.dut.inp.eq(inp)
+                yield Settle()
+                self.assertEqual((yield self.dut.sequence), expected_output, f"cycle={n}")
                 yield
         self.run_sim(process, True)
 

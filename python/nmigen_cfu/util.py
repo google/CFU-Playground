@@ -17,6 +17,7 @@ __package__ = 'nmigen_cfu'
 
 from nmigen import Elaboratable, Module, Mux, Signal, Memory
 from nmigen.build import Platform
+from nmigen.hdl.ast import Cat
 from nmigen.sim import Simulator
 
 import unittest
@@ -169,3 +170,34 @@ class DualPortMemory(SimpleElaboratable):
             rp.addr.eq(self.r_addr),
             self.r_data.eq(rp.data),
         ]
+
+
+class Sequencer(SimpleElaboratable):
+    """A shift register to use as a per-cycle sequencer.
+
+    Parameters
+    ----------
+    n: int
+      Number of positions supported by the sequencer. n >= 1.
+
+    Attributes
+    ----------
+    inp: Signal() input
+      The bit to shift into the sequencer. 
+    sequence: Signal(n+1) output
+      The sequence bits. sequence[0] is always equal to inp (via comb).
+      sequence[1] is the previous value of sequence[0], sequence[2] is
+      the previous value of sequence[1] and so forth.
+    """
+    def __init__(self, n):
+        self.inp = Signal()
+        self.sequence = Signal(n+1)
+
+    def elab(self, m):
+        shift_register = Signal(self.sequence.width - 1)
+        m.d.comb += self.sequence[0].eq(self.inp)
+        m.d.sync += [
+            shift_register[0].eq(self.inp),
+            shift_register[1:].eq(shift_register),
+        ]
+        m.d.comb += self.sequence.eq(Cat(self.inp, shift_register))
