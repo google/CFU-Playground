@@ -23,48 +23,31 @@ OUTPUT_CHANNEL_PARAM_DEPTH = 512
 
 
 class Mnv2RegisterInstruction(RegisterFileInstruction):
-    def __init__(self):
-        self.set_input_depth = RegisterSetter()
-        self.set_output_depth = RegisterSetter()
-        self.set_input_offset = RegisterSetter()
-        self.set_output_offset = RegisterSetter()
-        self.set_activation_min = RegisterSetter()
-        self.set_activation_max = RegisterSetter()
-        self.set_output_batch_size = RegisterSetter()
-        self.store_output_mutiplier = ParamStoreSetter(
-            width=32, depth=OUTPUT_CHANNEL_PARAM_DEPTH)
-        self.store_output_shift = ParamStoreSetter(
-            width=32, depth=OUTPUT_CHANNEL_PARAM_DEPTH)
-        self.store_output_bias = ParamStoreSetter(
-            width=32, depth=OUTPUT_CHANNEL_PARAM_DEPTH)
-        xetters = {
-            10: self.set_input_depth,
-            11: self.set_output_depth,
-            12: self.set_input_offset,
-            13: self.set_output_offset,
-            14: self.set_activation_min,
-            15: self.set_activation_max,
-            20: self.set_output_batch_size,
-            21: self.store_output_mutiplier,
-            22: self.store_output_shift,
-            23: self.store_output_bias,
-        }
-        super().__init__(xetters)
 
-    def register_xetters(self, m):
-        m.submodules['set_input_depth'] = self.set_input_depth
-        m.submodules['set_output_depth'] = self.set_output_depth
-        m.submodules['set_input_offset'] = self.set_input_offset
-        m.submodules['set_output_offset'] = self.set_output_offset
-        m.submodules['set_activation_min'] = self.set_activation_min
-        m.submodules['set_activation_max'] = self.set_activation_max
-        m.submodules['set_output_batch_size'] = self.set_output_batch_size
-        m.submodules['store_output_mutiplier'] = self.store_output_mutiplier
-        m.submodules['store_output_shift'] = self.store_output_shift
-        m.submodules['store_output_bias'] = self.store_output_bias
-
-    def elab(self, m):
-        self.register_xetters(m)
+    def elab_xetters(self, m):
+        m.submodules['set_input_depth'] = set_input_depth = RegisterSetter()
+        m.submodules['set_output_depth'] = set_output_depth = RegisterSetter()
+        m.submodules['set_input_offset'] = set_input_offset = RegisterSetter()
+        m.submodules['set_output_offset'] = set_output_offset = RegisterSetter()
+        m.submodules['set_activation_min'] = set_activation_min = RegisterSetter()
+        m.submodules['set_activation_max'] = set_activation_max = RegisterSetter()
+        m.submodules['set_output_batch_size'] = set_output_batch_size = RegisterSetter()
+        m.submodules['store_output_mutiplier'] = store_output_mutiplier = ParamStoreSetter(
+            width=32, depth=OUTPUT_CHANNEL_PARAM_DEPTH)
+        m.submodules['store_output_shift'] = store_output_shift = ParamStoreSetter(
+            width=32, depth=OUTPUT_CHANNEL_PARAM_DEPTH)
+        m.submodules['store_output_bias'] = store_output_bias = ParamStoreSetter(
+            width=32, depth=OUTPUT_CHANNEL_PARAM_DEPTH)
+        self.register_xetter(10, set_input_depth)
+        self.register_xetter(11, set_output_depth)
+        self.register_xetter(12, set_input_offset)
+        self.register_xetter(13, set_output_offset)
+        self.register_xetter(14, set_activation_min)
+        self.register_xetter(15, set_activation_max)
+        self.register_xetter(20, set_output_batch_size)
+        self.register_xetter(21, store_output_mutiplier)
+        self.register_xetter(22, store_output_shift)
+        self.register_xetter(23, store_output_bias)
 
 
 class Mnv2Cfu(Cfu):

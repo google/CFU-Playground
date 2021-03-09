@@ -82,36 +82,43 @@ class RegisterSetter(Xetter):
 
 
 class RegisterFileInstruction(InstructionBase):
-    """Aggregates a number instructions that allow a CPU to get and set values.
+    """An instruction for accessing a register file.
 
-    The instruction uses funct7 to identify a "Xetter" to which to delegate.
+    The instruction uses funct7 to identify a "Xetter" (getter/setter) to which 
+    to delegate.
     """
 
-    def __init__(self, xetters):
-        """Constructor
-
-        Parameters
-        ----------
-
-        xetters: mapping of register number (integer 0-127) to a subclass of Xetter.
-        """
+    def __init__(self):
+        """Constructor"""
         super().__init__()
-        self.xetters = OrderedDict(xetters)
+        self._xetters = {}
 
     def elab(self, m):
         # By default, wire done to start to prevent hangs
         m.d.comb += self.done.eq(self.start)
 
+        # Let the subclass register those xetters
+        self.elab_xetters(m)
+
         # Based on funct7, route start, done and output signals
         m.submodules['f7buf'] = f7buf = ValueBuffer(self.funct7, self.start)
-        for reg, x in self.xetters.items():
+        for reg_num, x in self._xetters.items():
             m.d.comb += [
                 x.in0.eq(self.in0),
                 x.in1.eq(self.in1),
             ]
-            with m.If(f7buf.output == reg):
+            with m.If(f7buf.output == reg_num):
                 m.d.comb += [
                     x.start.eq(self.start),
                     self.output.eq(x.output),
                     self.done.eq(x.done),
                 ]
+
+    def register_xetter(self, reg_num, xetter):
+        if reg_num in self._xetters:
+            raise Exception(f'xetter key {reg_num} already allocated')
+        self._xetters[reg_num] = xetter
+
+    def elab_xetters(self, m):
+        """Overridden by subclasses to add xetters."""
+        raise NotImplementedError()

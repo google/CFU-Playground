@@ -16,7 +16,7 @@
 from nmigen import Signal
 from nmigen.sim import Settle
 from nmigen_cfu import InstructionTestBase, TestBase
-from .getset import Xetter, RegisterSetter, RegisterFileInstruction
+from .registerfile import Xetter, RegisterSetter, RegisterFileInstruction
 
 
 class RegisterSetterTest(TestBase):
@@ -71,16 +71,19 @@ class _AccumulateXetter(Xetter):
                 m.next = "waiting"
 
 
+class _MyRegisterFileInstruction(RegisterFileInstruction):
+    def elab_xetters(self, m):
+        m.submodules['rs1'] = rs1 = RegisterSetter()
+        m.submodules['rs2'] = rs2 = RegisterSetter()
+        m.submodules['acc'] = adder = _AccumulateXetter()
+        self.register_xetter(1, rs1)
+        self.register_xetter(2, rs2)
+        self.register_xetter(9, adder)
+
+
 class RegisterFileInstructionTest(InstructionTestBase):
     def create_dut(self):
-        self.m.submodules['rs1'] = rs1 = RegisterSetter()
-        self.m.submodules['rs2'] = rs2 = RegisterSetter()
-        self.m.submodules['acc'] = adder = _AccumulateXetter()
-        return RegisterFileInstruction({
-            1: rs1,
-            2: rs2,
-            9: adder
-        })
+        return _MyRegisterFileInstruction()
 
     def test(self):
         self.verify([

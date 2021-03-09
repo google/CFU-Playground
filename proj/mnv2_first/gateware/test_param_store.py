@@ -49,8 +49,8 @@ class _CircularGetter(Xetter):
         ]
 
 
-class GetSetInstructionTest(InstructionTestBase):
-    def create_dut(self):
+class _PSRegisterFileInstruction(RegisterFileInstruction):
+    def elab_xetters(self, m):
         m = self.m
         m.submodules['dp'] = dp = DualPortMemory(
             width=8, depth=32, is_sim=True)
@@ -73,11 +73,14 @@ class GetSetInstructionTest(InstructionTestBase):
             dp.w_addr.eq(psset.w_addr),
             dp.w_data.eq(psset.w_data),
         ]
-        return RegisterFileInstruction({
-            1: psset,
-            2: psget,
-            9: reg,
-        })
+        self.register_xetter(1, psset)
+        self.register_xetter(2, psget)
+        self.register_xetter(9, reg)
+
+
+class ParamStoreTest(InstructionTestBase):
+    def create_dut(self):
+        return _PSRegisterFileInstruction()
 
     def test(self):
         self.verify([
