@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from util import DualPortMemory
 from .post_process import SRDHMInstruction, RoundingDividebyPOTInstruction
-from .param_store import ParamStoreSetter
+from .param_store import CircularIncrementer, ParamStoreSetter
 from .registerfile import RegisterFileInstruction, RegisterSetter
 
 from nmigen_cfu import Cfu
@@ -24,30 +25,55 @@ OUTPUT_CHANNEL_PARAM_DEPTH = 512
 
 class Mnv2RegisterInstruction(RegisterFileInstruction):
 
+    def _make_setter(self, m, reg_num, name):
+        """Constructs and registers a setter.
+
+        Return a pair of signals from setter: (value, set)
+        """
+        setter = RegisterSetter()
+        m.submodules[name] = setter
+        self.register_xetter(reg_num, setter)
+        return setter.value, setter.set
+
+    def _make_output_channel_param_store(
+            self, m, reg_num, name, restart_signal):
+        """Constructs and registers a param store connected to a memory
+        and a circular incrementer.
+
+        Returns a pair of signals: (current data, inc.next)
+        """
+        m.submodules[f'{name}_dp'] = dp = DualPortMemory(
+            width=32, depth=OUTPUT_CHANNEL_PARAM_DEPTH, is_sim=not bool(self.platform))
+        m.submodules[f'{name}_inc'] = inc = CircularIncrementer(
+            OUTPUT_CHANNEL_PARAM_DEPTH)
+        m.submodules[f'{name}_set'] = psset = ParamStoreSetter(
+            32, OUTPUT_CHANNEL_PARAM_DEPTH)
+        self.register_xetter(reg_num, psset)
+        m.d.comb += [
+            # Restart param store when reg is set
+            psset.restart.eq(restart_signal),
+            inc.restart.eq(restart_signal),
+            # Incrementer is limited to number of items already set
+            inc.limit.eq(psset.count),
+            # Hook memory up to various components
+            dp.r_addr.eq(inc.r_addr),
+            dp.w_en.eq(psset.w_en),
+            dp.w_addr.eq(psset.w_addr),
+            dp.w_data.eq(psset.w_data),
+        ]
+        return dp.r_data, inc.next
+
     def elab_xetters(self, m):
-        m.submodules['set_input_depth'] = set_input_depth = RegisterSetter()
-        m.submodules['set_output_depth'] = set_output_depth = RegisterSetter()
-        m.submodules['set_input_offset'] = set_input_offset = RegisterSetter()
-        m.submodules['set_output_offset'] = set_output_offset = RegisterSetter()
-        m.submodules['set_activation_min'] = set_activation_min = RegisterSetter()
-        m.submodules['set_activation_max'] = set_activation_max = RegisterSetter()
-        m.submodules['set_output_batch_size'] = set_output_batch_size = RegisterSetter()
-        m.submodules['store_output_mutiplier'] = store_output_mutiplier = ParamStoreSetter(
-            width=32, depth=OUTPUT_CHANNEL_PARAM_DEPTH)
-        m.submodules['store_output_shift'] = store_output_shift = ParamStoreSetter(
-            width=32, depth=OUTPUT_CHANNEL_PARAM_DEPTH)
-        m.submodules['store_output_bias'] = store_output_bias = ParamStoreSetter(
-            width=32, depth=OUTPUT_CHANNEL_PARAM_DEPTH)
-        self.register_xetter(10, set_input_depth)
-        self.register_xetter(11, set_output_depth)
-        self.register_xetter(12, set_input_offset)
-        self.register_xetter(13, set_output_offset)
-        self.register_xetter(14, set_activation_min)
-        self.register_xetter(15, set_activation_max)
-        self.register_xetter(20, set_output_batch_size)
-        self.register_xetter(21, store_output_mutiplier)
-        self.register_xetter(22, store_output_shift)
-        self.register_xetter(23, store_output_bias)
+        self._make_setter(m, 10, 'set_input_depth')
+        self._make_setter(m, 11, 'set_output_depth')
+        self._make_setter(m, 12, 'set_input_offset')
+        self._make_setter(m, 13, 'set_output_offset')
+        self._make_setter(m, 14, 'set_activation_min')
+        self._make_setter(m, 15, 'set_activation_max')
+        _, restart = self._make_setter(m, 20, 'set_output_batch_size')
+        self._make_output_channel_param_store(m, 21, 'store_output_mutiplier', restart)
+        self._make_output_channel_param_store(m, 22, 'store_output_shift', restart)
+        self._make_output_channel_param_store(m, 23, 'store_output_bias', restart)
 
 
 class Mnv2Cfu(Cfu):
