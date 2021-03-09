@@ -16,14 +16,15 @@
 from nmigen_cfu import CfuTestBase
 from .mnv2_cfu import make_cfu
 
-
 class CfuTest(CfuTestBase):
     def create_dut(self):
         return make_cfu()
 
     def test(self):
         DATA = [
-            # Test CFU calls here...
-            ((6, 7, 1), 4),
+            # Rounding divide 7 by 2**1 == 4
+            ((6, 0, 7, 1), 4),
+            # Store output shift
+            ((0, 22, 5, 0), 0),
         ]
         return self.run_ops(DATA, True)

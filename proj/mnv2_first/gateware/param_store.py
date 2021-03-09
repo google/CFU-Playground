@@ -21,7 +21,7 @@ from .registerfile import Xetter
 
 
 class ParamStoreSetter(Xetter):
-    """Stores into a ParamStore.
+    """Stores in0 into a ParamStore.
 
     Parameters
     ----------
