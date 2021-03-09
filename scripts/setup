@@ -20,6 +20,9 @@ fi
 if ! which ccache >/dev/null; then
     missing+=(ccache)
 fi
+if ! which verilator >/dev/null; then
+    missing+=(verilator libevent-dev libjson-c-dev)
+fi
 
 if [ ${#missing[@]} -gt 0 ]; then
     echo "Missing packages: ${missing[@]}" >&2
