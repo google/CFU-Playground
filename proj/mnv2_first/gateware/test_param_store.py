@@ -102,4 +102,4 @@ class ParamStoreTest(InstructionTestBase):
             (2, 0, 0, 15),
             (2, 0, 0, 12),
             (2, 0, 0, 13),
-        ], True)
+        ], False)

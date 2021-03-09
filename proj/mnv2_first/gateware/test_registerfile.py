@@ -102,4 +102,4 @@ class RegisterFileInstructionTest(InstructionTestBase):
             (1, 4, 1, 3),
             # One more accumulate
             (9, 17, 15, 64),
-        ], True)
+        ], False)
