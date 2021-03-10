@@ -1097,6 +1097,10 @@ TfLiteStatus MicroAllocator::CommitStaticMemoryPlan(
                                    memory_allocator_->GetHeadBuffer(),
                                    allocation_info, allocation_info_count));
   head_usage = planner.GetMaximumMemorySize();
+#ifdef SHOW_MEMORY_USE
+  planner.PrintMemoryPlan(error_reporter_);
+  error_reporter_->Report("Planner usage: %u", head_usage);
+#endif
 
   // The head is used to store memory plans for one model at a time during the
   // model preparation stage, and is re-purposed to store scratch buffer handles

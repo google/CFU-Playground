@@ -23,6 +23,14 @@
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
 
+#ifdef SHOW_MEMORY_USE
+#include "tensorflow/lite/micro/recording_micro_interpreter.h"
+#define INTERPRETER_TYPE RecordingMicroInterpreter
+#else
+#define INTERPRETER_TYPE MicroInterpreter
+#endif
+
+
 //
 // Unit test prototypes. Because of the way these names are generated, they are
 // not defined in any include file. The actual tests are in test_name.cc - e.g
@@ -53,7 +61,7 @@ namespace
   tflite::MicroProfiler *profiler = nullptr;
 
   const tflite::Model *model = nullptr;
-  tflite::MicroInterpreter *interpreter = nullptr;
+  tflite::INTERPRETER_TYPE *interpreter = nullptr;
 
   // An area of memory to use for input, output, and intermediate arrays.
   // constexpr int kTensorArenaSize = 136 * 1024;
@@ -110,7 +118,7 @@ void tflite_load_model(unsigned char *model_data)
   tflite_init();
   if (interpreter)
   {
-    interpreter->~MicroInterpreter();
+    interpreter->~INTERPRETER_TYPE();
     interpreter = nullptr;
   }
 
@@ -128,8 +136,8 @@ void tflite_load_model(unsigned char *model_data)
 
   // Build an interpreter to run the model with.
   // NOLINTNEXTLINE(runtime-global-variables)
-  alignas(tflite::MicroInterpreter) static unsigned char buf[sizeof(tflite::MicroInterpreter)];
-  interpreter = new (buf) tflite::MicroInterpreter(
+  alignas(tflite::INTERPRETER_TYPE) static unsigned char buf[sizeof(tflite::INTERPRETER_TYPE)];
+  interpreter = new (buf) tflite::INTERPRETER_TYPE(
       model, *op_resolver, tensor_arena, kTensorArenaSize, error_reporter, profiler);
 
   // Allocate memory from the tensor_arena for the model's tensors.
@@ -194,6 +202,10 @@ void tflite_classify()
   printf(" cycles total\n");
 
   // Uncomment to see how large the arena needs to be.
+
+#ifdef SHOW_MEMORY_USE
+  interpreter->GetMicroAllocator().PrintAllocations();
+#endif
   printf("Arena used bytes: %llu\n", (long long unsigned)(interpreter->arena_used_bytes()));
 }
 
