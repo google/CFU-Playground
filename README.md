@@ -28,7 +28,7 @@ With the exception of Vivado, everything used by this project is open source.
 * Currently, the only supported target is the Arty 35T board from Digilent.
 * The only supported host OS is Linux (Debian / Ubuntu).
 
-If you want to try things out using Renode simulation,
+If you want to try things out using [Renode](https://renode.io) simulation,
 then you don't need either the Arty board or Vivado software.
 You can also perform Verilog-level cycle-accurate simulation with Verilator,
 but this is much slower.
@@ -62,7 +62,7 @@ Build a program and execute it on the SoC you just loaded onto the Arty
 make load
 ```
 
-To use renode to execute on a simulator on your own machine, execute:
+To use Renode to execute on a simulator on your own machine, execute:
 
 ```sh
 make renode
