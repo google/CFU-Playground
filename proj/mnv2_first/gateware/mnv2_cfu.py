@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from util import DualPortMemory
-from .post_process import SRDHMInstruction, RoundingDividebyPOTInstruction
+from .post_process import PostProcessXetter, SRDHMInstruction, RoundingDividebyPOTInstruction
 from .param_store import CircularIncrementer, ParamStoreSetter
 from .registerfile import RegisterFileInstruction, RegisterSetter
 
@@ -67,13 +67,30 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         self._make_setter(m, 10, 'set_input_depth')
         self._make_setter(m, 11, 'set_output_depth')
         self._make_setter(m, 12, 'set_input_offset')
-        self._make_setter(m, 13, 'set_output_offset')
-        self._make_setter(m, 14, 'set_activation_min')
-        self._make_setter(m, 15, 'set_activation_max')
+        offset, _ = self._make_setter(m, 13, 'set_output_offset')
+        activation_min, _ = self._make_setter(m, 14, 'set_activation_min')
+        activation_max, _ = self._make_setter(m, 15, 'set_activation_max')
         _, restart = self._make_setter(m, 20, 'set_output_batch_size')
-        self._make_output_channel_param_store(m, 21, 'store_output_mutiplier', restart)
-        self._make_output_channel_param_store(m, 22, 'store_output_shift', restart)
-        self._make_output_channel_param_store(m, 23, 'store_output_bias', restart)
+        multiplier, multiplier_next = self._make_output_channel_param_store(
+            m, 21, 'store_output_mutiplier', restart)
+        shift, shift_next = self._make_output_channel_param_store(
+            m, 22, 'store_output_shift', restart)
+        bias, bias_next = self._make_output_channel_param_store(
+            m, 23, 'store_output_bias', restart)
+        m.submodules['ppx'] = ppx = PostProcessXetter()
+        self.register_xetter(120, ppx)
+
+        m.d.comb += [
+            ppx.offset.eq(offset),
+            ppx.activation_min.eq(activation_min),
+            ppx.activation_max.eq(activation_max),
+            ppx.bias.eq(bias),
+            bias_next.eq(ppx.bias_next),
+            ppx.multiplier.eq(multiplier),
+            multiplier_next.eq(ppx.multiplier_next),
+            ppx.shift.eq(shift),
+            shift_next.eq(ppx.shift_next),
+        ]
 
 
 class Mnv2Cfu(Cfu):
