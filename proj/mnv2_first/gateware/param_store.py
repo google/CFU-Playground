@@ -57,7 +57,9 @@ class ParamStoreSetter(Xetter):
             self.done.eq(True),
             self.w_addr.eq(self.count)
         ]
-        with m.If(self.start):
+        with m.If(self.restart):
+            m.d.sync += self.count.eq(0)
+        with m.Elif(self.start):
             m.d.comb += [
                 self.w_en.eq(1),
                 self.w_data.eq(self.in0),
