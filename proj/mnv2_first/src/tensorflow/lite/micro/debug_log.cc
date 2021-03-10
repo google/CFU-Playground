@@ -45,7 +45,13 @@ extern "C" void DebugLog(const char* s) {
   // Reusing TF_LITE_STRIP_ERROR_STRINGS to disable DebugLog completely to get
   // maximum reduction in binary size. This is because we have DebugLog calls
   // via TF_LITE_CHECK that are not stubbed out by TF_LITE_REPORT_ERROR.
-  //fprintf(stderr, "%s", s);
+  // fprintf(stderr, "%s", s);
   puts(s);
+
+  // Insert short delay to allow UART to catch up
+  for (int i = 0; i < 50000; i++) {
+    // nop
+    __asm__ __volatile__("add zero, zero, zero");
+  }
 #endif
 }
