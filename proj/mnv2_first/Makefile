@@ -17,13 +17,13 @@
 export DEFINES :=
 
 # Uncomment this line to use software defined CFU functions in software_cfu.cc
-DEFINES += CFU_SOFTWARE_DEFINED
+#DEFINES += CFU_SOFTWARE_DEFINED
 
 # Uncomment this line to skip debug code (large effect on performance)
 DEFINES += NDEBUG
 
 # Uncomment this line to skip individual profiling output (has minor effect on performance).
-DEFINES += NPROFILE
+#DEFINES += NPROFILE
 
 # Uncomment to include mnv2 in built binary (adds ~500kB to binary)
 DEFINES += INCLUDE_MODEL_MNV2
@@ -32,6 +32,7 @@ RUN_MENU_ITEMS := 1 2 1
 #DEFINES += SHOW_CONV_PARAMS
 #DEFINES += SHOW_DEPTHWISE_PARAMS
 #DEFINES += SHOW_ARITHMETIC_PARAMS
+#DEFINES += SHOW_SAMPLE_POST_PROCESSING
 
 DEFINES += ACCEL_CONV
 

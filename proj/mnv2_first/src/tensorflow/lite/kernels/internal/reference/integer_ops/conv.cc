@@ -156,6 +156,15 @@ void ConvPerChannel(const ConvParams& params, const int32_t* output_multiplier,
               }
             }
           }
+#if SHOW_SAMPLE_POST_PROCESSING
+          static uint32_t count = 0;
+          if ((count & (1024 * 128 - 1)) == 0) {
+            printf("(%ld, %ld, %ld, %ld, %ld, %ld, %ld), ", acc,
+                   bias_data[out_channel], output_multiplier[out_channel],
+                   output_shift[out_channel], output_offset,
+                   output_activation_min, output_activation_max);
+          }
+#endif
 
           if (bias_data) {
             acc += bias_data[out_channel];
@@ -167,6 +176,13 @@ void ConvPerChannel(const ConvParams& params, const int32_t* output_multiplier,
           acc = std::min(acc, output_activation_max);
           output_data[Offset(output_shape, batch, out_y, out_x, out_channel)] =
               static_cast<int8_t>(acc);
+
+#if SHOW_SAMPLE_POST_PROCESSING
+          if ((count & (1024 * 128 - 1)) == 0) {
+            printf("%ld\n", acc);
+          }
+          count++;
+#endif
         }
       }
     }

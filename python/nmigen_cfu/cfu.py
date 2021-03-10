@@ -76,7 +76,8 @@ class InstructionTestBase(TestBase):
         """
         def process():
             for n, values in enumerate(data):
-                funct7, in0, in1, expected = values if len(values) == 4 else (0,) + values
+                funct7, in0, in1, expected = values if len(
+                    values) == 4 else (0,) + values
                 yield self.dut.funct7.eq(funct7)
                 yield self.dut.in0.eq(in0)
                 yield self.dut.in1.eq(in1)
@@ -272,18 +273,24 @@ class Cfu(SimpleElaboratable):
 class CfuTestBase(TestBase):
     """Tests CFU ops independent of timing and handshaking."""
 
-    def run_ops(self, data):
+    def _unpack(self, inputs):
+        return inputs if len(inputs) == 4 else (
+            inputs[0], 0, inputs[1], inputs[2])
+
+    def run_ops(self, data, write_trace=False):
         """Runs the given ops through the CFU, checking results.
 
         Arguments:
-            data: [((function_id, in0, in1), expected_output)...]
+            data: [(input, expected_output)...]
                   if expected_output is None, it is ignored.
+                  input is either a 3-tuple (function_id, in0, in1) or
+                  a 4-tuple (function_id, funct7, in0, in1)
         """
         def process():
             for n, (inputs, expected) in enumerate(data):
-                function_id, in0, in1 = inputs
+                function_id, funct7, in0, in1 = self._unpack(inputs)
                 # Set inputs and cmd_valid
-                yield self.dut.cmd_function_id.eq(function_id)
+                yield self.dut.cmd_function_id.eq((funct7 << 13) | function_id)
                 yield self.dut.cmd_in0.eq(in0)
                 yield self.dut.cmd_in1.eq(in1)
                 yield self.dut.cmd_valid.eq(1)
@@ -306,4 +313,4 @@ class CfuTestBase(TestBase):
                                      f"op {n} output {hex(actual)} != {hex(expected & 0xffff_ffff)}")
                 yield
 
-        self.run_sim(process, False)
+        self.run_sim(process, write_trace)
