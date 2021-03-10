@@ -27,4 +27,4 @@ class CfuTest(CfuTestBase):
             # Store output shift
             ((0, 22, 5, 0), 0),
         ]
-        return self.run_ops(DATA, True)
+        return self.run_ops(DATA, False)
