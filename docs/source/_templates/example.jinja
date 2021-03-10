@@ -1,0 +1,51 @@
+{% for block in blocks -%}
+
+{% if block.type == 'literal_block' %}
+
+{% if not block.start_group and not block.in_group %}
+.. code-block:: {% if 'bash' in block.classes %}bash{% endif %}
+
+   {% for line in block.text -%}
+   {{ line }}
+   {% endfor %}
+
+{% elif block.start_group %}
+.. tabs::
+
+   .. group-tab:: {{ block.name }}
+
+      .. code-block:: bash
+
+         {% for line in block.text -%}
+         {{ line }}
+         {% endfor %}
+{% elif block.in_group %}
+   .. group-tab:: {{ block.name }}
+
+      .. code-block:: bash
+
+         {% for line in block.text -%}
+         {{ line }}
+         {% endfor %}
+
+{% endif %}
+
+{% elif block.type == 'image' %}
+.. image:: {{ block.uri }}
+   :align: {{ block.align }}
+   :width: {{ block.width }}
+
+{% elif block.type == 'note' %}
+.. note::
+
+   {% for line in block.text -%}
+   {{ line }}
+   {% endfor %}
+
+
+{% else %}
+{{ block.text }}
+
+{% endif %}
+
+{% endfor %}
