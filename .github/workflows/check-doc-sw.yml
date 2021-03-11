@@ -1,4 +1,4 @@
-name: sample
+name: check-doc-sw
 on: [push, pull_request]
 jobs:
   check-docs:
@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: '3.7'
-      - run: bash scripts/setup-ci
+      - run: bash scripts/setup -ci
       - run: which pip3 && which python3 && which pip
       - run: riscv64-unknown-elf-gcc --version
       - run: pwd && source environment && cd proj/mnv2_first && pip3 list && make -j9 software
