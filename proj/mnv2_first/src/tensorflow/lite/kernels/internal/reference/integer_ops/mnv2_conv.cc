@@ -101,10 +101,14 @@ void Mnv2ConvPerChannel1x1(
 
     // Load up parameters
     CFU_SET_OUTPUT_BATCH_SIZE(batch_size);
-    for (int out_channel = batch_base; out_channel < batch_end; ++out_channel) {
-      CFU_STORE_OUTPUT_MULTIPLIER(output_multiplier[out_channel]);
-      CFU_STORE_OUTPUT_SHIFT(output_shift[out_channel]);
-      CFU_STORE_OUTPUT_BIAS(bias_data[out_channel]);
+    for (int i = 0; i < batch_size; i++) {
+      CFU_STORE_OUTPUT_MULTIPLIER(*(output_multiplier++));
+    }
+    for (int i = 0; i < batch_size; i++) {
+      CFU_STORE_OUTPUT_SHIFT(*(output_shift++));
+    }
+    for (int i = 0; i < batch_size; i++) {
+      CFU_STORE_OUTPUT_BIAS(*(bias_data++));
     }
 
     // Reset input and output pointers
