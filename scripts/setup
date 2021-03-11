@@ -24,13 +24,24 @@ if ! which verilator >/dev/null; then
     missing+=(verilator libevent-dev libjson-c-dev)
 fi
 
+in_ci=0
+if [ $# -gt 0 ] ; then
+  if [ $1 == "-ci" ] ; then
+    in_ci=1
+  fi
+fi
+
 if [ ${#missing[@]} -gt 0 ]; then
     echo "Missing packages: ${missing[@]}" >&2
     if which apt >/dev/null; then
-        echo -n "Install [y]/n? " >&2
-        answer=$(read)
-        if [ "$answer" == "y" -o -z "$answer" ]; then
-            sudo apt install "${missing[@]}"
+        if [ $in_ci -gt 0 ]; then
+            sudo apt install -y "${missing[@]}"
+        else
+            echo -n "Install [y]/n? " >&2
+            answer=$(read)
+            if [ "$answer" == "y" -o -z "$answer" ]; then
+                sudo apt install "${missing[@]}"
+            fi
         fi
     else
         exit 1
