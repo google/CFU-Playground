@@ -1,0 +1,47 @@
+#!/bin/bash
+set -e
+git submodule update --init
+
+# Verify dependencies that can be installed with apt (if available)
+missing=()
+
+if ! which openocd >/dev/null; then
+    missing+=(openocd)    
+fi
+if ! which riscv64-unknown-elf-gcc >/dev/null; then
+    missing+=(gcc-riscv64-unknown-elf)
+fi
+if ! which yosys >/dev/null; then
+    missing+=(yosys)
+fi
+if ! which expect >/dev/null; then
+    missing+=(expect)
+fi
+if ! which ccache >/dev/null; then
+    missing+=(ccache)
+fi
+if ! which verilator >/dev/null; then
+    missing+=(verilator libevent-dev libjson-c-dev)
+fi
+
+if [ ${#missing[@]} -gt 0 ]; then
+    echo "Missing packages: ${missing[@]}" >&2
+    sudo apt install -y "${missing[@]}"
+fi
+
+# Warn about different versions
+
+if ! riscv64-unknown-elf-gcc --version | grep ' 8.3.' >/dev/null; then
+    echo "Unsupported version of riscv64-unknown-elf-gcc. Use 8.3.0." >&2
+    riscv64-unknown-elf-gcc --version
+    exit 1
+fi
+
+# Verify other dependencies
+
+if ! which vivado >/dev/null; then
+    echo "Please install vivado" >&2
+    exit
+fi
+
+echo "Setup complete"

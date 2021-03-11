@@ -40,3 +40,6 @@
 [submodule "third_party/python/jinja"]
 	path = third_party/python/jinja
 	url = https://github.com/pallets/jinja.git
+[submodule "third_party/python/markupsafe"]
+	path = third_party/python/markupsafe
+	url = https://github.com/pallets/markupsafe.git

@@ -1,0 +1,9 @@
+name: manual-wf
+on: [workflow_dispatch]
+jobs:
+  ls-recursive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: ls -R
+      - run: echo Hi There
