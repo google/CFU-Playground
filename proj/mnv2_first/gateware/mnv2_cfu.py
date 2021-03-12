@@ -15,7 +15,7 @@
 
 from util import DualPortMemory
 from .post_process import PostProcessXetter, SRDHMInstruction, RoundingDividebyPOTInstruction
-from .param_store import CircularIncrementer, ParamStoreSetter
+from .store import CircularIncrementer, ParamStoreSetter
 from .registerfile import RegisterFileInstruction, RegisterSetter
 
 from nmigen_cfu import Cfu

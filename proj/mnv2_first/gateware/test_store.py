@@ -16,7 +16,7 @@
 from nmigen import Signal
 from nmigen_cfu.cfu import InstructionTestBase
 from util import DualPortMemory
-from .param_store import CircularIncrementer, ParamStoreSetter
+from .store import CircularIncrementer, ParamStoreSetter
 from .registerfile import RegisterSetter, Xetter, RegisterFileInstruction
 
 
