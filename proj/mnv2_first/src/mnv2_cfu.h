@@ -51,6 +51,7 @@ extern "C" {
 #define EBRAM_DEPTH_WORDS (EBRAM_DEPTH_BYTES/4)
 #define NUM_FILTER_DATA_EBRAMS 4
 #define NUM_FILTER_DATA_BYTES (NUM_FILTER_DATA_EBRAMS*EBRAM_DEPTH_WORDS)
+#define NUM_FILTER_DATA_WORDS NUM_FILTER_DATA_EBRAMS
 
 
 // Useful to slow down output when it is overflowing UART buffers

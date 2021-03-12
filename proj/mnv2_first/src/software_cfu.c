@@ -74,10 +74,8 @@ static int32_t post_process(int32_t acc) {
   return acc;
 }
 
-#define FILTER_WIDTH 4
-#define MAX_FILTER_DEPTH 512
 struct FilterStore {
-  int32_t values[FILTER_WIDTH][MAX_FILTER_DEPTH];
+  int32_t values[NUM_FILTER_DATA_EBRAMS][NUM_FILTER_DATA_WORDS];
   int write_index;
   int write_bank;
   int read_index;
@@ -95,9 +93,9 @@ static void filter_store_restart(struct FilterStore* fs) {
 
 static uint32_t filter_store_set(struct FilterStore* fs, uint32_t val) {
   fs->values[fs->write_bank][fs->write_index] = val;
-  fs->write_bank = (fs->write_bank + 1) % FILTER_WIDTH;
+  fs->write_bank = (fs->write_bank + 1) % NUM_FILTER_DATA_EBRAMS;
   if (fs->write_bank == 0) {
-    fs->write_index = (fs->write_index + 1) % MAX_FILTER_DEPTH;
+    fs->write_index = (fs->write_index + 1) % NUM_FILTER_DATA_WORDS;
   }
   return 0;
 }
@@ -105,7 +103,7 @@ static uint32_t filter_store_set(struct FilterStore* fs, uint32_t val) {
 // Assumes that reads only take place after writes are complete
 static uint32_t filter_store_read(struct FilterStore* fs) {
   uint32_t result = fs->values[fs->read_bank][fs->read_index];
-  fs->read_bank = (fs->read_bank + 1) % FILTER_WIDTH;
+  fs->read_bank = (fs->read_bank + 1) % NUM_FILTER_DATA_EBRAMS;
   if (fs->read_bank == 0) {
     fs->read_index = (fs->read_index + 1) % fs->write_index;
   }
