@@ -35,6 +35,10 @@ RUN_MENU_ITEMS := 1 2 1
 #DEFINES += SHOW_SAMPLE_POST_PROCESSING
 #DEFINES += SHOW_MEMORY_USE
 
+# Uncomment to use smaller batches for debugging. This helps expose 
+# bugs with processing multiple batch handling.
+DEFINES += USE_CONV_SMALL_BATCHES
+
 DEFINES += ACCEL_CONV
 
 include ../proj.mk

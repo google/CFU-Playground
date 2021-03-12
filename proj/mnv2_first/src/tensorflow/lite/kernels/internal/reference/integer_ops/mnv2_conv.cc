@@ -96,13 +96,19 @@ void Mnv2ConvPerChannel1x1(
   // Access filter data as words
   uint32_t* filter_words = (uint32_t*)filter_data;
 
-  // Do the processing in batches, by output channel. batch size is number of
-  // output channels processed per batch and it is chosen to avoid overflowing
-  // filter_data memory, and then rounded down to a multiple of 4.
-  //
-  // For each batch, the entire input will be read once
+// Do the processing in batches, by output channel. batch size is number of
+// output channels processed per batch and it is chosen to avoid overflowing
+// filter_data memory, and then rounded down to a multiple of 4.
+//
+// For each batch, the entire input will be read once
+#ifdef USE_CONV_SMALL_BATCHES
+  const int channels_per_batch =
+      std::min(output_depth, (2048 / input_depth) / 4 * 4);
+#else
   const int channels_per_batch =
       std::min(output_depth, (NUM_FILTER_DATA_BYTES / input_depth) / 4 * 4);
+#endif
+
   const int num_pixels = output_height * output_width;
   const int num_batches =
       (channels_per_batch - 1 + output_depth) / channels_per_batch;
