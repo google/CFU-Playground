@@ -15,9 +15,11 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 
 #include "cfu.h"
 #include "cpp_math.h"
+#include "mnv2_cfu.h"
 
 static int32_t reg_input_depth;
 static int32_t reg_output_depth;
@@ -72,6 +74,44 @@ static int32_t post_process(int32_t acc) {
   return acc;
 }
 
+#define FILTER_WIDTH 4
+#define MAX_FILTER_DEPTH 512
+struct FilterStore {
+  int32_t values[FILTER_WIDTH][MAX_FILTER_DEPTH];
+  int write_index;
+  int write_bank;
+  int read_index;
+  int read_bank;
+};
+
+static struct FilterStore filter_store;
+
+static void filter_store_restart(struct FilterStore* fs) {
+  fs->write_index = 0;
+  fs->write_bank = 0;
+  fs->read_index;
+  fs->read_bank = 0;
+}
+
+static uint32_t filter_store_set(struct FilterStore* fs, uint32_t val) {
+  fs->values[fs->write_bank][fs->write_index] = val;
+  fs->write_bank = (fs->write_bank + 1) % FILTER_WIDTH;
+  if (fs->write_bank == 0) {
+    fs->write_index = (fs->write_index + 1) % MAX_FILTER_DEPTH;
+  }
+  return 0;
+}
+
+// Assumes that reads only take place after writes are complete
+static uint32_t filter_store_read(struct FilterStore* fs) {
+  uint32_t result = fs->values[fs->read_bank][fs->read_index];
+  fs->read_bank = (fs->read_bank + 1) % FILTER_WIDTH;
+  if (fs->read_bank == 0) {
+    fs->read_index = (fs->read_index + 1) % fs->write_index;
+  }
+  return result;
+}
+
 // Set register instruction
 static uint32_t set_reg(int funct7, uint32_t in0, uint32_t in1) {
   switch (funct7) {
@@ -98,6 +138,7 @@ static uint32_t set_reg(int funct7, uint32_t in0, uint32_t in1) {
       param_store_restart(&output_multiplier);
       param_store_restart(&output_shift);
       param_store_restart(&output_bias);
+      filter_store_restart(&filter_store);
       break;
     case 21:
       return param_store_set(&output_multiplier, in0);
@@ -105,7 +146,12 @@ static uint32_t set_reg(int funct7, uint32_t in0, uint32_t in1) {
       return param_store_set(&output_shift, in0);
     case 23:
       return param_store_set(&output_bias, in0);
+    case 24:
+      return filter_store_set(&filter_store, in0);
+      break;
 
+    case 110:
+      return filter_store_read(&filter_store);
     case 120:
       return post_process(in0);
       break;

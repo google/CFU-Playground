@@ -26,6 +26,7 @@ extern "C" {
 // Defines CFU instructions used in mnv2_first
 // Keep this in sync with gateware and software_cfu.c
 
+#define CFU_GET(reg) cfu_op0(reg, 0, 0)
 #define CFU_SET(reg, in0) cfu_op0(reg, in0, 0)
 
 #define CFU_SET_INPUT_DEPTH(in0) CFU_SET(10, in0)
@@ -39,7 +40,10 @@ extern "C" {
 #define CFU_STORE_OUTPUT_MULTIPLIER(in0) CFU_SET(21, in0)
 #define CFU_STORE_OUTPUT_SHIFT(in0) CFU_SET(22, in0)
 #define CFU_STORE_OUTPUT_BIAS(in0) CFU_SET(23, in0)
+#define CFU_STORE_FILTER_VALUE(in0) CFU_SET(24, in0)
 
+// Supports incremental development
+#define CFU_GET_FILTER_VALUE() CFU_GET(110)
 #define CFU_POST_PROCESS(in0) CFU_SET(120, in0)
 
 #define EBRAM_DEPTH_BITS (16*1024)
