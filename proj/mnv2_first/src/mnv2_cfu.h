@@ -54,6 +54,12 @@ extern "C" {
 #define NUM_FILTER_DATA_BYTES (NUM_FILTER_DATA_EBRAMS*EBRAM_DEPTH_BYTES)
 #define NUM_FILTER_DATA_WORDS (NUM_FILTER_DATA_BYTES / 4)
 
+#define NUM_INPUT_DATA_EBRAMS 4
+#define NUM_INPUT_DATA_BYTES (NUM_INPUT_DATA_EBRAMS*EBRAM_DEPTH_BYTES)
+#define NUM_INPUT_DATA_WORDS (NUM_INPUT_DATA_BYTES / 4)
+#define MAX_CONV_INPUT_BYTES (NUM_INPUT_DATA_BYTES / 2)
+
+
 
 // Useful to slow down output when it is overflowing UART buffers
 static inline void delay() {

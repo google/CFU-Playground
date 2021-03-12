@@ -14,6 +14,7 @@ limitations under the License.
 ==============================================================================*/
 #include <stdio.h>
 
+#include "mnv2_cfu.h"
 #include "mnv2_conv.h"
 #include "tensorflow/lite/kernels/internal/common.h"
 #include "tf_util/print_params.h"
@@ -77,7 +78,8 @@ void ConvPerChannel(const ConvParams& params, const int32_t* output_multiplier,
     if (params.stride_width == 1 && params.stride_height == 1 &&
         input_height == output_height && input_width == output_width &&
         filter_height == 1 && filter_width == 1 && bias_data &&
-        (input_depth % 8) == 0 && (output_depth % 8) == 0) {
+        input_depth < MAX_CONV_INPUT_BYTES && (input_depth % 8) == 0 &&
+        (output_depth % 8) == 0) {
       Mnv2ConvPerChannel1x1(params, output_multiplier, output_shift,
                             input_shape, input_data, filter_shape, filter_data,
                             bias_shape, bias_data, output_shape, output_data);
