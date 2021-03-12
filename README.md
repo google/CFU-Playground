@@ -21,7 +21,7 @@ With the exception of Vivado, everything used by this project is open source.
 
 **Disclaimer: This is not an officially supported Google project.   Support and/or new releases may be limited.**
 
-_This is an early prototype of a ML exploration framework; expect a lack of documentation and occasional breakage. If you want to collaborate on building out this framework, reach out to tcal@google.com!   See "Contribution guidelines" below.
+_This is an early prototype of a ML exploration framework; expect a lack of documentation and occasional breakage. If you want to collaborate on building out this framework, reach out to tcal@google.com!   See "Contribution guidelines" below._
 
 
 ### Required hardware/OS
