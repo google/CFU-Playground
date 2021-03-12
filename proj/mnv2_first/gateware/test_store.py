@@ -16,7 +16,7 @@
 from nmigen import Signal
 from nmigen_cfu.cfu import InstructionTestBase
 from util import DualPortMemory
-from .store import CircularIncrementer, ParamStoreSetter
+from .store import CircularIncrementer, StoreSetter
 from .registerfile import RegisterSetter, Xetter, RegisterFileInstruction
 
 
@@ -52,10 +52,12 @@ class _CircularGetter(Xetter):
 class _PSRegisterFileInstruction(RegisterFileInstruction):
     def elab_xetters(self, m):
         m = self.m
+        # Set up a single memory store, such as used as a per-channel parameter
+        # store
         m.submodules['dp'] = dp = DualPortMemory(
             width=8, depth=32, is_sim=True)
         m.submodules['inc'] = inc = CircularIncrementer(32)
-        m.submodules['psset'] = psset = ParamStoreSetter(8, 32)
+        m.submodules['psset'] = psset = StoreSetter(8, 1, 32)
         m.submodules['psget'] = psget = _CircularGetter()
         m.submodules['reg'] = reg = RegisterSetter()
         m.d.comb += [
@@ -69,10 +71,8 @@ class _PSRegisterFileInstruction(RegisterFileInstruction):
             # Hook memory up to various components
             psget.r_data.eq(dp.r_data),
             dp.r_addr.eq(inc.r_addr),
-            dp.w_en.eq(psset.w_en),
-            dp.w_addr.eq(psset.w_addr),
-            dp.w_data.eq(psset.w_data),
         ]
+        m.d.comb += psset.connect_write_port([dp])
         self.register_xetter(1, psset)
         self.register_xetter(2, psget)
         self.register_xetter(9, reg)
