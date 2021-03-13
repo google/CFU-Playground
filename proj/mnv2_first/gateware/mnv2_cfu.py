@@ -13,12 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from util import DualPortMemory
+from nmigen_cfu import Cfu, DualPortMemory
+
 from .post_process import PostProcessXetter, SRDHMInstruction, RoundingDividebyPOTInstruction
 from .store import CircularIncrementer, FilterValueGetter, StoreSetter
 from .registerfile import RegisterFileInstruction, RegisterSetter
-
-from nmigen_cfu import Cfu
 
 OUTPUT_CHANNEL_PARAM_DEPTH = 512
 NUM_FILTER_DATA_WORDS = 512
@@ -131,7 +130,7 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         m.submodules['fvg'] = fvg = FilterValueGetter(4, NUM_FILTER_DATA_WORDS)
         m.d.comb += fvg.connect_read_port(fv_mems)
         m.d.comb += [
-            fvg.limit.eq(fv_count), 
+            fvg.limit.eq(fv_count),
             fvg.restart.eq(restart)
         ]
 

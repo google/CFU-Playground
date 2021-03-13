@@ -14,10 +14,8 @@
 # limitations under the License.
 
 from nmigen import Mux, Signal, signed
-from nmigen.sim import Settle
 
-from nmigen_cfu import InstructionBase, SimpleElaboratable
-from util import Sequencer, TestBase
+from nmigen_cfu import InstructionBase, SimpleElaboratable, Sequencer
 
 from .registerfile import Xetter
 

@@ -15,7 +15,9 @@
 
 from nmigen import Signal
 from nmigen.sim import Settle
+
 from nmigen_cfu import InstructionTestBase, TestBase
+
 from .registerfile import Xetter, RegisterSetter, RegisterFileInstruction
 
 

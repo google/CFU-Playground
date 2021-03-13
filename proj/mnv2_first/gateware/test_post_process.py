@@ -15,7 +15,7 @@
 
 from nmigen.sim import Settle
 
-from nmigen_cfu import DualPortMemory, TestBase
+from nmigen_cfu import TestBase
 
 from.post_process import PostProcessXetter, PostProcessor
 

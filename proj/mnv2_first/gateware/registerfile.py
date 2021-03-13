@@ -14,8 +14,8 @@
 # limitations under the License.
 
 
-from typing import OrderedDict
 from nmigen import Signal
+
 from nmigen_cfu import InstructionBase, SimpleElaboratable, ValueBuffer
 
 
@@ -84,7 +84,7 @@ class RegisterSetter(Xetter):
 class RegisterFileInstruction(InstructionBase):
     """An instruction for accessing a register file.
 
-    The instruction uses funct7 to identify a "Xetter" (getter/setter) to which 
+    The instruction uses funct7 to identify a "Xetter" (getter/setter) to which
     to delegate.
     """
 
