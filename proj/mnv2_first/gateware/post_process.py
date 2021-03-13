@@ -26,16 +26,18 @@ INT32_MAX = 0x7fff_ffff
 class SRDHM(SimpleElaboratable):
     """Implements gemmlowp::SaturatingRoundingDoublingHighMul
 
-    It multiplies two 32 bit numbers, then returns bits 62 to 31 of the
-    64 bit result. This is 2x the high word (allowing for saturating and
-    rounding).
+    The function calculated is approximately ((a*b) >> 31) & 0xffffffff,
+    allowing for saturating and rounding. In other words,it multiplies 
+    two 32 bit numbers, then returns bits 62 to 31 of the 64 bit result. 
+    This is 2x the high word of a 64 bit multiplication (allowing for 
+    saturating and rounding).
 
     Implemented as a pipeline so that results are always available 3
     cycles after setting inputs.
 
     Note that there is a bug to investigated here. This implementation
-    matches the behavior of the compiled source, however, "nudge" may be
-    one of two values.
+    matches the behavior of the RISCV compiled source, however, it seems 
+    that "nudge" is only ever one of the two values in RISCV.
 
     Public Interface
     ----------------
@@ -44,7 +46,7 @@ class SRDHM(SimpleElaboratable):
       b: Signal(signed(32)) input
         Second operand
       result: Signal(signed(32)) output
-        The result of a*b
+        The result of ((a*b) >> 31) & 0xffffffff
     """
 
     def __init__(self):
@@ -224,7 +226,8 @@ class PostProcessor(SimpleElaboratable):
 class PostProcessXetter(Xetter):
     """Does post-processing of an accumulator value.
 
-    The output channel index is implied by processing order.
+    The output channel index is implied by processing order. This 
+    is mostly a wrapper around PostProcessor.
 
     Attributes
     ---------

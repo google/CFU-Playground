@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from nmigen import Array, Signal, Mux
+
 from nmigen_cfu import SimpleElaboratable
 
 from .registerfile import Xetter
@@ -28,9 +29,9 @@ class StoreSetter(Xetter):
         bits in each word of memory
     num_memories:
         number of memories in the store. data will be striped over the memories.
-        Assumed to be a power of two
+        Assumed to be a power of two.
     depth:
-        Maximum number of items stored in each memory
+        Maximum number of items stored in each memory.
 
     Public Interface
     ----------------
@@ -89,7 +90,8 @@ class StoreSetter(Xetter):
 
 
 class CircularIncrementer(SimpleElaboratable):
-    """Does circular increments of a memory address counter over a store.
+    """Does circular increments of a memory address counter over a single memory
+    range.
 
     Parameters
     ----------
@@ -136,19 +138,21 @@ class FilterValueGetter(Xetter):
 
     This is a temporary getter. The full accelerator will use filter values internally.
 
-    Parameters:
+    Parameters
+    ----------
     num_memories:
         number of memories in the store. data will be striped over the memories.
         Assumed to be a power of two
     depth:
         Maximum number of items stored in each memory
 
-    Attributes:
-        r_addr: Signal(range(depth/num_memories)) output
-            Current read pointer
-        r_bank: Signal(range(num_memories)) output
-            Which of the memories to get from
-        restart: Signal() input
+    Public Interface
+    ----------------
+    r_addr: Signal(range(depth/num_memories)) output
+        Current read pointer
+    r_bank: Signal(range(num_memories)) output
+        Which of the memories to get from
+    restart: Signal() input
     """
 
     def __init__(self, num_memories, depth):

@@ -26,7 +26,7 @@ NUM_FILTER_DATA_WORDS = 512
 class Mnv2RegisterInstruction(RegisterFileInstruction):
 
     def _make_setter(self, m, reg_num, name):
-        """Constructs and registers a setter.
+        """Constructs and registers a simple RegisterSetter.
 
         Return a pair of signals from setter: (value, set)
         """
@@ -34,32 +34,6 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         m.submodules[name] = setter
         self.register_xetter(reg_num, setter)
         return setter.value, setter.set
-
-    def _make_output_channel_param_store(
-            self, m, reg_num, name, restart_signal):
-        """Constructs and registers a param store connected to a memory
-        and a circular incrementer.
-
-        Returns a pair of signals: (current data, inc.next)
-        """
-        m.submodules[f'{name}_dp'] = dp = DualPortMemory(
-            width=32, depth=OUTPUT_CHANNEL_PARAM_DEPTH, is_sim=not bool(self.platform))
-        m.submodules[f'{name}_inc'] = inc = CircularIncrementer(
-            OUTPUT_CHANNEL_PARAM_DEPTH)
-        m.submodules[f'{name}_set'] = psset = StoreSetter(
-            32, 1, OUTPUT_CHANNEL_PARAM_DEPTH)
-        self.register_xetter(reg_num, psset)
-        m.d.comb += [
-            # Restart param store when reg is set
-            psset.restart.eq(restart_signal),
-            inc.restart.eq(restart_signal),
-            # Incrementer is limited to number of items already set
-            inc.limit.eq(psset.count),
-            # Hook memory up to various components
-            dp.r_addr.eq(inc.r_addr),
-        ]
-        m.d.comb += psset.connect_write_port([dp])
-        return dp.r_data, inc.next
 
     def _make_output_channel_param_store(
             self, m, reg_num, name, restart_signal):
