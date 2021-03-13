@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from types import MemberDescriptorType
-from nmigen.hdl.ast import _MappedKeyCollection
 from util import DualPortMemory
 from .post_process import PostProcessXetter, SRDHMInstruction, RoundingDividebyPOTInstruction
 from .store import CircularIncrementer, FilterValueGetter, StoreSetter
