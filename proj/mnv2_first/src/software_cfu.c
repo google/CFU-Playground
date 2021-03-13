@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "cfu.h"
 #include "cpp_math.h"
 #include "mnv2_cfu.h"
 
-static int32_t reg_input_depth;
 static int32_t reg_output_depth;
 static int32_t reg_input_offset;
 static int32_t reg_output_offset;
@@ -107,14 +108,176 @@ static uint32_t filter_store_read(struct FilterStore* fs) {
   if (fs->read_bank == 0) {
     fs->read_index = (fs->read_index + 1) % fs->write_index;
   }
+#if 0
+  static int frc = 0;
+  if (frc < 24) {
+    printf("%02x, %02x, %02x, %02x, ", result & 0xff, (result >> 8) & 0xff,
+           (result >> 16) & 0xff, (result >> 24) & 0xff);
+    if (frc % 3 == 2) {
+      printf("\n");
+    }
+  }
+  frc++;
+#endif
   return result;
+}
+
+// Input store is double buffered so that one may be written
+// while the other being read
+struct InputStore {
+  // There are two buffers, 0 and 1.
+
+  // Write allowed is set by the reader to indicate buffer is now empty.
+  // It is cleared by the reader when the reader begins processing that buffer.
+  bool write_allowed[2];
+
+  // Read allowed is set by writer and inidicates the buffer is full
+  // It is cleared by the writer when the writer begins processing that buffer.
+  bool read_allowed[2];
+
+  // curr_read_buffer points to the buffer that the reader will next read.
+  int curr_read_buffer;
+
+  // curr_read_buffer points to the buffer that the reader will next read.
+  int curr_write_buffer;
+
+  // Actual data storage
+  int32_t values[NUM_INPUT_DATA_EBRAMS][NUM_INPUT_DATA_WORDS];
+
+  // Input depth in 32 bit (4 byte) words
+  uint32_t input_depth;
+
+  // Address at which to next write and read in current read buffer, in 32 bit
+  // words.
+  uint32_t write_addr;
+  uint32_t read_addr;
+};
+
+static struct InputStore input_store;
+
+static void input_store_restart(struct InputStore* is) {
+  memset(is, 0, sizeof(struct FilterStore));
+  is->write_allowed[0] = true;
+  is->write_allowed[1] = true;
+}
+
+static int32_t input_store_set(struct InputStore* is, uint32_t val) {
+  if (!is->write_allowed[is->curr_write_buffer]) {
+    // in gateware, this will be a stall
+    printf("could not write\n");
+    return 0;
+  }
+
+  // Not allowed to read buffer while writing
+  is->read_allowed[is->curr_write_buffer] = false;
+
+  // Calculate write address and write
+  int bank = is->write_addr & 0x3;
+  int w_addr = (is->write_addr >> 2) +
+               (is->curr_write_buffer ? EBRAM_DEPTH_WORDS / 2 : 0);
+  is->values[bank][w_addr] = val;
+  // printf("is->values[%d][%d] = %08lx\n", bank, w_addr, val);
+
+  // End of batch: reset address, mark buffer full and readable and go to next
+  // buffer
+  is->write_addr++;
+  if (is->write_addr == is->input_depth) {
+    is->write_addr = 0;
+    is->read_allowed[is->curr_write_buffer] = true;
+    is->curr_write_buffer = 1 - is->curr_write_buffer;
+  }
+}
+
+// Eventually, reads will all be 4 words (16 bytes) wide
+static uint32_t input_store_read(struct InputStore* is) {
+  if (!is->read_allowed[is->curr_read_buffer]) {
+    // in gateware, this will be a stall
+    printf("could not read\n");
+    return 0;
+  }
+
+  // Not allowed to write buffer while reading
+  is->write_allowed[is->curr_read_buffer] = false;
+
+  // Calculate read address and read
+  int bank = is->read_addr & 0x3;
+  int r_addr =
+      (is->read_addr >> 2) + (is->curr_read_buffer ? EBRAM_DEPTH_WORDS / 2 : 0);
+  uint32_t result = is->values[bank][r_addr];
+
+  // End of input: reset address, mark buffer empy and writeable and go to next
+  // buffer
+  is->read_addr++;
+  if (is->read_addr == is->input_depth) {
+    is->read_addr = 0;
+  }
+
+#if 0
+  static int irc = 0;
+  if (irc < 24) {
+    printf("%02x, %02x, %02x, %02x, ", result & 0xff, (result >> 8) & 0xff,
+           (result >> 16) & 0xff, (result >> 24) & 0xff);
+    if (irc % 3 == 2) {
+      printf("\n");
+    }
+  }
+  irc++;
+#endif
+
+  return result;
+}
+
+static uint32_t input_store_mark_read_finished(struct InputStore* is) {
+  // reset address, mark buffer empy and writeable and go to next buffer
+  is->read_addr = 0;
+  is->write_allowed[is->curr_read_buffer] = true;
+  is->curr_read_buffer = 1 - is->curr_read_buffer;
+  return 0;
+}
+
+static int print_as_bytes(uint32_t word) {
+  printf("%02x, %02x, %02x, %02x, ", word & 0xff, (word >> 8) & 0xff,
+         (word >> 16) & 0xff, (word >> 24) & 0xff);
+}
+
+static uint32_t input_store_dump(struct InputStore* is) {
+  printf("write buf: %1d allowed: %1d, %1d\n", is->curr_write_buffer,
+         is->write_allowed[0], is->write_allowed[1]);
+  printf("read  buf: %1d allowed: %1d, %1d\n", is->curr_write_buffer,
+         is->read_allowed[0], is->read_allowed[1]);
+
+  int32_t id = is->input_depth;
+  printf("input depth: %ld\n", id);
+
+  printf("write_addr: %d\n", is->write_addr);
+  printf("read_addr:  %d\n", is->read_addr);
+  printf("buf0");
+  for (int addr = 0; addr < id; addr++) {
+    if (addr % 3 == 0) {
+      printf("\n");
+    }
+    print_as_bytes(is->values[addr & 0x3][addr >> 2]);
+  }
+  printf("\n");
+  printf("buf1");
+  const int b1start = EBRAM_DEPTH_WORDS / 2;
+  for (int addr = 0; addr < id; addr++) {
+    if (addr % 3 == 0) {
+      printf("\n");
+    }
+    print_as_bytes(is->values[addr & 0x3][(addr >> 2) + b1start]);
+  }
+  printf("\n");
+
+  return 0;
 }
 
 // Set register instruction
 static uint32_t set_reg(int funct7, uint32_t in0, uint32_t in1) {
   switch (funct7) {
     case 10:
-      reg_input_depth = in0;
+      input_store_restart(&input_store);
+      input_store.input_depth = in0;
       return 0;
     case 11:
       reg_output_depth = in0;
@@ -146,10 +309,17 @@ static uint32_t set_reg(int funct7, uint32_t in0, uint32_t in1) {
       return param_store_set(&output_bias, in0);
     case 24:
       return filter_store_set(&filter_store, in0);
-      break;
+    case 25:
+      return input_store_set(&input_store, in0);
 
     case 110:
       return filter_store_read(&filter_store);
+    case 111:
+      return input_store_read(&input_store);
+    case 112:
+      return input_store_mark_read_finished(&input_store);
+    case 113:
+      return input_store_dump(&input_store);
     case 120:
       return post_process(in0);
       break;
