@@ -26,31 +26,37 @@ limitations under the License.
 namespace tflite {
 namespace reference_integer_ops {
 
-static inline int32_t macc(const int8_t* input_data, int8_t filter_val,
-                           int out_channel, int in_channel,
+static inline int32_t macc(const int8_t input_val, int8_t filter_val,
                            int32_t input_offset) {
-  int32_t input_val = input_data[in_channel];
   // Assumes filter values being used sequentially
-  return ((int32_t)filter_val) * (input_val + input_offset);
+  int32_t sum = ((int32_t)filter_val) * ((int32_t)input_val + input_offset);
+
+#if 0
+  static int dbg_ctr = 0;
+  if (dbg_ctr >= 96 * 24 && dbg_ctr < 96 * 25) {
+    printf("%6d, %4d, %6ld, %6ld\n", filter_val, input_val, input_offset, sum);
+  }
+  dbg_ctr++;
+#endif
+  return sum;
 }
 
-static inline int32_t accumulate(const int8_t* input_data, int out_channel,
-                                 int input_depth, int32_t input_offset) {
+static inline int32_t accumulate(int input_depth, int32_t input_offset) {
   int32_t acc = 0;
   for (int in_channel = 0; in_channel < input_depth; in_channel += 4) {
-    // Fetch 4 filter values
+    // Fetch 4 filter values and 4 input vals
     uint32_t filter_vals = CFU_GET_FILTER_VALUE();
-    acc += macc(input_data, filter_vals & 0xff, out_channel, in_channel,
-                input_offset);
+    uint32_t input_vals = CFU_GET_INPUT_VALUE();
+    acc += macc(input_vals & 0xff, filter_vals & 0xff, input_offset);
     filter_vals >>= 8;
-    acc += macc(input_data, filter_vals & 0xff, out_channel, in_channel + 1,
-                input_offset);
+    input_vals >>= 8;
+    acc += macc(input_vals & 0xff, filter_vals & 0xff, input_offset);
     filter_vals >>= 8;
-    acc += macc(input_data, filter_vals & 0xff, out_channel, in_channel + 2,
-                input_offset);
+    input_vals >>= 8;
+    acc += macc(input_vals & 0xff, filter_vals & 0xff, input_offset);
     filter_vals >>= 8;
-    acc += macc(input_data, filter_vals & 0xff, out_channel, in_channel + 3,
-                input_offset);
+    input_vals >>= 8;
+    acc += macc(input_vals & 0xff, filter_vals & 0xff, input_offset);
   }
   return acc;
 }
@@ -86,7 +92,8 @@ void Mnv2ConvPerChannel1x1(
   const int output_width = output_shape.Dims(2);
 
   // Set parameters for op
-  CFU_SET_INPUT_DEPTH(input_depth);
+  const int input_depth_words = input_depth / 4;
+  CFU_SET_INPUT_DEPTH_WORDS(input_depth_words);
   CFU_SET_OUTPUT_DEPTH(output_depth);
   CFU_SET_INPUT_OFFSET(input_offset);
   CFU_SET_OUTPUT_OFFSET(output_offset);
@@ -136,21 +143,26 @@ void Mnv2ConvPerChannel1x1(
     for (int i = 0; i < num_filter_words; i++) {
       CFU_STORE_FILTER_VALUE(*(filter_words++));
     }
-
     // Reset input and output pointers
-    const int8_t* input_ptr = input_data;
+    const uint32_t* input_ptr = (uint32_t*)input_data;
     int8_t* output_ptr = output_data + batch_base;
     for (int p = 0; p < num_pixels; p++) {
+      // Load one pixel's worth of input data
+      for (int i = 0; i < input_depth_words; i++) {
+        uint32_t val = *(input_ptr++);
+        CFU_STORE_INPUT_VALUE(val);
+      }
+
       for (int out_channel = batch_base; out_channel < batch_end;
            ++out_channel) {
-        int32_t acc =
-            accumulate(input_ptr, out_channel, input_depth, input_offset);
+        int32_t acc = accumulate(input_depth, input_offset);
 
         int32_t out = CFU_POST_PROCESS(acc);
         *(output_ptr++) = static_cast<int8_t>(out);
       }
+      CFU_MARK_INPUT_READ_FINISHED();
+
       output_ptr += output_depth - batch_size;
-      input_ptr += input_depth;
     }
   }
 }
