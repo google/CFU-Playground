@@ -24,47 +24,41 @@ extern "C" {
 #endif
 
 // Defines an item in a menu
-struct MenuItem
-{
-    // Character used to select the item
-    const char selection;
-    // Description of the item in the menu
-    const char *description;
-    // The function that implements the menu item
-    void (*const fn)(void);
-    // Used to exit from submenus
-    const bool exit;
+struct MenuItem {
+  // Character used to select the item
+  const char selection;
+  // Description of the item in the menu
+  const char* description;
+  // The function that implements the menu item
+  void (*const fn)(void);
+  // Used to exit from submenus
+  const bool exit;
 };
 
 // Defines a menu
-struct Menu
-{
-    // The title of the menu
-    const char *title;
-    // String to use in the prompt
-    const char *prompt;
-    // The menu choices
-    struct MenuItem items[];
+struct Menu {
+  // The title of the menu
+  const char* title;
+  // String to use in the prompt
+  const char* prompt;
+  // The menu choices
+  struct MenuItem items[];
 };
 
 #define MENU_ITEM(selection, description, fn) \
-    {                                         \
-        selection, description, fn, false     \
-    }
+  { selection, description, fn, false }
 
 // Last items in a non-top level menu
 #define MENU_END {'x', "eXit to previous menu", NULL, true}, MENU_SENTINEL
 
 // Last item in a top level menu
-#define MENU_SENTINEL           \
-    {                           \
-        '\0', NULL, NULL, false \
-    }
+#define MENU_SENTINEL \
+  { '\0', NULL, NULL, false }
 
 // Run a menu
-void menu_run(struct Menu *menu);
+void menu_run(struct Menu* menu);
 
 #ifdef __cplusplus
 }
 #endif
-#endif // MENU_H
+#endif  // MENU_H

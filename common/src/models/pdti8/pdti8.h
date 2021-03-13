@@ -28,6 +28,4 @@ void pdti8_menu();
 }
 #endif
 
-
-#endif   // _PDTI8_H
-
+#endif  // _PDTI8_H

@@ -27,5 +27,4 @@ void mnv2_menu();
 #ifdef __cplusplus
 }
 #endif
-#endif   // _MNV2H
-
+#endif  // _MNV2H

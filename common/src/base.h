@@ -22,7 +22,8 @@
 void init_runtime();
 
 // Read value from console
-// Uses strtol. Can accept values in hex or decimal. Also allows negative values.
-uint32_t read_val(const char *prompt);
+// Uses strtol. Can accept values in hex or decimal. Also allows negative
+// values.
+uint32_t read_val(const char* prompt);
 
-#endif // !BASE_H
+#endif  // !BASE_H

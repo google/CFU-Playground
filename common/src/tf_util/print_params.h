@@ -17,23 +17,20 @@
 #define _PRINT_PARAMS_H
 #include "tensorflow/lite/kernels/internal/types.h"
 
-void print_conv_params(
-    const tflite::ConvParams &params,
-    const tflite::RuntimeShape &input_shape,
-    const tflite::RuntimeShape &filter_shape,
-    const tflite::RuntimeShape &output_shape);
+void print_conv_params(const tflite::ConvParams& params,
+                       const tflite::RuntimeShape& input_shape,
+                       const tflite::RuntimeShape& filter_shape,
+                       const tflite::RuntimeShape& output_shape);
 
-void print_depthwise_params(
-    const tflite::DepthwiseParams &params,
-    const tflite::RuntimeShape &input_shape,
-    const tflite::RuntimeShape &filter_shape,
-    const tflite::RuntimeShape &output_shape);
+void print_depthwise_params(const tflite::DepthwiseParams& params,
+                            const tflite::RuntimeShape& input_shape,
+                            const tflite::RuntimeShape& filter_shape,
+                            const tflite::RuntimeShape& output_shape);
 
-void print_arithmetic_params(
-    const char *op_name,
-    const tflite::ArithmeticParams &params,
-    const tflite::RuntimeShape &input1_shape,
-    const tflite::RuntimeShape &input2_shape,
-    const tflite::RuntimeShape &output_shape);
+void print_arithmetic_params(const char* op_name,
+                             const tflite::ArithmeticParams& params,
+                             const tflite::RuntimeShape& input1_shape,
+                             const tflite::RuntimeShape& input2_shape,
+                             const tflite::RuntimeShape& output_shape);
 
-#endif // _PRINT_PARAMS_H
+#endif  // _PRINT_PARAMS_H

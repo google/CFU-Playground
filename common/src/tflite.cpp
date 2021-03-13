@@ -13,13 +13,13 @@
 // limitations under the License.
 
 #include "tflite.h"
-#include "perf.h"
 
+#include "perf.h"
 #include "tensorflow/lite/micro/all_ops_resolver.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
-#include "tensorflow/lite/micro/micro_profiler.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
+#include "tensorflow/lite/micro/micro_profiler.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
 
@@ -30,17 +30,15 @@
 #define INTERPRETER_TYPE MicroInterpreter
 #endif
 
-
 //
 // Unit test prototypes. Because of the way these names are generated, they are
 // not defined in any include file. The actual tests are in test_name.cc - e.g
 // conv_test is defined in conv_test.cc.
-extern int conv_test(int argc, char **argv);
-extern int depthwise_conv_test(int argc, char **argv);
+extern int conv_test(int argc, char** argv);
+extern int depthwise_conv_test(int argc, char** argv);
 
 // Run tflite unit tests
-void tflite_do_tests()
-{
+void tflite_do_tests() {
   // conv test from conv_test.cc
   puts("\nCONV TEST:");
   conv_test(0, NULL);
@@ -50,30 +48,27 @@ void tflite_do_tests()
 }
 
 // For C++ exceptions
-void *__dso_handle = &__dso_handle;
+void* __dso_handle = &__dso_handle;
 
 //
 // TfLM global objects
-namespace
-{
-  tflite::ErrorReporter *error_reporter = nullptr;
-  tflite::MicroOpResolver *op_resolver = nullptr;
-  tflite::MicroProfiler *profiler = nullptr;
+namespace {
+tflite::ErrorReporter* error_reporter = nullptr;
+tflite::MicroOpResolver* op_resolver = nullptr;
+tflite::MicroProfiler* profiler = nullptr;
 
-  const tflite::Model *model = nullptr;
-  tflite::INTERPRETER_TYPE *interpreter = nullptr;
+const tflite::Model* model = nullptr;
+tflite::INTERPRETER_TYPE* interpreter = nullptr;
 
-  // An area of memory to use for input, output, and intermediate arrays.
-  // constexpr int kTensorArenaSize = 136 * 1024;
-  constexpr int kTensorArenaSize = 800 * 1024;
-  static uint8_t tensor_arena[kTensorArenaSize];
-} // namespace
+// An area of memory to use for input, output, and intermediate arrays.
+// constexpr int kTensorArenaSize = 136 * 1024;
+constexpr int kTensorArenaSize = 800 * 1024;
+static uint8_t tensor_arena[kTensorArenaSize];
+}  // namespace
 
-static void tflite_init()
-{
+static void tflite_init() {
   static bool initialized = false;
-  if (initialized)
-  {
+  if (initialized) {
     return;
   }
   initialized = true;
@@ -99,8 +94,8 @@ static void tflite_init()
   // micro_op_resolver.AddReshape();
   // micro_op_resolver.AddSoftmax();
 
-  // // needed for jon's model conv2d/relu, maxpool2d, reshape, fullyconnected, logistic
-  // micro_op_resolver.AddMaxPool2D();
+  // // needed for jon's model conv2d/relu, maxpool2d, reshape, fullyconnected,
+  // logistic micro_op_resolver.AddMaxPool2D();
   // micro_op_resolver.AddFullyConnected();
   // micro_op_resolver.AddLogistic();
 
@@ -113,11 +108,9 @@ static void tflite_init()
   profiler = &micro_profiler;
 }
 
-void tflite_load_model(unsigned char *model_data)
-{
+void tflite_load_model(unsigned char* model_data) {
   tflite_init();
-  if (interpreter)
-  {
+  if (interpreter) {
     interpreter->~INTERPRETER_TYPE();
     interpreter = nullptr;
   }
@@ -125,8 +118,7 @@ void tflite_load_model(unsigned char *model_data)
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
   model = tflite::GetModel(model_data);
-  if (model->version() != TFLITE_SCHEMA_VERSION)
-  {
+  if (model->version() != TFLITE_SCHEMA_VERSION) {
     TF_LITE_REPORT_ERROR(error_reporter,
                          "Model provided is schema version %d not equal "
                          "to supported version %d.",
@@ -136,14 +128,15 @@ void tflite_load_model(unsigned char *model_data)
 
   // Build an interpreter to run the model with.
   // NOLINTNEXTLINE(runtime-global-variables)
-  alignas(tflite::INTERPRETER_TYPE) static unsigned char buf[sizeof(tflite::INTERPRETER_TYPE)];
-  interpreter = new (buf) tflite::INTERPRETER_TYPE(
-      model, *op_resolver, tensor_arena, kTensorArenaSize, error_reporter, profiler);
+  alignas(tflite::INTERPRETER_TYPE) static unsigned char
+      buf[sizeof(tflite::INTERPRETER_TYPE)];
+  interpreter = new (buf)
+      tflite::INTERPRETER_TYPE(model, *op_resolver, tensor_arena,
+                               kTensorArenaSize, error_reporter, profiler);
 
   // Allocate memory from the tensor_arena for the model's tensors.
   TfLiteStatus allocate_status = interpreter->AllocateTensors();
-  if (allocate_status != kTfLiteOk)
-  {
+  if (allocate_status != kTfLiteOk) {
     TF_LITE_REPORT_ERROR(error_reporter, "AllocateTensors() failed");
     return;
   }
@@ -152,48 +145,39 @@ void tflite_load_model(unsigned char *model_data)
   auto input = interpreter->input(0);
   auto dims = input->dims;
   printf("Input: %d bytes, %d dims:", input->bytes, dims->size);
-  for (int ii = 0; ii < dims->size; ++ii)
-  {
+  for (int ii = 0; ii < dims->size; ++ii) {
     printf(" %d", dims->data[ii]);
   }
   puts("\n");
 }
 
-void tflite_set_input_zeros()
-{
+void tflite_set_input_zeros() {
   auto input = interpreter->input(0);
   memset(input->data.int8, 0, input->bytes);
   printf("Zeroed %d bytes at 0x%p\n", input->bytes, input->data.int8);
 }
 
-void tflite_set_input(const void *data)
-{
+void tflite_set_input(const void* data) {
   auto input = interpreter->input(0);
   memcpy(input->data.int8, data, input->bytes);
   printf("Copied %d bytes at 0x%p\n", input->bytes, input->data.int8);
 }
 
-void tflite_set_input_unsigned(const unsigned char *data)
-{
+void tflite_set_input_unsigned(const unsigned char* data) {
   auto input = interpreter->input(0);
   for (size_t i = 0; i < input->bytes; i++) {
-    input->data.int8[i] = (int) data[i] - 127;
+    input->data.int8[i] = (int)data[i] - 127;
   }
   printf("Set %d bytes at 0x%p\n", input->bytes, input->data.int8);
 }
 
-int8_t *tflite_get_output()
-{
-  return interpreter->output(0)->data.int8;
-}
+int8_t* tflite_get_output() { return interpreter->output(0)->data.int8; }
 
-void tflite_classify()
-{
+void tflite_classify() {
   // Run the model on this input and make sure it succeeds.
   perf_reset_all_counters();
   perf_set_mcycle(0);
-  if (kTfLiteOk != interpreter->Invoke())
-  {
+  if (kTfLiteOk != interpreter->Invoke()) {
     TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed.");
   }
   unsigned int cyc = perf_get_mcycle();
@@ -206,10 +190,8 @@ void tflite_classify()
 #ifdef SHOW_MEMORY_USE
   interpreter->GetMicroAllocator().PrintAllocations();
 #endif
-  printf("Arena used bytes: %llu\n", (long long unsigned)(interpreter->arena_used_bytes()));
+  printf("Arena used bytes: %llu\n",
+         (long long unsigned)(interpreter->arena_used_bytes()));
 }
 
-int8_t *get_input()
-{
-  return interpreter->input(0)->data.int8;
-}
+int8_t* get_input() { return interpreter->input(0)->data.int8; }

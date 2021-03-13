@@ -20,4 +20,4 @@
 // Project-specific menu
 void do_proj_menu();
 
-#endif // !_PROJ_MENU_H
+#endif  // !_PROJ_MENU_H

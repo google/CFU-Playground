@@ -20,4 +20,4 @@
 // Menu driven tests suitable for functional CFUs
 void do_functional_cfu_tests();
 
-#endif // !FUNCTIONAL_CFU_TESTS_H
+#endif  // !FUNCTIONAL_CFU_TESTS_H

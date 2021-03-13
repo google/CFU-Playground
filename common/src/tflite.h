@@ -30,18 +30,18 @@ extern "C" {
 void tflite_do_tests();
 
 // Sets up TfLite with a given model
-void tflite_load_model(unsigned char *model_data);
+void tflite_load_model(unsigned char* model_data);
 void tflite_set_input_zeros();
-void tflite_set_input(const void *data);
-void tflite_set_input_unsigned(const unsigned char *data);
+void tflite_set_input(const void* data);
+void tflite_set_input_unsigned(const unsigned char* data);
 
 // Run classification with data already set into input.
 void tflite_classify();
 
 // Obtain the result vector
-int8_t *tflite_get_output();
+int8_t* tflite_get_output();
 
 #ifdef __cplusplus
 }
 #endif
-#endif // _TFLITE_H
+#endif  // _TFLITE_H
