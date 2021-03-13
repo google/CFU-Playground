@@ -158,7 +158,7 @@ class FilterValueGetter(Xetter):
         self.num_memories = num_memories
         self.r_addr = Signal(range(depth))
         self.r_bank = Signal(range(num_memories))
-        self.limit = Signal(self.num_memories * depth)
+        self.limit = Signal(range(self.num_memories * depth))
         self.restart = Signal()
 
     def connect_read_port(self, dual_port_memories):
