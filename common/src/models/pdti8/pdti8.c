@@ -40,19 +40,22 @@ static int32_t pdti8_classify() {
 
 static void do_classify_zeros() {
   tflite_set_input_zeros();
-  pdti8_classify();
+  int32_t result = pdti8_classify();
+  printf("  result is %ld\n", result);
 }
 
 static void do_classify_no_person() {
   puts("Classify Not Person");
   tflite_set_input(g_no_person_data);
-  pdti8_classify();
+  int32_t result = pdti8_classify();
+  printf("  result is %ld\n", result);
 }
 
 static void do_classify_person() {
   puts("Classify Person");
   tflite_set_input(g_person_data);
-  pdti8_classify();
+  int32_t result = pdti8_classify();
+  printf("  result is %ld\n", result);
 }
 
 #define NUM_GOLDEN 3
@@ -78,8 +81,9 @@ static void do_golden_tests() {
 
   if (failed) {
     puts("FAIL Golden tests failed");
+  } else {
+    puts("OK   Golden tests passed");
   }
-  { puts("OK   Golden tests passed"); }
 }
 
 static struct Menu MENU = {
