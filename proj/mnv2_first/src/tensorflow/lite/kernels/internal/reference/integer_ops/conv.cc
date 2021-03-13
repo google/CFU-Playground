@@ -154,7 +154,16 @@ void ConvPerChannel(const ConvParams& params, const int32_t* output_multiplier,
                 // we have seen so far.
                 // TODO(jianlijianli): Add a check to make sure the
                 // accumulator depth is smaller than 2^16.
-                acc += filter_val * (input_val + input_offset);
+                int32_t sum = filter_val * (input_val + input_offset);
+                acc += sum;
+#if 0
+                static int dbg_ctr = 0;
+                if (dbg_ctr >= 96*24 && dbg_ctr < 96*24+96) {
+                  printf("%6ld, %4ld, %6ld, %6ld\n", filter_val, input_val, input_offset, sum);
+                }
+                dbg_ctr++;
+
+#endif
               }
             }
           }
@@ -167,7 +176,6 @@ void ConvPerChannel(const ConvParams& params, const int32_t* output_multiplier,
                    output_activation_min, output_activation_max);
           }
 #endif
-
           if (bias_data) {
             acc += bias_data[out_channel];
           }
@@ -178,6 +186,16 @@ void ConvPerChannel(const ConvParams& params, const int32_t* output_multiplier,
           acc = std::min(acc, output_activation_max);
           output_data[Offset(output_shape, batch, out_y, out_x, out_channel)] =
               static_cast<int8_t>(acc);
+
+#if 0
+          // fixme int32_t acc_in = acc;
+          static int dbg_ctr = 0;
+          if (dbg_ctr == 0) {
+            printf("%6ld, %6ld, %02lx\n", acc_in, acc, acc & 0xff);
+          }
+          dbg_ctr++;
+
+#endif
 
 #if SHOW_SAMPLE_POST_PROCESSING
           if ((count & (1024 * 128 - 1)) == 0) {
