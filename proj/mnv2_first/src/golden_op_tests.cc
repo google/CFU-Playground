@@ -1284,21 +1284,6 @@ static const uint8_t raw_1x1_output_data[] = {
     0x04, 0xfe, 0x00, 0xff, 0x23, 0xe0, 0x0d, 0xf7, 0xfb, 0x0e, 0xf9, 0x07,
 };
 
-// Force expansion of inline ConvPerChannel function so that no static
-// data-specific optimizations are made
-void conv1x1(const tflite::ConvParams& params, const int32_t* output_multiplier,
-             const int32_t* output_shift,
-             const tflite::RuntimeShape& input_shape, const int8_t* input_data,
-             const tflite::RuntimeShape& filter_shape,
-             const int8_t* filter_data, const tflite::RuntimeShape& bias_shape,
-             const int32_t* bias_data, const tflite::RuntimeShape& output_shape,
-             int8_t* output_data) {
-  tflite::reference_integer_ops::ConvPerChannel(
-      params, output_multiplier, output_shift, input_shape, input_data,
-      filter_shape, filter_data, bias_shape, bias_data, output_shape,
-      output_data);
-}
-
 void golden_op_run_1x1conv(void) {
   // Use serialized values
   tflite::ConvParams& params = *((tflite::ConvParams*)raw_1x1_conv_params);
