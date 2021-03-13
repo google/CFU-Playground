@@ -131,4 +131,7 @@ static struct Menu MENU = {
     },
 };
 
-void do_proj_menu() { menu_run(&MENU); }
+void do_proj_menu() {
+  // sim_trace_enable_write(1);
+  menu_run(&MENU);
+}

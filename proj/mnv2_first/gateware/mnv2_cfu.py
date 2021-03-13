@@ -13,14 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from types import MemberDescriptorType
+from nmigen.hdl.ast import _MappedKeyCollection
 from util import DualPortMemory
 from .post_process import PostProcessXetter, SRDHMInstruction, RoundingDividebyPOTInstruction
-from .param_store import CircularIncrementer, ParamStoreSetter
+from .store import CircularIncrementer, FilterValueGetter, StoreSetter
 from .registerfile import RegisterFileInstruction, RegisterSetter
 
 from nmigen_cfu import Cfu
 
 OUTPUT_CHANNEL_PARAM_DEPTH = 512
+NUM_FILTER_DATA_WORDS = 512
 
 
 class Mnv2RegisterInstruction(RegisterFileInstruction):
@@ -46,8 +49,8 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
             width=32, depth=OUTPUT_CHANNEL_PARAM_DEPTH, is_sim=not bool(self.platform))
         m.submodules[f'{name}_inc'] = inc = CircularIncrementer(
             OUTPUT_CHANNEL_PARAM_DEPTH)
-        m.submodules[f'{name}_set'] = psset = ParamStoreSetter(
-            32, OUTPUT_CHANNEL_PARAM_DEPTH)
+        m.submodules[f'{name}_set'] = psset = StoreSetter(
+            32, 1, OUTPUT_CHANNEL_PARAM_DEPTH)
         self.register_xetter(reg_num, psset)
         m.d.comb += [
             # Restart param store when reg is set
@@ -57,11 +60,58 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
             inc.limit.eq(psset.count),
             # Hook memory up to various components
             dp.r_addr.eq(inc.r_addr),
-            dp.w_en.eq(psset.w_en),
-            dp.w_addr.eq(psset.w_addr),
-            dp.w_data.eq(psset.w_data),
         ]
+        m.d.comb += psset.connect_write_port([dp])
         return dp.r_data, inc.next
+
+    def _make_output_channel_param_store(
+            self, m, reg_num, name, restart_signal):
+        """Constructs and registers a param store connected to a memory
+        and a circular incrementer.
+
+        Returns a pair of signals: (current data, inc.next)
+        """
+        m.submodules[f'{name}_dp'] = dp = DualPortMemory(
+            width=32, depth=OUTPUT_CHANNEL_PARAM_DEPTH, is_sim=not bool(self.platform))
+        m.submodules[f'{name}_inc'] = inc = CircularIncrementer(
+            OUTPUT_CHANNEL_PARAM_DEPTH)
+        m.submodules[f'{name}_set'] = psset = StoreSetter(
+            32, 1, OUTPUT_CHANNEL_PARAM_DEPTH)
+        self.register_xetter(reg_num, psset)
+        m.d.comb += [
+            # Restart param store when reg is set
+            psset.restart.eq(restart_signal),
+            inc.restart.eq(restart_signal),
+            # Incrementer is limited to number of items already set
+            inc.limit.eq(psset.count),
+            # Hook memory up to various components
+            dp.r_addr.eq(inc.r_addr),
+        ]
+        m.d.comb += psset.connect_write_port([dp])
+        return dp.r_data, inc.next
+
+    def _make_filter_value_store(
+            self, m, reg_num, name, restart_signal):
+        """Constructs and registers a param store connected to a memory
+        and a circular incrementer.
+
+        Returns a list of dual port memories used to implement the store,
+        plus signal for count of words.
+        """
+        dps = []
+        for i in range(4):
+            m.submodules[f'{name}_dp_{i}'] = dp = DualPortMemory(
+                width=32, depth=NUM_FILTER_DATA_WORDS, is_sim=not bool(self.platform))
+            dps.append(dp)
+        m.submodules[f'{name}_set'] = fvset = StoreSetter(
+            32, 4, NUM_FILTER_DATA_WORDS)
+        self.register_xetter(reg_num, fvset)
+        m.d.comb += [
+            # Restart param store when reg is set
+            fvset.restart.eq(restart_signal),
+        ]
+        m.d.comb += fvset.connect_write_port(dps)
+        return dps, fvset.count
 
     def elab_xetters(self, m):
         self._make_setter(m, 10, 'set_input_depth')
@@ -77,6 +127,17 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
             m, 22, 'store_output_shift', restart)
         bias, bias_next = self._make_output_channel_param_store(
             m, 23, 'store_output_bias', restart)
+        fv_mems, fv_count = self._make_filter_value_store(
+            m, 24, 'store_filter_values', restart)
+
+        m.submodules['fvg'] = fvg = FilterValueGetter(4, NUM_FILTER_DATA_WORDS)
+        m.d.comb += fvg.connect_read_port(fv_mems)
+        m.d.comb += [
+            fvg.limit.eq(fv_count), 
+            fvg.restart.eq(restart)
+        ]
+
+        self.register_xetter(110, fvg)
         m.submodules['ppx'] = ppx = PostProcessXetter()
         self.register_xetter(120, ppx)
 

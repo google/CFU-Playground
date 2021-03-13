@@ -26,20 +26,30 @@ limitations under the License.
 namespace tflite {
 namespace reference_integer_ops {
 
-static inline int32_t macc(const int8_t* input_data, const int8_t* filter_data,
-                           int out_channel, int in_channel, int input_depth,
+static inline int32_t macc(const int8_t* input_data, int8_t filter_val,
+                           int out_channel, int in_channel,
                            int32_t input_offset) {
   int32_t input_val = input_data[in_channel];
-  int32_t filter_val = filter_data[out_channel * input_depth + in_channel];
-  return filter_val * (input_val + input_offset);
+  // Assumes filter values being used sequentially
+  return ((int32_t)filter_val) * (input_val + input_offset);
 }
 
-static inline int32_t accumulate(const int8_t* input_data,
-                                 const int8_t* filter_data, int out_channel,
+static inline int32_t accumulate(const int8_t* input_data, int out_channel,
                                  int input_depth, int32_t input_offset) {
   int32_t acc = 0;
-  for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-    acc += macc(input_data, filter_data, out_channel, in_channel, input_depth,
+  for (int in_channel = 0; in_channel < input_depth; in_channel += 4) {
+    // Fetch 4 filter values
+    uint32_t filter_vals = CFU_GET_FILTER_VALUE();
+    acc += macc(input_data, filter_vals & 0xff, out_channel, in_channel,
+                input_offset);
+    filter_vals >>= 8;
+    acc += macc(input_data, filter_vals & 0xff, out_channel, in_channel + 1,
+                input_offset);
+    filter_vals >>= 8;
+    acc += macc(input_data, filter_vals & 0xff, out_channel, in_channel + 2,
+                input_offset);
+    filter_vals >>= 8;
+    acc += macc(input_data, filter_vals & 0xff, out_channel, in_channel + 3,
                 input_offset);
   }
   return acc;
@@ -83,28 +93,42 @@ void Mnv2ConvPerChannel1x1(
   CFU_SET_ACTIVATION_MIN(output_activation_min);
   CFU_SET_ACTIVATION_MAX(output_activation_max);
 
+  // Access filter data as words
+  uint32_t* filter_words = (uint32_t*)filter_data;
+
   // Do the processing in batches, by output channel. batch size is number of
   // output channels processed per batch and it is chosen to avoid overflowing
   // filter_data memory, and then rounded down to a multiple of 4.
   //
   // For each batch, the entire input will be read once
-  int channels_per_batch =
+  const int channels_per_batch =
       std::min(output_depth, (NUM_FILTER_DATA_BYTES / input_depth) / 4 * 4);
-  int num_pixels = output_height * output_width;
-  int num_batches =
+  const int num_pixels = output_height * output_width;
+  const int num_batches =
       (channels_per_batch - 1 + output_depth) / channels_per_batch;
 
   for (int batch = 0; batch < num_batches; batch++) {
-    int batch_base = batch * channels_per_batch;
-    int batch_end = std::min(output_depth, batch_base + channels_per_batch);
-    int batch_size = batch_end - batch_base;
+    const int batch_base = batch * channels_per_batch;
+    const int batch_end =
+        std::min(output_depth, batch_base + channels_per_batch);
+    const int batch_size = batch_end - batch_base;
 
     // Load up parameters
     CFU_SET_OUTPUT_BATCH_SIZE(batch_size);
-    for (int out_channel = batch_base; out_channel < batch_end; ++out_channel) {
-      CFU_STORE_OUTPUT_MULTIPLIER(output_multiplier[out_channel]);
-      CFU_STORE_OUTPUT_SHIFT(output_shift[out_channel]);
-      CFU_STORE_OUTPUT_BIAS(bias_data[out_channel]);
+    for (int i = 0; i < batch_size; i++) {
+      CFU_STORE_OUTPUT_MULTIPLIER(*(output_multiplier++));
+    }
+    for (int i = 0; i < batch_size; i++) {
+      CFU_STORE_OUTPUT_SHIFT(*(output_shift++));
+    }
+    for (int i = 0; i < batch_size; i++) {
+      CFU_STORE_OUTPUT_BIAS(*(bias_data++));
+    }
+
+    // Load up weights
+    int num_filter_words = batch_size * input_depth / 4;
+    for (int i = 0; i < num_filter_words; i++) {
+      CFU_STORE_FILTER_VALUE(*(filter_words++));
     }
 
     // Reset input and output pointers
@@ -113,8 +137,8 @@ void Mnv2ConvPerChannel1x1(
     for (int p = 0; p < num_pixels; p++) {
       for (int out_channel = batch_base; out_channel < batch_end;
            ++out_channel) {
-        int32_t acc = accumulate(input_ptr, filter_data, out_channel,
-                                 input_depth, input_offset);
+        int32_t acc =
+            accumulate(input_ptr, out_channel, input_depth, input_offset);
 
         int32_t out = CFU_POST_PROCESS(acc);
         *(output_ptr++) = static_cast<int8_t>(out);
