@@ -22,6 +22,14 @@ from nmigen.sim import Simulator
 
 import unittest
 
+# This global will be set by unittests to indicate that the test is
+# being done in simulation
+_IS_SIM_RUN = False
+
+
+def is_sim_run():
+    return _IS_SIM_RUN
+
 
 class SimpleElaboratable(Elaboratable):
     """Simplified Elaboratable interface
@@ -67,6 +75,10 @@ class TestBase(unittest.TestCase):
     """
 
     def setUp(self):
+        # Ensure IS_SIM_RUN set
+        global _IS_SIM_RUN
+        _IS_SIM_RUN = True
+        # Create DUT and add to simulator
         self.m = Module()
         self.dut = self.create_dut()
         self.m.submodules['dut'] = self.dut
@@ -183,15 +195,16 @@ class Sequencer(SimpleElaboratable):
     Attributes
     ----------
     inp: Signal() input
-      The bit to shift into the sequencer. 
+      The bit to shift into the sequencer.
     sequence: Signal(n+1) output
       The sequence bits. sequence[0] is always equal to inp (via comb).
       sequence[1] is the previous value of sequence[0], sequence[2] is
       the previous value of sequence[1] and so forth.
     """
+
     def __init__(self, n):
         self.inp = Signal()
-        self.sequence = Signal(n+1)
+        self.sequence = Signal(n + 1)
 
     def elab(self, m):
         shift_register = Signal(self.sequence.width - 1)

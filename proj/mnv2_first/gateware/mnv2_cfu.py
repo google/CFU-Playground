@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen_cfu import Cfu, DualPortMemory
+from nmigen_cfu import Cfu, DualPortMemory, is_sim_run
 
 from .post_process import PostProcessXetter, SRDHMInstruction, RoundingDividebyPOTInstruction
 from .store import CircularIncrementer, FilterValueGetter, StoreSetter
@@ -43,7 +43,7 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         Returns a pair of signals: (current data, inc.next)
         """
         m.submodules[f'{name}_dp'] = dp = DualPortMemory(
-            width=32, depth=OUTPUT_CHANNEL_PARAM_DEPTH, is_sim=not bool(self.platform))
+            width=32, depth=OUTPUT_CHANNEL_PARAM_DEPTH, is_sim=is_sim_run())
         m.submodules[f'{name}_inc'] = inc = CircularIncrementer(
             OUTPUT_CHANNEL_PARAM_DEPTH)
         m.submodules[f'{name}_set'] = psset = StoreSetter(
@@ -72,7 +72,7 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         dps = []
         for i in range(4):
             m.submodules[f'{name}_dp_{i}'] = dp = DualPortMemory(
-                width=32, depth=NUM_FILTER_DATA_WORDS, is_sim=not bool(self.platform))
+                width=32, depth=NUM_FILTER_DATA_WORDS, is_sim=is_sim_run())
             dps.append(dp)
         m.submodules[f'{name}_set'] = fvset = StoreSetter(
             32, 4, NUM_FILTER_DATA_WORDS)
