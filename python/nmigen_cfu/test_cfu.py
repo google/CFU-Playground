@@ -19,7 +19,6 @@
 __package__ = 'nmigen_cfu'
 
 import math
-import unittest
 from nmigen import Signal
 from nmigen.sim import Delay
 
@@ -258,8 +257,4 @@ class _CfuTest(TestBase):
                 if exp_cmd_ready is not None:
                     self.assertEqual((yield self.dut.cmd_ready), exp_cmd_ready)
                 yield
-        self.run_sim(process, True)
-
-
-if __name__ == '__main__':
-    unittest.main()
+        self.run_sim(process, False)

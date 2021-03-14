@@ -22,6 +22,14 @@ from nmigen.sim import Simulator
 
 import unittest
 
+# This global will be set by unittests to indicate that the test is
+# being done in simulation
+_IS_SIM_RUN = False
+
+
+def is_sim_run():
+    return _IS_SIM_RUN
+
 
 class SimpleElaboratable(Elaboratable):
     """Simplified Elaboratable interface
@@ -67,6 +75,10 @@ class TestBase(unittest.TestCase):
     """
 
     def setUp(self):
+        # Ensure IS_SIM_RUN set
+        global _IS_SIM_RUN
+        _IS_SIM_RUN = True
+        # Create DUT and add to simulator
         self.m = Module()
         self.dut = self.create_dut()
         self.m.submodules['dut'] = self.dut
@@ -183,15 +195,16 @@ class Sequencer(SimpleElaboratable):
     Attributes
     ----------
     inp: Signal() input
-      The bit to shift into the sequencer. 
+      The bit to shift into the sequencer.
     sequence: Signal(n+1) output
       The sequence bits. sequence[0] is always equal to inp (via comb).
       sequence[1] is the previous value of sequence[0], sequence[2] is
       the previous value of sequence[1] and so forth.
     """
+
     def __init__(self, n):
         self.inp = Signal()
-        self.sequence = Signal(n+1)
+        self.sequence = Signal(n + 1)
 
     def elab(self, m):
         shift_register = Signal(self.sequence.width - 1)
@@ -201,3 +214,83 @@ class Sequencer(SimpleElaboratable):
             shift_register[1:].eq(shift_register),
         ]
         m.d.comb += self.sequence.eq(Cat(self.inp, shift_register))
+
+
+def increment_to_limit(value, limit):
+    """Builds a statement that performs circular increments.
+
+    Parameters
+    ----------
+    value: Signal(n)
+        The value to be incremented
+    limit: Signal(n)
+        The maximum allowed value
+    """
+    return value.eq(Mux(value == limit - 1, 0, value + 1))
+
+
+class SequentialMemoryReader(SimpleElaboratable):
+    """A sequentially reading wrapper for a memory.
+    Buffers inputs in such a way that the next input can be obtained next
+    cycle, even though reads to the memory take a cycle.
+
+    Parameters
+    ----------
+    max_depth:
+        Maximum number of items stored in memory
+    width:
+        bits in each word of memory
+
+    Public Interface
+    ----------------
+    depth: Signal(range(max_depth)) input
+        The number of items to read
+    mem_addr: Signal(range(max_depth)) output
+        The address to send to the memory read port
+    mem_data: Signal(32) input
+        The data from memory
+    data: Signal(32) output
+        The current piece of data
+    next: Signal() input
+        Indicates the current piece of data has been read, and want the next bit, please
+    restart: Signal() input
+        Indicates that reader should be reset to address zero. Takes
+    """
+
+    def __init__(self, *, width, max_depth):
+        self.width = width
+        self.max_depth = max_depth
+        self.depth = Signal(range(max_depth))
+        self.mem_addr = Signal(range(max_depth))
+        self.mem_data = Signal(32)
+        self.data = Signal(32)
+        self.next = Signal()
+        self.restart = Signal()
+
+    def elab(self, m):
+        # Track previous restart, next
+        was_restart = Signal()
+        m.d.sync += was_restart.eq(self.restart)
+        was_next = Signal()
+        m.d.sync += was_next.eq(self.next)
+
+        # Decide address to be output (determines data available next cycle)
+        last_mem_addr = Signal.like(self.depth)
+        m.d.sync += last_mem_addr.eq(self.mem_addr)
+        incremented_addr = Signal.like(self.depth)
+        m.d.comb += incremented_addr.eq(Mux(last_mem_addr ==
+                                            self.depth - 1, 0, last_mem_addr + 1))
+        with m.If(self.restart):
+            m.d.comb += self.mem_addr.eq(0)
+        with m.Elif(was_next | was_restart):
+            m.d.comb += self.mem_addr.eq(incremented_addr)
+        with m.Else():
+            m.d.comb += self.mem_addr.eq(last_mem_addr)
+
+        # Decide data to be output
+        last_data = Signal.like(self.data)
+        m.d.sync += last_data.eq(self.data)
+        with m.If(was_restart | was_next):
+            m.d.comb += self.data.eq(self.mem_data)
+        with m.Else():
+            m.d.comb += self.data.eq(last_data)

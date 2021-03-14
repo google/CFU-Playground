@@ -13,9 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Array, Signal, Mux
+from nmigen import Array, Signal, Mux, Cat
 
-from nmigen_cfu import SimpleElaboratable
+from nmigen_cfu import SimpleElaboratable, is_sim_run
+from util import DualPortMemory, SequentialMemoryReader, increment_to_limit
 
 from .registerfile import Xetter
 
@@ -188,3 +189,274 @@ class FilterValueGetter(Xetter):
             m.d.sync += count.eq(0)
         with m.Elif(self.start):
             m.d.sync += count.eq(Mux(count_at_limit, 0, count + 1))
+
+
+class InputStore(SimpleElaboratable):
+    """Stores one "pixel" of input values for processing.
+
+    This store is double-buffered so that processing may continue
+    on one buffer while data is being loaded onto the other.
+
+    All channels for a single pixel of data are written once, then
+    read many times. Reads are performed circularly over the input
+    data.
+
+    Attributes
+    ----------
+    max_depth: int
+        maximum allowed input depth.
+        Assumed to be power of two.
+
+    Public Interface
+    ----------------
+    restart: Signal() input
+        Resets component to known state to begin processing.
+    input_depth: Signal(8) input
+        Number of words per input pixel
+
+    w_data: Signal(32) input
+        Data to store
+    w_en: Signal() input
+        Hold high to store data - w_ready must also be high for data
+        to be considered stored.
+    w_ready: Signal() output
+        Indicates that store is read to receive data.
+
+    r_ready: Signal() output
+        Indicates that data has been stored and reading is allowed
+    r_data: Signal(32)[4] output
+        Four words of data
+    r_next: Signal() input
+        Advance data pointer by one word
+    r_finished: Signal() input
+        Strobe to indicate that we have finished reading this buffer.
+    """
+
+    def __init__(self, max_depth):
+        super().__init__()
+        self.max_depth = max_depth
+        self.restart = Signal()
+        self.input_depth = Signal(range(max_depth * 4 // 2))
+        self.w_data = Signal(32)
+        self.w_en = Signal()
+        self.w_ready = Signal()
+        self.r_ready = Signal()
+        self.r_data = Signal(32)  # TODO: increase to 2 and 4 words
+        self.r_next = Signal()
+        self.r_finished = Signal()
+
+    def _elab_read(self, m, dps, r_full):
+        r_curr_buf = Signal()
+        # Address within current buffer
+        r_addr = Signal.like(self.input_depth)
+
+        # Create and connect sequential memory readers
+        smrs = [
+            SequentialMemoryReader(
+                max_depth=self.max_depth // 2,
+                width=32) for _ in range(4)]
+        for (n, dp, smr) in zip(range(4), dps, smrs):
+            m.submodules[f"smr_{n}"] = smr
+            m.d.comb += [
+                dp.r_addr.eq(Cat(smr.mem_addr, r_curr_buf)),
+                smr.mem_data.eq(dp.r_data),
+                smr.depth.eq((self.input_depth + 3 - n) >> 2),
+            ]
+
+        smr_nexts = Array(smr.next for smr in smrs)
+
+        # Ready if current buffer is full
+        full = Signal()
+        m.d.comb += full.eq(r_full[r_curr_buf])
+        last_full = Signal()
+        m.d.sync += last_full.eq(full)
+        with m.If(full & ~last_full):
+            m.d.sync += self.r_ready.eq(1)
+            m.d.comb += [smr.restart.eq(1) for smr in smrs]
+
+        # Increment address
+        with m.If(self.r_next & self.r_ready):
+            with m.If(r_addr == self.input_depth - 1):
+                m.d.sync += r_addr.eq(0)
+            with m.Else():
+                m.d.sync += r_addr.eq(r_addr + 1)
+            m.d.comb += smr_nexts[r_addr[:2]].eq(1)
+
+        # Get data
+        smr_datas = Array(smr.data for smr in smrs)
+        m.d.comb += self.r_data.eq(smr_datas[r_addr[:2]])
+
+        # On finished
+        with m.If(self.r_finished):
+            m.d.sync += [
+                r_addr.eq(0),
+                r_full[r_curr_buf].eq(0),
+                last_full.eq(0),
+                self.r_ready.eq(0),
+                r_curr_buf.eq(~r_curr_buf),
+            ]
+
+        # On restart, reset addresses and Sequential Memory readers, go to not
+        # ready
+        with m.If(self.restart):
+            m.d.sync += [
+                r_addr.eq(0),
+                last_full.eq(0),
+                self.r_ready.eq(0),
+                r_curr_buf.eq(0),
+            ]
+
+    def _elab_write(self, m, dps, r_full):
+        w_curr_buf = Signal()
+        # Address within current buffer
+        w_addr = Signal.like(self.input_depth)
+
+        # Connect to memory write port
+        for n, dp in enumerate(dps):
+            m.d.comb += [
+                dp.w_addr.eq(Cat(w_addr[2:], w_curr_buf)),
+                dp.w_data.eq(self.w_data),
+                dp.w_en.eq(self.w_en & self.w_ready & (n == w_addr[:2])),
+            ]
+        # Ready to write current buffer if reading is not allowed
+        m.d.comb += self.w_ready.eq(~r_full[w_curr_buf])
+
+        # Write address increment
+        with m.If(self.w_en & self.w_ready):
+            with m.If(w_addr == self.input_depth - 1):
+                # at end of buffer - mark buffer ready for reading and go to
+                # next
+                m.d.sync += [
+                    w_addr.eq(0),
+                    r_full[w_curr_buf].eq(1),
+                    w_curr_buf.eq(~w_curr_buf),
+                ]
+            with m.Else():
+                m.d.sync += w_addr.eq(w_addr + 1)
+
+        with m.If(self.restart):
+            m.d.sync += [
+                w_addr.eq(0),
+                w_curr_buf.eq(0),
+            ]
+
+    def elab(self, m):
+        # Create the four memories
+        dps = [
+            DualPortMemory(
+                depth=self.max_depth,
+                width=32,
+                is_sim=is_sim_run()) for _ in range(4)]
+        for n, dp in enumerate(dps):
+            m.submodules[f"dp_{n}"] = dp
+
+        # Tracks which buffers are "full" and ready for reading
+        r_full = Array([Signal(name="r_full_0"), Signal(name="r_full_1")])
+        with m.If(self.restart):
+            m.d.sync += [
+                r_full[0].eq(0),
+                r_full[1].eq(0),
+            ]
+
+        # Track reading and writing
+        self._elab_write(m, dps, r_full)
+        self._elab_read(m, dps, r_full)
+
+
+class InputStoreGetter(Xetter):
+    """Gets next word from an input store
+
+    This is a temporary getter. The full accelerator will use filter values internally.
+
+    Public Interface
+    ----------------
+    r_data: Signal(32) input
+        Data from Input value store
+    r_next: Signal() output
+        Indicate data has been read
+    r_ready: Signal() input
+        Indicate data is ready to be read
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.r_data = Signal(32)
+        self.r_next = Signal()
+        self.r_ready = Signal()
+
+    def connect(self, input_store):
+        """Connect to self to input_store.
+
+        Returns a list of statements that performs the connection.
+        """
+        return [
+            self.r_data.eq(input_store.r_data),
+            self.r_ready.eq(input_store.r_ready),
+            input_store.r_next.eq(self.r_next),
+        ]
+
+    def elab(self, m):
+        waiting = Signal()
+        with m.If(self.r_ready & (waiting | self.start)):
+            m.d.comb += [
+                self.output.eq(self.r_data),
+                self.r_next.eq(1),
+                self.done.eq(1),
+            ]
+            m.d.sync += waiting.eq(0)
+        with m.Elif(self.start & ~self.r_ready):
+            m.d.sync += waiting.eq(1)
+
+
+class InputStoreSetter(Xetter):
+    """Puts a word into the input store.
+
+    Public Interface
+    ----------------
+    w_data: Signal(32) input
+        Data to send to input value store
+    w_en: Signal() output
+        Indicate ready to write data
+    w_ready: Signal() input
+        Indicates input store is ready to receive data
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.w_data = Signal(32)
+        self.w_en = Signal()
+        self.w_ready = Signal()
+
+    def connect(self, input_store):
+        """Connect to self to input_store.
+
+        Returns a list of statements that performs the connection.
+        """
+        return [
+            input_store.w_data.eq(self.w_data),
+            input_store.w_en.eq(self.w_en),
+            self.w_ready.eq(input_store.w_ready),
+        ]
+
+    def elab(self, m):
+        buffer = Signal(32)
+        waiting = Signal()
+
+        with m.If(self.start & self.w_ready):
+            m.d.comb += [
+                self.done.eq(1),
+                self.w_en.eq(1),
+                self.w_data.eq(self.in0)
+            ]
+        with m.Elif(self.start & ~self.w_ready):
+            m.d.sync += [
+                waiting.eq(1),
+                buffer.eq(self.in0),
+            ]
+        with m.Elif(waiting & ~self.w_ready):
+            m.d.comb += [
+                self.done.eq(1),
+                self.w_en.eq(1),
+                self.w_data.eq(self.in0)
+            ]
+            m.d.sync += waiting.eq(1)

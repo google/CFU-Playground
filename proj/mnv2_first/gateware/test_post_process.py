@@ -129,4 +129,4 @@ class PostProcessXetterTest(TestBase):
                 self.assertEqual(
                     (yield self.dut.output.as_signed()), expected, f"case={n}")
                 yield
-        self.run_sim(process, True)
+        self.run_sim(process, False)

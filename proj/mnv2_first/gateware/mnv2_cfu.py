@@ -13,14 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen_cfu import Cfu, DualPortMemory
+from nmigen_cfu import Cfu, DualPortMemory, is_sim_run
 
 from .post_process import PostProcessXetter, SRDHMInstruction, RoundingDividebyPOTInstruction
-from .store import CircularIncrementer, FilterValueGetter, StoreSetter
+from .store import CircularIncrementer, FilterValueGetter, InputStore, InputStoreGetter, InputStoreSetter, StoreSetter
 from .registerfile import RegisterFileInstruction, RegisterSetter
 
 OUTPUT_CHANNEL_PARAM_DEPTH = 512
 NUM_FILTER_DATA_WORDS = 512
+MAX_PER_PIXEL_INPUT_WORDS = 1024
 
 
 class Mnv2RegisterInstruction(RegisterFileInstruction):
@@ -43,7 +44,7 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         Returns a pair of signals: (current data, inc.next)
         """
         m.submodules[f'{name}_dp'] = dp = DualPortMemory(
-            width=32, depth=OUTPUT_CHANNEL_PARAM_DEPTH, is_sim=not bool(self.platform))
+            width=32, depth=OUTPUT_CHANNEL_PARAM_DEPTH, is_sim=is_sim_run())
         m.submodules[f'{name}_inc'] = inc = CircularIncrementer(
             OUTPUT_CHANNEL_PARAM_DEPTH)
         m.submodules[f'{name}_set'] = psset = StoreSetter(
@@ -72,7 +73,7 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         dps = []
         for i in range(4):
             m.submodules[f'{name}_dp_{i}'] = dp = DualPortMemory(
-                width=32, depth=NUM_FILTER_DATA_WORDS, is_sim=not bool(self.platform))
+                width=32, depth=NUM_FILTER_DATA_WORDS, is_sim=is_sim_run())
             dps.append(dp)
         m.submodules[f'{name}_set'] = fvset = StoreSetter(
             32, 4, NUM_FILTER_DATA_WORDS)
@@ -84,8 +85,24 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         m.d.comb += fvset.connect_write_port(dps)
         return dps, fvset.count
 
+    def _make_input_store(self, m, name, restart_signal, input_depth):
+        m.submodules[f'{name}'] = ins = InputStore(MAX_PER_PIXEL_INPUT_WORDS)
+        m.submodules[f'{name}_set'] = insset = InputStoreSetter()
+        m.d.comb += insset.connect(ins)
+        self.register_xetter(25, insset)
+        m.submodules[f'{name}_get'] = insget = InputStoreGetter()
+        m.d.comb += insget.connect(ins)
+        self.register_xetter(111, insget)
+
+        _, read_finished = self._make_setter(m, 112, 'mark_read')
+        m.d.comb += [
+            ins.restart.eq(restart_signal),
+            ins.input_depth.eq(input_depth),
+            ins.r_finished.eq(read_finished),
+        ]
+
     def elab_xetters(self, m):
-        self._make_setter(m, 10, 'set_input_depth')
+        input_depth, set_id = self._make_setter(m, 10, 'set_input_depth')
         self._make_setter(m, 11, 'set_output_depth')
         self._make_setter(m, 12, 'set_input_offset')
         offset, _ = self._make_setter(m, 13, 'set_output_offset')
@@ -111,6 +128,8 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         self.register_xetter(110, fvg)
         m.submodules['ppx'] = ppx = PostProcessXetter()
         self.register_xetter(120, ppx)
+
+        self._make_input_store(m, 'ins', set_id, input_depth)
 
         m.d.comb += [
             ppx.offset.eq(offset),

@@ -27,13 +27,17 @@ DEFINES += NDEBUG
 
 # Uncomment to include mnv2 in built binary (adds ~500kB to binary)
 DEFINES += INCLUDE_MODEL_MNV2
-RUN_MENU_ITEMS := 1 2 1
+RUN_MENU_ITEMS := 3 1
 
 #DEFINES += SHOW_CONV_PARAMS
 #DEFINES += SHOW_DEPTHWISE_PARAMS
 #DEFINES += SHOW_ARITHMETIC_PARAMS
 #DEFINES += SHOW_SAMPLE_POST_PROCESSING
 #DEFINES += SHOW_MEMORY_USE
+
+# Uncomment to use smaller batches for debugging. This helps expose 
+# bugs with processing multiple batch handling.
+DEFINES += USE_CONV_SMALL_BATCHES
 
 DEFINES += ACCEL_CONV
 

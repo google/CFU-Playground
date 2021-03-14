@@ -91,8 +91,9 @@ static void do_golden_tests() {
 
   if (failed) {
     puts("FAIL Golden tests failed");
+  } else {
+    puts("OK   Golden tests passed");
   }
-  { puts("OK   Golden tests passed"); }
 }
 static struct Menu MENU = {
     "Tests for mnv2 model",

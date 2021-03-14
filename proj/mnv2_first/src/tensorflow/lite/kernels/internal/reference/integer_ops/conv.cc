@@ -14,6 +14,7 @@ limitations under the License.
 ==============================================================================*/
 #include <stdio.h>
 
+#include "mnv2_cfu.h"
 #include "mnv2_conv.h"
 #include "tensorflow/lite/kernels/internal/common.h"
 #include "tf_util/print_params.h"
@@ -77,7 +78,8 @@ void ConvPerChannel(const ConvParams& params, const int32_t* output_multiplier,
     if (params.stride_width == 1 && params.stride_height == 1 &&
         input_height == output_height && input_width == output_width &&
         filter_height == 1 && filter_width == 1 && bias_data &&
-        (input_depth % 8) == 0 && (output_depth % 8) == 0) {
+        input_depth < MAX_CONV_INPUT_BYTES && (input_depth % 8) == 0 &&
+        (output_depth % 8) == 0) {
       Mnv2ConvPerChannel1x1(params, output_multiplier, output_shift,
                             input_shape, input_data, filter_shape, filter_data,
                             bias_shape, bias_data, output_shape, output_data);
@@ -152,7 +154,16 @@ void ConvPerChannel(const ConvParams& params, const int32_t* output_multiplier,
                 // we have seen so far.
                 // TODO(jianlijianli): Add a check to make sure the
                 // accumulator depth is smaller than 2^16.
-                acc += filter_val * (input_val + input_offset);
+                int32_t sum = filter_val * (input_val + input_offset);
+                acc += sum;
+#if 0
+                static int dbg_ctr = 0;
+                if (dbg_ctr >= 96*24 && dbg_ctr < 96*24+96) {
+                  printf("%6ld, %4ld, %6ld, %6ld\n", filter_val, input_val, input_offset, sum);
+                }
+                dbg_ctr++;
+
+#endif
               }
             }
           }
@@ -165,7 +176,6 @@ void ConvPerChannel(const ConvParams& params, const int32_t* output_multiplier,
                    output_activation_min, output_activation_max);
           }
 #endif
-
           if (bias_data) {
             acc += bias_data[out_channel];
           }
@@ -176,6 +186,16 @@ void ConvPerChannel(const ConvParams& params, const int32_t* output_multiplier,
           acc = std::min(acc, output_activation_max);
           output_data[Offset(output_shape, batch, out_y, out_x, out_channel)] =
               static_cast<int8_t>(acc);
+
+#if 0
+          // fixme int32_t acc_in = acc;
+          static int dbg_ctr = 0;
+          if (dbg_ctr == 0) {
+            printf("%6ld, %6ld, %02lx\n", acc_in, acc, acc & 0xff);
+          }
+          dbg_ctr++;
+
+#endif
 
 #if SHOW_SAMPLE_POST_PROCESSING
           if ((count & (1024 * 128 - 1)) == 0) {
