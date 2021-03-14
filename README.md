@@ -6,24 +6,25 @@ This project provides a framework that an engineer, intern, or student can use t
 
 This project enables rapid iteration on processor improvements -- multiple iterations per day.
 
-This is how it works at the highest level:
-* Choose a TensorFlow Lite model; a quantized person detection model is provided
-* Execute the inference on the Arty FPGA board to get cycle counts per layer
-* Choose an TFLite operator to accelerate, and dig into that code
-* Design new instruction(s) that can replace multiple basic operations
-* Build a custom function unit (a small amount of hardware) that performs the new instruction(s)
+This is how it works:
+* Choose a TensorFlow Lite model; a quantized person detection model is provided, or bring your own.
+* Execute the inference on the Arty FPGA board to get cycle counts per layer.
+* Choose an TFLite operator to accelerate, and dig into that code.
+* Design new instruction(s) that can replace multiple basic operations.
+* Build a custom function unit (a small amount of hardware) that performs the new instruction(s).
 * Modify the TFLite/Micro library kernel to use the new instruction(s), which are available as intrinsics with function call syntax.
-* Rebuild the FPGA Soc, recompile the TFLM library, and rerun to measure improvement (simple `make` targets are provided)
+* Rebuild the FPGA Soc, recompile the TFLM library, and rerun to measure improvement.
 
-The focus here is performance, not demos.  The inputs to the ML inference are canned/faked, and the only output is cycle counts.  
-It would be possible to export the improvements made here to an actual demo, but no pathway has been set up for doing so.
-
-**Disclaimer: This is not an officially supported Google project.   Support and/or new releases may be limited.**
+The focus here is performance, not demos.  The inputs to the ML inference are canned/faked, and the only output is cycle counts.  It would be possible to export the improvements made here to an actual demo, but currently no pathway is set up for doing so.
 
 With the exception of Vivado, everything used by this project is open source.
 
+**Disclaimer: This is not an officially supported Google project.   Support and/or new releases may be limited.**
 
-### Required Hardware/OS
+_This is an early prototype of a ML exploration framework; expect a lack of documentation and occasional breakage. If you want to collaborate on building out this framework, reach out to tcal@google.com!   See "Contribution guidelines" below._
+
+
+### Required hardware/OS
 
 * Currently, the only supported target is the Arty 35T board from Digilent.
 * The only supported host OS is Linux (Debian / Ubuntu).
@@ -33,7 +34,7 @@ then you don't need either the Arty board or Vivado software.
 You can also perform Verilog-level cycle-accurate simulation with Verilator,
 but this is much slower.
 
-### Assumed Software
+### Assumed software
 
 * [Vivado](https://www.xilinx.com/support/download.html) must be manually installed.
 
@@ -54,18 +55,25 @@ Build the SoC and load the bitstream onto Arty:
 cd proj/proj_template
 make prog
 ```
-This builds the SoC with the default CFU from `proj/proj_template`.   Later you'll make your own project, and rerun those make commands with a modified `PROJ=proj_myproj` definition.
+
+This builds the SoC with the default CFU from `proj/proj_template`.   Later you'll copy this and modify it to make your own project.
 
 
-Build a program and execute it on the SoC you just loaded onto the Arty
+Build a RISC-V program and execute it on the SoC that you just loaded onto the Arty:
 ```sh
 make load
 ```
 
-To use Renode to execute on a simulator on your own machine, execute:
+To use Renode to execute on a simulator on the host machine (no Vivado or Arty board required), execute:
 
 ```sh
 make renode
+```
+
+To use Verilator to execute on a cycle-accurate RTL-level simulator (no Vivado or Arty board required), execute:
+
+```sh
+make PLATFORM=sim load
 ```
 
 ### Underlying open-source technology
@@ -85,6 +93,3 @@ See the file [LICENSE](LICENSE).
 [contribution guidelines](CONTRIBUTING.md).  This project adheres to Google's
 [code of conduct](CODE_OF_CONDUCT.md).   By participating, you are expected to
 uphold this code.**
-
-
-

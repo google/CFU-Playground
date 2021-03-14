@@ -1,18 +1,32 @@
 #!/usr/bin/expect -f
-
-# first arg:  path to binary (kernel)
-# second arg: path to tty device (e.g. /dev/ttyUSB1)
-# third arg: UART SPEED
-# subsequent args: main menu choices
+#
+# Choose simulation mode by making the first arg "s" (no dash).   
+#  Then no other options, just the menu choices.
+#
+# For non-simulation (Arty) mode:
+#  first arg:  path to binary (kernel)
+#  second arg: path to tty device (e.g. /dev/ttyUSB1)
+#  third arg: UART SPEED
+#  subsequent args: main menu choices
+#
 
 set timeout 500
+set simpid 0
 
-spawn ../../soc/bin/litex_term --speed [lindex $argv 2] --kernel [lindex $argv 0] --no-crc [lindex $argv 1]
+
+
+if { [lindex $argv 0] == "s" } {
+  set choices [lrange $argv 1 end]
+  set simpid [spawn make PLATFORM=sim load]
+  send_user "Sim PID $simpid\n"
+} else {
+  spawn ../../soc/bin/litex_term --speed [lindex $argv 2] --kernel [lindex $argv 0] --no-crc [lindex $argv 1]
+  set choices [lrange $argv 3 end]
+}
+
 
 expect "CFU Playground"
-set timeout 30
 
-set choices [lrange $argv 3 end]
 
 foreach c $choices {
 
@@ -30,5 +44,10 @@ expect ">"
 send_user "\nFinished interaction\n"
 
 send_user "\nDisconnecting...\n"
+
+if { $simpid > 0 } {
+  send_user "\nKilling process $simpid\n"
+  exec kill $simpid
+}
 
 close

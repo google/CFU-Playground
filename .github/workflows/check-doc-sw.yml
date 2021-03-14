@@ -23,4 +23,5 @@ jobs:
       - run: bash scripts/setup -ci
       - run: which pip3 && which python3 && which pip
       - run: riscv64-unknown-elf-gcc --version
-      - run: pwd && source environment && cd proj/mnv2_first && pip3 list && make -j9 software
+      - run: pwd && source environment && cd proj/mnv2_first && pip3 list && make -j8 software
+      - run: pwd && source environment && cd proj/mnv2_first && pip3 list && make -j8 PLATFORM=sim unit
