@@ -191,11 +191,6 @@ class FilterValueGetter(Xetter):
             m.d.sync += count.eq(Mux(count_at_limit, 0, count + 1))
 
 
-# Depth one input store, in words. Total number of words in both buffers
-# is 4 times this.
-INPUT_STORE_DEPTH = 512
-
-
 class InputStore(SimpleElaboratable):
     """Stores one "pixel" of input values for processing.
 
@@ -366,3 +361,102 @@ class InputStore(SimpleElaboratable):
         # Track reading and writing
         self._elab_write(m, dps, r_full)
         self._elab_read(m, dps, r_full)
+
+
+class InputStoreGetter(Xetter):
+    """Gets next word from an input store
+
+    This is a temporary getter. The full accelerator will use filter values internally.
+
+    Public Interface
+    ----------------
+    r_data: Signal(32) input
+        Data from Input value store
+    r_next: Signal() output
+        Indicate data has been read
+    r_ready: Signal() input
+        Indicate data is ready to be read
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.r_data = Signal(32)
+        self.r_next = Signal()
+        self.r_ready = Signal()
+
+    def connect(self, input_store):
+        """Connect to self to input_store.
+
+        Returns a list of statements that performs the connection.
+        """
+        return [
+            self.r_data.eq(input_store.r_data),
+            self.r_ready.eq(input_store.r_ready),
+            input_store.r_next.eq(self.r_next),
+        ]
+
+    def elab(self, m):
+        waiting = Signal()
+        with m.If(self.r_ready & (waiting | self.start)):
+            m.d.comb += [
+                self.output.eq(self.r_data),
+                self.r_next.eq(1),
+                self.done.eq(1),
+            ]
+            m.d.sync += waiting.eq(0)
+        with m.Elif(self.start & ~self.r_ready):
+            m.d.sync += waiting.eq(1)
+
+
+class InputStoreSetter(Xetter):
+    """Puts a word into the input store.
+
+    Public Interface
+    ----------------
+    w_data: Signal(32) input
+        Data to send to input value store
+    w_en: Signal() output
+        Indicate ready to write data
+    w_ready: Signal() input
+        Indicates input store is ready to receive data
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.w_data = Signal(32)
+        self.w_en = Signal()
+        self.w_ready = Signal()
+
+    def connect(self, input_store):
+        """Connect to self to input_store.
+
+        Returns a list of statements that performs the connection.
+        """
+        return [
+            input_store.w_data.eq(self.w_data),
+            input_store.w_en.eq(self.w_en),
+            self.w_ready.eq(input_store.w_ready),
+        ]
+
+    def elab(self, m):
+        buffer = Signal(32)
+        waiting = Signal()
+
+        with m.If(self.start & self.w_ready):
+            m.d.comb += [
+                self.done.eq(1),
+                self.w_en.eq(1),
+                self.w_data.eq(self.in0)
+            ]
+        with m.Elif(self.start & ~self.w_ready):
+            m.d.sync += [
+                waiting.eq(1),
+                buffer.eq(self.in0),
+            ]
+        with m.Elif(waiting & ~self.w_ready):
+            m.d.comb += [
+                self.done.eq(1),
+                self.w_en.eq(1),
+                self.w_data.eq(self.in0)
+            ]
+            m.d.sync += waiting.eq(1)
