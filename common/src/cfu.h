@@ -17,8 +17,9 @@
 #ifndef CFU_H
 #define CFU_H
 
-#include "riscv.h"
 #include <stdint.h>
+
+#include "riscv.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -27,7 +28,8 @@ extern "C" {
 
     #define opcode_R(opcode, funct3, funct7, rs1, rs2)
 
-   that returns at 32b value.  The opcode must be "CUSTOM0" (also defined in riscv.h).
+   that returns at 32b value.  The opcode must be "CUSTOM0" (also defined in
+   riscv.h).
 
    'func3' is used as functionID sent to the CFU.
 
@@ -36,57 +38,55 @@ extern "C" {
 // =============== Access the custom instruction
 
 // generic name for each custom instruction
-#define cfu_op0_hw(funct7, rs1, rs2)  opcode_R(CUSTOM0, 0, funct7, (rs1), (rs2))
-#define cfu_op1_hw(funct7, rs1, rs2)  opcode_R(CUSTOM0, 1, funct7, (rs1), (rs2))
-#define cfu_op2_hw(funct7, rs1, rs2)  opcode_R(CUSTOM0, 2, funct7, (rs1), (rs2))
-#define cfu_op3_hw(funct7, rs1, rs2)  opcode_R(CUSTOM0, 3, funct7, (rs1), (rs2))
-#define cfu_op4_hw(funct7, rs1, rs2)  opcode_R(CUSTOM0, 4, funct7, (rs1), (rs2))
-#define cfu_op5_hw(funct7, rs1, rs2)  opcode_R(CUSTOM0, 5, funct7, (rs1), (rs2))
-#define cfu_op6_hw(funct7, rs1, rs2)  opcode_R(CUSTOM0, 6, funct7, (rs1), (rs2))
-#define cfu_op7_hw(funct7, rs1, rs2)  opcode_R(CUSTOM0, 7, funct7, (rs1), (rs2))
+#define cfu_op0_hw(funct7, rs1, rs2) opcode_R(CUSTOM0, 0, funct7, (rs1), (rs2))
+#define cfu_op1_hw(funct7, rs1, rs2) opcode_R(CUSTOM0, 1, funct7, (rs1), (rs2))
+#define cfu_op2_hw(funct7, rs1, rs2) opcode_R(CUSTOM0, 2, funct7, (rs1), (rs2))
+#define cfu_op3_hw(funct7, rs1, rs2) opcode_R(CUSTOM0, 3, funct7, (rs1), (rs2))
+#define cfu_op4_hw(funct7, rs1, rs2) opcode_R(CUSTOM0, 4, funct7, (rs1), (rs2))
+#define cfu_op5_hw(funct7, rs1, rs2) opcode_R(CUSTOM0, 5, funct7, (rs1), (rs2))
+#define cfu_op6_hw(funct7, rs1, rs2) opcode_R(CUSTOM0, 6, funct7, (rs1), (rs2))
+#define cfu_op7_hw(funct7, rs1, rs2) opcode_R(CUSTOM0, 7, funct7, (rs1), (rs2))
 
 // =============== Software (C implementation of custom instructions)
 
 uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2);
 
 // generic name for each custom instruction
-#define cfu_op0_sw(funct7, rs1, rs2)  software_cfu(0, funct7, rs1, rs2)
-#define cfu_op1_sw(funct7, rs1, rs2)  software_cfu(1, funct7, rs1, rs2)
-#define cfu_op2_sw(funct7, rs1, rs2)  software_cfu(2, funct7, rs1, rs2)
-#define cfu_op3_sw(funct7, rs1, rs2)  software_cfu(3, funct7, rs1, rs2)
-#define cfu_op4_sw(funct7, rs1, rs2)  software_cfu(4, funct7, rs1, rs2)
-#define cfu_op5_sw(funct7, rs1, rs2)  software_cfu(5, funct7, rs1, rs2)
-#define cfu_op6_sw(funct7, rs1, rs2)  software_cfu(6, funct7, rs1, rs2)
-#define cfu_op7_sw(funct7, rs1, rs2)  software_cfu(7, funct7, rs1, rs2)
-
-
+#define cfu_op0_sw(funct7, rs1, rs2) software_cfu(0, funct7, rs1, rs2)
+#define cfu_op1_sw(funct7, rs1, rs2) software_cfu(1, funct7, rs1, rs2)
+#define cfu_op2_sw(funct7, rs1, rs2) software_cfu(2, funct7, rs1, rs2)
+#define cfu_op3_sw(funct7, rs1, rs2) software_cfu(3, funct7, rs1, rs2)
+#define cfu_op4_sw(funct7, rs1, rs2) software_cfu(4, funct7, rs1, rs2)
+#define cfu_op5_sw(funct7, rs1, rs2) software_cfu(5, funct7, rs1, rs2)
+#define cfu_op6_sw(funct7, rs1, rs2) software_cfu(6, funct7, rs1, rs2)
+#define cfu_op7_sw(funct7, rs1, rs2) software_cfu(7, funct7, rs1, rs2)
 
 // =============== Switch HW vs SW
 
 #ifdef CFU_SOFTWARE_DEFINED
-#define cfu_op0(funct7, rs1, rs2)       cfu_op0_sw(funct7, rs1, rs2)
-#define cfu_op1(funct7, rs1, rs2)       cfu_op1_sw(funct7, rs1, rs2)
-#define cfu_op2(funct7, rs1, rs2)       cfu_op2_sw(funct7, rs1, rs2)
-#define cfu_op3(funct7, rs1, rs2)       cfu_op3_sw(funct7, rs1, rs2)
-#define cfu_op4(funct7, rs1, rs2)       cfu_op4_sw(funct7, rs1, rs2)
-#define cfu_op5(funct7, rs1, rs2)       cfu_op5_sw(funct7, rs1, rs2)
-#define cfu_op6(funct7, rs1, rs2)       cfu_op6_sw(funct7, rs1, rs2)
-#define cfu_op7(funct7, rs1, rs2)       cfu_op7_sw(funct7, rs1, rs2)
+#define cfu_op0(funct7, rs1, rs2) cfu_op0_sw(funct7, rs1, rs2)
+#define cfu_op1(funct7, rs1, rs2) cfu_op1_sw(funct7, rs1, rs2)
+#define cfu_op2(funct7, rs1, rs2) cfu_op2_sw(funct7, rs1, rs2)
+#define cfu_op3(funct7, rs1, rs2) cfu_op3_sw(funct7, rs1, rs2)
+#define cfu_op4(funct7, rs1, rs2) cfu_op4_sw(funct7, rs1, rs2)
+#define cfu_op5(funct7, rs1, rs2) cfu_op5_sw(funct7, rs1, rs2)
+#define cfu_op6(funct7, rs1, rs2) cfu_op6_sw(funct7, rs1, rs2)
+#define cfu_op7(funct7, rs1, rs2) cfu_op7_sw(funct7, rs1, rs2)
 
 #else
 
-#define cfu_op0(funct7, rs1, rs2)       cfu_op0_hw(funct7, (rs1), (rs2))
-#define cfu_op1(funct7, rs1, rs2)       cfu_op1_hw(funct7, (rs1), (rs2))
-#define cfu_op2(funct7, rs1, rs2)       cfu_op2_hw(funct7, (rs1), (rs2))
-#define cfu_op3(funct7, rs1, rs2)       cfu_op3_hw(funct7, (rs1), (rs2))
-#define cfu_op4(funct7, rs1, rs2)       cfu_op4_hw(funct7, (rs1), (rs2))
-#define cfu_op5(funct7, rs1, rs2)       cfu_op5_hw(funct7, (rs1), (rs2))
-#define cfu_op6(funct7, rs1, rs2)       cfu_op6_hw(funct7, (rs1), (rs2))
-#define cfu_op7(funct7, rs1, rs2)       cfu_op7_hw(funct7, (rs1), (rs2))
+#define cfu_op0(funct7, rs1, rs2) cfu_op0_hw(funct7, (rs1), (rs2))
+#define cfu_op1(funct7, rs1, rs2) cfu_op1_hw(funct7, (rs1), (rs2))
+#define cfu_op2(funct7, rs1, rs2) cfu_op2_hw(funct7, (rs1), (rs2))
+#define cfu_op3(funct7, rs1, rs2) cfu_op3_hw(funct7, (rs1), (rs2))
+#define cfu_op4(funct7, rs1, rs2) cfu_op4_hw(funct7, (rs1), (rs2))
+#define cfu_op5(funct7, rs1, rs2) cfu_op5_hw(funct7, (rs1), (rs2))
+#define cfu_op6(funct7, rs1, rs2) cfu_op6_hw(funct7, (rs1), (rs2))
+#define cfu_op7(funct7, rs1, rs2) cfu_op7_hw(funct7, (rs1), (rs2))
 
 #endif
 
 #ifdef __cplusplus
 }
 #endif
-#endif // CFU_H
+#endif  // CFU_H

@@ -14,8 +14,9 @@
 # limitations under the License.
 
 from nmigen import Signal
-from nmigen_cfu.cfu import InstructionTestBase
-from util import DualPortMemory
+
+from nmigen_cfu import InstructionTestBase, DualPortMemory
+
 from .store import CircularIncrementer, StoreSetter
 from .registerfile import RegisterSetter, Xetter, RegisterFileInstruction
 

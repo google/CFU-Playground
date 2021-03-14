@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-#include "menu.h"
 #include "proj_menu.h"
+
+#include <stdio.h>
+
+#include "menu.h"
 
 // Each project should make their own proj_menu.c, which will replace this one.
 
-static void do_hello_world(void) {
-    puts("Hello, World!\n");
-}
+static void do_hello_world(void) { puts("Hello, World!\n"); }
 
 static struct Menu MENU = {
     "Project Menu",
@@ -33,7 +33,4 @@ static struct Menu MENU = {
     },
 };
 
-void do_proj_menu()
-{
-  menu_run(&MENU);
-}
+void do_proj_menu() { menu_run(&MENU); }

@@ -15,7 +15,9 @@
 
 from nmigen import Signal
 from nmigen.sim import Settle
+
 from nmigen_cfu import InstructionTestBase, TestBase
+
 from .registerfile import Xetter, RegisterSetter, RegisterFileInstruction
 
 
@@ -87,7 +89,7 @@ class RegisterFileInstructionTest(InstructionTestBase):
 
     def test(self):
         self.verify([
-            # Accumulate"setter"
+            # Accumulate "setter"
             (9, 12, 10, 22),
             (9, 9, 1, 32),
             # Set Reg 1, Reg 2

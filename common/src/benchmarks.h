@@ -20,4 +20,4 @@
 // micro-benchmark menu
 void do_benchmarks_menu();
 
-#endif // !BENCHMARKS_H
+#endif  // !BENCHMARKS_H

@@ -14,49 +14,44 @@
  * limitations under the License.
  */
 
+#include "base.h"
+
+#include <console.h>
 #include <generated/csr.h>
 #include <hw/common.h>
-#include <console.h>
+#include <irq.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <irq.h>
 #include <uart.h>
 
-#include "base.h"
+void isr(void) {
+  __attribute__((unused)) unsigned int irqs;
 
-void isr(void)
-{
-        __attribute__((unused)) unsigned int irqs;
+  irqs = irq_pending() & irq_getmask();
 
-        irqs = irq_pending() & irq_getmask();
-
-        if (irqs & (1 << UART_INTERRUPT))
-        {
-                uart_isr();
-        }
+  if (irqs & (1 << UART_INTERRUPT)) {
+    uart_isr();
+  }
 }
 
-void init_runtime()
-{
-        irq_setmask(0);
-        irq_setie(1);
-        uart_init();
+void init_runtime() {
+  irq_setmask(0);
+  irq_setie(1);
+  uart_init();
 }
 
-uint32_t read_val(const char *prompt)
-{
-        printf("%s > ", prompt);
-        char buf[81];
-        char c = readchar();
-        int i = 0;
-        while (i < 80 && c != '\r' && c != '\n')
-        {
-                buf[i++] = c;
-                putchar(c);
-                c = readchar();
-        }
-        buf[i] = '\0';
-        putchar('\n');
-        return strtol(buf, NULL, 0);
+uint32_t read_val(const char* prompt) {
+  printf("%s > ", prompt);
+  char buf[81];
+  char c = readchar();
+  int i = 0;
+  while (i < 80 && c != '\r' && c != '\n') {
+    buf[i++] = c;
+    putchar(c);
+    c = readchar();
+  }
+  buf[i] = '\0';
+  putchar('\n');
+  return strtol(buf, NULL, 0);
 }

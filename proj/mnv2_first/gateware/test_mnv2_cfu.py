@@ -14,7 +14,9 @@
 # limitations under the License.
 
 from nmigen_cfu import CfuTestBase
+
 from .mnv2_cfu import make_cfu
+
 
 class CfuTest(CfuTestBase):
     def create_dut(self):
@@ -36,7 +38,7 @@ class CfuTest(CfuTestBase):
             ((0, 110, 0, 0), 777),
             ((0, 110, 0, 0), 888),
             ((0, 110, 0, 0), 999),
-            ((0, 110, 0, 0), 666), # wrap around
+            ((0, 110, 0, 0), 666),  # wrap around
             # Restart, store five more, retrieve again
             ((0, 20, 5, 0), 0),
             ((0, 24, 111, 0), 0),

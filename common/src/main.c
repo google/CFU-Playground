@@ -17,15 +17,14 @@
 #include <console.h>
 #include <stdio.h>
 
-#include "tflite.h"
-#include "menu.h"
-#include "functional_cfu_tests.h"
-#include "models/models.h"
-#include "proj_menu.h"
-#include "benchmarks.h"
-#include "perf.h"
 #include "base.h"
-
+#include "benchmarks.h"
+#include "functional_cfu_tests.h"
+#include "menu.h"
+#include "models/models.h"
+#include "perf.h"
+#include "proj_menu.h"
+#include "tflite.h"
 
 static struct Menu MENU = {
     "CFU Playground",
@@ -41,8 +40,7 @@ static struct Menu MENU = {
     },
 };
 
-int main(void)
-{
+int main(void) {
   init_runtime();
   printf("Hello, %s!\n", "World");
 

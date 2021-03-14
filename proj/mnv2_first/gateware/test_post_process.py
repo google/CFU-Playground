@@ -15,7 +15,7 @@
 
 from nmigen.sim import Settle
 
-from nmigen_cfu import DualPortMemory, TestBase
+from nmigen_cfu import TestBase
 
 from.post_process import PostProcessXetter, PostProcessor
 
@@ -27,7 +27,7 @@ class PostProcessorTestCase(TestBase):
     def test(self):
         DATA = [
             # Test data generated from actual values captured during model
-            # evaluations.
+            # evaluations with the RISCV (non-CFU) code.
             #
             # NOTE: only negative shift values are present in this test data
             #
@@ -77,7 +77,11 @@ class PostProcessorTestCase(TestBase):
         ]
 
         def process():
+            # Outputs are delayed by 3 cycles, so put in this data structure
+            # with indices shifted by 3
             expected_outputs = [None, None, None] + [o for (_, o) in DATA]
+
+            # Iterate through inputs as usual
             for n, (inputs, _) in enumerate(DATA):
                 acc, bias, multiplier, shift, offset, activation_min, activation_max = inputs
                 yield self.dut.accumulator.eq(acc)
@@ -101,6 +105,7 @@ class PostProcessXetterTest(TestBase):
 
     def test(self):
         DATA = [
+            # Small sample to show timing and wiring are correct
             ((5141, -493, 1279881256, -6, -128, -128, 127), -85),
             ((11714, -12447, 1795228372, -7, -5, -128, 127), -10),
             ((-18706, 12439, 1493407068, -9, 10, -128, 127), 1),
