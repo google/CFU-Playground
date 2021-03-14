@@ -257,4 +257,4 @@ class _CfuTest(TestBase):
                 if exp_cmd_ready is not None:
                     self.assertEqual((yield self.dut.cmd_ready), exp_cmd_ready)
                 yield
-        self.run_sim(process, True)
+        self.run_sim(process, False)
