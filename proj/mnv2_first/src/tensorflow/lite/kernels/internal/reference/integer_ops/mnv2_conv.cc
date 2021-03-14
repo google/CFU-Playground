@@ -26,37 +26,14 @@ limitations under the License.
 namespace tflite {
 namespace reference_integer_ops {
 
-static inline int32_t macc(const int8_t input_val, int8_t filter_val,
-                           int32_t input_offset) {
-  // Assumes filter values being used sequentially
-  int32_t sum = ((int32_t)filter_val) * ((int32_t)input_val + input_offset);
-
-#if 0
-  static int dbg_ctr = 0;
-  if (dbg_ctr >= 96 * 24 && dbg_ctr < 96 * 25) {
-    printf("%6d, %4d, %6ld, %6ld\n", filter_val, input_val, input_offset, sum);
-  }
-  dbg_ctr++;
-#endif
-  return sum;
-}
-
 static inline int32_t accumulate(int input_depth, int32_t input_offset) {
   int32_t acc = 0;
   for (int in_channel = 0; in_channel < input_depth; in_channel += 4) {
+
     // Fetch 4 filter values and 4 input vals
     uint32_t filter_vals = CFU_GET_FILTER_VALUE();
     uint32_t input_vals = CFU_GET_INPUT_VALUE();
-    acc += macc(input_vals & 0xff, filter_vals & 0xff, input_offset);
-    filter_vals >>= 8;
-    input_vals >>= 8;
-    acc += macc(input_vals & 0xff, filter_vals & 0xff, input_offset);
-    filter_vals >>= 8;
-    input_vals >>= 8;
-    acc += macc(input_vals & 0xff, filter_vals & 0xff, input_offset);
-    filter_vals >>= 8;
-    input_vals >>= 8;
-    acc += macc(input_vals & 0xff, filter_vals & 0xff, input_offset);
+    acc += CFU_MACC4_EXPLICIT(input_vals, filter_vals);
   }
   return acc;
 }

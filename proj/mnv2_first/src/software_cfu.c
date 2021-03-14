@@ -272,6 +272,36 @@ static uint32_t input_store_dump(struct InputStore* is) {
   return 0;
 }
 
+static inline int32_t macc(const int8_t input_val, int8_t filter_val) {
+  // Assumes filter values being used sequentially
+  int32_t sum = ((int32_t)filter_val) * ((int32_t)input_val + reg_input_offset);
+
+#if 0
+  static int dbg_ctr = 0;
+  if (dbg_ctr >= 96 * 24 && dbg_ctr < 96 * 25) {
+    printf("%6d, %4d, %6ld, %6ld\n", filter_val, input_val, input_offset, sum);
+  }
+  dbg_ctr++;
+#endif
+  return sum;
+}
+
+static int32_t macc4_explicit_inputs(uint32_t input_vals,
+                                     uint32_t filter_vals) {
+  int32_t result = 0;
+  result += macc(input_vals & 0xff, filter_vals & 0xff);
+  filter_vals >>= 8;
+  input_vals >>= 8;
+  result += macc(input_vals & 0xff, filter_vals & 0xff);
+  filter_vals >>= 8;
+  input_vals >>= 8;
+  result += macc(input_vals & 0xff, filter_vals & 0xff);
+  filter_vals >>= 8;
+  input_vals >>= 8;
+  result += macc(input_vals & 0xff, filter_vals & 0xff);
+  return result;
+}
+
 // Set register instruction
 static uint32_t set_reg(int funct7, uint32_t in0, uint32_t in1) {
   switch (funct7) {
@@ -311,6 +341,9 @@ static uint32_t set_reg(int funct7, uint32_t in0, uint32_t in1) {
       return filter_store_set(&filter_store, in0);
     case 25:
       return input_store_set(&input_store, in0);
+
+    case 30:
+      return macc4_explicit_inputs(in0, in1);
 
     case 110:
       return filter_store_read(&filter_store);
