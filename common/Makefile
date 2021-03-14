@@ -148,7 +148,7 @@ $(TARGET): $(OBJECTS) $(LDSCRIPTS)
 	$(QUIET) echo "  LD       $@"
 	$(QUIET) $(CXX) $(OBJECTS) $(LFLAGS) -o $@
 	$(QUIET) echo "  OBJDUMP  $@.dis"
-	$(QUIET) $(OBJDUMP) -d $(TARGET) > $(TARGET).dis
+	$(QUIET) $(OBJDUMP) -d -S -l $(TARGET) > $(TARGET).dis
 	$(QUIET) echo "  OBJDUMP  $@.sym"
 	$(QUIET) $(OBJDUMP) -s $(TARGET) > $(TARGET).sym
 
