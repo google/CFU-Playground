@@ -20,7 +20,6 @@ from nmigen.sim import Settle
 
 from .util import TestBase, ValueBuffer, Sequencer
 
-import unittest
 
 
 class ValueBufferTest(TestBase):
@@ -78,7 +77,3 @@ class SequencerTest(TestBase):
                 self.assertEqual((yield self.dut.sequence), expected_output, f"cycle={n}")
                 yield
         self.run_sim(process, True)
-
-
-if __name__ == '__main__':
-    unittest.main()
