@@ -27,16 +27,16 @@ class SRDHM(SimpleElaboratable):
     """Implements gemmlowp::SaturatingRoundingDoublingHighMul
 
     The function calculated is approximately ((a*b) >> 31) & 0xffffffff,
-    allowing for saturating and rounding. In other words,it multiplies 
-    two 32 bit numbers, then returns bits 62 to 31 of the 64 bit result. 
-    This is 2x the high word of a 64 bit multiplication (allowing for 
+    allowing for saturating and rounding. In other words,it multiplies
+    two 32 bit numbers, then returns bits 62 to 31 of the 64 bit result.
+    This is 2x the high word of a 64 bit multiplication (allowing for
     saturating and rounding).
 
     Implemented as a pipeline so that results are always available 3
     cycles after setting inputs.
 
     Note that there is a bug to investigated here. This implementation
-    matches the behavior of the RISCV compiled source, however, it seems 
+    matches the behavior of the RISCV compiled source, however, it seems
     that "nudge" is only ever one of the two values in RISCV.
 
     Public Interface
@@ -226,7 +226,7 @@ class PostProcessor(SimpleElaboratable):
 class PostProcessXetter(Xetter):
     """Does post-processing of an accumulator value.
 
-    The output channel index is implied by processing order. This 
+    The output channel index is implied by processing order. This
     is mostly a wrapper around PostProcessor.
 
     Attributes

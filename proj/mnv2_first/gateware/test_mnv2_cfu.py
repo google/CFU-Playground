@@ -51,11 +51,15 @@ class CfuTest(CfuTestBase):
             ((0, 110, 0, 0), 333),
             ((0, 110, 0, 0), 444),
             ((0, 110, 0, 0), 555),
+            # Set input offset to 5, then do a macc
+            ((0, 12, 5, 0), 0),
+            ((0, 30, 0x01020304, 0x02040608), 6 * 2 + 7 * 4 + 8 * 6 + 9 * 8),
+
         ]
         return self.run_ops(DATA, False)
 
     def test_input_store(self):
-        DATA = []
+        DATA= []
 
         def set_val(val):
             return ((0, 25, val, 0), 0)
@@ -69,12 +73,12 @@ class CfuTest(CfuTestBase):
         def finish_read():
             return ((0, 112, 0, 0), 0)
 
-        DATA = (
+        DATA= (
             [set_input_depth(10)] +
             [set_val(v) for v in range(100, 110)] +
             [get_val(v) for v in range(100, 110)] +
             [set_val(v) for v in range(200, 210)] +
             [get_val(v) for v in range(100, 110)] +
-            [finish_read() ]+
+            [finish_read()]+
             [get_val(v) for v in range(200, 210)])
-        return self.run_ops(DATA, True)
+        return self.run_ops(DATA, False)
