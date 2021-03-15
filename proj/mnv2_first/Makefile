@@ -37,7 +37,7 @@ RUN_MENU_ITEMS := 3 1
 
 # Uncomment to use smaller batches for debugging. This helps expose 
 # bugs with processing multiple batch handling.
-DEFINES += USE_CONV_SMALL_BATCHES
+#DEFINES += USE_CONV_SMALL_BATCHES
 
 DEFINES += ACCEL_CONV
 
