@@ -118,6 +118,37 @@ static void do_rdbpot_tests() {
   }
 }
 
+static void do_explicit_macc4_tests() {
+  int failcount = 0;
+
+  // sim_trace_enable_write(1);
+  int64_t r = 0x0;
+  for (int i = 0; i < 1024; i++) {
+    int32_t in_val = next_random(&r);
+    int32_t f_val = next_random(&r);
+    int32_t offset = next_random(&r);
+    if (offset & 0x100) {
+      offset = 0x80;
+    } else {
+      offset = (int8_t)offset;
+    }
+
+    cfu_op0_sw(12, offset, 0);
+    cfu_op0_hw(12, offset, 0);
+    int32_t sw = cfu_op0_sw(30, in_val, f_val);
+    int32_t hw = cfu_op0_hw(30, in_val, f_val);
+
+    if (hw != sw) {
+      printf("off=%08lx in=%08lx filt=%08lx -->sw=%08lx, hw=%08lx\n", offset,
+             in_val, f_val, sw, hw);
+      failcount++;
+    }
+  }
+  if (!failcount) {
+    printf("All OK\n");
+  }
+}
+
 static struct Menu MENU = {
     "Project Menu",
     "mnv2_first",
@@ -127,6 +158,7 @@ static struct Menu MENU = {
         MENU_ITEM('3', "srdhm tests", do_srdhm_tests),
         MENU_ITEM('4', "rdbpot tests", do_rdbpot_tests),
         MENU_ITEM('5', "mbqm tests", do_mbqm_tests),
+        MENU_ITEM('6', "explicit macc 4", do_explicit_macc4_tests),
         MENU_END,
     },
 };

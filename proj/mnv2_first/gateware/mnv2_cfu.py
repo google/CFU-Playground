@@ -18,6 +18,7 @@ from nmigen_cfu import Cfu, DualPortMemory, is_sim_run
 from .post_process import PostProcessXetter, SRDHMInstruction, RoundingDividebyPOTInstruction
 from .store import CircularIncrementer, FilterValueGetter, InputStore, InputStoreGetter, InputStoreSetter, StoreSetter
 from .registerfile import RegisterFileInstruction, RegisterSetter
+from .macc import ExplicitMacc4
 
 OUTPUT_CHANNEL_PARAM_DEPTH = 512
 NUM_FILTER_DATA_WORDS = 512
@@ -101,10 +102,19 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
             ins.r_finished.eq(read_finished),
         ]
 
+    def _make_explicit_macc_4(self, m, reg_num, name, input_offset):
+        """Constructs and registers an explicit macc4 instruction
+
+        """
+        xetter = ExplicitMacc4()
+        m.d.comb += xetter.input_offset.eq(input_offset)
+        m.submodules[name] = xetter
+        self.register_xetter(reg_num, xetter)
+
     def elab_xetters(self, m):
         input_depth, set_id = self._make_setter(m, 10, 'set_input_depth')
         self._make_setter(m, 11, 'set_output_depth')
-        self._make_setter(m, 12, 'set_input_offset')
+        input_offset, _ = self._make_setter(m, 12, 'set_input_offset')
         offset, _ = self._make_setter(m, 13, 'set_output_offset')
         activation_min, _ = self._make_setter(m, 14, 'set_activation_min')
         activation_max, _ = self._make_setter(m, 15, 'set_activation_max')
@@ -130,6 +140,9 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         self.register_xetter(120, ppx)
 
         self._make_input_store(m, 'ins', set_id, input_depth)
+
+        # MACC 4
+        self._make_explicit_macc_4(m, 30, 'ex_m4', input_offset)
 
         m.d.comb += [
             ppx.offset.eq(offset),
