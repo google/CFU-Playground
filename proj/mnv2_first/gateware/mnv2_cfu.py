@@ -16,7 +16,7 @@
 from nmigen_cfu import Cfu, DualPortMemory, is_sim_run
 
 from .post_process import PostProcessXetter, SRDHMInstruction, RoundingDividebyPOTInstruction
-from .store import CircularIncrementer, FilterValueGetter, InputStore, InputStoreGetter, InputStoreSetter, StoreSetter
+from .store import CircularIncrementer, FilterValueFetcher, InputStore, InputStoreGetter, InputStoreSetter, NextWordGetter, StoreSetter
 from .registerfile import RegisterFileInstruction, RegisterSetter
 from .macc import ExplicitMacc4
 
@@ -128,11 +128,17 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         fv_mems, fv_count = self._make_filter_value_store(
             m, 24, 'store_filter_values', restart)
 
-        m.submodules['fvg'] = fvg = FilterValueGetter(4, NUM_FILTER_DATA_WORDS)
-        m.d.comb += fvg.connect_read_port(fv_mems)
+        m.submodules['fvf'] = fvf = FilterValueFetcher(
+            4, NUM_FILTER_DATA_WORDS)
+        m.d.comb += fvf.connect_read_port(fv_mems)
         m.d.comb += [
-            fvg.limit.eq(fv_count),
-            fvg.restart.eq(restart)
+            fvf.limit.eq(fv_count),
+            fvf.restart.eq(restart)
+        ]
+        m.submodules['fvg'] = fvg = NextWordGetter()
+        m.d.comb += [
+            fvf.next.eq(fvg.next),
+            fvg.data.eq(fvf.data),
         ]
 
         self.register_xetter(110, fvg)
