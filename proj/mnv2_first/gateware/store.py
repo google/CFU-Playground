@@ -205,19 +205,26 @@ class NextWordGetter(Xetter):
         The current value to be fetched
     next: Signal() output
         Indicates that fetched value has been read.
+    ready: Signal() input
+        Signal from the store that data is valid. The read only completes when ready is true.
     """
     def __init__(self):
         super().__init__()
         self.data = Signal(32)
         self.next = Signal()
+        self.ready = Signal()
 
     def elab(self, m):
-        m.d.comb += [
-            self.done.eq(True),
-            self.output.eq(self.data),
-            self.next.eq(self.start),
-        ]
-
+        waiting = Signal()
+        with m.If(self.ready & (waiting | self.start)):
+            m.d.comb += [
+                self.output.eq(self.data),
+                self.next.eq(1),
+                self.done.eq(1),
+            ]
+            m.d.sync += waiting.eq(0)
+        with m.Elif(self.start & ~self.ready):
+            m.d.sync += waiting.eq(1)
 
 
 class InputStore(SimpleElaboratable):

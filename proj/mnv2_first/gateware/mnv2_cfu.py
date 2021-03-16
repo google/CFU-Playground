@@ -16,7 +16,7 @@
 from nmigen_cfu import Cfu, DualPortMemory, is_sim_run
 
 from .post_process import PostProcessXetter, SRDHMInstruction, RoundingDividebyPOTInstruction
-from .store import CircularIncrementer, FilterValueFetcher, InputStore, InputStoreGetter, InputStoreSetter, NextWordGetter, StoreSetter
+from .store import CircularIncrementer, FilterValueFetcher, InputStore, InputStoreSetter, NextWordGetter, StoreSetter
 from .registerfile import RegisterFileInstruction, RegisterSetter
 from .macc import ExplicitMacc4
 
@@ -91,8 +91,12 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         m.submodules[f'{name}_set'] = insset = InputStoreSetter()
         m.d.comb += insset.connect(ins)
         self.register_xetter(25, insset)
-        m.submodules[f'{name}_get'] = insget = InputStoreGetter()
-        m.d.comb += insget.connect(ins)
+        m.submodules[f'{name}_get'] = insget = NextWordGetter()
+        m.d.comb += [
+            insget.data.eq(ins.r_data),
+            insget.ready.eq(ins.r_ready),
+            ins.r_next.eq(insget.next),
+        ]
         self.register_xetter(111, insget)
 
         _, read_finished = self._make_setter(m, 112, 'mark_read')
@@ -139,6 +143,7 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         m.d.comb += [
             fvf.next.eq(fvg.next),
             fvg.data.eq(fvf.data),
+            fvg.ready.eq(1),
         ]
 
         self.register_xetter(110, fvg)
