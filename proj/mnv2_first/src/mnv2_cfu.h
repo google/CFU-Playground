@@ -44,6 +44,7 @@ extern "C" {
 #define CFU_STORE_INPUT_VALUE(in0) CFU_SET(25, in0)
 
 #define CFU_MACC4_EXPLICIT(input_vals, filter_vals) cfu_op0(30, input_vals, filter_vals)
+#define CFU_MACC4_IMPLICIT(input_vals, filter_vals) CFU_GET(31)
 
 // Supports incremental development
 #define CFU_GET_FILTER_VALUE() CFU_GET(110)
