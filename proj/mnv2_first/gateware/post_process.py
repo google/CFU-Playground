@@ -110,10 +110,12 @@ def rounding_divide_by_pot(x, exponent):
 
 class RoundingDividebyPOTInstruction(InstructionBase):
     def elab(self, m):
-        m.d.comb += [
-            self.output.eq(rounding_divide_by_pot(self.in0s, self.in1[:5])),
-            self.done.eq(1),
-        ]
+        m.d.sync += self.done.eq(0)
+        with m.If(self.start):
+          m.d.sync += [
+              self.output.eq(rounding_divide_by_pot(self.in0s, self.in1[:5])),
+              self.done.eq(1),
+          ]
 
 
 def clamped(value, min_bound, max_bound):
