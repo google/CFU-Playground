@@ -51,13 +51,28 @@ ARTY_RUN:=  MAKEFLAGS=-j8 $(PYRUN) ./arty.py $(LITEX_ARGS)
 BIOS_BIN := $(OUT_DIR)/software/bios/bios.bin
 BITSTREAM:= $(OUT_DIR)/gateware/arty.bit
 
-.PHONY: bitstream litex-software prog clean
+.PHONY: bitstream litex-software prog clean check-timing
 
-bitstream: $(BITSTREAM)
+bitstream: $(BITSTREAM) check-timing
 
 litex-software: $(BIOS_BIN)
 
-prog: $(BITSTREAM)
+ifndef USE_SYMBIFLOW
+ifndef IGNORE_TIMING
+check-timing:
+	@echo Checking Vivado timing.
+	@echo To disable this check, set IGNORE_TIMING=1
+	@if grep -B 6 "Timing constraints are not met" $(OUT_DIR)/gateware/vivado.log  ; then exit 1 ; fi
+else
+check-timing:
+	@echo Vivado timing check is skipped.
+endif
+else
+check-timing:
+	@echo Timing check not performed for SymbiFlow.
+endif
+
+prog: $(BITSTREAM) check-timing
 	@echo Loading bitstream onto Arty
 	$(ARTY_RUN) --no-compile-software --load
 	
