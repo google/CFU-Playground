@@ -56,9 +56,11 @@ class PostProcessorTestCase(TestBase):
             ((0, 0, 0, 0, -128, -128, 127), None),
             ((0, 0, 0, 0, -128, -128, 127), None),
             ((0, 0, 0, 0, -128, -128, 127), None),
+            ((0, 0, 0, 0, -128, -128, 127), None),
 
             ((11714, -12447, 1795228372, -7, -5, -128, 127), -10),
             ((12571, -12447, 1795228372, -7, -5, -128, 127), -4),
+            ((0, 0, 0, 0, -5, -128, 127), None),
             ((0, 0, 0, 0, -5, -128, 127), None),
             ((0, 0, 0, 0, -5, -128, 127), None),
             ((0, 0, 0, 0, -5, -128, 127), None),
@@ -67,9 +69,10 @@ class PostProcessorTestCase(TestBase):
             ((0, 0, 0, 0, -4, -128, 127), None),
             ((0, 0, 0, 0, -4, -128, 127), None),
             ((0, 0, 0, 0, -4, -128, 127), None),
-
+            ((0, 0, 0, 0, -4, -128, 127), None),
 
             ((-18706, 12439, 1493407068, -9, 10, -128, 127), 1),
+            ((0, 0, 0, 0, 10, -128, 127), None),
             ((0, 0, 0, 0, 10, -128, 127), None),
             ((0, 0, 0, 0, 10, -128, 127), None),
             ((0, 0, 0, 0, 10, -128, 127), None),
@@ -77,9 +80,9 @@ class PostProcessorTestCase(TestBase):
         ]
 
         def process():
-            # Outputs are delayed by 3 cycles, so put in this data structure
-            # with indices shifted by 3
-            expected_outputs = [None, None, None] + [o for (_, o) in DATA]
+            # Outputs are delayed by 4 cycles, so put in this data structure
+            # with indices shifted by 4
+            expected_outputs = [None, None, None, None] + [o for (_, o) in DATA]
 
             # Iterate through inputs as usual
             for n, (inputs, _) in enumerate(DATA):

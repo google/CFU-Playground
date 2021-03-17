@@ -124,7 +124,7 @@ def clamped(value, min_bound, max_bound):
 class PostProcessor(SimpleElaboratable):
     """Does post-processing of an accumulator value.
 
-    This is a pipeline: place values at inputs and outputs appear 3 cycles later.
+    This is a pipeline: place values at inputs and outputs appear 4 cycles later.
     It is capable of producing one result per cycle.
 
     The function being implemented is:
@@ -160,6 +160,9 @@ class PostProcessor(SimpleElaboratable):
     result: Signal(signed(32)) output
       The post processed result
     """
+
+    # TODO: see if we can make this 3 cycles by bringing SRDHM down to 2 cycles
+    PIPELINE_CYCLES = 4
 
     def __init__(self):
         self.accumulator = Signal(signed(32))
@@ -200,11 +203,11 @@ class PostProcessor(SimpleElaboratable):
         ]
 
         # Output from SRDHM appears several cycles later
-        # Logic is then combinational to output
         right_shifted = Signal(signed(32))
-        m.d.comb += right_shifted.eq(
+        m.d.sync += right_shifted.eq(
             rounding_divide_by_pot(srdhm.result, right_sr[-1]))
 
+        # This logic is combinational to output
         # acc += reg_output_offset
         # if (acc < reg_activation_min) {
         #     acc = reg_activation_min
@@ -279,7 +282,7 @@ class PostProcessXetter(Xetter):
         ]
 
         # Use a sequencer to count down to processing end
-        m.submodules['seq'] = seq = Sequencer(4)
+        m.submodules['seq'] = seq = Sequencer(PostProcessor.PIPELINE_CYCLES)
         m.d.comb += seq.inp.eq(self.start)
 
         # Other control signal outputs - set *_next to indicate values used
@@ -288,5 +291,5 @@ class PostProcessXetter(Xetter):
             self.bias_next.eq(self.start),
             self.multiplier_next.eq(self.start),
             self.shift_next.eq(self.start),
-            self.done.eq(seq.sequence[3]),
+            self.done.eq(seq.sequence[-1]),
         ]
