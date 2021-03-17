@@ -89,7 +89,7 @@ static void do_mbqm_tests() {
         cpp_math_mul_by_quantized_mul_gateware1(x, quantized_multiplier, shift);
     int32_t gw2 =
         cpp_math_mul_by_quantized_mul_gateware2(x, quantized_multiplier, shift);
-    if (gw1 != sw || gw2 != sw || (i % 128 == 0)) {
+    if (gw1 != sw || gw2 != sw || (i % (1024 * 8) == 0)) {
       printf("mbqm(0x%08lx, 0x%08lx, %3d) = ", x, quantized_multiplier, shift);
       printf("0x%08lx", sw);
       if (gw1 != sw || gw2 != sw) {
