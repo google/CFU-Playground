@@ -15,7 +15,7 @@
 
 from nmigen import Signal, signed
 
-from nmigen_cfu import SimpleElaboratable
+from nmigen_cfu import Sequencer
 
 from .registerfile import Xetter
 
@@ -35,6 +35,7 @@ class ExplicitMacc4(Xetter):
         self.input_offset = Signal(signed(9))
 
     def elab(self, m):
+
         muls = []
         for n in range(4):
             tmp = Signal(signed(9))
@@ -46,7 +47,14 @@ class ExplicitMacc4(Xetter):
                 mul.eq(tmp * fval)
             ]
             muls.append(mul)
-        m.d.comb += [
-            self.output.eq(sum(muls)),
-            self.done.eq(1),
-        ]
+        sum_muls = Signal(signed(32))
+        m.d.sync += sum_muls.eq(sum(muls))
+
+        # Use a sequencer to count one cycle between start and end
+        m.submodules['seq'] = seq = Sequencer(1)
+        m.d.comb += seq.inp.eq(self.start)
+        with m.If(seq.sequence[-1]):
+            m.d.comb += [
+                self.done.eq(1),
+                self.output.eq(sum_muls),
+            ]

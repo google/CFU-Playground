@@ -50,7 +50,7 @@ class ExplicitMacc4Test(TestBase):
                 yield self.dut.in0.eq(input_value)
                 yield self.dut.in1.eq(filter_value)
                 yield self.dut.start.eq(1)
-                yield Delay(0.25)
+                yield 
                 yield self.dut.start.eq(0)
                 while not (yield self.dut.done):
                     yield
