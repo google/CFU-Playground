@@ -105,7 +105,7 @@ class AccumulatorRegisterXetter(Xetter):
     add_en: Signal input
         This signal is pulsed high to add to the accumulator.
     add_data: Signal(signed(32)) input
-        The value to add to the accumulator when
+        The value to add to the accumulator
     """
 
     def __init__(self):
@@ -175,3 +175,103 @@ class ImplicitMacc4(Xetter):
             m.d.sync += waiting_for_i_ready.eq(0)
         with m.Elif(self.start & ~self.i_ready):
             m.d.sync += waiting_for_i_ready.eq(1)
+
+
+class Macc4Run1(Xetter):
+    """A Macc4 that accumlates 1 input channel's worth of data.
+
+    Public Interface
+    ----------------
+    input_offset: Signal(signed(8)) input
+        Offset to be added to all inputs.
+    input_depth: Signal(10) input
+        Number of words in input
+    f_data: Signal(32) input
+        Filter data to use next
+    f_next: Signal() output
+        Indicates filter data has been used
+    i_data: Signal(32) input
+        Input data to use next
+    i_next: Signal() output
+        Indicates input data has been used
+    i_ready: Signal() input
+        Whether or not i_data is valid.
+    add_en: Signal output
+        Indicates something avialable to add
+    add_data: Signal(signed(32)) output
+        The value to add to the accumulator
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.input_offset = Signal(signed(9))
+        self.input_depth = Signal(32)
+        self.f_data = Signal(32)
+        self.f_next = Signal()
+        self.i_data = Signal(32)
+        self.i_next = Signal()
+        self.i_ready = Signal()
+        self.add_en = Signal()
+        self.add_data = Signal(signed(32))
+
+    def elab(self, m):
+        m.submodules['madd4'] = madd4 = Madd4Pipeline()
+        m.d.comb += [
+            madd4.offset.eq(self.input_offset),
+            madd4.f_data.eq(self.f_data),
+            madd4.i_data.eq(self.i_data),
+            self.output.eq(madd4.result),
+        ]
+        m.submodules['macc_seq'] = macc_seq = Sequencer(
+            Madd4Pipeline.PIPELINE_CYCLES)
+
+        started_macc4s = Signal(10)
+        starting_last = Signal()
+        retired_macc4s = Signal(10)
+        retiring_last = Signal()
+
+        # Puts 1 word of data into the pipeline, if it's ready
+        def start_macc4():
+            with m.If(self.i_ready):
+                m.d.sync += started_macc4s.eq(started_macc4s + 1)
+                m.d.comb += [
+                    macc_seq.inp.eq(1),
+                    self.f_next.eq(1),
+                    self.i_next.eq(1),
+                    starting_last.eq(started_macc4s == self.input_depth - 1)
+                ]
+
+        def retire_macc4():
+            with m.If(macc_seq.sequence[-1]):
+                m.d.sync += retired_macc4s.eq(retired_macc4s + 1)
+                m.d.comb += [
+                    self.add_en.eq(1),
+                    self.add_data.eq(madd4.result),
+                    retiring_last.eq(retired_macc4s == self.input_depth - 1)
+                ]
+
+        with m.FSM():
+            with m.State("PREPARE"):
+                m.d.sync += [
+                    started_macc4s.eq(0),
+                    retired_macc4s.eq(0),
+                ]
+                m.next = "READY"
+            with m.State("READY"):
+                with m.If(self.start):
+                    start_macc4()
+                    m.next = "RUN"
+            with m.State("RUN"):
+                start_macc4()
+                retire_macc4()
+                with m.If(starting_last):
+                    m.next = "FINISH"
+            with m.State("FINISH"):
+                retire_macc4()
+                with m.If(retiring_last):
+                    m.d.comb += self.done.eq(1)
+                    m.d.sync += [
+                        started_macc4s.eq(0),
+                        retired_macc4s.eq(0),
+                    ]
+                    m.next = "READY"
