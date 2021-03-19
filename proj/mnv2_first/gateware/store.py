@@ -399,51 +399,6 @@ class InputStore(SimpleElaboratable):
         self._elab_read(m, dps, r_full)
 
 
-class InputStoreGetter(Xetter):
-    """Gets next word from an input store
-
-    This is a temporary getter. The full accelerator will use filter values internally.
-
-    Public Interface
-    ----------------
-    r_data: Signal(32) input
-        Data from Input value store
-    r_next: Signal() output
-        Indicate data has been read
-    r_ready: Signal() input
-        Indicate data is ready to be read
-    """
-
-    def __init__(self):
-        super().__init__()
-        self.r_data = Signal(32)
-        self.r_next = Signal()
-        self.r_ready = Signal()
-
-    def connect(self, input_store):
-        """Connect to self to input_store.
-
-        Returns a list of statements that performs the connection.
-        """
-        return [
-            self.r_data.eq(input_store.r_data),
-            self.r_ready.eq(input_store.r_ready),
-            input_store.r_next.eq(self.r_next),
-        ]
-
-    def elab(self, m):
-        waiting = Signal()
-        with m.If(self.r_ready & (waiting | self.start)):
-            m.d.comb += [
-                self.output.eq(self.r_data),
-                self.r_next.eq(1),
-                self.done.eq(1),
-            ]
-            m.d.sync += waiting.eq(0)
-        with m.Elif(self.start & ~self.r_ready):
-            m.d.sync += waiting.eq(1)
-
-
 class InputStoreSetter(Xetter):
     """Puts a word into the input store.
 

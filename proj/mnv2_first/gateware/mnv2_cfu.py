@@ -18,7 +18,7 @@ from nmigen_cfu import Cfu, DualPortMemory, is_sim_run
 from .post_process import PostProcessXetter, SRDHMInstruction, RoundingDividebyPOTInstruction
 from .store import CircularIncrementer, FilterValueFetcher, InputStore, InputStoreSetter, NextWordGetter, StoreSetter
 from .registerfile import RegisterFileInstruction, RegisterSetter
-from .macc import ExplicitMacc4
+from .macc import ExplicitMacc4, ImplicitMacc4
 
 OUTPUT_CHANNEL_PARAM_DEPTH = 512
 NUM_FILTER_DATA_WORDS = 512
@@ -91,20 +91,13 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         m.submodules[f'{name}_set'] = insset = InputStoreSetter()
         m.d.comb += insset.connect(ins)
         self.register_xetter(25, insset)
-        m.submodules[f'{name}_get'] = insget = NextWordGetter()
-        m.d.comb += [
-            insget.data.eq(ins.r_data),
-            insget.ready.eq(ins.r_ready),
-            ins.r_next.eq(insget.next),
-        ]
-        self.register_xetter(111, insget)
-
         _, read_finished = self._make_setter(m, 112, 'mark_read')
         m.d.comb += [
             ins.restart.eq(restart_signal),
             ins.input_depth.eq(input_depth),
             ins.r_finished.eq(read_finished),
         ]
+        return ins
 
     def _make_explicit_macc_4(self, m, reg_num, name, input_offset):
         """Constructs and registers an explicit macc4 instruction
@@ -114,6 +107,16 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         m.d.comb += xetter.input_offset.eq(input_offset)
         m.submodules[name] = xetter
         self.register_xetter(reg_num, xetter)
+
+    def _make_implicit_macc_4(self, m, reg_num, name, input_offset):
+        """Constructs and registers an implicit macc4 instruction
+
+        """
+        xetter = ImplicitMacc4()
+        m.d.comb += xetter.input_offset.eq(input_offset)
+        m.submodules[name] = xetter
+        self.register_xetter(reg_num, xetter)
+        return xetter
 
     def elab_xetters(self, m):
         input_depth, set_id = self._make_setter(m, 10, 'set_input_depth')
@@ -139,21 +142,36 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
             fvf.limit.eq(fv_count),
             fvf.restart.eq(restart)
         ]
+        m.submodules['ppx'] = ppx = PostProcessXetter()
+        self.register_xetter(120, ppx)
+
+        ins = self._make_input_store(m, 'ins', set_id, input_depth)
+
         m.submodules['fvg'] = fvg = NextWordGetter()
         m.d.comb += [
             fvf.next.eq(fvg.next),
             fvg.data.eq(fvf.data),
             fvg.ready.eq(1),
         ]
-
         self.register_xetter(110, fvg)
-        m.submodules['ppx'] = ppx = PostProcessXetter()
-        self.register_xetter(120, ppx)
-
-        self._make_input_store(m, 'ins', set_id, input_depth)
+        m.submodules['insget'] = insget = NextWordGetter()
+        m.d.comb += [
+            insget.data.eq(ins.r_data),
+            insget.ready.eq(ins.r_ready),
+            ins.r_next.eq(insget.next),
+        ]
+        self.register_xetter(111, insget)
 
         # MACC 4
         self._make_explicit_macc_4(m, 30, 'ex_m4', input_offset)
+        im4 = self._make_implicit_macc_4(m, 31, 'im4_m4', input_offset)
+        m.d.comb += [
+            im4.f_data.eq(fvf.data),
+            fvf.next.eq(im4.f_next | fvg.next),
+            im4.i_data.eq(ins.r_data),
+            im4.i_ready.eq(ins.r_ready),
+            ins.r_next.eq(im4.i_next | insget.next),
+        ]
 
         m.d.comb += [
             ppx.offset.eq(offset),
