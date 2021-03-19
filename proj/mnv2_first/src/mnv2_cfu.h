@@ -47,8 +47,12 @@ extern "C" {
 #define CFU_STORE_INPUT_VALUE(in0) CFU_SET(25, in0)
 
 // Not actually and accumulate - more a multiply-add
-#define CFU_MACC4_EXPLICIT(input_vals, filter_vals) cfu_op0(30, input_vals, filter_vals)
+#define CFU_MACC4_EXPLICIT(input_vals, filter_vals) \
+  cfu_op0(30, input_vals, filter_vals)
 #define CFU_MACC4_IMPLICIT() CFU_GET(31)
+
+// Run enough MACC4s to do one input channel, then return
+#define CFU_MACC4_RUN_1() CFU_GET(32)
 
 // Supports incremental development
 #define CFU_GET_FILTER_VALUE() CFU_GET(110)
@@ -57,21 +61,19 @@ extern "C" {
 #define CFU_DUMP_INPUT_STORE() CFU_GET(113)
 #define CFU_POST_PROCESS(in0) CFU_SET(120, in0)
 
-#define EBRAM_DEPTH_BITS (16*1024)
-#define EBRAM_DEPTH_BYTES (EBRAM_DEPTH_BITS/8)
-#define EBRAM_DEPTH_WORDS (EBRAM_DEPTH_BYTES/4)
+#define EBRAM_DEPTH_BITS (16 * 1024)
+#define EBRAM_DEPTH_BYTES (EBRAM_DEPTH_BITS / 8)
+#define EBRAM_DEPTH_WORDS (EBRAM_DEPTH_BYTES / 4)
 
 #define NUM_FILTER_DATA_EBRAMS 4
-#define NUM_FILTER_DATA_BYTES (NUM_FILTER_DATA_EBRAMS*EBRAM_DEPTH_BYTES)
+#define NUM_FILTER_DATA_BYTES (NUM_FILTER_DATA_EBRAMS * EBRAM_DEPTH_BYTES)
 #define NUM_FILTER_DATA_WORDS (NUM_FILTER_DATA_BYTES / 4)
 
 #define NUM_INPUT_DATA_EBRAMS 4
-#define NUM_INPUT_DATA_BYTES (NUM_INPUT_DATA_EBRAMS*EBRAM_DEPTH_BYTES)
+#define NUM_INPUT_DATA_BYTES (NUM_INPUT_DATA_EBRAMS * EBRAM_DEPTH_BYTES)
 #define NUM_INPUT_DATA_WORDS (NUM_INPUT_DATA_BYTES / 4)
 #define MAX_CONV_INPUT_BYTES (NUM_INPUT_DATA_BYTES / 2)
 #define MAX_CONV_INPUT_WORDS (MAX_CONV_INPUT_BYTES / 4)
-
-
 
 // Useful to slow down output when it is overflowing UART buffers
 static inline void delay() {

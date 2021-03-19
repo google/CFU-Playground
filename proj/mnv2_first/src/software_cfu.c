@@ -311,6 +311,12 @@ static int32_t macc4_implicit_inputs(struct InputStore* is,
   return add;
 }
 
+static int32_t macc4_run1(struct InputStore* is, struct FilterStore* fs) {
+  for (uint32_t i = 0; i < is->input_depth; i++) {
+    macc4_implicit_inputs(is, fs);
+  }
+}
+
 // Set register instruction
 static uint32_t set_reg(int funct7, uint32_t in0, uint32_t in1) {
   int32_t result;
@@ -360,6 +366,8 @@ static uint32_t set_reg(int funct7, uint32_t in0, uint32_t in1) {
       return macc4_explicit_inputs(in0, in1);
     case 31:
       return macc4_implicit_inputs(&input_store, &filter_store);
+    case 32:
+      return macc4_run1(&input_store, &filter_store);
 
     case 110:
       return filter_store_read(&filter_store);
