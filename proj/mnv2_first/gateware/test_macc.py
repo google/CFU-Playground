@@ -13,18 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen.sim import Delay
+from nmigen_cfu import TestBase, pack_vals
 
-from nmigen_cfu import TestBase
+from .macc import ExplicitMacc4, ImplicitMacc4
 
-from .macc import ExplicitMacc4
-
-
-def pack_vals(a, b, c, d):
-    return ((a & 0xff)
-            + ((b & 0xff) << 8)
-            + ((c & 0xff) << 16)
-            + ((d & 0xff) << 24))
 
 
 class ExplicitMacc4Test(TestBase):
@@ -50,11 +42,47 @@ class ExplicitMacc4Test(TestBase):
                 yield self.dut.in0.eq(input_value)
                 yield self.dut.in1.eq(filter_value)
                 yield self.dut.start.eq(1)
-                yield 
+                yield
                 yield self.dut.start.eq(0)
                 while not (yield self.dut.done):
                     yield
                 self.assertEqual(
                     (yield self.dut.output.as_signed()), expected, f"case={n}")
                 yield
-        self.run_sim(process, True)
+        self.run_sim(process, False)
+
+
+class ImplicitMacc4Test(TestBase):
+    def create_dut(self):
+        return ImplicitMacc4()
+
+    def test(self):
+        DATA = [
+            ((0, 0, 0, 0), 0),
+            ((2, 1, 1, 0), 3),
+            ((2, 1, 1, 3), 3),
+            ((128, pack_vals(-128, -128, -128, -128), pack_vals(1, 1, 1, 1), 0), 0),
+            ((128, pack_vals(-128, -127, -126, -125),
+              pack_vals(10, 11, 12, 13), 0), 1 * 11 + 2 * 12 + 3 * 13),
+            ((128, pack_vals(127, 0, 0, 0),
+              pack_vals(10, 11, 12, 13), 12), 10 * 255 + 11 * 128 + 12 * 128 + 13 * 128),
+        ]
+
+        def process():
+            for n, (inputs, expected) in enumerate(DATA):
+                input_offset, input_value, filter_value, i_ready_wait = inputs
+                yield self.dut.input_offset.eq(input_offset)
+                yield self.dut.f_data.eq(filter_value)
+                yield self.dut.i_data.eq(input_value)
+                yield self.dut.i_ready.eq(i_ready_wait == 0)
+                yield self.dut.start.eq(1)
+                yield
+                yield self.dut.start.eq(0)
+                while not (yield self.dut.done):
+                    i_ready_wait -= 1
+                    yield self.dut.i_ready.eq(i_ready_wait == 0)
+                    yield
+                self.assertEqual(
+                    (yield self.dut.output.as_signed()), expected, f"case={n}")
+                yield
+        self.run_sim(process, False)

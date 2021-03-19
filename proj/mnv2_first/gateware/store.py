@@ -134,10 +134,8 @@ class CircularIncrementer(SimpleElaboratable):
                                            self.limit - 1, 0, last_addr + 1))
 
 
-class FilterValueGetter(Xetter):
-    """Gets next word from 4-way filter value store.
-
-    This is a temporary getter. The full accelerator will use filter values internally.
+class FilterValueFetcher(SimpleElaboratable):
+    """Fetches next single word from a 4-way filter value store.
 
     Parameters
     ----------
@@ -153,9 +151,15 @@ class FilterValueGetter(Xetter):
         Current read pointer
     r_bank: Signal(range(num_memories)) output
         Which of the memories to get from
+    limit: Signal(range(depth)) input
+        Number of entries currently contained in the filter store
     restart: Signal() input
+        Soft reset signal to restart all processing
+    data: Signal(32) output
+        Value fetched
+    next: Signal() input
+        Indicates that fetched value has been read.
     """
-
     def __init__(self, num_memories, depth):
         super().__init__()
         assert 0 == ((num_memories - 1) &
@@ -165,6 +169,8 @@ class FilterValueGetter(Xetter):
         self.r_bank = Signal(range(num_memories))
         self.limit = Signal(range(self.num_memories * depth))
         self.restart = Signal()
+        self.data = Signal(32)
+        self.next = Signal()
 
     def connect_read_port(self, dual_port_memories):
         """Connect read ports of a list of dual port memories to self.
@@ -173,7 +179,7 @@ class FilterValueGetter(Xetter):
         """
         result = [dp.r_addr.eq(self.r_addr) for dp in dual_port_memories]
         r_datas = Array(dp.r_data for dp in dual_port_memories)
-        result.append(self.output.eq(r_datas[self.r_bank]))
+        result.append(self.data.eq(r_datas[self.r_bank]))
         return result
 
     def elab(self, m):
@@ -181,14 +187,44 @@ class FilterValueGetter(Xetter):
         count = Signal.like(self.limit)
         count_at_limit = count == (self.limit - 1)
         m.d.comb += [
-            self.done.eq(True),
             self.r_addr.eq(count[num_memories_bits:]),
             self.r_bank.eq(count[:num_memories_bits]),
         ]
         with m.If(self.restart):
             m.d.sync += count.eq(0)
-        with m.Elif(self.start):
+        with m.Elif(self.next):
             m.d.sync += count.eq(Mux(count_at_limit, 0, count + 1))
+
+
+class NextWordGetter(Xetter):
+    """Gets the next word from a store.
+
+    Public Interface
+    ----------------
+    data: Signal(32) input
+        The current value to be fetched
+    next: Signal() output
+        Indicates that fetched value has been read.
+    ready: Signal() input
+        Signal from the store that data is valid. The read only completes when ready is true.
+    """
+    def __init__(self):
+        super().__init__()
+        self.data = Signal(32)
+        self.next = Signal()
+        self.ready = Signal()
+
+    def elab(self, m):
+        waiting = Signal()
+        with m.If(self.ready & (waiting | self.start)):
+            m.d.comb += [
+                self.output.eq(self.data),
+                self.next.eq(1),
+                self.done.eq(1),
+            ]
+            m.d.sync += waiting.eq(0)
+        with m.Elif(self.start & ~self.ready):
+            m.d.sync += waiting.eq(1)
 
 
 class InputStore(SimpleElaboratable):
@@ -361,51 +397,6 @@ class InputStore(SimpleElaboratable):
         # Track reading and writing
         self._elab_write(m, dps, r_full)
         self._elab_read(m, dps, r_full)
-
-
-class InputStoreGetter(Xetter):
-    """Gets next word from an input store
-
-    This is a temporary getter. The full accelerator will use filter values internally.
-
-    Public Interface
-    ----------------
-    r_data: Signal(32) input
-        Data from Input value store
-    r_next: Signal() output
-        Indicate data has been read
-    r_ready: Signal() input
-        Indicate data is ready to be read
-    """
-
-    def __init__(self):
-        super().__init__()
-        self.r_data = Signal(32)
-        self.r_next = Signal()
-        self.r_ready = Signal()
-
-    def connect(self, input_store):
-        """Connect to self to input_store.
-
-        Returns a list of statements that performs the connection.
-        """
-        return [
-            self.r_data.eq(input_store.r_data),
-            self.r_ready.eq(input_store.r_ready),
-            input_store.r_next.eq(self.r_next),
-        ]
-
-    def elab(self, m):
-        waiting = Signal()
-        with m.If(self.r_ready & (waiting | self.start)):
-            m.d.comb += [
-                self.output.eq(self.r_data),
-                self.r_next.eq(1),
-                self.done.eq(1),
-            ]
-            m.d.sync += waiting.eq(0)
-        with m.Elif(self.start & ~self.r_ready):
-            m.d.sync += waiting.eq(1)
 
 
 class InputStoreSetter(Xetter):

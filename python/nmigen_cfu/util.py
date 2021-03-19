@@ -31,6 +31,35 @@ def is_sim_run():
     return _IS_SIM_RUN
 
 
+def tree_sum(l):
+    """Sums a list of values in a tree rather than sequentially.
+
+    This is helpful to some synthesis tools. Others automatically recognize
+    a series of additions and build special, optimized logic.
+    """
+    l = list(l)
+    if len(l) == 1:
+        return l[0]
+    half = len(l) // 2
+    return tree_sum(l[:half]) + tree_sum(l[half:])
+
+
+def all_words(signal, word_length):
+    """Returns a longer signal as several word_length portions"""
+    return (signal[i:i + word_length]
+            for i in range(0, len(signal), word_length))
+
+
+def pack_vals(a, b, c, d, offset=0):
+    """Packs 4 byte values into a 32-bit word
+    offset is subtracted from the values before storing
+    """
+    return (((a - offset) & 0xff)
+            + (((b - offset) & 0xff) << 8)
+            + (((c - offset) & 0xff) << 16)
+            + (((d - offset) & 0xff) << 24))
+
+
 class SimpleElaboratable(Elaboratable):
     """Simplified Elaboratable interface
     Widely, but not generally applicable. Suitable for use with

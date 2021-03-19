@@ -310,7 +310,9 @@ class CfuTestBase(TestBase):
                 if expected is not None:
                     actual = (yield self.dut.rsp_out)
                     self.assertEqual(actual, expected & 0xffff_ffff,
-                                     f"op {n} output {hex(actual)} != {hex(expected & 0xffff_ffff)}")
+                                     f"output {hex(actual)} != {hex(expected & 0xffff_ffff)} ::: " +
+                                     f"function_id={function_id}, funct7={funct7}, " +
+                                     f" in0={in0} {hex(in0)}, in1={in1} {hex(in1)} (n={n})")
                 yield
 
         self.run_sim(process, write_trace)
