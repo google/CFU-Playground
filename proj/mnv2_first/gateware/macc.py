@@ -21,7 +21,9 @@ from .registerfile import Xetter
 
 
 class Madd4Pipeline(SimpleElaboratable):
-    """A 4-wide Multiply Add pipeline. Takes 2 cycles.
+    """A 4-wide Multiply Add pipeline. 
+
+    Pipeline takes 1 cycle: result ready next cycle
 
     f_data and i_data each contain 4 signed 8 bit values. The
     calculation performed is:
@@ -39,7 +41,7 @@ class Madd4Pipeline(SimpleElaboratable):
     result: Signal(signed(32)) output
         Result of the multiply and add
     """
-    PIPELINE_CYCLES = 2
+    PIPELINE_CYCLES = 1
 
     def __init__(self):
         super().__init__()

@@ -13,18 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen.sim import Delay
-
-from nmigen_cfu import TestBase
+from nmigen_cfu import TestBase, pack_vals
 
 from .macc import ExplicitMacc4, ImplicitMacc4
 
-
-def pack_vals(a, b, c, d):
-    return ((a & 0xff)
-            + ((b & 0xff) << 8)
-            + ((c & 0xff) << 16)
-            + ((d & 0xff) << 24))
 
 
 class ExplicitMacc4Test(TestBase):
@@ -90,8 +82,7 @@ class ImplicitMacc4Test(TestBase):
                     i_ready_wait -= 1
                     yield self.dut.i_ready.eq(i_ready_wait == 0)
                     yield
-                yield
                 self.assertEqual(
                     (yield self.dut.output.as_signed()), expected, f"case={n}")
                 yield
-        self.run_sim(process, True)
+        self.run_sim(process, False)
