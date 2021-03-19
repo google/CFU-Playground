@@ -61,7 +61,7 @@ class CfuTest(CfuTestBase):
             ((0, 12, 5, 0), 0),
             ((0, 30, 0x01020304, 0x02040608), 6 * 2 + 7 * 4 + 8 * 6 + 9 * 8),
 
-            # Test setting and getting accumulator
+            # Test setting and getting accumulator. Leave at zero
             ((0, 16, 59, 0), 0),
             ((0, 16, 0, 0), 59),
 
@@ -86,6 +86,9 @@ class CfuTest(CfuTestBase):
             ((0, 31, 0, 0), -128 * 255 * 4),
             ((0, 31, 0, 0), -99 * 19 + 92 * 17 + -37 * 103 + 2 * 11),
 
+            # Get accumulator
+            ((0, 16, 0, 0), (1 * 2 + 2 * 3 + 3 * 4 + 4 * 5) + (3 * 2 + 3 * 12 + 3 * 220 + 3 * 51)
+             + (-128 * 255 * 4) + (-99 * 19 + 92 * 17 + -37 * 103 + 2 * 11)),
         ]
         return self.run_ops(DATA, False)
 

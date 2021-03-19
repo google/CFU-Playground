@@ -183,6 +183,8 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
             im4.i_data.eq(ins.r_data),
             im4.i_ready.eq(ins.r_ready),
             ins.r_next.eq(im4.i_next | insget.next),
+            add_en.eq(im4.done),
+            add_data.eq(im4.output),
         ]
 
         m.d.comb += [
