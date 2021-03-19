@@ -27,12 +27,11 @@ namespace tflite {
 namespace reference_integer_ops {
 
 static inline int32_t accumulate(int input_depth, int32_t input_offset) {
-  int32_t acc = 0;
   for (int in_channel = 0; in_channel < input_depth; in_channel += 8) {
-    acc += CFU_MACC4_IMPLICIT();
-    acc += CFU_MACC4_IMPLICIT();
+    CFU_MACC4_IMPLICIT();
+    CFU_MACC4_IMPLICIT();
   }
-  return acc;
+  return CFU_GET_SET_ACCUMULATOR(0);
 }
 
 // Fixed-point per-channel-quantization convolution reference kernel.
@@ -73,6 +72,9 @@ void Mnv2ConvPerChannel1x1(
   CFU_SET_OUTPUT_OFFSET(output_offset);
   CFU_SET_ACTIVATION_MIN(output_activation_min);
   CFU_SET_ACTIVATION_MAX(output_activation_max);
+
+  // Ensure accumulator clear before starting
+  CFU_GET_SET_ACCUMULATOR(0);
 
   // Access filter data as words
   uint32_t* filter_words = (uint32_t*)filter_data;
