@@ -66,6 +66,7 @@ export SOC_SOFTWARE_DIR
 SOC_GATEWARE_DIR := $(SOC_BUILD_DIR)/gateware
 
 # Make software build dependent on platform
+export DEFINES    += PLATFORM_$(PLATFORM)
 export DEFINES    += PLATFORM=$(PLATFORM)
 
 SHELL           := /bin/bash

@@ -149,6 +149,18 @@ static void do_explicit_macc4_tests() {
   }
 }
 
+#ifdef PLATFORM_sim
+static void do_start_trace() {
+  printf("Start trace\n");
+  sim_trace_enable_write(1);
+}
+
+static void do_quit_sim() {
+  printf("BYE\n");
+  sim_finish_finish_write(1);
+}
+#endif
+
 static struct Menu MENU = {
     "Project Menu",
     "mnv2_first",
@@ -159,6 +171,10 @@ static struct Menu MENU = {
         MENU_ITEM('4', "rdbpot tests", do_rdbpot_tests),
         MENU_ITEM('5', "mbqm tests", do_mbqm_tests),
         MENU_ITEM('6', "explicit macc 4", do_explicit_macc4_tests),
+#ifdef PLATFORM_sim
+        MENU_ITEM('t', "Trace sim", do_start_trace),
+        MENU_ITEM('Q', "Quit sim", do_quit_sim),
+#endif
         MENU_END,
     },
 };
