@@ -29,8 +29,8 @@ namespace reference_integer_ops {
 static inline int32_t accumulate(int input_depth, int32_t input_offset) {
   int32_t acc = 0;
   for (int in_channel = 0; in_channel < input_depth; in_channel += 8) {
-    acc += CFU_MACC4_IMPLICIT(input_vals, filter_vals);
-    acc += CFU_MACC4_IMPLICIT(input_vals, filter_vals);
+    acc += CFU_MACC4_IMPLICIT();
+    acc += CFU_MACC4_IMPLICIT();
   }
   return acc;
 }
