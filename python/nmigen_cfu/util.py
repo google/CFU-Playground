@@ -30,6 +30,8 @@ _IS_SIM_RUN = False
 def is_sim_run():
     return _IS_SIM_RUN
 
+def all_words(signal, word_length):
+    return (signal[i:i+word_length] for i in range(0, len(signal), word_length))
 
 class SimpleElaboratable(Elaboratable):
     """Simplified Elaboratable interface
