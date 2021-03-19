@@ -27,19 +27,23 @@ class CfuTest(CfuTestBase):
         DATA = [
             # Rounding divide 7 by 2**1 == 4
             ((6, 0, 7, 1), 4),
+
             # Store output shift
             ((0, 22, 5, 0), 0),
+
             # Store filter value * 4
             ((0, 24, 666, 0), 0),
             ((0, 24, 777, 0), 0),
             ((0, 24, 888, 0), 0),
             ((0, 24, 999, 0), 0),
+
             # Get filter value * 5
             ((0, 110, 0, 0), 666),
             ((0, 110, 0, 0), 777),
             ((0, 110, 0, 0), 888),
             ((0, 110, 0, 0), 999),
             ((0, 110, 0, 0), 666),  # wrap around
+
             # Restart, store five more filters, retrieve again
             ((0, 20, 5, 0), 0),
             ((0, 24, 111, 0), 0),
@@ -52,9 +56,14 @@ class CfuTest(CfuTestBase):
             ((0, 110, 0, 0), 333),
             ((0, 110, 0, 0), 444),
             ((0, 110, 0, 0), 555),
+
             # Set input offset to 5, then do a macc
             ((0, 12, 5, 0), 0),
             ((0, 30, 0x01020304, 0x02040608), 6 * 2 + 7 * 4 + 8 * 6 + 9 * 8),
+
+            # Test setting and getting accumulator. Leave at zero
+            ((0, 16, 59, 0), 0),
+            ((0, 16, 0, 0), 59),
 
             # Store 4 filter value words
             ((0, 20, 4, 0), 5),
@@ -77,8 +86,11 @@ class CfuTest(CfuTestBase):
             ((0, 31, 0, 0), -128 * 255 * 4),
             ((0, 31, 0, 0), -99 * 19 + 92 * 17 + -37 * 103 + 2 * 11),
 
+            # Get accumulator
+            ((0, 16, 0, 0), (1 * 2 + 2 * 3 + 3 * 4 + 4 * 5) + (3 * 2 + 3 * 12 + 3 * 220 + 3 * 51)
+             + (-128 * 255 * 4) + (-99 * 19 + 92 * 17 + -37 * 103 + 2 * 11)),
         ]
-        return self.run_ops(DATA, True)
+        return self.run_ops(DATA, False)
 
     def test_input_store(self):
         DATA = []

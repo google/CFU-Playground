@@ -13,10 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from nmigen.sim import Delay
+
 from nmigen_cfu import TestBase, pack_vals
 
-from .macc import ExplicitMacc4, ImplicitMacc4
-
+from .macc import AccumulatorRegisterXetter, ExplicitMacc4, ImplicitMacc4
 
 
 class ExplicitMacc4Test(TestBase):
@@ -48,6 +50,48 @@ class ExplicitMacc4Test(TestBase):
                     yield
                 self.assertEqual(
                     (yield self.dut.output.as_signed()), expected, f"case={n}")
+                yield
+        self.run_sim(process, False)
+
+
+class AccumulatorRegisterXetterTest(TestBase):
+    def create_dut(self):
+        return AccumulatorRegisterXetter()
+
+    def test_setget(self):
+        DATA = [
+            ((0, 0, 0, 0), (0, 0, 0)),
+
+            # Add a few things
+            ((0, 0, 1, 0), (0, 0, 0)),
+            ((0, 0, 0, 0), (0, 0, 0)),
+            ((0, 0, 1, 10), (0, 0, 0)),
+            ((0, 0, 1, 22), (0, 0, 10)),
+            ((0, 0, 0, 0), (0, 0, 32)),
+
+            # Read and set to 50
+            ((1, 50, 0, 0), (1, 32, 32)),
+            ((0, 0, 0, 0), (0, 0, 50)),
+
+            # Add a few more things
+            ((0, 0, 1, 3), (0, 0, 50)),
+            ((0, 0, 1, 7), (0, 0, 53)),
+            ((0, 0, 1, 1), (0, 0, 60)),
+            ((0, 0, 1, 5), (0, 0, 61)),
+        ]
+
+        def process():
+            for n, ((start, in0, add_en, add_data), (done, output, value)
+                    ) in enumerate(DATA):
+                yield self.dut.start.eq(start)
+                yield self.dut.in0.eq(in0)
+                yield self.dut.add_en.eq(add_en)
+                yield self.dut.add_data.eq(add_data)
+                yield Delay(0.25)
+                self.assertEqual((yield self.dut.done), done, f"cycle={n}")
+                if done:
+                    self.assertEqual((yield self.dut.output), output, f"cycle={n}")
+                self.assertEqual((yield self.dut.value), value, f"cycle={n}")
                 yield
         self.run_sim(process, False)
 

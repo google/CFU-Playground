@@ -36,6 +36,9 @@ extern "C" {
 #define CFU_SET_ACTIVATION_MIN(in0) CFU_SET(14, in0)
 #define CFU_SET_ACTIVATION_MAX(in0) CFU_SET(15, in0)
 
+// Sets in0 into the accumulator, returns the old value
+#define CFU_GET_SET_ACCUMULATOR(in0) CFU_SET(16, in0)
+
 #define CFU_SET_OUTPUT_BATCH_SIZE(in0) CFU_SET(20, in0)
 #define CFU_STORE_OUTPUT_MULTIPLIER(in0) CFU_SET(21, in0)
 #define CFU_STORE_OUTPUT_SHIFT(in0) CFU_SET(22, in0)
@@ -43,6 +46,7 @@ extern "C" {
 #define CFU_STORE_FILTER_VALUE(in0) CFU_SET(24, in0)
 #define CFU_STORE_INPUT_VALUE(in0) CFU_SET(25, in0)
 
+// Not actually and accumulate - more a multiply-add
 #define CFU_MACC4_EXPLICIT(input_vals, filter_vals) cfu_op0(30, input_vals, filter_vals)
 #define CFU_MACC4_IMPLICIT() CFU_GET(31)
 
