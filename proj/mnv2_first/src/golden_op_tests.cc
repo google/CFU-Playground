@@ -1319,6 +1319,8 @@ void golden_op_run_1x1conv(void) {
     if (actual_output[i] != expected_output[i]) {
       if (!fails) {
         printf("FAIL - first output tensor mismatch at %u\n", i);
+        printf("       actual   = 0x%02x\n", actual_output[i] & 0xff);
+        printf("       expected = 0x%02x\n", expected_output[i] & 0xff);
       }
       fails++;
     }

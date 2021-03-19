@@ -39,6 +39,7 @@ extern "C" {
 // Sets in0 into the accumulator, returns the old value
 #define CFU_GET_SET_ACCUMULATOR(in0) CFU_SET(16, in0)
 
+// Number of words in the output batch
 #define CFU_SET_OUTPUT_BATCH_SIZE(in0) CFU_SET(20, in0)
 #define CFU_STORE_OUTPUT_MULTIPLIER(in0) CFU_SET(21, in0)
 #define CFU_STORE_OUTPUT_SHIFT(in0) CFU_SET(22, in0)

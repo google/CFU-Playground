@@ -158,11 +158,11 @@ void ConvPerChannel(const ConvParams& params, const int32_t* output_multiplier,
                 acc += sum;
 #if 0
                 static int dbg_ctr = 0;
-                if (dbg_ctr >= 96*24 && dbg_ctr < 96*24+96) {
-                  printf("%6ld, %4ld, %6ld, %6ld\n", filter_val, input_val, input_offset, sum);
+                if (dbg_ctr < 96) {
+                  printf("%6ld, %4ld, %6ld, %6ld\n", filter_val, input_val,
+                         input_offset, sum);
                 }
                 dbg_ctr++;
-
 #endif
               }
             }
