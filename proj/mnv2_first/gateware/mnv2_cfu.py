@@ -13,12 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from nmigen.hdl.ast import Mux
 from nmigen_cfu import Cfu, DualPortMemory, is_sim_run
 
 from .post_process import PostProcessXetter, SRDHMInstruction, RoundingDividebyPOTInstruction
 from .store import CircularIncrementer, FilterValueFetcher, InputStore, InputStoreSetter, NextWordGetter, StoreSetter
 from .registerfile import RegisterFileInstruction, RegisterSetter
-from .macc import AccumulatorRegisterXetter, ExplicitMacc4, ImplicitMacc4
+from .macc import AccumulatorRegisterXetter, ExplicitMacc4, ImplicitMacc4, Macc4Run1
 
 OUTPUT_CHANNEL_PARAM_DEPTH = 512
 NUM_FILTER_DATA_WORDS = 512
@@ -128,6 +129,19 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         self.register_xetter(reg_num, xetter)
         return xetter
 
+    def _make_macc_4_run_1(self, m, reg_num, name, input_offset, input_depth):
+        """Constructs and registers an implicit macc4 instruction
+
+        """
+        xetter = Macc4Run1()
+        m.d.comb += [
+            xetter.input_offset.eq(input_offset),
+            xetter.input_depth.eq(input_depth),
+        ]
+        m.submodules[name] = xetter
+        self.register_xetter(reg_num, xetter)
+        return xetter
+
     def elab_xetters(self, m):
         input_depth, set_id = self._make_setter(m, 10, 'set_input_depth')
         self._make_setter(m, 11, 'set_output_depth')
@@ -177,14 +191,18 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         # MACC 4
         self._make_explicit_macc_4(m, 30, 'ex_m4', input_offset)
         im4 = self._make_implicit_macc_4(m, 31, 'im4_m4', input_offset)
+        m4r1 = self._make_macc_4_run_1(m, 32, 'm4r1', input_offset, input_depth)
         m.d.comb += [
             im4.f_data.eq(fvf.data),
-            fvf.next.eq(im4.f_next | fvg.next),
+            m4r1.f_data.eq(fvf.data),
+            fvf.next.eq(im4.f_next | m4r1.f_next | fvg.next),
             im4.i_data.eq(ins.r_data),
             im4.i_ready.eq(ins.r_ready),
-            ins.r_next.eq(im4.i_next | insget.next),
-            add_en.eq(im4.done),
-            add_data.eq(im4.output),
+            m4r1.i_data.eq(ins.r_data),
+            m4r1.i_ready.eq(ins.r_ready),
+            ins.r_next.eq(im4.i_next | m4r1.i_next | insget.next),
+            add_en.eq(im4.done | m4r1.add_en),
+            add_data.eq(Mux(im4.done, im4.output, m4r1.add_data)),
         ]
 
         m.d.comb += [

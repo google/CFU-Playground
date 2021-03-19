@@ -220,7 +220,6 @@ class Macc4Run1(Xetter):
             madd4.offset.eq(self.input_offset),
             madd4.f_data.eq(self.f_data),
             madd4.i_data.eq(self.i_data),
-            self.output.eq(madd4.result),
         ]
         m.submodules['macc_seq'] = macc_seq = Sequencer(
             Madd4Pipeline.PIPELINE_CYCLES)

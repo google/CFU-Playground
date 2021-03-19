@@ -116,3 +116,48 @@ class CfuTest(CfuTestBase):
             [finish_read()] +
             [get_val(v) for v in range(200, 210)])
         return self.run_ops(DATA, False)
+
+    def test_macc_4_run_1(self):
+        DATA = []
+
+        def set_input_depth(val):
+            return ((0, 10, val, 0), 0)
+
+        def set_input_offset(val):
+            return ((0, 12, val, 0), 0)
+
+        def get_set_accum(new_val, old_val):
+            return ((0, 16, new_val, 0), old_val)
+
+        def set_output_batch_size(val):
+            return ((0, 20, val, 0), 0)
+
+        def set_filter_val(val):
+            return ((0, 24, val, 0), 0)
+
+        def set_input_val(val):
+            return ((0, 25, val, 0), 0)
+
+        def macc_4_run_1():
+            return ((0, 32, 0, 0), 0)
+
+        def make_op_stream():
+            yield set_input_depth(4)
+            yield set_input_offset(128)
+            yield set_output_batch_size(16)
+            for f_vals in zip(range(2, 18), range(3, 19), range(4, 20), range(5, 21)):
+                yield set_filter_val(pack_vals(*f_vals))
+            for i_vals in zip(range(1, 5), range(3, 7), range(5, 9), range(7, 11)):
+                yield set_input_val(pack_vals(*i_vals))
+            yield get_set_accum(0, 0)
+            yield macc_4_run_1()
+            yield get_set_accum(0, 10740)
+            yield macc_4_run_1()
+            yield get_set_accum(0, 19284)
+            yield macc_4_run_1()
+            yield get_set_accum(0, 27828)
+            yield macc_4_run_1()
+            yield get_set_accum(0, 36372)
+
+
+        return self.run_ops(make_op_stream(), True)
