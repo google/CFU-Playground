@@ -106,7 +106,7 @@ class SequentialMemoryReaderTest(TestBase):
         ]
 
         def process():
-            yield self.dut.depth.eq(4)  # depth constant for this test
+            yield self.dut.limit.eq(4)  # depth constant for this test
             yield
             for n, (inputs,outputs) in enumerate(DATA):
                 restart, next, mem_data = inputs

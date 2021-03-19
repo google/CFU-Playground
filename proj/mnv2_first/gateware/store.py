@@ -37,7 +37,7 @@ class StoreSetter(Xetter):
     Public Interface
     ----------------
     w_en: Signal(1)[num_memories] output
-        Memory write enable
+        Memory write enable.
     w_addr: Signal(range(depth)) output
         Memory address to which to write
     w_data: Signal(width) output
@@ -46,6 +46,8 @@ class StoreSetter(Xetter):
         Signal to drop all parameters from memory and restart all counters.
     count: Signal(range(depth)) output
         How many items the memory currently holds
+    updated: Signal() output
+        Indicates that store has been updated with a new value or restarted
     """
 
     def __init__(self, bits_width, num_memories, depth):
@@ -58,6 +60,7 @@ class StoreSetter(Xetter):
         self.w_data = Signal(bits_width)
         self.restart = Signal()
         self.count = Signal(range(depth * num_memories))
+        self.updated = Signal()
 
     def connect_write_port(self, dual_port_memories):
         """Connects the write port of a list of dual port memories to this.
@@ -78,7 +81,8 @@ class StoreSetter(Xetter):
     def elab(self, m):
         m.d.comb += [
             self.done.eq(True),
-            self.w_addr.eq(self.count[self.num_memories_bits:])
+            self.w_addr.eq(self.count[self.num_memories_bits:]),
+            self.updated.eq(Cat(self.w_en).any() | self.restart),
         ]
         with m.If(self.restart):
             m.d.sync += self.count.eq(0)
@@ -139,61 +143,86 @@ class FilterValueFetcher(SimpleElaboratable):
 
     Parameters
     ----------
-    num_memories:
-        number of memories in the store. data will be striped over the memories.
-        Assumed to be a power of two
-    depth:
+    max_depth:
         Maximum number of items stored in each memory
 
     Public Interface
     ----------------
-    r_addr: Signal(range(depth/num_memories)) output
-        Current read pointer
-    r_bank: Signal(range(num_memories)) output
-        Which of the memories to get from
     limit: Signal(range(depth)) input
-        Number of entries currently contained in the filter store
-    restart: Signal() input
-        Soft reset signal to restart all processing
-    data: Signal(32) output
-        Value fetched
+        Number of entries currently contained in the filter store, divided by 4
+    mem_addr: Signal(range(depth/num_memories))[4] output
+        Current read pointer for each memory
+    mem_data: Signal(range(depth/num_memories))[4] input
+        Current value being read from each memory
+    data: Signal(32)[4] output
+        Four words being fetched
     next: Signal() input
         Indicates that fetched value has been read.
+    updated: Signal() input
+        Indicates that memory store has been updated, and processing should start at start
+    restart: Signal() input
+        Soft reset signal to restart all processing
     """
-    def __init__(self, num_memories, depth):
+
+    def __init__(self, max_depth):
         super().__init__()
-        assert 0 == ((num_memories - 1) &
-                     num_memories), "Num memories (f{num_memories}) not a power of two"
-        self.num_memories = num_memories
-        self.r_addr = Signal(range(depth))
-        self.r_bank = Signal(range(num_memories))
-        self.limit = Signal(range(self.num_memories * depth))
-        self.restart = Signal()
+        self.max_depth = max_depth
+        self.limit = Signal(range(max_depth))
+        self.mem_addrs = [
+            Signal(
+                range(max_depth),
+                name=f"mem_addr_{n}") for n in range(4)]
+        self.mem_datas = [Signal(32, name=f"mem_data_{n}") for n in range(4)]
         self.data = Signal(32)
         self.next = Signal()
+        self.updated = Signal()
+        self.restart = Signal()
 
-    def connect_read_port(self, dual_port_memories):
-        """Connect read ports of a list of dual port memories to self.
+        self.smrs = [
+            SequentialMemoryReader(
+                width=32,
+                max_depth=max_depth) for _ in range(4)]
+
+    def connect_read_ports(self, dual_port_memories):
+        """Helper method to connect a list of dual port memories to self.
 
         Returns a list of statements that perform the connection.
         """
-        result = [dp.r_addr.eq(self.r_addr) for dp in dual_port_memories]
-        r_datas = Array(dp.r_data for dp in dual_port_memories)
-        result.append(self.data.eq(r_datas[self.r_bank]))
+        result = []
+        for mem_addr, mem_data, dpm in zip(
+                self.mem_addrs, self.mem_datas, dual_port_memories):
+            result += [
+                dpm.r_addr.eq(mem_addr),
+                mem_data.eq(dpm.r_data),
+            ]
         return result
 
     def elab(self, m):
-        num_memories_bits = (self.num_memories - 1).bit_length()
-        count = Signal.like(self.limit)
-        count_at_limit = count == (self.limit - 1)
-        m.d.comb += [
-            self.r_addr.eq(count[num_memories_bits:]),
-            self.r_bank.eq(count[:num_memories_bits]),
-        ]
+        was_updated  = Signal()
+        m.d.sync += was_updated.eq(self.updated)
+        # Connect sequential memory readers
+        smr_datas = Array([Signal(32, name=f"smr_data_{n}") for n in range(4)])
+        smr_nexts = Array([Signal(name=f"smr_next_{n}") for n in range(4)])
+        for n, (smr, mem_addr, mem_data, smr_data, smr_next) in enumerate(
+                zip(self.smrs, self.mem_addrs, self.mem_datas, smr_datas, smr_nexts)):
+            m.submodules[f"smr_{n}"] = smr
+            m.d.comb += [
+                smr.limit.eq(self.limit >> 2),
+                mem_addr.eq(smr.mem_addr),
+                smr.mem_data.eq(mem_data),
+                smr_data.eq(smr.data),
+                smr.next.eq(smr_next),
+                smr.restart.eq(was_updated),
+            ]
+
+        curr_bank = Signal(2)
+        m.d.comb += self.data.eq(smr_datas[curr_bank])
+
         with m.If(self.restart):
-            m.d.sync += count.eq(0)
+            m.d.sync += curr_bank.eq(0)
         with m.Elif(self.next):
-            m.d.sync += count.eq(Mux(count_at_limit, 0, count + 1))
+            m.d.comb += smr_nexts[curr_bank].eq(1)
+            m.d.sync += curr_bank.eq(curr_bank + 1)
 
 
 class NextWordGetter(Xetter):
@@ -208,6 +237,7 @@ class NextWordGetter(Xetter):
     ready: Signal() input
         Signal from the store that data is valid. The read only completes when ready is true.
     """
+
     def __init__(self):
         super().__init__()
         self.data = Signal(32)
@@ -260,7 +290,7 @@ class InputStore(SimpleElaboratable):
 
     r_ready: Signal() output
         Indicates that data has been stored and reading is allowed
-    r_data: Signal(32)[4] output
+    r_data: Signal(32) output
         Four words of data
     r_next: Signal() input
         Advance data pointer by one word
@@ -296,7 +326,7 @@ class InputStore(SimpleElaboratable):
             m.d.comb += [
                 dp.r_addr.eq(Cat(smr.mem_addr, r_curr_buf)),
                 smr.mem_data.eq(dp.r_data),
-                smr.depth.eq((self.input_depth + 3 - n) >> 2),
+                smr.limit.eq((self.input_depth + 3 - n) >> 2),
             ]
 
         smr_nexts = Array(smr.next for smr in smrs)

@@ -23,7 +23,7 @@ class CfuTest(CfuTestBase):
     def create_dut(self):
         return make_cfu()
 
-    def test(self):
+    def test_simple(self):
         DATA = [
             # Rounding divide 7 by 2**1 == 4
             ((6, 0, 7, 1), 4),
@@ -44,18 +44,28 @@ class CfuTest(CfuTestBase):
             ((0, 110, 0, 0), 999),
             ((0, 110, 0, 0), 666),  # wrap around
 
-            # Restart, store five more filters, retrieve again
-            ((0, 20, 5, 0), 0),
+            # Restart, store eight more filters, retrieve again
+            ((0, 20, 8, 0), 0),
             ((0, 24, 111, 0), 0),
             ((0, 24, 222, 0), 0),
             ((0, 24, 333, 0), 0),
             ((0, 24, 444, 0), 0),
             ((0, 24, 555, 0), 0),
+            ((0, 24, 666, 0), 0),
+            ((0, 24, 777, 0), 0),
+            ((0, 24, 888, 0), 0),
             ((0, 110, 0, 0), 111),
             ((0, 110, 0, 0), 222),
             ((0, 110, 0, 0), 333),
             ((0, 110, 0, 0), 444),
             ((0, 110, 0, 0), 555),
+            ((0, 110, 0, 0), 666),
+            ((0, 110, 0, 0), 777),
+            ((0, 110, 0, 0), 888),
+            ((0, 110, 0, 0), 111),
+            ((0, 110, 0, 0), 222),
+            ((0, 110, 0, 0), 333),
+            ((0, 110, 0, 0), 444),
 
             # Set input offset to 5, then do a macc
             ((0, 12, 5, 0), 0),
@@ -66,7 +76,7 @@ class CfuTest(CfuTestBase):
             ((0, 16, 0, 0), 59),
 
             # Store 4 filter value words
-            ((0, 20, 4, 0), 5),
+            ((0, 20, 4, 0), 8),
             ((0, 24, pack_vals(1, 2, 3, 4), 0), 0),
             ((0, 24, pack_vals(3, 3, 3, 3), 0), 0),
             ((0, 24, pack_vals(-128, -128, -128, -128), 0), 0),
@@ -142,22 +152,19 @@ class CfuTest(CfuTestBase):
             return ((0, 32, 0, 0), 0)
 
         def make_op_stream():
-            yield set_input_depth(4)
+            def nums(start, count): return range(start, start + count)
+            yield set_input_depth(8)
             yield set_input_offset(128)
             yield set_output_batch_size(16)
-            for f_vals in zip(range(2, 18), range(3, 19), range(4, 20), range(5, 21)):
+            for f_vals in zip(nums(2, 16), nums(3, 16),
+                              nums(4, 16), nums(5, 16)):
                 yield set_filter_val(pack_vals(*f_vals))
-            for i_vals in zip(range(1, 5), range(3, 7), range(5, 9), range(7, 11)):
+            for i_vals in zip(nums(1, 8), nums(3, 8), nums(5, 8), nums(7, 8)):
                 yield set_input_val(pack_vals(*i_vals))
             yield get_set_accum(0, 0)
             yield macc_4_run_1()
-            yield get_set_accum(0, 10740)
+            yield get_set_accum(0, 30600)
             yield macc_4_run_1()
-            yield get_set_accum(0, 19284)
-            yield macc_4_run_1()
-            yield get_set_accum(0, 27828)
-            yield macc_4_run_1()
-            yield get_set_accum(0, 36372)
+            yield get_set_accum(0, 65288)
 
-
-        return self.run_ops(make_op_stream(), True)
+        return self.run_ops(make_op_stream(), False)

@@ -272,7 +272,7 @@ class SequentialMemoryReader(SimpleElaboratable):
 
     Public Interface
     ----------------
-    depth: Signal(range(max_depth)) input
+    limit: Signal(range(max_depth)) input
         The number of items to read
     mem_addr: Signal(range(max_depth)) output
         The address to send to the memory read port
@@ -281,15 +281,17 @@ class SequentialMemoryReader(SimpleElaboratable):
     data: Signal(32) output
         The current piece of data
     next: Signal() input
-        Indicates the current piece of data has been read, and want the next bit, please
+        Indicates the current piece of data has been read, and want
+        the next word, please
     restart: Signal() input
-        Indicates that reader should be reset to address zero. Takes
+        Indicates that reader should be reset to address zero. Data 
+        is ready at next cycle.
     """
 
     def __init__(self, *, width, max_depth):
         self.width = width
         self.max_depth = max_depth
-        self.depth = Signal(range(max_depth))
+        self.limit = Signal(range(max_depth))
         self.mem_addr = Signal(range(max_depth))
         self.mem_data = Signal(32)
         self.data = Signal(32)
@@ -304,11 +306,11 @@ class SequentialMemoryReader(SimpleElaboratable):
         m.d.sync += was_next.eq(self.next)
 
         # Decide address to be output (determines data available next cycle)
-        last_mem_addr = Signal.like(self.depth)
+        last_mem_addr = Signal.like(self.limit)
         m.d.sync += last_mem_addr.eq(self.mem_addr)
-        incremented_addr = Signal.like(self.depth)
+        incremented_addr = Signal.like(self.limit)
         m.d.comb += incremented_addr.eq(Mux(last_mem_addr ==
-                                            self.depth - 1, 0, last_mem_addr + 1))
+                                            self.limit - 1, 0, last_mem_addr + 1))
         with m.If(self.restart):
             m.d.comb += self.mem_addr.eq(0)
         with m.Elif(was_next | was_restart):
