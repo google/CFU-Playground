@@ -18,7 +18,7 @@ from nmigen_cfu import Cfu, DualPortMemory, is_sim_run
 from .post_process import PostProcessXetter, SRDHMInstruction, RoundingDividebyPOTInstruction
 from .store import CircularIncrementer, FilterValueFetcher, InputStore, InputStoreSetter, NextWordGetter, StoreSetter
 from .registerfile import RegisterFileInstruction, RegisterSetter
-from .macc import ExplicitMacc4, ImplicitMacc4
+from .macc import AccumulatorRegisterXetter, ExplicitMacc4, ImplicitMacc4
 
 OUTPUT_CHANNEL_PARAM_DEPTH = 512
 NUM_FILTER_DATA_WORDS = 512
@@ -36,6 +36,16 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         m.submodules[name] = setter
         self.register_xetter(reg_num, setter)
         return setter.value, setter.set
+
+    def _make_accumulator(self, m, reg_num, name):
+        """Constructs and registers a simple RegisterSetter.
+
+        Return a pair of signals from setter: (value, set)
+        """
+        xetter = AccumulatorRegisterXetter()
+        m.submodules[name] = xetter
+        self.register_xetter(reg_num, xetter)
+        return xetter.add_en, xetter.add_data
 
     def _make_output_channel_param_store(
             self, m, reg_num, name, restart_signal):
@@ -125,6 +135,8 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         offset, _ = self._make_setter(m, 13, 'set_output_offset')
         activation_min, _ = self._make_setter(m, 14, 'set_activation_min')
         activation_max, _ = self._make_setter(m, 15, 'set_activation_max')
+        add_en, add_data = self._make_accumulator(m, 16, 'accumulator')
+
         _, restart = self._make_setter(m, 20, 'set_output_batch_size')
         multiplier, multiplier_next = self._make_output_channel_param_store(
             m, 21, 'store_output_mutiplier', restart)
