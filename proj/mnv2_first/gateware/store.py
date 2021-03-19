@@ -167,7 +167,7 @@ class FilterValueFetcher(SimpleElaboratable):
     def __init__(self, max_depth):
         super().__init__()
         self.max_depth = max_depth
-        self.limit = Signal(range(max_depth))
+        self.limit = Signal(range(max_depth * 4))
         self.mem_addrs = [
             Signal(
                 range(max_depth),
@@ -198,7 +198,7 @@ class FilterValueFetcher(SimpleElaboratable):
         return result
 
     def elab(self, m):
-        was_updated  = Signal()
+        was_updated = Signal()
         m.d.sync += was_updated.eq(self.updated)
         # Connect sequential memory readers
         smr_datas = Array([Signal(32, name=f"smr_data_{n}") for n in range(4)])
