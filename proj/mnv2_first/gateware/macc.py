@@ -15,7 +15,7 @@
 
 from nmigen import Signal, signed
 
-from nmigen_cfu import all_words, Sequencer, SimpleElaboratable, ValueBuffer
+from nmigen_cfu import all_words, Sequencer, SimpleElaboratable, tree_sum
 
 from .registerfile import Xetter
 
@@ -23,7 +23,7 @@ from .registerfile import Xetter
 class Madd4Pipeline(SimpleElaboratable):
     """A 4-wide Multiply Add pipeline. 
 
-    Pipeline takes 1 cycle: result ready next cycle
+    Pipeline takes 2 additional cycles.
 
     f_data and i_data each contain 4 signed 8 bit values. The
     calculation performed is:
@@ -41,7 +41,7 @@ class Madd4Pipeline(SimpleElaboratable):
     result: Signal(signed(32)) output
         Result of the multiply and add
     """
-    PIPELINE_CYCLES = 1
+    PIPELINE_CYCLES = 2
 
     def __init__(self):
         super().__init__()
@@ -55,11 +55,13 @@ class Madd4Pipeline(SimpleElaboratable):
         products = [Signal(signed(17), name=f"product_{n}") for n in range(4)]
         for i_val, f_val, product in zip(
                 all_words(self.i_data, 8), all_words(self.f_data, 8), products):
-            tmp = Signal(signed(9))
-            m.d.comb += tmp.eq(i_val.as_signed() + self.offset)
-            m.d.sync += product.eq(tmp * f_val.as_signed())
+            f_tmp = Signal(signed(9))
+            m.d.sync += f_tmp.eq(f_val.as_signed())
+            i_tmp = Signal(signed(9))
+            m.d.sync += i_tmp.eq(i_val.as_signed() + self.offset)
+            m.d.comb += product.eq(i_tmp * f_tmp)
 
-        m.d.comb += self.result.eq(sum(products))
+        m.d.sync += self.result.eq(tree_sum(products))
 
 
 class ExplicitMacc4(Xetter):
@@ -84,7 +86,7 @@ class ExplicitMacc4(Xetter):
             madd4.i_data.eq(self.in0),
             self.output.eq(madd4.result),
         ]
-        m.submodules['seq'] = seq = Sequencer(1)
+        m.submodules['seq'] = seq = Sequencer(Madd4Pipeline.PIPELINE_CYCLES)
         m.d.comb += seq.inp.eq(self.start)
         m.d.comb += self.done.eq(seq.sequence[-1])
 
