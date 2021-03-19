@@ -21,7 +21,7 @@ from .registerfile import Xetter
 
 
 class Madd4Pipeline(SimpleElaboratable):
-    """A 4-wide Multiply Add pipeline. 
+    """A 4-wide Multiply Add pipeline.
 
     Pipeline takes 2 additional cycles.
 
@@ -91,6 +91,38 @@ class ExplicitMacc4(Xetter):
         m.d.comb += self.done.eq(seq.sequence[-1])
 
 
+class AccumulatorRegisterXetter(Xetter):
+    """An accumulator which can also be get and set.
+
+    Sets new value from in0. Return previous value on set.
+
+
+    Public Interface
+    ----------------
+    value: Signal(signed(32)) output
+        The value held by this register. It will be set from in0 (on self.start)
+        or added to from add_data (on self.add_en)
+    add_en: Signal input
+        This signal is pulsed high to add to the accumulator.
+    add_data: Signal(signed(32)) input
+        The value to add to the accumulator when
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.value = Signal(signed(32))
+        self.add_en = Signal()
+        self.add_data = Signal(signed(32))
+
+    def elab(self, m):
+        with m.If(self.start):
+            m.d.sync += self.value.eq(self.in0),
+            m.d.comb += self.output.eq(self.value)
+            m.d.comb += self.done.eq(1)
+        with m.Elif(self.add_en):
+            m.d.sync += self.value.eq(self.value + self.add_data),
+
+
 class ImplicitMacc4(Xetter):
     """A Macc4 that operates on input_vals and filter_vals provided
     from within the CFU.
@@ -129,7 +161,8 @@ class ImplicitMacc4(Xetter):
             self.output.eq(madd4.result),
         ]
 
-        # Signal only when i_ready has been set, then start sequence to be done next cycle
+        # Signal only when i_ready has been set, then start sequence to be done
+        # next cycle
         m.submodules['seq'] = seq = Sequencer(Madd4Pipeline.PIPELINE_CYCLES)
         m.d.comb += self.done.eq(seq.sequence[-1])
         waiting_for_i_ready = Signal()

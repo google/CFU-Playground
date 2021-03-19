@@ -78,7 +78,7 @@ class CfuTest(CfuTestBase):
             ((0, 31, 0, 0), -99 * 19 + 92 * 17 + -37 * 103 + 2 * 11),
 
         ]
-        return self.run_ops(DATA, True)
+        return self.run_ops(DATA, False)
 
     def test_input_store(self):
         DATA = []
