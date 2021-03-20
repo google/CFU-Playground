@@ -133,9 +133,9 @@ void Mnv2ConvPerChannel1x1(
     for (int p = 0; p < num_pixels; p++) {
       // Load one pixel's worth of input data
       PERF_START(6);
-      for (int i = 0; i < input_depth_words; i++) {
-        uint32_t val = *(input_ptr++);
-        CFU_STORE_INPUT_VALUE(val);
+      for (int i = 0; i < input_depth_words; i += 2) {
+        CFU_STORE_INPUT_VALUE(*(input_ptr++));
+        CFU_STORE_INPUT_VALUE(*(input_ptr++));
       }
       PERF_END(6);
       PERF_START(7);
