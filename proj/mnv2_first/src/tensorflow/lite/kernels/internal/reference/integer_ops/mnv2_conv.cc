@@ -35,6 +35,21 @@ limitations under the License.
 namespace tflite {
 namespace reference_integer_ops {
 
+static void LoadFilterValues(uint32_t* filter_words, int num_words) {
+  PERF_START(4);
+  for (int i = 0; i < num_words; i += 8) {
+    CFU_STORE_FILTER_VALUE(*(filter_words++));
+    CFU_STORE_FILTER_VALUE(*(filter_words++));
+    CFU_STORE_FILTER_VALUE(*(filter_words++));
+    CFU_STORE_FILTER_VALUE(*(filter_words++));
+    CFU_STORE_FILTER_VALUE(*(filter_words++));
+    CFU_STORE_FILTER_VALUE(*(filter_words++));
+    CFU_STORE_FILTER_VALUE(*(filter_words++));
+    CFU_STORE_FILTER_VALUE(*(filter_words++));
+  }
+  PERF_END(4);
+}
+
 // Fixed-point per-channel-quantization convolution reference kernel.
 void Mnv2ConvPerChannel1x1(
     const ConvParams& params, const int32_t* output_multiplier,
@@ -119,13 +134,8 @@ void Mnv2ConvPerChannel1x1(
     }
     PERF_END(3);
 
-    PERF_START(4);
-    // Load up weights
-    int num_filter_words = batch_size * input_depth / 4;
-    for (int i = 0; i < num_filter_words; i++) {
-      CFU_STORE_FILTER_VALUE(*(filter_words++));
-    }
-    PERF_END(4);
+    LoadFilterValues(filter_words, batch_size * input_depth_words);
+
     PERF_START(5);
     // Reset input and output pointers
     const uint32_t* input_ptr = (uint32_t*)input_data;
