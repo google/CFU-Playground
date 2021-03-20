@@ -35,6 +35,32 @@ limitations under the License.
 namespace tflite {
 namespace reference_integer_ops {
 
+static void LoadOutputChannelWeights(const int32_t*& output_multiplier,
+                                     const int32_t*& output_shift,
+                                     const int32_t*& bias_data, int batch_size) {
+  PERF_START(3);
+  CFU_SET_OUTPUT_BATCH_SIZE(batch_size);
+  for (int i = 0; i < batch_size; i += 4) {
+    CFU_STORE_OUTPUT_MULTIPLIER(*(output_multiplier++));
+    CFU_STORE_OUTPUT_MULTIPLIER(*(output_multiplier++));
+    CFU_STORE_OUTPUT_MULTIPLIER(*(output_multiplier++));
+    CFU_STORE_OUTPUT_MULTIPLIER(*(output_multiplier++));
+  }
+  for (int i = 0; i < batch_size; i += 4) {
+    CFU_STORE_OUTPUT_SHIFT(*(output_shift++));
+    CFU_STORE_OUTPUT_SHIFT(*(output_shift++));
+    CFU_STORE_OUTPUT_SHIFT(*(output_shift++));
+    CFU_STORE_OUTPUT_SHIFT(*(output_shift++));
+  }
+  for (int i = 0; i < batch_size; i += 4) {
+    CFU_STORE_OUTPUT_BIAS(*(bias_data++));
+    CFU_STORE_OUTPUT_BIAS(*(bias_data++));
+    CFU_STORE_OUTPUT_BIAS(*(bias_data++));
+    CFU_STORE_OUTPUT_BIAS(*(bias_data++));
+  }
+  PERF_END(3);
+}
+
 static void LoadFilterValues(uint32_t*& filter_words, int num_words) {
   PERF_START(4);
   for (int i = 0; i < num_words; i += 8) {
@@ -115,25 +141,14 @@ void Mnv2ConvPerChannel1x1(
   PERF_END(2);
 
   for (int batch = 0; batch < num_batches; batch++) {
-    PERF_START(3);
     const int batch_base = batch * channels_per_batch;
     const int batch_end =
         std::min(output_depth, batch_base + channels_per_batch);
     const int batch_size = batch_end - batch_base;
 
-    // Load up parameters
-    CFU_SET_OUTPUT_BATCH_SIZE(batch_size);
-    for (int i = 0; i < batch_size; i++) {
-      CFU_STORE_OUTPUT_MULTIPLIER(*(output_multiplier++));
-    }
-    for (int i = 0; i < batch_size; i++) {
-      CFU_STORE_OUTPUT_SHIFT(*(output_shift++));
-    }
-    for (int i = 0; i < batch_size; i++) {
-      CFU_STORE_OUTPUT_BIAS(*(bias_data++));
-    }
-    PERF_END(3);
-
+    // Load up output channel parameters and filter values
+    LoadOutputChannelWeights(output_multiplier, output_shift, bias_data,
+                             batch_size);
     LoadFilterValues(filter_words, batch_size * input_depth_words);
 
     PERF_START(5);
