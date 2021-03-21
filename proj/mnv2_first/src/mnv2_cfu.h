@@ -47,19 +47,12 @@ extern "C" {
 #define CFU_STORE_FILTER_VALUE(in0) CFU_SET(24, in0)
 #define CFU_STORE_INPUT_VALUE(in0) CFU_SET(25, in0)
 
-// Not actually and accumulate - more a multiply-add
-#define CFU_MACC4_EXPLICIT(input_vals, filter_vals) \
-  cfu_op0(30, input_vals, filter_vals)
-#define CFU_MACC4_IMPLICIT() CFU_GET(31)
-
 // Run enough MACC4s to do one input channel, then return
 #define CFU_MACC4_RUN_1() CFU_GET(32)
 
 // Supports incremental development
-#define CFU_GET_FILTER_VALUE() CFU_GET(110)
-#define CFU_GET_INPUT_VALUE() CFU_GET(111)
 #define CFU_MARK_INPUT_READ_FINISHED() CFU_GET(112)
-#define CFU_DUMP_INPUT_STORE() CFU_GET(113)
+
 #define CFU_POST_PROCESS(in0) CFU_SET(120, in0)
 
 #define EBRAM_DEPTH_BITS (16 * 1024)

@@ -76,6 +76,7 @@ static int32_t post_process(int32_t acc) {
   return acc;
 }
 
+// Filter store
 struct FilterStore {
   int32_t values[NUM_FILTER_DATA_EBRAMS][NUM_FILTER_DATA_WORDS];
   int write_index;
@@ -109,22 +110,11 @@ static uint32_t filter_store_read(struct FilterStore* fs) {
   if (fs->read_bank == 0) {
     fs->read_index = (fs->read_index + 1) % fs->write_index;
   }
-#if 0
-  static int frc = 0;
-  if (frc < 24) {
-    printf("%02x, %02x, %02x, %02x, ", result & 0xff, (result >> 8) & 0xff,
-           (result >> 16) & 0xff, (result >> 24) & 0xff);
-    if (frc % 3 == 2) {
-      printf("\n");
-    }
-  }
-  frc++;
-#endif
   return result;
 }
 
-// Input store is double buffered so that one may be written
-// while the other being read
+// Input store is double buffered: reading and writing occur on different
+// bufers.
 struct InputStore {
   // There are two buffers, 0 and 1.
 
@@ -213,18 +203,6 @@ static uint32_t input_store_read(struct InputStore* is) {
     is->read_addr = 0;
   }
 
-#if 0
-  static int irc = 0;
-  if (irc < 24) {
-    printf("%02x, %02x, %02x, %02x, ", result & 0xff, (result >> 8) & 0xff,
-           (result >> 16) & 0xff, (result >> 24) & 0xff);
-    if (irc % 3 == 2) {
-      printf("\n");
-    }
-  }
-  irc++;
-#endif
-
   return result;
 }
 
@@ -236,59 +214,11 @@ static uint32_t input_store_mark_read_finished(struct InputStore* is) {
   return 0;
 }
 
-static int print_as_bytes(uint32_t word) {
-  printf("%02x, %02x, %02x, %02x, ", word & 0xff, (word >> 8) & 0xff,
-         (word >> 16) & 0xff, (word >> 24) & 0xff);
-}
-
-static uint32_t input_store_dump(struct InputStore* is) {
-  printf("write buf: %1d allowed: %1d, %1d\n", is->curr_write_buffer,
-         is->write_allowed[0], is->write_allowed[1]);
-  printf("read  buf: %1d allowed: %1d, %1d\n", is->curr_write_buffer,
-         is->read_allowed[0], is->read_allowed[1]);
-
-  int32_t id = is->input_depth;
-  printf("input depth: %ld\n", id);
-
-  printf("write_addr: %d\n", is->write_addr);
-  printf("read_addr:  %d\n", is->read_addr);
-  printf("buf0");
-  for (int addr = 0; addr < id; addr++) {
-    if (addr % 3 == 0) {
-      printf("\n");
-    }
-    print_as_bytes(is->values[addr & 0x3][addr >> 2]);
-  }
-  printf("\n");
-  printf("buf1");
-  const int b1start = EBRAM_DEPTH_WORDS / 2;
-  for (int addr = 0; addr < id; addr++) {
-    if (addr % 3 == 0) {
-      printf("\n");
-    }
-    print_as_bytes(is->values[addr & 0x3][(addr >> 2) + b1start]);
-  }
-  printf("\n");
-
-  return 0;
-}
-
 static inline int32_t macc(const int8_t input_val, int8_t filter_val) {
-  // Assumes filter values being used sequentially
-  int32_t sum = ((int32_t)filter_val) * ((int32_t)input_val + reg_input_offset);
-
-#if 0
-  static int dbg_ctr = 0;
-  if (dbg_ctr >= 96 * 24 && dbg_ctr < 96 * 25) {
-    printf("%6d, %4d, %6ld, %6ld\n", filter_val, input_val, input_offset, sum);
-  }
-  dbg_ctr++;
-#endif
-  return sum;
+  return ((int32_t)filter_val) * ((int32_t)input_val + reg_input_offset);
 }
 
-static int32_t macc4_explicit_inputs(uint32_t input_vals,
-                                     uint32_t filter_vals) {
+static int32_t macc4(uint32_t input_vals, uint32_t filter_vals) {
   int32_t result = 0;
   result += macc(input_vals & 0xff, filter_vals & 0xff);
   filter_vals >>= 8;
@@ -303,17 +233,10 @@ static int32_t macc4_explicit_inputs(uint32_t input_vals,
   return result;
 }
 
-static int32_t macc4_implicit_inputs(struct InputStore* is,
-                                     struct FilterStore* fs) {
-  int32_t add = macc4_explicit_inputs(input_store_read(&input_store),
-                                      filter_store_read(&filter_store));
-  reg_accumulator += add;
-  return add;
-}
-
 static int32_t macc4_run1(struct InputStore* is, struct FilterStore* fs) {
   for (uint32_t i = 0; i < is->input_depth; i++) {
-    macc4_implicit_inputs(is, fs);
+    reg_accumulator +=
+        macc4(input_store_read(&input_store), filter_store_read(&filter_store));
   }
 }
 
@@ -344,7 +267,8 @@ static uint32_t set_reg(int funct7, uint32_t in0, uint32_t in1) {
       result = reg_accumulator;
       reg_accumulator = in0;
       return result;
-    case 20:  // set size of output channel batch
+    case 20:
+      // set size of output channel batch, resetting param stores
       reg_output_batch_size = in0;
       param_store_restart(&output_multiplier);
       param_store_restart(&output_shift);
@@ -362,23 +286,15 @@ static uint32_t set_reg(int funct7, uint32_t in0, uint32_t in1) {
     case 25:
       return input_store_set(&input_store, in0);
 
-    case 30:
-      return macc4_explicit_inputs(in0, in1);
-    case 31:
-      return macc4_implicit_inputs(&input_store, &filter_store);
     case 32:
       return macc4_run1(&input_store, &filter_store);
 
-    case 110:
-      return filter_store_read(&filter_store);
-    case 111:
-      return input_store_read(&input_store);
     case 112:
       return input_store_mark_read_finished(&input_store);
-    case 113:
-      return input_store_dump(&input_store);
+
     case 120:
       return post_process(in0);
+
     default:
       return 0;
   }
