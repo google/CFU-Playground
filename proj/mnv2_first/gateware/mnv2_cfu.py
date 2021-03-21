@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen.hdl.ast import Mux
-from nmigen_cfu import Cfu, DualPortMemory, is_sim_run
+from nmigen.hdl.ast import Mux, Signal
+from nmigen_cfu import Cfu, DualPortMemory, is_pysim_run
 
 from .post_process import PostProcessXetter
 from .store import CircularIncrementer, FilterValueFetcher, InputStore, InputStoreSetter, NextWordGetter, StoreSetter
@@ -56,7 +56,7 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         Returns a pair of signals: (current data, inc.next)
         """
         m.submodules[f'{name}_dp'] = dp = DualPortMemory(
-            width=32, depth=OUTPUT_CHANNEL_PARAM_DEPTH, is_sim=is_sim_run())
+            width=32, depth=OUTPUT_CHANNEL_PARAM_DEPTH, is_sim=is_pysim_run())
         m.submodules[f'{name}_inc'] = inc = CircularIncrementer(
             OUTPUT_CHANNEL_PARAM_DEPTH)
         m.submodules[f'{name}_set'] = psset = StoreSetter(
@@ -85,7 +85,7 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         dps = []
         for i in range(4):
             m.submodules[f'{name}_dp_{i}'] = dp = DualPortMemory(
-                width=32, depth=FILTER_DATA_MEM_DEPTH, is_sim=is_sim_run())
+                width=32, depth=FILTER_DATA_MEM_DEPTH, is_sim=is_pysim_run())
             dps.append(dp)
         m.submodules[f'{name}_set'] = fvset = StoreSetter(
             32, 4, FILTER_DATA_MEM_DEPTH)
@@ -123,6 +123,32 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         self.register_xetter(reg_num, xetter)
         return xetter
 
+    def _make_filter_value_getter(self, m, fvf):
+        fvg_next= Signal()
+        if is_pysim_run():
+            m.submodules['fvg'] = fvg = NextWordGetter()
+            m.d.comb += [
+                fvf.next.eq(fvg.next),
+                fvg.data.eq(fvf.data),
+                fvg.ready.eq(1),
+                fvg_next.eq(fvg.next),
+            ]
+            self.register_xetter(110, fvg)
+        return fvg_next
+
+    def _make_input_store_getter(self, m, ins):
+        insget_next = Signal()
+        if is_pysim_run():
+            m.submodules['insget'] = insget = NextWordGetter()
+            m.d.comb += [
+                insget.data.eq(ins.r_data),
+                insget.ready.eq(ins.r_ready),
+                ins.r_next.eq(insget.next),
+                insget_next.eq(insget.next),
+            ]
+            self.register_xetter(111, insget)
+        return insget_next
+
     def elab_xetters(self, m):
         input_depth, set_id = self._make_setter(m, 10, 'set_input_depth')
         self._make_setter(m, 11, 'set_output_depth')
@@ -156,30 +182,20 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
 
         ins = self._make_input_store(m, 'ins', set_id, input_depth)
 
-        m.submodules['fvg'] = fvg = NextWordGetter()
-        m.d.comb += [
-            fvf.next.eq(fvg.next),
-            fvg.data.eq(fvf.data),
-            fvg.ready.eq(1),
-        ]
-        self.register_xetter(110, fvg)
-        m.submodules['insget'] = insget = NextWordGetter()
-        m.d.comb += [
-            insget.data.eq(ins.r_data),
-            insget.ready.eq(ins.r_ready),
-            ins.r_next.eq(insget.next),
-        ]
-        self.register_xetter(111, insget)
+        # Make getters for filter and instuction next words
+        # Only required during pysim unit tests
+        fvg_next = self._make_filter_value_getter(m, fvf)
+        insget_next = self._make_input_store_getter(m, ins)
 
         # MACC 4
         m4r1 = self._make_macc_4_run_1(
             m, 32, 'm4r1', input_offset, input_depth)
         m.d.comb += [
             m4r1.f_data.eq(fvf.data),
-            fvf.next.eq(m4r1.f_next | fvg.next),
+            fvf.next.eq(m4r1.f_next | fvg_next),
             m4r1.i_data.eq(ins.r_data),
             m4r1.i_ready.eq(ins.r_ready),
-            ins.r_next.eq(m4r1.i_next | insget.next),
+            ins.r_next.eq(m4r1.i_next | insget_next),
             add_en.eq(m4r1.add_en),
             add_data.eq(m4r1.add_data),
         ]
@@ -195,6 +211,7 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
             ppx.shift.eq(shift),
             shift_next.eq(ppx.shift_next),
         ]
+
 
 
 class Mnv2Cfu(Cfu):
