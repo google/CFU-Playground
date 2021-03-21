@@ -26,14 +26,6 @@ limitations under the License.
 namespace tflite {
 namespace reference_integer_ops {
 
-static inline int32_t accumulate(int input_depth, int32_t input_offset) {
-  for (int in_channel = 0; in_channel < input_depth; in_channel += 8) {
-    CFU_MACC4_IMPLICIT();
-    CFU_MACC4_IMPLICIT();
-  }
-  return CFU_GET_SET_ACCUMULATOR(0);
-}
-
 // Fixed-point per-channel-quantization convolution reference kernel.
 void Mnv2ConvPerChannel1x1(
     const ConvParams& params, const int32_t* output_multiplier,
@@ -131,8 +123,8 @@ void Mnv2ConvPerChannel1x1(
 
       for (int out_channel = batch_base; out_channel < batch_end;
            ++out_channel) {
-        int32_t acc = accumulate(input_depth, input_offset);
-
+        CFU_MACC4_RUN_1();
+        int32_t acc = CFU_GET_SET_ACCUMULATOR(0);
         int32_t out = CFU_POST_PROCESS(acc);
         *(output_ptr++) = static_cast<int8_t>(out);
       }

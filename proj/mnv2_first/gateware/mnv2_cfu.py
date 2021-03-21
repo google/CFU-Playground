@@ -13,15 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from nmigen.hdl.ast import Mux
 from nmigen_cfu import Cfu, DualPortMemory, is_sim_run
 
 from .post_process import PostProcessXetter, SRDHMInstruction, RoundingDividebyPOTInstruction
 from .store import CircularIncrementer, FilterValueFetcher, InputStore, InputStoreSetter, NextWordGetter, StoreSetter
 from .registerfile import RegisterFileInstruction, RegisterSetter
-from .macc import AccumulatorRegisterXetter, ExplicitMacc4, ImplicitMacc4
+from .macc import AccumulatorRegisterXetter, ExplicitMacc4, ImplicitMacc4, Macc4Run1
 
 OUTPUT_CHANNEL_PARAM_DEPTH = 512
-NUM_FILTER_DATA_WORDS = 512
+FILTER_DATA_MEM_DEPTH = 512
 MAX_PER_PIXEL_INPUT_WORDS = 1024
 
 
@@ -84,17 +85,17 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         dps = []
         for i in range(4):
             m.submodules[f'{name}_dp_{i}'] = dp = DualPortMemory(
-                width=32, depth=NUM_FILTER_DATA_WORDS, is_sim=is_sim_run())
+                width=32, depth=FILTER_DATA_MEM_DEPTH, is_sim=is_sim_run())
             dps.append(dp)
         m.submodules[f'{name}_set'] = fvset = StoreSetter(
-            32, 4, NUM_FILTER_DATA_WORDS)
+            32, 4, FILTER_DATA_MEM_DEPTH)
         self.register_xetter(reg_num, fvset)
         m.d.comb += [
             # Restart param store when reg is set
             fvset.restart.eq(restart_signal),
         ]
         m.d.comb += fvset.connect_write_port(dps)
-        return dps, fvset.count
+        return dps, fvset.count, fvset.updated
 
     def _make_input_store(self, m, name, restart_signal, input_depth):
         m.submodules[f'{name}'] = ins = InputStore(MAX_PER_PIXEL_INPUT_WORDS)
@@ -128,6 +129,19 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         self.register_xetter(reg_num, xetter)
         return xetter
 
+    def _make_macc_4_run_1(self, m, reg_num, name, input_offset, input_depth):
+        """Constructs and registers an implicit macc4 instruction
+
+        """
+        xetter = Macc4Run1()
+        m.d.comb += [
+            xetter.input_offset.eq(input_offset),
+            xetter.input_depth.eq(input_depth),
+        ]
+        m.submodules[name] = xetter
+        self.register_xetter(reg_num, xetter)
+        return xetter
+
     def elab_xetters(self, m):
         input_depth, set_id = self._make_setter(m, 10, 'set_input_depth')
         self._make_setter(m, 11, 'set_output_depth')
@@ -144,15 +158,16 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
             m, 22, 'store_output_shift', restart)
         bias, bias_next = self._make_output_channel_param_store(
             m, 23, 'store_output_bias', restart)
-        fv_mems, fv_count = self._make_filter_value_store(
+        fv_mems, fv_count, fv_updated = self._make_filter_value_store(
             m, 24, 'store_filter_values', restart)
 
-        m.submodules['fvf'] = fvf = FilterValueFetcher(
-            4, NUM_FILTER_DATA_WORDS)
-        m.d.comb += fvf.connect_read_port(fv_mems)
+        m.submodules['fvf'] = fvf = FilterValueFetcher(FILTER_DATA_MEM_DEPTH)
+        m.d.comb += fvf.connect_read_ports(fv_mems)
         m.d.comb += [
-            fvf.limit.eq(fv_count),
-            fvf.restart.eq(restart)
+            # fetcher only works for multiples of 4, and only for multiples of 4 > 8
+            fvf.limit.eq(fv_count & ~0x3),
+            fvf.updated.eq(fv_updated),
+            fvf.restart.eq(restart),
         ]
         m.submodules['ppx'] = ppx = PostProcessXetter()
         self.register_xetter(120, ppx)
@@ -177,14 +192,19 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         # MACC 4
         self._make_explicit_macc_4(m, 30, 'ex_m4', input_offset)
         im4 = self._make_implicit_macc_4(m, 31, 'im4_m4', input_offset)
+        m4r1 = self._make_macc_4_run_1(
+            m, 32, 'm4r1', input_offset, input_depth)
         m.d.comb += [
             im4.f_data.eq(fvf.data),
-            fvf.next.eq(im4.f_next | fvg.next),
+            m4r1.f_data.eq(fvf.data),
+            fvf.next.eq(im4.f_next | m4r1.f_next | fvg.next),
             im4.i_data.eq(ins.r_data),
             im4.i_ready.eq(ins.r_ready),
-            ins.r_next.eq(im4.i_next | insget.next),
-            add_en.eq(im4.done),
-            add_data.eq(im4.output),
+            m4r1.i_data.eq(ins.r_data),
+            m4r1.i_ready.eq(ins.r_ready),
+            ins.r_next.eq(im4.i_next | m4r1.i_next | insget.next),
+            add_en.eq(im4.done | m4r1.add_en),
+            add_data.eq(Mux(im4.done, im4.output, m4r1.add_data)),
         ]
 
         m.d.comb += [
