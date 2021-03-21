@@ -20,6 +20,8 @@
 #include <stdint.h>
 
 #include "riscv.h"
+#include "software_cfu.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -47,10 +49,6 @@ extern "C" {
 #define cfu_op6_hw(funct7, rs1, rs2) opcode_R(CUSTOM0, 6, funct7, (rs1), (rs2))
 #define cfu_op7_hw(funct7, rs1, rs2) opcode_R(CUSTOM0, 7, funct7, (rs1), (rs2))
 
-// =============== Software (C implementation of custom instructions)
-
-uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2);
-
 // generic name for each custom instruction
 #define cfu_op0_sw(funct7, rs1, rs2) software_cfu(0, funct7, rs1, rs2)
 #define cfu_op1_sw(funct7, rs1, rs2) software_cfu(1, funct7, rs1, rs2)
@@ -64,6 +62,7 @@ uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2);
 // =============== Switch HW vs SW
 
 #ifdef CFU_SOFTWARE_DEFINED
+
 #define cfu_op0(funct7, rs1, rs2) cfu_op0_sw(funct7, rs1, rs2)
 #define cfu_op1(funct7, rs1, rs2) cfu_op1_sw(funct7, rs1, rs2)
 #define cfu_op2(funct7, rs1, rs2) cfu_op2_sw(funct7, rs1, rs2)
