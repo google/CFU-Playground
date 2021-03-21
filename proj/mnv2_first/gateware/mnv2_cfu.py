@@ -16,7 +16,7 @@
 from nmigen.hdl.ast import Mux
 from nmigen_cfu import Cfu, DualPortMemory, is_sim_run
 
-from .post_process import PostProcessXetter, SRDHMInstruction, RoundingDividebyPOTInstruction
+from .post_process import PostProcessXetter
 from .store import CircularIncrementer, FilterValueFetcher, InputStore, InputStoreSetter, NextWordGetter, StoreSetter
 from .registerfile import RegisterFileInstruction, RegisterSetter
 from .macc import AccumulatorRegisterXetter, ExplicitMacc4, ImplicitMacc4, Macc4Run1
@@ -229,8 +229,6 @@ class Mnv2Cfu(Cfu):
     def __init__(self):
         super().__init__({
             0: Mnv2RegisterInstruction(),
-            6: RoundingDividebyPOTInstruction(),
-            7: SRDHMInstruction(),
         })
 
     def elab(self, m):

@@ -15,7 +15,7 @@
 
 from nmigen import Mux, Signal, signed
 
-from nmigen_cfu import InstructionBase, SimpleElaboratable, Sequencer
+from nmigen_cfu import SimpleElaboratable, Sequencer
 
 from .registerfile import Xetter
 
@@ -79,23 +79,6 @@ class SRDHM(SimpleElaboratable):
         ]
 
 
-class SRDHMInstruction(InstructionBase):
-    def elab(self, m):
-        m.submodules['srdhm'] = srdhm = SRDHM()
-        countdown = Signal(signed(3))
-        m.d.comb += self.done.eq(countdown == 0)
-
-        m.d.comb += [
-            srdhm.a.eq(self.in0),
-            srdhm.b.eq(self.in1),
-            self.output.eq(srdhm.result),
-        ]
-        with m.If(self.start):
-            m.d.sync += countdown.eq(2)
-        with m.Else():
-            m.d.sync += countdown.eq(Mux(countdown != -1, countdown - 1, -1))
-
-
 def rounding_divide_by_pot(x, exponent):
     """Implements gemmlowp::RoundingDivideByPOT
 
@@ -106,16 +89,6 @@ def rounding_divide_by_pot(x, exponent):
     threshold = (mask >> 1) + x[31]
     rounding = Mux(remainder > threshold, 1, 0)
     return (x >> exponent) + rounding
-
-
-class RoundingDividebyPOTInstruction(InstructionBase):
-    def elab(self, m):
-        m.d.sync += self.done.eq(0)
-        with m.If(self.start):
-          m.d.sync += [
-              self.output.eq(rounding_divide_by_pot(self.in0s, self.in1[:5])),
-              self.done.eq(1),
-          ]
 
 
 def clamped(value, min_bound, max_bound):

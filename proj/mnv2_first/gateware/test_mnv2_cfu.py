@@ -25,9 +25,6 @@ class CfuTest(CfuTestBase):
 
     def test_simple(self):
         DATA = [
-            # Rounding divide 7 by 2**1 == 4
-            ((6, 0, 7, 1), 4),
-
             # Store output shift
             ((0, 22, 5, 0), 0),
 
