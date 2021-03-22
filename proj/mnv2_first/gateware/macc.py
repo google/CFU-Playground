@@ -65,6 +65,39 @@ class Madd4Pipeline(SimpleElaboratable):
         m.d.sync += self.result.eq(tree_sum(products))
 
 
+class Accumulator(SimpleElaboratable):
+    """An accumulator for a Madd4Pipline
+
+    Public Interface
+    ----------------
+    add_en: Signal() input
+        When to add the input
+    in_value: Signal(signed(32)) input
+        The input data to add
+    clear: Signal() input
+        Zero accumulator.
+    result: Signal(signed(32)) output
+        Result of the multiply and add
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.add_en = Signal()
+        self.in_value = Signal(signed(32))
+        self.clear = Signal()
+        self.result = Signal(signed(32))
+
+    def elab(self, m):
+        accumulator = Signal(signed(32))
+        m.d.comb += self.result.eq(accumulator)
+        with m.If(self.add_en):
+            m.d.sync += accumulator.eq(accumulator + self.in_value)
+            m.d.comb += self.result.eq(accumulator + self.in_value)
+        # clear always resets accumulator next cycle, even if add_en is high
+        with m.If(self.clear):
+            m.d.sync += accumulator.eq(0)
+
+
 class Macc4Run1(Xetter):
     """Sequences a Madd4 to accumulate 1 input channel's worth of data.
 
@@ -82,8 +115,11 @@ class Macc4Run1(Xetter):
         Notification that madd4 inputs have been read.
     madd4_inputs_ready: Signal() input
         Whether or not inputs for the madd4 are ready.
-    madd4_result: Signal(signed(32)) input
-        Result of the Madd4Pipeline
+
+    acc_add_en: Signal() output
+        Add to accumulator
+    acc_clear: Signal() output
+        Clear accumulator
 
     pp_start: Signal(1) output
         Notification that PP inputs have been read
@@ -162,7 +198,8 @@ class Macc4Run1(Xetter):
                     m.d.comb += [
                         self.pp_start.eq(1),
                         pp_seq.inp.eq(1),
-                        self.pp_accumulator.eq(accumulator + self.madd4_result),
+                        self.pp_accumulator.eq(
+                            accumulator + self.madd4_result),
                     ]
                     m.d.sync += [
                         accumulator.eq(0),

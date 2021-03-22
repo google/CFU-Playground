@@ -18,7 +18,37 @@ from nmigen.sim import Delay
 
 from nmigen_cfu import TestBase
 
-from .macc import Macc4Run1
+from .macc import Accumulator, Macc4Run1
+
+
+class AccumulatorTest(TestBase):
+    def create_dut(self):
+        return Accumulator()
+
+    def test(self):
+        DATA = [
+            ((1, 10, 0), 10),
+            ((0, 25, 0), 10),
+            ((1, 17, 0), 27),
+            ((1, -29, 0), -2),
+            ((1, 25, 1), 23),
+            ((0, 25, 0), 0),
+            ((1, 10, 0), 10),
+            ((0, 5, 1), 10),
+            ((0, 2, 0), 0),
+        ]
+
+        def process():
+            for n, (inputs, expected) in enumerate(DATA):
+                add_en, in_value, clear = inputs
+                yield self.dut.add_en.eq(add_en)
+                yield self.dut.in_value.eq(in_value)
+                yield self.dut.clear.eq(clear)
+                yield Delay(0.25)
+                if expected is not None:
+                    self.assertEqual((yield self.dut.result), expected, f"case={n}")
+                yield
+        self.run_sim(process, True)
 
 
 class Macc4Run1Test(TestBase):
