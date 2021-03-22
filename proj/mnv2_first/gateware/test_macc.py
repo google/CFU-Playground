@@ -16,51 +16,9 @@
 
 from nmigen.sim import Delay
 
-from nmigen_cfu import TestBase, pack_vals as PV
+from nmigen_cfu import TestBase
 
-from .macc import AccumulatorRegisterXetter, Macc4Run1
-
-
-class AccumulatorRegisterXetterTest(TestBase):
-    def create_dut(self):
-        return AccumulatorRegisterXetter()
-
-    def test_setget(self):
-        DATA = [
-            ((0, 0, 0, 0), (0, 0, 0)),
-
-            # Add a few things
-            ((0, 0, 1, 0), (0, 0, 0)),
-            ((0, 0, 0, 0), (0, 0, 0)),
-            ((0, 0, 1, 10), (0, 0, 0)),
-            ((0, 0, 1, 22), (0, 0, 10)),
-            ((0, 0, 0, 0), (0, 0, 32)),
-
-            # Read and set to 50
-            ((1, 50, 0, 0), (1, 32, 32)),
-            ((0, 0, 0, 0), (0, 0, 50)),
-
-            # Add a few more things
-            ((0, 0, 1, 3), (0, 0, 50)),
-            ((0, 0, 1, 7), (0, 0, 53)),
-            ((0, 0, 1, 1), (0, 0, 60)),
-            ((0, 0, 1, 5), (0, 0, 61)),
-        ]
-
-        def process():
-            for n, ((start, in0, add_en, add_data), (done, output, value)
-                    ) in enumerate(DATA):
-                yield self.dut.start.eq(start)
-                yield self.dut.in0.eq(in0)
-                yield self.dut.add_en.eq(add_en)
-                yield self.dut.add_data.eq(add_data)
-                yield Delay(0.25)
-                self.assertEqual((yield self.dut.done), done, f"cycle={n}")
-                if done:
-                    self.assertEqual((yield self.dut.output), output, f"cycle={n}")
-                self.assertEqual((yield self.dut.value), value, f"cycle={n}")
-                yield
-        self.run_sim(process, False)
+from .macc import Macc4Run1
 
 
 class Macc4Run1Test(TestBase):
@@ -70,42 +28,55 @@ class Macc4Run1Test(TestBase):
     def test(self):
         DATA = [
             # Allow time to prepare
-            ((0, 0, 0), (0, 0, 0)),
-            ((0, 0, 0), (0, 0, 0)),
+            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
+            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
             # Start, but not yet ready, then ready
-            ((1, 0, 0), (0, 0, 0)),
-            ((0, 0, 0), (0, 0, 0)),
-            ((0, 0, 0), (0, 0, 0)),
+            ((1, 0, 0, 0), (0, 0, 0, 0, 0)),
+            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
+            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
             # Ready, not ready, ready, ready, not ready, ready
-            ((0, 1, 0), (1, 0, 0)),
-            ((0, 0, 0), (0, 0, 0)),
-            ((0, 1, 3), (1, 0, 0)),
-            ((0, 0, 0), (0, 0, 0)),
-            ((0, 1, 2), (1, 0, 0)),
-            ((0, 1, 0), (1, 0, 0)),
-            ((0, 0, 5), (0, 0, 0)),
-            ((0, 0, 7), (0, 1, 17)),
+            ((0, 1, 0, 0), (1, 0, 0, 0, 0)),
+            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
+            ((0, 1, 3, 0), (1, 0, 0, 0, 0)),
+            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
+            ((0, 1, 2, 0), (1, 0, 0, 0, 0)),
+            ((0, 1, 0, 0), (1, 0, 0, 0, 0)),
+            ((0, 0, 5, 0), (0, 0, 0, 0, 0)),
+            ((0, 0, 7, 0), (0, 1, 17, 0, 0)),
+            # wait for post processor
+            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
+            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
+            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
+            ((0, 0, 0, 66), (0, 0, 0, 1, 66)),
             # Do one at full speed
-            ((1, 1, 0), (1, 0, 0)),
-            ((0, 1, 0), (1, 0, 0)),
-            ((0, 1, 1), (1, 0, 0)),
-            ((0, 1, 2), (1, 0, 0)),
-            ((0, 0, 3), (0, 0, 0)),
-            ((0, 0, -44), (0, 1, -38)),
+            ((1, 1, 0, 0), (1, 0, 0, 0, 0)),
+            ((0, 1, 0, 0), (1, 0, 0, 0, 0)),
+            ((0, 1, 1, 0), (1, 0, 0, 0, 0)),
+            ((0, 1, 2, 0), (1, 0, 0, 0, 0)),
+            ((0, 0, 3, 0), (0, 0, 0, 0, 0)),
+            ((0, 0, -44, 0), (0, 1, -38, 0, 0)),
+            # wait for post processor
+            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
+            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
+            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
+            ((0, 0, 0, 99), (0, 0, 0, 1, 99)),
         ]
 
         def process():
             yield self.dut.input_depth.eq(4)
             for n, (inputs, expected) in enumerate(DATA):
-                start, madd4_inputs_ready, madd4_result = inputs
+                start, madd4_inputs_ready, madd4_result, pp_result = inputs
                 yield self.dut.start.eq(start)
                 yield self.dut.madd4_inputs_ready.eq(madd4_inputs_ready)
                 yield self.dut.madd4_result.eq(madd4_result)
+                yield self.dut.pp_result.eq(pp_result)
                 yield Delay(0.25)
-                madd4_start, done, output= expected
+                madd4_start, pp_start, pp_accumulator, done, output = expected
+                self.assertEqual((yield self.dut.madd4_start), madd4_start, f"case={n}")
+                self.assertEqual((yield self.dut.pp_start), pp_start, f"case={n}")
+                self.assertEqual((yield self.dut.pp_accumulator), pp_accumulator, f"case={n}")
                 self.assertEqual((yield self.dut.done), done, f"case={n}")
                 if done:
                     self.assertEqual((yield self.dut.output.as_signed()), output, f"case={n}")
-                self.assertEqual((yield self.dut.madd4_start), madd4_start, f"case={n}")
                 yield
         self.run_sim(process, False)

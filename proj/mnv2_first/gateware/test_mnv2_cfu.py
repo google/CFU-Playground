@@ -108,17 +108,13 @@ class CfuTest(CfuTestBase):
     def test_macc_4_run_1(self):
         DATA = []
 
-        def set_input_depth(val):
-            return ((0, 10, val, 0), 0)
+        def set_reg(reg, val):
+            return ((0, reg, val, 0), 0)
 
-        def set_input_offset(val):
-            return ((0, 12, val, 0), 0)
-
-        def get_set_accum(new_val, old_val):
-            return ((0, 16, new_val, 0), old_val)
-
-        def set_output_batch_size(val):
-            return ((0, 20, val, 0), 0)
+        def set_out_channel_params(mult, shift, bias):
+            yield set_reg(21, mult)
+            yield set_reg(22, shift)
+            yield set_reg(23, bias)
 
         def set_filter_val(val):
             return ((0, 24, val, 0), 0)
@@ -131,16 +127,29 @@ class CfuTest(CfuTestBase):
 
         def make_op_stream():
             def nums(start, count): return range(start, start + count)
-            yield set_input_depth(8)
-            yield set_input_offset(128)
-            yield set_output_batch_size(16)
+            # Output offset 999,
+            yield set_reg(13, -128)
+            # Input depth 8, input offset 128, batch size 16
+            yield set_reg(10, 8)
+            yield set_reg(12, 128)
+            yield set_reg(20, 16)
+            # activation min max = -128, +127,
+            yield set_reg(14, -128)
+            yield set_reg(15, 127)
+
+            yield from set_out_channel_params(2000000, -5, 555000)
+            yield from set_out_channel_params(18000010, -3, 100000)
+
             for f_vals in zip(nums(2, 16), nums(3, 16),
                               nums(4, 16), nums(5, 16)):
                 yield set_filter_val(pack_vals(*f_vals))
             for i_vals in zip(nums(1, 8), nums(3, 8), nums(5, 8), nums(7, 8)):
                 yield set_input_val(pack_vals(*i_vals))
-            yield get_set_accum(0, 0)
-            yield macc_4_run_1(30600)
-            yield macc_4_run_1(65288)
+            # Accumulator = 30600
+            # -111 = (((30600 + 555000) * 2000000 / 2**31) / 2 ** 5) - 128
+            yield macc_4_run_1(-111)
+            # Accumulator = 65288
+            # 45 = (((65288 + 100000) * 18000010 / 2 **31) / 2 ** 3) - 128
+            yield macc_4_run_1(45)
 
         return self.run_ops(make_op_stream(), False)

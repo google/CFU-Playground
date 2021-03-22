@@ -16,10 +16,10 @@
 from nmigen.hdl.ast import Mux, Signal
 from nmigen_cfu import Cfu, DualPortMemory, is_pysim_run
 
-from .post_process import PostProcessXetter
+from .post_process import PostProcessor
 from .store import CircularIncrementer, FilterValueFetcher, InputStore, InputStoreSetter, NextWordGetter, StoreSetter
 from .registerfile import RegisterFileInstruction, RegisterSetter
-from .macc import AccumulatorRegisterXetter, Macc4Run1, Madd4Pipeline
+from .macc import Macc4Run1, Madd4Pipeline
 
 OUTPUT_CHANNEL_PARAM_DEPTH = 512
 FILTER_DATA_MEM_DEPTH = 512
@@ -145,13 +145,13 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         input_depth, set_id = self._make_setter(m, 10, 'set_input_depth')
         self._make_setter(m, 11, 'set_output_depth')
         input_offset, _ = self._make_setter(m, 12, 'set_input_offset')
-        offset, _ = self._make_setter(m, 13, 'set_output_offset')
+        output_offset, _ = self._make_setter(m, 13, 'set_output_offset')
         activation_min, _ = self._make_setter(m, 14, 'set_activation_min')
         activation_max, _ = self._make_setter(m, 15, 'set_activation_max')
 
         _, restart = self._make_setter(m, 20, 'set_output_batch_size')
         multiplier, multiplier_next = self._make_output_channel_param_store(
-            m, 21, 'store_output_mutiplier', restart)
+            m, 21, 'store_output_multiplier', restart)
         shift, shift_next = self._make_output_channel_param_store(
             m, 22, 'store_output_shift', restart)
         bias, bias_next = self._make_output_channel_param_store(
@@ -168,15 +168,24 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
             fvf.updated.eq(fv_updated),
             fvf.restart.eq(restart),
         ]
-        m.submodules['ppx'] = ppx = PostProcessXetter()
-        self.register_xetter(120, ppx)
-
         ins = self._make_input_store(m, 'ins', set_id, input_depth)
 
         # Make getters for filter and instuction next words
         # Only required during pysim unit tests
         fvg_next = self._make_filter_value_getter(m, fvf)
         insget_next = self._make_input_store_getter(m, ins)
+
+
+        m.submodules['pp'] = pp = PostProcessor()
+        m.d.comb += [
+            pp.offset.eq(output_offset),
+            pp.activation_min.eq(activation_min),
+            pp.activation_max.eq(activation_max),
+            pp.bias.eq(bias),
+            pp.multiplier.eq(multiplier),
+            pp.shift.eq(shift),
+        ]
+
 
         # MACC 4
         m.submodules['m4r1'] = m4r1 = Macc4Run1(FILTER_DATA_MEM_DEPTH * 4)
@@ -192,18 +201,12 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
             ins.r_next.eq(m4r1.madd4_start | insget_next),
             m4r1.madd4_inputs_ready.eq(ins.r_ready),
             m4r1.madd4_result.eq(madd4.result),
-        ]
-
-        m.d.comb += [
-            ppx.offset.eq(offset),
-            ppx.activation_min.eq(activation_min),
-            ppx.activation_max.eq(activation_max),
-            ppx.bias.eq(bias),
-            bias_next.eq(ppx.bias_next),
-            ppx.multiplier.eq(multiplier),
-            multiplier_next.eq(ppx.multiplier_next),
-            ppx.shift.eq(shift),
-            shift_next.eq(ppx.shift_next),
+            
+            pp.accumulator.eq(m4r1.pp_accumulator),
+            m4r1.pp_result.eq(pp.result),
+            bias_next.eq(m4r1.pp_start),
+            multiplier_next.eq(m4r1.pp_start),
+            shift_next.eq(m4r1.pp_start),
         ]
 
 

@@ -17,6 +17,7 @@ from nmigen import Signal, signed
 
 from nmigen_cfu import all_words, Sequencer, SimpleElaboratable, tree_sum
 
+from .post_process import PostProcessor
 from .registerfile import Xetter
 
 
@@ -64,39 +65,6 @@ class Madd4Pipeline(SimpleElaboratable):
         m.d.sync += self.result.eq(tree_sum(products))
 
 
-
-class AccumulatorRegisterXetter(Xetter):
-    """An accumulator which can also be get and set.
-
-    Sets new value from in0. Return previous value on set.
-
-
-    Public Interface
-    ----------------
-    value: Signal(signed(32)) output
-        The value held by this register. It will be set from in0 (on self.start)
-        or added to from add_data (on self.add_en)
-    add_en: Signal input
-        This signal is pulsed high to add to the accumulator.
-    add_data: Signal(signed(32)) input
-        The value to add to the accumulator
-    """
-
-    def __init__(self):
-        super().__init__()
-        self.value = Signal(signed(32))
-        self.add_en = Signal()
-        self.add_data = Signal(signed(32))
-
-    def elab(self, m):
-        with m.If(self.start):
-            m.d.sync += self.value.eq(self.in0),
-            m.d.comb += self.output.eq(self.value)
-            m.d.comb += self.done.eq(1)
-        with m.Elif(self.add_en):
-            m.d.sync += self.value.eq(self.value + self.add_data),
-
-
 class Macc4Run1(Xetter):
     """Sequences a Madd4 to accumulate 1 input channel's worth of data.
 
@@ -109,13 +77,20 @@ class Macc4Run1(Xetter):
     ----------------
     input_depth: Signal(range(max_input_depth)) input
         Number of words in input
-    
+
     madd4_start: Signal(1) output
         Notification that madd4 inputs have been read.
     madd4_inputs_ready: Signal() input
         Whether or not inputs for the madd4 are ready.
     madd4_result: Signal(signed(32)) input
         Result of the Madd4Pipeline
+
+    pp_start: Signal(1) output
+        Notification that PP inputs have been read
+    pp_accumulator: Signal(signed(32)) output
+        Input to post processor. i.e the accumulated value.
+    pp_result: Signal(signed(32))
+        The post processed accumulator value - result of the post processor.
     """
 
     def __init__(self, max_input_depth):
@@ -125,10 +100,15 @@ class Macc4Run1(Xetter):
         self.madd4_start = Signal()
         self.madd4_inputs_ready = Signal()
         self.madd4_result = Signal(signed(32))
+        self.pp_start = Signal()
+        self.pp_accumulator = Signal(signed(32))
+        self.pp_result = Signal(signed(32))
 
     def elab(self, m):
         m.submodules['madd_seq'] = madd4_seq = Sequencer(
             Madd4Pipeline.PIPELINE_CYCLES)
+        m.submodules['pp_seq'] = pp_seq = Sequencer(
+            PostProcessor.PIPELINE_CYCLES)
 
         started_madd4s = Signal(10)
         starting_last = Signal()
@@ -175,17 +155,25 @@ class Macc4Run1(Xetter):
                 start_madd4()
                 retire_madd4()
                 with m.If(starting_last):
-                    m.next = "FINISH"
-            with m.State("FINISH"):
+                    m.next = "WAIT_ACCUMULATE"
+            with m.State("WAIT_ACCUMULATE"):
                 retire_madd4()
                 with m.If(retiring_last):
                     m.d.comb += [
-                        self.done.eq(1),
-                        self.output.eq(accumulator + self.madd4_result),
+                        self.pp_start.eq(1),
+                        pp_seq.inp.eq(1),
+                        self.pp_accumulator.eq(accumulator + self.madd4_result),
                     ]
                     m.d.sync += [
                         accumulator.eq(0),
                         started_madd4s.eq(0),
                         retired_madd4s.eq(0),
+                    ]
+                    m.next = "WAIT_POST_PROCESS"
+            with m.State("WAIT_POST_PROCESS"):
+                with m.If(pp_seq.sequence[-1]):
+                    m.d.comb += [
+                        self.done.eq(1),
+                        self.output.eq(self.pp_result),
                     ]
                     m.next = "READY"
