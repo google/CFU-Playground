@@ -37,7 +37,8 @@ namespace reference_integer_ops {
 
 static void LoadOutputChannelWeights(const int32_t*& output_multiplier,
                                      const int32_t*& output_shift,
-                                     const int32_t*& bias_data, int batch_size) {
+                                     const int32_t*& bias_data,
+                                     int batch_size) {
   PERF_START(3);
   CFU_SET_OUTPUT_BATCH_SIZE(batch_size);
   for (int i = 0; i < batch_size; i += 4) {
@@ -116,9 +117,6 @@ void Mnv2ConvPerChannel1x1(
   CFU_SET_ACTIVATION_MIN(output_activation_min);
   CFU_SET_ACTIVATION_MAX(output_activation_max);
 
-  // Ensure accumulator clear before starting
-  CFU_GET_SET_ACCUMULATOR(0);
-
   // Access filter data as words
   uint32_t* filter_words = (uint32_t*)filter_data;
 
@@ -167,8 +165,7 @@ void Mnv2ConvPerChannel1x1(
 
       for (int out_channel = batch_base; out_channel < batch_end;
            ++out_channel) {
-        CFU_MACC4_RUN_1();
-        int32_t acc = CFU_GET_SET_ACCUMULATOR(0);
+        int32_t acc = CFU_MACC4_RUN_1();
         int32_t out = CFU_POST_PROCESS(acc);
         *(output_ptr++) = static_cast<int8_t>(out);
       }

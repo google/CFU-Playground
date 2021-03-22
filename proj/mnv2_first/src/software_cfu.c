@@ -28,7 +28,6 @@ static int32_t reg_input_offset;
 static int32_t reg_output_offset;
 static int32_t reg_activation_min;
 static int32_t reg_activation_max;
-static int32_t reg_accumulator;
 
 #define MAX_OUTPUT_DEPTH 512
 struct ParamStore {
@@ -234,15 +233,16 @@ static int32_t macc4(uint32_t input_vals, uint32_t filter_vals) {
 }
 
 static int32_t macc4_run1(struct InputStore* is, struct FilterStore* fs) {
+  int32_t accumulator = 0;
   for (uint32_t i = 0; i < is->input_depth; i++) {
-    reg_accumulator +=
+    accumulator +=
         macc4(input_store_read(&input_store), filter_store_read(&filter_store));
   }
+  return accumulator;
 }
 
 // Set register instruction
 static uint32_t set_reg(int funct7, uint32_t in0, uint32_t in1) {
-  int32_t result;
   switch (funct7) {
     case 10:
       input_store_restart(&input_store);
@@ -263,10 +263,7 @@ static uint32_t set_reg(int funct7, uint32_t in0, uint32_t in1) {
     case 15:
       reg_activation_max = in0;
       break;
-    case 16:
-      result = reg_accumulator;
-      reg_accumulator = in0;
-      return result;
+
     case 20:
       // set size of output channel batch, resetting param stores
       reg_output_batch_size = in0;
