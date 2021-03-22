@@ -16,7 +16,7 @@
 from nmigen import Array, Signal, Mux, Cat
 
 from nmigen_cfu import SimpleElaboratable, is_pysim_run
-from util import DualPortMemory, SequentialMemoryReader, increment_to_limit
+from util import DualPortMemory, SequentialMemoryReader
 
 from .registerfile import Xetter
 
@@ -277,7 +277,7 @@ class InputStore(SimpleElaboratable):
     ----------------
     restart: Signal() input
         Resets component to known state to begin processing.
-    input_depth: Signal(8) input
+    input_depth: Signal(range(max_depth * 4 // 2)) input
         Number of words per input pixel
 
     w_data: Signal(32) input

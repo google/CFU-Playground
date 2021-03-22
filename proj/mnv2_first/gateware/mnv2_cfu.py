@@ -114,7 +114,7 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         """Constructs and registers an implicit macc4 instruction
 
         """
-        xetter = Macc4Run1()
+        xetter = Macc4Run1(FILTER_DATA_MEM_DEPTH * 4)
         m.d.comb += [
             xetter.input_offset.eq(input_offset),
             xetter.input_depth.eq(input_depth),
@@ -124,7 +124,7 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         return xetter
 
     def _make_filter_value_getter(self, m, fvf):
-        fvg_next= Signal()
+        fvg_next = Signal()
         if is_pysim_run():
             m.submodules['fvg'] = fvg = NextWordGetter()
             m.d.comb += [
@@ -211,7 +211,6 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
             ppx.shift.eq(shift),
             shift_next.eq(ppx.shift_next),
         ]
-
 
 
 class Mnv2Cfu(Cfu):
