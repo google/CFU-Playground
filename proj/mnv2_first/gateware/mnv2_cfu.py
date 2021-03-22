@@ -16,10 +16,10 @@
 from nmigen.hdl.ast import Mux, Signal
 from nmigen_cfu import Cfu, DualPortMemory, is_pysim_run
 
-from .post_process import PostProcessXetter
+from .post_process import PostProcessor
 from .store import CircularIncrementer, FilterValueFetcher, InputStore, InputStoreSetter, NextWordGetter, StoreSetter
 from .registerfile import RegisterFileInstruction, RegisterSetter
-from .macc import AccumulatorRegisterXetter, ExplicitMacc4, ImplicitMacc4, Macc4Run1
+from .macc import Accumulator, Macc4Run1, Madd4Pipeline
 
 OUTPUT_CHANNEL_PARAM_DEPTH = 512
 FILTER_DATA_MEM_DEPTH = 512
@@ -37,16 +37,6 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         m.submodules[name] = setter
         self.register_xetter(reg_num, setter)
         return setter.value, setter.set
-
-    def _make_accumulator(self, m, reg_num, name):
-        """Constructs and registers a simple RegisterSetter.
-
-        Return a pair of signals from setter: (value, set)
-        """
-        xetter = AccumulatorRegisterXetter()
-        m.submodules[name] = xetter
-        self.register_xetter(reg_num, xetter)
-        return xetter.add_en, xetter.add_data
 
     def _make_output_channel_param_store(
             self, m, reg_num, name, restart_signal):
@@ -114,13 +104,15 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         """Constructs and registers an implicit macc4 instruction
 
         """
-        xetter = Macc4Run1(FILTER_DATA_MEM_DEPTH * 4)
+    
+        m.submodules[name] = xetter = Macc4Run1(FILTER_DATA_MEM_DEPTH * 4)
+        self.register_xetter(reg_num, xetter)
+        m.submodules[f"{name}_madd4"] = madd4 = Madd4Pipeline()
+
         m.d.comb += [
             xetter.input_offset.eq(input_offset),
             xetter.input_depth.eq(input_depth),
         ]
-        m.submodules[name] = xetter
-        self.register_xetter(reg_num, xetter)
         return xetter
 
     def _make_filter_value_getter(self, m, fvf):
@@ -153,14 +145,13 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         input_depth, set_id = self._make_setter(m, 10, 'set_input_depth')
         self._make_setter(m, 11, 'set_output_depth')
         input_offset, _ = self._make_setter(m, 12, 'set_input_offset')
-        offset, _ = self._make_setter(m, 13, 'set_output_offset')
+        output_offset, _ = self._make_setter(m, 13, 'set_output_offset')
         activation_min, _ = self._make_setter(m, 14, 'set_activation_min')
         activation_max, _ = self._make_setter(m, 15, 'set_activation_max')
-        add_en, add_data = self._make_accumulator(m, 16, 'accumulator')
 
         _, restart = self._make_setter(m, 20, 'set_output_batch_size')
         multiplier, multiplier_next = self._make_output_channel_param_store(
-            m, 21, 'store_output_mutiplier', restart)
+            m, 21, 'store_output_multiplier', restart)
         shift, shift_next = self._make_output_channel_param_store(
             m, 22, 'store_output_shift', restart)
         bias, bias_next = self._make_output_channel_param_store(
@@ -177,9 +168,6 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
             fvf.updated.eq(fv_updated),
             fvf.restart.eq(restart),
         ]
-        m.submodules['ppx'] = ppx = PostProcessXetter()
-        self.register_xetter(120, ppx)
-
         ins = self._make_input_store(m, 'ins', set_id, input_depth)
 
         # Make getters for filter and instuction next words
@@ -187,29 +175,45 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         fvg_next = self._make_filter_value_getter(m, fvf)
         insget_next = self._make_input_store_getter(m, ins)
 
-        # MACC 4
-        m4r1 = self._make_macc_4_run_1(
-            m, 32, 'm4r1', input_offset, input_depth)
+        # MACC 4, with Madd, Accumulator and post processor
+        m.submodules['m4r1'] = m4r1 = Macc4Run1(FILTER_DATA_MEM_DEPTH * 4)
+        self.register_xetter(32, m4r1)
         m.d.comb += [
-            m4r1.f_data.eq(fvf.data),
-            fvf.next.eq(m4r1.f_next | fvg_next),
-            m4r1.i_data.eq(ins.r_data),
-            m4r1.i_ready.eq(ins.r_ready),
-            ins.r_next.eq(m4r1.i_next | insget_next),
-            add_en.eq(m4r1.add_en),
-            add_data.eq(m4r1.add_data),
+            m4r1.input_depth.eq(input_depth),
+            m4r1.madd4_inputs_ready.eq(ins.r_ready),
+            fvf.next.eq(m4r1.madd4_start | fvg_next),
+            ins.r_next.eq(m4r1.madd4_start | insget_next),
         ]
 
+        m.submodules['madd4'] = madd4 = Madd4Pipeline()
         m.d.comb += [
-            ppx.offset.eq(offset),
-            ppx.activation_min.eq(activation_min),
-            ppx.activation_max.eq(activation_max),
-            ppx.bias.eq(bias),
-            bias_next.eq(ppx.bias_next),
-            ppx.multiplier.eq(multiplier),
-            multiplier_next.eq(ppx.multiplier_next),
-            ppx.shift.eq(shift),
-            shift_next.eq(ppx.shift_next),
+            madd4.offset.eq(input_offset),
+            madd4.f_data.eq(fvf.data),
+            madd4.i_data.eq(ins.r_data),
+        ]
+
+        m.submodules['acc'] = acc = Accumulator()
+        m.d.comb += [
+            acc.add_en.eq(m4r1.acc_add_en),
+            acc.in_value.eq(madd4.result),
+            acc.clear.eq(m4r1.pp_start),
+        ]
+
+        m.submodules['pp'] = pp = PostProcessor()
+        m.d.comb += [
+            pp.offset.eq(output_offset),
+            pp.activation_min.eq(activation_min),
+            pp.activation_max.eq(activation_max),
+            pp.bias.eq(bias),
+            pp.multiplier.eq(multiplier),
+            pp.shift.eq(shift),
+            pp.accumulator.eq(acc.result),
+
+            bias_next.eq(m4r1.pp_start),
+            multiplier_next.eq(m4r1.pp_start),
+            shift_next.eq(m4r1.pp_start),
+            
+            m4r1.pp_result.eq(pp.result),
         ]
 
 

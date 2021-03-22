@@ -36,9 +36,6 @@ extern "C" {
 #define CFU_SET_ACTIVATION_MIN(in0) CFU_SET(14, in0)
 #define CFU_SET_ACTIVATION_MAX(in0) CFU_SET(15, in0)
 
-// Sets in0 into the accumulator, returns the old value
-#define CFU_GET_SET_ACCUMULATOR(in0) CFU_SET(16, in0)
-
 // Number of words in the output batch
 #define CFU_SET_OUTPUT_BATCH_SIZE(in0) CFU_SET(20, in0)
 #define CFU_STORE_OUTPUT_MULTIPLIER(in0) CFU_SET(21, in0)
@@ -52,8 +49,6 @@ extern "C" {
 
 // Supports incremental development
 #define CFU_MARK_INPUT_READ_FINISHED() CFU_GET(112)
-
-#define CFU_POST_PROCESS(in0) CFU_SET(120, in0)
 
 #define EBRAM_DEPTH_BITS (16 * 1024)
 #define EBRAM_DEPTH_BYTES (EBRAM_DEPTH_BITS / 8)
