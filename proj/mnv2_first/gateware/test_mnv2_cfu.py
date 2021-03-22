@@ -152,4 +152,4 @@ class CfuTest(CfuTestBase):
             # 45 = (((65288 + 100000) * 18000010 / 2 **31) / 2 ** 3) - 128
             yield macc_4_run_1(45)
 
-        return self.run_ops(make_op_stream(), True)
+        return self.run_ops(make_op_stream(), False)

@@ -131,79 +131,48 @@ class Macc4Run1(Xetter):
         self.input_depth = Signal(range(max_input_depth))
         self.madd4_start = Signal()
         self.madd4_inputs_ready = Signal()
-
         self.acc_add_en = Signal()
-
         self.pp_start = Signal()
         self.pp_result = Signal(signed(32))
 
     def elab(self, m):
         m.submodules['madd_seq'] = madd4_seq = Sequencer(
             Madd4Pipeline.PIPELINE_CYCLES)
+        m.submodules['last_madd_seq'] = last_madd4_seq = Sequencer(
+            Madd4Pipeline.PIPELINE_CYCLES)
         m.submodules['pp_seq'] = pp_seq = Sequencer(
             PostProcessor.PIPELINE_CYCLES)
 
-        started_madd4s = Signal(10)
-        starting_last = Signal()
-        retired_madd4s = Signal(10)
-        retiring_last = Signal()
-        input_depth_minus_1 = Signal.like(self.input_depth)
-        m.d.sync += input_depth_minus_1.eq(self.input_depth - 1)
-        m.d.comb += [
-            starting_last.eq(started_madd4s == input_depth_minus_1),
-            retiring_last.eq(retired_madd4s == input_depth_minus_1),
-        ]
+        def schedule_madd4():
+            m.d.comb += [
+                madd4_seq.inp.eq(1),
+                self.madd4_start.eq(1),
+            ]
 
-        # Puts 1 word of data into the pipeline, if it's ready
-        def start_madd4():
+        outstanding_madd4s = Signal(10)
+        with m.If(self.start):
+            # Start doing Madds
             with m.If(self.madd4_inputs_ready):
-                m.d.sync += started_madd4s.eq(started_madd4s + 1)
-                m.d.comb += [
-                    madd4_seq.inp.eq(1),
-                    self.madd4_start.eq(1),
-                ]
+                schedule_madd4()
+                m.d.sync += outstanding_madd4s.eq(self.input_depth - 1)
+            with m.Else():
+                m.d.sync += outstanding_madd4s.eq(self.input_depth)
+        with m.Elif((outstanding_madd4s != 0) & self.madd4_inputs_ready):
+            schedule_madd4()
+            # Track outstanding and trigger "last" on last
+            m.d.sync += outstanding_madd4s.eq(outstanding_madd4s - 1)
+            with m.If(outstanding_madd4s == 1):
+                m.d.comb += last_madd4_seq.inp.eq(1)
 
-        def retire_madd4():
-            with m.If(madd4_seq.sequence[-1]):
-                m.d.sync += [
-                    retired_madd4s.eq(retired_madd4s + 1),
-                ]
-                m.d.comb += [
-                    self.acc_add_en.eq(1),
-                ]
+        # Tell accumulator to add as each madd is finished
+        m.d.comb += self.acc_add_en.eq(madd4_seq.sequence[-1])
 
-        with m.FSM():
-            with m.State("PREPARE"):
-                m.d.sync += [
-                    started_madd4s.eq(0),
-                    retired_madd4s.eq(0),
-                ]
-                m.next = "READY"
-            with m.State("READY"):
-                with m.If(self.start):
-                    start_madd4()
-                    m.next = "RUN"
-            with m.State("RUN"):
-                start_madd4()
-                retire_madd4()
-                with m.If(starting_last):
-                    m.next = "WAIT_ACCUMULATE"
-            with m.State("WAIT_ACCUMULATE"):
-                retire_madd4()
-                with m.If(retiring_last):
-                    m.d.comb += [
-                        self.pp_start.eq(1),
-                        pp_seq.inp.eq(1),
-                    ]
-                    m.d.sync += [
-                        started_madd4s.eq(0),
-                        retired_madd4s.eq(0),
-                    ]
-                    m.next = "WAIT_POST_PROCESS"
-            with m.State("WAIT_POST_PROCESS"):
-                with m.If(pp_seq.sequence[-1]):
-                    m.d.comb += [
-                        self.done.eq(1),
-                        self.output.eq(self.pp_result),
-                    ]
-                    m.next = "READY"
+        # Tell Post processor to start on last Madd finish
+        m.d.comb += self.pp_start.eq(last_madd4_seq.sequence[-1])
+        m.d.comb += pp_seq.inp.eq(last_madd4_seq.sequence[-1])
+
+        # On post processor finished, take result and declare done
+        m.d.comb += [
+            self.output.eq(self.pp_result),
+            self.done.eq(pp_seq.sequence[-1]),
+        ]
