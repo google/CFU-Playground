@@ -27,7 +27,7 @@ import unittest
 _IS_SIM_RUN = False
 
 
-def is_sim_run():
+def is_pysim_run():
     return _IS_SIM_RUN
 
 

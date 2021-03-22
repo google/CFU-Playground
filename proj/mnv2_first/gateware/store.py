@@ -15,7 +15,7 @@
 
 from nmigen import Array, Signal, Mux, Cat
 
-from nmigen_cfu import SimpleElaboratable, is_sim_run
+from nmigen_cfu import SimpleElaboratable, is_pysim_run
 from util import DualPortMemory, SequentialMemoryReader, increment_to_limit
 
 from .registerfile import Xetter
@@ -412,7 +412,7 @@ class InputStore(SimpleElaboratable):
             DualPortMemory(
                 depth=self.max_depth,
                 width=32,
-                is_sim=is_sim_run()) for _ in range(4)]
+                is_sim=is_pysim_run()) for _ in range(4)]
         for n, dp in enumerate(dps):
             m.submodules[f"dp_{n}"] = dp
 
