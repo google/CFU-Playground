@@ -65,51 +65,45 @@ class AccumulatorRegisterXetterTest(TestBase):
 
 class Macc4Run1Test(TestBase):
     def create_dut(self):
-        return Macc4Run1()
+        return Macc4Run1(512)
 
     def test(self):
         DATA = [
             # Allow time to prepare
-            ((0, 0, 0, 0), (0, 0, 0, 0)),
-            ((0, 0, 0, 0), (0, 0, 0, 0)),
+            ((0, 0), (0, 0, 0)),
+            ((0, 0), (0, 0, 0)),
             # Start, but not yet ready, then ready
-            ((1, PV(1, 3, 5, 0, offset=128), PV(2, 4, 6, 8), 0), (0, 0, 0, 0)),
-            ((1, PV(1, 3, 5, 0, offset=128), PV(2, 4, 6, 8), 0), (0, 0, 0, 0)),
-            # Now ready
-            ((0, PV(1, 3, 5, 7, offset=128), PV(2, 4, 6, 8), 1), (0, 0, 0, 1)),
-            ((0, PV(22, 132, 51, 71, offset=128), PV(99, 98, 1, -1), 1), (0, 0, 0, 1)),
-            ((0, 0, 0, 0), (0, 1, 100, 0)),
-            ((0, PV(0, 0, 0, 1, offset=128), PV(0, 0, 0, 1), 1), (0, 1, 15094, 1)),
-            ((0, 0, 0, 0), (0, 0, 0, 0)),
-            ((0, PV(255, 255, 255, 255, offset=128), PV(
-                127, 127, 127, 127), 1), (0, 1, 1, 1)),
-            ((0, 0, 0, 0), (0, 0, 0, 0)),
-            ((0, 0, 0, 0), (1, 1, 129540, 0)),
-            # Now do one quickly
-            ((1, PV(1, 3, 5, 7, offset=128), PV(2, 4, 6, 8), 1), (0, 0, 0, 1)),
-            ((1, PV(1, 3, 5, 7, offset=128), PV(12, 4, 6, 8), 1), (0, 0, 0, 1)),
-            ((1, PV(1, 3, 5, 7, offset=128), PV(22, 4, 6, 8), 1), (0, 1, 100, 1)),
-            ((1, PV(1, 3, 5, 7, offset=128), PV(32, 4, 6, 8), 1), (0, 1, 110, 1)),
-            ((0, 0, 0, 0), (0, 1, 120, 0)),
-            ((0, 0, 0, 0), (1, 1, 130, 0)),
+            ((1, 0), (0, 0, 0)),
+            ((0, 0), (0, 0, 0)),
+            ((0, 0), (0, 0, 0)),
+            # Ready, not ready, ready, ready, not ready, ready
+            ((0, 1), (0, 1, 0)),
+            ((0, 0), (0, 0, 0)),
+            ((0, 1), (0, 1, 1)),
+            ((0, 0), (0, 0, 0)),
+            ((0, 1), (0, 1, 1)),
+            ((0, 1), (0, 1, 0)),
+            ((0, 0), (0, 0, 1)),
+            ((0, 0), (1, 0, 1)),
+            # Now do one at full speed
+            ((1, 1), (0, 1, 0)),
+            ((0, 1), (0, 1, 0)),
+            ((0, 1), (0, 1, 1)),
+            ((0, 1), (0, 1, 1)),
+            ((0, 0), (0, 0, 1)),
+            ((0, 0), (1, 0, 1)),
         ]
 
         def process():
-            yield self.dut.input_offset.eq(128)
             yield self.dut.input_depth.eq(4)
             for n, (inputs, expected) in enumerate(DATA):
-                start, i_data, f_data, i_ready = inputs
+                start, madd4_inputs_ready = inputs
                 yield self.dut.start.eq(start)
-                yield self.dut.i_data.eq(i_data)
-                yield self.dut.f_data.eq(f_data)
-                yield self.dut.i_ready.eq(i_ready)
+                yield self.dut.madd4_inputs_ready.eq(madd4_inputs_ready)
                 yield Delay(0.25)
-                done, add_en, add_data, next = expected
+                done, madd4_start, add_en = expected
                 self.assertEqual((yield self.dut.done), done, f"case={n}")
+                self.assertEqual((yield self.dut.madd4_start), madd4_start, f"case={n}")
                 self.assertEqual((yield self.dut.add_en), add_en, f"case={n}")
-                if add_en:
-                    self.assertEqual((yield self.dut.add_data), add_data, f"case={n}")
-                self.assertEqual((yield self.dut.f_next), next, f"case={n}")
-                self.assertEqual((yield self.dut.i_next), next, f"case={n}")
                 yield
         self.run_sim(process, False)

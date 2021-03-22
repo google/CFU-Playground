@@ -114,13 +114,15 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         """Constructs and registers an implicit macc4 instruction
 
         """
-        xetter = Macc4Run1(FILTER_DATA_MEM_DEPTH * 4)
+    
+        m.submodules[name] = xetter = Macc4Run1(FILTER_DATA_MEM_DEPTH * 4)
+        self.register_xetter(reg_num, xetter)
+        m.submodules[f"{name}_madd4"] = madd4 = Madd4Pipeline()
+
         m.d.comb += [
             xetter.input_offset.eq(input_offset),
             xetter.input_depth.eq(input_depth),
         ]
-        m.submodules[name] = xetter
-        self.register_xetter(reg_num, xetter)
         return xetter
 
     def _make_filter_value_getter(self, m, fvf):
@@ -188,16 +190,20 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         insget_next = self._make_input_store_getter(m, ins)
 
         # MACC 4
-        m4r1 = self._make_macc_4_run_1(
-            m, 32, 'm4r1', input_offset, input_depth)
+        m.submodules['m4r1'] = m4r1 = Macc4Run1(FILTER_DATA_MEM_DEPTH * 4)
+        self.register_xetter(32, m4r1)
+        m.submodules['m4r1_madd4'] = madd4 = Madd4Pipeline()
+        
         m.d.comb += [
-            m4r1.f_data.eq(fvf.data),
-            fvf.next.eq(m4r1.f_next | fvg_next),
-            m4r1.i_data.eq(ins.r_data),
-            m4r1.i_ready.eq(ins.r_ready),
-            ins.r_next.eq(m4r1.i_next | insget_next),
+            m4r1.input_depth.eq(input_depth),
+            madd4.offset.eq(input_offset),
+            madd4.f_data.eq(fvf.data),
+            madd4.i_data.eq(ins.r_data),
+            fvf.next.eq(m4r1.madd4_start | fvg_next),
+            ins.r_next.eq(m4r1.madd4_start | insget_next),
+            m4r1.madd4_inputs_ready.eq(ins.r_ready),
             add_en.eq(m4r1.add_en),
-            add_data.eq(m4r1.add_data),
+            add_data.eq(madd4.result),
         ]
 
         m.d.comb += [
