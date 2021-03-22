@@ -117,15 +117,11 @@ class Macc4Run1(Xetter):
         Whether or not inputs for the madd4 are ready.
 
     acc_add_en: Signal() output
-        Add to accumulator
-    acc_clear: Signal() output
-        Clear accumulator
+        Add to accumulator (when Madd is complete)
 
     pp_start: Signal(1) output
         Notification that PP inputs have been read
-    pp_accumulator: Signal(signed(32)) output
-        Input to post processor. i.e the accumulated value.
-    pp_result: Signal(signed(32))
+    pp_result: Signal(signed(32)) input
         The post processed accumulator value - result of the post processor.
     """
 
@@ -135,9 +131,10 @@ class Macc4Run1(Xetter):
         self.input_depth = Signal(range(max_input_depth))
         self.madd4_start = Signal()
         self.madd4_inputs_ready = Signal()
-        self.madd4_result = Signal(signed(32))
+
+        self.acc_add_en = Signal()
+
         self.pp_start = Signal()
-        self.pp_accumulator = Signal(signed(32))
         self.pp_result = Signal(signed(32))
 
     def elab(self, m):
@@ -150,10 +147,12 @@ class Macc4Run1(Xetter):
         starting_last = Signal()
         retired_madd4s = Signal(10)
         retiring_last = Signal()
-        accumulator = Signal(signed(32))
-
         input_depth_minus_1 = Signal.like(self.input_depth)
         m.d.sync += input_depth_minus_1.eq(self.input_depth - 1)
+        m.d.comb += [
+            starting_last.eq(started_madd4s == input_depth_minus_1),
+            retiring_last.eq(retired_madd4s == input_depth_minus_1),
+        ]
 
         # Puts 1 word of data into the pipeline, if it's ready
         def start_madd4():
@@ -162,23 +161,20 @@ class Macc4Run1(Xetter):
                 m.d.comb += [
                     madd4_seq.inp.eq(1),
                     self.madd4_start.eq(1),
-                    starting_last.eq(started_madd4s == input_depth_minus_1)
                 ]
 
         def retire_madd4():
             with m.If(madd4_seq.sequence[-1]):
                 m.d.sync += [
                     retired_madd4s.eq(retired_madd4s + 1),
-                    accumulator.eq(accumulator + self.madd4_result),
                 ]
                 m.d.comb += [
-                    retiring_last.eq(retired_madd4s == input_depth_minus_1)
+                    self.acc_add_en.eq(1),
                 ]
 
         with m.FSM():
             with m.State("PREPARE"):
                 m.d.sync += [
-                    accumulator.eq(0),
                     started_madd4s.eq(0),
                     retired_madd4s.eq(0),
                 ]
@@ -198,11 +194,8 @@ class Macc4Run1(Xetter):
                     m.d.comb += [
                         self.pp_start.eq(1),
                         pp_seq.inp.eq(1),
-                        self.pp_accumulator.eq(
-                            accumulator + self.madd4_result),
                     ]
                     m.d.sync += [
-                        accumulator.eq(0),
                         started_madd4s.eq(0),
                         retired_madd4s.eq(0),
                     ]

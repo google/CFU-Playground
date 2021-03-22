@@ -19,7 +19,7 @@ from nmigen_cfu import Cfu, DualPortMemory, is_pysim_run
 from .post_process import PostProcessor
 from .store import CircularIncrementer, FilterValueFetcher, InputStore, InputStoreSetter, NextWordGetter, StoreSetter
 from .registerfile import RegisterFileInstruction, RegisterSetter
-from .macc import Macc4Run1, Madd4Pipeline
+from .macc import Accumulator, Macc4Run1, Madd4Pipeline
 
 OUTPUT_CHANNEL_PARAM_DEPTH = 512
 FILTER_DATA_MEM_DEPTH = 512
@@ -175,6 +175,29 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         fvg_next = self._make_filter_value_getter(m, fvf)
         insget_next = self._make_input_store_getter(m, ins)
 
+        # MACC 4, with Madd, Accumulator and post processor
+        m.submodules['m4r1'] = m4r1 = Macc4Run1(FILTER_DATA_MEM_DEPTH * 4)
+        self.register_xetter(32, m4r1)
+        m.d.comb += [
+            m4r1.input_depth.eq(input_depth),
+            m4r1.madd4_inputs_ready.eq(ins.r_ready),
+            fvf.next.eq(m4r1.madd4_start | fvg_next),
+            ins.r_next.eq(m4r1.madd4_start | insget_next),
+        ]
+
+        m.submodules['madd4'] = madd4 = Madd4Pipeline()
+        m.d.comb += [
+            madd4.offset.eq(input_offset),
+            madd4.f_data.eq(fvf.data),
+            madd4.i_data.eq(ins.r_data),
+        ]
+
+        m.submodules['acc'] = acc = Accumulator()
+        m.d.comb += [
+            acc.add_en.eq(m4r1.acc_add_en),
+            acc.in_value.eq(madd4.result),
+            acc.clear.eq(m4r1.pp_start),
+        ]
 
         m.submodules['pp'] = pp = PostProcessor()
         m.d.comb += [
@@ -184,29 +207,13 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
             pp.bias.eq(bias),
             pp.multiplier.eq(multiplier),
             pp.shift.eq(shift),
-        ]
+            pp.accumulator.eq(acc.result),
 
-
-        # MACC 4
-        m.submodules['m4r1'] = m4r1 = Macc4Run1(FILTER_DATA_MEM_DEPTH * 4)
-        self.register_xetter(32, m4r1)
-        m.submodules['m4r1_madd4'] = madd4 = Madd4Pipeline()
-        
-        m.d.comb += [
-            m4r1.input_depth.eq(input_depth),
-            madd4.offset.eq(input_offset),
-            madd4.f_data.eq(fvf.data),
-            madd4.i_data.eq(ins.r_data),
-            fvf.next.eq(m4r1.madd4_start | fvg_next),
-            ins.r_next.eq(m4r1.madd4_start | insget_next),
-            m4r1.madd4_inputs_ready.eq(ins.r_ready),
-            m4r1.madd4_result.eq(madd4.result),
-            
-            pp.accumulator.eq(m4r1.pp_accumulator),
-            m4r1.pp_result.eq(pp.result),
             bias_next.eq(m4r1.pp_start),
             multiplier_next.eq(m4r1.pp_start),
             shift_next.eq(m4r1.pp_start),
+            
+            m4r1.pp_result.eq(pp.result),
         ]
 
 

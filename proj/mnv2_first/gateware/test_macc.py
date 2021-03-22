@@ -48,7 +48,7 @@ class AccumulatorTest(TestBase):
                 if expected is not None:
                     self.assertEqual((yield self.dut.result), expected, f"case={n}")
                 yield
-        self.run_sim(process, True)
+        self.run_sim(process, False)
 
 
 class Macc4Run1Test(TestBase):
@@ -58,53 +58,52 @@ class Macc4Run1Test(TestBase):
     def test(self):
         DATA = [
             # Allow time to prepare
-            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
-            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
+            ((0, 0, 0), (0, 0, 0, 0, 0)),
+            ((0, 0, 0), (0, 0, 0, 0, 0)),
             # Start, but not yet ready, then ready
-            ((1, 0, 0, 0), (0, 0, 0, 0, 0)),
-            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
-            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
+            ((1, 0, 0), (0, 0, 0, 0, 0)),
+            ((0, 0, 0), (0, 0, 0, 0, 0)),
+            ((0, 0, 0), (0, 0, 0, 0, 0)),
             # Ready, not ready, ready, ready, not ready, ready
-            ((0, 1, 0, 0), (1, 0, 0, 0, 0)),
-            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
-            ((0, 1, 3, 0), (1, 0, 0, 0, 0)),
-            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
-            ((0, 1, 2, 0), (1, 0, 0, 0, 0)),
-            ((0, 1, 0, 0), (1, 0, 0, 0, 0)),
-            ((0, 0, 5, 0), (0, 0, 0, 0, 0)),
-            ((0, 0, 7, 0), (0, 1, 17, 0, 0)),
+            ((0, 1, 0), (1, 0, 0, 0, 0)),
+            ((0, 0, 0), (0, 0, 0, 0, 0)),
+            ((0, 1, 0), (1, 1, 0, 0, 0)),
+            ((0, 0, 0), (0, 0, 0, 0, 0)),
+            ((0, 1, 0), (1, 1, 0, 0, 0)),
+            ((0, 1, 0), (1, 0, 0, 0, 0)),
+            ((0, 0, 0), (0, 1, 0, 0, 0)),
+            ((0, 0, 0), (0, 1, 1, 0, 0)),
             # wait for post processor
-            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
-            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
-            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
-            ((0, 0, 0, 66), (0, 0, 0, 1, 66)),
+            ((0, 0, 0), (0, 0, 0, 0, 0)),
+            ((0, 0, 0), (0, 0, 0, 0, 0)),
+            ((0, 0, 0), (0, 0, 0, 0, 0)),
+            ((0, 0, 66), (0, 0, 0, 1, 66)),
             # Do one at full speed
-            ((1, 1, 0, 0), (1, 0, 0, 0, 0)),
-            ((0, 1, 0, 0), (1, 0, 0, 0, 0)),
-            ((0, 1, 1, 0), (1, 0, 0, 0, 0)),
-            ((0, 1, 2, 0), (1, 0, 0, 0, 0)),
-            ((0, 0, 3, 0), (0, 0, 0, 0, 0)),
-            ((0, 0, -44, 0), (0, 1, -38, 0, 0)),
+            ((1, 1, 0), (1, 0, 0, 0, 0)),
+            ((0, 1, 0), (1, 0, 0, 0, 0)),
+            ((0, 1, 0), (1, 1, 0, 0, 0)),
+            ((0, 1, 0), (1, 1, 0, 0, 0)),
+            ((0, 0, 0), (0, 1, 0, 0, 0)),
+            ((0, 0, 0), (0, 1, 1, 0, 0)),
             # wait for post processor
-            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
-            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
-            ((0, 0, 0, 0), (0, 0, 0, 0, 0)),
-            ((0, 0, 0, 99), (0, 0, 0, 1, 99)),
+            ((0, 0, 0), (0, 0, 0, 0, 0)),
+            ((0, 0, 0), (0, 0, 0, 0, 0)),
+            ((0, 0, 0), (0, 0, 0, 0, 0)),
+            ((0, 0, 99), (0, 0, 0, 1, 99)),
         ]
 
         def process():
             yield self.dut.input_depth.eq(4)
             for n, (inputs, expected) in enumerate(DATA):
-                start, madd4_inputs_ready, madd4_result, pp_result = inputs
+                start, madd4_inputs_ready, pp_result = inputs
                 yield self.dut.start.eq(start)
                 yield self.dut.madd4_inputs_ready.eq(madd4_inputs_ready)
-                yield self.dut.madd4_result.eq(madd4_result)
                 yield self.dut.pp_result.eq(pp_result)
                 yield Delay(0.25)
-                madd4_start, pp_start, pp_accumulator, done, output = expected
+                madd4_start, acc_add_en, pp_start, done, output = expected
                 self.assertEqual((yield self.dut.madd4_start), madd4_start, f"case={n}")
+                self.assertEqual((yield self.dut.acc_add_en), acc_add_en, f"case={n}")
                 self.assertEqual((yield self.dut.pp_start), pp_start, f"case={n}")
-                self.assertEqual((yield self.dut.pp_accumulator), pp_accumulator, f"case={n}")
                 self.assertEqual((yield self.dut.done), done, f"case={n}")
                 if done:
                     self.assertEqual((yield self.dut.output.as_signed()), output, f"case={n}")
