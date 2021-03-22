@@ -180,11 +180,16 @@ class ImplicitMacc4(Xetter):
 class Macc4Run1(Xetter):
     """A Macc4 that accumlates 1 input channel's worth of data.
 
+    Parameters
+    ----------------
+    max_input_depth:
+        Maximum number of input words (max input_depth)
+
     Public Interface
     ----------------
     input_offset: Signal(signed(8)) input
         Offset to be added to all inputs.
-    input_depth: Signal(10) input
+    input_depth: Signal(range(max_input_depth)) input
         Number of words in input
     f_data: Signal(32) input
         Filter data to use next
@@ -202,10 +207,11 @@ class Macc4Run1(Xetter):
         The value to add to the accumulator
     """
 
-    def __init__(self):
+    def __init__(self, max_input_depth):
         super().__init__()
+        self.max_input_depth = max_input_depth
         self.input_offset = Signal(signed(9))
-        self.input_depth = Signal(32)
+        self.input_depth = Signal(range(max_input_depth))
         self.f_data = Signal(32)
         self.f_next = Signal()
         self.i_data = Signal(32)
@@ -229,6 +235,9 @@ class Macc4Run1(Xetter):
         retired_macc4s = Signal(10)
         retiring_last = Signal()
 
+        input_depth_minus_1 = Signal.like(self.input_depth)
+        m.d.sync += input_depth_minus_1.eq(self.input_depth - 1)
+
         # Puts 1 word of data into the pipeline, if it's ready
         def start_macc4():
             with m.If(self.i_ready):
@@ -237,7 +246,7 @@ class Macc4Run1(Xetter):
                     macc_seq.inp.eq(1),
                     self.f_next.eq(1),
                     self.i_next.eq(1),
-                    starting_last.eq(started_macc4s == self.input_depth - 1)
+                    starting_last.eq(started_macc4s == input_depth_minus_1)
                 ]
 
         def retire_macc4():
@@ -246,7 +255,7 @@ class Macc4Run1(Xetter):
                 m.d.comb += [
                     self.add_en.eq(1),
                     self.add_data.eq(madd4.result),
-                    retiring_last.eq(retired_macc4s == self.input_depth - 1)
+                    retiring_last.eq(retired_macc4s == input_depth_minus_1)
                 ]
 
         with m.FSM():
