@@ -238,7 +238,7 @@ static int32_t macc4_run1(struct InputStore* is, struct FilterStore* fs) {
     accumulator +=
         macc4(input_store_read(&input_store), filter_store_read(&filter_store));
   }
-  return accumulator;
+  return post_process(accumulator);
 }
 
 // Set register instruction
@@ -288,9 +288,6 @@ static uint32_t set_reg(int funct7, uint32_t in0, uint32_t in1) {
 
     case 112:
       return input_store_mark_read_finished(&input_store);
-
-    case 120:
-      return post_process(in0);
 
     default:
       return 0;

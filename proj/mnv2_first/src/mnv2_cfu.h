@@ -50,8 +50,6 @@ extern "C" {
 // Supports incremental development
 #define CFU_MARK_INPUT_READ_FINISHED() CFU_GET(112)
 
-#define CFU_POST_PROCESS(in0) CFU_SET(120, in0)
-
 #define EBRAM_DEPTH_BITS (16 * 1024)
 #define EBRAM_DEPTH_BYTES (EBRAM_DEPTH_BITS / 8)
 #define EBRAM_DEPTH_WORDS (EBRAM_DEPTH_BYTES / 4)

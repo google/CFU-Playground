@@ -165,8 +165,7 @@ void Mnv2ConvPerChannel1x1(
 
       for (int out_channel = batch_base; out_channel < batch_end;
            ++out_channel) {
-        int32_t acc = CFU_MACC4_RUN_1();
-        int32_t out = CFU_POST_PROCESS(acc);
+        int32_t out = CFU_MACC4_RUN_1();
         *(output_ptr++) = static_cast<int8_t>(out);
       }
       CFU_MARK_INPUT_READ_FINISHED();
