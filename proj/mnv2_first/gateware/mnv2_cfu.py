@@ -38,16 +38,6 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         self.register_xetter(reg_num, setter)
         return setter.value, setter.set
 
-    def _make_accumulator(self, m, reg_num, name):
-        """Constructs and registers a simple RegisterSetter.
-
-        Return a pair of signals from setter: (value, set)
-        """
-        xetter = AccumulatorRegisterXetter()
-        m.submodules[name] = xetter
-        self.register_xetter(reg_num, xetter)
-        return xetter.add_en, xetter.add_data
-
     def _make_output_channel_param_store(
             self, m, reg_num, name, restart_signal):
         """Constructs and registers a param store connected to a memory
@@ -158,7 +148,6 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         offset, _ = self._make_setter(m, 13, 'set_output_offset')
         activation_min, _ = self._make_setter(m, 14, 'set_activation_min')
         activation_max, _ = self._make_setter(m, 15, 'set_activation_max')
-        add_en, add_data = self._make_accumulator(m, 16, 'accumulator')
 
         _, restart = self._make_setter(m, 20, 'set_output_batch_size')
         multiplier, multiplier_next = self._make_output_channel_param_store(
@@ -202,8 +191,7 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
             fvf.next.eq(m4r1.madd4_start | fvg_next),
             ins.r_next.eq(m4r1.madd4_start | insget_next),
             m4r1.madd4_inputs_ready.eq(ins.r_ready),
-            add_en.eq(m4r1.add_en),
-            add_data.eq(madd4.result),
+            m4r1.madd4_result.eq(madd4.result),
         ]
 
         m.d.comb += [

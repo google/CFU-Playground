@@ -114,9 +114,8 @@ class Macc4Run1(Xetter):
         Notification that madd4 inputs have been read.
     madd4_inputs_ready: Signal() input
         Whether or not inputs for the madd4 are ready.
-
-    add_en: Signal output
-        Indicates something available to add at madd4 result.
+    madd4_result: Signal(signed(32)) input
+        Result of the Madd4Pipeline
     """
 
     def __init__(self, max_input_depth):
@@ -125,8 +124,7 @@ class Macc4Run1(Xetter):
         self.input_depth = Signal(range(max_input_depth))
         self.madd4_start = Signal()
         self.madd4_inputs_ready = Signal()
-        self.add_en = Signal()
-
+        self.madd4_result = Signal(signed(32))
 
     def elab(self, m):
         m.submodules['madd_seq'] = madd4_seq = Sequencer(
@@ -136,6 +134,7 @@ class Macc4Run1(Xetter):
         starting_last = Signal()
         retired_madd4s = Signal(10)
         retiring_last = Signal()
+        accumulator = Signal(signed(32))
 
         input_depth_minus_1 = Signal.like(self.input_depth)
         m.d.sync += input_depth_minus_1.eq(self.input_depth - 1)
@@ -152,15 +151,18 @@ class Macc4Run1(Xetter):
 
         def retire_madd4():
             with m.If(madd4_seq.sequence[-1]):
-                m.d.sync += retired_madd4s.eq(retired_madd4s + 1)
+                m.d.sync += [
+                    retired_madd4s.eq(retired_madd4s + 1),
+                    accumulator.eq(accumulator + self.madd4_result),
+                ]
                 m.d.comb += [
-                    self.add_en.eq(1),
                     retiring_last.eq(retired_madd4s == input_depth_minus_1)
                 ]
 
         with m.FSM():
             with m.State("PREPARE"):
                 m.d.sync += [
+                    accumulator.eq(0),
                     started_madd4s.eq(0),
                     retired_madd4s.eq(0),
                 ]
@@ -177,8 +179,12 @@ class Macc4Run1(Xetter):
             with m.State("FINISH"):
                 retire_madd4()
                 with m.If(retiring_last):
-                    m.d.comb += self.done.eq(1)
+                    m.d.comb += [
+                        self.done.eq(1),
+                        self.output.eq(accumulator + self.madd4_result),
+                    ]
                     m.d.sync += [
+                        accumulator.eq(0),
                         started_madd4s.eq(0),
                         retired_madd4s.eq(0),
                     ]

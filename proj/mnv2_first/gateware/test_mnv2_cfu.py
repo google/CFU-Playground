@@ -64,10 +64,6 @@ class CfuTest(CfuTestBase):
             ((0, 110, 0, 0), 333),
             ((0, 110, 0, 0), 444),
 
-            # Test setting and getting accumulator. Leave at zero
-            ((0, 16, 59, 0), 0),
-            ((0, 16, 0, 0), 59),
-
             # Store 4 filter value words
             ((0, 20, 4, 0), 8),
             ((0, 24, pack_vals(1, 2, 3, 4), 0), 0),
@@ -130,8 +126,8 @@ class CfuTest(CfuTestBase):
         def set_input_val(val):
             return ((0, 25, val, 0), 0)
 
-        def macc_4_run_1():
-            return ((0, 32, 0, 0), 0)
+        def macc_4_run_1(expected_result):
+            return ((0, 32, 0, 0), expected_result)
 
         def make_op_stream():
             def nums(start, count): return range(start, start + count)
@@ -144,9 +140,7 @@ class CfuTest(CfuTestBase):
             for i_vals in zip(nums(1, 8), nums(3, 8), nums(5, 8), nums(7, 8)):
                 yield set_input_val(pack_vals(*i_vals))
             yield get_set_accum(0, 0)
-            yield macc_4_run_1()
-            yield get_set_accum(0, 30600)
-            yield macc_4_run_1()
-            yield get_set_accum(0, 65288)
+            yield macc_4_run_1(30600)
+            yield macc_4_run_1(65288)
 
         return self.run_ops(make_op_stream(), False)

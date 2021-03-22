@@ -70,40 +70,42 @@ class Macc4Run1Test(TestBase):
     def test(self):
         DATA = [
             # Allow time to prepare
-            ((0, 0), (0, 0, 0)),
-            ((0, 0), (0, 0, 0)),
+            ((0, 0, 0), (0, 0, 0)),
+            ((0, 0, 0), (0, 0, 0)),
             # Start, but not yet ready, then ready
-            ((1, 0), (0, 0, 0)),
-            ((0, 0), (0, 0, 0)),
-            ((0, 0), (0, 0, 0)),
+            ((1, 0, 0), (0, 0, 0)),
+            ((0, 0, 0), (0, 0, 0)),
+            ((0, 0, 0), (0, 0, 0)),
             # Ready, not ready, ready, ready, not ready, ready
-            ((0, 1), (0, 1, 0)),
-            ((0, 0), (0, 0, 0)),
-            ((0, 1), (0, 1, 1)),
-            ((0, 0), (0, 0, 0)),
-            ((0, 1), (0, 1, 1)),
-            ((0, 1), (0, 1, 0)),
-            ((0, 0), (0, 0, 1)),
-            ((0, 0), (1, 0, 1)),
-            # Now do one at full speed
-            ((1, 1), (0, 1, 0)),
-            ((0, 1), (0, 1, 0)),
-            ((0, 1), (0, 1, 1)),
-            ((0, 1), (0, 1, 1)),
-            ((0, 0), (0, 0, 1)),
-            ((0, 0), (1, 0, 1)),
+            ((0, 1, 0), (1, 0, 0)),
+            ((0, 0, 0), (0, 0, 0)),
+            ((0, 1, 3), (1, 0, 0)),
+            ((0, 0, 0), (0, 0, 0)),
+            ((0, 1, 2), (1, 0, 0)),
+            ((0, 1, 0), (1, 0, 0)),
+            ((0, 0, 5), (0, 0, 0)),
+            ((0, 0, 7), (0, 1, 17)),
+            # Do one at full speed
+            ((1, 1, 0), (1, 0, 0)),
+            ((0, 1, 0), (1, 0, 0)),
+            ((0, 1, 1), (1, 0, 0)),
+            ((0, 1, 2), (1, 0, 0)),
+            ((0, 0, 3), (0, 0, 0)),
+            ((0, 0, -44), (0, 1, -38)),
         ]
 
         def process():
             yield self.dut.input_depth.eq(4)
             for n, (inputs, expected) in enumerate(DATA):
-                start, madd4_inputs_ready = inputs
+                start, madd4_inputs_ready, madd4_result = inputs
                 yield self.dut.start.eq(start)
                 yield self.dut.madd4_inputs_ready.eq(madd4_inputs_ready)
+                yield self.dut.madd4_result.eq(madd4_result)
                 yield Delay(0.25)
-                done, madd4_start, add_en = expected
+                madd4_start, done, output= expected
                 self.assertEqual((yield self.dut.done), done, f"case={n}")
+                if done:
+                    self.assertEqual((yield self.dut.output.as_signed()), output, f"case={n}")
                 self.assertEqual((yield self.dut.madd4_start), madd4_start, f"case={n}")
-                self.assertEqual((yield self.dut.add_en), add_en, f"case={n}")
                 yield
         self.run_sim(process, False)
