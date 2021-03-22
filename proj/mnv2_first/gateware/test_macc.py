@@ -18,40 +18,7 @@ from nmigen.sim import Delay
 
 from nmigen_cfu import TestBase, pack_vals as PV
 
-from .macc import AccumulatorRegisterXetter, ExplicitMacc4, ImplicitMacc4, Macc4Run1
-
-
-class ExplicitMacc4Test(TestBase):
-    def create_dut(self):
-        return ExplicitMacc4()
-
-    def test(self):
-        DATA = [
-            ((0, 0, 0), 0),
-            ((2, 1, 1), 3),
-            ((2, 1, 1), 3),
-            ((128, PV(-128, -128, -128, -128), PV(1, 1, 1, 1)), 0),
-            ((128, PV(-128, -127, -126, -125),
-              PV(10, 11, 12, 13)), 1 * 11 + 2 * 12 + 3 * 13),
-            ((128, PV(127, 0, 0, 0),
-              PV(10, 11, 12, 13)), 10 * 255 + 11 * 128 + 12 * 128 + 13 * 128),
-        ]
-
-        def process():
-            for n, (inputs, expected) in enumerate(DATA):
-                input_offset, input_value, filter_value = inputs
-                yield self.dut.input_offset.eq(input_offset)
-                yield self.dut.in0.eq(input_value)
-                yield self.dut.in1.eq(filter_value)
-                yield self.dut.start.eq(1)
-                yield
-                yield self.dut.start.eq(0)
-                while not (yield self.dut.done):
-                    yield
-                self.assertEqual(
-                    (yield self.dut.output.as_signed()), expected, f"case={n}")
-                yield
-        self.run_sim(process, False)
+from .macc import AccumulatorRegisterXetter, Macc4Run1
 
 
 class AccumulatorRegisterXetterTest(TestBase):
@@ -92,42 +59,6 @@ class AccumulatorRegisterXetterTest(TestBase):
                 if done:
                     self.assertEqual((yield self.dut.output), output, f"cycle={n}")
                 self.assertEqual((yield self.dut.value), value, f"cycle={n}")
-                yield
-        self.run_sim(process, False)
-
-
-class ImplicitMacc4Test(TestBase):
-    def create_dut(self):
-        return ImplicitMacc4()
-
-    def test(self):
-        DATA = [
-            ((0, 0, 0, 0), 0),
-            ((2, 1, 1, 0), 3),
-            ((2, 1, 1, 3), 3),
-            ((128, PV(-128, -128, -128, -128), PV(1, 1, 1, 1), 0), 0),
-            ((128, PV(-128, -127, -126, -125),
-              PV(10, 11, 12, 13), 0), 1 * 11 + 2 * 12 + 3 * 13),
-            ((128, PV(127, 0, 0, 0),
-              PV(10, 11, 12, 13), 12), 10 * 255 + 11 * 128 + 12 * 128 + 13 * 128),
-        ]
-
-        def process():
-            for n, (inputs, expected) in enumerate(DATA):
-                input_offset, input_value, filter_value, i_ready_wait = inputs
-                yield self.dut.input_offset.eq(input_offset)
-                yield self.dut.i_data.eq(input_value)
-                yield self.dut.f_data.eq(filter_value)
-                yield self.dut.i_ready.eq(i_ready_wait == 0)
-                yield self.dut.start.eq(1)
-                yield
-                yield self.dut.start.eq(0)
-                while not (yield self.dut.done):
-                    i_ready_wait -= 1
-                    yield self.dut.i_ready.eq(i_ready_wait == 0)
-                    yield
-                self.assertEqual(
-                    (yield self.dut.output.as_signed()), expected, f"case={n}")
                 yield
         self.run_sim(process, False)
 

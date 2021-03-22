@@ -64,32 +64,6 @@ class Madd4Pipeline(SimpleElaboratable):
         m.d.sync += self.result.eq(tree_sum(products))
 
 
-class ExplicitMacc4(Xetter):
-    """A Macc4 that operates on in0 (input_vals) and in1 (filter_vals).
-
-    Public Interface
-    ----------------
-    input_offset: Signal(signed(8)) input
-        Offset to be added to all inputs.
-
-    """
-
-    def __init__(self):
-        super().__init__()
-        self.input_offset = Signal(signed(9))
-
-    def elab(self, m):
-        m.submodules['madd4'] = madd4 = Madd4Pipeline()
-        m.d.comb += [
-            madd4.offset.eq(self.input_offset),
-            madd4.f_data.eq(self.in1),
-            madd4.i_data.eq(self.in0),
-            self.output.eq(madd4.result),
-        ]
-        m.submodules['seq'] = seq = Sequencer(Madd4Pipeline.PIPELINE_CYCLES)
-        m.d.comb += seq.inp.eq(self.start)
-        m.d.comb += self.done.eq(seq.sequence[-1])
-
 
 class AccumulatorRegisterXetter(Xetter):
     """An accumulator which can also be get and set.
@@ -121,60 +95,6 @@ class AccumulatorRegisterXetter(Xetter):
             m.d.comb += self.done.eq(1)
         with m.Elif(self.add_en):
             m.d.sync += self.value.eq(self.value + self.add_data),
-
-
-class ImplicitMacc4(Xetter):
-    """A Macc4 that operates on input_vals and filter_vals provided
-    from within the CFU.
-
-    Public Interface
-    ----------------
-    input_offset: Signal(signed(8)) input
-        Offset to be added to all inputs.
-    f_data: Signal(32) input
-        Filter data to use next
-    f_next: Signal() output
-        Indicates filter data has been used
-    i_data: Signal(32) input
-        Input data to use next
-    i_next: Signal() output
-        Indicates input data has been used
-    i_ready: Signal() input
-        Whether or not i_data is valid.
-    """
-
-    def __init__(self):
-        super().__init__()
-        self.input_offset = Signal(signed(9))
-        self.f_data = Signal(32)
-        self.f_next = Signal()
-        self.i_data = Signal(32)
-        self.i_next = Signal()
-        self.i_ready = Signal()
-
-    def elab(self, m):
-        m.submodules['madd4'] = madd4 = Madd4Pipeline()
-        m.d.comb += [
-            madd4.offset.eq(self.input_offset),
-            madd4.f_data.eq(self.f_data),
-            madd4.i_data.eq(self.i_data),
-            self.output.eq(madd4.result),
-        ]
-
-        # Signal only when i_ready has been set, then start sequence to be done
-        # next cycle
-        m.submodules['seq'] = seq = Sequencer(Madd4Pipeline.PIPELINE_CYCLES)
-        m.d.comb += self.done.eq(seq.sequence[-1])
-        waiting_for_i_ready = Signal()
-        with m.If(self.i_ready & (waiting_for_i_ready | self.start)):
-            m.d.comb += [
-                self.f_next.eq(1),
-                self.i_next.eq(1),
-                seq.inp.eq(1),
-            ]
-            m.d.sync += waiting_for_i_ready.eq(0)
-        with m.Elif(self.start & ~self.i_ready):
-            m.d.sync += waiting_for_i_ready.eq(1)
 
 
 class Macc4Run1(Xetter):

@@ -19,7 +19,7 @@ from nmigen_cfu import Cfu, DualPortMemory, is_pysim_run
 from .post_process import PostProcessXetter
 from .store import CircularIncrementer, FilterValueFetcher, InputStore, InputStoreSetter, NextWordGetter, StoreSetter
 from .registerfile import RegisterFileInstruction, RegisterSetter
-from .macc import AccumulatorRegisterXetter, ExplicitMacc4, ImplicitMacc4, Macc4Run1
+from .macc import AccumulatorRegisterXetter, Macc4Run1, Madd4Pipeline
 
 OUTPUT_CHANNEL_PARAM_DEPTH = 512
 FILTER_DATA_MEM_DEPTH = 512
