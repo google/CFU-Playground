@@ -152,7 +152,8 @@ void Mnv2ConvPerChannel1x1(
     PERF_START(5);
     // Reset input and output pointers
     const uint32_t* input_ptr = (uint32_t*)input_data;
-    int8_t* output_ptr = output_data + batch_base;
+    int32_t* output_ptr = (int32_t*)(output_data + batch_base);
+
     for (int p = 0; p < num_pixels; p++) {
       // Load one pixel's worth of input data
       PERF_START(6);
@@ -164,13 +165,12 @@ void Mnv2ConvPerChannel1x1(
       PERF_START(7);
 
       for (int out_channel = batch_base; out_channel < batch_end;
-           ++out_channel) {
-        int32_t out = CFU_MACC4_RUN_1();
-        *(output_ptr++) = static_cast<int8_t>(out);
+           out_channel += 4) {
+        *(output_ptr++) = CFU_MACC4_RUN_4();
       }
       CFU_MARK_INPUT_READ_FINISHED();
 
-      output_ptr += output_depth - batch_size;
+      output_ptr += (output_depth - batch_size) / 4;
       PERF_END(7);
     }
     PERF_END(5);
