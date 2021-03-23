@@ -232,13 +232,17 @@ static int32_t macc4(uint32_t input_vals, uint32_t filter_vals) {
   return result;
 }
 
-static int32_t macc4_run1(struct InputStore* is, struct FilterStore* fs) {
-  int32_t accumulator = 0;
-  for (uint32_t i = 0; i < is->input_depth; i++) {
-    accumulator +=
-        macc4(input_store_read(&input_store), filter_store_read(&filter_store));
+static int32_t macc4_run4(struct InputStore* is, struct FilterStore* fs) {
+  uint32_t result = 0;
+  for (int i = 0; i < 4; i++) {
+    int32_t accumulator = 0;
+    for (uint32_t j = 0; j < is->input_depth; j++) {
+      accumulator += macc4(input_store_read(&input_store),
+                           filter_store_read(&filter_store));
+    }
+    result = (result >> 8) | ((0xff & post_process(accumulator)) << 24);
   }
-  return post_process(accumulator);
+  return result;
 }
 
 // Set register instruction
@@ -284,7 +288,7 @@ static uint32_t set_reg(int funct7, uint32_t in0, uint32_t in1) {
       return input_store_set(&input_store, in0);
 
     case 32:
-      return macc4_run1(&input_store, &filter_store);
+      return macc4_run4(&input_store, &filter_store);
 
     case 112:
       return input_store_mark_read_finished(&input_store);

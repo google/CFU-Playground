@@ -45,7 +45,7 @@ extern "C" {
 #define CFU_STORE_INPUT_VALUE(in0) CFU_SET(25, in0)
 
 // Run enough MACC4s to do one input channel, then return
-#define CFU_MACC4_RUN_1() CFU_GET(32)
+#define CFU_MACC4_RUN_4() CFU_GET(32)
 
 // Supports incremental development
 #define CFU_MARK_INPUT_READ_FINISHED() CFU_GET(112)
