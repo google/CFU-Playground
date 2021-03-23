@@ -19,7 +19,7 @@ from nmigen_cfu import Cfu, DualPortMemory, is_pysim_run
 from .post_process import PostProcessor
 from .store import CircularIncrementer, FilterValueFetcher, InputStore, InputStoreSetter, NextWordGetter, StoreSetter
 from .registerfile import RegisterFileInstruction, RegisterSetter
-from .macc import Accumulator, Macc4Run1, Madd4Pipeline
+from .macc import Accumulator, ByteToWordShifter, Macc4Run4, Madd4Pipeline
 
 OUTPUT_CHANNEL_PARAM_DEPTH = 512
 FILTER_DATA_MEM_DEPTH = 512
@@ -100,21 +100,6 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         ]
         return ins
 
-    def _make_macc_4_run_1(self, m, reg_num, name, input_offset, input_depth):
-        """Constructs and registers an implicit macc4 instruction
-
-        """
-    
-        m.submodules[name] = xetter = Macc4Run1(FILTER_DATA_MEM_DEPTH * 4)
-        self.register_xetter(reg_num, xetter)
-        m.submodules[f"{name}_madd4"] = madd4 = Madd4Pipeline()
-
-        m.d.comb += [
-            xetter.input_offset.eq(input_offset),
-            xetter.input_depth.eq(input_depth),
-        ]
-        return xetter
-
     def _make_filter_value_getter(self, m, fvf):
         fvg_next = Signal()
         if is_pysim_run():
@@ -176,13 +161,13 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         insget_next = self._make_input_store_getter(m, ins)
 
         # MACC 4, with Madd, Accumulator and post processor
-        m.submodules['m4r1'] = m4r1 = Macc4Run1(FILTER_DATA_MEM_DEPTH * 4)
-        self.register_xetter(32, m4r1)
+        m.submodules['m4r4'] = m4r4 = Macc4Run4(FILTER_DATA_MEM_DEPTH * 4)
+        self.register_xetter(32, m4r4)
         m.d.comb += [
-            m4r1.input_depth.eq(input_depth),
-            m4r1.madd4_inputs_ready.eq(ins.r_ready),
-            fvf.next.eq(m4r1.madd4_start | fvg_next),
-            ins.r_next.eq(m4r1.madd4_start | insget_next),
+            m4r4.input_depth.eq(input_depth),
+            m4r4.madd4_inputs_ready.eq(ins.r_ready),
+            fvf.next.eq(m4r4.madd4_start | fvg_next),
+            ins.r_next.eq(m4r4.madd4_start | insget_next),
         ]
 
         m.submodules['madd4'] = madd4 = Madd4Pipeline()
@@ -194,9 +179,9 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
 
         m.submodules['acc'] = acc = Accumulator()
         m.d.comb += [
-            acc.add_en.eq(m4r1.acc_add_en),
+            acc.add_en.eq(m4r4.acc_add_en),
             acc.in_value.eq(madd4.result),
-            acc.clear.eq(m4r1.pp_start),
+            acc.clear.eq(m4r4.pp_start),
         ]
 
         m.submodules['pp'] = pp = PostProcessor()
@@ -209,11 +194,16 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
             pp.shift.eq(shift),
             pp.accumulator.eq(acc.result),
 
-            bias_next.eq(m4r1.pp_start),
-            multiplier_next.eq(m4r1.pp_start),
-            shift_next.eq(m4r1.pp_start),
-            
-            m4r1.pp_result.eq(pp.result),
+            bias_next.eq(m4r4.pp_start),
+            multiplier_next.eq(m4r4.pp_start),
+            shift_next.eq(m4r4.pp_start),
+        ]
+
+        m.submodules['btw'] = btw = ByteToWordShifter()
+        m.d.comb += [
+            btw.shift_en.eq(m4r4.shift_en),
+            btw.in_value.eq(pp.result),
+            m4r4.shift_result.eq(btw.result),
         ]
 
 
