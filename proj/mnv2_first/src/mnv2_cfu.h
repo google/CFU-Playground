@@ -47,6 +47,10 @@ extern "C" {
 // Run enough MACC4s to do one input channel, then return
 #define CFU_MACC4_RUN_4() CFU_GET(32)
 
+// Calculate all the output channels for a single input pixel
+#define CFU_MACC_RUN() CFU_GET(33)
+#define CFU_GET_OUTPUT() CFU_GET(34)
+
 // Supports incremental development
 #define CFU_MARK_INPUT_READ_FINISHED() CFU_GET(112)
 

@@ -175,7 +175,9 @@ static int32_t input_store_set(struct InputStore* is, uint32_t val) {
     is->write_addr = 0;
     is->read_allowed[is->curr_write_buffer] = true;
     is->curr_write_buffer = 1 - is->curr_write_buffer;
+    return 1;  // indicates that buffer is now ready
   }
+  return 0;
 }
 
 // Eventually, reads will all be 4 words (16 bytes) wide
@@ -195,8 +197,7 @@ static uint32_t input_store_read(struct InputStore* is) {
       (is->read_addr >> 2) + (is->curr_read_buffer ? EBRAM_DEPTH_WORDS / 2 : 0);
   uint32_t result = is->values[bank][r_addr];
 
-  // End of input: reset address, mark buffer empy and writeable and go to next
-  // buffer
+  // End of input: reset address
   is->read_addr++;
   if (is->read_addr == is->input_depth) {
     is->read_addr = 0;
@@ -211,6 +212,40 @@ static uint32_t input_store_mark_read_finished(struct InputStore* is) {
   is->write_allowed[is->curr_read_buffer] = true;
   is->curr_read_buffer = 1 - is->curr_read_buffer;
   return 0;
+}
+
+struct OutputQueue {
+  uint32_t data[EBRAM_DEPTH_WORDS];
+  int r;
+  int w;
+};
+
+struct OutputQueue output_queue;
+
+int oq_size(struct OutputQueue* oq) {
+  return (oq->w - oq->r + EBRAM_DEPTH_WORDS) % EBRAM_DEPTH_WORDS;
+}
+
+// Nothing to read
+bool oq_is_empty(struct OutputQueue* oq) { return oq_size(oq) == 0; }
+
+bool oq_is_full(struct OutputQueue* oq) {
+  return oq_size(oq) == EBRAM_DEPTH_WORDS - 1;
+}
+
+uint32_t oq_get(struct OutputQueue* oq) {
+  uint32_t result = oq->data[oq->r];
+  oq->r = (oq->r + 1) % EBRAM_DEPTH_WORDS;
+  return result;
+}
+
+void oq_put(struct OutputQueue* oq, uint32_t word) {
+  oq->data[oq->w] = word;
+  oq->w = (oq->w + 1) % EBRAM_DEPTH_WORDS;
+  static int dbg_ctr = 0;
+  if (dbg_ctr++ == 0) {
+    printf("oqput: 0x%08x\n", word);
+  }
 }
 
 static inline int32_t macc(const int8_t input_val, int8_t filter_val) {
@@ -243,6 +278,16 @@ static int32_t macc4_run4(struct InputStore* is, struct FilterStore* fs) {
     result = (result >> 8) | ((0xff & post_process(accumulator)) << 24);
   }
   return result;
+}
+
+static uint32_t calc_to_oq(struct OutputQueue* oq, struct InputStore* is,
+                           struct FilterStore* fs) {
+  // Assumes batch_size fits in the output queue - really should check
+  // full/empty
+  for (int i = 0; i < reg_output_batch_size; i += 4) {
+    oq_put(oq, macc4_run4(is, fs));
+  }
+  return 0;
 }
 
 // Set register instruction
@@ -285,10 +330,17 @@ static uint32_t set_reg(int funct7, uint32_t in0, uint32_t in1) {
     case 24:
       return filter_store_set(&filter_store, in0);
     case 25:
-      return input_store_set(&input_store, in0);
+      input_store_set(&input_store, in0);
+      return 0;
 
     case 32:
       return macc4_run4(&input_store, &filter_store);
+
+    case 33:
+      return calc_to_oq(&output_queue, &input_store, &filter_store);
+
+    case 34:
+      return oq_get(&output_queue);
 
     case 112:
       return input_store_mark_read_finished(&input_store);

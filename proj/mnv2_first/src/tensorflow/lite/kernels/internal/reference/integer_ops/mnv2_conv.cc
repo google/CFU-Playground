@@ -163,10 +163,10 @@ void Mnv2ConvPerChannel1x1(
       }
       PERF_END(6);
       PERF_START(7);
-
+      CFU_MACC_RUN();
       for (int out_channel = batch_base; out_channel < batch_end;
            out_channel += 4) {
-        *(output_ptr++) = CFU_MACC4_RUN_4();
+        *(output_ptr++) = CFU_GET_OUTPUT();
       }
       CFU_MARK_INPUT_READ_FINISHED();
 
