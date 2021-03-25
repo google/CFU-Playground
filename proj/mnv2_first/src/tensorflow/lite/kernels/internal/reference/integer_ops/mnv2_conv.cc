@@ -35,10 +35,10 @@ limitations under the License.
 namespace tflite {
 namespace reference_integer_ops {
 
-static void LoadOutputChannelWeights(const int32_t*& output_multiplier,
-                                     const int32_t*& output_shift,
-                                     const int32_t*& bias_data,
-                                     int batch_size) {
+inline static void LoadOutputChannelWeights(const int32_t*& output_multiplier,
+                                            const int32_t*& output_shift,
+                                            const int32_t*& bias_data,
+                                            int batch_size) {
   PERF_START(3);
   CFU_SET_OUTPUT_BATCH_SIZE(batch_size);
   for (int i = 0; i < batch_size; i += 4) {
@@ -62,7 +62,8 @@ static void LoadOutputChannelWeights(const int32_t*& output_multiplier,
   PERF_END(3);
 }
 
-static void LoadFilterValues(uint32_t*& filter_words, int num_words) {
+inline static void LoadFilterValues(const uint32_t*& filter_words,
+                                    int num_words) {
   PERF_START(4);
   for (int i = 0; i < num_words; i += 8) {
     CFU_STORE_FILTER_VALUE(*(filter_words++));
@@ -75,6 +76,24 @@ static void LoadFilterValues(uint32_t*& filter_words, int num_words) {
     CFU_STORE_FILTER_VALUE(*(filter_words++));
   }
   PERF_END(4);
+}
+
+inline static void LoadInputValues(const uint32_t*& input_ptr,
+                                   int input_depth_words) {
+  PERF_START(6);
+  for (int i = 0; i < input_depth_words; i += 2) {
+    CFU_STORE_INPUT_VALUE(*(input_ptr++));
+    CFU_STORE_INPUT_VALUE(*(input_ptr++));
+  }
+  PERF_END(6);
+}
+
+inline static void UnloadOutputValues(uint32_t*& output_ptr, int num_words) {
+  PERF_START(7);
+  for (int i = 0; i < num_words; i++) {
+    *(output_ptr++) = CFU_GET_OUTPUT();
+  }
+  PERF_END(7);
 }
 
 // Fixed-point per-channel-quantization convolution reference kernel.
@@ -118,7 +137,7 @@ void Mnv2ConvPerChannel1x1(
   CFU_SET_ACTIVATION_MAX(output_activation_max);
 
   // Access filter data as words
-  uint32_t* filter_words = (uint32_t*)filter_data;
+  const uint32_t* filter_words = (const uint32_t*)filter_data;
 
 // Do the processing in batches, by output channel. batch size is number of
 // output channels processed per batch and it is chosen to avoid overflowing
@@ -152,26 +171,16 @@ void Mnv2ConvPerChannel1x1(
     PERF_START(5);
     // Reset input and output pointers
     const uint32_t* input_ptr = (uint32_t*)input_data;
-    int32_t* output_ptr = (int32_t*)(output_data + batch_base);
+    uint32_t* output_ptr = (uint32_t*)(output_data + batch_base);
 
     for (int p = 0; p < num_pixels; p++) {
       // Load one pixel's worth of input data
-      PERF_START(6);
-      for (int i = 0; i < input_depth_words; i += 2) {
-        CFU_STORE_INPUT_VALUE(*(input_ptr++));
-        CFU_STORE_INPUT_VALUE(*(input_ptr++));
-      }
-      PERF_END(6);
-      PERF_START(7);
+      LoadInputValues(input_ptr, input_depth_words);
       CFU_MACC_RUN();
-      for (int out_channel = batch_base; out_channel < batch_end;
-           out_channel += 4) {
-        *(output_ptr++) = CFU_GET_OUTPUT();
-      }
+      UnloadOutputValues(output_ptr, batch_size / 4);
       CFU_MARK_INPUT_READ_FINISHED();
 
       output_ptr += (output_depth - batch_size) / 4;
-      PERF_END(7);
     }
     PERF_END(5);
   }
