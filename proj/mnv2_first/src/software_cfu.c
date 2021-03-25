@@ -334,9 +334,6 @@ static uint32_t set_reg(int funct7, uint32_t in0, uint32_t in1) {
       input_store_set(&input_store, in0);
       return 0;
 
-    case 32:
-      return macc4_run4(&input_store, &filter_store);
-
     case 33:
       return calc_to_oq(&output_queue, &input_store, &filter_store);
 
