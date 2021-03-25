@@ -176,10 +176,9 @@ void Mnv2ConvPerChannel1x1(
     for (int p = 0; p < num_pixels; p++) {
       // Load one pixel's worth of input data
       LoadInputValues(input_ptr, input_depth_words);
-      CFU_MACC_RUN();
+      
+      CFU_MACC_RUN();      
       UnloadOutputValues(output_ptr, batch_size / 4);
-      CFU_MARK_INPUT_READ_FINISHED();
-
       output_ptr += (output_depth - batch_size) / 4;
     }
     PERF_END(5);

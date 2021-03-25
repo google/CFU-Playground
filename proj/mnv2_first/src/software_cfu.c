@@ -287,6 +287,7 @@ static uint32_t calc_to_oq(struct OutputQueue* oq, struct InputStore* is,
   for (int i = 0; i < reg_output_batch_size; i += 4) {
     oq_put(oq, macc4_run4(is, fs));
   }
+  input_store_mark_read_finished(is);
   return 0;
 }
 
@@ -341,9 +342,6 @@ static uint32_t set_reg(int funct7, uint32_t in0, uint32_t in1) {
 
     case 34:
       return oq_get(&output_queue);
-
-    case 112:
-      return input_store_mark_read_finished(&input_store);
 
     default:
       return 0;
