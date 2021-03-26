@@ -18,7 +18,8 @@ from nmigen.sim import Delay
 
 from nmigen_cfu import TestBase
 
-from .sequencing import Delayer, GateCalculator, UpCounter
+from .delay import Delayer
+from .sequencing import Delayer, GateCalculator, Sequencer, UpCounter
 
 
 class UpCounterTest(TestBase):
@@ -28,40 +29,38 @@ class UpCounterTest(TestBase):
     def test(self):
         DATA = [
             # count all the way around a few times
-            ((0, 0), (0, 0)),
-            ((0, 0), (0, 0)),
-            ((0, 1), (1, 0)),
-            ((0, 1), (2, 0)),
-            ((0, 1), (3, 1)),
-            ((0, 1), (0, 0)),
-            ((0, 0), (0, 0)),
-            ((0, 1), (1, 0)),
-            ((0, 0), (1, 0)),
-            ((0, 1), (2, 0)),
-            ((0, 0), (2, 0)),
-            ((0, 1), (3, 1)),
-            ((0, 0), (3, 0)),
-            ((0, 1), (0, 0)),
+            ((0, 0), 0),
+            ((0, 0), 0),
+            ((0, 1), 0),
+            ((0, 1), 0),
+            ((0, 1), 0),
+            ((0, 1), 1),
+            ((0, 0), 0),
+            ((0, 1), 0),
+            ((0, 0), 0),
+            ((0, 1), 0),
+            ((0, 0), 0),
+            ((0, 1), 0),
+            ((0, 0), 0),
+            ((0, 1), 1),
             # try restart with or without count_en
-            ((0, 1), (1, 0)),
-            ((0, 1), (2, 0)),
-            ((1, 0), (0, 0)),
-            ((0, 1), (1, 0)),
-            ((1, 1), (0, 0)),
+            ((0, 1), 0),
+            ((0, 1), 0),
+            ((1, 0), 0),
+            ((0, 1), 0),
+            ((1, 1), 0),
         ]
 
         def process():
             yield self.dut.max.eq(4)
             for n, (inputs, expected) in enumerate(DATA):
-                restart, count_en = inputs
+                restart, en = inputs
                 yield self.dut.restart.eq(restart)
-                yield self.dut.count_en.eq(count_en)
+                yield self.dut.en.eq(en)
                 yield Delay(0.25)
-                count, done = expected
-                self.assertEqual((yield self.dut.count), count, f"case={n}")
-                self.assertEqual((yield self.dut.done), done, f"case={n}")
+                self.assertEqual((yield self.dut.done), expected, f"case={n}")
                 yield
-        self.run_sim(process, True)
+        self.run_sim(process, False)
 
 
 class DelayerTest(TestBase):
@@ -91,7 +90,7 @@ class DelayerTest(TestBase):
                 yield Delay(0.25)
                 self.assertEqual((yield self.dut.output), expected, f"case={n}")
                 yield
-        self.run_sim(process, True)
+        self.run_sim(process, False)
 
 
 class GateCalculatorTest(TestBase):
@@ -105,7 +104,8 @@ class GateCalculatorTest(TestBase):
             ((1, 0, 1, 1), 1),
             ((0, 0, 1, 1), 1),
             ((0, 0, 1, 1), 1),
-            ((0, 1, 1, 1), 0),
+            ((0, 1, 1, 1), 1),
+            ((0, 0, 1, 1), 0),
 
             # Test various conditions
             ((0, 0, 0, 1), 0),
@@ -114,7 +114,8 @@ class GateCalculatorTest(TestBase):
             ((0, 0, 1, 0), 0),
             ((0, 0, 0, 1), 0),
             ((0, 0, 1, 1), 1),
-            ((0, 1, 1, 1), 0),
+            ((0, 1, 1, 1), 1),
+            ((0, 0, 1, 1), 0),
         ]
 
         def process():
@@ -127,4 +128,59 @@ class GateCalculatorTest(TestBase):
                 yield Delay(0.25)
                 self.assertEqual((yield self.dut.gate), expected, f"case={n}")
                 yield
+        self.run_sim(process, False)
+
+
+class SequencerTest(TestBase):
+    def create_dut(self):
+        return Sequencer()
+
+    def test(self):
+
+        def data():
+            yield (0, 0, 1), (0, 0, 0, 0, 0)
+            yield (1, 1, 0), (0, 0, 0, 0, 0)
+            yield (0, 0, 1), (0, 0, 0, 0, 0)
+
+            # read input and filter, starting pipeline
+            for i in range(24):
+                yield (0, 1, 1), (1, 0, 0, 0, 0)
+                yield (0, 1, 1), (1, 0, i != 0, 0, 0)
+                yield (0, 1, 1), (1, 0, 0, 0, 0)
+                yield (0, 1, 1), (1, 0, 0, 0, 0)
+                yield (0, 1, 1), (1, 0, 0, 0, 0)
+                yield (0, 1, 1), (1, 0, 0, i != 0, i != 0 and i % 4 == 0)
+                yield (0, 1, 1), (1, 0, 0, 0, 0)
+                yield (0, 1, 1), (1, i == 23, 0, 0, 0)
+
+            # Wait for output to work through - gate should be off
+            yield (0, 1, 1), (0, 0, 0, 0, 0)
+            yield (0, 1, 1), (0, 0, 1, 0, 0)
+            yield (0, 1, 1), (0, 0, 0, 0, 0)
+            yield (0, 1, 1), (0, 0, 0, 0, 0)
+            yield (0, 1, 1), (0, 0, 0, 0, 0)
+            yield (0, 1, 1), (0, 0, 0, 1, 1)
+            yield (0, 1, 1), (0, 0, 0, 0, 0)
+            yield (0, 0, 1), (0, 0, 0, 0, 0)
+
+        def process():
+            # test, input = 32 values (8 words), output = 24 values (6 words),
+            # so 32*24/4 = 192 filter words
+            yield self.dut.input_depth_words.eq(8)
+            yield self.dut.filter_value_words.eq(192)
+
+            for n, (inputs, expected) in enumerate(data()):
+                start_run, in_store_ready, fifo_has_space = inputs
+                yield self.dut.start_run.eq(start_run)
+                yield self.dut.in_store_ready.eq(in_store_ready)
+                yield self.dut.fifo_has_space.eq(fifo_has_space)
+                yield Delay(0.25)
+                gate, all_output_finished, acc_done, pp_done, out_word_done = expected
+                self.assertEqual((yield self.dut.gate), gate, f"case={n}")
+                self.assertEqual((yield self.dut.all_output_finished), all_output_finished, f"case={n}")
+                self.assertEqual((yield self.dut.acc_done), acc_done, f"case={n}")
+                self.assertEqual((yield self.dut.pp_done), pp_done, f"case={n}")
+                self.assertEqual((yield self.dut.out_word_done), out_word_done, f"case={n}")
+                yield
+
         self.run_sim(process, True)

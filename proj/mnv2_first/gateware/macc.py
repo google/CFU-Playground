@@ -17,7 +17,7 @@ from nmigen import Cat, Signal, signed
 
 from nmigen_cfu import all_words, SimpleElaboratable, tree_sum
 
-from .sequencing import Delayer
+from .delay import Delayer
 from .post_process import PostProcessor
 from .registerfile import Xetter
 

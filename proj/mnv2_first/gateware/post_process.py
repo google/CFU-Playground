@@ -17,7 +17,7 @@ from nmigen import Mux, Signal, signed
 
 from nmigen_cfu import SimpleElaboratable
 
-from .sequencing import Delayer
+from .delay import Delayer
 from .registerfile import Xetter
 
 INT32_MIN = 0x8000_0000

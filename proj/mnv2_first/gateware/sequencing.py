@@ -13,10 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Signal
-from nmigen.hdl.ast import Mux
+from nmigen import Signal, Mux
 
 from nmigen_cfu import SimpleElaboratable
+
+from .delay import Delayer
+from .macc import Madd4Pipeline
+from .post_process import PostProcessor
 
 
 class UpCounter(SimpleElaboratable):
@@ -31,67 +34,31 @@ class UpCounter(SimpleElaboratable):
     ---------------
     restart: Signal() in
         Zero all internal counter, get ready to start again.
-    count_en: Signal() in
+    en: Signal() in
         Count up by one.
     done: Signal() out
-        Set high for one cycle once counting finished.
-    count: Signal(width)
-        Current count
+        Set high for one cycle once max pulses received
     max: Signal(width) in
         The number of counts
     """
 
     def __init__(self, width):
         self.restart = Signal()
-        self.count_en = Signal()
+        self.en = Signal()
         self.done = Signal()
-        self.count = Signal(width)
         self.max = Signal(width)
 
     def elab(self, m):
-        count_reg = Signal.like(self.count)
+        count = Signal.like(self.max)
         last_count = self.max - 1
-        next_count = Mux(count_reg == last_count, 0, count_reg + 1)
-        m.d.comb += self.count.eq(count_reg)
+        next_count = Mux(count == last_count, 0, count + 1)
 
-        with m.If(self.count_en):
-            m.d.sync += count_reg.eq(next_count)
-            m.d.comb += self.count.eq(next_count)
-            m.d.comb += self.done.eq(next_count == last_count)
+        with m.If(self.en):
+            m.d.sync += count.eq(next_count)
+            m.d.comb += self.done.eq(count == last_count)
 
         with m.If(self.restart):
-            m.d.sync += count_reg.eq(0)
-            m.d.comb += self.count.eq(0)
-
-
-class Delayer(SimpleElaboratable):
-    """Delays an input Signal via a shift register.
-
-    Parameters
-    ----------
-    cycles: int
-        Number of cycles to delay the signal
-
-    Public Interface
-    ---------------
-    input: Signal() in
-        The input signal
-    output: Signal() out
-        Mirrors the input signal after cycles delay
-    """
-
-    def __init__(self, cycles):
-        self.cycles = cycles
-        self.input = Signal()
-        self.output = Signal()
-
-    def elab(self, m):
-        shift_register = Signal(self.cycles)
-        m.d.comb += self.output.eq(shift_register[-1])
-        m.d.sync += [
-            shift_register[1:].eq(shift_register),
-            shift_register[0].eq(self.input),
-        ]
+            m.d.sync += count.eq(0)
 
 
 class GateCalculator(SimpleElaboratable):
@@ -125,7 +92,92 @@ class GateCalculator(SimpleElaboratable):
         with m.If(self.all_output_finished):
             m.d.sync += running.eq(0)
 
-        m.d.comb += self.gate.eq(~self.all_output_finished
-                                 & (running | self.start_run)
-                                 & self.in_store_ready 
+        m.d.comb += self.gate.eq((running | self.start_run)
+                                 & self.in_store_ready
                                  & self.fifo_has_space)
+
+
+class Sequencer(SimpleElaboratable):
+    """Sequences a 1x1 convolution.
+
+    This is the control logic required to calculate all output channel values
+    for a single input pixel.
+
+    Public Interface
+    ---------------
+    start_run: Signal() in
+        When the run commences.
+    in_store_ready: Signal() in
+        Input store has data available
+    fifo_has_space: Signal() in
+        Output fifo has space to store a whole pipeline of output
+    filter_value_words: Signal(11) in
+        Number of 32bit words of filter data there are.
+        This value is output_channel_batch_size * input_depth / 4.
+    input_depth_words: Signal(10) in
+        Number of 32bit words of input channel data there are.
+        This value is input_depth / 4.
+    gate: Signal() out
+        High when pipeline should accept data
+    all_output_finished: Signal() out
+        High when all of the output channels calculations have been started.
+    acc_done: Signal() out
+        Accumulation is done, and post processing is ready to start
+    pp_done: Signal() out
+        Post processing is done and pp output should be shifted into the ouput word
+    out_word_done: Signal() out
+        Four output channel values have been calculated into the output word which is
+        ready to be put onto the FIFO.
+    """
+
+    def __init__(self):
+        self.start_run = Signal()
+        self.in_store_ready = Signal()
+        self.fifo_has_space = Signal()
+        self.filter_value_words = Signal(11)
+        self.input_depth_words = Signal(10)
+        self.gate = Signal()
+        self.all_output_finished = Signal()
+        self.acc_done = Signal()
+        self.pp_done = Signal()
+        self.out_word_done = Signal()
+
+    def elab(self, m):
+        m.submodules['gate_calc'] = gate_calc = GateCalculator()
+        m.d.comb += [
+            gate_calc.start_run.eq(self.start_run),
+            gate_calc.in_store_ready.eq(self.in_store_ready),
+            gate_calc.fifo_has_space.eq(self.fifo_has_space),
+            gate_calc.all_output_finished.eq(self.all_output_finished),
+            self.gate.eq(gate_calc.gate),
+        ]
+        m.submodules['f_count'] = f_count = UpCounter(11)
+        m.d.comb += [
+            f_count.en.eq(self.gate),
+            f_count.max.eq(self.filter_value_words),
+            self.all_output_finished.eq(f_count.done)
+        ]
+        m.submodules['i_count'] = i_count = UpCounter(10)
+        m.d.comb += [
+            i_count.en.eq(self.gate),
+            i_count.max.eq(self.input_depth_words),
+        ]
+        m.submodules['four_count'] = four_count = UpCounter(3)
+        m.d.comb += [
+            four_count.max.eq(4),
+            self.out_word_done.eq(four_count.done)
+        ]
+
+        m.submodules['madd_delay'] = madd_delay = Delayer(
+            Madd4Pipeline.PIPELINE_CYCLES)
+        m.d.comb += [
+            madd_delay.input.eq(i_count.done),
+            self.acc_done.eq(madd_delay.output),
+        ]
+        m.submodules['pp_delay'] = pp_delay = Delayer(
+            PostProcessor.PIPELINE_CYCLES)
+        m.d.comb += [
+            pp_delay.input.eq(self.acc_done),
+            self.pp_done.eq(pp_delay.output),
+            four_count.en.eq(pp_delay.output),
+        ]
