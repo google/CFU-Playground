@@ -174,10 +174,16 @@ void Mnv2ConvPerChannel1x1(
     uint32_t* output_ptr = (uint32_t*)(output_data + batch_base);
 
     for (int p = 0; p < num_pixels; p++) {
-      // Load one pixel's worth of input data
-      LoadInputValues(input_ptr, input_depth_words);
-      
-      CFU_MACC_RUN();      
+      // Load twice on first loop, no load on last loop and once every other
+      // time.
+      if (p == 0) {
+        LoadInputValues(input_ptr, input_depth_words);
+      }
+      if (p != num_pixels - 1) {
+        LoadInputValues(input_ptr, input_depth_words);
+      }
+
+      CFU_MACC_RUN();
       UnloadOutputValues(output_ptr, batch_size / 4);
       output_ptr += (output_depth - batch_size) / 4;
     }
