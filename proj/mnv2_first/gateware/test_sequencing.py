@@ -138,30 +138,30 @@ class SequencerTest(TestBase):
     def test(self):
 
         def data():
-            yield (0, 0, 1), (0, 0, 0, 0, 0)
-            yield (1, 1, 0), (0, 0, 0, 0, 0)
-            yield (0, 0, 1), (0, 0, 0, 0, 0)
+            yield (0, 0, 1), (0, 0, 0, 0, 0, 0)
+            yield (1, 1, 0), (0, 0, 0, 0, 0, 0)
+            yield (0, 0, 1), (0, 0, 0, 0, 0, 0)
 
             # read input and filter, starting pipeline
             for i in range(24):
-                yield (0, 1, 1), (1, 0, 0, 0, 0)
-                yield (0, 1, 1), (1, 0, i != 0, 0, 0)
-                yield (0, 1, 1), (1, 0, 0, 0, 0)
-                yield (0, 1, 1), (1, 0, 0, 0, 0)
-                yield (0, 1, 1), (1, 0, 0, 0, 0)
-                yield (0, 1, 1), (1, 0, 0, i != 0, i != 0 and i % 4 == 0)
-                yield (0, 1, 1), (1, 0, 0, 0, 0)
-                yield (0, 1, 1), (1, i == 23, 0, 0, 0)
+                yield (0, 1, 1), (1, 0, i != 0, 0, 0, 0)
+                yield (0, 1, 1), (1, 0, i != 0, i != 0, 0, 0)
+                yield (0, 1, 1), (1, 0, 1, 0, 0, 0)
+                yield (0, 1, 1), (1, 0, 1, 0, 0, 0)
+                yield (0, 1, 1), (1, 0, 1, 0, 0, 0)
+                yield (0, 1, 1), (1, 0, 1, 0, i != 0, i != 0 and i % 4 == 0)
+                yield (0, 1, 1), (1, 0, 1, 0, 0, 0)
+                yield (0, 1, 1), (1, i == 23, 1, 0, 0, 0)
 
             # Wait for output to work through - gate should be off
-            yield (0, 1, 1), (0, 0, 0, 0, 0)
-            yield (0, 1, 1), (0, 0, 1, 0, 0)
-            yield (0, 1, 1), (0, 0, 0, 0, 0)
-            yield (0, 1, 1), (0, 0, 0, 0, 0)
-            yield (0, 1, 1), (0, 0, 0, 0, 0)
-            yield (0, 1, 1), (0, 0, 0, 1, 1)
-            yield (0, 1, 1), (0, 0, 0, 0, 0)
-            yield (0, 0, 1), (0, 0, 0, 0, 0)
+            yield (0, 1, 1), (0, 0, 1, 0, 0, 0)
+            yield (0, 1, 1), (0, 0, 1, 1, 0, 0)
+            yield (0, 1, 1), (0, 0, 0, 0, 0, 0)
+            yield (0, 1, 1), (0, 0, 0, 0, 0, 0)
+            yield (0, 1, 1), (0, 0, 0, 0, 0, 0)
+            yield (0, 1, 1), (0, 0, 0, 0, 1, 1)
+            yield (0, 1, 1), (0, 0, 0, 0, 0, 0)
+            yield (0, 0, 1), (0, 0, 0, 0, 0, 0)
 
         def process():
             # test, input = 32 values (8 words), output = 24 values (6 words),
@@ -175,12 +175,13 @@ class SequencerTest(TestBase):
                 yield self.dut.in_store_ready.eq(in_store_ready)
                 yield self.dut.fifo_has_space.eq(fifo_has_space)
                 yield Delay(0.25)
-                gate, all_output_finished, acc_done, pp_done, out_word_done = expected
+                gate, all_output_finished, madd_done, acc_done, pp_done, out_word_done = expected
                 self.assertEqual((yield self.dut.gate), gate, f"case={n}")
                 self.assertEqual((yield self.dut.all_output_finished), all_output_finished, f"case={n}")
+                self.assertEqual((yield self.dut.madd_done), madd_done, f"case={n}")
                 self.assertEqual((yield self.dut.acc_done), acc_done, f"case={n}")
                 self.assertEqual((yield self.dut.pp_done), pp_done, f"case={n}")
                 self.assertEqual((yield self.dut.out_word_done), out_word_done, f"case={n}")
                 yield
 
-        self.run_sim(process, True)
+        self.run_sim(process, False)

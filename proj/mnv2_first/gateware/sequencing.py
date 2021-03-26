@@ -121,6 +121,8 @@ class Sequencer(SimpleElaboratable):
         High when pipeline should accept data
     all_output_finished: Signal() out
         High when all of the output channels calculations have been started.
+    madd_done: Signal() out
+        Result available from Madd Pipeline
     acc_done: Signal() out
         Accumulation is done, and post processing is ready to start
     pp_done: Signal() out
@@ -138,6 +140,7 @@ class Sequencer(SimpleElaboratable):
         self.input_depth_words = Signal(10)
         self.gate = Signal()
         self.all_output_finished = Signal()
+        self.madd_done = Signal()
         self.acc_done = Signal()
         self.pp_done = Signal()
         self.out_word_done = Signal()
@@ -159,8 +162,8 @@ class Sequencer(SimpleElaboratable):
         ]
         m.submodules['i_count'] = i_count = UpCounter(10)
         m.d.comb += [
-            i_count.en.eq(self.gate),
             i_count.max.eq(self.input_depth_words),
+            self.acc_done.eq(i_count.done),
         ]
         m.submodules['four_count'] = four_count = UpCounter(3)
         m.d.comb += [
@@ -171,9 +174,11 @@ class Sequencer(SimpleElaboratable):
         m.submodules['madd_delay'] = madd_delay = Delayer(
             Madd4Pipeline.PIPELINE_CYCLES)
         m.d.comb += [
-            madd_delay.input.eq(i_count.done),
-            self.acc_done.eq(madd_delay.output),
+            madd_delay.input.eq(self.gate),
+            self.madd_done.eq(madd_delay.output),
+            i_count.en.eq(madd_delay.output),
         ]
+
         m.submodules['pp_delay'] = pp_delay = Delayer(
             PostProcessor.PIPELINE_CYCLES)
         m.d.comb += [
