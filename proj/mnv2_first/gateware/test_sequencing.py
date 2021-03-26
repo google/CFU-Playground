@@ -18,7 +18,7 @@ from nmigen.sim import Delay
 
 from nmigen_cfu import TestBase
 
-from .sequencing import UpCounter
+from .sequencing import Delayer, GateCalculator, UpCounter
 
 
 class UpCounterTest(TestBase):
@@ -60,5 +60,71 @@ class UpCounterTest(TestBase):
                 count, done = expected
                 self.assertEqual((yield self.dut.count), count, f"case={n}")
                 self.assertEqual((yield self.dut.done), done, f"case={n}")
+                yield
+        self.run_sim(process, True)
+
+
+class DelayerTest(TestBase):
+    def create_dut(self):
+        return Delayer(3)
+
+    def test(self):
+        DATA = [
+            (0, 0),
+            (1, 0),
+            (0, 0),
+            (0, 0),
+            (0, 1),
+            (1, 0),
+            (1, 0),
+            (1, 0),
+            (1, 1),
+            (1, 1),
+            (0, 1),
+            (0, 1),
+            (0, 1),
+        ]
+
+        def process():
+            for n, (input, expected) in enumerate(DATA):
+                yield self.dut.input.eq(input)
+                yield Delay(0.25)
+                self.assertEqual((yield self.dut.output), expected, f"case={n}")
+                yield
+        self.run_sim(process, True)
+
+
+class GateCalculatorTest(TestBase):
+    def create_dut(self):
+        return GateCalculator()
+
+    def test(self):
+        DATA = [
+            # Start, stop without blockages
+            ((0, 0, 1, 1), 0),
+            ((1, 0, 1, 1), 1),
+            ((0, 0, 1, 1), 1),
+            ((0, 0, 1, 1), 1),
+            ((0, 1, 1, 1), 0),
+
+            # Test various conditions
+            ((0, 0, 0, 1), 0),
+            ((1, 0, 0, 1), 0),
+            ((0, 0, 1, 1), 1),
+            ((0, 0, 1, 0), 0),
+            ((0, 0, 0, 1), 0),
+            ((0, 0, 1, 1), 1),
+            ((0, 1, 1, 1), 0),
+        ]
+
+        def process():
+            for n, (input, expected) in enumerate(DATA):
+                start_run, all_output_finished, in_store_ready, fifo_has_space = input
+                yield self.dut.start_run.eq(start_run)
+                yield self.dut.all_output_finished.eq(all_output_finished)
+                yield self.dut.in_store_ready.eq(in_store_ready)
+                yield self.dut.fifo_has_space.eq(fifo_has_space)
+                yield Delay(0.25)
+                self.assertEqual((yield self.dut.gate), expected, f"case={n}")
                 yield
         self.run_sim(process, True)
