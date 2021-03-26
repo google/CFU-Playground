@@ -213,38 +213,6 @@ class DualPortMemory(SimpleElaboratable):
         ]
 
 
-class Sequencer(SimpleElaboratable):
-    """A shift register to use as a per-cycle sequencer.
-
-    Parameters
-    ----------
-    n: int
-      Number of positions supported by the sequencer. n >= 1.
-
-    Attributes
-    ----------
-    inp: Signal() input
-      The bit to shift into the sequencer.
-    sequence: Signal(n+1) output
-      The sequence bits. sequence[0] is always equal to inp (via comb).
-      sequence[1] is the previous value of sequence[0], sequence[2] is
-      the previous value of sequence[1] and so forth.
-    """
-
-    def __init__(self, n):
-        self.inp = Signal()
-        self.sequence = Signal(n + 1)
-
-    def elab(self, m):
-        shift_register = Signal(self.sequence.width - 1)
-        m.d.comb += self.sequence[0].eq(self.inp)
-        m.d.sync += [
-            shift_register[0].eq(self.inp),
-            shift_register[1:].eq(shift_register),
-        ]
-        m.d.comb += self.sequence.eq(Cat(self.inp, shift_register))
-
-
 def increment_to_limit(value, limit):
     """Builds a statement that performs circular increments.
 
@@ -284,7 +252,7 @@ class SequentialMemoryReader(SimpleElaboratable):
         Indicates the current piece of data has been read, and want
         the next word, please
     restart: Signal() input
-        Indicates that reader should be reset to address zero. Data 
+        Indicates that reader should be reset to address zero. Data
         is ready at next cycle.
     """
 

@@ -15,8 +15,9 @@
 
 from nmigen import Mux, Signal, signed
 
-from nmigen_cfu import SimpleElaboratable, Sequencer
+from nmigen_cfu import SimpleElaboratable
 
+from .sequencing import Delayer
 from .registerfile import Xetter
 
 INT32_MIN = 0x8000_0000
@@ -257,8 +258,8 @@ class PostProcessXetter(Xetter):
         ]
 
         # Use a sequencer to count down to processing end
-        m.submodules['seq'] = seq = Sequencer(PostProcessor.PIPELINE_CYCLES)
-        m.d.comb += seq.inp.eq(self.start)
+        m.submodules['delay'] = delay = Delayer(PostProcessor.PIPELINE_CYCLES)
+        m.d.comb += delay.input.eq(self.start)
 
         # Other control signal outputs - set *_next to indicate values used
         # Set done to fire when calculation is complete
@@ -266,5 +267,5 @@ class PostProcessXetter(Xetter):
             self.bias_next.eq(self.start),
             self.multiplier_next.eq(self.start),
             self.shift_next.eq(self.start),
-            self.done.eq(seq.sequence[-1]),
+            self.done.eq(delay.output),
         ]

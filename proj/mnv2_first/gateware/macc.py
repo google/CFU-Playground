@@ -15,8 +15,9 @@
 
 from nmigen import Cat, Signal, signed
 
-from nmigen_cfu import all_words, Sequencer, SimpleElaboratable, tree_sum
+from nmigen_cfu import all_words, SimpleElaboratable, tree_sum
 
+from .sequencing import Delayer
 from .post_process import PostProcessor
 from .registerfile import Xetter
 
@@ -101,7 +102,7 @@ class Accumulator(SimpleElaboratable):
 class ByteToWordShifter(SimpleElaboratable):
     """Shifts bytes into a word.
 
-    Bytes are shifted from high to low, so that result is little-endian, 
+    Bytes are shifted from high to low, so that result is little-endian,
     with the "first" byte occupying the LSBs
 
     Public Interface
@@ -176,14 +177,17 @@ class Macc4Run4(Xetter):
         self.shift_result = Signal(signed(32))
 
     def elab(self, m):
-        # Sequence triggers every time a madd4 starts in order trigger accumulator
-        m.submodules['madd_seq'] = madd4_seq = Sequencer(
+        # Sequence triggers every time a madd4 starts in order trigger
+        # accumulator
+        m.submodules['madd_delay'] = madd_delay = Delayer(
             Madd4Pipeline.PIPELINE_CYCLES)
-        # Sequence triggers on last madd4 for an output channel to start post processor
-        m.submodules['last_madd_seq'] = last_madd4_seq = Sequencer(
+        # Sequence triggers on last madd4 for an output channel to start post
+        # processor
+        m.submodules['last_madd_delay'] = last_madd_delay = Delayer(
             Madd4Pipeline.PIPELINE_CYCLES)
-        # Seqence triggers when post processor starts - allows pp output to be captured
-        m.submodules['pp_seq'] = pp_seq = Sequencer(
+        # Seqence triggers when post processor starts - allows pp output to be
+        # captured
+        m.submodules['pp_delay'] = pp_delay = Delayer(
             PostProcessor.PIPELINE_CYCLES)
 
         # Number of output channels that have outstanding madds
@@ -194,7 +198,7 @@ class Macc4Run4(Xetter):
 
         def schedule_madd4():
             m.d.comb += [
-                madd4_seq.inp.eq(1),
+                madd_delay.input.eq(1),
                 self.madd4_start.eq(1),
             ]
 
@@ -213,24 +217,26 @@ class Macc4Run4(Xetter):
             # Track outstanding and trigger "last" on last
             m.d.sync += outstanding_madd4s.eq(outstanding_madd4s - 1)
             with m.If(outstanding_madd4s == 1):
-                m.d.comb += last_madd4_seq.inp.eq(1)
+                m.d.comb += last_madd_delay.input.eq(1)
                 m.d.sync += [
-                    outstanding_madd4_channels.eq(outstanding_madd4_channels - 1),
+                    outstanding_madd4_channels.eq(
+                        outstanding_madd4_channels - 1),
                     outstanding_madd4s.eq(self.input_depth),
                 ]
 
         # Tell accumulator to add as each madd is finished
-        m.d.comb += self.acc_add_en.eq(madd4_seq.sequence[-1])
+        m.d.comb += self.acc_add_en.eq(madd_delay.output)
 
         # Tell Post processor to start on last Madd finish
-        m.d.comb += self.pp_start.eq(last_madd4_seq.sequence[-1])
-        m.d.comb += pp_seq.inp.eq(last_madd4_seq.sequence[-1])
+        m.d.comb += self.pp_start.eq(last_madd_delay.output)
+        m.d.comb += pp_delay.input.eq(last_madd_delay.output)
 
-        # On post processor finished, take result. When all channels done, declare finished
-        with m.If(pp_seq.sequence[-1]):
+        # On post processor finished, take result. When all channels done,
+        # declare finished
+        with m.If(pp_delay.output):
             m.d.comb += self.shift_en.eq(1)
             m.d.sync += complete_channels.eq(complete_channels + 1)
             with m.If(complete_channels == 3):
                 m.d.comb += self.done.eq(1)
 
-        m.d.comb +=  self.output.eq(self.shift_result)
+        m.d.comb += self.output.eq(self.shift_result)
