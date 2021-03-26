@@ -13,15 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen.hdl.ast import Mux, Signal
+from nmigen import Signal
+from nmigen.lib.fifo import SyncFIFOBuffered
 from nmigen_cfu import Cfu, DualPortMemory, is_pysim_run
 
+from .macc import Accumulator, ByteToWordShifter, Madd4Pipeline
 from .post_process import PostProcessor
 from .store import CircularIncrementer, FilterValueFetcher, InputStore, InputStoreSetter, NextWordGetter, StoreSetter
 from .registerfile import RegisterFileInstruction, RegisterSetter
-from .macc import Accumulator, ByteToWordShifter, Macc4Run4, Madd4Pipeline
+from .sequencing import Sequencer
 
 OUTPUT_CHANNEL_PARAM_DEPTH = 512
+OUTPUT_QUEUE_DEPTH = 512
 FILTER_DATA_MEM_DEPTH = 512
 MAX_PER_PIXEL_INPUT_WORDS = 1024
 
@@ -87,53 +90,68 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         m.d.comb += fvset.connect_write_port(dps)
         return dps, fvset.count, fvset.updated
 
-    def _make_input_store(self, m, name, restart_signal, input_depth):
+    def _make_input_store(self, m, name, restart_signal, input_depth_words):
         m.submodules[f'{name}'] = ins = InputStore(MAX_PER_PIXEL_INPUT_WORDS)
         m.submodules[f'{name}_set'] = insset = InputStoreSetter()
         m.d.comb += insset.connect(ins)
         self.register_xetter(25, insset)
-        _, read_finished = self._make_setter(m, 112, 'mark_read')
+        _, mark_finished = self._make_setter(m, 112, 'mark_read')
+        read_finished = Signal()
         m.d.comb += [
             ins.restart.eq(restart_signal),
-            ins.input_depth.eq(input_depth),
-            ins.r_finished.eq(read_finished),
+            ins.input_depth.eq(input_depth_words),
+            ins.r_finished.eq(mark_finished | read_finished),
         ]
-        return ins
+        return ins, read_finished
 
-    def _make_filter_value_getter(self, m, fvf):
+    def _make_filter_value_getter(self, m, fvf_data):
         fvg_next = Signal()
         if is_pysim_run():
             m.submodules['fvg'] = fvg = NextWordGetter()
             m.d.comb += [
-                fvf.next.eq(fvg.next),
-                fvg.data.eq(fvf.data),
+                fvg.data.eq(fvf_data),
                 fvg.ready.eq(1),
                 fvg_next.eq(fvg.next),
             ]
             self.register_xetter(110, fvg)
         return fvg_next
 
-    def _make_input_store_getter(self, m, ins):
+    def _make_input_store_getter(self, m, ins_r_data, ins_r_ready):
         insget_next = Signal()
         if is_pysim_run():
             m.submodules['insget'] = insget = NextWordGetter()
             m.d.comb += [
-                insget.data.eq(ins.r_data),
-                insget.ready.eq(ins.r_ready),
-                ins.r_next.eq(insget.next),
+                insget.data.eq(ins_r_data),
+                insget.ready.eq(ins_r_ready),
                 insget_next.eq(insget.next),
             ]
             self.register_xetter(111, insget)
         return insget_next
 
+    def _make_output_queue(self, m):
+        m.submodules['FIFO'] = fifo = SyncFIFOBuffered(
+            depth=OUTPUT_QUEUE_DEPTH, width=32)
+        m.submodules['oq_get'] = oq_get = NextWordGetter()
+        m.d.comb += [
+            oq_get.data.eq(fifo.r_data),
+            oq_get.ready.eq(fifo.r_rdy),
+            fifo.r_en.eq(oq_get.next),
+        ]
+        self.register_xetter(34, oq_get)
+        oq_has_space = fifo.w_level < (OUTPUT_QUEUE_DEPTH - 8)
+        return fifo.w_data, fifo.w_en, oq_has_space
+
     def elab_xetters(self, m):
-        input_depth, set_id = self._make_setter(m, 10, 'set_input_depth')
+        # Simple registers
+        input_depth_words, set_id = self._make_setter(
+            m, 10, 'set_input_depth_words')
         self._make_setter(m, 11, 'set_output_depth')
         input_offset, _ = self._make_setter(m, 12, 'set_input_offset')
         output_offset, _ = self._make_setter(m, 13, 'set_output_offset')
         activation_min, _ = self._make_setter(m, 14, 'set_activation_min')
         activation_max, _ = self._make_setter(m, 15, 'set_activation_max')
 
+        # Stores of input and output data
         _, restart = self._make_setter(m, 20, 'set_output_batch_size')
         multiplier, multiplier_next = self._make_output_channel_param_store(
             m, 21, 'store_output_multiplier', restart)
@@ -153,36 +171,27 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
             fvf.updated.eq(fv_updated),
             fvf.restart.eq(restart),
         ]
-        ins = self._make_input_store(m, 'ins', set_id, input_depth)
+        ins, ins_r_finished = self._make_input_store(
+            m, 'ins', set_id, input_depth_words)
 
-        # Make getters for filter and instuction next words
+        # Make getters for filter and instruction next words
         # Only required during pysim unit tests
-        fvg_next = self._make_filter_value_getter(m, fvf)
-        insget_next = self._make_input_store_getter(m, ins)
+        fvg_next = self._make_filter_value_getter(m, fvf.data)
+        insget_next = self._make_input_store_getter(m, ins.r_data, ins.r_ready)
 
-        # MACC 4, with Madd, Accumulator and post processor
-        m.submodules['m4r4'] = m4r4 = Macc4Run4(FILTER_DATA_MEM_DEPTH * 4)
-        self.register_xetter(32, m4r4)
-        m.d.comb += [
-            m4r4.input_depth.eq(input_depth),
-            m4r4.madd4_inputs_ready.eq(ins.r_ready),
-            fvf.next.eq(m4r4.madd4_start | fvg_next),
-            ins.r_next.eq(m4r4.madd4_start | insget_next),
-        ]
+        # The output queue
+        oq_w_data, oq_enable, oq_has_space = self._make_output_queue(m)
 
-        m.submodules['madd4'] = madd4 = Madd4Pipeline()
+        # Calculation aparatus
+        m.submodules['madd'] = madd = Madd4Pipeline()
         m.d.comb += [
-            madd4.offset.eq(input_offset),
-            madd4.f_data.eq(fvf.data),
-            madd4.i_data.eq(ins.r_data),
+            madd.offset.eq(input_offset),
+            madd.f_data.eq(fvf.data),
+            madd.i_data.eq(ins.r_data),
         ]
 
         m.submodules['acc'] = acc = Accumulator()
-        m.d.comb += [
-            acc.add_en.eq(m4r4.acc_add_en),
-            acc.in_value.eq(madd4.result),
-            acc.clear.eq(m4r4.pp_start),
-        ]
+        m.d.comb += acc.in_value.eq(madd.result)
 
         m.submodules['pp'] = pp = PostProcessor()
         m.d.comb += [
@@ -193,17 +202,35 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
             pp.multiplier.eq(multiplier),
             pp.shift.eq(shift),
             pp.accumulator.eq(acc.result),
-
-            bias_next.eq(m4r4.pp_start),
-            multiplier_next.eq(m4r4.pp_start),
-            shift_next.eq(m4r4.pp_start),
         ]
 
         m.submodules['btw'] = btw = ByteToWordShifter()
+        m.d.comb += btw.in_value.eq(pp.result)
+
+        # Sequencer
+        _, start_run = self._make_setter(m, 33, 'start_run')
+        m.submodules['seq'] = seq = Sequencer()
         m.d.comb += [
-            btw.shift_en.eq(m4r4.shift_en),
-            btw.in_value.eq(pp.result),
-            m4r4.shift_result.eq(btw.result),
+            seq.start_run.eq(start_run),
+            seq.in_store_ready.eq(ins.r_ready),
+            seq.fifo_has_space.eq(oq_has_space),
+            seq.filter_value_words.eq(fv_count),
+            seq.input_depth_words.eq(input_depth_words),
+
+            ins.r_next.eq(insget_next | seq.gate),
+            fvf.next.eq(fvg_next | seq.gate),
+            ins_r_finished.eq(seq.all_output_finished),
+
+            acc.add_en.eq(seq.madd_done),
+            acc.clear.eq(seq.acc_done),
+
+            bias_next.eq(seq.acc_done),
+            multiplier_next.eq(seq.acc_done),
+            shift_next.eq(seq.acc_done),
+
+            btw.shift_en.eq(seq.pp_done),
+            oq_w_data.eq(btw.result),
+            oq_enable.eq(seq.out_word_done),
         ]
 
 
