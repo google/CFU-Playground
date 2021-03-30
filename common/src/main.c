@@ -46,7 +46,7 @@ static struct Menu MENU = {
         MENU_ITEM('5', "TFLite Unit Tests", tflite_do_tests),
         MENU_ITEM('6', "Benchmarks", do_benchmarks_menu),
 #ifdef PLATFORM_sim
-        MENU_ITEM('x', "Exit (only works in simulation)", exit_sim),
+        MENU_ITEM('Q', "Exit (only works in simulation)", exit_sim),
 #endif
         MENU_SENTINEL,
     },
