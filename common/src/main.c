@@ -25,6 +25,15 @@
 #include "perf.h"
 #include "proj_menu.h"
 #include "tflite.h"
+#include "generated/csr.h"
+
+
+#ifdef PLATFORM_sim
+static void exit_sim() {
+    sim_finish_finish_write(1);
+}
+#endif
+
 
 static struct Menu MENU = {
     "CFU Playground",
@@ -36,6 +45,9 @@ static struct Menu MENU = {
         MENU_ITEM('4', "Performance Counter Tests", perf_test_menu),
         MENU_ITEM('5', "TFLite Unit Tests", tflite_do_tests),
         MENU_ITEM('6', "Benchmarks", do_benchmarks_menu),
+#ifdef PLATFORM_sim
+        MENU_ITEM('Q', "Exit (only works in simulation)", exit_sim),
+#endif
         MENU_SENTINEL,
     },
 };
