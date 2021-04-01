@@ -10,7 +10,8 @@ Welcome to CFU-Playground's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   md_example
+   docs/index
+   
 
 
 
