@@ -23,6 +23,10 @@ fi
 if ! which verilator >/dev/null; then
     missing+=(verilator libevent-dev libjson-c-dev)
 fi
+if ! which ditaa >/dev/null; then
+    missing+=(ditaa)
+fi
+
 
 in_ci=0
 if [ $# -gt 0 ] ; then

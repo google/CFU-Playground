@@ -49,6 +49,7 @@ copyright = authors + u', 2020'
 # ones.
 extensions = [
     'sphinx_tabs.tabs',
+    'sphinxcontrib.ditaa',
     'sphinxcontrib.jinja',
     'recommonmark',
 ]
