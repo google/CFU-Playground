@@ -36,3 +36,8 @@ This document is written in ReStructuredText. There is also a
 .. _Markdown: https://www.sphinx-doc.org/en/master/usage/markdown.html
 .. _ReStructured Text: https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Sub-pages:
+
+   md_example
