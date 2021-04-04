@@ -6,27 +6,44 @@
 The CFU Playground: Accelerate ML models on FPGAs
 =================================================
 
-The CFU Playground is a collection of software, gateware and hardware configured to 
+The CFU Playground is a collection of software, gateware and hardware configured to
 make it easy to:
 
-* "Run" ML models 
-* Benchmark and profile performance 
+* Run ML models
+* Benchmark and profile performance
 * Make incremental improvements
 * Measure the results of changes
 
-As well as being a useful tool for accelerating ML inferencing, the CFU Playground is 
+ML acceleration on microcontroller-class hardware is a new area, and one that, due
+to the expense of building ASICs, is currently dominated by hardware engineers.
+In order to encourage software engineers to join in the innovation, the
+CFU-Playground aims to make experimentation as simple, fast and fun as
+possible.
+
+As well as being a useful tool for accelerating ML inferencing, the CFU Playground is
 a relatively gentle introduction to using FPGAs for computation.
+
+If you find that you need help or that anything is not working as you expect,
+please `raise an issue`_ and we'll do our best to point you in the right direction.
+
+.. _`raise an issue`: https://github.com/google/CFU-Playground/issues/new
+
 
 Learning and Using the CFU Playground
 -------------------------------------
 
-Begin with the :doc:`overview`, which explains the various hardware, software and gateware components that make up the CFU Playground.
+Begin with the :doc:`overview`, which explains the various hardware, software and
+gateware components that make up the CFU Playground.
 
-:doc:`crash-course` explains the basics of FPGAs, Verilog, nMigen, RISCV, Custom Function Units and `Tensorflow Lite for Microcontrollers`_. 
+:doc:`setup-guide` gives detailed instructions for setting up an environment.
+
+:doc:`crash-course` explains the basics of FPGAs, Verilog, `nMigen`_, RISCV, Custom
+Function Units and `Tensorflow Lite for Microcontrollers`_.
 
 :doc:`step-by-step` will guide you through creating your first accelerator.
 
 .. _`Tensorflow Lite for Microcontrollers`: https://www.tensorflow.org/lite/microcontrollers
+.. _nMigen: https://github.com/nmigen/nmigen
 
 .. image:: images/overview.svg
    :height: 400px
@@ -39,13 +56,14 @@ Site Index
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
    overview
+   setup-guide
    crash-course
    step-by-step
+   vivado-install
    docs/index
-   
+
 
 .. Not currently in use
    * :ref:`genindex`
