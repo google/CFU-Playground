@@ -90,9 +90,28 @@ inline static void LoadInputValues(const uint32_t*& input_ptr,
 
 inline static void UnloadOutputValues(uint32_t*& output_ptr, int num_words) {
   PERF_START(7);
-  for (int i = 0; i < num_words; i++) {
+  // This works
+  if (num_words & 2) {
+    *(output_ptr++) = CFU_GET_OUTPUT();
     *(output_ptr++) = CFU_GET_OUTPUT();
   }
+  for (; num_words > 2; num_words -= 4) {
+    *(output_ptr++) = CFU_GET_OUTPUT();
+    *(output_ptr++) = CFU_GET_OUTPUT();
+    *(output_ptr++) = CFU_GET_OUTPUT();
+    *(output_ptr++) = CFU_GET_OUTPUT();
+  }
+
+  // // This works
+  // for (int i = num_words; i > 0; i -= 2) {
+  //   *(output_ptr++) = CFU_GET_OUTPUT();
+  //   *(output_ptr++) = CFU_GET_OUTPUT();
+  // }
+
+  // Original
+  // for (int i = 0; i < num_words; i++) {
+  //   *(output_ptr++) = CFU_GET_OUTPUT();
+  // }
   PERF_END(7);
 }
 
