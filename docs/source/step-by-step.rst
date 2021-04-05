@@ -1,10 +1,15 @@
 The Step-by-Step Guide to Building an ML Accelerator
 ====================================================
 
-After you have a good overview of the CFU Playground components, it's time to put it all together!
+After you have read the :doc:`overview <overview>` of the CFU Playground components and
+:doc:`set up <setup-guide>` your CFU-Playground, it's time to accelerate a model.
 
-* Step 1: pick a model. Suggest pdti8
-* Step 2: profile and identify an operation to focus upon
-* Step 3: software specialization
-* Step 4: simple calculation gateware
-* Step 5: moving loops into gateware
+
+TODO
+----
+
+* Step 2: pick a model. Suggest pdti8
+* Step 3: profile and identify an operation to focus upon
+* Step 4: software specialization
+* Step 5: simple calculation gateware
+* Step 6: moving loops into gateware
