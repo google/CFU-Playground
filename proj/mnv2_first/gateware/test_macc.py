@@ -18,7 +18,7 @@ from nmigen.sim import Delay
 
 from nmigen_cfu import TestBase
 
-from .macc import Accumulator, ByteToWordShifter, Macc4Run4
+from .macc import Accumulator, ByteToWordShifter
 
 
 class AccumulatorTest(TestBase):
@@ -78,81 +78,5 @@ class ByteToWordShifterTest(TestBase):
                 yield Delay(0.25)
                 if expected is not None:
                     self.assertEqual((yield self.dut.result), expected, f"case={n}")
-                yield
-        self.run_sim(process, False)
-
-
-class Macc4Run4Test(TestBase):
-    def create_dut(self):
-        return Macc4Run4(512)
-
-    def test(self):
-        DATA = [
-            # Allow time to prepare
-            ((0, 0, 0), (0, 0, 0, 0, 0, 0)),
-            ((0, 0, 0), (0, 0, 0, 0, 0, 0)),
-            # Start, but not yet ready, then ready
-            ((1, 0, 0), (0, 0, 0, 0, 0, 0)),
-            ((0, 0, 0), (0, 0, 0, 0, 0, 0)),
-            ((0, 0, 0), (0, 0, 0, 0, 0, 0)),
-            # Ready, not ready, ready, ready, not ready, ready
-            ((0, 1, 0), (1, 0, 0, 0, 0, 0)),
-            ((0, 0, 0), (0, 0, 0, 0, 0, 0)),
-            ((0, 1, 0), (1, 1, 0, 0, 0, 0)),
-            ((0, 0, 0), (0, 0, 0, 0, 0, 0)),
-            ((0, 1, 0), (1, 1, 0, 0, 0, 0)),
-            ((0, 1, 0), (1, 0, 0, 0, 0, 0)),
-            ((0, 0, 0), (0, 1, 0, 0, 0, 0)),
-            ((0, 0, 0), (0, 1, 1, 0, 0, 0)),
-            # wait for post processor
-            ((0, 0, 0), (0, 0, 0, 0, 0, 0)),
-            ((0, 0, 0), (0, 0, 0, 0, 0, 0)),
-            ((0, 0, 0), (0, 0, 0, 0, 0, 0)),
-            ((0, 0, 66), (0, 0, 0, 1, 0, 0)),
-            # Do one at full speed
-            ((0, 1, 0), (1, 0, 0, 0, 0, 0)),
-            ((0, 1, 0), (1, 0, 0, 0, 0, 0)),
-            ((0, 1, 0), (1, 1, 0, 0, 0, 0)),
-            ((0, 1, 0), (1, 1, 0, 0, 0, 0)),
-            ((0, 0, 0), (0, 1, 0, 0, 0, 0)),
-            ((0, 0, 0), (0, 1, 1, 0, 0, 0)),
-            # wait for post processor
-            ((0, 0, 0), (0, 0, 0, 0, 0, 0)),
-            ((0, 0, 0), (0, 0, 0, 0, 0, 0)),
-            ((0, 0, 0), (0, 0, 0, 0, 0, 0)),
-            ((0, 0, 0), (0, 0, 0, 1, 0, 0)),
-            # Do two more at full speed then wait for PP and done
-            ((0, 1, 0), (1, 0, 0, 0, 0, 0)),
-            ((0, 1, 0), (1, 0, 0, 0, 0, 0)),
-            ((0, 1, 0), (1, 1, 0, 0, 0, 0)),
-            ((0, 1, 0), (1, 1, 0, 0, 0, 0)),
-            ((0, 1, 0), (1, 1, 0, 0, 0, 0)),
-            ((0, 1, 0), (1, 1, 1, 0, 0, 0)),
-            ((0, 1, 0), (1, 1, 0, 0, 0, 0)),
-            ((0, 1, 0), (1, 1, 0, 0, 0, 0)),
-            ((0, 0, 0), (0, 1, 0, 0, 0, 0)),
-            ((0, 0, 0), (0, 1, 1, 1, 0, 0)),
-            ((0, 0, 0), (0, 0, 0, 0, 0, 0)),
-            ((0, 0, 0), (0, 0, 0, 0, 0, 0)),
-            ((0, 0, 0), (0, 0, 0, 0, 0, 0)),
-            ((0, 0, 99), (0, 0, 0, 1, 1, 99)),
-        ]
-
-        def process():
-            yield self.dut.input_depth.eq(4)
-            for n, (inputs, expected) in enumerate(DATA):
-                start, madd4_inputs_ready, shift_result = inputs
-                yield self.dut.start.eq(start)
-                yield self.dut.madd4_inputs_ready.eq(madd4_inputs_ready)
-                yield self.dut.shift_result.eq(shift_result)
-                yield Delay(0.25)
-                madd4_start, acc_add_en, pp_start, shift_en, done, output = expected
-                self.assertEqual((yield self.dut.madd4_start), madd4_start, f"case={n}")
-                self.assertEqual((yield self.dut.acc_add_en), acc_add_en, f"case={n}")
-                self.assertEqual((yield self.dut.pp_start), pp_start, f"case={n}")
-                self.assertEqual((yield self.dut.shift_en), shift_en, f"case={n}")
-                self.assertEqual((yield self.dut.done), done, f"case={n}")
-                if done:
-                    self.assertEqual((yield self.dut.output.as_signed()), output, f"case={n}")
                 yield
         self.run_sim(process, False)

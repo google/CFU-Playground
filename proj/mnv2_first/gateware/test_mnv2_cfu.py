@@ -105,11 +105,17 @@ class CfuTest(CfuTestBase):
             [get_val(v) for v in range(200, 210)])
         return self.run_ops(DATA, False)
 
-    def test_macc_4_run_1(self):
+    def test_2dconv(self):
+        # Run a whole pixel of data
+        # 16 values in input (4 words)
+        # 24 values in output
+        # filter words = 16 * 24 / 4 = 96
+        # Calculations are at
+        # https://docs.google.com/spreadsheets/d/1tQeX8expePNFisVX0Jl5_ZmKCX1QHWVMGRlPebpmpas/edit
         def set_reg(reg, val):
             return ((0, reg, val, 0), 0)
 
-        def set_out_channel_params(mult, shift, bias):
+        def set_out_channel_params(bias, mult, shift):
             yield set_reg(21, mult)
             yield set_reg(22, shift)
             yield set_reg(23, bias)
@@ -120,34 +126,40 @@ class CfuTest(CfuTestBase):
         def set_input_val(val):
             return ((0, 25, val, 0), 0)
 
-        def macc_4_run_4(expected_result):
-            return ((0, 32, 0, 0), expected_result)
+        def get_output(expected_result):
+            return ((0, 34, 0, 0), expected_result)
 
         def make_op_stream():
             def nums(start, count): return range(start, start + count)
             # Output offset -50,
-            yield set_reg(13, -50)
-            # Input depth 8, input offset 50, batch size 16
-            yield set_reg(10, 8)
-            yield set_reg(12, 50)
-            yield set_reg(20, 16)
+            yield set_reg(13, -128)
+            # Input depth 4 words, input offset 50, batch size 24 outputs (6 words)
+            yield set_reg(10, 4)
+            yield set_reg(12, 128)
+            yield set_reg(20, 24)
             # activation min max = -128, +127,
             yield set_reg(14, -128)
             yield set_reg(15, 127)
 
-            yield from set_out_channel_params(67_000_000, -4, 50_000)
-            yield from set_out_channel_params(50_000_000, -6, 50_000)
-            yield from set_out_channel_params(28_000_000, -4, 75_000)
-            yield from set_out_channel_params(50_000_000, -5, 100_000)
+            for _ in range(6):
+                yield from set_out_channel_params(30_000, 31_000_000, -3)
+                yield from set_out_channel_params(50_000, 50_000_000, -6)
+                yield from set_out_channel_params(75_000, 56_000_000, -4)
+                yield from set_out_channel_params(100_000, 50_000_000, -5)
 
-            for f_vals in zip(nums(2, 32), nums(3, 32),
-                              nums(4, 32), nums(5, 32)):
+            for f_vals in zip(nums(-17, 96), nums(3, 96),
+                              nums(-50, 96), nums(5, 96)):
                 yield set_filter_val(pack_vals(*f_vals))
-            for i_vals in zip(nums(1, 8), nums(3, 8), nums(5, 8), nums(7, 8)):
+            for i_vals in zip(nums(1, 4), nums(3, 4), nums(5, 4), nums(7, 4)):
                 yield set_input_val(pack_vals(*i_vals))
-            
-            # To see calculations for these four results in order, see
-            # https://docs.google.com/spreadsheets/d/1tQeX8expePNFisVX0Jl5_ZmKCX1QHWVMGRlPebpmpas/edit
-            yield macc_4_run_4(pack_vals(73, -22, 46, 64))
 
-        return self.run_ops(make_op_stream(), False)
+            # Start calculation
+            yield set_reg(33, 0)
+            yield get_output(pack_vals(-125, -117, -24, -57))
+            yield get_output(pack_vals(-63, -105, 32, -32))
+            yield get_output(pack_vals(-1, -92, 88, -7))
+            yield get_output(pack_vals(60, -80, 127, 17))
+            yield get_output(pack_vals(122, -67, 127, 42))
+            yield get_output(pack_vals(127, -55, 127, 67))
+
+        return self.run_ops(make_op_stream(), True)

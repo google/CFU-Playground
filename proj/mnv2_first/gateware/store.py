@@ -293,9 +293,9 @@ class InputStore(SimpleElaboratable):
     r_data: Signal(32) output
         Four words of data
     r_next: Signal() input
-        Advance data pointer by one word
+        Data being read this cycle, so advance data pointer by one word next cycle
     r_finished: Signal() input
-        Strobe to indicate that we have finished reading this buffer.
+        Last data read this cycle, so move to next buffer on next cycle
     """
 
     def __init__(self, max_depth):
@@ -352,7 +352,7 @@ class InputStore(SimpleElaboratable):
         smr_datas = Array(smr.data for smr in smrs)
         m.d.comb += self.r_data.eq(smr_datas[r_addr[:2]])
 
-        # On finished
+        # On finished (overrides r_next)
         with m.If(self.r_finished):
             m.d.sync += [
                 r_addr.eq(0),
