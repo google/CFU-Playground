@@ -177,7 +177,7 @@ class Cfu(SimpleElaboratable):
         self.cmd_valid = Signal(name='io_bus_cmd_valid')
         self.cmd_ready = Signal(name='io_bus_cmd_ready')
         self.cmd_function_id = Signal(
-            20, name='io_bus_cmd_payload_function_id')
+            10, name='io_bus_cmd_payload_function_id')
         self.cmd_in0 = Signal(32, name='io_bus_cmd_payload_inputs_0')
         self.cmd_in1 = Signal(32, name='io_bus_cmd_payload_inputs_1')
         self.rsp_valid = Signal(name='io_bus_rsp_valid')
@@ -290,7 +290,7 @@ class CfuTestBase(TestBase):
             for n, (inputs, expected) in enumerate(data):
                 function_id, funct7, in0, in1 = self._unpack(inputs)
                 # Set inputs and cmd_valid
-                yield self.dut.cmd_function_id.eq((funct7 << 13) | function_id)
+                yield self.dut.cmd_function_id.eq((funct7 << 3) | function_id)
                 yield self.dut.cmd_in0.eq(in0)
                 yield self.dut.cmd_in1.eq(in1)
                 yield self.dut.cmd_valid.eq(1)
