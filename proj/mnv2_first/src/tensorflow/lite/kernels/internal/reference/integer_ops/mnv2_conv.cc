@@ -35,6 +35,31 @@ limitations under the License.
 namespace tflite {
 namespace reference_integer_ops {
 
+inline static int CalculateChannelsPerBatch(int input_depth, int output_depth) {
+  // Each pixel processed requires:
+  // - output_depth words to be stored in output_params, and
+  // - input_depth * output_depth words stored in filter values.
+  // If either of these limits are exceeded, we break processing into batches
+
+  int channels_per_batch = output_depth;
+
+  // Limit by output params
+  channels_per_batch = std::min(channels_per_batch, MAX_CONV_OUTPUT_PARAMS);
+
+  // Limit by filter values
+  channels_per_batch =
+      std::min(channels_per_batch, MAX_FILTER_VALUES_PER_PIXEL / input_depth);
+
+#ifdef USE_CONV_SMALL_BATCHES
+  channels_per_batch = std::min(channels_per_batch, 2048);
+#endif
+
+  // Round to nearest lower multiple of 4
+  channels_per_batch &= ~3;
+
+  return channels_per_batch;
+}
+
 inline static void LoadOutputChannelWeights(const int32_t*& output_multiplier,
                                             const int32_t*& output_shift,
                                             const int32_t*& bias_data,
@@ -138,21 +163,9 @@ void Mnv2ConvPerChannel1x1(
 
   // Access filter data as words
   const uint32_t* filter_words = (const uint32_t*)filter_data;
-
-// Do the processing in batches, by output channel. batch size is number of
-// output channels processed per batch and it is chosen to avoid overflowing
-// filter_data memory, and then rounded down to a multiple of 4.
-//
-// For each batch, the entire input will be read once
-#ifdef USE_CONV_SMALL_BATCHES
-  const int channels_per_batch =
-      std::min(output_depth, (2048 / input_depth) / 4 * 4);
-#else
-  const int channels_per_batch =
-      std::min(output_depth, (NUM_FILTER_DATA_BYTES / input_depth) / 4 * 4);
-#endif
-
   const int num_pixels = output_height * output_width;
+  const int channels_per_batch =
+      CalculateChannelsPerBatch(input_depth, output_depth);
   const int num_batches =
       (channels_per_batch - 1 + output_depth) / channels_per_batch;
   PERF_END(2);
