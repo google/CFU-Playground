@@ -17,16 +17,12 @@ from nmigen import Signal
 from nmigen.lib.fifo import SyncFIFOBuffered
 from nmigen_cfu import Cfu, DualPortMemory, is_pysim_run
 
+from . import config
 from .macc import Accumulator, ByteToWordShifter, Madd4Pipeline
 from .post_process import PostProcessor
 from .store import CircularIncrementer, FilterValueFetcher, InputStore, InputStoreSetter, NextWordGetter, StoreSetter
 from .registerfile import RegisterFileInstruction, RegisterSetter
 from .sequencing import Sequencer
-
-OUTPUT_CHANNEL_PARAM_DEPTH = 512
-OUTPUT_QUEUE_DEPTH = 512
-FILTER_DATA_MEM_DEPTH = 512
-MAX_PER_PIXEL_INPUT_WORDS = 1024
 
 
 class Mnv2RegisterInstruction(RegisterFileInstruction):
@@ -49,11 +45,11 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         Returns a pair of signals: (current data, inc.next)
         """
         m.submodules[f'{name}_dp'] = dp = DualPortMemory(
-            width=32, depth=OUTPUT_CHANNEL_PARAM_DEPTH, is_sim=is_pysim_run())
+            width=32, depth=config.OUTPUT_CHANNEL_PARAM_DEPTH, is_sim=is_pysim_run())
         m.submodules[f'{name}_inc'] = inc = CircularIncrementer(
-            OUTPUT_CHANNEL_PARAM_DEPTH)
+            config.OUTPUT_CHANNEL_PARAM_DEPTH)
         m.submodules[f'{name}_set'] = psset = StoreSetter(
-            32, 1, OUTPUT_CHANNEL_PARAM_DEPTH)
+            32, 1, config.OUTPUT_CHANNEL_PARAM_DEPTH)
         self.register_xetter(reg_num, psset)
         m.d.comb += [
             # Restart param store when reg is set
@@ -78,10 +74,10 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         dps = []
         for i in range(4):
             m.submodules[f'{name}_dp_{i}'] = dp = DualPortMemory(
-                width=32, depth=FILTER_DATA_MEM_DEPTH, is_sim=is_pysim_run())
+                width=32, depth=config.FILTER_DATA_MEM_DEPTH, is_sim=is_pysim_run())
             dps.append(dp)
         m.submodules[f'{name}_set'] = fvset = StoreSetter(
-            32, 4, FILTER_DATA_MEM_DEPTH)
+            32, 4, config.FILTER_DATA_MEM_DEPTH)
         self.register_xetter(reg_num, fvset)
         m.d.comb += [
             # Restart param store when reg is set
@@ -91,7 +87,7 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         return dps, fvset.count, fvset.updated
 
     def _make_input_store(self, m, name, restart_signal, input_depth_words):
-        m.submodules[f'{name}'] = ins = InputStore(MAX_PER_PIXEL_INPUT_WORDS)
+        m.submodules[f'{name}'] = ins = InputStore(config.MAX_PER_PIXEL_INPUT_WORDS)
         m.submodules[f'{name}_set'] = insset = InputStoreSetter()
         m.d.comb += insset.connect(ins)
         self.register_xetter(25, insset)
@@ -130,7 +126,7 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
 
     def _make_output_queue(self, m):
         m.submodules['FIFO'] = fifo = SyncFIFOBuffered(
-            depth=OUTPUT_QUEUE_DEPTH, width=32)
+            depth=config.OUTPUT_QUEUE_DEPTH, width=32)
         m.submodules['oq_get'] = oq_get = NextWordGetter()
         m.d.comb += [
             oq_get.data.eq(fifo.r_data),
@@ -138,7 +134,7 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
             fifo.r_en.eq(oq_get.next),
         ]
         self.register_xetter(34, oq_get)
-        oq_has_space = fifo.w_level < (OUTPUT_QUEUE_DEPTH - 8)
+        oq_has_space = fifo.w_level < (config.OUTPUT_QUEUE_DEPTH - 8)
         return fifo.w_data, fifo.w_en, oq_has_space
 
     def elab_xetters(self, m):
@@ -162,7 +158,7 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         fv_mems, fv_count, fv_updated = self._make_filter_value_store(
             m, 24, 'store_filter_values', restart)
 
-        m.submodules['fvf'] = fvf = FilterValueFetcher(FILTER_DATA_MEM_DEPTH)
+        m.submodules['fvf'] = fvf = FilterValueFetcher(config.FILTER_DATA_MEM_DEPTH)
         m.d.comb += fvf.connect_read_ports(fv_mems)
         m.d.comb += [
             # fetcher only works for multiples of 4, and only for multiples of
