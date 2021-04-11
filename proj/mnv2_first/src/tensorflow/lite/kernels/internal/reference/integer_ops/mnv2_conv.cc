@@ -106,7 +106,13 @@ inline static void LoadFilterValues(const uint32_t*& filter_words,
 inline static void LoadInputValues(const uint32_t*& input_ptr,
                                    int input_depth_words) {
   PERF_START(6);
-  for (int i = 0; i < input_depth_words; i += 2) {
+  for (; input_depth_words > 2; input_depth_words -= 4) {
+    CFU_STORE_INPUT_VALUE(*(input_ptr++));
+    CFU_STORE_INPUT_VALUE(*(input_ptr++));
+    CFU_STORE_INPUT_VALUE(*(input_ptr++));
+    CFU_STORE_INPUT_VALUE(*(input_ptr++));
+  }
+  if (input_depth_words == 2) {
     CFU_STORE_INPUT_VALUE(*(input_ptr++));
     CFU_STORE_INPUT_VALUE(*(input_ptr++));
   }
@@ -115,7 +121,14 @@ inline static void LoadInputValues(const uint32_t*& input_ptr,
 
 inline static void UnloadOutputValues(uint32_t*& output_ptr, int num_words) {
   PERF_START(7);
-  for (int i = 0; i < num_words; i++) {
+  for (; num_words > 2; num_words -= 4) {
+    *(output_ptr++) = CFU_GET_OUTPUT();
+    *(output_ptr++) = CFU_GET_OUTPUT();
+    *(output_ptr++) = CFU_GET_OUTPUT();
+    *(output_ptr++) = CFU_GET_OUTPUT();
+  }
+  if (num_words == 2) {
+    *(output_ptr++) = CFU_GET_OUTPUT();
     *(output_ptr++) = CFU_GET_OUTPUT();
   }
   PERF_END(7);
@@ -186,20 +199,17 @@ void Mnv2ConvPerChannel1x1(
     const uint32_t* input_ptr = (uint32_t*)input_data;
     uint32_t* output_ptr = (uint32_t*)(output_data + batch_base);
 
-    for (int p = 0; p < num_pixels; p++) {
-      // Load twice on first loop, no load on last loop and once every other
-      // time.
-      if (p == 0) {
-        LoadInputValues(input_ptr, input_depth_words);
-      }
-      if (p != num_pixels - 1) {
-        LoadInputValues(input_ptr, input_depth_words);
-      }
-
+    // Load twice on first loop, no load on last loop and once every other
+    // time.
+    LoadInputValues(input_ptr, input_depth_words);
+    for (int p = 0; p < num_pixels - 1; p++) {
+      LoadInputValues(input_ptr, input_depth_words);
       CFU_MACC_RUN();
       UnloadOutputValues(output_ptr, batch_size / 4);
       output_ptr += (output_depth - batch_size) / 4;
     }
+    CFU_MACC_RUN();
+    UnloadOutputValues(output_ptr, batch_size / 4);
     PERF_END(5);
   }
 }
