@@ -63,6 +63,7 @@ Site Index
    step-by-step
    vivado-install
    docs/index
+   projects/mnv2_first
 
 
 .. Not currently in use
