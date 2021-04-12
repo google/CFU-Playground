@@ -17,6 +17,7 @@ from nmigen import Signal, Mux
 
 from nmigen_cfu import SimpleElaboratable
 
+from . import config
 from .delay import Delayer
 from .macc import Madd4Pipeline
 from .post_process import PostProcessor
@@ -111,10 +112,10 @@ class Sequencer(SimpleElaboratable):
         Input store has data available
     fifo_has_space: Signal() in
         Output fifo has space to store a whole pipeline of output
-    filter_value_words: Signal(11) in
+    filter_value_words: Signal(range(FILTER_DATA_TOTAL_WORDS+1)) in
         Number of 32bit words of filter data there are.
         This value is output_channel_batch_size * input_depth / 4.
-    input_depth_words: Signal(10) in
+    input_depth_words: Signal(range(MAX_PER_PIXEL_INPUT_WORDS+1)) in
         Number of 32bit words of input channel data there are.
         This value is input_depth / 4.
     gate: Signal() out
@@ -136,8 +137,10 @@ class Sequencer(SimpleElaboratable):
         self.start_run = Signal()
         self.in_store_ready = Signal()
         self.fifo_has_space = Signal()
-        self.filter_value_words = Signal(11)
-        self.input_depth_words = Signal(10)
+        self.filter_value_words = Signal(
+            range(config.FILTER_DATA_TOTAL_WORDS + 1))
+        self.input_depth_words = Signal(
+            range(config.MAX_PER_PIXEL_INPUT_WORDS + 1))
         self.gate = Signal()
         self.all_output_finished = Signal()
         self.madd_done = Signal()
@@ -154,13 +157,15 @@ class Sequencer(SimpleElaboratable):
             gate_calc.all_output_finished.eq(self.all_output_finished),
             self.gate.eq(gate_calc.gate),
         ]
-        m.submodules['f_count'] = f_count = UpCounter(11)
+        m.submodules['f_count'] = f_count = UpCounter(
+            self.filter_value_words.shape().width)
         m.d.comb += [
             f_count.en.eq(self.gate),
             f_count.max.eq(self.filter_value_words),
             self.all_output_finished.eq(f_count.done)
         ]
-        m.submodules['i_count'] = i_count = UpCounter(10)
+        m.submodules['i_count'] = i_count = UpCounter(
+            self.input_depth_words.shape().width)
         m.d.comb += [
             i_count.max.eq(self.input_depth_words),
             self.acc_done.eq(i_count.done),

@@ -35,6 +35,31 @@ limitations under the License.
 namespace tflite {
 namespace reference_integer_ops {
 
+inline static int CalculateChannelsPerBatch(int input_depth, int output_depth) {
+  // Each pixel processed requires:
+  // - output_depth words to be stored in output_params, and
+  // - input_depth * output_depth words stored in filter values.
+  // If either of these limits are exceeded, we break processing into batches
+
+  int channels_per_batch = output_depth;
+
+  // Limit by output params
+  channels_per_batch = std::min(channels_per_batch, MAX_CONV_OUTPUT_PARAMS);
+
+  // Limit by filter values
+  channels_per_batch =
+      std::min(channels_per_batch, MAX_FILTER_VALUES_PER_PIXEL / input_depth);
+
+#ifdef USE_CONV_SMALL_BATCHES
+  channels_per_batch = std::min(channels_per_batch, 2048);
+#endif
+
+  // Round to nearest lower multiple of 4
+  channels_per_batch &= ~3;
+
+  return channels_per_batch;
+}
+
 inline static void LoadOutputChannelWeights(const int32_t*& output_multiplier,
                                             const int32_t*& output_shift,
                                             const int32_t*& bias_data,
@@ -81,7 +106,13 @@ inline static void LoadFilterValues(const uint32_t*& filter_words,
 inline static void LoadInputValues(const uint32_t*& input_ptr,
                                    int input_depth_words) {
   PERF_START(6);
-  for (int i = 0; i < input_depth_words; i += 2) {
+  for (; input_depth_words > 2; input_depth_words -= 4) {
+    CFU_STORE_INPUT_VALUE(*(input_ptr++));
+    CFU_STORE_INPUT_VALUE(*(input_ptr++));
+    CFU_STORE_INPUT_VALUE(*(input_ptr++));
+    CFU_STORE_INPUT_VALUE(*(input_ptr++));
+  }
+  if (input_depth_words == 2) {
     CFU_STORE_INPUT_VALUE(*(input_ptr++));
     CFU_STORE_INPUT_VALUE(*(input_ptr++));
   }
@@ -90,7 +121,14 @@ inline static void LoadInputValues(const uint32_t*& input_ptr,
 
 inline static void UnloadOutputValues(uint32_t*& output_ptr, int num_words) {
   PERF_START(7);
-  for (int i = 0; i < num_words; i++) {
+  for (; num_words > 2; num_words -= 4) {
+    *(output_ptr++) = CFU_GET_OUTPUT();
+    *(output_ptr++) = CFU_GET_OUTPUT();
+    *(output_ptr++) = CFU_GET_OUTPUT();
+    *(output_ptr++) = CFU_GET_OUTPUT();
+  }
+  if (num_words == 2) {
+    *(output_ptr++) = CFU_GET_OUTPUT();
     *(output_ptr++) = CFU_GET_OUTPUT();
   }
   PERF_END(7);
@@ -138,21 +176,9 @@ void Mnv2ConvPerChannel1x1(
 
   // Access filter data as words
   const uint32_t* filter_words = (const uint32_t*)filter_data;
-
-// Do the processing in batches, by output channel. batch size is number of
-// output channels processed per batch and it is chosen to avoid overflowing
-// filter_data memory, and then rounded down to a multiple of 4.
-//
-// For each batch, the entire input will be read once
-#ifdef USE_CONV_SMALL_BATCHES
-  const int channels_per_batch =
-      std::min(output_depth, (2048 / input_depth) / 4 * 4);
-#else
-  const int channels_per_batch =
-      std::min(output_depth, (NUM_FILTER_DATA_BYTES / input_depth) / 4 * 4);
-#endif
-
   const int num_pixels = output_height * output_width;
+  const int channels_per_batch =
+      CalculateChannelsPerBatch(input_depth, output_depth);
   const int num_batches =
       (channels_per_batch - 1 + output_depth) / channels_per_batch;
   PERF_END(2);
@@ -173,20 +199,17 @@ void Mnv2ConvPerChannel1x1(
     const uint32_t* input_ptr = (uint32_t*)input_data;
     uint32_t* output_ptr = (uint32_t*)(output_data + batch_base);
 
-    for (int p = 0; p < num_pixels; p++) {
-      // Load twice on first loop, no load on last loop and once every other
-      // time.
-      if (p == 0) {
-        LoadInputValues(input_ptr, input_depth_words);
-      }
-      if (p != num_pixels - 1) {
-        LoadInputValues(input_ptr, input_depth_words);
-      }
-
+    // Load twice on first loop, no load on last loop and once every other
+    // time.
+    LoadInputValues(input_ptr, input_depth_words);
+    for (int p = 0; p < num_pixels - 1; p++) {
+      LoadInputValues(input_ptr, input_depth_words);
       CFU_MACC_RUN();
       UnloadOutputValues(output_ptr, batch_size / 4);
       output_ptr += (output_depth - batch_size) / 4;
     }
+    CFU_MACC_RUN();
+    UnloadOutputValues(output_ptr, batch_size / 4);
     PERF_END(5);
   }
 }

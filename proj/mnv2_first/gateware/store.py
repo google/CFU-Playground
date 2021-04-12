@@ -44,7 +44,7 @@ class StoreSetter(Xetter):
         Data to write
     restart: Signal input
         Signal to drop all parameters from memory and restart all counters.
-    count: Signal(range(depth)) output
+    count: Signal(range(depth*num_memories+1)) output
         How many items the memory currently holds
     updated: Signal() output
         Indicates that store has been updated with a new value or restarted
@@ -59,7 +59,7 @@ class StoreSetter(Xetter):
         self.w_addr = Signal(range(depth))
         self.w_data = Signal(bits_width)
         self.restart = Signal()
-        self.count = Signal(range(depth * num_memories))
+        self.count = Signal(range(depth * num_memories + 1))
         self.updated = Signal()
 
     def connect_write_port(self, dual_port_memories):

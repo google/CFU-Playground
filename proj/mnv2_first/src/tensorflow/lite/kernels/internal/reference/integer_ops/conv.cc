@@ -78,7 +78,7 @@ void ConvPerChannel(const ConvParams& params, const int32_t* output_multiplier,
     if (params.stride_width == 1 && params.stride_height == 1 &&
         input_height == output_height && input_width == output_width &&
         filter_height == 1 && filter_width == 1 && bias_data &&
-        input_depth < MAX_CONV_INPUT_BYTES && (input_depth % 8) == 0 &&
+        input_depth < MAX_CONV_INPUT_VALUES && (input_depth % 8) == 0 &&
         (output_depth % 8) == 0) {
       Mnv2ConvPerChannel1x1(params, output_multiplier, output_shift,
                             input_shape, input_data, filter_shape, filter_data,
