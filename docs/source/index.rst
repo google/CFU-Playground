@@ -37,8 +37,8 @@ gateware components that make up the CFU Playground.
 
 :doc:`setup-guide` gives detailed instructions for setting up an environment.
 
-:doc:`crash-course` explains the basics of FPGAs, Verilog, `nMigen`_, RISCV, Custom
-Function Units and `Tensorflow Lite for Microcontrollers`_.
+:doc:`crash-course/index` explains the basics of FPGAs, Verilog, `nMigen`_,
+RISCV, Custom Function Units and `Tensorflow Lite for Microcontrollers`_.
 
 :doc:`step-by-step` will guide you through creating your first accelerator.
 
@@ -59,7 +59,7 @@ Site Index
 
    overview
    setup-guide
-   crash-course
+   crash-course/index
    step-by-step
    vivado-install
    docs/index
