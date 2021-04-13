@@ -1,3 +1,4 @@
+==========================
 Crash Course on Everything
 ==========================
 
@@ -9,12 +10,73 @@ of any one part. Although each of these topics is very interesting in itself, it
 is better to learn the basics for each area and start applying them, and later
 work out where the gaps in your knowledge may be.
 
-* C and C++ for Microcontrollers
 * Tensorflow Lite for Microcontrollers 
 * RISCV and CFUs
 * Writing gateware with Verilog and nMigen
 * LiteX and SoCs.
 * Getting help.
 
+
+Required Background Knowledge
+=============================
+
+We assume you have some knowledge of:
+
+C and C++ for Microcontrollers
+    C_ and `C++`_ are the languages used in for programming microcontrollers in the
+    CFU Playground, and you will need a basic understanding of these languages.
+
+    We recommend playing with Arduino_ as an excellent way to learn how to
+    program microcontrollers with C and C++.
+
+Python
+    The nMigen framework uses Python_. It is remarkably easy to learn the
+    basics of Python. If you have a couple of days, we recommend working
+    through `Dive Into Python 3`_, which is well paced and provides many
+    practical exercises.
+
+.. _`C`: https://en.wikipedia.org/wiki/C_(programming_language)
+.. _`C++`: https://en.wikipedia.org/wiki/C%2B%2B
+.. _Arduino: https://arduino.cc
+.. _Python: https://python.org
+.. _`Dive Into Python 3`: https://diveintopython3.problemsolving.io/
+
+
+The Crash Course
+================
+
+:doc:`tflm`
+    The technology we use for evaluating ML models, and the accelerators in the
+    CFU-Playground fit into this model.
+
+:doc:`gateware`
+    At the lowest level, accelerators are built from gateware, and you'll need
+    to know how to write Verilog and/or nMigen_.
+
+:doc:`litex`
+    LiteX is a framework for defining FPGA SoCs. CFU-Playground accelerators
+    work inside a LiteX SoC.
+
+:doc:`riscv`
+    The CFU-Playground accelerators are implemented as Custom Function Units
+    for a RISCV CPU.
+
+:doc:`getting-help`
+    Building accelerators is hard. It is essential to know how to ask for help.
+
+.. _nMigen: https://github.com/nmigen/nmigen
+
+
+Index
+=====
+
+.. toctree::
+   :maxdepth: 2
+
+   tflm
+   gateware
+   litex
+   riscv
+   getting-help
 
 
