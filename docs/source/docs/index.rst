@@ -36,6 +36,27 @@ This document is written in ReStructuredText. There is also a
 .. _Markdown: https://www.sphinx-doc.org/en/master/usage/markdown.html
 .. _ReStructured Text: https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html
 
+
+
+Diagrams
+--------
+
+We use Google Drawings for diagrams. Store diagrams in the
+cfu-playground-media_ Google Drive folder. It is publically readable, and if
+you're working on diagrams, ask someone to put your diagram into this folder
+(you will still have write access).
+
+To get a link to a png image, use ``File > Publish To the Web`` and select size
+"Large". You can use the resulting link in Restructured Text or Markdown image
+tags.
+
+.. _cfu-playground-media: https://drive.google.com/drive/folders/1fAKv1StCrLiQi0PrUR2Et0NMQCLtffYa
+
+
+
+Sub-pages
+---------
+
 .. toctree::
    :maxdepth: 1
    :caption: Sub-pages:

@@ -45,7 +45,7 @@ RISCV, Custom Function Units and `Tensorflow Lite for Microcontrollers`_.
 .. _`Tensorflow Lite for Microcontrollers`: https://www.tensorflow.org/lite/microcontrollers
 .. _nMigen: https://github.com/nmigen/nmigen
 
-.. image:: images/overview.svg
+.. image:: https://docs.google.com/drawings/d/e/2PACX-1vS_ydCYGB6yykkh3EXcmcv48NoC-o7ywYXUxiP8kzuFNfpQm-0K8cK73pgb3VqOCs0vPhtsPaX1Nvot/pub?w=958&h=726
    :height: 400px
    :align: center
    :alt: Overview showing hardware, gateware and software layers

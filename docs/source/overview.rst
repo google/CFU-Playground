@@ -7,7 +7,7 @@ If this is your first time working with FPGAs or machine learning, then
 we advise skimming this page briefly before moving on to :doc:crash-course.
 
 
-.. image:: images/overview.svg
+.. image:: https://docs.google.com/drawings/d/e/2PACX-1vS_ydCYGB6yykkh3EXcmcv48NoC-o7ywYXUxiP8kzuFNfpQm-0K8cK73pgb3VqOCs0vPhtsPaX1Nvot/pub?w=958&h=726
    :height: 400px
    :align: center
    :alt: Overview showing hardware, gateware and software layers
@@ -39,7 +39,7 @@ Gateware and CFU
 
 We use LiteX_ to build a standard SoC (System-on-Chip) that runs on the FPGA. 
 
-.. image:: images/litex-soc.svg
+.. image:: https://docs.google.com/drawings/d/e/2PACX-1vSmmz6Jw8_yO57BPoy10aX2bWt_F0Cph8nidkz-0xzx_q783PmnTugndmlFOuPnxt8tLOY_4y_42OKh/pub?w=1339&h=806
    :height: 400px
    :align: center
    :alt: Overview of LiteX SoC
