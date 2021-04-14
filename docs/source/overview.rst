@@ -6,11 +6,11 @@ gateware and software. This page contains a short overview of all of it.
 If this is your first time working with FPGAs or machine learning, then 
 we advise skimming this page briefly before moving on to :doc:crash-course.
 
+.. raw:: html
 
-.. image:: images/overview.svg
-   :height: 400px
-   :align: center
-   :alt: Overview showing hardware, gateware and software layers
+   <img class="std"
+       alt="Overview showing hardware, gateware and software layers"
+       src="https://docs.google.com/drawings/d/e/2PACX-1vS_ydCYGB6yykkh3EXcmcv48NoC-o7ywYXUxiP8kzuFNfpQm-0K8cK73pgb3VqOCs0vPhtsPaX1Nvot/pub?w=958&amp;h=726">
 
 Hardware
 --------
@@ -39,10 +39,11 @@ Gateware and CFU
 
 We use LiteX_ to build a standard SoC (System-on-Chip) that runs on the FPGA. 
 
-.. image:: images/litex-soc.svg
-   :height: 400px
-   :align: center
-   :alt: Overview of LiteX SoC
+.. raw:: html
+
+   <img class="std"
+       alt="Overview showing hardware, gateware and software layers"
+       src="https://docs.google.com/drawings/d/e/2PACX-1vSmmz6Jw8_yO57BPoy10aX2bWt_F0Cph8nidkz-0xzx_q783PmnTugndmlFOuPnxt8tLOY_4y_42OKh/pub?w=1339&h=806"
 
 The SoC has: 
 
