@@ -45,10 +45,11 @@ RISCV, Custom Function Units and `Tensorflow Lite for Microcontrollers`_.
 .. _`Tensorflow Lite for Microcontrollers`: https://www.tensorflow.org/lite/microcontrollers
 .. _nMigen: https://github.com/nmigen/nmigen
 
-.. image:: https://docs.google.com/drawings/d/e/2PACX-1vS_ydCYGB6yykkh3EXcmcv48NoC-o7ywYXUxiP8kzuFNfpQm-0K8cK73pgb3VqOCs0vPhtsPaX1Nvot/pub?w=958&h=726
-   :height: 400px
-   :align: center
-   :alt: Overview showing hardware, gateware and software layers
+.. raw:: html
+
+   <img class="std"
+       alt="Overview showing hardware, gateware and software layers"
+       src="https://docs.google.com/drawings/d/e/2PACX-1vS_ydCYGB6yykkh3EXcmcv48NoC-o7ywYXUxiP8kzuFNfpQm-0K8cK73pgb3VqOCs0vPhtsPaX1Nvot/pub?w=958&amp;h=726">
 
 
 Site Index
@@ -56,6 +57,7 @@ Site Index
 
 .. toctree::
    :maxdepth: 2
+   :glob:
 
    overview
    setup-guide
@@ -63,7 +65,7 @@ Site Index
    step-by-step
    vivado-install
    docs/index
-   projects/mnv2_first
+   projects/*
 
 
 .. Not currently in use

@@ -34,10 +34,11 @@ iterative and incremental development.  The following diagram shows the main
 components and shows how a single op will be processed with the accelerator in
 its final form.
 
-.. image:: https://docs.google.com/drawings/d/e/2PACX-1vROU1XAmne9z_b7igzL1V65By3oyr46T5tX2lXDEUyX_3qw3RFblKQh1ly6COQU1t2gkW-2sspX5vuB/pub?w=1501&amp;h=964">
-   :height: 600px
-   :align: center
-   :alt: Overview of an Accelerator Architecure
+.. raw:: html
+
+   <img class="std"
+       alt="Overview of an mnv2_first Accelerator Architecure"
+       src="https://docs.google.com/drawings/d/e/2PACX-1vROU1XAmne9z_b7igzL1V65By3oyr46T5tX2lXDEUyX_3qw3RFblKQh1ly6COQU1t2gkW-2sspX5vuB/pub?w=1501&amp;h=964">
 
 To process an op:
 #. CPU loads filter values into the filter values store
@@ -459,10 +460,11 @@ Design
 
 The CFU_MACC_RUN machinery is more complicated than the CFU_MACC4_RUN4. Here is the design in diagram form. 
 
-.. image:: https://docs.google.com/drawings/d/e/2PACX-1vS9W0oUUX6APfnKn2QNIX1867RXAh_idFF6jN47EQJ6Ifcm8DfVowCvXbpEOiAGXXa5F-filZ4SeVWT/pub?w=1440&amp;h=1080
-   :height: 600px
-   :align: center
-   :alt: Sequencing for a Madd4 based Pipeline
+.. raw:: html
+
+   <img class="std"
+       alt="Sequencing for a Madd4 based Pipeline"
+       src="https://docs.google.com/drawings/d/e/2PACX-1vS9W0oUUX6APfnKn2QNIX1867RXAh_idFF6jN47EQJ6Ifcm8DfVowCvXbpEOiAGXXa5F-filZ4SeVWT/pub?w=1440&amp;h=1080">
 
 The design consists of three parts:
 

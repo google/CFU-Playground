@@ -21,3 +21,10 @@
 dt {
   font-weight: bold;
 }
+
+img.std {
+  height: 400px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
