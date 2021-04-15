@@ -44,12 +44,12 @@ Obtain the following:
 .. _Digikey: https://www.digikey.com.au/products/en/development-boards-kits-programmers/evaluation-boards-expansion-boards-daughter-cards/797?k=PMODAMP2&pkeyword=&sv=0&sf=0&FV=-8%7C797&quantity=&ColumnSort=0&page=1&pageSize=25
 .. _`Element 14`: https://au.element14.com/digilent/410-233/modlue-pmod-audio-amp-2-5w-class/dp/2311269?ost=pmod+amp2
 
-3. Speaker with 3.5mm plug. Obtain this from eBay or any electronics store. 
+3. Speaker with 3.5mm plug. Obtain this from eBay or any electronics store.
 
 4. Optional: UPduino. A small FGPA dev board which will make the nMigen
-   tutorial a little easier and faster. (Order from tindie.) 
+   tutorial a little easier and faster. (Order from tindie.)
    * The UPduino often goes out of stock and sometimes delivery times are long.
-   * It's more than possible to run the tutorial from an Arty A7.  
+   * It's more than possible to run the tutorial from an Arty A7.
 
 .. _`Order from Tindie`: https://www.tindie.com/products/tinyvision_ai/upduino-v30-low-cost-lattice-ice40-fpga-board/
 
@@ -67,7 +67,7 @@ Part 1: Verilog Programming With Xilinx Vivado
 Verilog
     ... is a hardware description language (HDL) used to model electronic
     systems. It is most commonly used in the design and verification of digital
-    circuits at the register-transfer level of abstraction. 
+    circuits at the register-transfer level of abstraction.
 
     -- Wikipedia: `Verilog <https://en.wikipedia.org/wiki/Verilog>`_
 
@@ -85,7 +85,7 @@ Work though tcal-x's Arty tutorials at `github.com/tcal-x/misc
 <https://github.com/tcal-x/misc>`. To do tutorial 2 you will either need to git
 clone the repo or download the top.bit file
 
-Board Definition file 
+Board Definition file
 =====================
 
 The board definition file tells Vivado about the eval board you're using -
@@ -209,7 +209,7 @@ PMOD AMP2 and a plug-in speaker.
       * CLK100MHz lines Clock lines
       * The switches - sw[0] to sw[3]
       * The leds - led[0] to led[3]
-      * Under PMOD header JD, uncomment jd[0] to jd[3] 
+      * Under PMOD header JD, uncomment jd[0] to jd[3]
 
 4. Use this Verilog:
 
@@ -224,7 +224,7 @@ PMOD AMP2 and a plug-in speaker.
       );
 
   // ***(B)***
-  // first create an 18bit binary counter  
+  // first create an 18bit binary counter
   reg [17:0] counter;
   always @(posedge CLK100MHZ) counter <= counter+1;
 
@@ -232,11 +232,11 @@ PMOD AMP2 and a plug-in speaker.
   wire speaker_out = counter[17];
 
   // ***(C)***
-  // EITHER 
-  // (1) you wish to annoy your neighbors, so send through the full speaker volume,  
+  // EITHER
+  // (1) you wish to annoy your neighbors, so send through the full speaker volume,
   //assign jd[0] = speaker_out
-  // OR 
-  // (2) just send through the 1/64th of the signal by only sending signal when last 6 bits of counter are zero 
+  // OR
+  // (2) just send through the 1/64th of the signal by only sending signal when last 6 bits of counter are zero
   assign jd[0] = speaker_out & (counter[5:0] == 0);
 
   // ***(D)***
@@ -249,7 +249,7 @@ PMOD AMP2 and a plug-in speaker.
   assign led[0] = speaker_out;   // Current wave form
   assign led[1] = jd[0];         // Attenuated signal sent to PMOD AMP
   assign led[3] = sw[3];
-      
+
   endmodule
 
 
@@ -278,7 +278,7 @@ PMOD AMP2 and a plug-in speaker.
 6. Synthesize and implement the design, then program it.
 7. Toggle switch 3 to turn the sound on and off.
 
-Make sure you understand what is going on here, then proceed through the rest of the sound box tutorials. 
+Make sure you understand what is going on here, then proceed through the rest of the sound box tutorials.
 
 Things to do:
 
@@ -292,7 +292,7 @@ Things to do:
 * Ask questions.
 
 
-More on FPGAs 
+More on FPGAs
 =============
 
 Now that you've mastered the Music Box tutorials. A few important points to recap.
@@ -324,7 +324,7 @@ Everything happens all the time, unless you say not to.
 
 .. code-block:: verilog
 
-   always @(posedge clk) 
+   always @(posedge clk)
        if(counter==0) counter <= clkdivider-1;
 
 Verilog's syntax is C-like, but it's not C.
@@ -340,10 +340,10 @@ Counters are an important building block.
 
    always @(posedge CLK100MHZ)
    begin
-     if(counter==0) 
-       counter <= reset_value; 
+     if(counter==0)
+       counter <= reset_value;
        << do something >>
-     else 
+     else
        counter <= counter-1;
    end
 
@@ -372,7 +372,7 @@ Preparation
    toolchain. Download the latest release of the `Fomu Toolchain`_ and extract it
    somewhere. (I just put mine directly under $HOME).
 
-.. _`Fomu Toolchain`: https://github.com/im-tomu/fomu-toolchain 
+.. _`Fomu Toolchain`: https://github.com/im-tomu/fomu-toolchain
 
 3. Create the virtualenv:
 
@@ -380,7 +380,7 @@ Preparation
 
    $ cd $HOME
    $ virtualenv -p python3 nmigen-tutorial
- 
+
 4. Add an alias to your ``.bashrc`` or ``.bash_aliases`` file:
 
 .. code-block: bash
@@ -403,7 +403,7 @@ Preparation
    $ pip install --upgrade \
      'git+https://github.com/nmigen/nmigen.git#egg=nmigen[builtin-yosys]'
    $ pip install --upgrade 'git+https://github.com/nmigen/nmigen-boards.git'
-   $ pip install --upgrade 'git+https://github.com/nmigen/nmigen-soc.git' 
+   $ pip install --upgrade 'git+https://github.com/nmigen/nmigen-soc.git'
 
 .. hint:: You may need to install udev rules
 
@@ -452,7 +452,7 @@ Some notes:
    p.build( dut )
 
 * In this tutorial, the author simulates designs and views the simulations
-  through gtkwave. Gtkwave's user interface is not exactly friendly. 
+  through gtkwave. Gtkwave's user interface is not exactly friendly.
 
   * Follow the instructions in the blog post to make signals viewable. You will
     need to both zoom out the timeline to fit the input and add signals to the
@@ -543,3 +543,261 @@ You now know how to:
 * Simulate a design
 * Synthesize a design
 * Program a real device
+
+
+-------------------------------------------
+Part 3: Test Driven Development with nMigen
+-------------------------------------------
+
+That tutorial was fun, but it was missing a vital piece: unit tests. Coupled
+with simulation, unit tests allow fast iteration without needing to deploy to
+hardware.
+
+Since the UPduino doesn't have any switches, we will use the Arty board for
+this code.
+
+Edge Detection
+==============
+
+In this tutorial, we make an edge detector. It will output a single cycle pulse
+whenever the input transitions from low to high.
+
+1. Under ~/playground, make a directory named lights.
+2. Create a skeleton file: ~/playground/lights/edge_detect.py
+
+.. code:: python
+
+   from nmigen import *
+   from nmigen.sim import Simulator
+
+   import unittest
+
+
+   class EdgeDetector(Elaboratable):
+       def __init__(self):             ### (A)
+           self.input = Signal()
+           self.output = Signal()
+
+       def elaborate(self, platform):  ### (B)
+           m = Module()
+           # TODO: Write code that works here
+           m.d.sync += self.output.eq(self.input)
+           return m
+
+   ### (C)
+   class EdgeDetectorTest(unittest.TestCase):
+       def setUp(self):               ### (D)
+           self.m = Module()
+           self.dut = EdgeDetector()
+           self.m.submodules['dut'] = self.dut
+
+       def test_simple_edge(self):
+           def process():            ### (E)
+               # TODO: Add test code here
+               yield
+           self.run_sim(process)
+
+       ### (F)
+       def run_sim(self, process, write_trace=False):
+           sim = Simulator(self.m)
+           sim.add_sync_process(process)
+           sim.add_clock(1)
+           if write_trace:
+               with sim.write_vcd("zz.vcd", "zz.gtkw"):
+                   sim.run()
+           else:
+               sim.run()
+
+   if __name__ == '__main__':
+       unittest.main()
+
+3. Run "python edge_detect.py". You should see the test pass.
+
+   There's a lot of boilerplate here, but the code is straightforward. Let's
+   look at the marked sections of code:
+
+   A. The EdgeDetector class sets up two signals in its constructor. These
+      will form its interface. In a real project, you would have comments or
+      docstrings to document this interface.
+   B. The ``elaborate()`` method sets the output based on the input.
+   C. The test case is a standard `Python unit test`_. Later, we'll use the
+      usual Python ``self.assertXXX()`` methods to check the function behaves
+      as expected.
+   D. setUp creates a module to hold the model to be simulated. We make an
+      EdgeDetector and assign to a variable named "self.dut". Because it is a
+      submodule, we add it to our list of submodules. "DUT" means "device under
+      test".
+   E. as we saw in the previous tutorial, nMigen uses generator functions to
+      drive the simulation. ``process()`` is a simple generator function.
+   F. ``run_sim()`` can optionally write a trace file. When debugging, it can
+      be helpful to write a tracefile.
+
+.. _`Python unit test`: https://docs.python.org/3/library/unittest.html
+
+
+4. Here are the basic things you need to know about simulation driver processes:
+
+   * The driver process does four things every tick:
+
+     1. Set values: Set input values for the next next tick, with a
+        yield-something-something-eq statement.
+     2. Settle: Let input values be fully processed
+     3. Check values: check the outputs are as expected
+     4. Tick: Go to the next tick.
+
+   * ``yield`` is used to communicate with the simulator
+
+.. code:: python
+
+   # A yield statement with an eq assigns a value to a DUT input.
+   #  However, the assignment doesn't take effect until after the next tick.
+
+   yield self.dut.some_input.eq(some_value)
+
+   # A yield statement with no parameters causes a clock tick:
+
+   yield
+
+   # A Settle() is used to ensure combinatorial outputs are completely processed
+
+   yield Settle()
+
+   # A yield expression returns a value from the DUT.
+
+   self.assertTrue((yield self.dut.some_output))
+
+5. The simplest test we can do is to leave the input low (``0``) and ensure the
+   output remains low. Add this code to the test process:
+
+.. code:: python
+
+   def process():
+       for _ in range(10):
+           # Set inputs
+           yield self.dut.input.eq(0)
+           # Settle
+           yield Settle()
+           # Check outputs
+           self.assertFalse((yield self.dut.output))
+           # Tick
+           yield
+
+6. Run the Python test.
+
+   a. Check that it passes.
+   b. Change the ``assertFalse`` to ``assertTrue`` and check that it fails.
+   c. Note that the last line of the traceback show the line of code with the
+      failing assertion.
+
+7.  Note that we don't need to keep setting the input to zero since it remains constant. That line could go outside the loop.
+
+8. Next, let's change the code to modify the input to high and check that there is a single pulse on the output:
+
+.. code:: python
+
+   def process():
+       yield self.dut.input.eq(0)
+       for _ in range(10):
+           yield
+           self.assertFalse((yield self.dut.output))
+       # Set input
+       yield self.dut.input.eq(1)
+       # Tick
+       yield
+       # Input now available to DUT, no change yet
+       self.assertFalse((yield self.dut.output))
+       # Tick
+       yield
+       # DUT should output high for one cycle
+       self.assertTrue((yield self.dut.output))
+       # Tick
+       yield
+       # Output should now be back to low
+       self.assertFalse((yield self.dut.output))
+
+
+9. Run this again. It will fail on the last line showing that the edge detector
+   is not outputting a single pulse. There is an easy fix for this -
+   implement the EdgeDetector:
+
+.. code:: python
+
+   def elaborate(self, platform):
+       m = Module()
+       last_input = Signal()
+       m.d.sync += last_input.eq(self.input)
+       m.d.sync += self.output.eq(self.input & ~last_input)
+       return m
+
+
+10. Re-run the test. It should pass.
+11. Write some more test functions:
+
+    a. Test that HIGH->LOW transitions are not detected
+    b. Test that multiple LOW->HIGH transitions are properly detected
+    c. Use a random number generator to test 100 low-high-low transitions in a
+       row, but with varying amounts of time at high and low values between
+       them.
+    d. For this last test, output to a VCD file and look at it in gtkwave.
+
+Toggle an LED
+=============
+
+We just wrote and tested an abstract module without hardware! Hooray! Now,
+let's create a Top() and deploy it to a real Arty board.
+
+1. In a file named edge_top.py, put:
+
+.. code:: python
+
+   from nmigen import *
+   from nmigen_boards.arty_a7 import *
+
+   from edge_detect import EdgeDetector
+
+   class Top(Elaboratable):
+
+       def elaborate(self, platform):
+           m = Module()
+
+           ### (A)
+           button = platform.request('switch', 0)
+           led = platform.request('led', 0)
+
+           ### (B)
+           detector = EdgeDetector()
+           m.submodules += detector
+
+           ### (C)
+           m.d.comb += detector.input.eq(button.i)
+           with m.If(detector.output):
+               m.d.sync += led.o.eq(~led.o)
+           return m
+
+   if __name__ == "__main__":
+       platform = ArtyA7Platform()
+       platform.build(Top(), do_program=True)
+
+
+2. This ought to look quite familiar. A couple of things to note:
+
+   (A) These resources are defined in arty_a7.py_. Note that, amongst other
+       things, there are 4 buttons, 4 switches, 4 LEDs and 4 RGB LEDs
+       accessible.
+   (B) When creating the ``EdgeDetector()`` module, we must also add it to the
+       module's ``submodules``.
+   (C) Button zero is comb'ed through to the detector input. Note that the LED
+       is toggled every cycle that the detector outputs '1'. It is very convenient
+       that the detector only outputs '1' for a single cycle when an edge is
+       detected.
+
+.. _arty_a7.py: https://github.com/nmigen/nmigen-boards/blob/8be37da521e8789726a53bd4e0c261c12e2ab22b/nmigen_boards/arty_a7.py
+
+3. Run it to synthesize the design and program the Arty.
+4. Wait around for this to finish. Notice how long it takes and remember how
+   much quicker and more productive it felt to be iterating with unit tests
+   instead.
+5. Get bored of waiting and make a cup a tea.
+6. Has it finished? Toggle switch zero a couple of times, and note that one of
+   the LEDs toggles on and off. Also note that only the low-high transition of
+   the switch causes the LED to change.
