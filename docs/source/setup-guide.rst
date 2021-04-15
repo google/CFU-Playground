@@ -4,15 +4,18 @@ Setup Guide
 This is a guide to setting up to use the CFU-Playground.
 
 
-Step 1: Order an Arty A7
-------------------------
+Step 1: Order an Arty A7-35T
+----------------------------
 
 (allow 1-2 week delivery time)
 
-The Arty A7 is available from several distributors, including direct from the
-`Digilent Store`_.
+The Arty A7-35T is available from several distributors, including direct from
+the `Digilent Store`_, `Element 14`_ or `Mouser`_. The A7-100T will also work,
+but is significantly more expensive.
 
 .. _`Digilent Store`: https://store.digilentinc.com/arty-a7-artix-7-fpga-development-board/
+.. _`Element 14`: https://au.element14.com/avnet/aes-a7mb-7a35t-g/eval-board-arty-artix-7-low-cost/dp/277520502?st=arty%20a7
+.. _`Mouser`: https://au.mouser.com/ProductDetail/Digilent/410-319?qs=%2Fha2pyFaduiP6GD6DfdhNp6rR4rT1KTVOohSnRQ%252BMgra5hr4M7aEiQ%3D%3D 
 
 
 Step 2: Install Vivado
