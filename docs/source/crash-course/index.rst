@@ -29,11 +29,14 @@ C and C++ for Microcontrollers
     We recommend playing with Arduino_ as an excellent way to learn how to
     program microcontrollers with C and C++.
 
+    Advanced understanding is not needed, since you'll be reading and modifying
+    a lot more code than you'll be writing.
+
 Python
     The nMigen framework uses Python_. It is remarkably easy to learn the
     basics of Python. If you have a couple of days, we recommend working
-    through `Dive Into Python 3`_, which is well paced and provides many
-    practical exercises.
+    through chapters 0 to 11 of `Dive Into Python 3`_. Dive Into Python 3 is
+    well paced and provides many practical exercises.
 
 .. _`C`: https://en.wikipedia.org/wiki/C_(programming_language)
 .. _`C++`: https://en.wikipedia.org/wiki/C%2B%2B
@@ -41,6 +44,13 @@ Python
 .. _Python: https://python.org
 .. _`Dive Into Python 3`: https://diveintopython3.problemsolving.io/
 
+It is also helpful to have some knowledge of:
+
+General Linux fu
+    Including GNU make and general bash scripting.
+
+Git
+    How to make branches and commits, fork a github respository and submit PRs.
 
 The Crash Course
 ================
