@@ -3,7 +3,9 @@ Building FPGA Gateware with Verilog and nMigen: A Tutorial
 ==========================================================
 
 This page takes the reader through a hands-on tutorial on FPGA, Verilog and
-nMigen.
+nMigen_.
+
+.. _nMigen: https://github.com/nmigen/nmigen
 
 Field Programmable Gate Arrays are fascinating devices that can efficiently
 perform all kinds of computing tasks. A configuration for and FPGA is known as
@@ -344,3 +346,200 @@ Counters are an important building block.
      else 
        counter <= counter-1;
    end
+
+---------------------
+Part 2: nMigen Basics
+---------------------
+
+We're now going to dive into nMigen_, a Python based domain-specific language
+for writing gateware. At the lowest levels, it works much the same as
+Verilog. At the higher levels, it allows all the power of Python to be applied
+to generalizing, reusing and testing components.
+
+Preparation
+===========
+
+1. Ensure that you have git and virtualenv installed:
+
+.. code-block: bash
+
+   $ sudo apt install git
+   $ sudo apt install python3-virtualenv
+
+2. Install the Fomu Toolchain
+
+   If using UPduino, you will need to install an iCE40 toolchain. We use the Fomu
+   toolchain. Download the latest release of the `Fomu Toolchain`_ and extract it
+   somewhere. (I just put mine directly under $HOME).
+
+.. _`Fomu Toolchain`: https://github.com/im-tomu/fomu-toolchain 
+
+3. Create the virtualenv:
+
+.. code-block: bash
+
+   $ cd $HOME
+   $ virtualenv -p python3 nmigen-tutorial
+ 
+4. Add an alias to your ``.bashrc`` or ``.bash_aliases`` file:
+
+.. code-block: bash
+
+   pathadd() {
+       if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
+           export PATH="${PATH:+"$PATH:"}$1"
+       fi
+   }
+   VIVADO_BIN_DIR=/home/$USER/tools/Xilinx/Vivado/2020.1/bin
+   FOMU_DIR=/home/$USER/fomu-toolchain-linux_x86_64-v1.5.6/bin
+   alias startp='pathadd $FOMU_DIR;pathadd $VIVADO_BIN_DIR;source ~/nmigen-tutorial/bin/activate'
+
+5. Execute the ``startp`` alias to enter the virtual environment.
+
+6. Install nMigen
+
+.. code-block: bash
+
+   $ pip install --upgrade \
+     'git+https://github.com/nmigen/nmigen.git#egg=nmigen[builtin-yosys]'
+   $ pip install --upgrade 'git+https://github.com/nmigen/nmigen-boards.git'
+   $ pip install --upgrade 'git+https://github.com/nmigen/nmigen-soc.git' 
+
+.. hint:: You may need to install udev rules
+
+
+Vivonomicon Tutorial
+====================
+
+Work through the `Learning FPGA Design with nMigen`_ from vivonomicon
+
+.. _`Learning FPGA Design with nMigen`: https://vivonomicon.com/2020/04/14/learning-fpga-design-with-nmigen/
+
+This is a big tutorial. Expect to spend at least half a day understanding what
+is going on.  This tutorial was written with the UPduino as a target, but you
+could also use the Arty A7. See notes below.  Before beginning, grab the sample
+code:
+
+.. code-block: bash
+
+   $ cd ~/playground
+   $ git clone https://github.com/WRansohoff/nmigen_getting_started.git
+
+
+Some notes:
+
+* the nMigen API has changed slightly since this tutorial was written. See
+  `this PR`__ for the required updates.
+
+.. __: https://github.com/WRansohoff/nmigen_getting_started/pull/1
+
+* You may notice that the different tutorials run so quickly that it's hard to
+  follow the sequence of lights.  can't see the sequences. Try to fix this by
+  modifying the code. for hello_led_, this is straight forward. For later
+  tutorials you might want to try slowing down the main clock / oscillator like
+  this:
+
+.. _hello_led: https://github.com/WRansohoff/nmigen_getting_started/blob/master/hello_led/led.py
+
+.. code:: python
+
+   # Replace this line
+   UpduinoV2Platform().build( dut )
+
+   # With these three lines
+   p = UpduinoV2Platform()
+   p.hfosc_div = 3 # Divide 48MHz high-freq oscillator by 8
+   p.build( dut )
+
+* In this tutorial, the author simulates designs and views the simulations
+  through gtkwave. Gtkwave's user interface is not exactly friendly. 
+
+  * Follow the instructions in the blog post to make signals viewable. You will
+    need to both zoom out the timeline to fit the input and add signals to the
+    viewer.
+  * gtkwave takes some time to master, but it is an invaluable tool for
+    tracking down certain types of error.
+
+* hello_led: the led flashes really fast. You can slow this down by increasing the delays in the code.
+
+* hello_mem: Sometimes the build will fail with errors similar to ``ERROR: Max
+  frequency for clock 'clk': 42.45 MHz (FAIL at 48.00 MHz).`` This means that
+  in some part of the design, the signals are taking too long to get from one
+  flip flop, through the routing and LUTs to the next flip flops.
+
+  * You can try changing the "seed" value for nextpnr. This will cause nextpnr
+    to choose a slightly different starting configuration which may result in a
+    different maximum clock speed.
+  * It may be that the code is just attempting to do to much in a single cycle.
+    Some ways in which you can reduce the work being done in a single cycle
+    are:
+
+    * When you get a delay instruction, instead of trying to handle the delay
+      inline, transition to a separate DELAY state and wait until a counter
+      reaches the appropriate value.
+    * Changing the RETURN instruction to be only 0xffffffff instead of
+      0xffffffff or 0x0 might get you a slightly higher frequency.
+    * Transitioning to a STEP state in order to increment the program counter (pc) might help as well.
+
+* Generally, take your time and experiment with the code - change constants and
+  make sure it does what you think it should.
+* iceprog is part of the fomu tools.
+* hello_spi: the author warns of potential problems with flashing due to the
+  SPI flash being accessed simultaneously by both the programmer and the FPGA.
+  I did not experience these problems, but you might.
+
+  * Don't forget there is an extra step in programming for this example:
+
+.. code:: bash
+
+   python3 top.py -w && iceprog -o 2M prog.bin
+   python3 top.py -b && iceprog build/top.bin
+
+
+If Using The Arty A7
+--------------------
+
+* The toolchain is much slower. Everything Takes Longer.
+* The code Should Mostly Just Work, but you will need to make a couple of
+  replacements:
+
++----------------------------------------------+------------------------------------------+
+| From                                         |  To                                      |
++==============================================+==========================================+
+| ``from nmigen_boards.upduino_v2 import *``   | ``from nmigen_boards.arty_a7 import *``  |
++----------------------------------------------+------------------------------------------+
+| ``grn_led = platform.request( 'led_g', 0 )`` | ``rgb = platform.request('rgb_led', 0)`` |
+| ``blu_led = platform.request( 'led_b', 0 )`` |                                          |
++----------------------------------------------+------------------------------------------+
+| ``grn_led.o.eq(<foo>)``                      | ``rgb.g.o.eq(<foo>)``                    |
+| ``blu_led.o.eq(<foo>)``                      | ``rgb.b.o.eq(<foo>)``                    |
++----------------------------------------------+------------------------------------------+
+
+
+* To program the Arty we use xcs3prog instead of iceprog:
+
+.. code:: bash
+
+   $ xc3sprog -c nexys4 build/top.bit
+
+* alternatively get nmigen to call xc3sprog for you by adding do_program=True to the build() call:
+
+.. code:: bash
+
+   ArtyA7Platform().build( dut, do_program=True )
+
+
+* The default Arty clock is 100MHz, much faster than the UPduino. You will need
+  to adjust the timing to make the LEDs flash at rate slow enough to be
+  perceived. I suggest making everything about 100x slower.
+* The Arty has 4 RGB LEDs. Go nuts
+
+Recap
+=====
+
+You now know how to:
+
+* Write basic nMigen code
+* Simulate a design
+* Synthesize a design
+* Program a real device
