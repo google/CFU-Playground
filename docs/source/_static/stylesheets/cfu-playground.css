@@ -22,9 +22,12 @@ dt {
   font-weight: bold;
 }
 
-img.std {
-  height: 400px;
+img {
   display: block;
   margin-left: auto;
   margin-right: auto;
+}
+
+img.std {
+  height: 400px;
 }

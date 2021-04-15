@@ -443,7 +443,7 @@ most of the input loading overhead, which is 3M cycles.
 .. code-block:: c++
 
    for (int p = 0; p < num_pixels; p++) {
-   // Load twice on first loop, no load on last loop and once every other time.
+     // Load twice on first loop, no load on last loop and once every other time.
      if (p == 0) {
        LoadInputValues(input_ptr, input_depth_words);
      }
