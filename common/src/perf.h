@@ -47,6 +47,7 @@ inline void perf_set_mcycle(unsigned cyc) {
 
 inline unsigned perf_get_counter(int counter_num) {
   unsigned count = 0;
+#ifndef NPROFILE
   switch (counter_num) {
     case 0:
       asm volatile("csrr %0, 0xB04" : "=r"(count));
@@ -74,11 +75,13 @@ inline unsigned perf_get_counter(int counter_num) {
       break;
     default:;
   }
+#endif
   return count;
 }
 
 inline unsigned perf_get_counter_enable(int counter_num) {
   unsigned en = 0;
+#ifndef NPROFILE
   switch (counter_num) {
     case 0:
       asm volatile("csrr %0, 0xB05" : "=r"(en));
@@ -106,10 +109,12 @@ inline unsigned perf_get_counter_enable(int counter_num) {
       break;
     default:;
   }
+#endif
   return en;
 }
 
 inline void perf_set_counter(int counter_num, unsigned count) {
+#ifndef NPROFILE
   switch (counter_num) {
     case 0:
       asm volatile("csrw 0xB04, %0" ::"r"(count));
@@ -137,12 +142,14 @@ inline void perf_set_counter(int counter_num, unsigned count) {
       break;
     default:;
   }
+#endif
 }
 
 inline void perf_set_counter_enable(int counter_num, unsigned en) {
   if (en) {
     CFU_start_counts[counter_num]++;
   }
+#ifndef NPROFILE
   switch (counter_num) {
     case 0:
       asm volatile("csrw 0xB05, %0" ::"r"(en));
@@ -170,6 +177,7 @@ inline void perf_set_counter_enable(int counter_num, unsigned en) {
       break;
     default:;
   }
+#endif
 }
 
 inline void perf_enable_counter(int counter_num) {

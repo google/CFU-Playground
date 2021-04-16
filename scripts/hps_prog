@@ -1,0 +1,104 @@
+#!/bin/bash
+PROJECT_ROOT=$(realpath $(dirname ${BASH_SOURCE[0]})/..)
+FLASHROM=${PROJECT_ROOT}/third_party/flashrom/flashrom
+
+usage() {
+cat << EOF
+usage: $0 filename area
+
+This script programs the SPI flash on the protoboard using flashrom.
+
+Arguments:
+    filename  The name of a file to be written to the ROM
+    area      The area to write to.
+
+Valid areas are:
+    bitstream - at location 0
+    program   - at location 2M
+EOF
+}
+
+# Interpret arguments
+if [ "$#" -ne 2 ]; then
+  usage
+  exit 1
+fi
+
+# Ensure file exists and is readable
+FILE="$1"
+if [ ! -f "${FILE}" ]; then
+  echo "${FILE} is not a file"
+  exit 2
+fi
+
+if [ ! -r "${FILE}" ]; then
+  echo "${FILE} is not readable"
+  exit 3
+fi
+FILESIZE="$(stat -L -c %s "${FILE}")"
+
+
+# Use AREA to find start location in ROM
+AREA="$2"
+case "${AREA}" in
+  "bitstream")
+    START=0
+    ;;
+  "program")
+    START=2
+    SEEK=0
+    ;;
+  *)
+    echo "${AREA} is not a valid area."
+    exit 3
+    ;;
+esac
+
+echo "Programming file ${FILE} into SPI flash at ${START_HEX}, size=${FILESIZE}"
+
+# Calculate start and end points, in hex
+START_HEX=$(python3 -c "print(hex(${START}*1024*1024))")
+END_HEX=$(python3 -c "print(hex(${START_HEX}+(${FILESIZE}+1023)//1024*1024))")
+
+# Make the temporary files we'll need
+LAYOUT_FILE=$(mktemp -t prog-XXXX.layout)
+IMAGE_FILE=$(mktemp -t prog-XXXX.image)
+
+cleanup() {
+  rm -f "${LAYOUT_FILE}" "${IMAGE_FILE}"
+}
+trap "cleanup" EXIT
+
+
+# Build and print the layout file
+cat > "${LAYOUT_FILE}" << EOF
+${START_HEX}:${END_HEX} area
+EOF
+cat "${LAYOUT_FILE}"
+
+
+# Build the ROM image with file content embedded
+dd if=/dev/zero of="${IMAGE_FILE}" ibs=1M count=16
+dd conv=notrunc if="${FILE}" of="${IMAGE_FILE}" obs=1M seek=${START}
+
+# Call flashrom to do the programming
+PROGRAMMER_TYPE=${PROGRAMMER_TYPE:-2232H}
+# PROGRAMMER_TYPE=${PROGRAMMER_TYPE:-232H}
+DIVISOR=${DIVISOR:-4}
+read -d '' CMD <<EOF
+${FLASHROM}
+  -p ft2232_spi:type=${PROGRAMMER_TYPE},divisor=$DIVISOR,gpiol=LLLL
+  --noverify-all
+  --layout $(printf "%q" ${LAYOUT_FILE})
+  --image area
+  -w $(printf "%q" ${IMAGE_FILE})
+EOF
+
+echo ${CMD}
+if $CMD; then
+  echo "Programming succeeded"
+else
+  echo "Programming failed. Is programmer connected?"
+fi
+
+

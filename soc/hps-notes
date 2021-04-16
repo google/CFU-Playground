@@ -1,0 +1,23 @@
+
+
+Build flashrom:
+
+    make CONFIG_ENABLE_LIBPCI_PROGRAMMERS=no
+
+
+From THIS directory (soc/):
+
+    build:
+    ../scripts/pyrun ./hps_soc.py --build
+
+
+    flash bitstream:
+    ../scripts/hps_prog build/hps_platform/gateware/hps_platform.bit bitstream
+
+
+    flash bios:
+    ../scripts/hps_prog build/hps_platform/software/bios/bios.bin program
+
+
+    connect to bios:
+    ./bin/litex_term --speed 115200 /dev/ttyUSB1

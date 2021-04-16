@@ -108,12 +108,15 @@ UNITTEST_LOG     := $(BUILD_DIR)/unittest.log
 # Directory where we build the project-specific gateware
 SOC_DIR      := $(CFU_ROOT)/soc
 ARTY_MK      := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/arty.mk
+HPS_MK       := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/hps.mk
 SIM_MK       := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/sim.mk SOFTWARE_BIN=$(SOFTWARE_BIN)
 NEXYS_VIDEO_MK := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/nexys_video.mk
 ifeq '$(PLATFORM)' 'arty'
 	SOC_MK   := $(ARTY_MK)
 else ifeq '$(PLATFORM)' 'nexys_video'
 	SOC_MK   := $(NEXYS_VIDEO_MK)
+else ifeq '$(PLATFORM)' 'hps'
+	SOC_MK   := $(HPS_MK)
 else ifeq '$(PLATFORM)' 'sim'
 	SOC_MK   := $(SIM_MK)
 else
@@ -128,7 +131,7 @@ renode: $(SOFTWARE_ELF)
 
 .PHONY: clean
 clean:
-	$(ARTY_MK) clean
+	$(SOC_MK) clean
 	$(SIM_MK) clean
 	@echo Removing $(BUILD_DIR)
 	$(RM) $(BUILD_DIR)
@@ -158,10 +161,14 @@ build-dir:
 	mkdir -p $(BUILD_DIR)/src
 	@# TFLM copied first due it having old/outdated copies of cfu.h etc
 	@# that need to be overwritten
-	$(COPY) $(TFLM_SRC_DIR)/*        $(BUILD_DIR)/src
-	$(COPY) $(COMMON_DIR)/*          $(BUILD_DIR)
-	$(COPY) $(SAXON_SRC_DIR)/riscv.h $(BUILD_DIR)/src
-	$(COPY) $(SRC_DIR)/*             $(BUILD_DIR)/src
+	$(COPY) $(TFLM_SRC_DIR)/*            $(BUILD_DIR)/src
+	$(COPY) $(COMMON_DIR)/*              $(BUILD_DIR)
+	$(COPY) $(SAXON_SRC_DIR)/riscv.h     $(BUILD_DIR)/src
+	$(COPY) $(SRC_DIR)/*                 $(BUILD_DIR)/src
+	$(RM)			             $(BUILD_DIR)/_*
+ifneq ($(wildcard $(COMMON_DIR)/_$(PLATFORM)/*),)
+	$(COPY) $(COMMON_DIR)/_$(PLATFORM)/* $(BUILD_DIR)
+endif
 
 .PHONY: litex-software
 litex-software: $(CFU_VERILOG)
@@ -187,9 +194,16 @@ unit: $(SOFTWARE_BIN)
 	@echo Running unit test on Arty Board
 	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) $(UART_SPEED) $(TEST_MENU_ITEMS) |& tee $(UNITTEST_LOG)
 
+ifeq 'hps' '$(PLATFORM)'
 load: $(SOFTWARE_BIN)
-	@echo Running interactively on Arty Board
+	@echo Running interactively on HPS Board
+	$(CFU_ROOT)/scripts/hps_prog $(SOFTWARE_BIN) program
+	$(LXTERM) --speed 115200 $(TTY)
+else
+load: $(SOFTWARE_BIN)
+	@echo Running interactively on FPGA Board
 	$(LXTERM) --speed $(UART_SPEED) $(CRC) --kernel $(SOFTWARE_BIN) $(TTY)
+endif
 
 else
 $(RUN_TARGETS):
