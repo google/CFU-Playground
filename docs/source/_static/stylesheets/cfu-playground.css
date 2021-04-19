@@ -31,3 +31,7 @@ img {
 img.std {
   height: 400px;
 }
+
+img.medium {
+  height: 300px;
+}
