@@ -5,6 +5,9 @@ git submodule update --init
 # Verify dependencies that can be installed with apt (if available)
 missing=()
 
+if ! which make >/dev/null; then
+    missing+=(make)    
+fi
 if ! which openocd >/dev/null; then
     missing+=(openocd)    
 fi
