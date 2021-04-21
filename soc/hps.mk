@@ -42,7 +42,9 @@ OUT_DIR:=   build/$(SOC_NAME)
 # LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv $(OUT_DIR)/csr.csv $(CFU_ARGS) $(UART_ARGS)
 LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv $(OUT_DIR)/csr.csv $(CFU_ARGS)
 
-ifdef USE_SYMBIFLOW
+ifdef USE_OXIDE
+LITEX_ARGS += --toolchain oxide
+else ifdef USE_SYMBIFLOW
 LITEX_ARGS += --toolchain oxide
 endif
 
