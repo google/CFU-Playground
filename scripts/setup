@@ -51,10 +51,15 @@ if [ ${#missing[@]} -gt 0 ]; then
     fi
 fi
 
-# Warn about different versions
+# Check GCC
+if ! which riscv64-unknown-elf-gcc >/dev/null; then
+    echo "Error: RISCV GCC toolchain not found. Please install one, following the instructions at"
+    echo "https://cfu-playground.readthedocs.io/en/latest/setup-guide.html#step-3-install-riscv-toolchain"
 
-if ! riscv64-unknown-elf-gcc --version | grep ' 8.3.' >/dev/null; then
-    echo "Possibly unsupported version of riscv64-unknown-elf-gcc. 8.3.0 works." >&2
+elif ! riscv64-unknown-elf-gcc --version | grep 'SiFive GCC 8.3.0-2020.04.1.' >/dev/null; then
+    echo "Unsupported version of riscv64-unknown-elf-gcc. SiFive GCC 8.3.0-2020.04.1 is known to work." >&2
+    echo "To install this version, follow the instructions at"
+    echo "https://cfu-playground.readthedocs.io/en/latest/setup-guide.html#step-3-install-riscv-toolchain"
 fi
 
 # Verify other dependencies
