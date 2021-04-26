@@ -153,6 +153,11 @@ void tflite_load_model(const unsigned char* model_data) {
     printf(" %d", dims->data[ii]);
   }
   puts("\n");
+
+#ifdef SHOW_MEMORY_USE
+  interpreter->GetMicroAllocator().PrintAllocations();
+#endif
+
 }
 
 void tflite_set_input_zeros() {
@@ -189,11 +194,6 @@ void tflite_classify() {
   perf_print_value(cyc);
   printf(" cycles total\n");
 
-  // Uncomment to see how large the arena needs to be.
-
-#ifdef SHOW_MEMORY_USE
-  interpreter->GetMicroAllocator().PrintAllocations();
-#endif
   printf("Arena used bytes: %llu\n",
          (long long unsigned)(interpreter->arena_used_bytes()));
 }
