@@ -1170,9 +1170,9 @@ The LEDs are very bright. Try adding a module to dim them. Don't forget the
 test case! Hint: dimming the LEDs will be similar to making the speaker volume
 lower.
 
-================
+----------------
 Things To Do Now
-================
+----------------
 
 You now know enough nMigen to do quite a bit. If you'd like to experiment further, you could:
 

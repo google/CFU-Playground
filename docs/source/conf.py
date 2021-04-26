@@ -87,7 +87,7 @@ html_theme_options = {
     'color_accent': 'gray',
     'repo_name': "google/CFU-Playground",
     'repo_url': 'https://github.com/google/CFU-Playground',
-    'globaltoc_depth': 2,
+    'globaltoc_depth': 5,
     'globaltoc_collapse': True
 }
 
