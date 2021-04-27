@@ -29,6 +29,11 @@ from litex.soc.cores.bitbang import I2CMaster
 
 from litex.build.lattice.radiant import radiant_build_args, radiant_build_argdict
 
+from litespi.modules import GD25LQ128C
+from litespi.opcodes import SpiNorFlashOpCodes as Codes
+from litespi.phy.generic import LiteSPIPHY
+from litespi import LiteSPI
+
 from patch import Patch
 # from cam_control import CameraControl
 
@@ -71,11 +76,11 @@ class HpsSoC(LiteXSoC):
 
     cpu_type = "vexriscv"
 
-    def __init__(self, platform, debug):
+    def __init__(self, platform, debug, litespi_flash=False):
         LiteXSoC.__init__(self,
                           platform=platform,
                           sys_clk_freq=platform.sys_clk_freq,
-                          csr_data_width=8)
+                          csr_data_width=32)
 
         # Clock, Controller, CPU
         self.submodules.crg = platform.create_crg()
@@ -88,7 +93,10 @@ class HpsSoC(LiteXSoC):
         self.setup_ram()
 
         # SPI Flash
-        self.setup_flash()
+        if litespi_flash:
+            self.setup_litespi_flash()
+        else:
+            self.setup_flash()
 
         # ROM (part of SPI Flash)
         self.bus.add_region("rom", self.rom_region)
@@ -130,6 +138,15 @@ class HpsSoC(LiteXSoC):
                                             endianness="little", div=4)
         self.bus.add_slave("spiflash", self.spiflash.bus, self.spiflash_region)
         self.csr.add("spiflash")
+        
+    def setup_litespi_flash(self):
+        self.submodules.spiflash_phy  = LiteSPIPHY(self.platform.request("spiflash"), GD25LQ128C(Codes.READ_1_1_1))
+        self.submodules.spiflash_mmap  = LiteSPI(phy=self.spiflash_phy,
+            clk_freq        = self.platform.sys_clk_freq,
+            mmap_endianness = self.cpu.endianness)
+        self.csr.add("spiflash_mmap")
+        self.csr.add("spiflash_phy")
+        self.bus.add_slave(name="spiflash", slave=self.spiflash_mmap.bus, region=self.spiflash_region)
 
     def add_serial(self):
         self.add_uart("serial", baudrate=UART_SPEED)
@@ -193,11 +210,12 @@ def main():
                         help="Whether to do a full build, including the bitstream")
     parser.add_argument("--toolchain", default="radiant",
                         help="Which toolchain to use, radiant (default) or oxide")
+    parser.add_argument("--litespi-flash", action="store_true", help="Use litespi flash")
     parser.add_argument("--cfu", default=None, help="Specify file containing CFU Verilog module")
 
     args = parser.parse_args()
 
-    soc = HpsSoC(Platform(args.toolchain), debug=args.debug)
+    soc = HpsSoC(Platform(args.toolchain), debug=args.debug, litespi_flash=args.litespi_flash)
 
     # get the CFU version, plus the CFU itself and a wrapper 
     # ...since we're using stock litex, it doesn't know about the Cfu variants, so we need to use "external_variant"
