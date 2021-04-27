@@ -187,6 +187,8 @@ def main():
     hps_soc_args(parser)
     parser.add_argument("--debug", action="store_true",
                         help="Enable debug mode")
+    parser.add_argument("--slim_cpu", action="store_true",
+                        help="Use slimmer VexRiscv (required for mnv2_first)")
     parser.add_argument("--build", action="store_true",
                         help="Whether to do a full build, including the bitstream")
     parser.add_argument("--toolchain", default="radiant",
@@ -201,7 +203,10 @@ def main():
     # ...since we're using stock litex, it doesn't know about the Cfu variants, so we need to use "external_variant"
     if args.cfu:
         assert 'full' in soc.cpu.variant
-        var = "FullCfuDebug" if args.debug else "FullCfu"
+        if args.slim_cpu:
+            var = "SlimCfuDebug" if args.debug else "SlimCfu"
+        else:
+            var = "FullCfuDebug" if args.debug else "FullCfu"
         vexriscv = "../third_party/python/pythondata_cpu_vexriscv/pythondata_cpu_vexriscv"
         soc.cpu.use_external_variant(f"{vexriscv}/verilog/VexRiscv_{var}.v")
         soc.platform.add_source(args.cfu)

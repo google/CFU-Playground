@@ -26,7 +26,9 @@ DEFINES += NDEBUG
 #DEFINES += NPROFILE
 
 # Uncomment to include mnv2 in built binary (adds ~500kB to binary)
+ifneq 'hps' '$(PLATFORM)'
 DEFINES += INCLUDE_MODEL_MNV2
+endif
 RUN_MENU_ITEMS := 3 1
 
 #DEFINES += SHOW_CONV_PARAMS
@@ -41,5 +43,11 @@ RUN_MENU_ITEMS := 3 1
 #DEFINES += USE_CONV_SMALL_BATCHES
 
 DEFINES += ACCEL_CONV
+
+# Used by soc/hps.mk
+# Choose the slimmer version of VexRiscv to fit with this large CFU
+ifeq 'hps' '$(PLATFORM)'
+export SLIM_CPU:=1
+endif
 
 include ../proj.mk

@@ -199,6 +199,10 @@ load: $(SOFTWARE_BIN)
 	@echo Running interactively on HPS Board
 	$(CFU_ROOT)/scripts/hps_prog $(SOFTWARE_BIN) program
 	$(LXTERM) --speed 115200 $(TTY)
+
+connect:
+	@echo Connecting to HPS Board
+	$(LXTERM) --speed 115200 $(TTY)
 else
 load: $(SOFTWARE_BIN)
 	@echo Running interactively on FPGA Board

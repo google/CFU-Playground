@@ -48,6 +48,10 @@ else ifdef USE_SYMBIFLOW
 LITEX_ARGS += --toolchain oxide
 endif
 
+ifdef SLIM_CPU
+LITEX_ARGS += --slim_cpu
+endif
+
 PYRUN:=     $(CFU_ROOT)/scripts/pyrun
 HPS_RUN:=   MAKEFLAGS=-j8 $(PYRUN) ./hps_soc.py $(LITEX_ARGS)
 
