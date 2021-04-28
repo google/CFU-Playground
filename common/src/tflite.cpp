@@ -62,7 +62,11 @@ tflite::INTERPRETER_TYPE* interpreter = nullptr;
 
 // An area of memory to use for input, output, and intermediate arrays.
 // constexpr int kTensorArenaSize = 136 * 1024;
+#ifdef INCLUDE_MODEL_MNV2
 constexpr int kTensorArenaSize = 800 * 1024;
+#else
+constexpr int kTensorArenaSize = 81 * 1024;
+#endif
 static uint8_t tensor_arena[kTensorArenaSize];
 }  // namespace
 
@@ -108,7 +112,7 @@ static void tflite_init() {
   profiler = &micro_profiler;
 }
 
-void tflite_load_model(unsigned char* model_data) {
+void tflite_load_model(const unsigned char* model_data) {
   tflite_init();
   if (interpreter) {
     interpreter->~INTERPRETER_TYPE();

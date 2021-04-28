@@ -43,3 +43,6 @@
 [submodule "third_party/python/markupsafe"]
 	path = third_party/python/markupsafe
 	url = https://github.com/pallets/markupsafe.git
+[submodule "third_party/flashrom"]
+	path = third_party/flashrom
+	url = https://chromium.googlesource.com/external/coreboot.org/flashrom

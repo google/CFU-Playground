@@ -35,7 +35,7 @@ def main():
         print(s, file=outfile, end='')
 
     out(f"/* C array created from file {infile_name}.*/\n\n")
-    out(f"unsigned char {array_name}[] = {{\n")
+    out(f"const unsigned char {array_name}[] = {{\n")
 
     for n, b in enumerate(data):
         if 0 == (n % LINE_LEN):

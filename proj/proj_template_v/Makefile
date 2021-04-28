@@ -16,6 +16,9 @@
 # This variable lists symbols to define to the C preprocessor
 export DEFINES := PLACEHOLDER
 
+DEFINES += NDEBUG
+# DEFINES += NPROFILE
+
 # Uncomment this line to use software defined CFU
 # DEFINES += CFU_SOFTWARE_DEFINED
 
