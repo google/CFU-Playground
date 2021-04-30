@@ -19,7 +19,7 @@
 
 from migen import *
 
-from litex_boards.targets.nexys_video import BaseSoC
+from litex_boards.targets.digilent_nexys_video import BaseSoC
 
 from litex.build.generic_platform import *
 from litex.build.xilinx.vivado import vivado_build_args, vivado_build_argdict
@@ -53,8 +53,8 @@ class CustomSoC(BaseSoC):
         # self.add_uartbone(name="uart_bone_serial", baudrate=kwargs['uart_baudrate'])
 
         # Add in debug registers
-        if 'debug' in kwargs['cpu_variant']:
-            self.register_mem("vexriscv_debug", 0xf00f0000, self.cpu.debug_bus, 0x100)
+        # if 'debug' in kwargs['cpu_variant']:
+        #     self.register_mem("vexriscv_debug", 0xf00f0000, self.cpu.debug_bus, 0x100)
 
 def main():
     parser = argparse.ArgumentParser(description="LiteX SoC on Nexys Video")
