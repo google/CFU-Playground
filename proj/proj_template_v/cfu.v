@@ -24,6 +24,7 @@ module Cfu (
   input               io_bus_rsp_ready,
   output              io_bus_rsp_payload_response_ok,
   output     [31:0]   io_bus_rsp_payload_outputs_0,
+  input               rst,
   input               clk
 );
 
