@@ -80,7 +80,8 @@ class HpsSoC(LiteXSoC):
         LiteXSoC.__init__(self,
                           platform=platform,
                           sys_clk_freq=platform.sys_clk_freq,
-                          csr_data_width=32)
+                          csr_data_width=(32 if litespi_flash else 8))
+
 
         # Clock, Controller, CPU
         self.submodules.crg = platform.create_crg()
