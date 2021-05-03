@@ -42,6 +42,14 @@ OUT_DIR:=   build/$(SOC_NAME)
 # LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv $(OUT_DIR)/csr.csv $(CFU_ARGS) $(UART_ARGS)
 LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv $(OUT_DIR)/csr.csv $(CFU_ARGS)
 
+#==== Specify a different synth tool; still uses Radiant PnR
+ifdef USE_YOSYS
+LITEX_ARGS += --synth_mode yosys
+else ifdef USE_LSE
+LITEX_ARGS += --synth_mode lse
+endif
+
+#==== Specify complete open source toolchain: Yosys + NextPnR
 ifdef USE_OXIDE
 LITEX_ARGS += --toolchain oxide
 else ifdef USE_SYMBIFLOW
