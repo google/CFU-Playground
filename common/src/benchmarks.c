@@ -21,6 +21,7 @@
 #include "assert.h"
 #include "menu.h"
 #include "perf.h"
+#include "generated/mem.h"
 
 #ifdef PLATFORM_hps
 #define BUF_SIZE (32 * 1024)  // must be at least 1024
@@ -68,6 +69,39 @@ static void __attribute__((noinline)) do_loads_strided(void) {
   printf("Val:%d  Cycles: %d   Cycles/load: %d\n\n\n", acc,
          end_time - start_time, (end_time - start_time) / total_iters);
 }
+
+#ifdef SPIFLASH_BASE
+
+static void __attribute__((noinline)) do_flash_loads(void) {
+  printf("Hello, Flash Load! (SPI flash at %p, size %dkB)\n", SPIFLASH_BASE, (SPIFLASH_SIZE/1024));
+  int*  buf = (int*)((void*)(SPIFLASH_BASE));
+  int acc = 0;
+  unsigned int start_time = perf_get_mcycle();
+  int total_iters = 64*1024;
+  for (int j = 0; j<total_iters; j++) {
+    acc += buf[j];
+  }
+  unsigned int end_time = perf_get_mcycle();
+  unsigned int delta_cycles = end_time - start_time;
+  printf("Val:%d  Cycles: %u   Cycles/load: %u\n\n\n", acc,
+         delta_cycles, delta_cycles / total_iters);
+}
+
+static void __attribute__((noinline)) do_flash_loads_strided(void) {
+  printf("Hello, STRIDED Flash Load! (SPI flash at %p, size %dkB)\n", SPIFLASH_BASE, (SPIFLASH_SIZE/1024));
+  int*  buf = (int*)((void*)(SPIFLASH_BASE));
+  int acc = 0;
+  unsigned int start_time = perf_get_mcycle();
+  int total_iters = 64*1024;
+  for (int j = 0; j<total_iters; j++) {
+    acc += buf[j*2];    // 2x stride
+  }
+  unsigned int end_time = perf_get_mcycle();
+  unsigned int delta_cycles = end_time - start_time;
+  printf("Val:%d  Cycles: %u   Cycles/load: %u\n\n\n", acc,
+         delta_cycles, delta_cycles / total_iters);
+}
+#endif
 
 static void __attribute__((noinline)) do_loads(void) {
   puts("Hello, Load!\n");
@@ -128,6 +162,10 @@ static struct Menu MENU = {
                   "sequential loads benchmark (expect one miss per cache line, "
                   "one every eight accesses)",
                   do_loads),
+#ifdef SPIFLASH_BASE
+        MENU_ITEM('f', "flash sequential loads benchmark", do_flash_loads),
+        MENU_ITEM('g', "flash STRIDED loads benchmark", do_flash_loads_strided),
+#endif
         MENU_ITEM('c', "cached loads benchmark (expect all hits)",
                   do_loads_cached),
         MENU_ITEM('8', "strided loads benchmark (expect all misses)",
