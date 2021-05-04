@@ -25,6 +25,12 @@ DEFINES += NDEBUG
 # Uncomment this line to skip individual profiling output (has minor effect on performance).
 #DEFINES += NPROFILE
 
+# so that CI can make a SW-only version of the executable
+#   (no custom instructions or CSRs)
+ifdef SW_ONLY
+DEFINES += NDEBUG NPROFILE CFU_SOFTWARE_DEFINED
+endif
+
 # Uncomment to include mnv2 in built binary (adds ~500kB to binary)
 ifneq 'hps' '$(PLATFORM)'
 DEFINES += INCLUDE_MODEL_MNV2
