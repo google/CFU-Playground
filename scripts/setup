@@ -56,6 +56,7 @@ if [ ${#missing[@]} -gt 0 ]; then
     fi
 fi
 
+
 # Build flashrom after installing dependencies
 echo "BUILDING FLASHROM"
 (
