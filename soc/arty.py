@@ -19,7 +19,7 @@
 
 from migen import *
 
-from litex_boards.targets.arty import BaseSoC
+from litex_boards.targets.digilent_arty import BaseSoC
 
 from litex.build.generic_platform import *
 from litex.build.xilinx.vivado import vivado_build_args, vivado_build_argdict
@@ -52,9 +52,9 @@ class CustomSoC(BaseSoC):
         # self.platform.add_extension(_uart_bone_serial)
         # self.add_uartbone(name="uart_bone_serial", baudrate=kwargs['uart_baudrate'])
 
-        # Add in debug registers
-        if 'debug' in kwargs['cpu_variant']:
-            self.register_mem("vexriscv_debug", 0xf00f0000, self.cpu.debug_bus, 0x100)
+        # Add in debug registers -- NOW DONE ELSEWHERE
+        # if 'debug' in kwargs['cpu_variant']:
+        #    self.register_mem("vexriscv_debug", 0xf00f0000, self.cpu.debug_bus, 0x100)
 
 def main():
     parser = argparse.ArgumentParser(description="LiteX SoC on Arty A7")
@@ -66,6 +66,7 @@ def main():
     parser.add_argument("--with-ethernet",  action="store_true", help="Enable Ethernet support")
     parser.add_argument("--with-etherbone", action="store_true", help="Enable Etherbone support")
     parser.add_argument("--cfu", default=None, help="Specify file containing CFU Verilog module")
+    parser.add_argument("--with-mapped-flash", action="store_true", help="Add litespi SPI flash")
     parser.add_argument("--toolchain", default="vivado", help="Specify toolchain for implementing gateware ('vivado' or 'symbiflow')")
     parser.set_defaults(
             csr_csv='csr.csv',
@@ -80,8 +81,11 @@ def main():
     cpu = CPUS["vexriscv"]
     soc_kwargs = soc_sdram_argdict(args)
     soc_kwargs["l2_size"] = 8 * 1024
-    soc = CustomSoC(with_ethernet=args.with_ethernet, with_etherbone=args.with_etherbone,
-                    toolchain=args.toolchain, **soc_kwargs)
+    soc = CustomSoC(with_ethernet=args.with_ethernet, 
+                    with_etherbone=args.with_etherbone,
+                    toolchain=args.toolchain, 
+                    with_mapped_flash=args.with_mapped_flash,
+                    **soc_kwargs)
 
     # get the CFU version, plus the CFU itself and a wrapper 
     # ...since we're using stock litex, it doesn't know about the Cfu variants, so we need to use "external_variant"

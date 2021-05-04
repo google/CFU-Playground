@@ -2,14 +2,16 @@
 set -e
 git submodule update --init
 
+
+
 # Verify dependencies that can be installed with apt (if available)
 missing=()
 
 if ! which make >/dev/null; then
-    missing+=(make)    
+    missing+=(make)
 fi
 if ! which openocd >/dev/null; then
-    missing+=(openocd)    
+    missing+=(openocd)
 fi
 if ! which yosys >/dev/null; then
     missing+=(yosys)
@@ -23,6 +25,12 @@ fi
 if ! which verilator >/dev/null; then
     missing+=(verilator libevent-dev libjson-c-dev)
 fi
+if ! (apt list -i | grep libusb-1.0-0-dev) ; then
+    missing+=(libusb-1.0-0-dev libftdi1-dev)
+fi
+
+echo Missing:
+echo $missing
 
 in_ci=0
 if [ $# -gt 0 ] ; then
@@ -47,6 +55,13 @@ if [ ${#missing[@]} -gt 0 ]; then
         exit 1
     fi
 fi
+
+# Build flashrom after installing dependencies
+echo "BUILDING FLASHROM"
+(
+  cd third_party/flashrom
+  make -j4 CONFIG_ENABLE_LIBPCI_PROGRAMMERS=no
+)
 
 # Check GCC
 if ! which riscv64-unknown-elf-gcc >/dev/null; then

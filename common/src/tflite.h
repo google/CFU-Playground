@@ -30,7 +30,7 @@ extern "C" {
 void tflite_do_tests();
 
 // Sets up TfLite with a given model
-void tflite_load_model(unsigned char* model_data);
+void tflite_load_model(const unsigned char* model_data);
 void tflite_set_input_zeros();
 void tflite_set_input(const void* data);
 void tflite_set_input_unsigned(const unsigned char* data);

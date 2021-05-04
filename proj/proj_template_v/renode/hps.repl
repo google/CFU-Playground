@@ -1,8 +1,3 @@
-ram: Memory.MappedMemory @ {
-        sysbus 0x40000000;
-        sysbus 0xc0000000 // shadow
-    }
-    size: 0x10000000
 
 cpu: CPU.VexRiscv @ sysbus
     cpuType: "rv32im"
@@ -27,14 +22,41 @@ cpu: CPU.VexRiscv @ sysbus
         RegisterCustomCSR "BPM" 0xB15  User
 
 
-uart: UART.LiteX_UART @ {
-        sysbus 0xf0003000
-    }
+ctrl: Miscellaneous.LiteX_SoC_Controller @ { sysbus 0xf0000000 }
+
+
+uart: UART.LiteX_UART @ { sysbus 0xf0002800 }
     -> cpu@0
 
-timer0: Timers.LiteX_Timer @ {
-        sysbus 0xf0002800
-    }
-    frequency: 100000000
-    -> cpu@1
 
+timer0: Timers.LiteX_Timer @ { sysbus 0xf0003000 }
+    -> cpu@1
+    frequency: 56250000
+
+
+sram: Memory.MappedMemory @ { sysbus 0x40000000 }
+    size: 0x00050000
+
+
+//spiflash: Memory.MappedMemory @ { sysbus 0x20000000 }
+//    size: 0x01000000
+
+
+spi: SPI.LiteX_SPI_Flash @ { sysbus 0xf0001000 }
+
+
+//mt25q: SPI.Micron_MT25Q @ spi
+//    underlyingMemory: spiflash
+
+
+rom: Memory.MappedMemory @ { sysbus 0x20200000 }
+    size: 0x00e00000
+
+
+//# MEMORY {
+//#         sram_lram : ORIGIN = 0x40000000, LENGTH = 0x00050000
+//#         sram : ORIGIN = 0x40000000, LENGTH = 0x00050000
+//#         spiflash : ORIGIN = 0x20000000, LENGTH = 0x01000000
+//#         rom : ORIGIN = 0x20200000, LENGTH = 0x00e00000
+//#         csr : ORIGIN = 0xf0000000, LENGTH = 0x00010000
+//# }
