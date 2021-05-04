@@ -1,0 +1,62 @@
+
+cpu: CPU.VexRiscv @ sysbus
+    cpuType: "rv32im"
+    init:
+        RegisterCustomCSR "BPM" 0xB04  User
+        RegisterCustomCSR "BPM" 0xB05  User
+        RegisterCustomCSR "BPM" 0xB06  User
+        RegisterCustomCSR "BPM" 0xB07  User
+        RegisterCustomCSR "BPM" 0xB08  User
+        RegisterCustomCSR "BPM" 0xB09  User
+        RegisterCustomCSR "BPM" 0xB0A  User
+        RegisterCustomCSR "BPM" 0xB0B  User
+        RegisterCustomCSR "BPM" 0xB0C  User
+        RegisterCustomCSR "BPM" 0xB0D  User
+        RegisterCustomCSR "BPM" 0xB0E  User
+        RegisterCustomCSR "BPM" 0xB0F  User
+        RegisterCustomCSR "BPM" 0xB10  User
+        RegisterCustomCSR "BPM" 0xB11  User
+        RegisterCustomCSR "BPM" 0xB12  User
+        RegisterCustomCSR "BPM" 0xB13  User
+        RegisterCustomCSR "BPM" 0xB14  User
+        RegisterCustomCSR "BPM" 0xB15  User
+
+
+ctrl: Miscellaneous.LiteX_SoC_Controller @ { sysbus 0xf0000000 }
+
+
+uart: UART.LiteX_UART @ { sysbus 0xf0002800 }
+    -> cpu@0
+
+
+timer0: Timers.LiteX_Timer @ { sysbus 0xf0003000 }
+    -> cpu@1
+    frequency: 56250000
+
+
+sram: Memory.MappedMemory @ { sysbus 0x40000000 }
+    size: 0x00050000
+
+
+//spiflash: Memory.MappedMemory @ { sysbus 0x20000000 }
+//    size: 0x01000000
+
+
+spi: SPI.LiteX_SPI_Flash @ { sysbus 0xf0001000 }
+
+
+//mt25q: SPI.Micron_MT25Q @ spi
+//    underlyingMemory: spiflash
+
+
+rom: Memory.MappedMemory @ { sysbus 0x20200000 }
+    size: 0x00e00000
+
+
+//# MEMORY {
+//#         sram_lram : ORIGIN = 0x40000000, LENGTH = 0x00050000
+//#         sram : ORIGIN = 0x40000000, LENGTH = 0x00050000
+//#         spiflash : ORIGIN = 0x20000000, LENGTH = 0x01000000
+//#         rom : ORIGIN = 0x20200000, LENGTH = 0x00e00000
+//#         csr : ORIGIN = 0xf0000000, LENGTH = 0x00010000
+//# }
