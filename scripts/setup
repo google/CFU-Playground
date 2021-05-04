@@ -11,9 +11,6 @@ fi
 if ! which openocd >/dev/null; then
     missing+=(openocd)    
 fi
-if ! which riscv64-unknown-elf-gcc >/dev/null; then
-    missing+=(gcc-riscv64-unknown-elf)
-fi
 if ! which yosys >/dev/null; then
     missing+=(yosys)
 fi
