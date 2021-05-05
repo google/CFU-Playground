@@ -1,6 +1,6 @@
 
 using sysbus
-mach create "litex-vexriscv"
+mach create "hps"
 machine LoadPlatformDescription $ORIGIN/hps.repl
 machine StartGdbServer 10001
 showAnalyzer sysbus.uart
