@@ -3,10 +3,10 @@
 # Do not modify this file directly!
 # !! WARNING !!
 #
-# It is generated from: ../workflows-src/run-in-renode.yml
+# It is generated from: ../workflows-src/test-projects.yml
 # using the script from https://github.com/mithro/actions-includes@main
 
-name: Run in Renode
+name: Test projects
 on: [push, pull_request, workflow_dispatch]
 jobs:
   proj_template:
@@ -17,7 +17,7 @@ jobs:
       if: runner.os == 'Linux'
       continue-on-error: false
       with:
-        workflow: .github/workflows/run-in-renode.yml
+        workflow: .github/workflows/test-projects.yml
     - name: Fetch toolchain
       run: |
         wget -O- https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14.tar.gz | tar -xzC /opt
@@ -58,7 +58,7 @@ jobs:
       if: runner.os == 'Linux'
       continue-on-error: false
       with:
-        workflow: .github/workflows/run-in-renode.yml
+        workflow: .github/workflows/test-projects.yml
     - name: Fetch toolchain
       run: |
         wget -O- https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14.tar.gz | tar -xzC /opt
@@ -99,7 +99,7 @@ jobs:
       if: runner.os == 'Linux'
       continue-on-error: false
       with:
-        workflow: .github/workflows/run-in-renode.yml
+        workflow: .github/workflows/test-projects.yml
     - name: Fetch toolchain
       run: |
         wget -O- https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14.tar.gz | tar -xzC /opt

@@ -1,4 +1,4 @@
-name: Run in Renode
+name: Test projects
 on: [push, pull_request, workflow_dispatch]
 jobs:
   proj_template:
