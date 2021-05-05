@@ -17,8 +17,6 @@
 import sys
 import re
 
-totals =  {}
-
 regnames = ['x0', 'ra', 'sp', 'gp', 
                 'tp', 't0', 't1', 't2', 
                 's0', 's1', 'a0', 'a1',
@@ -28,8 +26,7 @@ regnames = ['x0', 'ra', 'sp', 'gp',
                 's8', 's9', 's10', 's11',
                 't3', 't4', 't5', 't6']
 
-n = 1
-cyc = 0
+
 lines = sys.stdin.readlines()
 
 for i in range(len(lines)):
