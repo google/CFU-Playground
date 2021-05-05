@@ -77,3 +77,10 @@ csr.csv
 # VSCode files
 *.code-workspace
 .vscode/*
+
+# Robot test results
+log.html
+report.html
+results-*robot.xml
+robot_output.xml
+*fail.save
