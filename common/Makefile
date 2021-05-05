@@ -29,6 +29,7 @@ LIBBASE_DIR    := $(SOC_SOFTWARE_DIR)/libbase
 LITEX_DIR      := $(CFU_ROOT)/third_party/python/litex/litex
 VEX_SRC_DIR    := $(LITEX_DIR)/soc/cores/cpu/vexriscv
 PYRUN          := $(CFU_ROOT)/scripts/pyrun
+FIX_CFU_DIS    := $(PYRUN) $(CFU_ROOT)/scripts/fix_cfu_dis.py
 XXD            := $(PYRUN) $(CFU_ROOT)/scripts/xxd.py
 
 LD_DIR     := $(BUILD_DIR)/ld
@@ -148,7 +149,7 @@ $(TARGET): $(OBJECTS) $(LDSCRIPTS)
 	$(QUIET) echo "  LD       $@"
 	$(QUIET) $(CXX) $(OBJECTS) $(LFLAGS) -o $@
 	$(QUIET) echo "  OBJDUMP  $@.dis"
-	$(QUIET) $(OBJDUMP) -d -S -l $(TARGET) > $(TARGET).dis
+	$(QUIET) $(OBJDUMP) -d -S -l $(TARGET) | $(FIX_CFU_DIS) > $(TARGET).dis
 	$(QUIET) echo "  OBJDUMP  $@.sym"
 	$(QUIET) $(OBJDUMP) -s $(TARGET) > $(TARGET).sym
 
