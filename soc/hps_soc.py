@@ -211,6 +211,8 @@ def main():
                         help="Whether to do a full build, including the bitstream")
     parser.add_argument("--toolchain", default="radiant",
                         help="Which toolchain to use, radiant (default) or oxide")
+    parser.add_argument("--synth_mode", default="radiant",
+                        help="Which synthesis to use, radiant/synplify (default), lse, or yosys")
     parser.add_argument("--litespi-flash", action="store_true", help="Use litespi flash")
     parser.add_argument("--cfu", default=None, help="Specify file containing CFU Verilog module")
 
