@@ -26,7 +26,8 @@ lines = sys.stdin.readlines()
 for i in range(len(lines)):
     lin = lines[i]
     lin = lin.replace('\r','')
-    m = re.match(r"(\S+) took (\d+) cyc", lin)
+    lin = lin.replace('\n','')
+    m = re.match(r".*PROFILER\", \"(.*)\", (\d+)", lin)
     if m:
         tfop = m.group(1)
         cyc = m.group(2)
