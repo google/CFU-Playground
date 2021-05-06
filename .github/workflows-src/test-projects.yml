@@ -1,0 +1,26 @@
+name: Test projects
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  proj_template:
+    runs-on: ubuntu-20.04
+    steps:
+      - includes: /run-in-renode
+        with:
+          path: proj/proj_template
+          test: proj/proj_template/renode/litex-vexriscv-tflite.robot
+  mnv2_first-litex:
+    runs-on: ubuntu-20.04
+    steps:
+      - includes: /run-in-renode
+        with:
+          path: proj/mnv2_first
+          test: proj/mnv2_first/renode/litex-vexriscv-tflite.robot
+          build-params: SW_ONLY=1
+  mnv2_first-hps:
+    runs-on: ubuntu-20.04
+    steps:
+      - includes: /run-in-renode
+        with:
+          path: proj/mnv2_first
+          test: proj/mnv2_first/renode/hps.robot
+          build-params: SW_ONLY=1 PLATFORM=hps

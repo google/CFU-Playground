@@ -1,0 +1,134 @@
+
+# !! WARNING !!
+# Do not modify this file directly!
+# !! WARNING !!
+#
+# It is generated from: ../workflows-src/test-projects.yml
+# using the script from https://github.com/mithro/actions-includes@main
+
+name: Test projects
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  proj_template:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: ⏰ 🛂 📕 - Checking workflow expansion is up to date
+      uses: mithro/actions-includes@main
+      if: runner.os == 'Linux'
+      continue-on-error: false
+      with:
+        workflow: .github/workflows/test-projects.yml
+    - name: Fetch toolchain
+      run: |
+        wget -O- https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14.tar.gz | tar -xzC /opt
+        echo "/opt/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14/bin" >> $GITHUB_PATH
+    - name: Clone repository
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.7'
+
+    - name: Setup environment
+      run: bash scripts/setup -ci
+    - name: Build sample
+      run: pwd && source environment && cd proj/proj_template && make  -j8 software && cp build/software.elf renode/
+
+    - name: Run tests
+      uses: antmicro/renode-actions/test-in-renode@main
+      with:
+        renode-version: 1.12.0+20210403git44d6786
+        tests-to-run: proj/proj_template/renode/litex-vexriscv-tflite.robot
+    - name: Archive results
+      uses: actions/upload-artifact@v2
+      with:
+        name: test-results
+        path: |
+          report.html
+          log.html
+          robot_output.xml
+
+  mnv2_first-litex:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: ⏰ 🛂 📕 - Checking workflow expansion is up to date
+      uses: mithro/actions-includes@main
+      if: runner.os == 'Linux'
+      continue-on-error: false
+      with:
+        workflow: .github/workflows/test-projects.yml
+    - name: Fetch toolchain
+      run: |
+        wget -O- https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14.tar.gz | tar -xzC /opt
+        echo "/opt/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14/bin" >> $GITHUB_PATH
+    - name: Clone repository
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.7'
+
+    - name: Setup environment
+      run: bash scripts/setup -ci
+    - name: Build sample
+      run: pwd && source environment && cd proj/mnv2_first && make SW_ONLY=1 -j8 software && cp build/software.elf renode/
+
+    - name: Run tests
+      uses: antmicro/renode-actions/test-in-renode@main
+      with:
+        renode-version: 1.12.0+20210403git44d6786
+        tests-to-run: proj/mnv2_first/renode/litex-vexriscv-tflite.robot
+    - name: Archive results
+      uses: actions/upload-artifact@v2
+      with:
+        name: test-results
+        path: |
+          report.html
+          log.html
+          robot_output.xml
+
+  mnv2_first-hps:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: ⏰ 🛂 📕 - Checking workflow expansion is up to date
+      uses: mithro/actions-includes@main
+      if: runner.os == 'Linux'
+      continue-on-error: false
+      with:
+        workflow: .github/workflows/test-projects.yml
+    - name: Fetch toolchain
+      run: |
+        wget -O- https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14.tar.gz | tar -xzC /opt
+        echo "/opt/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14/bin" >> $GITHUB_PATH
+    - name: Clone repository
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.7'
+
+    - name: Setup environment
+      run: bash scripts/setup -ci
+    - name: Build sample
+      run: pwd && source environment && cd proj/mnv2_first && make SW_ONLY=1 PLATFORM=hps -j8 software && cp build/software.elf renode/
+
+    - name: Run tests
+      uses: antmicro/renode-actions/test-in-renode@main
+      with:
+        renode-version: 1.12.0+20210403git44d6786
+        tests-to-run: proj/mnv2_first/renode/hps.robot
+    - name: Archive results
+      uses: actions/upload-artifact@v2
+      with:
+        name: test-results
+        path: |
+          report.html
+          log.html
+          robot_output.xml
+
