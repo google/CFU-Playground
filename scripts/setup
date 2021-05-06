@@ -7,6 +7,9 @@ git submodule update --init
 # Verify dependencies that can be installed with apt (if available)
 missing=()
 
+if ! which gcc >/dev/null; then
+    missing+=(gcc)
+fi
 if ! which make >/dev/null; then
     missing+=(make)
 fi
