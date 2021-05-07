@@ -26,13 +26,34 @@ static void do_hello_world(void)
 }
 
 // Test template instruction
+static void do_grid_cfu_op0(void)
+{
+    puts("\nExercise CFU Op0\n");
+    printf("a   b-->");
+    for (int b = 0; b < 6; b++)
+    {
+        printf("%8d", b);
+    }
+    puts("\n-------------------------------------------------------");
+    for (int a = 0; a < 6; a++)
+    {
+        printf("%-8d", a);
+        for (int b = 0; b < 6; b++)
+        {
+            int cfu = cfu_op0(0, a, b);
+            printf("%8d", cfu);
+        }
+        puts("");
+    }
+}
+
+// Test template instruction
 static void do_exercise_cfu_op0(void)
 {
-    puts("\nExercise CFU Op0 aka Select in0\n");
+    puts("\nExercise CFU Op0\n");
     int count = 0;
     for (int a = -0x71234567; a < 0x68000000; a += 0x10012345)
     {
-
         for (int b = -0x7edcba98; b < 0x68000000; b += 0x10770077)
         {
             int cfu = cfu_op0(0, a, b);
@@ -53,6 +74,7 @@ static struct Menu MENU = {
     "project",
     {
         MENU_ITEM('0', "exercise cfu op0", do_exercise_cfu_op0),
+        MENU_ITEM('g', "grid cfu op0", do_grid_cfu_op0),
         MENU_ITEM('h', "say Hello", do_hello_world),
         MENU_END,
     },
