@@ -1,0 +1,11 @@
+
+using sysbus
+mach create "litex-vexriscv"
+machine LoadPlatformDescription @hps.repl
+machine StartGdbServer 10001
+showAnalyzer sysbus.uart
+showAnalyzer sysbus.uart Antmicro.Renode.Analyzers.LoggingUartAnalyzer
+
+sysbus LoadELF $ORIGIN/build/software.elf
+
+
