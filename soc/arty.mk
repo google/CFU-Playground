@@ -49,7 +49,7 @@ PYRUN:=     $(CFU_ROOT)/scripts/pyrun
 ARTY_RUN:=  MAKEFLAGS=-j8 $(PYRUN) ./arty.py $(LITEX_ARGS)
 
 BIOS_BIN := $(OUT_DIR)/software/bios/bios.bin
-BITSTREAM:= $(OUT_DIR)/gateware/arty.bit
+BITSTREAM:= $(OUT_DIR)/gateware/digilent_arty.bit
 
 .PHONY: bitstream litex-software prog clean check-timing
 
@@ -75,7 +75,7 @@ endif
 prog: $(BITSTREAM) check-timing
 	@echo Loading bitstream onto Arty
 	$(ARTY_RUN) --no-compile-software --load
-	
+
 clean:
 	@echo Removing $(OUT_DIR)
 	rm -rf $(OUT_DIR)
