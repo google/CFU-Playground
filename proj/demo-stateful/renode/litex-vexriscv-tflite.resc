@@ -3,35 +3,36 @@
 # Define the custom instruction functionality
 ######################################################
 
-set in_image_init
-"""
-src_rs1 = (instruction >> 15) & 31
-src_rs2 = (instruction >> 20) & 31
-dst     = (instruction >> 7) & 31
-state['xmax'] = cpu.GetRegisterUnsafe(src_rs1).RawValue
-state['ymax'] = cpu.GetRegisterUnsafe(src_rs2).RawValue
-# no writeback? 
-cpu.DebugLog('Custom Instruction init!')
-cpu.DebugLog("x_bound:")
-cpu.DebugLog(str(state['xmax']))
-cpu.DebugLog("y_bound:")
-cpu.DebugLog(str(state['ymax']))
-"""
-
-
-set in_image_run
+set macc_init
 """
 src_rs1 = (instruction >> 15) & 31
 src_rs2 = (instruction >> 20) & 31
 dst_reg = (instruction >> 7) & 31
-x = int(cpu.GetRegisterUnsafe(src_rs1).RawValue)
-y = int(cpu.GetRegisterUnsafe(src_rs2).RawValue)
-xmax = int(state['xmax'])
-ymax = int(state['ymax'])
-res = (x >= 0) and (x < xmax) and (y >= 0) and (y < ymax)
+op1 = int(cpu.GetRegisterUnsafe(src_rs1).RawValue)
+op2 = int(cpu.GetRegisterUnsafe(src_rs2).RawValue)
+# acc = int(state['acc'])
+# res = (acc + op1 * op2) & 0xffffffff
+state['acc'] = op1
+cpu.SetRegisterUnsafe(dst_reg, 0)
+cpu.DebugLog('Custom Instruction init!')
+cpu.DebugLog("acc:")
+cpu.DebugLog(str(state['acc']))
+"""
+
+
+set macc
+"""
+src_rs1 = (instruction >> 15) & 31
+src_rs2 = (instruction >> 20) & 31
+dst_reg = (instruction >> 7) & 31
+op1 = int(cpu.GetRegisterUnsafe(src_rs1).RawValue)
+op2 = int(cpu.GetRegisterUnsafe(src_rs2).RawValue)
+acc = int(state['acc'])
+res = (acc + op1 * op2) & 0xffffffff
+state['acc'] = res
 cpu.SetRegisterUnsafe(dst_reg, res)
-txt = "x:{x} xmax:{xmax} y:{y} ymax:{ymax}   --> {res}"
-cpu.DebugLog(txt.format(x=x, xmax=xmax, y=y, ymax=ymax, res=res))
+txt = "acc:{acc} op1:{op1} op2:{op2}  --> {res}"
+cpu.DebugLog(txt.format(acc=acc, op1=op1, op2=op2, res=res))
 """
 
 
@@ -47,8 +48,8 @@ showAnalyzer uart
 
 logLevel 0 sysbus.cpu
 
-#sysbus.cpu InstallCustomInstructionHandlerFromString "0000000yyyyyxxxxx111ddddd0001011" $in_image_init
-#sysbus.cpu InstallCustomInstructionHandlerFromString "0000000yyyyyxxxxx000ddddd0001011" $in_image_run
+sysbus.cpu InstallCustomInstructionHandlerFromString "0000000yyyyyxxxxx001ddddd0001011" $macc
+sysbus.cpu InstallCustomInstructionHandlerFromString "0000000yyyyyxxxxx000ddddd0001011" $macc_init
 #                                                         function id--^^^
 
 sysbus LoadELF $ORIGIN/software.elf
