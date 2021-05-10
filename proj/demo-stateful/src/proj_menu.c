@@ -31,8 +31,8 @@ static void do_seq(void)
     puts("\nExercise CFU\n");
 
     // init
-    unsigned r = cfu_op0(0, 0, 0);
-    printf("R: %u\n", r);
+    (void) cfu_op0(0, 0, 0);
+    (void) cfu_op0_sw(0, 0, 0);
 
     // sequence of macc
     for (unsigned a = 0; a < 6; a++)
