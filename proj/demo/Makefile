@@ -19,6 +19,13 @@ export DEFINES := PLACEHOLDER
 DEFINES += NDEBUG
 # DEFINES += NPROFILE
 
+# mnv2
+#DEFINES += INCLUDE_MODEL_MNV2
+#RUN_MENU_ITEMS = 1 2 1
+
+# pdti8
+RUN_MENU_ITEMS = 1 1 1
+
 # Uncomment this line to use software defined CFU
 # DEFINES += CFU_SOFTWARE_DEFINED
 
