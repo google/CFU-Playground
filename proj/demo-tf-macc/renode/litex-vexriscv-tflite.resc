@@ -1,0 +1,75 @@
+
+######################################################
+# Define the custom instruction functionality
+######################################################
+
+set macc_init
+"""
+src_rs1 = (instruction >> 15) & 31
+src_rs2 = (instruction >> 20) & 31
+dst_reg = (instruction >> 7) & 31
+op1 = int(cpu.GetRegisterUnsafe(src_rs1).RawValue)
+op2 = int(cpu.GetRegisterUnsafe(src_rs2).RawValue)
+# acc = int(state['acc'])
+# res = (acc + op1 * op2) & 0xffffffff
+state['acc'] = op1
+cpu.SetRegisterUnsafe(dst_reg, 0)
+cpu.DebugLog('Custom Instruction init!')
+cpu.DebugLog("acc:")
+cpu.DebugLog(str(state['acc']))
+"""
+
+
+set macc
+"""
+src_rs1 = (instruction >> 15) & 31
+src_rs2 = (instruction >> 20) & 31
+dst_reg = (instruction >> 7) & 31
+op1 = int(cpu.GetRegisterUnsafe(src_rs1).RawValue)
+op2 = int(cpu.GetRegisterUnsafe(src_rs2).RawValue)
+acc = int(state['acc'])
+res = (acc + op1 * op2) & 0xffffffff
+state['acc'] = res
+cpu.SetRegisterUnsafe(dst_reg, res)
+txt = "acc:{acc} op1:{op1} op2:{op2}  --> {res}"
+cpu.DebugLog(txt.format(acc=acc, op1=op1, op2=op2, res=res))
+"""
+
+
+######################################################
+# Set up the machine, load the ELF
+######################################################
+
+using sysbus
+
+mach create
+machine LoadPlatformDescription $ORIGIN/litex-vexriscv-tflite.repl
+showAnalyzer uart
+
+logLevel 0 sysbus.cpu
+
+sysbus.cpu InstallCustomInstructionHandlerFromString "0000000yyyyyxxxxx001ddddd0001011" $macc
+sysbus.cpu InstallCustomInstructionHandlerFromString "0000000yyyyyxxxxx000ddddd0001011" $macc_init
+#                                                         function id--^^^
+
+sysbus LoadELF $ORIGIN/software.elf
+
+# machine StartGdbServer 3333
+
+
+######################################################
+# Print out some info
+######################################################
+
+peripherals
+echo
+echo -n "RAM Size:    "
+sysbus.ram Size
+
+# Examine some memory locations
+#echo -n "RAM 0x6b758: "
+#sysbus.ram ReadDoubleWord 0x6b758
+#echo -n "RAM 0x6b75c: "
+#sysbus.ram ReadDoubleWord 0x6b75c
+#echo -n "RAM 0x6b760: "
+#sysbus.ram ReadDoubleWord 0x6b760
