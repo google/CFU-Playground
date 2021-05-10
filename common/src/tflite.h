@@ -41,6 +41,9 @@ void tflite_classify();
 // Obtain the result vector
 int8_t* tflite_get_output();
 
+// Obtain the input vector
+int8_t* tflite_get_input();
+
 #ifdef __cplusplus
 }
 #endif

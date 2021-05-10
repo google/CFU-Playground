@@ -176,6 +176,7 @@ void tflite_set_input_unsigned(const unsigned char* data) {
 }
 
 int8_t* tflite_get_output() { return interpreter->output(0)->data.int8; }
+int8_t* tflite_get_input()  { return interpreter->input(0)->data.int8; }
 
 void tflite_classify() {
   // Run the model on this input and make sure it succeeds.
