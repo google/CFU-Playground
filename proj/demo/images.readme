@@ -1,0 +1,21 @@
+
+To use the images.json file to upload images, edit images.json
+to point to your 8b grayscale file(s), then run
+
+   ../../soc/bin/litex_term  --images images.json --speed 3686400 /dev/ttyUSB2
+
+
+
+To create a 96x96 8b grayscale file from an arbitrary image "image.jpg", use
+
+
+   convert -resize 96x96\!  -grayscale average -depth 8 image.jpg image.gray
+
+
+The escaped "!" is necessary to force the 1:1 aspect ration.
+
+
+
+
+
+
