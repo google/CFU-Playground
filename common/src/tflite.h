@@ -45,4 +45,7 @@ void tflite_classify();
 int8_t* tflite_get_output();
 float* tflite_get_output_float();
 
+// Obtain the input vector
+int8_t* tflite_get_input();
+
 #endif  // _TFLITE_H

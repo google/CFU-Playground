@@ -234,6 +234,7 @@ void tflite_set_grid_input(void) {
 }
 
 int8_t* tflite_get_output() { return interpreter->output(0)->data.int8; }
+int8_t* tflite_get_input()  { return interpreter->input(0)->data.int8; }
 
 float* tflite_get_output_float() { return interpreter->output(0)->data.f; }
 
