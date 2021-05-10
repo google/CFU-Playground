@@ -285,6 +285,7 @@ ifeq '1' '$(words $(TTY))'
 run: $(SOFTWARE_BIN)
 	@echo Running automated pdti8 test on board
 	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) $(UART_SPEED) $(RUN_MENU_ITEMS) |& tee $(SOFTWARE_LOG)
+	$(CFU_ROOT)/scripts/scanprof.py < $(SOFTWARE_LOG)
 
 unit: $(SOFTWARE_BIN)
 	@echo Running unit test on board
