@@ -29,7 +29,7 @@ from litex.soc.cores.bitbang import I2CMaster
 
 from litex.build.lattice.radiant import radiant_build_args, radiant_build_argdict
 
-from litespi.modules import GD25LQ128C
+from litespi.modules import GD25LQ128D
 from litespi.opcodes import SpiNorFlashOpCodes as Codes
 from litespi.phy.generic import LiteSPIPHY
 from litespi import LiteSPI
@@ -141,7 +141,7 @@ class HpsSoC(LiteXSoC):
         self.csr.add("spiflash")
         
     def setup_litespi_flash(self):
-        self.submodules.spiflash_phy  = LiteSPIPHY(self.platform.request("spiflash"), GD25LQ128C(Codes.READ_1_1_1))
+        self.submodules.spiflash_phy  = LiteSPIPHY(self.platform.request("spiflash"), GD25LQ128D(Codes.READ_1_1_1), default_divisor=1)
         self.submodules.spiflash_mmap  = LiteSPI(phy=self.spiflash_phy,
             clk_freq        = self.platform.sys_clk_freq,
             mmap_endianness = self.cpu.endianness)
