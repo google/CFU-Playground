@@ -4,7 +4,7 @@ Overview
 The CFU Playground consists of an opinionated configuration of hardware, 
 gateware and software. This page contains a short overview of all of it. 
 If this is your first time working with FPGAs or machine learning, then 
-we advise skimming this page briefly before moving on to :doc:crash-course.
+we advise skimming this page briefly before moving on to :doc:`crash-course/index`.
 
 .. raw:: html
 
