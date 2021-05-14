@@ -83,7 +83,7 @@ html_sidebars = {
 html_theme = 'sphinx_material'
 html_theme_options = {
     'nav_title': project,
-    'color_primary': 'orange',
+    'color_primary': 'deep-orange',
     'color_accent': 'gray',
     'repo_name': "google/CFU-Playground",
     'repo_url': 'https://github.com/google/CFU-Playground',
