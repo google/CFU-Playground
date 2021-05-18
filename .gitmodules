@@ -48,4 +48,4 @@
 	url = https://chromium.googlesource.com/external/coreboot.org/flashrom
 [submodule "third_party/python/litespi"]
 	path = third_party/python/litespi
-	url = https://github.com/litex-hub/litespi.git
+	url = https://github.com/tcal-x/litespi.git
