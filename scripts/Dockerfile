@@ -2,7 +2,7 @@ FROM debian:testing
 
 ENV RISCV_DIR=/toolchain/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14/bin
 ENV PATH="/renode:${RISCV_DIR}:${PATH}"
-ENV WORKDIR=/CFU-Playground
+ARG WORKDIR=/CFU-Playground
 
 RUN apt update -y && apt install -y wget git python3-pip make gcc openocd yosys expect ccache verilator libevent-dev libjson-c-dev libusb-1.0-0-dev libftdi1-dev vim && rm -rf /var/lib/apt/lists/*
 
