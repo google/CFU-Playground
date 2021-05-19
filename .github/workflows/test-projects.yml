@@ -7,7 +7,31 @@
 # using the script from https://github.com/mithro/actions-includes@main
 
 name: Test projects
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    paths-ignore:
+    - docs/**
+    - README.md
+    - LICENSE
+    - CONTRIBUTING.md
+    - CODE_OF_CONDUCT.md
+    - AUTHORS
+  pull_request:
+    paths-ignore:
+    - docs/**
+    - README.md
+    - LICENSE
+    - CONTRIBUTING.md
+    - CODE_OF_CONDUCT.md
+    - AUTHORS
+  workflow_dispatch:
+    paths-ignore:
+    - docs/**
+    - README.md
+    - LICENSE
+    - CONTRIBUTING.md
+    - CODE_OF_CONDUCT.md
+    - AUTHORS
 jobs:
   proj_template:
     runs-on: ubuntu-20.04

@@ -1,5 +1,12 @@
 name: check-doc-sw
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - 'docs/**'
+  pull_request:
+    paths:
+      - 'docs/**'
+
 jobs:
   check-docs:
     runs-on: ubuntu-latest
