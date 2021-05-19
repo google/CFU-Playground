@@ -29,6 +29,9 @@ please `raise an issue`_ and we'll do our best to point you in the right directi
 .. _`raise an issue`: https://github.com/google/CFU-Playground/issues/new
 
 
+**Disclaimer: This is not an officially supported Google project. Support and/or new releases may be limited.**
+
+
 Learning and Using the CFU Playground
 -------------------------------------
 
