@@ -157,16 +157,17 @@ class Cfu(SimpleElaboratable):
     ----------
     Attribute public names and types form the Verilog module interface:
 
-        input               io_bus_cmd_valid,
-        output              io_bus_cmd_ready,
-        input      [19:0]   io_bus_cmd_payload_function_id,
-        input      [31:0]   io_bus_cmd_payload_inputs_0,
-        input      [31:0]   io_bus_cmd_payload_inputs_1,
-        output              io_bus_rsp_valid,
-        input               io_bus_rsp_ready,
-        output              io_bus_rsp_payload_response_ok,
-        output     [31:0]   io_bus_rsp_payload_outputs_0,
-        input clk
+        input               cmd_valid,
+        output              cmd_ready,
+        input      [9:0]    cmd_payload_function_id,
+        input      [31:0]   cmd_payload_inputs_0,
+        input      [31:0]   cmd_payload_inputs_1,
+        output              rsp_valid,
+        input               rsp_ready,
+        output              rsp_payload_response_ok,
+        output     [31:0]   rsp_payload_outputs_0,
+        input               clk
+        input               reset
     """
 
     def __init__(self, instructions):
@@ -174,16 +175,17 @@ class Cfu(SimpleElaboratable):
         for i in range(8):
             if i not in self.instructions:
                 self.instructions[i] = _FallbackInstruction()
-        self.cmd_valid = Signal(name='io_bus_cmd_valid')
-        self.cmd_ready = Signal(name='io_bus_cmd_ready')
+        self.cmd_valid = Signal(name='cmd_valid')
+        self.cmd_ready = Signal(name='cmd_ready')
         self.cmd_function_id = Signal(
-            10, name='io_bus_cmd_payload_function_id')
-        self.cmd_in0 = Signal(32, name='io_bus_cmd_payload_inputs_0')
-        self.cmd_in1 = Signal(32, name='io_bus_cmd_payload_inputs_1')
-        self.rsp_valid = Signal(name='io_bus_rsp_valid')
-        self.rsp_ready = Signal(name='io_bus_rsp_ready')
-        self.rsp_ok = Signal(name='io_bus_rsp_payload_response_ok')
-        self.rsp_out = Signal(32, name='io_bus_rsp_payload_outputs_0')
+            10, name='cmd_payload_function_id')
+        self.cmd_in0 = Signal(32, name='cmd_payload_inputs_0')
+        self.cmd_in1 = Signal(32, name='cmd_payload_inputs_1')
+        self.rsp_valid = Signal(name='rsp_valid')
+        self.rsp_ready = Signal(name='rsp_ready')
+        self.rsp_ok = Signal(name='rsp_payload_response_ok')
+        self.rsp_out = Signal(32, name='rsp_payload_outputs_0')
+        self.reset = Signal(name='reset')
         self.ports = [
             self.cmd_valid,
             self.cmd_ready,
@@ -194,6 +196,7 @@ class Cfu(SimpleElaboratable):
             self.rsp_ready,
             self.rsp_ok,
             self.rsp_out,
+            self.reset
         ]
 
     def elab(self, m):
