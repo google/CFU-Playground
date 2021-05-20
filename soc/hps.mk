@@ -34,7 +34,7 @@ endif
 
 PROJ_DIR:=  $(CFU_ROOT)/proj/$(PROJ)
 CFU_V:=     $(PROJ_DIR)/cfu.v
-CFU_ARGS:=  --cfu $(CFU_V)
+CFU_ARGS:=  --cpu-cfu $(CFU_V)
 
 SOC_NAME:=  hps.$(PROJ)
 OUT_DIR:=   build/$(SOC_NAME)
@@ -100,8 +100,8 @@ $(CFU_V):
 	$(error $(CFU_V) not found. $(HELP_MESSAGE))
 
 $(BIOS_BIN): $(CFU_V)
-	$(HPS_RUN) $(LITEX_ARGS)
+	$(HPS_RUN)
 
 $(BITSTREAM): $(CFU_V)
 	@echo Building bitstream for Arty. CFU option: $(CFU_ARGS)
-	$(HPS_RUN) $(LITEX_ARGS) --build
+	$(HPS_RUN) --build
