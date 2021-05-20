@@ -65,13 +65,12 @@ def main():
     vivado_build_args(parser)
     parser.add_argument("--with-ethernet",  action="store_true", help="Enable Ethernet support")
     parser.add_argument("--with-etherbone", action="store_true", help="Enable Etherbone support")
-    parser.add_argument("--cfu", default=None, help="Specify file containing CFU Verilog module")
     parser.add_argument("--toolchain", default="vivado", help="Specify toolchain for implementing gateware ('vivado' or 'symbiflow')")
     parser.set_defaults(
             csr_csv='csr.csv',
             uart_name='serial',
             uart_baudrate=921600,
-            cpu_variant='full+debug',    # don't specify 'cfu' here
+            cpu_variant='full+cfu+debug',
             with_etherbone=False)
 
     args = parser.parse_args()
@@ -82,16 +81,6 @@ def main():
     soc_kwargs["l2_size"] = 8 * 1024
     soc = CustomSoC(with_ethernet=args.with_ethernet, with_etherbone=args.with_etherbone,
                     toolchain=args.toolchain, **soc_kwargs)
-
-    # get the CFU version, plus the CFU itself and a wrapper 
-    # ...since we're using stock litex, it doesn't know about the Cfu variants, so we need to use "external_variant"
-    if args.cfu:
-        assert 'full' in args.cpu_variant
-        var = "FullCfuDebug" if ('debug' in args.cpu_variant) else "FullCfu"
-        vexriscv = "../third_party/python/pythondata_cpu_vexriscv/pythondata_cpu_vexriscv"
-        soc.cpu.use_external_variant(f"{vexriscv}/verilog/VexRiscv_{var}.v")
-        soc.platform.add_source(args.cfu)
-        soc.platform.add_source(f"{vexriscv}/verilog/wrapVexRiscv_{var}.v")
 
     builder = Builder(soc, **builder_argdict(args))
 
