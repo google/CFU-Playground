@@ -42,7 +42,7 @@ hps_io = [
         Subsignal("cs_n", Pins("A3")),
         Subsignal("clk", Pins("B4")),
         Subsignal("dq", Pins("B5 C4 B3 B2")),
-        IOStandard("LVCMOS18H")
+        IOStandard("LVCMOS18")
      ),
 ]
 
@@ -101,7 +101,7 @@ class _CRG(Module):
 
 class Platform(LatticePlatform):
     # The NX-17 has a 450 MHz clock. Our system clock should be a divisor of that.
-    clk_divisor = 6
+    clk_divisor = 4
     sys_clk_freq = int(450e6 / clk_divisor)
 
     def __init__(self, toolchain="radiant"):

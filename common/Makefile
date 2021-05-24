@@ -100,6 +100,7 @@ LFLAGS     := \
 	$(CXXFLAGS) \
 	-L$(LD_DIR) \
 	-L$(GEN_LD_DIR) \
+	-L$(SOC_SOFTWARE_DIR)/liblitespi -llitespi \
 	-L$(SOC_SOFTWARE_DIR)/libbase -lbase-nofloat \
 	-L$(SOC_SOFTWARE_DIR)/libcompiler_rt -lcompiler_rt \
 	-lm \

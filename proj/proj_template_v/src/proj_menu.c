@@ -14,15 +14,41 @@
  * limitations under the License.
  */
 
+#include <console.h>
 #include <stdio.h>
 #include "cfu.h"
 #include "menu.h"
 #include "proj_menu.h"
 
+#include "../liblitespi/spiflash.h"
+
 // Template Fn
 static void do_hello_world(void)
 {
     puts("Hello, World!!!\n");
+}
+
+static void do_set_spiflash_div(void)
+{
+    printf("Enter DIV (0-9):\n");
+    char c = readchar();
+    putchar(c);
+    if (c < '0') return;
+    if (c > '9') return;
+    spiflash_phy_clk_divisor_write((uint32_t)(c - '0'));
+    unsigned int div = spiflash_phy_clk_divisor_read();
+    printf("New div: %d\n", div);
+}
+
+static void do_spiflash_init(void)
+{
+    unsigned int div = spiflash_phy_clk_divisor_read();
+    printf("Initial div: %d\n", div);
+
+    spiflash_init();
+
+    div = spiflash_phy_clk_divisor_read();
+    printf("Final div: %d\n", div);
 }
 
 // Test template instruction
@@ -76,6 +102,8 @@ static struct Menu MENU = {
         MENU_ITEM('0', "exercise cfu op0", do_exercise_cfu_op0),
         MENU_ITEM('g', "grid cfu op0", do_grid_cfu_op0),
         MENU_ITEM('h', "say Hello", do_hello_world),
+        MENU_ITEM('f', "spiflash init", do_spiflash_init),
+        MENU_ITEM('s', "set spiflash div", do_set_spiflash_div),
         MENU_END,
     },
 };

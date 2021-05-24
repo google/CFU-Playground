@@ -87,7 +87,7 @@ static void __attribute__((noinline)) do_flash_loads(void) {
          delta_cycles, delta_cycles / total_iters);
 }
 
-static void __attribute__((noinline)) do_flash_loads_strided(void) {
+static void __attribute__((noinline)) do_flash_loads_strided_2x(void) {
   printf("Hello, STRIDED Flash Load! (SPI flash at %p, size %dkB)\n", SPIFLASH_BASE, (SPIFLASH_SIZE/1024));
   int*  buf = (int*)((void*)(SPIFLASH_BASE));
   int acc = 0;
@@ -101,6 +101,67 @@ static void __attribute__((noinline)) do_flash_loads_strided(void) {
   printf("Val:%d  Cycles: %u   Cycles/load: %u\n\n\n", acc,
          delta_cycles, delta_cycles / total_iters);
 }
+
+static void __attribute__((noinline)) do_flash_loads_strided_4x(void) {
+  printf("Hello, STRIDED Flash Load! (SPI flash at %p, size %dkB)\n", SPIFLASH_BASE, (SPIFLASH_SIZE/1024));
+  int*  buf = (int*)((void*)(SPIFLASH_BASE));
+  int acc = 0;
+  unsigned int start_time = perf_get_mcycle();
+  int total_iters = 64*1024;
+  for (int j = 0; j<total_iters; j++) {
+    acc += buf[j*4];    // 4x stride
+  }
+  unsigned int end_time = perf_get_mcycle();
+  unsigned int delta_cycles = end_time - start_time;
+  printf("Val:%d  Cycles: %u   Cycles/load: %u\n\n\n", acc,
+         delta_cycles, delta_cycles / total_iters);
+}
+
+static void __attribute__((noinline)) do_flash_loads_strided_8x(void) {
+  printf("Hello, STRIDED Flash Load! (SPI flash at %p, size %dkB)\n", SPIFLASH_BASE, (SPIFLASH_SIZE/1024));
+  int*  buf = (int*)((void*)(SPIFLASH_BASE));
+  int acc = 0;
+  unsigned int start_time = perf_get_mcycle();
+  int total_iters = 32*1024;
+  for (int j = 0; j<total_iters; j++) {
+    acc += buf[j*8];    // 8x stride
+  }
+  unsigned int end_time = perf_get_mcycle();
+  unsigned int delta_cycles = end_time - start_time;
+  printf("Val:%d  Cycles: %u   Cycles/load: %u\n\n\n", acc,
+         delta_cycles, delta_cycles / total_iters);
+}
+
+static void __attribute__((noinline)) do_flash_loads_strided_16x(void) {
+  printf("Hello, STRIDED Flash Load! (SPI flash at %p, size %dkB)\n", SPIFLASH_BASE, (SPIFLASH_SIZE/1024));
+  int*  buf = (int*)((void*)(SPIFLASH_BASE));
+  int acc = 0;
+  unsigned int start_time = perf_get_mcycle();
+  int total_iters = 16*1024;
+  for (int j = 0; j<total_iters; j++) {
+    acc += buf[j*16];    // 16x stride
+  }
+  unsigned int end_time = perf_get_mcycle();
+  unsigned int delta_cycles = end_time - start_time;
+  printf("Val:%d  Cycles: %u   Cycles/load: %u\n\n\n", acc,
+         delta_cycles, delta_cycles / total_iters);
+}
+
+static void __attribute__((noinline)) do_flash_loads_strided_32x(void) {
+  printf("Hello, STRIDED Flash Load! (SPI flash at %p, size %dkB)\n", SPIFLASH_BASE, (SPIFLASH_SIZE/1024));
+  int*  buf = (int*)((void*)(SPIFLASH_BASE));
+  int acc = 0;
+  unsigned int start_time = perf_get_mcycle();
+  int total_iters = 16*1024;
+  for (int j = 0; j<total_iters; j++) {
+    acc += buf[j*32];    // 32x stride
+  }
+  unsigned int end_time = perf_get_mcycle();
+  unsigned int delta_cycles = end_time - start_time;
+  printf("Val:%d  Cycles: %u   Cycles/load: %u\n\n\n", acc,
+         delta_cycles, delta_cycles / total_iters);
+}
+
 #endif
 
 static void __attribute__((noinline)) do_loads(void) {
@@ -164,11 +225,15 @@ static struct Menu MENU = {
                   do_loads),
 #ifdef SPIFLASH_BASE
         MENU_ITEM('f', "flash sequential loads benchmark", do_flash_loads),
-        MENU_ITEM('g', "flash STRIDED loads benchmark", do_flash_loads_strided),
+        MENU_ITEM('g', "flash STRIDED 2x loads benchmark", do_flash_loads_strided_2x),
+        MENU_ITEM('4', "flash STRIDED 4x loads benchmark", do_flash_loads_strided_4x),
+        MENU_ITEM('8', "flash STRIDED 8x loads benchmark", do_flash_loads_strided_8x),
+        MENU_ITEM('y', "flash STRIDED 16x loads benchmark", do_flash_loads_strided_16x),
+        MENU_ITEM('z', "flash STRIDED 32x loads benchmark", do_flash_loads_strided_32x),
 #endif
         MENU_ITEM('c', "cached loads benchmark (expect all hits)",
                   do_loads_cached),
-        MENU_ITEM('8', "strided loads benchmark (expect all misses)",
+        MENU_ITEM('e', "strided loads benchmark (expect all misses)",
                   do_loads_strided),
         MENU_ITEM('s', "sequential stores benchmark", do_stores),
         MENU_ITEM('i', "load-increment-store benchmark (expect misses)",
