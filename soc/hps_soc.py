@@ -20,7 +20,6 @@
 from hps_platform import Platform
 from litex.soc.cores.clock import S7PLL
 from litex.soc.integration.soc import SoCRegion
-from litex.soc.integration.soc_sdram import SoCSDRAM
 from litex.soc.integration.builder import Builder, builder_args, builder_argdict
 from litex.soc.integration.soc import LiteXSoC, SoCRegion
 from litex.soc.cores.led import LedChaser

@@ -26,7 +26,7 @@ from litex.build.sim.config import SimConfig
 
 from litex.soc.integration.common import get_mem_data
 from litex.soc.integration.builder import *
-from litex.soc.integration.soc_sdram import *
+from litex.soc.integration.soc_core import soc_core_args, soc_core_argdict
 
 from litex.tools.litex_sim import SimSoC
 
@@ -51,7 +51,7 @@ def configure_sim_builder(builder: Builder, sim_rom_bin):
 def main():
     parser = argparse.ArgumentParser(description="LiteX SoC on Arty A7")
     builder_args(parser)
-    soc_sdram_args(parser)
+    soc_core_args(parser)
     parser.add_argument("--cfu", required=True, help="Specify file containing CFU Verilog module")
     parser.add_argument("--sim-trace",  action="store_true", help="Whether to enable tracing of simulation")
     parser.add_argument("--sim-trace-start", default=0, help="Start tracing at this time in picoseconds")
@@ -72,7 +72,7 @@ def main():
         else:
             print("must provide --bin if using --run")
     
-    soc_kwargs = soc_sdram_argdict(args)
+    soc_kwargs = soc_core_argdict(args)
     soc_kwargs["l2_size"] = 8 * 1024
     soc_kwargs["uart_name"] = "sim"
     soc = SimSoC(

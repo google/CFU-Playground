@@ -25,7 +25,7 @@ from litex.build.generic_platform import *
 from litex.build.xilinx.vivado import vivado_build_args, vivado_build_argdict
 
 from litex.soc.integration.builder import *
-from litex.soc.integration.soc_sdram import *
+from litex.soc.integration.soc_core import soc_core_args, soc_core_argdict
 from litex.soc.integration.common import get_mem_data
 
 from litex.soc.cores.led import LedChaser
@@ -61,7 +61,7 @@ def main():
     parser.add_argument("--build", action="store_true", help="Build bitstream")
     parser.add_argument("--load",  action="store_true", help="Load bitstream")
     builder_args(parser)
-    soc_sdram_args(parser)
+    soc_core_args(parser)
     vivado_build_args(parser)
     parser.add_argument("--with-ethernet",  action="store_true", help="Enable Ethernet support")
     parser.add_argument("--with-etherbone", action="store_true", help="Enable Etherbone support")
@@ -78,7 +78,7 @@ def main():
 
     assert not (args.with_ethernet and args.with_etherbone)
     cpu = CPUS["vexriscv"]
-    soc_kwargs = soc_sdram_argdict(args)
+    soc_kwargs = soc_core_argdict(args)
     soc_kwargs["l2_size"] = 8 * 1024
     soc = CustomSoC(with_ethernet=args.with_ethernet, with_etherbone=args.with_etherbone,
                     toolchain=args.toolchain, **soc_kwargs)
