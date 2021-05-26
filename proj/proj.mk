@@ -54,8 +54,8 @@ export PLATFORM   ?= arty
 RUN_MENU_ITEMS    ?=1 1 1
 TEST_MENU_ITEMS   ?=5
 
-ifneq '' '$(fiter-out nexys_video,arty,sim,$(PLATFORM))'
-	$(error PLATFORM must be 'arty' or 'nexys_video' or 'sim')
+ifneq '' '$(fiter-out nexys_video,arty,qmtech_wukong,sim,$(PLATFORM))'
+	$(error PLATFORM must be 'arty' or 'nexys_video' or 'qmtech_wukong' or 'sim')
 endif
 
 SOC_DIR          := $(CFU_ROOT)/soc
@@ -111,16 +111,20 @@ ARTY_MK      := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/arty.mk
 HPS_MK       := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/hps.mk
 SIM_MK       := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/sim.mk SOFTWARE_BIN=$(SOFTWARE_BIN)
 NEXYS_VIDEO_MK := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/nexys_video.mk
+QMTECH_WUKONG_MK := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/qmtech_wukong.mk
+
 ifeq '$(PLATFORM)' 'arty'
 	SOC_MK   := $(ARTY_MK)
 else ifeq '$(PLATFORM)' 'nexys_video'
 	SOC_MK   := $(NEXYS_VIDEO_MK)
 else ifeq '$(PLATFORM)' 'hps'
 	SOC_MK   := $(HPS_MK)
+else ifeq '$(PLATFORM)' 'qmtech_wukong'
+	SOC_MK   := $(QMTECH_WUKONG_MK)
 else ifeq '$(PLATFORM)' 'sim'
 	SOC_MK   := $(SIM_MK)
 else
-	$(error PLATFORM must be 'arty' or 'nexys_video' or 'sim')
+	$(error PLATFORM must be 'arty' or 'nexys_video' or 'qmtech_wukong' or 'sim')
 endif
 
 .PHONY:	renode 
