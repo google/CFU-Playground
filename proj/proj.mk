@@ -112,21 +112,12 @@ UNITTEST_LOG     := $(BUILD_DIR)/unittest.log
 
 # Directory where we build the project-specific gateware
 SOC_DIR      := $(CFU_ROOT)/soc
-ARTY_MK      := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/arty.mk
 HPS_MK       := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/hps.mk
 SIM_MK       := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/sim.mk SOFTWARE_BIN=$(SOFTWARE_BIN)
-NEXYS_VIDEO_MK := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/nexys_video.mk
-QMTECH_WUKONG_MK := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/qmtech_wukong.mk
 COMMON_SOC_MK := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/common_soc.mk
 
-ifeq '$(PLATFORM)' 'arty'
-	SOC_MK   := $(ARTY_MK)
-else ifeq '$(PLATFORM)' 'nexys_video'
-	SOC_MK   := $(NEXYS_VIDEO_MK)
-else ifeq '$(PLATFORM)' 'hps'
+ifeq '$(PLATFORM)' 'hps'
 	SOC_MK   := $(HPS_MK)
-else ifeq '$(PLATFORM)' 'qmtech_wukong'
-	SOC_MK   := $(QMTECH_WUKONG_MK)
 else ifeq '$(PLATFORM)' 'common_soc'
 	SOC_MK   := $(COMMON_SOC_MK)
 else ifeq '$(PLATFORM)' 'sim'
@@ -199,11 +190,11 @@ bitstream: $(CFU_VERILOG)
 
 ifeq '1' '$(words $(TTY))'
 run: $(SOFTWARE_BIN)
-	@echo Running automated pdti8 test on Arty Board
+	@echo Running automated pdti8 test on board
 	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) $(UART_SPEED) $(RUN_MENU_ITEMS) |& tee $(SOFTWARE_LOG)
 
 unit: $(SOFTWARE_BIN)
-	@echo Running unit test on Arty Board
+	@echo Running unit test on board
 	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) $(UART_SPEED) $(TEST_MENU_ITEMS) |& tee $(UNITTEST_LOG)
 
 ifeq 'hps' '$(PLATFORM)'
