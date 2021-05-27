@@ -56,7 +56,6 @@ SHARED_FLAGS := \
 	-ffunction-sections \
 	-fdata-sections \
 	-fno-common \
-	-fno-aggressive-loop-optimizations \
 	-fomit-frame-pointer \
     -ffreestanding \
 	-Werror\

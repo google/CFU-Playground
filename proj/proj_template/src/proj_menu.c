@@ -29,15 +29,19 @@ static void do_hello_world(void)
 static void do_exercise_cfu_op0(void)
 {
     puts("\r\nExercise CFU Op0 aka ADD\r\n");
-    int count = 0;
-    int pass_count = 0;
-    int fail_count = 0;
 
-    for (int a = -0x71234567; a < 0x68000000; a += 0x10012345)
+    unsigned int a = 0;
+    unsigned int b = 0;
+    unsigned int cfu = 0;
+    unsigned int count = 0;
+    unsigned int pass_count = 0;
+    unsigned int fail_count = 0;
+
+    for (a = 0x00004567; a < 0xF8000000; a += 0x00212345)
     {
-        for (int b = -0x7edcba98; b < 0x68000000; b += 0x10770077)
+        for (b = 0x0000ba98; b < 0xFF000000; b += 0x00770077)
         {
-            int cfu = cfu_op0(0, a, b);
+            cfu = cfu_op0(0, a, b);
             if (cfu != a + b) 
             {
                 printf("[%4d] a: %08x b:%08x a+b=%08x cfu=%08x FAIL\r\n", count, a, b, a + b, cfu);
@@ -48,6 +52,7 @@ static void do_exercise_cfu_op0(void)
             count++;
         }
     }
+
     printf("\r\nPerformed %d comparisons, %d pass, %d fail\r\n", count, pass_count, fail_count);
 }
 
