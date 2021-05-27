@@ -49,17 +49,22 @@
 export UART_SPEED ?= 3686400
 export PROJ       := $(lastword $(subst /, ,${CURDIR}))
 export CFU_ROOT   := $(realpath $(CURDIR)/../..)
-export PLATFORM   ?= arty
+export PLATFORM   ?= common_soc
+export TARGET     ?= digilent_arty
 
 RUN_MENU_ITEMS    ?=1 1 1
 TEST_MENU_ITEMS   ?=5
 
-ifneq '' '$(fiter-out nexys_video,arty,qmtech_wukong,sim,$(PLATFORM))'
+ifneq '' '$(fiter-out nexys_video,arty,qmtech_wukong,sim,common_soc,$(PLATFORM))'
 	$(error PLATFORM must be 'arty' or 'nexys_video' or 'qmtech_wukong' or 'sim')
 endif
 
+ifneq 'common_soc' '$(PLATFORM)'
+TARGET := $(PLATFORM)
+endif
+
 SOC_DIR          := $(CFU_ROOT)/soc
-SOC_BUILD_NAME   := $(PLATFORM).$(PROJ)
+SOC_BUILD_NAME   := $(TARGET).$(PROJ)
 SOC_BUILD_DIR    := $(SOC_DIR)/build/$(SOC_BUILD_NAME)
 SOC_SOFTWARE_DIR := $(SOC_BUILD_DIR)/software
 export SOC_SOFTWARE_DIR
@@ -112,6 +117,7 @@ HPS_MK       := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/hps.mk
 SIM_MK       := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/sim.mk SOFTWARE_BIN=$(SOFTWARE_BIN)
 NEXYS_VIDEO_MK := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/nexys_video.mk
 QMTECH_WUKONG_MK := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/qmtech_wukong.mk
+COMMON_SOC_MK := $(MAKE) -C $(SOC_DIR) -f $(SOC_DIR)/common_soc.mk
 
 ifeq '$(PLATFORM)' 'arty'
 	SOC_MK   := $(ARTY_MK)
@@ -121,6 +127,8 @@ else ifeq '$(PLATFORM)' 'hps'
 	SOC_MK   := $(HPS_MK)
 else ifeq '$(PLATFORM)' 'qmtech_wukong'
 	SOC_MK   := $(QMTECH_WUKONG_MK)
+else ifeq '$(PLATFORM)' 'common_soc'
+	SOC_MK   := $(COMMON_SOC_MK)
 else ifeq '$(PLATFORM)' 'sim'
 	SOC_MK   := $(SIM_MK)
 else
