@@ -55,8 +55,9 @@ export TARGET     ?= digilent_arty
 RUN_MENU_ITEMS    ?=1 1 1
 TEST_MENU_ITEMS   ?=5
 
-ifneq '' '$(fiter-out nexys_video,arty,qmtech_wukong,sim,common_soc,$(PLATFORM))'
-	$(error PLATFORM must be 'arty' or 'nexys_video' or 'qmtech_wukong' or 'sim')
+PLATFORMS=common_soc sim hps
+ifneq '$(PLATFORM)' '$(findstring $(PLATFORM),$(PLATFORMS))'
+$(error PLATFORM must be one of following: $(PLATFORMS))
 endif
 
 ifneq 'common_soc' '$(PLATFORM)'
