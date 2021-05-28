@@ -28,24 +28,32 @@ static void do_hello_world(void)
 // Test template instruction
 static void do_exercise_cfu_op0(void)
 {
-    puts("\nExercise CFU Op0 aka ADD\n");
-    int count = 0;
-    for (int a = -0x71234567; a < 0x68000000; a += 0x10012345)
-    {
+    puts("\r\nExercise CFU Op0 aka ADD\r\n");
 
-        for (int b = -0x7edcba98; b < 0x68000000; b += 0x10770077)
+    unsigned int a = 0;
+    unsigned int b = 0;
+    unsigned int cfu = 0;
+    unsigned int count = 0;
+    unsigned int pass_count = 0;
+    unsigned int fail_count = 0;
+
+    for (a = 0x00004567; a < 0xF8000000; a += 0x00212345)
+    {
+        for (b = 0x0000ba98; b < 0xFF000000; b += 0x00770077)
         {
-            int cfu = cfu_op0(0, a, b);
-            printf("a: %08x b:%08x a+b=%08x cfu= %08x\n", a, b, a + b, cfu);
+            cfu = cfu_op0(0, a, b);
             if (cfu != a + b) 
             {
-                printf("\n***FAIL\n");
-                return;
+                printf("[%4d] a: %08x b:%08x a+b=%08x cfu=%08x FAIL\r\n", count, a, b, a + b, cfu);
+                fail_count++;
+            } else {
+                pass_count++;
             }
             count++;
         }
     }
-    printf("Performed %d comparisons", count);
+
+    printf("\r\nPerformed %d comparisons, %d pass, %d fail\r\n", count, pass_count, fail_count);
 }
 
 static struct Menu MENU = {
