@@ -219,20 +219,19 @@ def main():
 
     args = parser.parse_args()
 
-    # get the CFU version, plus the CFU itself and a wrapper 
-    # ...since we're using stock litex, it doesn't know about the Cfu variants, so we need to use "external_variant"
-    variant = "full"
+
     if args.cpu_cfu:
+        variant = "full+cfu+debug" if args.debug else "full+cfu"
+        soc = HpsSoC(Platform(args.toolchain), debug=args.debug, litespi_flash=args.litespi_flash, variant=variant, cpu_cfu=args.cpu_cfu)
         if args.slim_cpu:
-            var = "SlimCfuDebug" if args.debug else "SlimCfu"
+            # override the actual source to get the Slim version
+            #  -- this is a hack needed because litex/.../vexriscv/core.py doesn't know about the Slim versions.
             vexriscv = "../third_party/python/pythondata_cpu_vexriscv/pythondata_cpu_vexriscv"
-            soc = HpsSoC(Platform(args.toolchain), debug=args.debug, litespi_flash=args.litespi_flash)
+            var = "SlimCfuDebug" if args.debug else "SlimCfu"
             soc.cpu.use_external_variant(f"{vexriscv}/verilog/VexRiscv_{var}.v")
-            soc.platform.add_source(args.cpu_cfu)
-            soc.platform.add_source(f"{vexriscv}/verilog/wrapVexRiscv_{var}.v")
-        else:
-            variant = "full+cfu+debug" if args.debug else "full+cfu"
-            soc = HpsSoC(Platform(args.toolchain), debug=args.debug, litespi_flash=args.litespi_flash, variant=variant, cpu_cfu=args.cpu_cfu)
+    else:
+        variant = "full+debug" if args.debug else "full"
+        soc = HpsSoC(Platform(args.toolchain), debug=args.debug, litespi_flash=args.litespi_flash, variant=variant)
         
 
     builder = create_builder(soc, args)
