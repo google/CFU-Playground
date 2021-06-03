@@ -26,7 +26,7 @@
 
 // Automatically incrementing compile time constant character.
 // Used for avoiding selection character collisions in the menu.
-#define STARTING_SEL_CHAR 0x61  // 'a'
+#define STARTING_SEL_CHAR 0x31  // '1'
 #define AUTO_INC_CHAR __COUNTER__ + STARTING_SEL_CHAR
 
 void no_menu() {}
