@@ -24,15 +24,31 @@
 #include "models/mnv2/mnv2.h"
 #include "models/pdti8/pdti8.h"
 
+// Automatically incrementing compile time constant character.
+// Used for avoiding selection character collisions in the menu.
+#define STARTING_SEL_CHAR 0x61 // 'a'
+#define AUTO_INC_CHAR __COUNTER__ + STARTING_SEL_CHAR
+
+void no_menu() { }
+
 static struct Menu MENU = {
     "TfLM Models",
     "models",
     {
-        MENU_ITEM('1', "Person Detection int8 model", pdti8_menu),
-        MENU_ITEM('3', "Micro Speech", micro_speech_menu),
-        MENU_ITEM('4', "Magic Wand", magic_wand_menu),
-#ifdef INCLUDE_MODEL_MNV2
-        MENU_ITEM('2', "Mobile Net v2 models", mnv2_menu),
+#if defined(INCLUDE_MODEL_PDTI8) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "Person Detection int8 model", pdti8_menu),
+#endif
+#if defined(INCLUDE_MODEL_MICRO_SPEECH) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "Micro Speech", micro_speech_menu),
+#endif
+#if defined(INCLUDE_MODEL_MAGIC_WAND) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "Magic Wand", magic_wand_menu),
+#endif
+#if defined(INCLUDE_MODEL_MNV2)
+        MENU_ITEM(AUTO_INC_CHAR, "Mobile Net v2 models", mnv2_menu),
+#endif
+#if AUTO_INC_CHAR == STARTING_SEL_CHAR
+        MENU_ITEM('!', "No models selected! Check defines in Makefile!", no_menu),
 #endif
         MENU_END,
     },

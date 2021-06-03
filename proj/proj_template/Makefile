@@ -25,7 +25,19 @@ DEFINES += NDEBUG
 # Uncomment this line to skip individual profiling output (has minor effect on performance).
 #DEFINES += NPROFILE
 
+# Uncomment to include pdti8 in built binary
+#DEFINES += INCLUDE_MODEL_PDTI8
+
+# Uncomment to include micro_speech in built binary
+#DEFINES += INCLUDE_MODEL_MICRO_SPEECH
+
+# Uncomment to include magic_wand in built binary
+#DEFINES += INCLUDE_MODEL_MAGIC_WAND
+
 # Uncomment to include mnv2 in built binary (adds ~500kB to binary)
 #DEFINES += INCLUDE_MODEL_MNV2
+
+# Uncomment to include all TFLM examples (pdti8, micro_speech, magic_wand)
+DEFINES += INCLUDE_ALL_TFLM_EXAMPLES
 
 include ../proj.mk
