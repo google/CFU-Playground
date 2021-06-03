@@ -19,6 +19,7 @@
 #include <stdio.h>
 
 #include "menu.h"
+#include "models/magic_wand/magic_wand.h"
 #include "models/micro_speech/micro_speech.h"
 #include "models/mnv2/mnv2.h"
 #include "models/pdti8/pdti8.h"
@@ -29,6 +30,7 @@ static struct Menu MENU = {
     {
         MENU_ITEM('1', "Person Detection int8 model", pdti8_menu),
         MENU_ITEM('3', "Micro Speech", micro_speech_menu),
+        MENU_ITEM('4', "Magic Wand", magic_wand_menu),
 #ifdef INCLUDE_MODEL_MNV2
         MENU_ITEM('2', "Mobile Net v2 models", mnv2_menu),
 #endif
