@@ -14,27 +14,18 @@
  * limitations under the License.
  */
 
-#include "models/models.h"
+#ifndef _MICRO_SPEECH_H
+#define _MICRO_SPEECH_H
 
-#include <stdio.h>
-
-#include "menu.h"
-#include "models/micro_speech/micro_speech.h"
-#include "models/mnv2/mnv2.h"
-#include "models/pdti8/pdti8.h"
-
-static struct Menu MENU = {
-    "TfLM Models",
-    "models",
-    {
-        MENU_ITEM('1', "Person Detection int8 model", pdti8_menu),
-        MENU_ITEM('3', "Micro Speech", micro_speech_menu),
-#ifdef INCLUDE_MODEL_MNV2
-        MENU_ITEM('2', "Mobile Net v2 models", mnv2_menu),
+#ifdef __cplusplus
+extern "C" {
 #endif
-        MENU_END,
-    },
-};
 
 // For integration into menu system
-void models_menu() { menu_run(&MENU); }
+void micro_speech_menu();
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif  // _MICRO_SPEECH_H
