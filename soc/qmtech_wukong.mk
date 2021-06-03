@@ -34,7 +34,7 @@ endif
 
 PROJ_DIR:=  $(CFU_ROOT)/proj/$(PROJ)
 CFU_V:=     $(PROJ_DIR)/cfu.v
-CFU_ARGS:=  --cfu $(CFU_V)
+CFU_ARGS:=  --cpu-cfu $(CFU_V)
 
 SOC_NAME:=  qmtech_wukong.$(PROJ)
 OUT_DIR:=   build/$(SOC_NAME)
@@ -84,8 +84,8 @@ $(CFU_V):
 	$(error $(CFU_V) not found. $(HELP_MESSAGE))
 
 $(BIOS_BIN): $(CFU_V)
-	$(QMTECH_WUKONG_RUN) $(LITEX_ARGS) 
+	$(QMTECH_WUKONG_RUN)
 
 $(BITSTREAM): $(CFU_V)
 	@echo Building bitstream for QMTECH Wukong Board. CFU option: $(CFU_ARGS)
-	$(QMTECH_WUKONG_RUN) $(LITEX_ARGS) --build
+	$(QMTECH_WUKONG_RUN) --build
