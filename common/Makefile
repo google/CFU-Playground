@@ -149,7 +149,8 @@ $(TARGET): $(OBJECTS) $(LDSCRIPTS)
 	$(QUIET) echo "  LD       $@"
 	$(QUIET) $(CXX) $(OBJECTS) $(LFLAGS) -o $@
 	$(QUIET) echo "  OBJDUMP  $@.dis"
-	$(QUIET) $(OBJDUMP) -d -S -l $(TARGET) | $(FIX_CFU_DIS) > $(TARGET).dis
+	$(QUIET) $(OBJDUMP) -d -S -l $(TARGET) | $(FIX_CFU_DIS) > $(TARGET).dis_with_source
+	$(QUIET) $(OBJDUMP) -d $(TARGET) | $(FIX_CFU_DIS) > $(TARGET).dis
 	$(QUIET) echo "  OBJDUMP  $@.sym"
 	$(QUIET) $(OBJDUMP) -s $(TARGET) > $(TARGET).sym
 
