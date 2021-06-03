@@ -26,7 +26,7 @@
 
 // The magic_wand model classifies based on the greatest of 4 scores.
 typedef struct {
-  uint32_t wing_score;
+  uint32_t wing_score;  // Stored as uint32_t because we can't print floats.
   uint32_t ring_score;
   uint32_t slope_score;
   uint32_t negative_score;
@@ -44,44 +44,45 @@ MagicWandResult magic_wand_classify() {
   // Process the inference results.
   float* output = tflite_get_output_float();
 
-  return (MagicWandResult) {
-      (uint32_t) (output[0] * 1000000000),
-      (uint32_t) (output[1] * 1000000000),
-      (uint32_t) (output[2] * 1000000000),
-      (uint32_t) (output[3] * 1000000000),
+  // Kindly ask for the raw bits of the floats.
+  return (MagicWandResult){
+      *(uint32_t*)&output[0],
+      *(uint32_t*)&output[1],
+      *(uint32_t*)&output[2],
+      *(uint32_t*)&output[3],
   };
 }
 
 static void do_classify_zeros() {
   tflite_set_input_zeros_float();
   MagicWandResult res = magic_wand_classify();
-  printf("  results-- wing: %ld, ring: %ld, slope: %ld, negative: %ld\n",
-      res.wing_score, res.ring_score, res.slope_score, res.negative_score);
+  printf("  results-- wing: 0x%x, ring: 0x%x, slope: 0x%x, negative: 0x%x\n",
+         res.wing_score, res.ring_score, res.slope_score, res.negative_score);
 }
 
 static void do_classify_ring() {
   puts("Classify ring");
   tflite_set_input_float(g_ring_micro_f9643d42_nohash_4_data);
   MagicWandResult res = magic_wand_classify();
-  printf("  results-- wing: %ld, ring: %ld, slope: %ld, negative: %ld\n",
-      res.wing_score, res.ring_score, res.slope_score, res.negative_score);
+  printf("  results-- wing: 0x%x, ring: 0x%x, slope: 0x%x, negative: 0x%x\n",
+         res.wing_score, res.ring_score, res.slope_score, res.negative_score);
 }
 
 static void do_classify_slope() {
   puts("Classify slope");
   tflite_set_input_float(g_slope_micro_f2e59fea_nohash_1_data);
   MagicWandResult res = magic_wand_classify();
-  printf("  results-- wing: %ld, ring: %ld, slope: %ld, negative: %ld\n",
-      res.wing_score, res.ring_score, res.slope_score, res.negative_score);
+  printf("  results-- wing: 0x%x, ring: 0x%x, slope: 0x%x, negative: 0x%x\n",
+         res.wing_score, res.ring_score, res.slope_score, res.negative_score);
 }
 
 #define NUM_GOLDEN 3
 
 static void do_golden_tests() {
   static MagicWandResult magic_wand_golden_results[NUM_GOLDEN] = {
-      {43647280, 438047296, 86014968, 432290464},
-      {39272976, 800915392, 30703206, 129108432},
-      {425349, 34397, 953839872, 45700424},
+      {0x3d32c77d, 0x3ee047bc, 0x3db0289e, 0x3edd552d},
+      {0x3d20dcb3, 0x3f4d08cb, 0x3cfb854a, 0x3e043500},
+      {0x39df0176, 0x381045eb, 0x3f742eda, 0x3d3b305e},
   };
 
   MagicWandResult actual[NUM_GOLDEN];
@@ -96,16 +97,17 @@ static void do_golden_tests() {
   for (size_t i = 0; i < NUM_GOLDEN; i++) {
     MagicWandResult res = actual[i];
     MagicWandResult exp = magic_wand_golden_results[i];
-    if (res.wing_score     != exp.wing_score  ||
-        res.ring_score     != exp.ring_score  ||
-        res.slope_score    != exp.slope_score ||
+    if (res.wing_score != exp.wing_score || res.ring_score != exp.ring_score ||
+        res.slope_score != exp.slope_score ||
         res.negative_score != exp.negative_score) {
       failed = true;
       printf("*** Golden test %d failed: \n", i);
-      printf("actual-- wing: %ld, ring: %ld, slope: %ld, negative: %ld\n",
-          res.wing_score, res.ring_score, res.slope_score, res.negative_score);
-      printf("expected-- wing: %ld, ring: %ld, slope: %ld, negative: %ld\n",
-          exp.wing_score, exp.ring_score, exp.slope_score, exp.negative_score);
+      printf("actual-- wing: 0x%x, ring: 0x%x, slope: 0x%x, negative: 0x%x\n",
+             res.wing_score, res.ring_score, res.slope_score,
+             res.negative_score);
+      printf("expected-- wing: 0x%x, ring: ox%x, slope: 0x%x, negative: 0x%x\n",
+             exp.wing_score, exp.ring_score, exp.slope_score,
+             exp.negative_score);
     }
   }
 
