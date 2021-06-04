@@ -53,36 +53,44 @@ MagicWandResult magic_wand_classify() {
   };
 }
 
-static void do_classify_zeros() {
-  tflite_set_input_zeros_float();
-  MagicWandResult res = magic_wand_classify();
-  printf("  results-- wing: 0x%x, ring: 0x%x, slope: 0x%x, negative: 0x%x\n",
+static void print_magic_wand_result(const char* prefix, MagicWandResult res) {
+  printf("%s-- wing: 0x%x, ring: 0x%x, slope: 0x%x, negative: 0x%x\n", prefix,
          res.wing_score, res.ring_score, res.slope_score, res.negative_score);
+  printf(
+      "%s approx-- wing: 0.%06ld ring: 0.%06ld, slope: 0.%06ld, negative: "
+      "0.%06ld\n",
+      prefix, (int)(*(float*)&res.wing_score * 1000000),
+      (int)(*(float*)&res.ring_score * 1000000),
+      (int)(*(float*)&res.slope_score * 1000000),
+      (int)(*(float*)&res.negative_score * 1000000));
+}
+
+static void do_classify_zeros() {
+  puts("Classify all zeros input");
+  tflite_set_input_zeros_float();
+  print_magic_wand_result("  results", magic_wand_classify());
 }
 
 static void do_classify_ring() {
   puts("Classify ring");
   tflite_set_input_float(g_ring_micro_f9643d42_nohash_4_data);
-  MagicWandResult res = magic_wand_classify();
-  printf("  results-- wing: 0x%x, ring: 0x%x, slope: 0x%x, negative: 0x%x\n",
-         res.wing_score, res.ring_score, res.slope_score, res.negative_score);
+  print_magic_wand_result("  results", magic_wand_classify());
 }
 
 static void do_classify_slope() {
   puts("Classify slope");
   tflite_set_input_float(g_slope_micro_f2e59fea_nohash_1_data);
-  MagicWandResult res = magic_wand_classify();
-  printf("  results-- wing: 0x%x, ring: 0x%x, slope: 0x%x, negative: 0x%x\n",
-         res.wing_score, res.ring_score, res.slope_score, res.negative_score);
+  print_magic_wand_result("  results", magic_wand_classify());
 }
 
 #define NUM_GOLDEN 3
 
 static void do_golden_tests() {
+  // Dequantization leads to simpler floats.
   static MagicWandResult magic_wand_golden_results[NUM_GOLDEN] = {
-      {0x3d32c77d, 0x3ee047bc, 0x3db0289e, 0x3edd552d},
-      {0x3d20dcb3, 0x3f4d08cb, 0x3cfb854a, 0x3e043500},
-      {0x39df0176, 0x381045eb, 0x3f742eda, 0x3d3b305e},
+      {0x3d200000, 0x3ee00000, 0x3db00000, 0x3ee00000},
+      {0x0, 0x3f7f0000, 0x0, 0x0},
+      {0x0, 0x0, 0x3f7f0000, 0x0},
   };
 
   MagicWandResult actual[NUM_GOLDEN];
@@ -102,12 +110,8 @@ static void do_golden_tests() {
         res.negative_score != exp.negative_score) {
       failed = true;
       printf("*** Golden test %d failed: \n", i);
-      printf("actual-- wing: 0x%x, ring: 0x%x, slope: 0x%x, negative: 0x%x\n",
-             res.wing_score, res.ring_score, res.slope_score,
-             res.negative_score);
-      printf("expected-- wing: 0x%x, ring: ox%x, slope: 0x%x, negative: 0x%x\n",
-             exp.wing_score, exp.ring_score, exp.slope_score,
-             exp.negative_score);
+      print_magic_wand_result("actual", res);
+      print_magic_wand_result("expected", exp);
     }
   }
 
