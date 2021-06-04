@@ -14,37 +14,18 @@
  * limitations under the License.
  */
 
-/*
- * Defines tflite functions for evaluating models
- */
-#include <stdint.h>
-
-#ifndef _TFLITE_H
-#define _TFLITE_H
+#ifndef _MICRO_SPEECH_H
+#define _MICRO_SPEECH_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Runs tflite operation unit tests
-void tflite_do_tests();
-
-// Sets up TfLite with a given model
-void tflite_load_model(const unsigned char* model_data);
-void tflite_set_input_zeros();
-void tflite_set_input_zeros_float();
-void tflite_set_input(const void* data);
-void tflite_set_input_unsigned(const unsigned char* data);
-void tflite_set_input_float(const float* data);
-
-// Run classification with data already set into input.
-void tflite_classify();
-
-// Obtain the result vector
-int8_t* tflite_get_output();
-float* tflite_get_output_float();
+// For integration into menu system
+void micro_speech_menu();
 
 #ifdef __cplusplus
 }
 #endif
-#endif  // _TFLITE_H
+
+#endif  // _MICRO_SPEECH_H

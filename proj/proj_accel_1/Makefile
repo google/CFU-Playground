@@ -25,4 +25,7 @@ DEFINES += NDEBUG
 # Uncomment this line to skip individual profiling output (has minor effect on performance).
 #DEFINES += NPROFILE
 
+# Uncomment to include pdti8 in built binary
+DEFINES += INCLUDE_MODEL_PDTI8
+
 include ../proj.mk

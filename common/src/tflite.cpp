@@ -161,6 +161,12 @@ void tflite_set_input_zeros() {
   printf("Zeroed %d bytes at 0x%p\n", input->bytes, input->data.int8);
 }
 
+void tflite_set_input_zeros_float() {
+  auto input = interpreter->input(0);
+  memset(input->data.f, 0, input->bytes);
+  printf("Zeroed %d bytes at 0x%p\n", input->bytes, input->data.f);
+}
+
 void tflite_set_input(const void* data) {
   auto input = interpreter->input(0);
   memcpy(input->data.int8, data, input->bytes);
@@ -175,7 +181,15 @@ void tflite_set_input_unsigned(const unsigned char* data) {
   printf("Set %d bytes at 0x%p\n", input->bytes, input->data.int8);
 }
 
+void tflite_set_input_float(const float* data) {
+  auto input = interpreter->input(0);
+  memcpy(input->data.f, data, input->bytes);
+  printf("Copied %d bytes at 0x%p\n", input->bytes, input->data.f);
+}
+
 int8_t* tflite_get_output() { return interpreter->output(0)->data.int8; }
+
+float* tflite_get_output_float() { return interpreter->output(0)->data.f; }
 
 void tflite_classify() {
   // Run the model on this input and make sure it succeeds.

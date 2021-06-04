@@ -25,6 +25,9 @@ DEFINES += NDEBUG
 # Uncomment this line to skip individual profiling output (has minor effect on performance).
 DEFINES += NPROFILE
 
+# Uncomment to include pdti8 in built binary
+DEFINES += INCLUDE_MODEL_PDTI8
+
 # output model parameters and weights
 #DEFINES += SHOW_CONV_PARAMS
 #DEFINES += SHOW_CONV_OUT_WEIGHTS

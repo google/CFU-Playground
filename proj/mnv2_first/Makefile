@@ -31,6 +31,9 @@ ifdef SW_ONLY
 DEFINES += NDEBUG NPROFILE CFU_SOFTWARE_DEFINED
 endif
 
+# Uncomment to include pdti8 in built binary
+DEFINES += INCLUDE_MODEL_PDTI8
+
 # Uncomment to include mnv2 in built binary (adds ~500kB to binary)
 ifneq 'hps' '$(PLATFORM)'
 DEFINES += INCLUDE_MODEL_MNV2

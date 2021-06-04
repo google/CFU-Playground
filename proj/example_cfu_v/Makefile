@@ -19,4 +19,7 @@ export DEFINES := PLACEHOLDER
 # Uncomment this line to use software defined CFU
 # DEFINES += CFU_SOFTWARE_DEFINED
 
+# Uncomment to include pdti8 in built binary
+DEFINES += INCLUDE_MODEL_PDTI8
+
 include ../proj.mk
