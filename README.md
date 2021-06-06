@@ -26,20 +26,22 @@ _This is an early prototype of a ML exploration framework; expect a lack of docu
 
 ### Required hardware/OS
 
-* Currently, the only supported target is the Arty 35T board from Digilent.
+* One of the boards supported by [LiteX Boards](https://github.com/litex-hub/litex-boards/tree/master/litex_boards/targets). Most of LiteX Boards targets should work.\
+It has been tested on **Arty A7-35T** and **Nexys Video Board**.
 * The only supported host OS is Linux (Debian / Ubuntu).
 
-If you want to try things out using [Renode](https://renode.io) simulation,
-then you don't need either the Arty board or Vivado software.
-You can also perform Verilog-level cycle-accurate simulation with Verilator,
-but this is much slower.
+You don't need any board if you want to run [Renode](https://renode.io) or Verilator simulation.
 
 ### Assumed software
 
-* [Vivado](https://www.xilinx.com/support/download.html) must be manually installed.
+* Toolchain that depends on a chosen board.\
+For Arty A7-35T it would be [Vivado](https://www.xilinx.com/support/download.html) which must be manually installed.
+You always need a toolchain for a target that you choose.
 
-Other required packages will be checked for and, if on a Debian-based system,
-automatically installed by the setup script below.
+If you want to try things out using [Renode](https://renode.io) simulation, then you don't need either the board or toolchain.
+You can also perform Verilog-level cycle-accurate simulation with Verilator, but this is much slower.
+
+Other required packages will be checked for and, if on a Debian-based system, automatically installed by the setup script below.
 
 
 ### Setup
@@ -48,21 +50,26 @@ Clone this repo, `cd` into it, then get run:
 ```sh
 scripts/setup
 ```
-### Use
+### Use with board
 
-Build the SoC and load the bitstream onto Arty:
+The default board is Arty. If you want to use different board you must specify target, e.g. `TARGET=digilent_nexys_video`.
+1. Build the SoC and load the bitstream onto Arty:
 ```sh
 cd proj/proj_template
 make prog
 ```
 
-This builds the SoC with the default CFU from `proj/proj_template`.   Later you'll copy this and modify it to make your own project.
+This builds the SoC with the default CFU from `proj/proj_template`. Later you'll copy this and modify it to make your own project.
 
 
-Build a RISC-V program and execute it on the SoC that you just loaded onto the Arty:
+2. Build a RISC-V program and execute it on the SoC that you just loaded onto the Arty:
 ```sh
 make load
 ```
+
+### Use without board
+
+If you don't have any board supported by LiteX Boards you can use Renode or Verilator to simulate it.
 
 To use Renode to execute on a simulator on the host machine (no Vivado or Arty board required), execute:
 
@@ -75,6 +82,17 @@ To use Verilator to execute on a cycle-accurate RTL-level simulator (no Vivado o
 ```sh
 make PLATFORM=sim load
 ```
+
+### Most useful make flags
+
+| Option          | Explanation   | Example | Default |
+| --------------- | ------------- | ------- | ------- |
+| `PLATFORM`      | Choose which SoC platform you want to build: `hps` or `sim` or `common_soc` | `make bitstream PLATFORM=hps` | `common_soc` |
+| `TARGET`        | Choose one of many targets from [LiteX Boards](https://github.com/litex-hub/litex-boards/tree/master/litex_boards/targets) repository, `common_soc` will take `BaseSoC` from specified `target.py` | `make bitstream TARGET=nexys_video_board` | `digilent_arty` |
+| `USE_VIVADO`    | Use Vivado toolchain | `make bitstream USE_VIVADO=1` | `0` |
+| `USE_SYMBIFLOW` | Use Symbiflow toolchain | `make bitstream USE_SYMBIFLOW=1` | `0` |
+| `UART_SPEED`    | Choose UART baudrate | `make bitstream UART_SPEED=115200` | `3686400` |
+| `IGNORE_TIMING` | Ignore timing contraints (only for Vivado) | `make bitstream USE_VIVADO=1 IGNORE_TIMING=1` | `0` |
 
 ### Underlying open-source technology
 

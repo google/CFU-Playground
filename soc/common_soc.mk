@@ -35,21 +35,26 @@ endif
 PROJ_DIR:=  $(CFU_ROOT)/proj/$(PROJ)
 CFU_V:=     $(PROJ_DIR)/cfu.v
 CFU_ARGS:=  --cpu-cfu $(CFU_V)
+TARGET_ARGS:= --target $(TARGET)
 
-SOC_NAME:=  nexys_video.$(PROJ)
+SOC_NAME:=  $(TARGET).$(PROJ)
 OUT_DIR:=   build/$(SOC_NAME)
 UART_ARGS=  --uart-baudrate $(UART_SPEED)
-LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv $(OUT_DIR)/csr.csv $(CFU_ARGS) $(UART_ARGS)
+LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv $(OUT_DIR)/csr.csv $(CFU_ARGS) $(UART_ARGS) $(TARGET_ARGS)
 
 ifdef USE_SYMBIFLOW
 LITEX_ARGS += --toolchain symbiflow
+else 
+ifdef USE_VIVADO
+LITEX_ARGS += --toolchain vivado
+endif
 endif
 
 PYRUN:=     $(CFU_ROOT)/scripts/pyrun
-NEXYS_VIDEO_RUN:=  MAKEFLAGS=-j8 $(PYRUN) ./nexys_video.py $(LITEX_ARGS)
+TARGET_RUN:=  MAKEFLAGS=-j8 $(PYRUN) ./common_soc.py $(LITEX_ARGS)
 
 BIOS_BIN := $(OUT_DIR)/software/bios/bios.bin
-BITSTREAM:= $(OUT_DIR)/gateware/nexys_video.bit
+BITSTREAM:= $(OUT_DIR)/gateware/$(TARGET).bit
 
 .PHONY: bitstream litex-software prog clean check-timing
 
@@ -57,7 +62,7 @@ bitstream: $(BITSTREAM) check-timing
 
 litex-software: $(BIOS_BIN)
 
-ifndef USE_SYMBIFLOW
+ifdef USE_VIVADO
 ifndef IGNORE_TIMING
 check-timing:
 	@echo Checking Vivado timing.
@@ -69,13 +74,13 @@ check-timing:
 endif
 else
 check-timing:
-	@echo Timing check not performed for SymbiFlow.
+	@echo Timing check performed only for Vivado.
 endif
 
 prog: $(BITSTREAM) check-timing
-	@echo Loading bitstream onto nexys_video
-	$(NEXYS_VIDEO_RUN) --no-compile-software --load
-	
+	@echo Loading bitstream onto board
+	$(TARGET_RUN) --no-compile-software --load
+
 clean:
 	@echo Removing $(OUT_DIR)
 	rm -rf $(OUT_DIR)
@@ -84,8 +89,8 @@ $(CFU_V):
 	$(error $(CFU_V) not found. $(HELP_MESSAGE))
 
 $(BIOS_BIN): $(CFU_V)
-	$(NEXYS_VIDEO_RUN)
+	$(TARGET_RUN)
 
 $(BITSTREAM): $(CFU_V)
-	@echo Building bitstream for nexys_video. CFU option: $(CFU_ARGS)
-	$(NEXYS_VIDEO_RUN) --build
+	@echo Building bitstream for $(TARGET). CFU option: $(CFU_ARGS)
+	$(TARGET_RUN) --build
