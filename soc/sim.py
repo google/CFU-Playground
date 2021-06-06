@@ -52,7 +52,6 @@ def main():
     parser = argparse.ArgumentParser(description="LiteX SoC on Arty A7")
     builder_args(parser)
     soc_core_args(parser)
-    parser.add_argument("--cfu", required=True, help="Specify file containing CFU Verilog module")
     parser.add_argument("--sim-trace",  action="store_true", help="Whether to enable tracing of simulation")
     parser.add_argument("--sim-trace-start", default=0, help="Start tracing at this time in picoseconds")
     parser.add_argument("--sim-trace-end", default=-1, help="Stop tracing at this time in picoseconds")
@@ -62,7 +61,7 @@ def main():
             csr_csv='csr.csv',
             uart_name='serial',
             uart_baudrate=921600,
-            cpu_variant='full+debug',    # don't specify 'cfu' here
+            cpu_variant='full+cfu+debug',
             with_etherbone=False)
     args = parser.parse_args()
     bin = None
@@ -84,16 +83,6 @@ def main():
     sim_config.add_clocker("sys_clk", freq_hz=soc.clk_freq)
     sim_config.add_module("serial2console", "serial")
     soc.add_constant("ROM_BOOT_ADDRESS", 0x40000000)
-
-    # get the CFU version, plus the CFU itself and a wrapper 
-    # ...since we're using stock litex, it doesn't know about the Cfu variants, so we need to use "external_variant"
-    if args.cfu:
-        assert 'full' in args.cpu_variant
-        var = "FullCfuDebug" if ('debug' in args.cpu_variant) else "FullCfu"
-        vexriscv = "../third_party/python/pythondata_cpu_vexriscv/pythondata_cpu_vexriscv"
-        soc.cpu.use_external_variant(f"{vexriscv}/verilog/VexRiscv_{var}.v")
-        soc.platform.add_source(args.cfu)
-        soc.platform.add_source(f"{vexriscv}/verilog/wrapVexRiscv_{var}.v")
 
     builder = Builder(soc, **builder_argdict(args))
 
