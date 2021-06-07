@@ -34,7 +34,7 @@ endif
 
 PROJ_DIR:=  $(CFU_ROOT)/proj/$(PROJ)
 CFU_V:=     $(PROJ_DIR)/cfu.v
-CFU_ARGS:=  --cfu $(CFU_V)
+CFU_ARGS:=  --cpu-cfu $(CFU_V)
 
 SOC_NAME:=  sim.$(PROJ)
 OUT_DIR:=   build/$(SOC_NAME)
