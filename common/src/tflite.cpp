@@ -62,7 +62,7 @@ tflite::INTERPRETER_TYPE* interpreter = nullptr;
 
 // An area of memory to use for input, output, and intermediate arrays.
 // constexpr int kTensorArenaSize = 136 * 1024;
-#ifdef INCLUDE_MODEL_MNV2
+#if defined(INCLUDE_MODEL_MNV2) || defined(INLCUDE_MODEL_MLCOMMONS_TINY_V01_VWW)
 constexpr int kTensorArenaSize = 800 * 1024;
 #else
 constexpr int kTensorArenaSize = 81 * 1024;

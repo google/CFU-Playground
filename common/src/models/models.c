@@ -24,6 +24,7 @@
 #include "models/mlcommons_tiny_v01/anomd/anomd.h"
 #include "models/mlcommons_tiny_v01/imgc/imgc.h"
 #include "models/mlcommons_tiny_v01/kws/kws.h"
+#include "models/mlcommons_tiny_v01/vww/vww.h"
 #include "models/mnv2/mnv2.h"
 #include "models/pdti8/pdti8.h"
 
@@ -50,20 +51,21 @@ static struct Menu MENU = {
 #if defined(INCLUDE_MODEL_MNV2)
         MENU_ITEM(AUTO_INC_CHAR, "Mobile Net v2 models", mnv2_menu),
 #endif
-#if defined(INLCUDE_MODEL_MLCOMMONS_TINY_V01_ANOMD) || \
-    defined(INCLUDE_ALL_MLCOMMONS_TINY_V01)
+#if defined(INLCUDE_MODEL_MLCOMMONS_TINY_V01_ANOMD)
         MENU_ITEM(AUTO_INC_CHAR, "MLCommons Tiny V0.1 Anomaly Detection",
                   mlcommons_tiny_v01_anomd_menu),
 #endif
-#if defined(INLCUDE_MODEL_MLCOMMONS_TINY_V01_IMGC) || \
-    defined(INCLUDE_ALL_MLCOMMONS_TINY_V01)
+#if defined(INLCUDE_MODEL_MLCOMMONS_TINY_V01_IMGC)
         MENU_ITEM(AUTO_INC_CHAR, "MLCommons Tiny V0.1 Image Classification",
                   mlcommons_tiny_v01_imgc_menu),
 #endif
-#if defined(INLCUDE_MODEL_MLCOMMONS_TINY_V01_KWS) || \
-    defined(INCLUDE_ALL_MLCOMMONS_TINY_V01)
+#if defined(INLCUDE_MODEL_MLCOMMONS_TINY_V01_KWS)
         MENU_ITEM(AUTO_INC_CHAR, "MLCommons Tiny V0.1 Keyword Spotting",
                   mlcommons_tiny_v01_kws_menu),
+#endif
+#if defined(INLCUDE_MODEL_MLCOMMONS_TINY_V01_VWW)
+        MENU_ITEM(AUTO_INC_CHAR, "MLCommons Tiny V0.1 Visual Wake Words",
+                  mlcommons_tiny_v01_vww_menu),
 #endif
 #if AUTO_INC_CHAR == STARTING_SEL_CHAR
         MENU_ITEM('!', "No models selected! Check defines in Makefile!",
