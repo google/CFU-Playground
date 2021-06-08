@@ -219,17 +219,15 @@ def main():
                         help="Which toolchain to use, radiant (default) or oxide")
     parser.add_argument("--synth_mode", default="radiant",
                         help="Which synthesis to use, radiant/synplify (default), lse, or yosys")
-    parser.add_argument("--litespi-flash", action="store_true", help="Use litespi flash")
+    parser.add_argument("--litespi-flash", action="store_true", help="Use litespi flash (OPTION IGNORED, HARDCODED TRUE)")
     parser.add_argument("--cpu-cfu", default=None, help="Specify file containing CFU Verilog module")
 
     args = parser.parse_args()
 
-    # soc = HpsSoC(Platform(args.toolchain), debug=args.debug, litespi_flash=args.litespi_flash)
-    soc = HpsSoC(Platform(args.toolchain), debug=args.debug, litespi_flash=True)
 
     if args.cpu_cfu:
         variant = "full+cfu+debug" if args.debug else "full+cfu"
-        soc = HpsSoC(Platform(args.toolchain), debug=args.debug, litespi_flash=args.litespi_flash, variant=variant, cpu_cfu=args.cpu_cfu)
+        soc = HpsSoC(Platform(args.toolchain), debug=args.debug, litespi_flash=True, variant=variant, cpu_cfu=args.cpu_cfu)
         if args.slim_cpu:
             # override the actual source to get the Slim version
             #  -- this is a hack needed because litex/.../vexriscv/core.py doesn't know about the Slim versions.
@@ -238,7 +236,7 @@ def main():
             soc.cpu.use_external_variant(f"{vexriscv}/verilog/VexRiscv_{var}.v")
     else:
         variant = "full+debug" if args.debug else "full"
-        soc = HpsSoC(Platform(args.toolchain), debug=args.debug, litespi_flash=args.litespi_flash, variant=variant)
+        soc = HpsSoC(Platform(args.toolchain), debug=args.debug, litespi_flash=True, variant=variant)
         
 
     builder = create_builder(soc, args)
