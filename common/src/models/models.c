@@ -21,15 +21,16 @@
 #include "menu.h"
 #include "models/magic_wand/magic_wand.h"
 #include "models/micro_speech/micro_speech.h"
+#include "models/mlcommons_tiny_v01/kws/kws.h"
 #include "models/mnv2/mnv2.h"
 #include "models/pdti8/pdti8.h"
+
+void no_menu() {}
 
 // Automatically incrementing compile time constant character.
 // Used for avoiding selection character collisions in the menu.
 #define STARTING_SEL_CHAR 0x31  // '1'
 #define AUTO_INC_CHAR __COUNTER__ + STARTING_SEL_CHAR
-
-void no_menu() {}
 
 static struct Menu MENU = {
     "TfLM Models",
@@ -47,6 +48,11 @@ static struct Menu MENU = {
 #if defined(INCLUDE_MODEL_MNV2)
         MENU_ITEM(AUTO_INC_CHAR, "Mobile Net v2 models", mnv2_menu),
 #endif
+#if defined(INLCUDE_MODEL_MLCOMMONS_TINY_V01_KWS) || \
+    defined(INCLUDE_ALL_MLCOMMONS_TINY_V01)
+        MENU_ITEM(AUTO_INC_CHAR, "MLCommons Tiny V0.1 Keyword Spotting",
+                  mlcommons_tiny_v01_kws_menu),
+#endif
 #if AUTO_INC_CHAR == STARTING_SEL_CHAR
         MENU_ITEM('!', "No models selected! Check defines in Makefile!",
                   no_menu),
@@ -54,6 +60,9 @@ static struct Menu MENU = {
         MENU_END,
     },
 };
+
+#undef AUTO_INC_CHAR
+#undef STARTING_SEL_CHAR
 
 // For integration into menu system
 void models_menu() { menu_run(&MENU); }
