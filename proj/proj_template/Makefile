@@ -38,6 +38,9 @@ DEFINES += NDEBUG
 #DEFINES += INCLUDE_MODEL_MNV2
 
 # Uncomment to include  mlcommons tiny v0.1 v0.1 keyword_spotting in built binary
+#DEFINES += INLCUDE_MODEL_MLCOMMONS_TINY_V01_IMGC
+
+# Uncomment to include  mlcommons tiny v0.1 v0.1 keyword_spotting in built binary
 #DEFINES += INLCUDE_MODEL_MLCOMMONS_TINY_V01_KWS
 
 # Uncomment to include all TFLM examples (pdti8, micro_speech, magic_wand)
