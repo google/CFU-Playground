@@ -100,11 +100,12 @@ CFU_VERILOG     := $(PROJ_DIR)/cfu.v
 BUILD_DIR       := $(PROJ_DIR)/build
 PYRUN           := $(CFU_ROOT)/scripts/pyrun
 
-COMMON_DIR      := $(CFU_ROOT)/common
-COMMON_FILES	:= $(shell find $(COMMON_DIR) -type f)
-TFLM_SRC_DIR    := $(CFU_ROOT)/third_party/tflm_gen
-SAXON_SRC_DIR   := $(CFU_ROOT)/third_party/SaxonSoc
-SRC_DIR         := $(abspath $(PROJ_DIR)/src)
+COMMON_DIR            := $(CFU_ROOT)/common
+COMMON_FILES	      := $(shell find $(COMMON_DIR) -type f)
+MLCOMMONS_SRC_DIR     := $(CFU_ROOT)/third_party/mlcommons
+TFLM_SRC_DIR          := $(CFU_ROOT)/third_party/tflm_gen
+SAXON_SRC_DIR         := $(CFU_ROOT)/third_party/SaxonSoc
+SRC_DIR               := $(abspath $(PROJ_DIR)/src)
 
 SOFTWARE_BIN     := $(BUILD_DIR)/software.bin
 SOFTWARE_ELF     := $(BUILD_DIR)/software.elf
@@ -167,6 +168,7 @@ build-dir:
 	@# that need to be overwritten
 	$(COPY) $(TFLM_SRC_DIR)/*            $(BUILD_DIR)/src
 	$(COPY) $(COMMON_DIR)/*              $(BUILD_DIR)
+	$(COPY) $(MLCOMMONS_SRC_DIR)/*       $(BUILD_DIR)/src
 	$(COPY) $(SAXON_SRC_DIR)/riscv.h     $(BUILD_DIR)/src
 	$(COPY) $(SRC_DIR)/*                 $(BUILD_DIR)/src
 	$(RM)			             $(BUILD_DIR)/_*
