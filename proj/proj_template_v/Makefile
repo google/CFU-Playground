@@ -34,6 +34,9 @@ DEFINES += NDEBUG
 # Uncomment to include mnv2 in built binary (adds ~500kB to binary)
 #DEFINES += INCLUDE_MODEL_MNV2
 
+# Uncomment to include  mlcommons tiny v0.1 v0.1 anomaly_detection in built binary
+#DEFINES += INLCUDE_MODEL_MLCOMMONS_TINY_V01_ANOMD
+
 # Uncomment to include  mlcommons tiny v0.1 v0.1 keyword_spotting in built binary
 #DEFINES += INLCUDE_MODEL_MLCOMMONS_TINY_V01_IMGC
 
