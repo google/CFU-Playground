@@ -23,7 +23,7 @@ DEFINES += NDEBUG
 # DEFINES += CFU_SOFTWARE_DEFINED
 
 # Uncomment to include pdti8 in built binary
-#DEFINES += INCLUDE_MODEL_PDTI8
+DEFINES += INCLUDE_MODEL_PDTI8
 
 # Uncomment to include micro_speech in built binary
 #DEFINES += INCLUDE_MODEL_MICRO_SPEECH
@@ -47,6 +47,6 @@ DEFINES += NDEBUG
 #DEFINES += INLCUDE_MODEL_MLCOMMONS_TINY_V01_VWW
 
 # Uncomment to include all TFLM examples (pdti8, micro_speech, magic_wand)
-DEFINES += INCLUDE_ALL_TFLM_EXAMPLES
+#DEFINES += INCLUDE_ALL_TFLM_EXAMPLES
 
 include ../proj.mk

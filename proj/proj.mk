@@ -76,7 +76,7 @@ export DEFINES    += PLATFORM_$(PLATFORM)
 export DEFINES    += PLATFORM=$(PLATFORM)
 
 SHELL           := /bin/bash
-TTY             := $(wildcard /dev/ttyUSB?)
+TTY             := $(or $(wildcard /dev/ttyUSB?), $(wildcard /dev/ttyACM?))
 CRC             := 
 #CRC             := --no-crc
 
