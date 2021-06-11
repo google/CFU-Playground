@@ -17,6 +17,7 @@ __package__ = 'nmigen_cfu'
 
 from nmigen import Array, Signal, signed
 from .util import SimpleElaboratable, TestBase
+from nmigen.hdl import ResetSignal
 
 
 class InstructionBase(SimpleElaboratable):
