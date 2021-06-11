@@ -272,6 +272,11 @@ class Cfu(SimpleElaboratable):
             ]
             m.submodules[f"fn{i}"] = instruction
 
+        # tie "reset" and "rst" together (issue #110)
+        rst = ResetSignal('sync')
+        m.d.comb += rst.eq(self.reset)
+
+
 
 class CfuTestBase(TestBase):
     """Tests CFU ops independent of timing and handshaking."""
