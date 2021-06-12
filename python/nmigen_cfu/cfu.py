@@ -17,6 +17,7 @@ __package__ = 'nmigen_cfu'
 
 from nmigen import Array, Signal, signed
 from .util import SimpleElaboratable, TestBase
+from nmigen.hdl import ResetSignal
 
 
 class InstructionBase(SimpleElaboratable):
@@ -271,6 +272,11 @@ class Cfu(SimpleElaboratable):
                 instruction.funct7.eq(funct7),
             ]
             m.submodules[f"fn{i}"] = instruction
+
+        # tie "reset" and "rst" together (issue #110)
+        rst = ResetSignal('sync')
+        m.d.comb += rst.eq(self.reset)
+
 
 
 class CfuTestBase(TestBase):
