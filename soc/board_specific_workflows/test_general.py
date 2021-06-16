@@ -22,7 +22,7 @@ from litex.soc.integration import builder
 from litex.soc.integration import soc as litex_soc
 
 
-class TestGeneralSoCWorkflow(unittest.TestCase):
+class GeneralSoCWorkflowTest(unittest.TestCase):
     """TestCase for the GeneralSoCWorkflow class.
     
     All methods except 'run' are tested here.
@@ -60,20 +60,16 @@ class TestGeneralSoCWorkflow(unittest.TestCase):
         return general.GeneralSoCWorkflow(self.args, self.soc_constructor,
                                           self.builder_constructor)
 
-    def test_init(self):
-        """Tests functionality of __init__ method."""
-        flow = self.simple_init()
-
-        self.assertEqual(flow.args, self.args)
-        self.assertEqual(flow.soc_constructor, self.soc_constructor)
-        self.assertEqual(flow.builder_constructor, self.builder_constructor)
-
-    def test_make_soc(self):
+    @mock.patch('litex.soc.integration.soc_core.soc_core_argdict')
+    def test_make_soc(self, mock_soc_core_argdict):
         """Tests functionality of the make_soc method."""
         in_kwargs = {'abcd': 'efgh'}
+        argdict_return = {'ijkl': 'mnop'}
+        mock_soc_core_argdict.return_value = argdict_return
         soc = self.simple_init().make_soc(**in_kwargs)
         soc_kwargs = self.soc_constructor.call_args.kwargs
 
+        # Check the kwargs of the constructor.
         self.soc_constructor.assert_called_once()
         self.assertEqual(soc, self.soc)
         self.assertNotIn('toolchain', soc_kwargs)
@@ -84,37 +80,34 @@ class TestGeneralSoCWorkflow(unittest.TestCase):
         self.assertEqual(self.args.with_mapped_flash,
                          soc_kwargs['with_mapped_flash'])
 
-    @mock.patch('litex.soc.integration.soc_core.soc_core_argdict')
-    def test_make_soc_argdict_call(self, mock_soc_core_argdict):
-        """Tests soc_core_argdict is called when making the SoC."""
-        argdict_kwargs = {'abcd': 'efgh'}
-        mock_soc_core_argdict.return_value = argdict_kwargs
-        self.simple_init().make_soc()
-        soc_kwargs = self.soc_constructor.call_args.kwargs
-
+        # Check the return value of soc_core_argdict is used.
         mock_soc_core_argdict.assert_called_once()
-        self.assertEqual(argdict_kwargs['abcd'], soc_kwargs['abcd'])
+        self.assertEqual(argdict_return['ijkl'], argdict_return['ijkl'])
 
-    def test_build_soc(self):
+    @mock.patch('litex.soc.integration.builder.builder_argdict')
+    def test_build_soc(self, mock_builder_argdict):
         """Tests functionality of the build_soc method."""
         in_kwargs = {'abcd': 'efgh'}
+        argdict_return = {'output_dir': 'abcd'}
+        mock_builder_argdict.return_value = argdict_return
         soc_builder = self.simple_init().build_soc(self.soc, **in_kwargs)
         build_kwargs = soc_builder.build.call_args.kwargs
 
+        # Check the args / kwargs of the .build(...) call.
         self.builder_constructor.assert_called_once()
         soc_builder.build.assert_called_once()
         self.assertEqual(soc_builder, self.builder)
         self.assertEqual(in_kwargs['abcd'], build_kwargs['abcd'])
 
-    @mock.patch('litex.soc.integration.builder.builder_argdict')
-    def test_build_soc_argdict_call(self, mock_builder_argdict):
-        """Tests builder_argdict is called when making the SoC."""
-        self.simple_init().build_soc(self.soc)
+        # Check the args / kwargs of the constructor.
         constructor_args = self.builder_constructor.call_args.args
-
-        self.builder_constructor.assert_called_once()
-        self.assertIn(self.soc, constructor_args)
+        constructor_kwargs = self.builder_constructor.call_args.kwargs
         mock_builder_argdict.assert_called_once()
+        self.assertIn(self.soc, constructor_args)
+
+        # Check the return value of builder_argdict is used.
+        self.assertEqual(argdict_return['output_dir'],
+                         constructor_kwargs['output_dir'])
 
     def test_load(self):
         """Tests functionality of the load method."""
@@ -147,7 +140,7 @@ class FakeGeneralSoCWorkflow(general.GeneralSoCWorkflow):
         self.call_order.append('load')
 
 
-class TestGeneralSoCWorkflowRun(unittest.TestCase):
+class GeneralSoCWorkflowRunTest(unittest.TestCase):
     """TestCase for the `run` method of GeneralSoCWorkflow."""
     def test_run_load_false(self):
         workflow = FakeGeneralSoCWorkflow(load=False)

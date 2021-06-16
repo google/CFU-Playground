@@ -49,10 +49,7 @@ class GeneralSoCWorkflow():
         """
         self.args = args
         self.soc_constructor = soc_constructor
-        if builder_constructor:
-            self.builder_constructor = builder_constructor
-        else:
-            self.builder_constructor = builder.Builder
+        self.builder_constructor = builder_constructor or builder.Builder
 
     def make_soc(self, **kwargs) -> litex_soc.LiteXSoC:
         """Utilizes self.soc_constructor to make a LiteXSoC.

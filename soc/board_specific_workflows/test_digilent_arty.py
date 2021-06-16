@@ -22,7 +22,7 @@ from litex.build.xilinx import vivado
 from unittest import mock
 
 
-class DigilentArtySoCWorkflow(unittest.TestCase):
+class DigilentArtySoCWorkflowTest(unittest.TestCase):
     """TestCase for the DigilentArtySoCWorkflow."""
     def setUp(self):
         self.args = mock.MagicMock()
@@ -33,6 +33,9 @@ class DigilentArtySoCWorkflow(unittest.TestCase):
             vivado.XilinxVivadoToolchain)
         self.soc_constructor = mock.MagicMock()
         self.builder_constructor = mock.create_autospec(builder.Builder)
+        self.builder = mock.create_autospec(builder.Builder, instance=True)
+        self.builder_constructor.return_value = self.builder
+
 
     def simple_init(self):
         """Returns a DigilentArtySoCWorkflow with testing parameters."""
@@ -46,14 +49,18 @@ class DigilentArtySoCWorkflow(unittest.TestCase):
         kwargs = self.soc_constructor.call_args.kwargs
 
         self.assertIn('l2_size', kwargs)
-        self.assertTrue(kwargs['l2_size'], 8 * 1024)
+        self.assertEqual(kwargs['l2_size'], 8 * 1024)
 
     @mock.patch('litex.build.xilinx.vivado.vivado_build_argdict')
     def test_build_soc_vivado(self, mock_vivado_build_argdict):
         """Tests that vivado_build_argdict is called when using Vivado."""
+        argdict_return = {'ijkl': 'mnop'}
+        mock_vivado_build_argdict.return_value = argdict_return
         self.simple_init().build_soc(self.soc)
 
         mock_vivado_build_argdict.assert_called_once_with(self.args)
+        build_kwargs = self.builder.build.call_args.kwargs
+        self.assertEqual(argdict_return['ijkl'], build_kwargs['ijkl'])
 
 
 if __name__ == '__main__':

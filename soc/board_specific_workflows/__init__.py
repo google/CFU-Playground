@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .general import GeneralSoCWorkflow
-from .digilent_arty import DigilentArtySoCWorkflow
-from .workflow_args import parse_workflow_args
+from general import GeneralSoCWorkflow
+from digilent_arty import DigilentArtySoCWorkflow
+from workflow_args import parse_workflow_args
 
 
 def workflow_factory(target: str) -> GeneralSoCWorkflow:
