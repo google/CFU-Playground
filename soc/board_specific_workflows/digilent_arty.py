@@ -13,12 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .general import GeneralSoCWorkflow
-from litex.soc.integration.soc import LiteXSoC
+import general
+from litex.soc.integration import soc as litex_soc
+from litex.soc.integration import builder
+from litex.build.xilinx import vivado
 
 
-class DigilentArtySoCWorkflow(GeneralSoCWorkflow):
+class DigilentArtySoCWorkflow(general.GeneralSoCWorkflow):
     """Specializes the general workflow for the Digilent Arty."""
-    def make_soc(self, **kwargs) -> LiteXSoC:
+    def make_soc(self, **kwargs) -> litex_soc.LiteXSoC:
         """Runs the general make_soc with a l2_size parameter."""
         return super().make_soc(l2_size=8 * 1024, **kwargs)
+
+    def build_soc(self, soc: litex_soc.LiteXSoC, **kwargs) -> builder.Builder:
+        """Specializes build_soc to add Vivado args if needed."""
+        if isinstance(soc.platform.toolchain, vivado.XilinxVivadoToolchain):
+            kwargs.update(vivado.vivado_build_argdict(self.args))
+        return super().build_soc(soc, **kwargs)

@@ -15,25 +15,45 @@
 
 import digilent_arty
 import unittest
-import unittest.mock
-
-
-class FakeDigilentArtySoCWorkflow(digilent_arty.DigilentArtySoCWorkflow):
-    """Subclass of DigilentArtySoCWorkflow that makes __init__ a no-op."""
-    def __init__(self):
-        pass
+from litex.build import generic_platform
+from litex.soc.integration import builder
+from litex.soc.integration import soc as litex_soc
+from litex.build.xilinx import vivado
+from unittest import mock
 
 
 class DigilentArtySoCWorkflow(unittest.TestCase):
     """TestCase for the DigilentArtySoCWorkflow."""
-    @unittest.mock.patch('general.GeneralSoCWorkflow.make_soc')
-    def test_make_soc(self, mock_make_soc):
+    def setUp(self):
+        self.args = mock.MagicMock()
+        self.soc = mock.create_autospec(litex_soc.LiteXSoC)
+        self.soc.platform = mock.create_autospec(
+            generic_platform.GenericPlatform)
+        self.soc.platform.toolchain = mock.create_autospec(
+            vivado.XilinxVivadoToolchain)
+        self.soc_constructor = mock.MagicMock()
+        self.builder_constructor = mock.create_autospec(builder.Builder)
+
+    def simple_init(self):
+        """Returns a DigilentArtySoCWorkflow with testing parameters."""
+        return digilent_arty.DigilentArtySoCWorkflow(self.args,
+                                                     self.soc_constructor,
+                                                     self.builder_constructor)
+
+    def test_make_soc(self):
         """Tests the make_soc method of DigilentArtySoCWorkflow."""
-        FakeDigilentArtySoCWorkflow().make_soc()
-        kwargs = mock_make_soc.call_args.kwargs
-        mock_make_soc.assert_called_once()
+        self.simple_init().make_soc()
+        kwargs = self.soc_constructor.call_args.kwargs
+
         self.assertIn('l2_size', kwargs)
         self.assertTrue(kwargs['l2_size'], 8 * 1024)
+
+    @mock.patch('litex.build.xilinx.vivado.vivado_build_argdict')
+    def test_build_soc_vivado(self, mock_vivado_build_argdict):
+        """Tests that vivado_build_argdict is called when using Vivado."""
+        self.simple_init().build_soc(self.soc)
+
+        mock_vivado_build_argdict.assert_called_once_with(self.args)
 
 
 if __name__ == '__main__':

@@ -13,6 +13,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-pushd $(dirname ${BASH_SOURCE[0]})
 ../../scripts/pyrun -m unittest $*
-popd

@@ -15,6 +15,7 @@
 
 from .general import GeneralSoCWorkflow
 from .digilent_arty import DigilentArtySoCWorkflow
+from .workflow_args import parse_workflow_args
 
 
 def workflow_factory(target: str) -> GeneralSoCWorkflow:
@@ -35,5 +36,6 @@ def workflow_factory(target: str) -> GeneralSoCWorkflow:
 __all__ = [
     'DigilentArtySoCWorkflow',
     'GeneralSoCWorkflow',
+    'parse_workflow_args'
     'workflow_factory',
 ]

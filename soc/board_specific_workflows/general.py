@@ -14,15 +14,11 @@
 # limitations under the License.
 
 import argparse
-import importlib
-import litex.build.xilinx.vivado as litex_vivado
-import litex.soc.integration.builder as litex_builder
-import litex.soc.integration.soc as litex_soc
-import litex.soc.integration.soc_core as litex_soc_core
 import os
-
-# By caching this type we are allowed to patch it in tests.
-_VIVADO_TOOLCHAIN_TYPE = litex_vivado.XilinxVivadoToolchain
+from litex.soc.integration import builder
+from litex.soc.integration import soc as litex_soc
+from litex.soc.integration import soc_core
+from typing import Callable
 
 
 class GeneralSoCWorkflow():
@@ -34,27 +30,36 @@ class GeneralSoCWorkflow():
 
     Attributes:
         args: An argparse Namespace that holds SoC and build options.
-        module: The Litex-Boards module for the target board.
+        soc_constructor: The constructor for the LiteXSoC.
+        builder_constructor: The constructor for the LiteX Builder.
     """
-    def __init__(self, args: argparse.Namespace) -> None:
-        try:
-            self.module = importlib.import_module(
-                self.format_import_path(args.target))
-        except:
-            raise ModuleNotFoundError(f'Could not load {args.target} target.')
+    def __init__(
+        self,
+        args: argparse.Namespace,
+        soc_constructor: Callable[..., litex_soc.LiteXSoC],
+        builder_constructor: Callable[..., builder.Builder] = None,
+    ) -> None:
+        """Initializes the GeneralSoCWorkflow.
+        
+        Args:
+            args: An argparse Namespace that holds SoC and build options.
+            soc_constructor: The constructor for the LiteXSoC.
+            builder_constructor: The constructor for the LiteX Builder. If
+              omitted, litex.soc.integration.builder.Builder will be used.
+        """
         self.args = args
-
-    @classmethod
-    def format_import_path(cls, target: str) -> str:
-        """Formats the import path for the litex_boards import."""
-        return f'litex_boards.targets.{target}'
+        self.soc_constructor = soc_constructor
+        if builder_constructor:
+            self.builder_constructor = builder_constructor
+        else:
+            self.builder_constructor = builder.Builder
 
     def make_soc(self, **kwargs) -> litex_soc.LiteXSoC:
-        """ Utilizes self.module.BaseSoC to make a LiteXSoC.
+        """Utilizes self.soc_constructor to make a LiteXSoC.
         
         Args:
             **kwargs: Arguments meant to extend/overwrite the general
-              arguments to self.module.BaseSoc.
+              arguments to self.soc_constructor.
         
         Returns:
             The LiteXSoC for the target board.
@@ -64,16 +69,15 @@ class GeneralSoCWorkflow():
             'with_etherbone': self.args.with_etherbone,
             'with_mapped_flash': self.args.with_mapped_flash,
         }
-        base_soc_kwargs.update(litex_soc_core.soc_core_argdict(self.args))
+        base_soc_kwargs.update(soc_core.soc_core_argdict(self.args))
         if self.args.toolchain:
             base_soc_kwargs['toolchain'] = self.args.toolchain
 
         base_soc_kwargs.update(kwargs)
-        return self.module.BaseSoC(**base_soc_kwargs)
+        return self.soc_constructor(**base_soc_kwargs)
 
-    def build_soc(self, soc: litex_soc.LiteXSoC,
-                  **kwargs) -> litex_builder.Builder:
-        """ Creates a LiteX Builder and builds the Soc if self.args.build.
+    def build_soc(self, soc: litex_soc.LiteXSoC, **kwargs) -> builder.Builder:
+        """Creates a LiteX Builder and builds the Soc if self.args.build.
         
         Args:
             soc: The LiteXSoC meant to be built.
@@ -83,35 +87,31 @@ class GeneralSoCWorkflow():
         Returns:
             The LiteX Builder for the SoC.
         """
-        builder_kwargs = litex_builder.builder_argdict(self.args)
-        builder_kwargs.update(kwargs)
-        builder = litex_builder.Builder(soc, **builder_kwargs)
-        if isinstance(soc.platform.toolchain, _VIVADO_TOOLCHAIN_TYPE):
-            builder.build(**litex_vivado.vivado_build_argdict(self.args),
-                          run=self.args.build)
-        else:
-            builder.build(run=self.args.build)
-        return builder
+        soc_builder = self.builder_constructor(
+            soc, **builder.builder_argdict(self.args))
+        soc_builder.build(run=self.args.build, **kwargs)
+        return soc_builder
 
     def load(self, soc: litex_soc.LiteXSoC,
-             builder: litex_builder.Builder) -> None:
-        """ Loads a SoC onto the target baord.
+             soc_builder: builder.Builder) -> None:
+        """Loads a SoC onto the target board.
         
         Args:
             soc: The LiteXSoc meant to be loaded.
-            builder: The LiteX builder used to build the SoC.
+            soc_builder: The LiteX builder used to build the SoC.
         """
         prog = soc.platform.create_programmer()
-        bitstream_filename = self.format_bitstream_filename(builder.gateware_dir, soc.build_name)
+        bitstream_filename = self.format_bitstream_filename(
+            soc_builder.gateware_dir, soc.build_name)
         prog.load_bitstream(bitstream_filename)
-    
+
     @classmethod
     def format_bitstream_filename(cls, directory: str, build_name: str) -> str:
         return os.path.join(directory, f'{build_name}.bit')
 
     def run(self) -> None:
-        """ Runs the workflow in order (make_soc -> build_soc -> load)."""
+        """Runs the workflow in order (make_soc -> build_soc -> load)."""
         soc = self.make_soc()
-        builder = self.build_soc(soc)
+        soc_builder = self.build_soc(soc)
         if self.args.load:
-            self.load(soc, builder)
+            self.load(soc, soc_builder)

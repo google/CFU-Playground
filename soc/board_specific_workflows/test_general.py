@@ -15,169 +15,125 @@
 
 import general
 import unittest
-import unittest.mock
+import workflow_args
+from unittest import mock
+from litex.build import generic_platform, generic_programmer
+from litex.soc.integration import builder
+from litex.soc.integration import soc as litex_soc
 
 
 class TestGeneralSoCWorkflow(unittest.TestCase):
     """TestCase for the GeneralSoCWorkflow class.
     
-    All methods except `run` are tested in this test case.  
+    All methods except 'run' are tested here.
     """
     def setUp(self):
-        """Sets up various mocks used throughout the tests."""
+        """Sets up mocks and fakes used throughout the tests."""
+        # Generates a real argparse Namespace for testing.
+        self.target = 'test_target'
+        self.build = True
+        self.args = workflow_args.parse_workflow_args(
+            ['--target', self.target, '--build' if self.build else ''])
 
-        # Mocks the argparse arguments
-        self.mock_namespace = unittest.mock.MagicMock()
-        self.target_value = 'test_target'
-        self.target_keyword = 'target'
-        self.build_keyword = 'build'
-        self.build_value = True
-        self.call_kwargs = {
-            self.target_keyword: self.target_value,
-            self.build_keyword: self.build_value,
-        }
-        self.mock_namespace.configure_mock(**self.call_kwargs)
+        # Autospec the SoC.
+        self.programmer = mock.create_autospec(
+            generic_programmer.GenericProgrammer)
+        self.soc = mock.create_autospec(litex_soc.LiteXSoC, instance=True)
+        self.soc.platform = mock.create_autospec(
+            generic_platform.GenericPlatform, instance=True)
+        self.soc.platform.create_programmer.return_value = self.programmer
+        self.build_name = 'test_build_name'
+        self.soc.build_name = self.build_name
 
-        # Mocks the generated LiteXSoC
-        self.mock_soc = unittest.mock.MagicMock()
-        self.build_name = 'build_name'
-        self.mock_soc.configure_mock(build_name=self.build_name)
-
-        # Mocks the imported LiteX-Boards module
-        self.mock_module = unittest.mock.MagicMock()
-        self.mock_module.BaseSoC = unittest.mock.MagicMock(
-            return_value=self.mock_soc)
-
-        # Mocks the LiteX Builder
-        self.mock_builder = unittest.mock.MagicMock()
+        # Autospec the Builder.
+        self.builder = mock.create_autospec(builder.Builder, instance=True)
         self.gateware_dir = 'test_gateware_dir/'
-        self.mock_builder.configure_mock(gateware_dir=self.gateware_dir)
-        self.mock_builder.build = unittest.mock.MagicMock()
+        self.builder.gateware_dir = self.gateware_dir
 
-        # Overwrite the format_bistream_filename method to avoid os.
-        self.format_bitsream_filename = general.GeneralSoCWorkflow.format_bitstream_filename
-        self.test_format_func = lambda cls, x, y: f'{x}, {y}'
-        general.GeneralSoCWorkflow.format_bitstream_filename = self.test_format_func
+        self.builder_constructor = mock.create_autospec(
+            builder.Builder, return_value=self.builder)
+        # Can't easily autospec the soc_constructor -- interface inconsistent.
+        self.soc_constructor = mock.MagicMock(return_value=self.soc)
 
-    def tearDown(self):
-        """Fixes the overwritten format_bitstream_filename method."""
-        general.GeneralSoCWorkflow.format_bitstream_filename = self.format_bitsream_filename
-
-    @unittest.mock.patch('importlib.import_module')
-    def patched_init(self, mock_import_module):
-        """Calls the constructor with a redefined importlib.import_module."""
-        mock_import_module.return_value = self.mock_module
-        self.mock_import_module = mock_import_module
-        return general.GeneralSoCWorkflow(self.mock_namespace)
+    def simple_init(self):
+        """Returns a GeneralSoCWorkflow with reasonable testing parameters."""
+        return general.GeneralSoCWorkflow(self.args, self.soc_constructor,
+                                          self.builder_constructor)
 
     def test_init(self):
-        """Tests constructor args and import."""
-        workflow = self.patched_init()
+        """Tests functionality of __init__ method."""
+        flow = self.simple_init()
 
-        self.mock_import_module.assert_called_once_with(
-            general.GeneralSoCWorkflow.format_import_path(self.target_value))
-        self.assertEqual(workflow.args, self.mock_namespace)
-        self.assertEqual(workflow.module, self.mock_module)
-
-    @unittest.mock.patch('litex.soc.integration.soc_core.soc_core_argdict')
-    def patched_make_soc(self, mock_soc_core_argdict, **kwargs):
-        """Calls make_soc with a redefined soc_core_argdict."""
-        workflow = self.patched_init()
-        self.mock_soc_core_argdict = mock_soc_core_argdict
-        return workflow, workflow.make_soc(**kwargs)
+        self.assertEqual(flow.args, self.args)
+        self.assertEqual(flow.soc_constructor, self.soc_constructor)
+        self.assertEqual(flow.builder_constructor, self.builder_constructor)
 
     def test_make_soc(self):
-        """Tests the general make_soc function without kwargs."""
-        _, soc = self.patched_make_soc()
+        """Tests functionality of the make_soc method."""
+        in_kwargs = {'abcd': 'efgh'}
+        soc = self.simple_init().make_soc(**in_kwargs)
+        soc_kwargs = self.soc_constructor.call_args.kwargs
 
-        self.mock_soc_core_argdict.assert_called_once_with(self.mock_namespace)
-        self.assertEqual(soc, self.mock_soc)
-        self.mock_module.BaseSoC.assert_called_once()
+        self.soc_constructor.assert_called_once()
+        self.assertEqual(soc, self.soc)
+        self.assertNotIn('toolchain', soc_kwargs)
+        self.assertEqual(in_kwargs['abcd'], soc_kwargs['abcd'])
+        self.assertEqual(self.args.with_ethernet, soc_kwargs['with_ethernet'])
+        self.assertEqual(self.args.with_etherbone,
+                         soc_kwargs['with_etherbone'])
+        self.assertEqual(self.args.with_mapped_flash,
+                         soc_kwargs['with_mapped_flash'])
 
-    def test_make_soc_kwargs(self):
-        """Tests to see if kwargs are passed through in make_soc."""
-        self.patched_make_soc(**self.call_kwargs)
-        kwargs = self.mock_module.BaseSoC.call_args.kwargs
+    @mock.patch('litex.soc.integration.soc_core.soc_core_argdict')
+    def test_make_soc_argdict_call(self, mock_soc_core_argdict):
+        """Tests soc_core_argdict is called when making the SoC."""
+        argdict_kwargs = {'abcd': 'efgh'}
+        mock_soc_core_argdict.return_value = argdict_kwargs
+        self.simple_init().make_soc()
+        soc_kwargs = self.soc_constructor.call_args.kwargs
 
-        self.assertIn(self.target_keyword, kwargs)
-        self.assertTrue(kwargs[self.target_keyword] == self.target_value)
-
-    @unittest.mock.patch('litex.soc.integration.builder.Builder')
-    @unittest.mock.patch('litex.soc.integration.builder.builder_argdict')
-    @unittest.mock.patch('litex.build.xilinx.vivado.vivado_build_argdict')
-    def patched_build_soc(self,
-                          mock_vivado_build_argdict,
-                          mock_builder_argdict,
-                          mock_builder_class,
-                          is_vivado=False,
-                          **kwargs):
-        """Calls build_soc with redefined imports."""
-        workflow, soc = self.patched_make_soc()
-        mock_builder_argdict.return_value = self.call_kwargs
-        mock_builder_class.return_value = self.mock_builder
-        soc.platform = unittest.mock.MagicMock()
-        if is_vivado:
-            soc.platform.toolchain = unittest.mock.MagicMock(
-                spec=general._VIVADO_TOOLCHAIN_TYPE)
-            mock_vivado_build_argdict.return_value = self.call_kwargs
-
-        self.mock_builder_class = mock_builder_class
-        self.mock_builder_argdict = mock_builder_argdict
-        self.mock_vivado_build_argdict = mock_vivado_build_argdict
-
-        return workflow, workflow.build_soc(soc, **kwargs)
+        mock_soc_core_argdict.assert_called_once()
+        self.assertEqual(argdict_kwargs['abcd'], soc_kwargs['abcd'])
 
     def test_build_soc(self):
-        """Tests general logic of build_soc (when is_vivado is False)."""
-        _, builder = self.patched_build_soc(is_vivado=False)
-        kwargs = self.mock_builder.build.call_args.kwargs
+        """Tests functionality of the build_soc method."""
+        in_kwargs = {'abcd': 'efgh'}
+        soc_builder = self.simple_init().build_soc(self.soc, **in_kwargs)
+        build_kwargs = soc_builder.build.call_args.kwargs
 
-        self.assertEqual(builder, self.mock_builder)
-        self.mock_builder_argdict.assert_called_once_with(self.mock_namespace)
-        self.mock_builder_class.assert_called_once_with(
-            self.mock_soc, **self.call_kwargs)
-        self.assertEqual(kwargs['run'], self.build_value)
-        self.mock_vivado_build_argdict.assert_not_called()
+        self.builder_constructor.assert_called_once()
+        soc_builder.build.assert_called_once()
+        self.assertEqual(soc_builder, self.builder)
+        self.assertEqual(in_kwargs['abcd'], build_kwargs['abcd'])
 
-    def test_build_soc_vivado(self):
-        """Tests build_soc when is_vivado is True."""
-        _, builder = self.patched_build_soc(is_vivado=True)
-        kwargs = self.mock_builder.build.call_args.kwargs
+    @mock.patch('litex.soc.integration.builder.builder_argdict')
+    def test_build_soc_argdict_call(self, mock_builder_argdict):
+        """Tests builder_argdict is called when making the SoC."""
+        self.simple_init().build_soc(self.soc)
+        constructor_args = self.builder_constructor.call_args.args
 
-        self.assertEqual(builder, self.mock_builder)
-        self.mock_builder_argdict.assert_called_once_with(self.mock_namespace)
-        self.mock_builder_class.assert_called_once_with(
-            self.mock_soc, **self.call_kwargs)
-        self.assertEqual(kwargs['run'], self.build_value)
-        self.mock_vivado_build_argdict.assert_called_once_with(
-            self.mock_namespace)
-
-    def test_build_soc_kwargs(self):
-        """Tests to see if kwargs are passed through in build_soc."""
-        extra_kwarg = {'a': 'a'}
-        self.patched_build_soc(is_vivado=False, **extra_kwarg)
-        kwargs = self.mock_builder_class.call_args.kwargs
-
-        self.assertIn('a', kwargs)
+        self.builder_constructor.assert_called_once()
+        self.assertIn(self.soc, constructor_args)
+        mock_builder_argdict.assert_called_once()
 
     def test_load(self):
-        """Tests load with a redefined format bitstream."""
-        workflow, _ = self.patched_build_soc()
-        programmer = unittest.mock.MagicMock()
-        self.mock_soc.platform.create_programmer.return_value = programmer
-        workflow.load(self.mock_soc, self.mock_builder)
+        """Tests functionality of the load method."""
+        self.simple_init().load(self.soc, self.builder)
 
-        self.mock_soc.platform.create_programmer.assert_called_once()
-        programmer.load_bitstream.assert_called_once_with(
-            self.test_format_func(None, self.gateware_dir, self.build_name))
+        self.soc.platform.create_programmer.assert_called_once()
+        self.programmer.load_bitstream.assert_called_once_with(
+            f'{self.gateware_dir}{self.build_name}.bit')
 
 
-class FakeGeneralSockWorkflow(general.GeneralSoCWorkflow):
-    """Subclasses GeneralSoCWorkflow to have all methods record call order."""
-    def __init__(self, load=False):
+class FakeGeneralSoCWorkflow(general.GeneralSoCWorkflow):
+    """Subclasses GeneralSoCWorkflow to have all methods record call order.
+    
+    This is used to make sure the `run` method is working as intended.
+    """
+    def __init__(self, load):
         self.call_order = []
         self.args = unittest.mock.MagicMock()
-        self.args.configure_mock(load=load)
+        self.args.load = load
 
     def make_soc(self):
         self.call_order.append('make_soc')
@@ -194,12 +150,12 @@ class FakeGeneralSockWorkflow(general.GeneralSoCWorkflow):
 class TestGeneralSoCWorkflowRun(unittest.TestCase):
     """TestCase for the `run` method of GeneralSoCWorkflow."""
     def test_run_load_false(self):
-        workflow = FakeGeneralSockWorkflow(load=False)
+        workflow = FakeGeneralSoCWorkflow(load=False)
         workflow.run()
         self.assertListEqual(workflow.call_order, ['make_soc', 'build_soc'])
 
     def test_run_load_true(self):
-        workflow = FakeGeneralSockWorkflow(load=True)
+        workflow = FakeGeneralSoCWorkflow(load=True)
         workflow.run()
         self.assertListEqual(workflow.call_order,
                              ['make_soc', 'build_soc', 'load'])
