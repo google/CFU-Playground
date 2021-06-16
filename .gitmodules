@@ -49,3 +49,6 @@
 [submodule "third_party/python/litespi"]
 	path = third_party/python/litespi
 	url = https://github.com/tcal-x/litespi.git
+[submodule "third_party/tflite-micro"]
+	path = third_party/tflite-micro
+	url = https://github.com/tensorflow/tflite-micro.git
