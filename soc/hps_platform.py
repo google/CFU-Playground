@@ -88,7 +88,11 @@ class _CRG(Module):
         # Clock from HFOSC
         self.submodules.sys_clk = sys_osc = NXOSCA()
         sys_osc.create_hf_clk(self.cd_sys, sys_clk_freq)
-        platform.add_period_constraint(self.cd_sys.clk, 1e9/sys_clk_freq)
+        # We make the period constraint 10% tighter than our actual system
+        # clock frequency, because the CrossLink-NX internal oscillator runs
+        # at ±10% of nominal frequency.
+        platform.add_period_constraint(self.cd_sys.clk,
+                                       1e9 / (sys_clk_freq * 1.1))
 
         # Power On Reset
         por_cycles = 4096
