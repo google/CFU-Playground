@@ -20,8 +20,8 @@
 
 #include "menu.h"
 #include "models/pdti8/model_pdti8.h"
-#include "tensorflow/lite/micro/examples/person_detection_experimental/no_person_image_data.h"
-#include "tensorflow/lite/micro/examples/person_detection_experimental/person_image_data.h"
+#include "tensorflow/lite/micro/examples/person_detection/no_person_image_data.h"
+#include "tensorflow/lite/micro/examples/person_detection/person_image_data.h"
 #include "tflite.h"
 
 // Initialize everything once

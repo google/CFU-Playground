@@ -21,7 +21,6 @@
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/micro/micro_profiler.h"
 #include "tensorflow/lite/schema/schema_generated.h"
-#include "tensorflow/lite/version.h"
 
 #ifdef SHOW_MEMORY_USE
 #include "tensorflow/lite/micro/recording_micro_interpreter.h"
@@ -108,7 +107,7 @@ static void tflite_init() {
   // op_resolver = &micro_op_resolver;
 
   // profiler
-  static tflite::MicroProfiler micro_profiler(error_reporter);
+  static tflite::MicroProfiler micro_profiler;
   profiler = &micro_profiler;
 }
 
@@ -122,13 +121,6 @@ void tflite_load_model(const unsigned char* model_data) {
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
   model = tflite::GetModel(model_data);
-  if (model->version() != TFLITE_SCHEMA_VERSION) {
-    TF_LITE_REPORT_ERROR(error_reporter,
-                         "Model provided is schema version %d not equal "
-                         "to supported version %d.",
-                         model->version(), TFLITE_SCHEMA_VERSION);
-    return;
-  }
 
   // Build an interpreter to run the model with.
   // NOLINTNEXTLINE(runtime-global-variables)

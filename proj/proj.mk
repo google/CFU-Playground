@@ -100,12 +100,42 @@ CFU_VERILOG     := $(PROJ_DIR)/cfu.v
 BUILD_DIR       := $(PROJ_DIR)/build
 PYRUN           := $(CFU_ROOT)/scripts/pyrun
 
-COMMON_DIR            := $(CFU_ROOT)/common
-COMMON_FILES	      := $(shell find $(COMMON_DIR) -type f)
-MLCOMMONS_SRC_DIR     := $(CFU_ROOT)/third_party/mlcommons
-TFLM_SRC_DIR          := $(CFU_ROOT)/third_party/tflm_gen
-SAXON_SRC_DIR         := $(CFU_ROOT)/third_party/SaxonSoc
-SRC_DIR               := $(abspath $(PROJ_DIR)/src)
+COMMON_DIR         := $(CFU_ROOT)/common
+COMMON_FILES	   := $(shell find $(COMMON_DIR) -type f)
+MLCOMMONS_SRC_DIR  := $(CFU_ROOT)/third_party/mlcommons
+SAXON_SRC_DIR      := $(CFU_ROOT)/third_party/SaxonSoc
+SRC_DIR            := $(abspath $(PROJ_DIR)/src)
+
+TFLM_SRC_DIR       := $(CFU_ROOT)/third_party/tflite-micro
+TFLM_MAKE_DIR      := $(TFLM_SRC_DIR)/tensorflow/lite/micro/tools/make
+
+# Copy every file found in these directories, except those excluded
+TFLM_COPY_SRC_DIRS := \
+	tensorflow/lite \
+	tensorflow/lite/c \
+	tensorflow/lite/core/api \
+	tensorflow/lite/kernels \
+	tensorflow/lite/kernels/internal \
+	tensorflow/lite/kernels/internal/optimized \
+	tensorflow/lite/kernels/internal/reference \
+	tensorflow/lite/kernels/internal/reference/integer_ops \
+	tensorflow/lite/micro \
+	tensorflow/lite/micro/kernels \
+	tensorflow/lite/micro/memory_planner \
+	tensorflow/lite/schema
+
+TFLM_FIND_PARAMS := \
+	-maxdepth 1 -type f \
+	-not -name '*_test*' \
+	-not -name 'space_to_depth.*' \
+	-regex '.*\.\(h\|c\|cc\)'
+
+# Just copy data files from these dirs
+TFLM_COPY_DATA_DIRS := \
+	tensorflow/lite/micro/benchmarks \
+	tensorflow/lite/micro/examples/magic_wand \
+	tensorflow/lite/micro/examples/micro_speech/micro_features \
+	tensorflow/lite/micro/examples/person_detection \
 
 SOFTWARE_BIN     := $(BUILD_DIR)/software.bin
 SOFTWARE_ELF     := $(BUILD_DIR)/software.elf
@@ -160,13 +190,43 @@ endif
 
 # Note that the common Makefile is used in preference to the TfLM Makefile
 # TODO: consider using rsync instead of cp
+#$(COPY) $(TFLM_SRC_DIR)/third_party  $(BUILD_DIR)/src/third_party
+#	$(COPY) $(TFLM_SRC_DIR)/third_party  $(BUILD_DIR)/src/third_party
+
+$(BUILD_DIR)/src:
+	@echo "Making BUILD_DIR"
+	@mkdir -p $(BUILD_DIR)/src
+
+.PHONY: tflite-micro-src
+tflite-micro-src: 
+	@echo "Copying tflite-micro files"
+	for d in $(TFLM_COPY_SRC_DIRS); do \
+		mkdir -p $(BUILD_DIR)/src/$$d; \
+		$(COPY) `find $(TFLM_SRC_DIR)/$$d $(TFLM_FIND_PARAMS)` $(BUILD_DIR)/src/$$d; \
+	done
+	$(COPY) $(TFLM_SRC_DIR)/tensorflow/lite/micro/kernels/conv_test* $(BUILD_DIR)/src/tensorflow/lite/micro/kernels
+	$(COPY) $(TFLM_SRC_DIR)/tensorflow/lite/micro/kernels/depthwise_conv_test* $(BUILD_DIR)/src/tensorflow/lite/micro/kernels
+	@for d in $(TFLM_COPY_DATA_DIRS); do \
+		mkdir -p $(BUILD_DIR)/src/$$d; \
+		$(COPY) `find $(TFLM_SRC_DIR)/$$d -maxdepth 1 -type f -regex '.*_data\.\(h\|cc\)'` $(BUILD_DIR)/src/$$d; \
+	done
+	$(COPY) $(TFLM_SRC_DIR)/tensorflow/lite/micro/examples/person_detection/model_settings* $(BUILD_DIR)/src/tensorflow/lite/micro/examples/person_detection
+
+	@echo "TfLM: downloading third_party files"
+	( cd $(TFLM_SRC_DIR); $(MAKE) -f $(TFLM_MAKE_DIR)/Makefile third_party_downloads )
+	@echo "TfLM: copying selected third_party files"
+	mkdir -p $(BUILD_DIR)/src/third_party/gemmlowp
+	$(COPY) $(TFLM_MAKE_DIR)/downloads/gemmlowp/fixedpoint $(BUILD_DIR)/src/third_party/gemmlowp
+	$(COPY) $(TFLM_MAKE_DIR)/downloads/gemmlowp/internal $(BUILD_DIR)/src/third_party/internal
+	mkdir -p $(BUILD_DIR)/src/third_party/flatbuffers/include
+	$(COPY) $(TFLM_MAKE_DIR)/downloads/flatbuffers/include/* $(BUILD_DIR)/src/third_party/flatbuffers/include
+	mkdir -p $(BUILD_DIR)/src/third_party/ruy/ruy/profiler
+	$(COPY) $(TFLM_MAKE_DIR)/downloads/ruy/ruy/profiler/instrumentation.h $(BUILD_DIR)/src/third_party/ruy/ruy/profiler
+	$(COPY) $(TFLM_MAKE_DIR)/downloads/person_model_int8/* $(BUILD_DIR)/src/tensorflow/lite/micro/examples/person_detection
+
 .PHONY: build-dir
-build-dir:
-	@echo Making BUILD_DIR
-	mkdir -p $(BUILD_DIR)/src
-	@# TFLM copied first due it having old/outdated copies of cfu.h etc
-	@# that need to be overwritten
-	$(COPY) $(TFLM_SRC_DIR)/*            $(BUILD_DIR)/src
+build-dir: $(BUILD_DIR)/src tflite-micro-src
+	@echo "build-dir: copying source to build dir"
 	$(COPY) $(COMMON_DIR)/*              $(BUILD_DIR)
 	$(COPY) $(MLCOMMONS_SRC_DIR)/*       $(BUILD_DIR)/src
 	$(COPY) $(SAXON_SRC_DIR)/riscv.h     $(BUILD_DIR)/src
@@ -175,7 +235,7 @@ build-dir:
 ifneq ($(wildcard $(COMMON_DIR)/_$(PLATFORM)/*),)
 	$(COPY) $(COMMON_DIR)/_$(PLATFORM)/* $(BUILD_DIR)
 endif
-
+	
 .PHONY: litex-software
 litex-software: $(CFU_VERILOG)
 	$(SOC_MK) litex-software
