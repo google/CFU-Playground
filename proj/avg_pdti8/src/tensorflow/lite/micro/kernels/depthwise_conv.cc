@@ -15,6 +15,7 @@ limitations under the License.
 
 #include "tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h"
 
+#include "perf.h"
 #include "tensorflow/lite/c/builtin_op_data.h"
 #include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/kernels/internal/common.h"
@@ -25,8 +26,6 @@ limitations under the License.
 #include "tensorflow/lite/kernels/kernel_util.h"
 #include "tensorflow/lite/kernels/padding.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
-
-#include "perf.h"
 
 namespace tflite {
 namespace {
@@ -94,8 +93,8 @@ TfLiteStatus CalculateOpData(TfLiteContext* context, TfLiteNode* node,
         context, input, filter, bias, output, params->activation,
         &data->output_multiplier, &data->output_shift,
         &data->output_activation_min, &data->output_activation_max,
-        data->per_channel_output_multiplier,
-        reinterpret_cast<int*>(data->per_channel_output_shift), num_channels);
+        data->per_channel_output_multiplier, data->per_channel_output_shift,
+        num_channels);
   }
   return kTfLiteOk;
 }
