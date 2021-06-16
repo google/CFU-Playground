@@ -17,6 +17,8 @@
 #ifndef CFU_PLAYGROUND_PERF_H_
 #define CFU_PLAYGROUND_PERF_H_
 
+#include "generated/soc.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -48,6 +50,7 @@ inline void perf_set_mcycle(unsigned cyc) {
 inline unsigned perf_get_counter(int counter_num) {
   unsigned count = 0;
 #ifndef NPROFILE
+#ifndef CONFIG_CPU_VARIANT_FOMU
   switch (counter_num) {
     case 0:
       asm volatile("csrr %0, 0xB04" : "=r"(count));
@@ -76,12 +79,14 @@ inline unsigned perf_get_counter(int counter_num) {
     default:;
   }
 #endif
+#endif
   return count;
 }
 
 inline unsigned perf_get_counter_enable(int counter_num) {
   unsigned en = 0;
 #ifndef NPROFILE
+#ifndef CONFIG_CPU_VARIANT_FOMU
   switch (counter_num) {
     case 0:
       asm volatile("csrr %0, 0xB05" : "=r"(en));
@@ -110,11 +115,13 @@ inline unsigned perf_get_counter_enable(int counter_num) {
     default:;
   }
 #endif
+#endif
   return en;
 }
 
 inline void perf_set_counter(int counter_num, unsigned count) {
 #ifndef NPROFILE
+#ifndef CONFIG_CPU_VARIANT_FOMU
   switch (counter_num) {
     case 0:
       asm volatile("csrw 0xB04, %0" ::"r"(count));
@@ -143,6 +150,7 @@ inline void perf_set_counter(int counter_num, unsigned count) {
     default:;
   }
 #endif
+#endif
 }
 
 inline void perf_set_counter_enable(int counter_num, unsigned en) {
@@ -150,6 +158,7 @@ inline void perf_set_counter_enable(int counter_num, unsigned en) {
     CFU_start_counts[counter_num]++;
   }
 #ifndef NPROFILE
+#ifndef CONFIG_CPU_VARIANT_FOMU
   switch (counter_num) {
     case 0:
       asm volatile("csrw 0xB05, %0" ::"r"(en));
@@ -177,6 +186,7 @@ inline void perf_set_counter_enable(int counter_num, unsigned en) {
       break;
     default:;
   }
+#endif
 #endif
 }
 
