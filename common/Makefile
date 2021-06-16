@@ -53,11 +53,12 @@ SHARED_FLAGS := \
 	-I$(SRC_DIR)/third_party/flatbuffers/include \
 	-I$(SRC_DIR)/third_party/ruy \
 	-I$(SRC_DIR)/third_party/kissfft \
+	-I$(SOC_SOFTWARE_DIR)/include \
 	-ffunction-sections \
 	-fdata-sections \
 	-fno-common \
 	-fomit-frame-pointer \
-    -ffreestanding \
+	-ffreestanding \
 	-Werror\
 	-Wsign-compare\
 	-Wdouble-promotion\
@@ -78,7 +79,6 @@ SHARED_FLAGS := \
 	
 CFLAGS  := \
 	$(SHARED_FLAGS)\
-	-I$(SOC_SOFTWARE_DIR)/include \
 	-I$(LITEX_DIR)/soc/software/include/base \
 	-I$(LITEX_DIR)/soc/software/include \
 	-I$(VEX_SRC_DIR) 
