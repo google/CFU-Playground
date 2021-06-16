@@ -13,48 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import argparse
-from board_specific_workflows import workflow_factory
-from litex.build.xilinx.vivado import vivado_build_args
-from litex.soc.integration.builder import builder_args
-from litex.soc.integration.soc_core import soc_core_args
+import importlib
+from board_specific_workflows import workflow_factory, parse_workflow_args
+from litex.soc.integration import soc
+from typing import Callable
+
+def get_soc_constructor(target: str) -> Callable[..., soc.LiteXSoC]:
+    """Returns the constructor for the target SoC from litex-boards module."""
+    try:
+        module = importlib.import_module(f'litex_boards.targets.{target}')
+    except:
+        raise ModuleNotFoundError(f'Could not load {target} target.')
+    return module.BaseSoC
 
 
 def main():
-    parser = argparse.ArgumentParser(description="LiteX SoC")
-    parser.add_argument("--build", action="store_true", help="Build bitstream")
-    parser.add_argument("--load", action="store_true", help="Load bitstream")
-    parser.add_argument(
-        "--toolchain",
-        help=
-        "Specify toolchain for implementing gateware ('vivado' or 'symbiflow')"
-    )
-    builder_args(parser)
-    soc_core_args(parser)
-    vivado_build_args(parser)
-    parser.add_argument("--with-ethernet",
-                        action="store_true",
-                        help="Enable Ethernet support")
-    parser.add_argument("--with-etherbone",
-                        action="store_true",
-                        help="Enable Etherbone support")
-    parser.add_argument("--with-mapped-flash",
-                        action="store_true",
-                        help="Add litespi SPI flash")
-    parser.add_argument("--target",
-                        default="digilent_arty",
-                        help="Specify target board")
-    parser.set_defaults(csr_csv='csr.csv',
-                        uart_name='serial',
-                        uart_baudrate=921600,
-                        cpu_variant='full+cfu+debug',
-                        with_etherbone=False)
-
-    args = parser.parse_args()
+    args = parse_workflow_args()
     assert not (args.with_ethernet and args.with_etherbone)
 
-    soc_workflow = workflow_factory(args.target)(args)
-    soc_workflow.run()
+    soc_workflow = workflow_factory(args.target)
+    soc_workflow(args, get_soc_constructor(args.target)).run()
 
 
 if __name__ == "__main__":
