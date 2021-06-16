@@ -19,7 +19,7 @@ CFU_ROOT=$(dirname $(realpath ${BASH_SOURCE[0]}))
 # We deliberately clear anything that may have already been in PYTHONPATH to
 # prevent accidentally pulling in anything outside this project.
 PYTHONPATH="${CFU_ROOT}/python"
-for i in "${CFU_ROOT}/third_party/python"/* "${CFU_ROOT}/python/"*; do
+for i in "${CFU_ROOT}/third_party/python"/* "${CFU_ROOT}/python/"* "${CFU_ROOT}/soc/"*; do
     # Avoid adding files such as README.md to our path
     if [ -d "$i/src" ]; then
         PYTHONPATH="${PYTHONPATH}:${i}/src"

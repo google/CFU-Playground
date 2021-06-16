@@ -26,7 +26,7 @@ DEFINES += NDEBUG
 #DEFINES += NPROFILE
 
 # Uncomment to include pdti8 in built binary
-#DEFINES += INCLUDE_MODEL_PDTI8
+DEFINES += INCLUDE_MODEL_PDTI8
 
 # Uncomment to include micro_speech in built binary
 #DEFINES += INCLUDE_MODEL_MICRO_SPEECH
