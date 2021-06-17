@@ -21,7 +21,6 @@
 
 #include "perf.h"
 #include "tensorflow/lite/kernels/internal/reference/integer_ops/conv.h"
-#include "tf_util/print_params.h"
 
 // raw 1x1 inputs and output as dumped from reference implmentation
 static const uint8_t raw_1x1_conv_params[] = {

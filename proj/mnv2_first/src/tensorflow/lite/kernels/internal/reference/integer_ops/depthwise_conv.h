@@ -16,7 +16,7 @@ limitations under the License.
 #define TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_DEPTHWISE_CONV_H_
 
 #include "tensorflow/lite/kernels/internal/common.h"
-#include "tf_util/print_params.h"
+#include "playground_util/print_params.h"
 
 namespace tflite
 {

@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "mnv2_cfu.h"
 #include "perf.h"
-#include "tf_util/print_params.h"
+#include "playground_util/print_params.h"
 
 #ifdef SHOW_CONV_PERF
 #define PERF_START(n) perf_enable_counter(n)

@@ -20,7 +20,7 @@ limitations under the License.
 #include "tensorflow/lite/kernels/internal/common.h"
 #include "tensorflow/lite/kernels/internal/types.h"
 
-#include "tf_util/print_params.h"
+#include "playground_util/print_params.h"
 
 namespace tflite
 {
