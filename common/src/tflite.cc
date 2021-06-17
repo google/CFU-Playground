@@ -22,7 +22,7 @@
 #include "tensorflow/lite/micro/micro_profiler.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 
-#ifdef SHOW_MEMORY_USE
+#ifdef TF_LITE_SHOW_MEMORY_USE
 #include "tensorflow/lite/micro/recording_micro_interpreter.h"
 #define INTERPRETER_TYPE RecordingMicroInterpreter
 #else
@@ -171,6 +171,10 @@ void tflite_load_model(const unsigned char* model_data) {
     return;
   }
 
+#ifdef TF_LITE_SHOW_MEMORY_USE
+  interpreter->GetMicroAllocator().PrintAllocations();
+#endif
+
   // Get information about the memory area to use for the model's input.
   auto input = interpreter->input(0);
   auto dims = input->dims;
@@ -179,6 +183,7 @@ void tflite_load_model(const unsigned char* model_data) {
     printf(" %d", dims->data[ii]);
   }
   puts("\n");
+
 }
 
 void tflite_set_input_zeros() {
@@ -229,13 +234,6 @@ void tflite_classify() {
   perf_print_value(cyc);
   printf(" cycles total\n");
 
-  // Uncomment to see how large the arena needs to be.
-
-#ifdef SHOW_MEMORY_USE
-  interpreter->GetMicroAllocator().PrintAllocations();
-#endif
-  printf("Arena used bytes: %llu\n",
-         (long long unsigned)(interpreter->arena_used_bytes()));
 }
 
 int8_t* get_input() { return interpreter->input(0)->data.int8; }
