@@ -3,13 +3,15 @@
 	url = https://github.com/m-labs/migen.git
 [submodule "soc/deps/litex"]
 	path = third_party/python/litex
-	url = https://github.com/tcal-x/litex.git
+	url = https://github.com/antmicro/litex.git
+	branch = counter
 [submodule "soc/deps/litedram"]
 	path = third_party/python/litedram
 	url = https://github.com/enjoy-digital/litedram.git
 [submodule "soc/deps/litex_boards"]
 	path = third_party/python/litex_boards
-	url = https://github.com/litex-hub/litex-boards.git
+	url = https://github.com/antmicro/litex-boards.git
+	branch = lattice_litespi
 [submodule "soc/deps/liteeth"]
 	path = third_party/python/liteeth
 	url = https://github.com/enjoy-digital/liteeth.git
@@ -48,7 +50,8 @@
 	url = https://chromium.googlesource.com/external/coreboot.org/flashrom
 [submodule "third_party/python/litespi"]
 	path = third_party/python/litespi
-	url = https://github.com/litex-hub/litespi.git
+	url = https://github.com/antmicro/litespi.git
+	branch = lattice_mem
 [submodule "third_party/tflite-micro"]
 	path = third_party/tflite-micro
 	url = https://github.com/tensorflow/tflite-micro.git
