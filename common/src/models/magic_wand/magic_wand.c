@@ -34,7 +34,9 @@ typedef struct {
 
 // Initialize everything once
 // deallocate tensors when done
-static void magic_wand_init(void) { tflite_load_model(model_magic_wand); }
+static void magic_wand_init(void) {
+  tflite_load_model(model_magic_wand, model_magic_wand_len);
+}
 
 // Run classification, after input has been loaded
 MagicWandResult magic_wand_classify() {

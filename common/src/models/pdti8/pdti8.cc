@@ -26,7 +26,9 @@
 
 // Initialize everything once
 // deallocate tensors when done
-static void pdti8_init(void) { tflite_load_model(model_pdti8); }
+static void pdti8_init(void) {
+  tflite_load_model(model_pdti8, model_pdti8_len);
+}
 
 // Run classification, after input has been loaded
 static int32_t pdti8_classify() {

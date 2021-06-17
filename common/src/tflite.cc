@@ -145,7 +145,7 @@ static void tflite_init() {
   profiler = &micro_profiler;
 }
 
-void tflite_load_model(const unsigned char* model_data) {
+void tflite_load_model(const unsigned char* model_data, unsigned int model_length) {
   tflite_init();
   if (interpreter) {
     interpreter->~INTERPRETER_TYPE();

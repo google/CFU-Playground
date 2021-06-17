@@ -65,7 +65,9 @@ struct {
     {quant_truck, {-128, -128, -128, -128, -128, -128, -128, -128, -128, 127}},
 };
 
-static void imgc_init(void) { tflite_load_model(pretrainedResnet_quant); }
+static void imgc_init(void) {
+  tflite_load_model(pretrainedResnet_quant, pretrainedResnet_quant_len);
+}
 
 V01ImageClassificationResult image_classify() {
   printf("Running imgc\n");
