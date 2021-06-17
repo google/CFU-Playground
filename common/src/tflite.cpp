@@ -59,13 +59,47 @@ tflite::MicroProfiler* profiler = nullptr;
 const tflite::Model* model = nullptr;
 tflite::INTERPRETER_TYPE* interpreter = nullptr;
 
-// An area of memory to use for input, output, and intermediate arrays.
-// constexpr int kTensorArenaSize = 136 * 1024;
-#if defined(INCLUDE_MODEL_MNV2) || defined(INLCUDE_MODEL_MLCOMMONS_TINY_V01_VWW)
-constexpr int kTensorArenaSize = 800 * 1024;
-#else
-constexpr int kTensorArenaSize = 81 * 1024;
+// C++ 11 does not have a constexpr std::max.
+// For this reason, a small implementation is written.
+template <typename T>
+constexpr T const& const_max(const T& x) {
+  return x;
+}
+
+template <typename T, typename... Args>
+constexpr T const& const_max(const T& x, const T& y, const Args&... rest) {
+  return const_max(x > y ? x : y, rest...);
+}
+
+// Get the smallest kTensorArenaSize possible.
+constexpr int kTensorArenaSize = const_max<int>(
+#ifdef INCLUDE_MODEL_PDTI8
+    81 * 1024,
 #endif
+#ifdef INCLUDE_MODEL_MICRO_SPEECH
+    7 * 1024,
+#endif
+#ifdef INCLUDE_MODEL_MAGIC_WAND
+    5 * 1024,
+#endif
+#ifdef INCLUDE_MODEL_MNV2
+    800 * 1024,
+#endif
+#ifdef INLCUDE_MODEL_MLCOMMONS_TINY_V01_ANOMD
+    3 * 1024,
+#endif
+#ifdef INLCUDE_MODEL_MLCOMMONS_TINY_V01_IMGC
+    53 * 1024,
+#endif
+#ifdef INLCUDE_MODEL_MLCOMMONS_TINY_V01_KWS
+    23 * 1024,
+#endif
+#ifdef INLCUDE_MODEL_MLCOMMONS_TINY_V01_VWW
+    99 * 1024,
+#endif
+    0 /* When no models defined, we don't need a tensor arena. */
+);
+
 static uint8_t tensor_arena[kTensorArenaSize];
 }  // namespace
 
