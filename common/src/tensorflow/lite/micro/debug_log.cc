@@ -37,7 +37,9 @@ limitations under the License.
 #include "tensorflow/lite/micro/debug_log.h"
 
 #ifndef TF_LITE_STRIP_ERROR_STRINGS
-#include <cstdio>
+// CFU-Playground: this function declared in includes/base/console.h
+// but that file is not friendly to C++.
+extern "C" void putsnonl(const char *s);
 #endif
 
 extern "C" void DebugLog(const char* s) {
@@ -47,6 +49,6 @@ extern "C" void DebugLog(const char* s) {
   // via TF_LITE_CHECK that are not stubbed out by TF_LITE_REPORT_ERROR.
 
   // CFU-Playground: put to stdout
-  puts(s);
+  putsnonl(s);
 #endif
 }
