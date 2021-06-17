@@ -27,6 +27,7 @@ from litex.soc.cores.spi_flash import SpiFlash
 from litex.soc.cores.bitbang import I2CMaster
 
 from litex.build.lattice.radiant import radiant_build_args, radiant_build_argdict
+from litex.build.lattice.oxide import oxide_args, oxide_argdict
 
 from litespi.modules import GD25LQ128D
 from litespi.opcodes import SpiNorFlashOpCodes as Codes
@@ -187,6 +188,7 @@ class HpsSoC(LiteXSoC):
 def hps_soc_args(parser: argparse.ArgumentParser):
     builder_args(parser)
     radiant_build_args(parser)
+    oxide_args(parser)
 
 def create_builder(soc, args):
     builder = Builder(soc, **builder_argdict(args))
@@ -235,7 +237,11 @@ def main():
         
 
     builder = create_builder(soc, args)
-    builder_kwargs = radiant_build_argdict(args) if args.toolchain == "radiant" else {}
+    builder_kwargs = {}
+    if args.toolchain == "radiant":
+        builder_kwargs.update(radiant_build_argdict(args))
+    elif args.toolchain == "oxide":
+        builder_kwargs.update(oxide_argdict(args))
     vns = builder.build(**builder_kwargs, run=args.build)
     soc.do_exit(vns)
 
