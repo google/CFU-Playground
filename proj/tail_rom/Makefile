@@ -14,7 +14,7 @@
 # limitations under the License.
 
 # This variable lists symbols to define to the C preprocessor
-export DEFINES :=
+export DEFINES := TF_LITE_SHOW_MEMORY_USE
 
 # Uncomment this line to use software defined CFU functions in software_cfu.cc
 #DEFINES += CFU_SOFTWARE_DEFINED
@@ -35,7 +35,7 @@ DEFINES += INCLUDE_MODEL_PDTI8
 #DEFINES += INCLUDE_MODEL_MAGIC_WAND
 
 # Uncomment to include mnv2 in built binary (adds ~500kB to binary)
-#DEFINES += INCLUDE_MODEL_MNV2
+DEFINES += INCLUDE_MODEL_MNV2
 
 # Uncomment to include  mlcommons tiny v0.1 v0.1 anomaly detection in built binary
 #DEFINES += INLCUDE_MODEL_MLCOMMONS_TINY_V01_ANOMD
