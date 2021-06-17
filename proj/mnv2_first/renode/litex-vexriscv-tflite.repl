@@ -25,6 +25,9 @@ cpu: CPU.VexRiscv @ sysbus
         RegisterCustomCSR "BPM" 0xB13  User
         RegisterCustomCSR "BPM" 0xB14  User
         RegisterCustomCSR "BPM" 0xB15  User
+        RegisterCustomCSR "BPM" 0xCC4  User
+        RegisterCustomCSR "BPM" 0xCC8  User
+        RegisterCustomCSR "BPM" 0xCCC  User
 
 
 uart: UART.LiteX_UART @ {

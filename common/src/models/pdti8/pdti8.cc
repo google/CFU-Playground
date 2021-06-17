@@ -19,6 +19,7 @@
 #include <stdio.h>
 
 #include "menu.h"
+#include "metrics.h"
 #include "models/pdti8/model_pdti8.h"
 #include "tensorflow/lite/micro/examples/person_detection/no_person_image_data.h"
 #include "tensorflow/lite/micro/examples/person_detection/person_image_data.h"
@@ -31,7 +32,9 @@ static void pdti8_init(void) { tflite_load_model(model_pdti8); }
 // Run classification, after input has been loaded
 static int32_t pdti8_classify() {
   printf("Running pdti8\n");
+  DCACHE_SETUP_METRICS;
   tflite_classify();
+  DCACHE_PRINT_METRICS;
 
   // Process the inference results.
   int8_t* output = tflite_get_output();

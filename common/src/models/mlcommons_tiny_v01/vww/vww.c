@@ -19,6 +19,7 @@
 #include <stdio.h>
 
 #include "menu.h"
+#include "metrics.h"
 #include "models/mlcommons_tiny_v01/vww/test_data/quant_test_no_0.h"
 #include "models/mlcommons_tiny_v01/vww/test_data/quant_test_no_1.h"
 #include "models/mlcommons_tiny_v01/vww/test_data/quant_test_yes_0.h"
@@ -42,7 +43,9 @@ static void vww_init(void) { tflite_load_model(vww_96_int8); }
 
 int32_t vww_classify() {
   printf("Running vww\n");
+  DCACHE_SETUP_METRICS;
   tflite_classify();
+  DCACHE_PRINT_METRICS;
 
   int8_t* output = tflite_get_output();
   return (int32_t)output[1] - output[0];

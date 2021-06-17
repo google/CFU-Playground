@@ -19,6 +19,7 @@
 #include <stdio.h>
 
 #include "menu.h"
+#include "metrics.h"
 #include "models/mlcommons_tiny_v01/kws/test_data/down_0.h"
 #include "models/mlcommons_tiny_v01/kws/test_data/go_1.h"
 #include "models/mlcommons_tiny_v01/kws/test_data/left_2.h"
@@ -87,7 +88,9 @@ static void kws_init(void) { tflite_load_model(kws_ref_model); }
 
 V01KeywordSpottingResult kws_classify() {
   printf("Running kws\n");
+  DCACHE_SETUP_METRICS;
   tflite_classify();
+  DCACHE_PRINT_METRICS;
 
   int8_t* output = tflite_get_output();
   return (V01KeywordSpottingResult){

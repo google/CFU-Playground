@@ -19,6 +19,7 @@
 #include <stdio.h>
 
 #include "menu.h"
+#include "metrics.h"
 #include "models/micro_speech/model_micro_speech.h"
 #include "tensorflow/lite/micro/examples/micro_speech/micro_features/no_micro_features_data.h"
 #include "tensorflow/lite/micro/examples/micro_speech/micro_features/yes_micro_features_data.h"
@@ -39,7 +40,9 @@ static void micro_speech_init(void) { tflite_load_model(model_micro_speech); }
 // Run classification, after input has been loaded
 MicroSpeechResult micro_speech_classify() {
   printf("Running micro_speech\n");
+  DCACHE_SETUP_METRICS;
   tflite_classify();
+  DCACHE_PRINT_METRICS;
 
   // Process the inference results.
   int8_t* output = tflite_get_output();

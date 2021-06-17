@@ -24,7 +24,7 @@
 	url = https://github.com/litex-hub/pythondata-software-compiler_rt.git
 [submodule "soc/deps/pythondata_cpu_vexriscv"]
 	path = third_party/python/pythondata_cpu_vexriscv
-	url = https://github.com/tcal-x/pythondata-cpu-vexriscv.git
+	url = https://github.com/antmicro/VexRiscv-verilog.git
 [submodule "third_party/python/nmigen"]
 	path = third_party/python/nmigen
 	url = https://github.com/nmigen/nmigen

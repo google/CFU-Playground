@@ -19,6 +19,7 @@
 #include <stdio.h>
 
 #include "menu.h"
+#include "metrics.h"
 #include "models/mlcommons_tiny_v01/imgc/test_data/quant_airplane.h"
 #include "models/mlcommons_tiny_v01/imgc/test_data/quant_bird.h"
 #include "models/mlcommons_tiny_v01/imgc/test_data/quant_car.h"
@@ -69,7 +70,9 @@ static void imgc_init(void) { tflite_load_model(pretrainedResnet_quant); }
 
 V01ImageClassificationResult image_classify() {
   printf("Running imgc\n");
+  DCACHE_SETUP_METRICS;
   tflite_classify();
+  DCACHE_PRINT_METRICS;
 
   int8_t* output = tflite_get_output();
   return (V01ImageClassificationResult){

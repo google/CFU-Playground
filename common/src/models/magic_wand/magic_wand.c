@@ -19,6 +19,7 @@
 #include <stdio.h>
 
 #include "menu.h"
+#include "metrics.h"
 #include "models/magic_wand/model_magic_wand.h"
 #include "tensorflow/lite/micro/examples/magic_wand/ring_micro_features_data.h"
 #include "tensorflow/lite/micro/examples/magic_wand/slope_micro_features_data.h"
@@ -39,7 +40,9 @@ static void magic_wand_init(void) { tflite_load_model(model_magic_wand); }
 // Run classification, after input has been loaded
 MagicWandResult magic_wand_classify() {
   printf("Running magic_wand\n");
+  DCACHE_SETUP_METRICS;
   tflite_classify();
+  DCACHE_PRINT_METRICS;
 
   // Process the inference results.
   float* output = tflite_get_output_float();
