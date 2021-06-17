@@ -15,6 +15,7 @@
 #include "tflite.h"
 
 #include "perf.h"
+#include "proj_tflite.h"
 #include "tensorflow/lite/micro/all_ops_resolver.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
@@ -145,8 +146,10 @@ static void tflite_init() {
   profiler = &micro_profiler;
 }
 
-void tflite_load_model(const unsigned char* model_data, unsigned int model_length) {
+void tflite_load_model(const unsigned char* model_data,
+                       unsigned int model_length) {
   tflite_init();
+  tflite_preload(model_data, model_length);
   if (interpreter) {
     interpreter->~INTERPRETER_TYPE();
     interpreter = nullptr;
@@ -183,7 +186,6 @@ void tflite_load_model(const unsigned char* model_data, unsigned int model_lengt
     printf(" %d", dims->data[ii]);
   }
   puts("\n");
-
 }
 
 void tflite_set_input_zeros() {
@@ -233,7 +235,6 @@ void tflite_classify() {
   perf_print_all_counters();
   perf_print_value(cyc);
   printf(" cycles total\n");
-
 }
 
 int8_t* get_input() { return interpreter->input(0)->data.int8; }
