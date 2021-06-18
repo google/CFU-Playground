@@ -22,7 +22,9 @@
 // Empty hooks to be overridden per-project
 void tflite_preload(const unsigned char* model_data,
                     unsigned int model_length) {
-  // Begin capturing for this model
+  // Begin capturing for this model, if eabled by preprocessor define.
+#ifdef TAIL_CAPTURE
   calculate_once::capturer.Enable(true);
+#endif
   calculate_once::capturer.Reset(model_data, model_length);
 }

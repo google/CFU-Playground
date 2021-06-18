@@ -14,7 +14,7 @@
 # limitations under the License.
 
 # This variable lists symbols to define to the C preprocessor
-export DEFINES := TF_LITE_SHOW_MEMORY_USE
+export DEFINES := TF_LITE_SHOW_MEMORY_USE TAIL_CAPTURE
 
 # Uncomment this line to use software defined CFU functions in software_cfu.cc
 #DEFINES += CFU_SOFTWARE_DEFINED
