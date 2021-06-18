@@ -13,47 +13,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-// Reference implementation of timer functions.  Platforms are not required to
-// implement these timer methods, but they are required to enable profiling.
-
-// On platforms that have a POSIX stack or C library, it can be written using
-// methods from <sys/time.h> or clock() from <time.h>.
-
-// To add an equivalent function for your own platform, create your own
-// implementation file, and place it in a subfolder with named after the OS
-// you're targeting. For example, see the Cortex M bare metal version in
-// tensorflow/lite/micro/bluepill/micro_time.cc or the mbed one on
-// tensorflow/lite/micro/mbed/micro_time.cc.
-
 #include "tensorflow/lite/micro/micro_time.h"
 
-#if defined(TF_LITE_USE_CTIME)
-#include <ctime>
-#endif
+static inline unsigned get_mcycle() {
+  unsigned result;
+  asm volatile("csrr %0, mcycle" : "=r"(result));
+  return result;
+}
+
+static inline void set_mcycle(unsigned cyc) {
+  asm volatile("csrw mcycle, %0" ::"r"(cyc));
+}
 
 namespace tflite {
 
-#if !defined(TF_LITE_USE_CTIME)
+// Assumes 100 MHz
+int32_t ticks_per_second() { return 100000000; }
 
-// Reference implementation of the ticks_per_second() function that's required
-// for a platform to support Tensorflow Lite for Microcontrollers profiling.
-// This returns 0 by default because timing is an optional feature that builds
-// without errors on platforms that do not need it.
-int32_t ticks_per_second() { return 0; }
-
-// Reference implementation of the GetCurrentTimeTicks() function that's
-// required for a platform to support Tensorflow Lite for Microcontrollers
-// profiling. This returns 0 by default because timing is an optional feature
-// that builds without errors on platforms that do not need it.
-int32_t GetCurrentTimeTicks() { return 0; }
-
-#else  // defined(TF_LITE_USE_CTIME)
-
-// For platforms that support ctime, we implment the micro_time interface in
-// this central location.
-int32_t ticks_per_second() { return CLOCKS_PER_SEC; }
-
-int32_t GetCurrentTimeTicks() { return clock(); }
-#endif
+// WARNING (from tcal) -- very susceptible to wrap-around (happens every 40s)
+//   --> need to get mcycleh, and shift/divide down
+//
+int32_t GetCurrentTimeTicks() { return (int32_t)get_mcycle(); }
 
 }  // namespace tflite
