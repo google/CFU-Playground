@@ -54,12 +54,10 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: '3.7'
-
     - name: Setup environment
       run: bash scripts/setup -ci
     - name: Build sample
       run: pwd && source environment && cd proj/proj_template && make  -j8 software && cp build/software.elf renode/
-
     - name: Run tests
       uses: antmicro/renode-actions/test-in-renode@main
       with:
@@ -73,7 +71,6 @@ jobs:
           report.html
           log.html
           robot_output.xml
-
   mnv2_first-litex:
     runs-on: ubuntu-20.04
     steps:
@@ -95,12 +92,10 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: '3.7'
-
     - name: Setup environment
       run: bash scripts/setup -ci
     - name: Build sample
       run: pwd && source environment && cd proj/mnv2_first && make SW_ONLY=1 -j8 software && cp build/software.elf renode/
-
     - name: Run tests
       uses: antmicro/renode-actions/test-in-renode@main
       with:
@@ -114,7 +109,6 @@ jobs:
           report.html
           log.html
           robot_output.xml
-
   mnv2_first-hps:
     runs-on: ubuntu-20.04
     steps:
@@ -136,12 +130,10 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: '3.7'
-
     - name: Setup environment
       run: bash scripts/setup -ci
     - name: Build sample
       run: pwd && source environment && cd proj/mnv2_first && make SW_ONLY=1 PLATFORM=hps -j8 software && cp build/software.elf renode/
-
     - name: Run tests
       uses: antmicro/renode-actions/test-in-renode@main
       with:
