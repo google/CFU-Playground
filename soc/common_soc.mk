@@ -36,6 +36,7 @@ PROJ_DIR:=  $(CFU_ROOT)/proj/$(PROJ)
 CFU_V:=     $(PROJ_DIR)/cfu.v
 CFU_ARGS:=  --cpu-cfu $(CFU_V)
 TARGET_ARGS:= --target $(TARGET)
+SOFTWARE_ARGS:= --software-load --software-path $(PROJ_DIR)/build/software.bin
 
 SOC_NAME:=  $(TARGET).$(PROJ)
 OUT_DIR:=   build/$(SOC_NAME)
@@ -56,7 +57,7 @@ TARGET_RUN:=  MAKEFLAGS=-j8 $(PYRUN) ./common_soc.py $(LITEX_ARGS)
 BIOS_BIN := $(OUT_DIR)/software/bios/bios.bin
 BITSTREAM:= $(OUT_DIR)/gateware/$(TARGET).bit
 
-.PHONY: bitstream litex-software prog clean check-timing
+.PHONY: bitstream litex-software load_hook prog clean check-timing
 
 bitstream: $(BITSTREAM) check-timing
 
@@ -76,6 +77,9 @@ else
 check-timing:
 	@echo Timing check performed only for Vivado.
 endif
+
+load_hook:
+	$(TARGET_RUN) $(SOFTWARE_ARGS)
 
 prog: $(BITSTREAM) check-timing
 	@echo Loading bitstream onto board
