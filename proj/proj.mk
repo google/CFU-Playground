@@ -232,8 +232,9 @@ build-dir: $(BUILD_DIR)/src tflite-micro-src
 	$(COPY) $(SAXON_SRC_DIR)/riscv.h     $(BUILD_DIR)/src
 	$(COPY) $(SRC_DIR)/*                 $(BUILD_DIR)/src
 	$(RM)			             $(BUILD_DIR)/_*
-ifneq ($(wildcard $(COMMON_DIR)/_$(PLATFORM)/*),)
-	$(COPY) $(COMMON_DIR)/_$(PLATFORM)/* $(BUILD_DIR)
+# Overlay platform / target specific changes.
+ifneq ($(wildcard $(COMMON_DIR)/_$(PLATFORM)/$(TARGET)/*),)
+	$(COPY) $(COMMON_DIR)/_$(PLATFORM)/$(TARGET)/* $(BUILD_DIR)
 endif
 	
 .PHONY: litex-software
@@ -272,6 +273,9 @@ connect:
 else
 load: $(SOFTWARE_BIN)
 	@echo Running interactively on FPGA Board
+# Load hook allows common_soc.py to provide board-specific changes to load.
+# This isn't ideal, the logic is starting to get too voluminous for a Makefile.
+	$(SOC_MK) load_hook
 	$(LXTERM) --speed $(UART_SPEED) $(CRC) --kernel $(SOFTWARE_BIN) $(TTY)
 endif
 

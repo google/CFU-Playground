@@ -112,3 +112,13 @@ class GeneralSoCWorkflow():
         soc_builder = self.build_soc(soc)
         if self.args.load:
             self.load(soc, soc_builder)
+
+    def software_load(self, filename: str) -> None:
+        """Perform software loading procedures.
+        
+        For boards that use serialboot, this can be a no-op.
+
+        Args:
+            filename: The name of the software file to load on the board.
+        """
+        pass  # Most boards can use serialboot.
