@@ -39,7 +39,7 @@ void Capturer::Capture(const int32_t* data, size_t num_words) {
 
   printf(CAPTURE_BEGIN);
   printf("captured.SetBuffer(%d, int32_t[] {", sequence_counter_);
-  dump_hex(reinterpret_cast<const uint8_t*>(data), num_words * 4);
+  dump_hex(data, num_words);
   printf("}, %d)", num_words);
   printf(CAPTURE_END);
   sequence_counter_++;
