@@ -209,12 +209,16 @@ float* tflite_get_output_float() { return interpreter->output(0)->data.f; }
 
 void tflite_classify() {
   // Run the model on this input and make sure it succeeds.
+  profiler->ClearEvents();
   perf_reset_all_counters();
   perf_set_mcycle(0);
   if (kTfLiteOk != interpreter->Invoke()) {
     TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed.");
   }
   unsigned int cyc = perf_get_mcycle();
+#ifndef NPROFILE
+  profiler->Log();
+#endif
   perf_print_all_counters();
   perf_print_value(cyc);
   printf(" cycles total\n");
