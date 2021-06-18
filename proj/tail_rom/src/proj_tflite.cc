@@ -12,14 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "playground_util/murmurhash.h"
 #include "proj_tflite.h"
 
 #include <cstdio>
 
+#include "calc_once_data.h"
+#include "playground_util/murmurhash.h"
+
 // Empty hooks to be overridden per-project
 void tflite_preload(const unsigned char* model_data,
                     unsigned int model_length) {
-  printf("length: %u\n", model_length);
-  printf("hash: %08lx\n", murmurhash3_32(model_data, model_length));
+  // Begin capturing for this model
+  CalculateOnce::capturer.Enable(true);
+  CalculateOnce::capturer.Reset(model_data, model_length);
 }
