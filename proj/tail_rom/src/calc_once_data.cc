@@ -19,32 +19,32 @@
 #include "playground_util/dump.h"
 #include "playground_util/murmurhash.h"
 
-#define CAPTURE_BEGIN "\n+++ CalculateOnce Capture begin +++\n"
-#define CAPTURE_END "+++ CalculateOnce Capture end +++\n"
+#define CAPTURE_BEGIN "\n+++ calculate_once Capture begin +++\n"
+#define CAPTURE_END "+++ calculate_once Capture end +++\n"
 
-namespace CalculateOnce {
+namespace calculate_once {
 
 // Reset this this object
 void Capturer::Reset(const unsigned char* model_data,
                      unsigned int model_length) {
-                         if (!enabled) {return;}
+                         if (!enabled_) {return;}
   printf(CAPTURE_BEGIN "captured.SetHash(0x%08lx);\n" CAPTURE_END,
          murmurhash3_32(model_data, model_length));
-  sequence_counter = 0;
+  sequence_counter_ = 0;
 }
 
 // Capture an area of memory
 void Capturer::Capture(const int32_t* data, size_t num_words) {
-                         if (!enabled) {return;}
+                         if (!enabled_) {return;}
 
   printf(CAPTURE_BEGIN);
-  printf("captured.SetBuffer(%d, int32_t[] {", sequence_counter);
+  printf("captured.SetBuffer(%d, int32_t[] {", sequence_counter_);
   dump_hex(reinterpret_cast<const uint8_t*>(data), num_words * 4);
   printf("}, %d)", num_words);
   printf(CAPTURE_END);
-  sequence_counter++;
+  sequence_counter_++;
 }
 
 Capturer capturer;
 
-}  // namespace CalculateOnce
+}  // namespace calculate_once

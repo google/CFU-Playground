@@ -23,6 +23,6 @@
 void tflite_preload(const unsigned char* model_data,
                     unsigned int model_length) {
   // Begin capturing for this model
-  CalculateOnce::capturer.Enable(true);
-  CalculateOnce::capturer.Reset(model_data, model_length);
+  calculate_once::capturer.Enable(true);
+  calculate_once::capturer.Reset(model_data, model_length);
 }

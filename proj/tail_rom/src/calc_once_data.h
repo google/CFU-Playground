@@ -21,12 +21,12 @@
 // Functions to support capturing, storing and returning data that can be
 // calculated once and placed into ROM.
 
-namespace CalculateOnce {
+namespace calculate_once {
 
 // The capturer outputs (via printf) each permanent data buffer
 class Capturer {
  public:
-  Capturer() : enabled(false), sequence_counter(0){};
+  Capturer() : enabled_(false), sequence_counter_(0){};
   virtual ~Capturer(){};
 
   // Reset this this object
@@ -36,17 +36,18 @@ class Capturer {
   void Capture(const int32_t* data, size_t num_words);
 
   // Enable or Disable
-  void Enable(bool enable) { enabled = enable; }
+  void Enable(bool enable) { enabled_ = enable; }
 
  private:
   // Whether capturing is happening
-  bool enabled;
+  bool enabled_;
 
   // The sequence of capturing.
-  int sequence_counter;
+  int sequence_counter_;
 };
 
 extern Capturer capturer;
-}  // namespace CalculateOnce
+
+}  // namespace calculate_once
 
 #endif  // _CALC_ONCE_DATA_H
