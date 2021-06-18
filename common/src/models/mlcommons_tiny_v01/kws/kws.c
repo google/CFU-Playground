@@ -83,7 +83,9 @@ struct {
      {-128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, 127}},
 };
 
-static void kws_init(void) { tflite_load_model(kws_ref_model); }
+static void kws_init(void) {
+  tflite_load_model(kws_ref_model, kws_ref_model_len);
+}
 
 V01KeywordSpottingResult kws_classify() {
   printf("Running kws\n");

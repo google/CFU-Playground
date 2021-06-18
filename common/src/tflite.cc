@@ -15,6 +15,7 @@
 #include "tflite.h"
 
 #include "perf.h"
+#include "proj_tflite.h"
 #include "tensorflow/lite/micro/all_ops_resolver.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
@@ -22,7 +23,7 @@
 #include "tensorflow/lite/micro/micro_profiler.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 
-#ifdef SHOW_MEMORY_USE
+#ifdef TF_LITE_SHOW_MEMORY_USE
 #include "tensorflow/lite/micro/recording_micro_interpreter.h"
 #define INTERPRETER_TYPE RecordingMicroInterpreter
 #else
@@ -145,8 +146,10 @@ static void tflite_init() {
   profiler = &micro_profiler;
 }
 
-void tflite_load_model(const unsigned char* model_data) {
+void tflite_load_model(const unsigned char* model_data,
+                       unsigned int model_length) {
   tflite_init();
+  tflite_preload(model_data, model_length);
   if (interpreter) {
     interpreter->~INTERPRETER_TYPE();
     interpreter = nullptr;
@@ -170,6 +173,10 @@ void tflite_load_model(const unsigned char* model_data) {
     TF_LITE_REPORT_ERROR(error_reporter, "AllocateTensors() failed");
     return;
   }
+
+#ifdef TF_LITE_SHOW_MEMORY_USE
+  interpreter->GetMicroAllocator().PrintAllocations();
+#endif
 
   // Get information about the memory area to use for the model's input.
   auto input = interpreter->input(0);
@@ -228,14 +235,6 @@ void tflite_classify() {
   perf_print_all_counters();
   perf_print_value(cyc);
   printf(" cycles total\n");
-
-  // Uncomment to see how large the arena needs to be.
-
-#ifdef SHOW_MEMORY_USE
-  interpreter->GetMicroAllocator().PrintAllocations();
-#endif
-  printf("Arena used bytes: %llu\n",
-         (long long unsigned)(interpreter->arena_used_bytes()));
 }
 
 int8_t* get_input() { return interpreter->input(0)->data.int8; }

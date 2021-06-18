@@ -19,7 +19,7 @@ limitations under the License.
 #include "ruy/profiler/instrumentation.h" // from @ruy
 #include "tensorflow/lite/kernels/internal/common.h"
 
-#include "tf_util/print_params.h"
+#include "playground_util/print_params.h"
 
 namespace tflite
 {

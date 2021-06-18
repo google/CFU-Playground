@@ -40,7 +40,9 @@ struct golden_test golden_tests[] = {
 };
 // Initialize everything once
 // deallocate tensors when done
-static void mnv2_init(void) { tflite_load_model(model_mobilenetv2_160_035); }
+static void mnv2_init(void) {
+  tflite_load_model(model_mobilenetv2_160_035, model_mobilenetv2_160_035_len);
+}
 
 // Run classification, after input has been loaded
 static int32_t mnv2_classify() {

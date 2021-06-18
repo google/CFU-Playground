@@ -20,13 +20,13 @@
 #include "base.h"
 #include "benchmarks.h"
 #include "functional_cfu_tests.h"
+#include "generated/csr.h"
 #include "menu.h"
 #include "models/models.h"
 #include "perf.h"
+#include "playground_util/util_tests.h"
 #include "proj_menu.h"
 #include "tflite.h"
-#include "generated/csr.h"
-
 
 #ifdef PLATFORM_sim
 static void trace_sim() {
@@ -34,11 +34,10 @@ static void trace_sim() {
   sim_trace_enable_write(1);
 }
 static void exit_sim() {
-    puts("Goodbye!");
-    sim_finish_finish_write(1);
+  puts("Goodbye!");
+  sim_finish_finish_write(1);
 }
 #endif
-
 
 static struct Menu MENU = {
     "CFU Playground",
@@ -50,6 +49,7 @@ static struct Menu MENU = {
         MENU_ITEM('4', "Performance Counter Tests", perf_test_menu),
         MENU_ITEM('5', "TFLite Unit Tests", tflite_do_tests),
         MENU_ITEM('6', "Benchmarks", do_benchmarks_menu),
+        MENU_ITEM('7', "Util Tests", do_util_tests_menu),
 #ifdef PLATFORM_sim
         MENU_ITEM('t', "trace (only works in simulation)", trace_sim),
         MENU_ITEM('Q', "Exit (only works in simulation)", exit_sim),

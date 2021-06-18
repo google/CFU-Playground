@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "mnv2_conv.h"
 #include "tensorflow/lite/kernels/internal/common.h"
-#include "tf_util/print_params.h"
+#include "playground_util/print_params.h"
 
 #ifdef DUMP_CONV
 #include "b64_util.h"

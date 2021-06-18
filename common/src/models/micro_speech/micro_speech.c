@@ -34,7 +34,9 @@ typedef struct {
 
 // Initialize everything once
 // deallocate tensors when done
-static void micro_speech_init(void) { tflite_load_model(model_micro_speech); }
+static void micro_speech_init(void) {
+  tflite_load_model(model_micro_speech, model_micro_speech_len);
+}
 
 // Run classification, after input has been loaded
 MicroSpeechResult micro_speech_classify() {
