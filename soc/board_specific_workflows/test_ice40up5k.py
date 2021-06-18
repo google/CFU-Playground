@@ -15,6 +15,7 @@
 
 import ice40up5k
 import unittest
+import warnings
 import workflow_args
 from litex.soc.integration import builder
 from unittest import mock
@@ -23,8 +24,7 @@ from unittest import mock
 class Ice40UP5KWorkflowTest(unittest.TestCase):
     """TestCase for the Ice40UP5KWorkflow."""
     def setUp(self):
-        self.args = workflow_args.parse_workflow_args(
-            ['--cpu_variant', 'not fomu + cfu...'])
+        self.args = workflow_args.parse_workflow_args([])
         self.soc_constructor = mock.MagicMock()
 
     def simple_init(self, warn: bool = False):
@@ -34,13 +34,16 @@ class Ice40UP5KWorkflowTest(unittest.TestCase):
                                                builder.Builder),
                                            warn=warn)
 
-    @mock.patch('warnings.warn')
-    def test_warning(self, mock_warner):
+    def test_warning(self):
         """Asserts the user is warned when cpu_variant switched."""
-        self.simple_init(warn=True)
-
+        self.args.cpu_variant = 'Not fomu + cfu....'
+        
+        with warnings.catch_warnings(record=True) as caught:
+            self.simple_init(warn=True)
+        
         # Let's not worry about the warning text, but make sure it exists.
-        mock_warner.assert_called_once()
+        self.assertEqual(len(caught), 1)
+        self.assertEqual(self.args.cpu_variant, 'fomu+cfu')
 
     def test_make_soc(self):
         """Tests to make sure the bios_flash_offset is passed through."""
