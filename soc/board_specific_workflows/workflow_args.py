@@ -23,12 +23,14 @@ from typing import List
 def parse_workflow_args(input: List[str] = None) -> argparse.Namespace:
     """Parses command-line style flags for the workflow.
 
+    All unknown args are discarded to allow multiple parses on args. 
+
     Args:
         input: An optional list of strings in the style of sys.argv. Will
           default to argparse's interpretation of sys.argv if omitted.
     
     Returns:
-        An argparse Namespace with the parsed arguments.
+        An argparse Namespace with the parsed, known arguments.
     """
     parser = argparse.ArgumentParser(description='LiteX SoC')
     parser.add_argument('--build', action='store_true', help='Build bitstream')
@@ -56,5 +58,8 @@ def parse_workflow_args(input: List[str] = None) -> argparse.Namespace:
                         uart_baudrate=921600,
                         cpu_variant='full+cfu+debug',
                         with_etherbone=False)
-
-    return parser.parse_args(input) if input else parser.parse_args()
+    # Return only the known args
+    if input:
+        return parser.parse_known_args(input)[0]
+    else:
+        return parser.parse_known_args()[0]

@@ -50,7 +50,7 @@ export UART_SPEED ?= 3686400
 export PROJ       := $(lastword $(subst /, ,${CURDIR}))
 export CFU_ROOT   := $(realpath $(CURDIR)/../..)
 export PLATFORM   ?= common_soc
-export TARGET     ?= 1bitsquared_icebreaker
+export TARGET     ?= digilent_arty
 
 RUN_MENU_ITEMS    ?=1 1 1
 TEST_MENU_ITEMS   ?=5

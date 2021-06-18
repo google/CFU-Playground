@@ -13,10 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
 import importlib
 from board_specific_workflows import workflow_factory, parse_workflow_args
 from litex.soc.integration import soc
 from typing import Callable
+
 
 def get_soc_constructor(target: str) -> Callable[..., soc.LiteXSoC]:
     """Returns the constructor for the target SoC from litex-boards module."""
@@ -28,11 +30,24 @@ def get_soc_constructor(target: str) -> Callable[..., soc.LiteXSoC]:
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        'Determine purpose (load software or hardware).')
+    parser.add_argument('--software-load',
+                        action='store_true',
+                        help='Perform pre-lxterm loading procedures.')
+    parser.add_argument('--software-path', help='Path to software to load')
+    purpose, _ = parser.parse_known_args()
+
     args = parse_workflow_args()
     assert not (args.with_ethernet and args.with_etherbone)
+    workflow = workflow_factory(args.target)(args,
+                                             get_soc_constructor(args.target))
 
-    soc_workflow = workflow_factory(args.target)
-    soc_workflow(args, get_soc_constructor(args.target)).run()
+    # Determine if call to code was for loading software or hardware/bios.
+    if purpose.software_load == True:
+        workflow.software_load(purpose.software_path)
+    else:
+        workflow.run()
 
 
 if __name__ == "__main__":
