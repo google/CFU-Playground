@@ -36,6 +36,7 @@ void* __dso_handle = &__dso_handle;
 //
 // TfLM global objects
 namespace {
+
 tflite::ErrorReporter* error_reporter = nullptr;
 tflite::MicroOpResolver* op_resolver = nullptr;
 tflite::MicroProfiler* profiler = nullptr;
@@ -85,7 +86,7 @@ constexpr int kTensorArenaSize = const_max<int>(
 );
 
 static uint8_t tensor_arena[kTensorArenaSize];
-}  // namespace
+}  // anonymous namespace
 
 static void tflite_init() {
   static bool initialized = false;
@@ -213,7 +214,7 @@ void tflite_classify() {
   perf_reset_all_counters();
   perf_set_mcycle(0);
   if (kTfLiteOk != interpreter->Invoke()) {
-    TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed.");
+    puts("Invoke failed.");
   }
   unsigned int cyc = perf_get_mcycle();
 #ifndef NPROFILE
