@@ -22,8 +22,9 @@ from litex.build.xilinx import vivado
 class DigilentArtySoCWorkflow(general.GeneralSoCWorkflow):
     """Specializes the general workflow for the Digilent Arty."""
     def make_soc(self, **kwargs) -> litex_soc.LiteXSoC:
-        """Runs the general make_soc with a l2_size parameter."""
-        return super().make_soc(l2_size=8 * 1024, **kwargs)
+        """Runs the general make_soc with a l2_size parameter,"""
+        """   and jtagbone disabled.                          """
+        return super().make_soc(l2_size=8 * 1024, with_jtagbone = False, **kwargs)
 
     def build_soc(self, soc: litex_soc.LiteXSoC, **kwargs) -> builder.Builder:
         """Specializes build_soc to add Vivado args if needed."""
