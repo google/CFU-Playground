@@ -13,6 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+#include "calc_once_data.h"
 #include "tensorflow/lite/c/builtin_op_data.h"
 #include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/kernels/internal/common.h"
@@ -179,6 +180,11 @@ TfLiteStatus DepthwiseConvPrepare(TfLiteContext* context, TfLiteNode* node) {
   TF_LITE_ENSURE_STATUS(CalculateOpDataDepthwiseConv(
       context, node, params, input_width, input_height, filter_width,
       filter_height, output_width, output_height, input->type, data));
+
+  // CFU-Playground: capture, if required
+  CalculateOnce::capturer.Capture(data->per_channel_output_multiplier,
+                                  num_channels);
+  CalculateOnce::capturer.Capture(data->per_channel_output_shift, num_channels);
 
   return kTfLiteOk;
 }
