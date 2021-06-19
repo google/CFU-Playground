@@ -24,3 +24,10 @@ void dump_hex(const uint8_t* data, size_t len) {
     printf("0x%02x,%c", data[i], (i & 0xf) == 0xf ? '\n' : ' ');
   }
 }
+
+// Dump len words of data
+void dump_hex(const int32_t* data, size_t len) {
+  for (size_t i = 0; i < len; i++) {
+    printf("0x%08lx,%c", data[i], (i & 0x3) == 0x3 ? '\n' : ' ');
+  }
+}

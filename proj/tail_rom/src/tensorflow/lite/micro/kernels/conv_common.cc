@@ -178,9 +178,9 @@ TfLiteStatus ConvPrepare(TfLiteContext* context, TfLiteNode* node) {
       filter_height, output_width, output_height, input->type, data));
 
   // CFU-Playground: capture, if required
-  CalculateOnce::capturer.Capture(data->per_channel_output_multiplier,
+  calculate_once::capturer.Capture(data->per_channel_output_multiplier,
                                   num_channels);
-  CalculateOnce::capturer.Capture(data->per_channel_output_shift, num_channels);
+  calculate_once::capturer.Capture(data->per_channel_output_shift, num_channels);
 
   return kTfLiteOk;
 }

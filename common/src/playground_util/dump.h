@@ -21,15 +21,10 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // Dump len bytes of data
 void dump_hex(const uint8_t* data, size_t len);
 
-#ifdef __cplusplus
-}
-#endif
+// Dump len words of data
+void dump_hex(const int32_t* data, size_t len);
 
 #endif  // _DUMP_H
