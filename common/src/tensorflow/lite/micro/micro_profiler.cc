@@ -23,6 +23,9 @@ limitations under the License.
 namespace tflite {
 
 uint32_t MicroProfiler::BeginEvent(const char* tag) {
+  // CFU-Playground: output a dot
+  putchar('.');
+
   if (num_events_ == kMaxEvents) {
     num_events_ = 0;
   }
@@ -50,7 +53,8 @@ void MicroProfiler::Log() const {
 #if !defined(TF_LITE_STRIP_ERROR_STRINGS)
   for (int i = 0; i < num_events_; ++i) {
     int32_t ticks = end_ticks_[i] - start_ticks_[i];
-    MicroPrintf("%s took %d ticks (%d ms).", tags_[i], ticks, TicksToMs(ticks));
+    // CFU-Playground: output in CSV format
+    MicroPrintf("%d,%s,%d", i, tags_[i], ticks);
   }
 #endif
 }
