@@ -213,7 +213,8 @@ tflite-micro-src:
 	$(COPY) $(TFLM_SRC_DIR)/tensorflow/lite/micro/examples/person_detection/model_settings* $(BUILD_DIR)/src/tensorflow/lite/micro/examples/person_detection
 
 	@echo "TfLM: downloading third_party files"
-	( cd $(TFLM_SRC_DIR); $(MAKE) -f $(TFLM_MAKE_DIR)/Makefile third_party_downloads )
+	# ensure TARGET is not passed to the TFLM make, where it means something different
+	( unset TARGET; unset MAKEFLAGS; cd $(TFLM_SRC_DIR); $(MAKE) -f $(TFLM_MAKE_DIR)/Makefile third_party_downloads )
 	@echo "TfLM: copying selected third_party files"
 	mkdir -p $(BUILD_DIR)/src/third_party/gemmlowp
 	$(COPY) $(TFLM_MAKE_DIR)/downloads/gemmlowp/fixedpoint $(BUILD_DIR)/src/third_party/gemmlowp
