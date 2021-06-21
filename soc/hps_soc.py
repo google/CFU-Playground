@@ -19,6 +19,7 @@
 
 from hps_platform import Platform
 from litex.soc.cores.clock import S7PLL
+from litex.soc.integration.common import get_mem_data
 from litex.soc.integration.soc import SoCRegion
 from litex.soc.integration.builder import Builder, builder_args, builder_argdict
 from litex.soc.integration.soc import LiteXSoC, SoCRegion
@@ -67,7 +68,8 @@ class HpsSoC(LiteXSoC):
     cpu_type = "vexriscv"
 
     def __init__(self, platform, debug, litespi_flash=False, variant=None,
-                 cpu_cfu=None, execute_from_lram=False):
+                 cpu_cfu=None, execute_from_lram=False,
+                 integrated_rom_init=[]):
         LiteXSoC.__init__(self,
                           platform=platform,
                           sys_clk_freq=platform.sys_clk_freq,
@@ -104,6 +106,10 @@ class HpsSoC(LiteXSoC):
         # ROM (either part of SPI Flash, or embedded)
         if execute_from_lram:
             self.setup_rom_in_lram()
+            if integrated_rom_init:
+                assert len(integrated_rom_init) <= 64 * KB / 4
+                self.integrated_rom_initialized = True
+                self.rom.add_init(integrated_rom_init)
         else:
             self.setup_rom_in_flash()
 
@@ -179,7 +185,7 @@ class HpsSoC(LiteXSoC):
 
     # This method is defined on SoCCore and the builder assumes it exists.
     def initialize_rom(self, data):
-        if hasattr(self, 'rom'):
+        if hasattr(self, 'rom') and not self.integrated_rom_initialized:
             self.rom.add_init(data)
 
     @property
@@ -233,9 +239,15 @@ def main():
     parser.add_argument("--cpu-cfu", default=None, help="Specify file containing CFU Verilog module")
     parser.add_argument("--execute-from-lram", action="store_true",
                         help="Make the CPU execute from integrated ROM stored in LRAM instead of flash")
+    parser.add_argument("--integrated-rom-init", metavar="FILE",
+                        help="Use FILE as integrated ROM data instead of default BIOS")
 
     args = parser.parse_args()
 
+    if args.integrated_rom_init:
+        integrated_rom_init = get_mem_data(args.integrated_rom_init, "little")
+    else:
+        integrated_rom_init = []
 
     if args.cpu_cfu:
         variant = "full+cfu+debug" if args.debug else "full+cfu"
@@ -244,7 +256,8 @@ def main():
                      litespi_flash=args.litespi_flash,
                      variant=variant,
                      cpu_cfu=args.cpu_cfu,
-                     execute_from_lram=args.execute_from_lram)
+                     execute_from_lram=args.execute_from_lram,
+                     integrated_rom_init=integrated_rom_init)
         if args.slim_cpu:
             # override the actual source to get the Slim version
             #  -- this is a hack needed because litex/.../vexriscv/core.py doesn't know about the Slim versions.
@@ -257,7 +270,8 @@ def main():
                      debug=args.debug,
                      litespi_flash=args.litespi_flash,
                      variant=variant,
-                     execute_from_lram=args.execute_from_lram)
+                     execute_from_lram=args.execute_from_lram,
+                     integrated_rom_init=integrated_rom_init)
 
     builder = create_builder(soc, args)
     builder_kwargs = {}
