@@ -19,6 +19,7 @@
 
 from hps_platform import Platform
 from litex.soc.cores.clock import S7PLL
+from litex.soc.integration.common import get_mem_data
 from litex.soc.integration.soc import SoCRegion
 from litex.soc.integration.builder import Builder, builder_args, builder_argdict
 from litex.soc.integration.soc import LiteXSoC, SoCRegion
@@ -56,27 +57,19 @@ class HpsSoC(LiteXSoC):
     # The start of the SPI Flash contains the FPGA gateware. Our ROM is after
     # that.
     rom_offset = 2*MB
-    rom_origin = spiflash_region.origin + rom_offset
-    rom_region = SoCRegion(rom_origin, spiflash_region.size - rom_offset,
-                           cached=True, linker=True)
     sram_origin = 0x40000000
-    sram_region = SoCRegion(sram_origin, RAM_SIZE, cached=True, linker=True)
     vexriscv_region = SoCRegion(origin=0xf00f0000, size=0x100)
 
-    # These variables are needed by builder.py. Normally they're defined by
-    # SoCCore, but we don't inherit from SoCCore.
-    integrated_rom_initialized = False
-    integrated_rom_size = rom_region.size
-
     mem_map = {
-        "rom":  rom_offset,
         "sram": sram_origin,
         "csr":  csr_origin,
     }
 
     cpu_type = "vexriscv"
 
-    def __init__(self, platform, debug, litespi_flash=False, variant=None, cpu_cfu=None):
+    def __init__(self, platform, debug, litespi_flash=False, variant=None,
+                 cpu_cfu=None, execute_from_lram=False,
+                 integrated_rom_init=[]):
         LiteXSoC.__init__(self,
                           platform=platform,
                           sys_clk_freq=platform.sys_clk_freq,
@@ -87,13 +80,22 @@ class HpsSoC(LiteXSoC):
         # Clock, Controller, CPU
         self.submodules.crg = platform.create_crg()
         self.add_controller("ctrl")
+        if execute_from_lram:
+            reset_address = 0x00000000
+        else:
+            reset_address = self.spiflash_region.origin + self.rom_offset
         self.add_cpu(self.cpu_type,
                      variant=variant,
-                     reset_address=self.rom_origin,
+                     reset_address=reset_address,
                      cfu=cpu_cfu)
 
         # RAM
-        self.setup_ram()
+        if execute_from_lram:
+            # Leave one LRAM free for ROM
+            ram_size = RAM_SIZE - 64*KB
+        else:
+            ram_size = RAM_SIZE
+        self.setup_ram(size=ram_size)
 
         # SPI Flash
         if litespi_flash:
@@ -101,8 +103,15 @@ class HpsSoC(LiteXSoC):
         else:
             self.setup_flash()
 
-        # ROM (part of SPI Flash)
-        self.bus.add_region("rom", self.rom_region)
+        # ROM (either part of SPI Flash, or embedded)
+        if execute_from_lram:
+            self.setup_rom_in_lram()
+            if integrated_rom_init:
+                assert len(integrated_rom_init) <= 64 * KB / 4
+                self.integrated_rom_initialized = True
+                self.rom.add_init(integrated_rom_init)
+        else:
+            self.setup_rom_in_flash()
 
         # "LEDS" - Just one LED on JTAG port
         self.submodules.leds = LedChaser(
@@ -130,11 +139,20 @@ class HpsSoC(LiteXSoC):
             self.platform.request("i2c", 1))
         self.csr.add("i2c")
 
-    def setup_ram(self):
-        self.submodules.lram = self.platform.create_ram(
-            32, self.sram_region.size)
-        self.bus.add_slave("sram_lram", self.lram.bus, self.sram_region)
-        self.bus.add_region("sram", self.sram_region)
+    def setup_ram(self, size):
+        region = SoCRegion(self.sram_origin, size, cached=True, linker=True)
+        self.submodules.lram = self.platform.create_ram(32, size)
+        self.bus.add_slave("sram_lram", self.lram.bus, region)
+        self.bus.add_region("sram", region)
+
+    def setup_rom_in_lram(self):
+        region = SoCRegion(self.cpu.reset_address, 64 * KB, mode='r',
+                           cached=True, linker=True)
+        self.submodules.rom = self.platform.create_ram(32, region.size)
+        self.bus.add_slave("rom_lram", self.rom.bus, region)
+        self.bus.add_region("rom", region)
+        self.integrated_rom_initialized = False
+        self.integrated_rom_size = region.size
 
     def setup_flash(self):
         self.submodules.spiflash = SpiFlash(self.platform.request("spiflash"), dummy=8,
@@ -151,6 +169,14 @@ class HpsSoC(LiteXSoC):
         self.csr.add("spiflash_phy")
         self.bus.add_slave(name="spiflash", slave=self.spiflash_mmap.bus, region=self.spiflash_region)
 
+    def setup_rom_in_flash(self):
+        region = SoCRegion(self.spiflash_region.origin + self.rom_offset,
+                           self.spiflash_region.size - self.rom_offset,
+                           mode='r', cached=True, linker=True)
+        self.bus.add_region("rom", region)
+        self.integrated_rom_initialized = False
+        self.integrated_rom_size = region.size
+
     def add_serial(self):
         self.add_uart("serial", baudrate=UART_SPEED)
 
@@ -159,7 +185,8 @@ class HpsSoC(LiteXSoC):
 
     # This method is defined on SoCCore and the builder assumes it exists.
     def initialize_rom(self, data):
-        pass
+        if hasattr(self, 'rom') and not self.integrated_rom_initialized:
+            self.rom.add_init(data)
 
     @property
     def mem_regions(self):
@@ -175,14 +202,6 @@ class HpsSoC(LiteXSoC):
             if region.linker:
                 region.type += "+linker"
         self.csr_regions = self.csr.regions
-
-        self.configure_rom()
-
-    def configure_rom(self):
-        # Have the builder build the BIOS, but not create an integrated ROM
-        # self.integrated_rom_size = 0
-        # self.integrated_rom_initialized = False
-        pass
 
 
 def hps_soc_args(parser: argparse.ArgumentParser):
@@ -218,13 +237,27 @@ def main():
                         help="Which synthesis to use, radiant/synplify (default), lse, or yosys")
     parser.add_argument("--litespi-flash", action="store_true", help="Use litespi flash")
     parser.add_argument("--cpu-cfu", default=None, help="Specify file containing CFU Verilog module")
+    parser.add_argument("--execute-from-lram", action="store_true",
+                        help="Make the CPU execute from integrated ROM stored in LRAM instead of flash")
+    parser.add_argument("--integrated-rom-init", metavar="FILE",
+                        help="Use FILE as integrated ROM data instead of default BIOS")
 
     args = parser.parse_args()
 
+    if args.integrated_rom_init:
+        integrated_rom_init = get_mem_data(args.integrated_rom_init, "little")
+    else:
+        integrated_rom_init = []
 
     if args.cpu_cfu:
         variant = "full+cfu+debug" if args.debug else "full+cfu"
-        soc = HpsSoC(Platform(args.toolchain), debug=args.debug, litespi_flash=args.litespi_flash, variant=variant, cpu_cfu=args.cpu_cfu)
+        soc = HpsSoC(Platform(args.toolchain),
+                     debug=args.debug,
+                     litespi_flash=args.litespi_flash,
+                     variant=variant,
+                     cpu_cfu=args.cpu_cfu,
+                     execute_from_lram=args.execute_from_lram,
+                     integrated_rom_init=integrated_rom_init)
         if args.slim_cpu:
             # override the actual source to get the Slim version
             #  -- this is a hack needed because litex/.../vexriscv/core.py doesn't know about the Slim versions.
@@ -233,8 +266,12 @@ def main():
             soc.cpu.use_external_variant(f"{vexriscv}/verilog/VexRiscv_{var}.v")
     else:
         variant = "full+debug" if args.debug else "full"
-        soc = HpsSoC(Platform(args.toolchain), debug=args.debug, litespi_flash=args.litespi_flash, variant=variant)
-        
+        soc = HpsSoC(Platform(args.toolchain),
+                     debug=args.debug,
+                     litespi_flash=args.litespi_flash,
+                     variant=variant,
+                     execute_from_lram=args.execute_from_lram,
+                     integrated_rom_init=integrated_rom_init)
 
     builder = create_builder(soc, args)
     builder_kwargs = {}
