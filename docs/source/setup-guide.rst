@@ -22,9 +22,9 @@ Step 2: Install Vivado and renode
 ---------------------------------
 
 1. vivaldo
-
-  (can take ~8 hours to download software)
-  See https://cfu-playground.readthedocs.io/en/latest/vivado-install.html for a comprehensive guide.
+  
+  See https://cfu-playground.readthedocs.io/en/latest/vivado-install.html for a comprehensive guide. 
+  Note that the software can take up to 8H to download
 
 2. renode
 
