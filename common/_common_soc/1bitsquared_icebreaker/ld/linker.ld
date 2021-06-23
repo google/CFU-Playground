@@ -8,57 +8,57 @@ INCLUDE regions.ld
 
 SECTIONS
 {
-	.reserved :
-	{
-		/* Space reserved for gateware, shouldn't step on it. */
-		. += 0x30000;
-	} > spiflash
+    /* .data first to take precedence for explicit code we want in SRAM. */
+    .data : AT (_erodata) /* Loaded in spiflash but runtime copied to SRAM. */
+    {
+        . = ALIGN(4);
+        _fdata = .;  /* Start of .data in SRAM, copied to in crt0. */
 
-	.text :
-	{
-		_ftext = .;
-		*(.text.start)
-		*(.text .stub .text.* .gnu.linkonce.t.*)
-		_etext = .;
-	} > spiflash
+        *(.ramtext .ramtext*)
 
-	.rodata :
-	{
-		. = ALIGN(8);
-		_frodata = .;
-		*(.rodata .rodata.* .gnu.linkonce.r.*)
-		*(.rodata1)
-		*(.srodata .srodata.*)
-		. = ALIGN(8);
-		_erodata = .;
-	} > spiflash
+        /* 
+         * We need to ensure .data starts at > 0, otherwise a pointer to the
+         * first element of .data will be mistaken for a nullptr.
+         */
+        . = MAX(., 0x4); 
 
-	.data : AT (ADDR(.rodata) + SIZEOF (.rodata))
-	{
-		. = ALIGN(8);
-		_fdata = .;
-		*(.data .data.* .gnu.linkonce.d.*)
-		*(.data1)
-		*(.ramtext .ramtext.*)
-		_gp = ALIGN(16);
-		*(.sdata .sdata.* .gnu.linkonce.s.* .sdata2 .sdata2.*)
-		_edata = ALIGN(16); /* Make sure _edata is >= _gp. */
-	} > sram
+        *(.data .data*)
+        *(.sdata .sdata*)
 
-	.bss : AT (ADDR(.data) + SIZEOF (.data))
-	{
-		. = ALIGN(16);
-		_fbss = .;
-		*(.dynsbss)
-		*(.sbss .sbss.* .gnu.linkonce.sb.*)
-		*(.scommon)
-		*(.dynbss)
-		*(.bss .bss.* .gnu.linkonce.b.*)
-		*(COMMON)
-		. = ALIGN(8);
-		_ebss = .;
-		_end = .;
-	} > sram
+        . = ALIGN(4);
+        _edata = .;  /* End of .data in SRAM, end of copying in crt0. */
+    } > sram
+
+    /* Start .text at 4 byte boundary after gateware. */
+    _ftext = (ORIGIN(spiflash) + 0x30000 + 3) & ~3;
+    .text _ftext :
+    {
+        *(.text.start)
+        *(.text .text*)
+    } > spiflash
+
+    .rodata :
+    {
+        *(.rodata .rodata*)
+        *(.srodata .srodata*)
+
+        . = ALIGN(4);
+        _erodata = .;  /* Start of .data in spiflash, copied from in crt0. */
+    } > spiflash
+
+    .bss :
+    {
+        . = ALIGN(4);
+        _fbss = .;  /* Start of zeroing in crt0. */
+
+        *(.bss .bss*)
+        *(.sbss .sbss*)
+
+        *(COMMON)
+        
+        . = ALIGN(4);
+        _ebss = .;  /* End of zeroing in crt0. */
+    } > sram
 }
 
 PROVIDE(_fstack = ORIGIN(sram) + LENGTH(sram) - 4);
