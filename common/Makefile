@@ -131,27 +131,27 @@ else
 QUIET      := @
 endif
 
-TARGET := $(PACKAGE).elf
+SOFTWARE_ELF := $(PACKAGE).elf
 
 .PHONY: all
-all: $(TARGET) $(PACKAGE).bin $(PACKAGE).ihex
+all: $(SOFTWARE_ELF) $(PACKAGE).bin $(PACKAGE).ihex
 
-$(PACKAGE).bin: $(TARGET)	
+$(PACKAGE).bin: $(SOFTWARE_ELF)
 	$(QUIET) echo "  OBJCOPY  $@"
-	$(QUIET) $(OBJCOPY) -O binary $(TARGET) $@
+	$(QUIET) $(OBJCOPY) -O binary $(SOFTWARE_ELF) $@
 
-$(PACKAGE).ihex: $(TARGET)
+$(PACKAGE).ihex: $(SOFTWARE_ELF)
 	$(QUIET) echo "  IHEX     $(PACKAGE).ihex"
-	$(QUIET) $(OBJCOPY) -O ihex $(TARGET) $@
+	$(QUIET) $(OBJCOPY) -O ihex $(SOFTWARE_ELF) $@
 
-$(TARGET): $(OBJECTS) $(LDSCRIPTS)
+$(SOFTWARE_ELF): $(OBJECTS) $(LDSCRIPTS)
 	$(QUIET) echo "  LD       $@"
 	$(QUIET) $(CXX) $(OBJECTS) $(LFLAGS) -o $@
 	$(QUIET) echo "  OBJDUMP  $@.dis"
-	$(QUIET) $(OBJDUMP) -d -S -l $(TARGET) | $(FIX_CFU_DIS) > $(TARGET).dis_with_source
-	$(QUIET) $(OBJDUMP) -d $(TARGET) | $(FIX_CFU_DIS) > $(TARGET).dis
+	$(QUIET) $(OBJDUMP) -d -S -l $(SOFTWARE_ELF) | $(FIX_CFU_DIS) > $(SOFTWARE_ELF).dis_with_source
+	$(QUIET) $(OBJDUMP) -d $(SOFTWARE_ELF) | $(FIX_CFU_DIS) > $(SOFTWARE_ELF).dis
 	$(QUIET) echo "  OBJDUMP  $@.sym"
-	$(QUIET) $(OBJDUMP) -s $(TARGET) > $(TARGET).sym
+	$(QUIET) $(OBJDUMP) -s $(SOFTWARE_ELF) > $(SOFTWARE_ELF).sym
 
 %.h : %.tflite
 	$(QUIET) echo "  XXD  $(notdir $<) $(notdir $@)"
