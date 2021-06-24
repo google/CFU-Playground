@@ -6,6 +6,6 @@ machine StartGdbServer 10001
 showAnalyzer sysbus.uart
 showAnalyzer sysbus.uart Antmicro.Renode.Analyzers.LoggingUartAnalyzer
 
-sysbus LoadELF $ORIGIN/software.elf
+sysbus LoadELF $ORIGIN/../build/software.elf
 
 
