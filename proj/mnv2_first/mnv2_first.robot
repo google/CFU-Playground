@@ -7,7 +7,7 @@ Resource                      ${RENODEKEYWORDS}
 
 *** Keywords ***
 Create Machine
-    Execute Command          include @${CURDIR}/litex-vexriscv-tflite.resc
+    Execute Command          include @${CURDIR}/TARGET.resc
     Create Terminal Tester   sysbus.uart
 
     Start Emulation
