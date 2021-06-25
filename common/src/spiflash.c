@@ -15,11 +15,13 @@
  */
 
 #include <console.h>
+#include <crc.h>
 #include <generated/csr.h>
 #include <generated/mem.h>
 #include <stdio.h>
 
 #include "menu.h"
+#include "perf.h"
 #include "spiflash.h"
 
 #ifdef SPIFLASH_BASE
@@ -51,6 +53,44 @@ static void dump_spiflash(void) {
   } while (line_offset <= SPIFLASH_SIZE - BYTES_PER_LINE);
 }
 
+// We compute the checksum of an arbitrarily chosen region later in flash,
+// which is unlikely to hold the bitstream or any other important data,
+// so that you can pre-fill it with some chosen values and then compare the
+// checksum produced by different versions of the bitstream (expecting the
+// checksum to be the same each time).
+#define CHECKSUM_REGION_OFFSET (4*1024*1024)
+#define CHECKSUM_REGION_LENGTH (256*1024)
+static void checksum_spiflash(void) {
+  printf("Computing CRC32 of SPI flash region 0x%08x-0x%08x: ",
+         CHECKSUM_REGION_OFFSET,
+         CHECKSUM_REGION_OFFSET + CHECKSUM_REGION_LENGTH);
+  unsigned int crc = crc32(
+    (unsigned char *)(SPIFLASH_BASE + CHECKSUM_REGION_OFFSET),
+    CHECKSUM_REGION_LENGTH);
+  printf("%08x\n\n", crc);
+}
+
+// The intention here is to catch problems with consecutive SPI command cycles,
+// for example CS inactive time too short.
+static void test_spiflash_nonsequential_access(void) {
+  unsigned int start = perf_get_mcycle();
+  uint32_t val = *(volatile uint32_t *)SPIFLASH_BASE;
+  // Now access another address elsewhere to force a new SPI command cycle.
+  *(volatile uint32_t *)(SPIFLASH_BASE + 1024);
+  // Now go back and load the original value in a new SPI command cycle.
+  // It should match.
+  uint32_t val2 = *(volatile uint32_t *)SPIFLASH_BASE;
+  unsigned int end = perf_get_mcycle();
+  printf("Spent %u cycles\n", end - start);
+  if (val == 0xff || val2 == 0xff)
+    // 0xff may indicate a failed read
+    printf("%08x == %08x  SEEMS SUPICIOUS\n", val, val2);
+  else if (val == val2)
+    printf("%08x == %08x  OK\n", val, val2);
+  else
+    printf("%08x != %08x  NOT OK\n", val, val2);
+}
+
 #ifdef CSR_SPIFLASH_PHY_BASE
 static void do_set_spiflash_div(void) {
   unsigned int div = spiflash_phy_clk_divisor_read();
@@ -71,6 +111,8 @@ static struct Menu MENU = {
   "spiflash",
   {
     MENU_ITEM('d', "dump flash contents", dump_spiflash),
+    MENU_ITEM('c', "CRC32 checksum", checksum_spiflash),
+    MENU_ITEM('n', "non-sequential access test", test_spiflash_nonsequential_access),
 #ifdef CSR_SPIFLASH_PHY_BASE
     MENU_ITEM('s', "set clock divisor", do_set_spiflash_div),
 #endif
