@@ -74,10 +74,10 @@ Python virtualenv ensures that you have the correct python and modules needed by
    $ virtualenv CFU-Playground
    $ cd CFU-Playground
    $ source bin/activate   # start python3 virtualenv
-   $ pip install --upgrade 'git+https://github.com/nmigen/nmigen.git#egg=nmigen[builtin-yosys]'
    $ # Check that you have the correct gcc in path
-   $ (CFU-Playground) sauron:~/fpga/CFU-Playground$ type riscv64-unknown-elf-gcc; riscv64-unknown-elf-gcc --version |head -1
+   $ (CFU-Playground) sauron:~/fpga/CFU-Playground$ type riscv64-unknown-elf-gcc
    riscv64-unknown-elf-gcc is hashed (/home/merlin/fpga/riscv64-unknown-elf-gcc/bin/riscv64-unknown-elf-gcc)
+   $ (CFU-Playground) sauron:~/fpga/CFU-Playground$ riscv64-unknown-elf-gcc --version |he
    riscv64-unknown-elf-gcc (SiFive GCC 8.3.0-2020.04.1) 8.3.0
    $ scripts/setup         # install prerequisites
    
