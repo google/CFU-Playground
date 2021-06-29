@@ -174,10 +174,10 @@ introduction to FPGAs we have found.
 Start off by reading through the material under FPGA introduction in the left
 hand menu (scroll way down). The most relevant pages are:
 
-* `What are FPGAs?`: https://www.fpga4fun.com/FPGAinfo1.html>
-* `How FPGAs work`: https://www.fpga4fun.com/FPGAinfo2.html>
-* `Internal RAM`: https://www.fpga4fun.com/FPGAinfo3.html>
-* `FPGA pins`: https://www.fpga4fun.com/FPGAinfo4.html>
+* `What are FPGAs?`: https://www.fpga4fun.com/FPGAinfo1.html
+* `How FPGAs work`: https://www.fpga4fun.com/FPGAinfo2.html
+* `Internal RAM`: https://www.fpga4fun.com/FPGAinfo3.html
+* `FPGA pins`: https://www.fpga4fun.com/FPGAinfo4.html
 * `Clocks and global lines`: https://www.fpga4fun.com/FPGAinfo5.html
 
 
