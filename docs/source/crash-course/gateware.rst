@@ -196,6 +196,13 @@ PMOD AMP2 and a plug-in speaker.
 .. image:: ../images/arty_with_amp.jpg
    :height: 300px
    :alt: View of an Arty A7 plugged into a PMOD2 and a speaker
+   
+If you do not have a pmod2 (maybe you have a pmod3 in your kit, and it's entirely incompatible),
+you can still get basic analog output by wiring speakers between GND an JD pin#1 (jd[0] in the code)
+
+.. image:: ../images/arty_direct_speaker.jpg
+   :height: 300px
+   :alt: View of an Arty A7 plugged directly into a speaker
 
 2. Read through the first section of `Music box 1 - Simple beep`__.
 
