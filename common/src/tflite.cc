@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "tflite.h"
+#include "tflite_unit_tests.h"
 
 #include "perf.h"
 #include "proj_tflite.h"

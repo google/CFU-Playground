@@ -55,16 +55,21 @@ MagicWandResult magic_wand_classify() {
   };
 }
 
+static int interpret_score(uint32_t& score) {
+  return 1000000 * static_cast<int>(*reinterpret_cast<float*>(&score));
+}
+
 static void print_magic_wand_result(const char* prefix, MagicWandResult res) {
-  printf("%s-- wing: 0x%x, ring: 0x%x, slope: 0x%x, negative: 0x%x\n", prefix,
-         res.wing_score, res.ring_score, res.slope_score, res.negative_score);
+  printf("%s-- wing: 0x%lx, ring: 0x%lx, slope: 0x%lx, negative: 0x%lx\n",
+         prefix, res.wing_score, res.ring_score, res.slope_score,
+         res.negative_score);
   printf(
-      "%s approx-- wing: 0.%06ld ring: 0.%06ld, slope: 0.%06ld, negative: "
-      "0.%06ld\n",
-      prefix, (int)(*(float*)&res.wing_score * 1000000),
-      (int)(*(float*)&res.ring_score * 1000000),
-      (int)(*(float*)&res.slope_score * 1000000),
-      (int)(*(float*)&res.negative_score * 1000000));
+      "%s approx-- wing: 0.%06d ring: 0.%06d, slope: 0.%06d, negative: "
+      "0.%06d\n",
+      prefix, interpret_score(res.wing_score) * 1000000,
+      interpret_score(res.ring_score) * 1000000,
+      interpret_score(res.slope_score) * 1000000,
+      interpret_score(res.negative_score) * 1000000);
 }
 
 static void do_classify_zeros() {

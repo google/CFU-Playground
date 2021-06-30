@@ -28,7 +28,7 @@
 #include "models/mnv2/mnv2.h"
 #include "models/pdti8/pdti8.h"
 
-void no_menu() {}
+inline void no_menu() {}
 
 // Automatically incrementing compile time constant character.
 // Used for avoiding selection character collisions in the menu.

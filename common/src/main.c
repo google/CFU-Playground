@@ -28,7 +28,7 @@
 #include "playground_util/util_tests.h"
 #include "proj_menu.h"
 #include "spiflash.h"
-#include "tflite.h"
+#include "tflite_unit_tests.h"
 
 #ifdef PLATFORM_sim
 static void trace_sim() {
@@ -66,8 +66,6 @@ static struct Menu MENU = {
 int main(void) {
   init_runtime();
   printf("Hello, %s!\n", "World");
-
-  puts("initTfLite()");
 
   menu_run(&MENU);
 
