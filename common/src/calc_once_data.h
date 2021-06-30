@@ -48,6 +48,51 @@ class Capturer {
 
 extern Capturer capturer;
 
+class Cache {
+ public:
+  Cache(uint32_t model_hash, size_t num_buffers, int32_t const** buffers,
+        size_t const* sizes)
+      : model_hash_(model_hash),
+        num_buffers_(num_buffers),
+        buffers_(buffers),
+        sizes_(sizes),
+        use_(false),
+        next_(0) {}
+  virtual ~Cache(){};
+
+  // Initialize cache for given model.
+  // Returns false if model does not match, and then marks the cache as "don't
+  // use"
+  bool InitForModel(const unsigned char* model_data, unsigned int model_length);
+
+  // Fetch the next buffer of captured data
+  // Returns NULL if all buffers have already been returned or if num_words does
+  // not match the next buffer's size.
+  int32_t* FetchNextBuffer(size_t num_words);
+
+ private:
+  // Hash of the model to which this cache applies
+  uint32_t model_hash_;
+
+  // The number of buffers cached
+  size_t num_buffers_;
+
+  // An array of pointers to the cached buffers
+  int32_t const** buffers_;
+
+  // An array of sizes of the buffers
+  size_t const* sizes_;
+
+  // Whether this cache should be used
+  bool use_;
+
+  // Index of the next buffer to be retrieved
+  size_t next_;
+};
+
+// The cache currently in use - will be used to prepare the next model
+extern Cache* cache;
+
 }  // namespace calculate_once
 
 #endif  // _CALC_ONCE_DATA_H

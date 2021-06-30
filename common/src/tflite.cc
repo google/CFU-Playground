@@ -15,6 +15,7 @@
 #include "tflite.h"
 
 #include "perf.h"
+#include "playground_util/murmurhash.h"
 #include "proj_tflite.h"
 #include "tensorflow/lite/micro/all_ops_resolver.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
