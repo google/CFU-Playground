@@ -38,7 +38,9 @@ struct {
     {quant_test_yes_1, 146},
 };
 
-static void vww_init(void) { tflite_load_model(vww_96_int8, vww_96_int8_len); }
+static void vww_init(void) {
+  tflite_load_model(vww_96_int8, vww_96_int8_len);
+}
 
 int32_t vww_classify() {
   printf("Running vww\n");

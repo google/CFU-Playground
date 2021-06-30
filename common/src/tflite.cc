@@ -22,6 +22,7 @@
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/micro/micro_profiler.h"
 #include "tensorflow/lite/schema/schema_generated.h"
+#include "tflite_unit_tests.h"
 
 #ifdef TF_LITE_SHOW_MEMORY_USE
 #include "tensorflow/lite/micro/recording_micro_interpreter.h"
