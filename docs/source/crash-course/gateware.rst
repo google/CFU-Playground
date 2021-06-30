@@ -198,7 +198,10 @@ PMOD AMP2 and a plug-in speaker.
    :alt: View of an Arty A7 plugged into a PMOD2 and a speaker
    
 If you do not have a pmod2 (maybe you have a pmod3 in your kit, and it's entirely incompatible),
-you can still get basic analog output by wiring speakers between GND an JD pin#1 (jd[0] in the code)
+you can still get basic analog output by wiring amplified speakers between GND an JD pin#1 
+(jd[0] in the code). Note that, especially if you are using unamplified speakers, you should 
+limit current, which is done automatically on JA and JD PMOD I/O pins but not on other outputs
+which would require an additional current limiting resistor.
 
 .. image:: ../images/arty_direct_speaker.jpg
    :height: 300px
