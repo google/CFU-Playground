@@ -21,7 +21,7 @@ but is significantly more expensive.
 Step 2: Install Vivado and renode
 ---------------------------------
 
-1. vivaldo
+1. vivado
   
   See https://cfu-playground.readthedocs.io/en/latest/vivado-install.html for a comprehensive guide. 
   Note that the software can take up to 8H to download
@@ -102,7 +102,7 @@ as a useful "minimal" system.
    $ make prog
 
    # Build the RISCV program and load it onto the board
-   # Also starts a terminal ( exit the terminal with CTRL+\ )
+   # Also starts a terminal ( exit the terminal with CTRL+C )
    $ make load
    (...)
    /home/merlin/fpga/CFU-Playground/soc/bin/litex_term --speed 3686400  --kernel /home/merlin/fpga/CFU-Playground/proj/proj_template/build/software.bin /dev/ttyUSB1
@@ -139,4 +139,4 @@ as a useful "minimal" system.
 * Then `1` - Person Detection int8 model
 * Then `g` - Golden tests
 
-If the golden tests pass, then all is well.
+If the golden tests pass, then all is well (remember that you can exit with CTRL+C)
