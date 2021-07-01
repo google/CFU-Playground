@@ -26,32 +26,32 @@ namespace calculate_once {
 // The capturer outputs (via printf) each permanent data buffer
 class Capturer {
  public:
-  Capturer() : enabled_(false), sequence_counter_(0){};
+  Capturer() : capturing_(false), sequence_counter_(0){};
   virtual ~Capturer(){};
 
   // Reset this this object
-  void Reset(const unsigned char* model_data, unsigned int model_length);
+  void Start(const unsigned char* model_data, unsigned int model_length);
 
   // Capture an area of memory
   void Capture(const int32_t* data, size_t num_words);
 
-  // Enable or Disable
-  void Enable(bool enable) { enabled_ = enable; }
+  // Finish capturing data
+  void Finish();
 
  private:
   // Whether capturing is happening
-  bool enabled_;
+  bool capturing_;
 
   // The sequence of capturing.
-  int sequence_counter_;
+  size_t sequence_counter_;
 };
 
 extern Capturer capturer;
 
 class Cache {
  public:
-  Cache(uint32_t model_hash, size_t num_buffers, int32_t const** buffers,
-        size_t const* sizes)
+  Cache(uint32_t model_hash, size_t num_buffers, const int32_t** buffers,
+        const size_t* sizes)
       : model_hash_(model_hash),
         num_buffers_(num_buffers),
         buffers_(buffers),

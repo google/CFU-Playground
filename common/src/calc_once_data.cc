@@ -19,34 +19,68 @@
 #include "playground_util/dump.h"
 #include "playground_util/murmurhash.h"
 
-#define CAPTURE_BEGIN "\n+++ calculate_once Capture begin +++\n"
-#define CAPTURE_END "+++ calculate_once Capture end +++\n"
+#define CAPTURE_BEGIN "\n+++ calculate_once::Capture begin +++\n"
+#define CAPTURE_END "+++ calculate_once::Capture end +++\n"
 
 namespace calculate_once {
 
 // Reset this this object
-void Capturer::Reset(const unsigned char* model_data,
+void Capturer::Start(const unsigned char* model_data,
                      unsigned int model_length) {
-  if (!enabled_) {
-    return;
-  }
-  printf(CAPTURE_BEGIN "captured.SetHash(0x%08lx);\n" CAPTURE_END,
+  capturing_ = true;
+  printf(CAPTURE_BEGIN);
+  printf("// Generated cache data include file\n\n");
+  printf("#include \"calc_once_data.h\"\n\n");
+  printf("namespace {\n");
+  printf("uint32_t model_hash = 0x%08lx;\n",
          murmurhash3_32(model_data, model_length));
+  printf(CAPTURE_END);
   sequence_counter_ = 0;
 }
 
 // Capture an area of memory
 void Capturer::Capture(const int32_t* data, size_t num_words) {
-  if (!enabled_) {
+  if (!capturing_) {
     return;
   }
 
+  // Capture as uint32_t to allow data to be capture in hex. The hex format is
+  // more convenient for debugging.
   printf(CAPTURE_BEGIN);
-  printf("captured.SetBuffer(%d, int32_t[] {", sequence_counter_);
+  printf("const uint32_t buffer_%d[%d] = {\n", sequence_counter_, num_words);
   dump_hex(data, num_words);
-  printf("}, %d)", num_words);
+  printf("};\n");
+  printf("constexpr size_t size_%d = sizeof(buffer_%d);\n", sequence_counter_,
+         sequence_counter_);
   printf(CAPTURE_END);
   sequence_counter_++;
+}
+
+void Capturer::Finish() {
+  if (!capturing_) {
+    return;
+  }
+  printf(CAPTURE_BEGIN);
+
+  printf("const int32_t* buffers[] = {\n");
+  for (size_t i = 0; i < sequence_counter_; i++) {
+    printf("  reinterpret_cast<const int32_t*>(buffer_%d),\n", i);
+  }
+  printf("};\n");
+
+  printf("const size_t sizes[] = {\n");
+  for (size_t i = 0; i < sequence_counter_; i++) {
+    printf("  size_%d,\n", i);
+  }
+  printf("};\n");
+
+  printf("} // anonymous namespace \n");
+  // The Cache variable name needs to be fixed by the capturing scripts
+  printf("calculate_once::Cache XXX_cache(model_hash, %d, buffers, sizes);\n",
+         sequence_counter_);
+  printf(CAPTURE_END);
+
+  capturing_ = false;
 }
 
 Capturer capturer;
