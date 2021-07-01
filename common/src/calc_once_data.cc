@@ -90,6 +90,11 @@ bool Cache::InitForModel(const unsigned char* model_data,
   // By default, don't use cache
   use_ = false;
 
+  // If buffers are not set, do not use. (probably the empty default object)
+  if (!buffers_) {
+    return false;
+  }
+
   // Check whether hash matches
   uint32_t hash = murmurhash3_32(model_data, model_length);
   if (hash != model_hash_) {
@@ -128,6 +133,12 @@ int32_t* Cache::FetchNextBuffer(size_t num_words) {
 // Empty cache is never able to be used by allocators
 Cache empty_cache(0, 0, nullptr, nullptr);
 
-Cache* cache = &empty_cache;
+Cache* current_cache = NULL;
+
+void SetCache(Cache* cache) { current_cache = cache; }
+
+// Returns the current cache object. Will return an empty default object if no
+// cache is set.
+Cache* GetCache() { return current_cache ? current_cache : &empty_cache; }
 
 }  // namespace calculate_once

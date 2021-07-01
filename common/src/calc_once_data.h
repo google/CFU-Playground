@@ -90,8 +90,12 @@ class Cache {
   size_t next_;
 };
 
-// The cache currently in use - will be used to prepare the next model
-extern Cache* cache;
+// Sets the current cache - set to null to use default (empty) cache.
+void SetCache(Cache* cache);
+
+// Returns the current cache object. Will return an empty default object if no
+// cache is set.
+Cache* GetCache();
 
 }  // namespace calculate_once
 
