@@ -370,7 +370,7 @@ Preparation
 
 1. Ensure that you have git and virtualenv installed:
 
-.. code-block: bash
+.. code-block:: bash
 
    $ sudo apt install git
    $ sudo apt install python3-virtualenv
@@ -385,14 +385,14 @@ Preparation
 
 3. Create the virtualenv:
 
-.. code-block: bash
+.. code-block:: bash
 
    $ cd $HOME
    $ virtualenv -p python3 nmigen-tutorial
 
 4. Add an alias to your ``.bashrc`` or ``.bash_aliases`` file:
 
-.. code-block: bash
+.. code-block:: bash
 
    pathadd() {
        if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
@@ -407,7 +407,7 @@ Preparation
 
 6. Install nMigen
 
-.. code-block: bash
+.. code-block:: bash
 
    $ pip install --upgrade \
      'git+https://github.com/nmigen/nmigen.git#egg=nmigen[builtin-yosys]'
@@ -429,7 +429,7 @@ is going on.  This tutorial was written with the UPduino as a target, but you
 could also use the Arty A7. See notes below.  Before beginning, grab the sample
 code:
 
-.. code-block: bash
+.. code-block:: bash
 
    $ cd ~/playground
    $ git clone https://github.com/WRansohoff/nmigen_getting_started.git
