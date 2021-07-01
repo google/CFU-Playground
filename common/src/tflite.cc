@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include "tflite.h"
-#include "tflite_unit_tests.h"
 
 #include "perf.h"
 #include "proj_tflite.h"
@@ -30,23 +29,6 @@
 #else
 #define INTERPRETER_TYPE MicroInterpreter
 #endif
-
-//
-// Unit test prototypes. Because of the way these names are generated, they are
-// not defined in any include file. The actual tests are in test_name.cc - e.g
-// conv_test is defined in conv_test.cc.
-extern int conv_test(int argc, char** argv);
-extern int depthwise_conv_test(int argc, char** argv);
-
-// Run tflite unit tests
-void tflite_do_tests() {
-  // conv test from conv_test.cc
-  puts("\nCONV TEST:");
-  conv_test(0, NULL);
-  // depthwise conv test from depthwise_conv_test.cc
-  puts("DEPTHWISE_CONV TEST:");
-  depthwise_conv_test(0, NULL);
-}
 
 // For C++ exceptions
 void* __dso_handle = &__dso_handle;
