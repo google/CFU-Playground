@@ -14,18 +14,26 @@
  * limitations under the License.
  */
 
-#ifndef PROJ_MENU_H
-#define PROJ_MENU_H
+#include "proj_menu.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <stdio.h>
 
-// Project-specific menu
-void do_proj_menu();
+#include "calc_once_data.h"
+#include "menu.h"
 
-#ifdef __cplusplus
-}
-#endif
+namespace {
 
-#endif  // !_PROJ_MENU_H
+void do_reset_cache() { calculate_once::SetCache(NULL); }
+
+}  // anonymous namespace
+
+static struct Menu MENU = {
+    "Project Menu",
+    "project",
+    {
+        MENU_ITEM('0', "reset cache", do_reset_cache),
+        MENU_END,
+    },
+};
+
+void do_proj_menu() { menu_run(&MENU); }
