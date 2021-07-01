@@ -170,6 +170,8 @@ void tflite_load_model(const unsigned char* model_data,
     printf(" %d", dims->data[ii]);
   }
   puts("\n");
+
+  tflite_postload();
 }
 
 void tflite_set_input_zeros() {
