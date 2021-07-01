@@ -14,7 +14,14 @@
 # limitations under the License.
 
 # This variable lists symbols to define to the C preprocessor
-export DEFINES := TF_LITE_SHOW_MEMORY_USE TAIL_CAPTURE
+export DEFINES := TF_LITE_SHOW_MEMORY_USE
+
+# Conditionally enable tail capture
+ifdef TAIL_CAPTURE
+DEFINES += TAIL_ROM_CAPTURE
+else
+DEFINES += TAIL_ROM_USE
+endif
 
 # Uncomment this line to use software defined CFU functions in software_cfu.cc
 #DEFINES += CFU_SOFTWARE_DEFINED

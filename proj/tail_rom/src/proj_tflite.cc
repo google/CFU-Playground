@@ -23,7 +23,7 @@
 void tflite_preload(const unsigned char* model_data,
                     unsigned int model_length) {
   // Begin capturing for this model, if eabled by preprocessor define.
-#ifdef TAIL_CAPTURE
+#ifdef TAIL_ROM_CAPTURE
   calculate_once::capturer.Start(model_data, model_length);
 #endif
 }
