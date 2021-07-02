@@ -52,7 +52,7 @@ int32_t vww_classify() {
   static void name() {                                                 \
     puts(#name);                                                       \
     tflite_set_input(mlcommons_tiny_v01_vww_dataset[test_index].data); \
-    printf("  result-- score: %ld\n", vww_classify());                  \
+    printf("  result-- score: %ld\n", vww_classify());                 \
   }
 
 MLCOMMONS_TINY_V01_VWW_TEST(do_classify_no_person, 0);
