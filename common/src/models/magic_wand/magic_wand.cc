@@ -66,10 +66,10 @@ static void print_magic_wand_result(const char* prefix, MagicWandResult res) {
   printf(
       "%s approx-- wing: 0.%06d ring: 0.%06d, slope: 0.%06d, negative: "
       "0.%06d\n",
-      prefix, interpret_score(res.wing_score) * 1000000,
-      interpret_score(res.ring_score) * 1000000,
-      interpret_score(res.slope_score) * 1000000,
-      interpret_score(res.negative_score) * 1000000);
+      prefix, interpret_score(res.wing_score),
+      interpret_score(res.ring_score),
+      interpret_score(res.slope_score),
+      interpret_score(res.negative_score));
 }
 
 static void do_classify_zeros() {
