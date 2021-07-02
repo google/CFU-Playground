@@ -26,6 +26,13 @@ void tflite_preload(const unsigned char* model_data,
 #ifdef TAIL_ROM_CAPTURE
   calculate_once::capturer.Start(model_data, model_length);
 #endif
+
+  // Use captured data, if available
+#ifdef TAIL_ROM_USE
+  if (!calculate_once::GetCache()->InitForModel(model_data, model_length)) {
+    printf("Cached data does not match model\n");
+  }
+#endif
 }
 
 // Finish capture

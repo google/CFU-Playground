@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-#include "proj_menu.h"
-
 #include <stdio.h>
 
 #include "calc_once_data.h"
 #include "menu.h"
+#include "proj_menu.h"
+
+// Defined in pdti8_cache.cc
+extern calculate_once::Cache pdti8_cache;
 
 namespace {
 
 void do_reset_cache() { calculate_once::SetCache(NULL); }
+
+void do_set_pdti8() { calculate_once::SetCache(&pdti8_cache); }
 
 }  // anonymous namespace
 
@@ -32,6 +36,7 @@ static struct Menu MENU = {
     "project",
     {
         MENU_ITEM('0', "reset cache", do_reset_cache),
+        MENU_ITEM('1', "Set cache for pdti8", do_set_pdti8),
         MENU_END,
     },
 };
