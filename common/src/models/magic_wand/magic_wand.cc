@@ -56,7 +56,7 @@ MagicWandResult magic_wand_classify() {
 }
 
 static int interpret_score(uint32_t& score) {
-  return 1000000 * static_cast<int>(*reinterpret_cast<float*>(&score));
+  return static_cast<int>(*reinterpret_cast<float*>(&score) * 1000000);
 }
 
 static void print_magic_wand_result(const char* prefix, MagicWandResult res) {
