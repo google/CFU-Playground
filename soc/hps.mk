@@ -52,8 +52,14 @@ endif
 #==== Specify complete open source toolchain: Yosys + NextPnR
 ifdef USE_OXIDE
 LITEX_ARGS += --toolchain oxide
+ifndef IGNORE_TIMING
+LITEX_ARGS += --nextpnr-timingstrict
+endif
 else ifdef USE_SYMBIFLOW
 LITEX_ARGS += --toolchain oxide
+ifndef IGNORE_TIMING
+LITEX_ARGS += --nextpnr-timingstrict
+endif
 endif
 
 ifdef SLIM_CPU
@@ -66,28 +72,13 @@ HPS_RUN:=   MAKEFLAGS=-j8 $(PYRUN) ./hps_soc.py $(LITEX_ARGS)
 BIOS_BIN := $(OUT_DIR)/software/bios/bios.bin
 BITSTREAM:= $(OUT_DIR)/gateware/hps_platform.bit
 
-.PHONY: bitstream litex-software prog clean check-timing
+.PHONY: bitstream litex-software prog clean
 
-bitstream: $(BITSTREAM) check-timing
+bitstream: $(BITSTREAM)
 
 litex-software: $(BIOS_BIN)
 
-ifndef USE_SYMBIFLOW
-ifndef IGNORE_TIMING
-check-timing:
-	@echo Checking Vivado timing.
-	@echo To disable this check, set IGNORE_TIMING=1
-	@if grep -B 6 "Timing constraints are not met" $(OUT_DIR)/gateware/vivado.log  ; then exit 1 ; fi
-else
-check-timing:
-	@echo Vivado timing check is skipped.
-endif
-else
-check-timing:
-	@echo Timing check not performed for SymbiFlow.
-endif
-
-prog: $(BITSTREAM) check-timing
+prog: $(BITSTREAM)
 	@echo Loading bitstream and bios onto HPS
 	$(CFU_ROOT)/scripts/hps_prog $(BITSTREAM) bitstream
 	$(CFU_ROOT)/scripts/hps_prog $(BIOS_BIN) program
