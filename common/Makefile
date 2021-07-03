@@ -20,7 +20,6 @@ OBJCOPY    := $(RV64)objcopy
 
 RM         := rm -rf
 COPY       := cp -a
-XXD        := xxd -i
 PATH_SEP   := /
 
 # Assumes current directory is the one containing the makefile
