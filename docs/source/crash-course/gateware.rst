@@ -174,13 +174,11 @@ introduction to FPGAs we have found.
 Start off by reading through the material under FPGA introduction in the left
 hand menu (scroll way down). The most relevant pages are:
 
-* `What are FPGAs? <https://www.fpga4fun.com/FPGAinfo1.html>`
-* `How FPGAs work <https://www.fpga4fun.com/FPGAinfo2.html>`
-* `Internal RAM <https://www.fpga4fun.com/FPGAinfo3.html>`
-* `FPGA pins <https://www.fpga4fun.com/FPGAinfo4.html>`
-* `Clocks and global lines <https://www.fpga4fun.com/FPGAinfo5.html>`
-
-
+* `What are FPGAs? <https://www.fpga4fun.com/FPGAinfo1.html>`_
+* `How FPGAs work <https://www.fpga4fun.com/FPGAinfo2.html>`_
+* `Internal RAM <https://www.fpga4fun.com/FPGAinfo3.html>`_
+* `FPGA pins <https://www.fpga4fun.com/FPGAinfo4.html>`_
+* `Clocks and global lines <https://www.fpga4fun.com/FPGAinfo5.html>`_
 
 FPGA4Fun - Music Box
 ====================
@@ -196,6 +194,16 @@ PMOD AMP2 and a plug-in speaker.
 .. image:: ../images/arty_with_amp.jpg
    :height: 300px
    :alt: View of an Arty A7 plugged into a PMOD2 and a speaker
+   
+If you do not have a pmod2 (maybe you have a pmod3 in your kit, and it's entirely incompatible),
+you can still get basic analog output by wiring amplified speakers between GND an JD pin#1 
+(jd[0] in the code). Note that, especially if you are using unamplified speakers, you should 
+limit current, which is done automatically on JA and JD PMOD I/O pins but not on other outputs
+which would require an additional current limiting resistor.
+
+.. image:: ../images/arty_direct_speaker.jpg
+   :height: 300px
+   :alt: View of an Arty A7 plugged directly into a speaker
 
 2. Read through the first section of `Music box 1 - Simple beep`__.
 
@@ -362,7 +370,7 @@ Preparation
 
 1. Ensure that you have git and virtualenv installed:
 
-.. code-block: bash
+.. code-block:: bash
 
    $ sudo apt install git
    $ sudo apt install python3-virtualenv
@@ -377,14 +385,14 @@ Preparation
 
 3. Create the virtualenv:
 
-.. code-block: bash
+.. code-block:: bash
 
    $ cd $HOME
    $ virtualenv -p python3 nmigen-tutorial
 
 4. Add an alias to your ``.bashrc`` or ``.bash_aliases`` file:
 
-.. code-block: bash
+.. code-block:: bash
 
    pathadd() {
        if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
@@ -399,7 +407,7 @@ Preparation
 
 6. Install nMigen
 
-.. code-block: bash
+.. code-block:: bash
 
    $ pip install --upgrade \
      'git+https://github.com/nmigen/nmigen.git#egg=nmigen[builtin-yosys]'
@@ -421,7 +429,7 @@ is going on.  This tutorial was written with the UPduino as a target, but you
 could also use the Arty A7. See notes below.  Before beginning, grab the sample
 code:
 
-.. code-block: bash
+.. code-block:: bash
 
    $ cd ~/playground
    $ git clone https://github.com/WRansohoff/nmigen_getting_started.git
