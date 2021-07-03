@@ -405,10 +405,11 @@ Preparation
 
 5. Execute the ``startp`` alias to enter the virtual environment.
 
-6. Install nMigen
+6. Install nMigen and gtkwave used for the tutorial
 
 .. code-block:: bash
 
+   $ sudo apt install gtkwave   
    $ pip install --upgrade \
      'git+https://github.com/nmigen/nmigen.git#egg=nmigen[builtin-yosys]'
    $ pip install --upgrade 'git+https://github.com/nmigen/nmigen-boards.git'
@@ -431,16 +432,33 @@ code:
 
 .. code-block:: bash
 
-   $ cd ~/playground
-   $ git clone https://github.com/WRansohoff/nmigen_getting_started.git
+   $ cd ~/nmigen-tutorial
+   $ git clone --branch updated_api https://github.com/alanvgreen/nmigen_getting_started.git
+   $ # make sure the virtualenv is activated with startp as explained above
+     
+This is a summary of the first commands in the tutorial to make sure everything is working:
 
+.. code-block:: bash
+
+   $ cd nmigen_getting_started/hello_nmigen
+   $ python3 test.py 
+   $ gtkwave test.vcd 
+   $ # make sure you click the zoom out icon in gtkwave after enabling the signals to view
+   
+   $ cd ../hello_led
+   $ python3 led.py
+   $ iceprog build/top.bin
 
 Some notes:
 
 * the nMigen API has changed slightly since this tutorial was written. See
-  `this PR`__ for the required updates.
+  `this PR`__ for the required updates. Because the PR has not been merged
+  the git clone command above will get you correct tree 
 
 .. __: https://github.com/WRansohoff/nmigen_getting_started/pull/1
+
+* Do not try to cut and paste the code bits in the tutorial, they contain the outdated non
+  working code. Instead use hello_nmigen/test.py from the patched tree you just cloned.
 
 * You may notice that the different tutorials run so quickly that it's hard to
   follow the sequence of lights.  can't see the sequences. Try to fix this by
