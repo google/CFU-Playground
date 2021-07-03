@@ -18,18 +18,18 @@ but is significantly more expensive.
 .. _`Mouser`: https://au.mouser.com/ProductDetail/Digilent/410-319?qs=%2Fha2pyFaduiP6GD6DfdhNp6rR4rT1KTVOohSnRQ%252BMgra5hr4M7aEiQ%3D%3D 
 
 
-Step 2: Install Vivado and renode
+Step 2: Install Vivado and Renode
 ---------------------------------
 
-1. vivado
+1. Vivado
   
   See https://cfu-playground.readthedocs.io/en/latest/vivado-install.html for a comprehensive guide. 
   Note that the software can take up to 8H to download
 
-2. renode
+2. Renode
 
    Either "apt-get install renode" or get renode-xxx-linux.portable.tar.gz from
-   https://dl.antmicro.com/projects/renode/builds/ (and make sure renode is in your PATH)
+   https://dl.antmicro.com/projects/renode/builds/ (and make sure ``renode`` is in your PATH)
 
 
 Step 3: Install RISCV toolchain
@@ -69,6 +69,15 @@ Step 5: Setup python virtual environment + setup
 
 Python virtualenv ensures that you have the correct python and modules needed by this code.
 
+If you don't have ``virtualenv``, install it; for example, on a Debian-based Linux such as Ubuntu, use:
+
+.. code-block:: bash
+
+   $ apt install python3-virtualenv
+
+
+Once you have virtualenv, do the following:
+
 .. code-block:: bash
 
    $ virtualenv CFU-Playground
@@ -102,7 +111,7 @@ as a useful "minimal" system.
    $ make prog
 
    # Build the RISCV program and load it onto the board
-   # Also starts a terminal ( exit the terminal with CTRL+C )
+   # Also starts a terminal ( exit the terminal by hitting CTRL+C twice rapidly )
    $ make load
    (...)
    /home/merlin/fpga/CFU-Playground/soc/bin/litex_term --speed 3686400  --kernel /home/merlin/fpga/CFU-Playground/proj/proj_template/build/software.bin /dev/ttyUSB1
