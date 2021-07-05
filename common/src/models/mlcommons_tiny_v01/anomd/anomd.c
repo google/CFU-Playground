@@ -19,6 +19,7 @@
 #include <stdio.h>
 
 #include "menu.h"
+#include "metrics.h"
 #include "models/mlcommons_tiny_v01/anomd/test_data/quant_anomaly_0.h"
 #include "models/mlcommons_tiny_v01/anomd/test_data/quant_anomaly_1.h"
 #include "models/mlcommons_tiny_v01/anomd/test_data/quant_anomaly_2.h"
@@ -53,7 +54,9 @@ uint32_t uint32_xor_reduction(int8_t* output, unsigned int length) {
 
 uint32_t anomd_classify() {
   printf("Running anomd\n");
+  DCACHE_SETUP_METRICS;
   tflite_classify();
+  DCACHE_PRINT_METRICS;
 
   int8_t* output = tflite_get_output();
   return uint32_xor_reduction(output, 640);

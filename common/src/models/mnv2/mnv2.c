@@ -19,6 +19,7 @@
 #include <stdio.h>
 
 #include "menu.h"
+#include "metrics.h"
 #include "models/mnv2/input_00001_18027.h"
 #include "models/mnv2/input_00001_7281.h"
 #include "models/mnv2/input_00001_7425.h"
@@ -47,7 +48,9 @@ static void mnv2_init(void) {
 // Run classification, after input has been loaded
 static int32_t mnv2_classify() {
   printf("Running mnv2\n");
+  DCACHE_SETUP_METRICS;
   tflite_classify();
+  DCACHE_PRINT_METRICS;
 
   // Process the inference results.
   int8_t* output = tflite_get_output();
