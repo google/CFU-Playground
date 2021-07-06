@@ -105,6 +105,7 @@ COMMON_FILES	   := $(shell find $(COMMON_DIR) -type f)
 MLCOMMONS_SRC_DIR  := $(CFU_ROOT)/third_party/mlcommons
 SAXON_SRC_DIR      := $(CFU_ROOT)/third_party/SaxonSoc
 RENODE_DIR         := $(CFU_ROOT)/third_party/renode
+LITEX_RENODE_DIR   := $(CFU_ROOT)/third_party/python/litex-renode
 SRC_DIR            := $(abspath $(PROJ_DIR)/src)
 
 TFLM_SRC_DIR       := $(CFU_ROOT)/third_party/tflite-micro
@@ -159,10 +160,19 @@ else
 endif
 
 .PHONY:	renode 
-renode: $(SOFTWARE_ELF) 
+renode: $(SOFTWARE_ELF) renode-scripts
 	@echo Running interactively under renode
 	$(COPY) $(SOFTWARE_ELF) $(PROJ_DIR)/renode/
 	pushd $(PROJ_DIR)/renode/ && $(RENODE_DIR)/renode -e "s @litex-vexriscv-tflite.resc" && popd
+
+.PHONY: renode-scripts
+renode-scripts:
+ifneq ("$(wildcard $(SOC_BUILD_DIR)/csr.csv)","")
+	$(LITEX_RENODE_DIR)/generate-renode-scripts.py $(SOC_BUILD_DIR)/csr.csv --repl $(PROJ_DIR)/renode/litex-vexriscv-tflite.repl
+	@echo Generating Renode scripts finished
+else
+	@echo $(SOC_BUILD_DIR)/csr.csv not found
+endif
 
 .PHONY: clean
 clean:
