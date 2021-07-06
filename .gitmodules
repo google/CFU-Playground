@@ -52,3 +52,15 @@
 [submodule "third_party/tflite-micro"]
 	path = third_party/tflite-micro
 	url = https://github.com/tensorflow/tflite-micro.git
+[submodule "third_party/python/litehyperbus"]
+	path = third_party/python/litehyperbus
+	url = https://github.com/litex-hub/litehyperbus.git
+[submodule "third_party/python/litepcie"]
+	path = third_party/python/litepcie
+	url = https://github.com/enjoy-digital/litepcie.git
+[submodule "third_party/python/litevideo"]
+	path = third_party/python/litevideo
+	url = https://github.com/enjoy-digital/litevideo.git
+[submodule "third_party/python/litex-renode"]
+	path = third_party/python/litex-renode
+	url = https://github.com/litex-hub/litex-renode.git
