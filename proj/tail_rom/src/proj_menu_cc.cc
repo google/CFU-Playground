@@ -20,14 +20,21 @@
 #include "menu.h"
 #include "proj_menu.h"
 
-// Defined in pdti8_cache.cc
-extern calculate_once::Cache pdti8_cache;
+#ifdef TAIL_ROM_USE
+#include "pdti8_cache.h"
+#endif
 
 namespace {
 
 void do_reset_cache() { calculate_once::SetCache(NULL); }
 
-void do_set_pdti8() { calculate_once::SetCache(&pdti8_cache); }
+void do_set_pdti8() {
+#ifdef TAIL_ROM_USE
+  calculate_once::SetCache(GetCachePdti8());
+#else
+  puts("Not configured to use tail rom.");
+#endif
+}
 
 }  // anonymous namespace
 
