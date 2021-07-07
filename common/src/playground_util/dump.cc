@@ -18,11 +18,7 @@
 
 #include <cstdio>
 
-static void pause() {
-  for (size_t i = 0; i < 20000000; i++) {
-    asm volatile("nop");
-  }
-}
+#include "playground_util/pause.h"
 
 // Dump len bytes of data
 void dump_hex(const uint8_t* data, size_t len) {
