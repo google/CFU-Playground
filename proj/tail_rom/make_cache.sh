@@ -15,8 +15,9 @@
 
 set -e
 
-# Add menu items that correspond to the model
-MENU_ITEMS="1 1 1"
+# Add menu items that correspond to the model menu item that causes the 
+# model to be loaded.
+MENU_ITEMS="1 1"
 MODEL=pdti8
 
 THIS_DIR=$(dirname "${BASH_SOURCE[0]}")
@@ -26,10 +27,10 @@ SCRIPTS="${CFU_ROOT}/scripts"
 TMP=$(mktemp /tmp/tailrom.XXXXXX)
 
 # capture the output
-make run TAIL_CAPTURE=1 RUN_MENU_ITEMS="${MENU_ITEMS}"| tee ${TMP}
+make run TAIL_CAPTURE=1 RUN_MENU_ITEMS="${MENU_ITEMS} x x"| tee ${TMP}
 
 # Make a .cc file
-"${SCRIPTS}/pyrun" "${SCRIPTS}/extract_captured_data.py" \
-    --var-name "${MODEL}_cache" "${TMP}" "src/${MODEL}_cache.cc"
+"${SCRIPTS}/pyrun" "${THIS_DIR}/extract_captured_data.py" \
+    --model-name "${MODEL}" "${TMP}" "src/${MODEL}_cache.cc" "src/${MODEL}_cache.h"
 
 rm "${TMP}"

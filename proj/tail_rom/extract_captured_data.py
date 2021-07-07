@@ -24,11 +24,12 @@ END = "+++ calculate_once::Capture end +++"
 
 
 def main():
+    # Handle arguments
     parser = argparse.ArgumentParser(description="Extract calculate once data")
     parser.add_argument(
-        '--var-name',
-        default="model_cache",
-        help="Name of the model variable")
+        '--model-name',
+        default="model",
+        help="Name of the model")
     parser.add_argument(
         'infile',
         type=argparse.FileType(
@@ -36,13 +37,21 @@ def main():
             encoding='latin-1'),
         help="Input file containing the strings to be extracted.")
     parser.add_argument(
-        'outfile',
+        'outfile_cc',
         type=argparse.FileType(
             'w',
             encoding='latin-1'),
-        help="Output file")
+        help="Output C++ file")
+    parser.add_argument(
+        'outfile_h',
+        type=argparse.FileType(
+            'w',
+            encoding='latin-1'),
+        help="Output header file file")
 
     args = parser.parse_args()
+
+    # Extract from output
     extracting = False
     for line in args.infile.readlines():
         if BEGIN in line:
@@ -52,13 +61,23 @@ def main():
             extracting = False
         elif extracting:
             line = line.replace('\r', '').replace('\n', '')
-            line = line.replace('XXX_cache', args.var_name)
-            if got_content and line ==  '':
+            line = line.replace('__CACHE_NAME__', args.model_name.capitalize())
+            if got_content and line == '':
                 got_content = False
             else:
                 got_content = True
-                print(line, file=args.outfile)
+                print(line, file=args.outfile_cc)
 
+    # Make the header file
+    print(f"""// Generated header file
+
+#ifndef {args.model_name.upper()}_CACHE_H
+#define {args.model_name.upper()}_CACHE_H
+
+calculate_once::Cache *GetCache{args.model_name.capitalize()}();
+
+#endif
+""", file=args.outfile_h)
 
 if __name__ == '__main__':
     main()
