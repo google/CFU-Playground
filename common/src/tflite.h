@@ -20,8 +20,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "calc_once_data.h"
-
 #ifndef _TFLITE_H
 #define _TFLITE_H
 
