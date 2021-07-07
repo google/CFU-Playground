@@ -175,6 +175,7 @@ void tflite_load_model(const unsigned char* model_data,
 }
 
 void tflite_set_input_zeros() {
+void tflite_set_input_zeros(void) {
   auto input = interpreter->input(0);
   memset(input->data.int8, 0, input->bytes);
   printf("Zeroed %d bytes at 0x%p\n", input->bytes, input->data.int8);
