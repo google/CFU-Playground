@@ -29,8 +29,8 @@ void init(void) {
 }
 
 // Run classification, after input has been loaded
-int32_t classify() {
-  printf("Running an hps model\n");
+int32_t classify(const char* desc) {
+  printf("Running %s\n", desc);
   tflite_classify();
 
   // Process the inference results.
@@ -38,18 +38,72 @@ int32_t classify() {
   return (int32_t)output[1] - (int32_t)output[0];
 }
 
+// Classify with random data
+int32_t classify_random_1() {
+  constexpr int64_t INPUT_SEED_1 = 0x1234567890abcdef;
+  tflite_randomize_input(INPUT_SEED_1);
+  return classify("random 1");
+}
+
+void do_classify_random_1() { printf("Result is %ld\n", classify_random_1()); }
+
+// Classify with a grid pattern
+int32_t classify_grid() {
+  tflite_set_grid_input();
+  return classify("grid");
+}
+
+void do_classify_grid() { printf("Result is %ld\n", classify_grid()); }
+
 // Set input to zero and run classification
-void do_classify_zeros() {
+int32_t classify_zeros() {
   tflite_set_input_zeros();
-  int32_t result = classify();
-  printf("Result is %ld\n", result);
+  return classify("zeroed input");
+}
+
+void do_classify_zeros() { printf("Result is %ld\n", classify_zeros()); }
+
+// Golden tests: expected results
+struct GoldenTest {
+  int32_t (*fn)();
+  int32_t expected;
+};
+
+GoldenTest golden_tests[4] = {
+    {classify_random_1, 0},
+    {classify_grid, -3},
+    {classify_zeros, -1},
+    {nullptr, 0},
+};
+
+static void do_golden_tests() {
+  bool failed = false;
+  for (size_t i = 0; golden_tests[i].fn; i++) {
+    int32_t actual = golden_tests[i].fn();
+    int32_t expected = golden_tests[i].expected;
+    if (actual != expected) {
+      failed = true;
+      printf("*** Golden test %d failed: %ld (actual) != %ld (expected))\n", i,
+             actual, expected);
+    }
+  }
+
+  if (failed) {
+    puts("FAIL Golden tests failed");
+  } else {
+    puts("OK   Golden tests passed");
+  }
 }
 
 struct Menu MENU = {
     "Tests for HPS model model",
     "hps",
     {
+        MENU_ITEM('1', "Run with random input seed #1", do_classify_random_1),
+        MENU_ITEM('2', "Run with grid", do_classify_grid),
         MENU_ITEM('z', "Run with zeros input", do_classify_zeros),
+        MENU_ITEM('g', "Run golden tests (check for expected outputs)",
+                  do_golden_tests),
         MENU_END,
     },
 };

@@ -15,6 +15,7 @@
 #include "tflite.h"
 
 #include "perf.h"
+#include "playground_util/random.h"
 #include "proj_tflite.h"
 #include "tensorflow/lite/micro/all_ops_resolver.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
@@ -174,7 +175,6 @@ void tflite_load_model(const unsigned char* model_data,
   puts("\n");
 }
 
-void tflite_set_input_zeros() {
 void tflite_set_input_zeros(void) {
   auto input = interpreter->input(0);
   memset(input->data.int8, 0, input->bytes);
@@ -205,6 +205,28 @@ void tflite_set_input_float(const float* data) {
   auto input = interpreter->input(0);
   memcpy(input->data.f, data, input->bytes);
   printf("Copied %d bytes at 0x%p\n", input->bytes, input->data.f);
+}
+
+void tflite_randomize_input(int64_t seed) {
+  int64_t r = seed;
+  auto input = interpreter->input(0);
+  for (size_t i = 0; i < input->bytes; i++) {
+    input->data.int8[i] = static_cast<int8_t>(next_pseudo_random(&r));
+  }
+  printf("Set %d bytes at 0x%p\n", input->bytes, input->data.int8);
+}
+
+void tflite_set_grid_input(void) {
+  auto input = interpreter->input(0);
+  size_t height = input->dims->data[1];
+  size_t width = input->dims->data[2];
+  for (size_t y = 0; y < height; y++) {
+    for (size_t x = 0; x < width; x++) {
+      int8_t val = (y & 0x20) & (x & 0x20) ? -128 : 127;
+      input->data.int8[x + y * width] = val;
+    }
+  }
+  printf("Set %d bytes at 0x%p\n", input->bytes, input->data.int8);
 }
 
 int8_t* tflite_get_output() { return interpreter->output(0)->data.int8; }
