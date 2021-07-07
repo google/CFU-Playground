@@ -18,6 +18,7 @@
 
 #include "playground_util/dump.h"
 #include "playground_util/murmurhash.h"
+#include "playground_util/pause.h"
 
 #define CAPTURE_BEGIN "\n+++ calculate_once::Capture begin +++\n"
 #define CAPTURE_END "+++ calculate_once::Capture end +++\n"
@@ -50,8 +51,7 @@ void Capturer::Capture(const int32_t* data, size_t num_words) {
   printf("const uint32_t buffer_%d[%d] = {\n", sequence_counter_, num_words);
   dump_hex(data, num_words);
   printf("};\n");
-  printf("constexpr size_t size_%d = sizeof(buffer_%d);\n", sequence_counter_,
-         sequence_counter_);
+  printf("constexpr size_t size_%d = %d;\n", sequence_counter_, num_words);
   printf(CAPTURE_END);
   sequence_counter_++;
 }
@@ -60,24 +60,29 @@ void Capturer::Finish() {
   if (!capturing_) {
     return;
   }
+  pause();
   printf(CAPTURE_BEGIN);
-
   printf("const int32_t* buffers[] = {\n");
   for (size_t i = 0; i < sequence_counter_; i++) {
-    printf("  reinterpret_cast<const int32_t*>(buffer_%d),\n", i);
+    printf("  reinterpret_cast<const int32_t *>(buffer_%d),\n", i);
   }
   printf("};\n");
 
+  pause();
   printf("const size_t sizes[] = {\n");
   for (size_t i = 0; i < sequence_counter_; i++) {
     printf("  size_%d,\n", i);
   }
   printf("};\n");
 
-  printf("} // anonymous namespace \n");
-  // The Cache variable name needs to be fixed by the capturing scripts
-  printf("calculate_once::Cache XXX_cache(model_hash, %d, buffers, sizes);\n",
-         sequence_counter_);
+  printf("} // anonymous namespace\n\n");
+  // __CACHE_NAME__ is replaced with the cache name, later
+  printf("calculate_once::Cache *GetCache__CACHE_NAME__() {\n");
+  printf(
+      "  static calculate_once::Cache cache(model_hash, %d, buffers, sizes);\n",
+      sequence_counter_);
+  printf("  return &cache;\n");
+  printf("};\n");
   printf(CAPTURE_END);
 
   capturing_ = false;
