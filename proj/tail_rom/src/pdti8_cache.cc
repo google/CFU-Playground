@@ -10,25 +10,25 @@ const uint32_t buffer_0[8] = {
   0x595756e6, 0x48aa2030, 0x425eeed7, 0x474548da,
   0x7e01c5a9, 0x66140e44, 0x6311d242, 0x5eea603f,
 };
-constexpr size_t size_0 = sizeof(buffer_0);
+constexpr size_t size_0 = 8;
 
 const uint32_t buffer_1[8] = {
   0xfffffff9, 0xfffffffa, 0xfffffff7, 0xfffffff7,
   0xfffffff8, 0xfffffffa, 0xfffffff9, 0xfffffff5,
 };
-constexpr size_t size_1 = sizeof(buffer_1);
+constexpr size_t size_1 = 8;
 
 const uint32_t buffer_2[8] = {
   0x4629e300, 0x654be500, 0x4ac11a80, 0x5f25e680,
   0x7818b680, 0x56cc3880, 0x78d0c880, 0x51d42100,
 };
-constexpr size_t size_2 = sizeof(buffer_2);
+constexpr size_t size_2 = 8;
 
 const uint32_t buffer_3[8] = {
   0xfffffff9, 0xfffffff9, 0xfffffffe, 0xfffffff8,
   0xfffffffa, 0xfffffff8, 0xfffffff9, 0xffffffff,
 };
-constexpr size_t size_3 = sizeof(buffer_3);
+constexpr size_t size_3 = 8;
 
 const uint32_t buffer_4[16] = {
   0x71448480, 0x48692680, 0x43b26300, 0x7721e080,
@@ -36,7 +36,7 @@ const uint32_t buffer_4[16] = {
   0x7503d980, 0x43da1400, 0x6963d980, 0x41b19380,
   0x63564380, 0x71ea7200, 0x4278a980, 0x595b2c00,
 };
-constexpr size_t size_4 = sizeof(buffer_4);
+constexpr size_t size_4 = 16;
 
 const uint32_t buffer_5[16] = {
   0xfffffffa, 0xfffffffa, 0xfffffffb, 0xfffffff9,
@@ -44,7 +44,7 @@ const uint32_t buffer_5[16] = {
   0xfffffffa, 0xfffffffa, 0xfffffffa, 0xfffffffa,
   0xfffffffa, 0xfffffff9, 0xfffffffa, 0xfffffffa,
 };
-constexpr size_t size_5 = sizeof(buffer_5);
+constexpr size_t size_5 = 16;
 
 const uint32_t buffer_6[16] = {
   0x72d77980, 0x6369bb00, 0x50c0a380, 0x4191d080,
@@ -52,7 +52,7 @@ const uint32_t buffer_6[16] = {
   0x5257cd00, 0x48ea1d00, 0x621d1100, 0x51335a80,
   0x7637f780, 0x72e31400, 0x6d11d880, 0x76904280,
 };
-constexpr size_t size_6 = sizeof(buffer_6);
+constexpr size_t size_6 = 16;
 
 const uint32_t buffer_7[16] = {
   0xfffffff8, 0xfffffff8, 0xfffffff9, 0xfffffff9,
@@ -60,7 +60,7 @@ const uint32_t buffer_7[16] = {
   0xfffffff9, 0xfffffffa, 0xfffffff8, 0xfffffff9,
   0xfffffff8, 0xfffffff8, 0xfffffff9, 0xfffffff9,
 };
-constexpr size_t size_7 = sizeof(buffer_7);
+constexpr size_t size_7 = 16;
 
 const uint32_t buffer_8[32] = {
   0x5e63ae00, 0x41c63300, 0x66916a00, 0x68b72400,
@@ -72,7 +72,7 @@ const uint32_t buffer_8[32] = {
   0x585a8500, 0x49162480, 0x5a46b000, 0x77bf3f80,
   0x4dc1cd00, 0x4d282500, 0x4426ea00, 0x78bcc000,
 };
-constexpr size_t size_8 = sizeof(buffer_8);
+constexpr size_t size_8 = 32;
 
 const uint32_t buffer_9[32] = {
   0xfffffffa, 0xfffffff9, 0xfffffff9, 0xfffffff9,
@@ -84,7 +84,7 @@ const uint32_t buffer_9[32] = {
   0xfffffff9, 0xfffffff7, 0xfffffff9, 0xfffffff9,
   0xfffffffa, 0xfffffff9, 0xfffffffa, 0xfffffff8,
 };
-constexpr size_t size_9 = sizeof(buffer_9);
+constexpr size_t size_9 = 32;
 
 const uint32_t buffer_10[32] = {
   0x4244c380, 0x4ee83c80, 0x72d1b400, 0x51135c80,
@@ -96,7 +96,7 @@ const uint32_t buffer_10[32] = {
   0x63a2e480, 0x78431500, 0x7c3e2300, 0x692b2b80,
   0x537a0200, 0x7046f600, 0x69cfa200, 0x5c0ca680,
 };
-constexpr size_t size_10 = sizeof(buffer_10);
+constexpr size_t size_10 = 32;
 
 const uint32_t buffer_11[32] = {
   0xfffffffa, 0xfffffffa, 0xfffffff9, 0xfffffffa,
@@ -108,7 +108,7 @@ const uint32_t buffer_11[32] = {
   0xfffffff9, 0xfffffffb, 0xfffffff9, 0xfffffff8,
   0xfffffff9, 0xfffffff9, 0xfffffff9, 0xfffffffa,
 };
-constexpr size_t size_11 = sizeof(buffer_11);
+constexpr size_t size_11 = 32;
 
 const uint32_t buffer_12[32] = {
   0x46e88f80, 0x63622500, 0x51614f00, 0x4193a800,
@@ -120,7 +120,7 @@ const uint32_t buffer_12[32] = {
   0x69017a00, 0x42614e00, 0x6bc68580, 0x58328b00,
   0x5d615780, 0x7e5deb00, 0x4c460b00, 0x7f68dd80,
 };
-constexpr size_t size_12 = sizeof(buffer_12);
+constexpr size_t size_12 = 32;
 
 const uint32_t buffer_13[32] = {
   0xfffffff9, 0xfffffff9, 0xfffffff9, 0xfffffff9,
@@ -132,7 +132,7 @@ const uint32_t buffer_13[32] = {
   0xfffffff9, 0xfffffffa, 0xfffffff9, 0xfffffff9,
   0xfffffff8, 0xfffffff8, 0xfffffff9, 0xfffffff8,
 };
-constexpr size_t size_13 = sizeof(buffer_13);
+constexpr size_t size_13 = 32;
 
 const uint32_t buffer_14[32] = {
   0x5d740700, 0x706d8300, 0x56558a80, 0x74a6e100,
@@ -144,7 +144,7 @@ const uint32_t buffer_14[32] = {
   0x71603080, 0x7c753e80, 0x6bcc1e80, 0x603e8980,
   0x4dee3000, 0x6f284900, 0x48630480, 0x6ba97000,
 };
-constexpr size_t size_14 = sizeof(buffer_14);
+constexpr size_t size_14 = 32;
 
 const uint32_t buffer_15[32] = {
   0xfffffff8, 0xfffffff8, 0xfffffff8, 0xfffffff8,
@@ -156,7 +156,7 @@ const uint32_t buffer_15[32] = {
   0xfffffff9, 0xfffffff8, 0xfffffff8, 0xfffffff8,
   0xfffffff9, 0xfffffff8, 0xfffffff9, 0xfffffff9,
 };
-constexpr size_t size_15 = sizeof(buffer_15);
+constexpr size_t size_15 = 32;
 
 const uint32_t buffer_16[64] = {
   0x454e4f00, 0x57fdd080, 0x52848400, 0x455afc80,
@@ -176,7 +176,7 @@ const uint32_t buffer_16[64] = {
   0x6a32be80, 0x6a86bd80, 0x490e2100, 0x5320f600,
   0x6107a500, 0x7eb4ae00, 0x5dcee900, 0x645d8500,
 };
-constexpr size_t size_16 = sizeof(buffer_16);
+constexpr size_t size_16 = 64;
 
 const uint32_t buffer_17[64] = {
   0xfffffff9, 0xfffffff8, 0xfffffff9, 0xfffffff9,
@@ -196,7 +196,7 @@ const uint32_t buffer_17[64] = {
   0xfffffff8, 0xfffffff9, 0xfffffff9, 0xfffffff9,
   0xfffffff8, 0xfffffff9, 0xfffffff9, 0xfffffff8,
 };
-constexpr size_t size_17 = sizeof(buffer_17);
+constexpr size_t size_17 = 64;
 
 const uint32_t buffer_18[64] = {
   0x53b6d780, 0x4d7db780, 0x7832a780, 0x7b2e3200,
@@ -216,7 +216,7 @@ const uint32_t buffer_18[64] = {
   0x4662f000, 0x641c6700, 0x4d9c5c00, 0x509a9180,
   0x650c2f00, 0x452a3180, 0x5bf48b80, 0x5eb27d00,
 };
-constexpr size_t size_18 = sizeof(buffer_18);
+constexpr size_t size_18 = 64;
 
 const uint32_t buffer_19[64] = {
   0xfffffff9, 0xfffffffa, 0xfffffff9, 0xfffffff9,
@@ -236,7 +236,7 @@ const uint32_t buffer_19[64] = {
   0xfffffffa, 0xfffffff9, 0xfffffff9, 0xfffffff9,
   0xfffffffa, 0xfffffff9, 0xfffffff9, 0xfffffffa,
 };
-constexpr size_t size_19 = sizeof(buffer_19);
+constexpr size_t size_19 = 64;
 
 const uint32_t buffer_20[64] = {
   0x55e45200, 0x7d352700, 0x46ae2580, 0x52430d00,
@@ -256,7 +256,7 @@ const uint32_t buffer_20[64] = {
   0x67fac800, 0x756ede00, 0x73134e80, 0x6f069400,
   0x7f512c00, 0x41c04300, 0x4a250180, 0x496d7a00,
 };
-constexpr size_t size_20 = sizeof(buffer_20);
+constexpr size_t size_20 = 64;
 
 const uint32_t buffer_21[64] = {
   0xfffffff8, 0xfffffff8, 0xfffffff9, 0xfffffff9,
@@ -276,7 +276,7 @@ const uint32_t buffer_21[64] = {
   0xfffffff8, 0xfffffff8, 0xfffffff8, 0xfffffff8,
   0xfffffff8, 0xfffffff9, 0xfffffff8, 0xfffffff8,
 };
-constexpr size_t size_21 = sizeof(buffer_21);
+constexpr size_t size_21 = 64;
 
 const uint32_t buffer_22[64] = {
   0x48580080, 0x443af380, 0x727b6d00, 0x7c51f980,
@@ -296,7 +296,7 @@ const uint32_t buffer_22[64] = {
   0x6cbb1800, 0x4191db00, 0x62eeab80, 0x63ee7e00,
   0x5e9fc800, 0x471d1000, 0x44019a80, 0x6cf97080,
 };
-constexpr size_t size_22 = sizeof(buffer_22);
+constexpr size_t size_22 = 64;
 
 const uint32_t buffer_23[64] = {
   0xfffffff9, 0xfffffff9, 0xfffffff8, 0xfffffff8,
@@ -316,7 +316,7 @@ const uint32_t buffer_23[64] = {
   0xfffffff9, 0xfffffff9, 0xfffffff8, 0xfffffff8,
   0xfffffff8, 0xfffffff9, 0xfffffff9, 0xfffffff9,
 };
-constexpr size_t size_23 = sizeof(buffer_23);
+constexpr size_t size_23 = 64;
 
 const uint32_t buffer_24[128] = {
   0x7b8b6d80, 0x6632c080, 0x5e187000, 0x7ecd1a00,
@@ -352,7 +352,7 @@ const uint32_t buffer_24[128] = {
   0x61e71580, 0x4ed27a00, 0x67695f80, 0x49357580,
   0x44f20b80, 0x54445400, 0x6a8e0200, 0x6363cc00,
 };
-constexpr size_t size_24 = sizeof(buffer_24);
+constexpr size_t size_24 = 128;
 
 const uint32_t buffer_25[128] = {
   0xfffffff8, 0xfffffff8, 0xfffffff9, 0xfffffff8,
@@ -388,7 +388,7 @@ const uint32_t buffer_25[128] = {
   0xfffffff8, 0xfffffff8, 0xfffffff8, 0xfffffff9,
   0xfffffff9, 0xfffffff8, 0xfffffff8, 0xfffffff8,
 };
-constexpr size_t size_25 = sizeof(buffer_25);
+constexpr size_t size_25 = 128;
 
 const uint32_t buffer_26[128] = {
   0x4c0d3180, 0x6fe57800, 0x6e1b3500, 0x4b45bd00,
@@ -424,7 +424,7 @@ const uint32_t buffer_26[128] = {
   0x7b13b700, 0x44918080, 0x4dd3ab80, 0x4aa51180,
   0x4d05a980, 0x402b5300, 0x44281e00, 0x48876800,
 };
-constexpr size_t size_26 = sizeof(buffer_26);
+constexpr size_t size_26 = 128;
 
 const uint32_t buffer_27[128] = {
   0xfffffff9, 0xfffffff9, 0xfffffff9, 0xfffffffa,
@@ -460,7 +460,7 @@ const uint32_t buffer_27[128] = {
   0xfffffff9, 0xfffffff9, 0xfffffff9, 0xfffffff9,
   0xfffffffa, 0xfffffffa, 0xfffffffa, 0xfffffff9,
 };
-constexpr size_t size_27 = sizeof(buffer_27);
+constexpr size_t size_27 = 128;
 
 const uint32_t buffer_28[128] = {
   0x4ab93480, 0x7715bd80, 0x5e3d8700, 0x597d4100,
@@ -496,7 +496,7 @@ const uint32_t buffer_28[128] = {
   0x4f645800, 0x5ec12100, 0x50943b00, 0x57000000,
   0x48ec1b80, 0x5b787580, 0x67bf8400, 0x5bdadd80,
 };
-constexpr size_t size_28 = sizeof(buffer_28);
+constexpr size_t size_28 = 128;
 
 const uint32_t buffer_29[128] = {
   0xfffffff8, 0xfffffff8, 0xfffffff8, 0xfffffff8,
@@ -532,7 +532,7 @@ const uint32_t buffer_29[128] = {
   0xfffffff8, 0xfffffff8, 0xfffffff8, 0xfffffff8,
   0xfffffff8, 0xfffffff8, 0xfffffff8, 0xfffffff8,
 };
-constexpr size_t size_29 = sizeof(buffer_29);
+constexpr size_t size_29 = 128;
 
 const uint32_t buffer_30[128] = {
   0x5ce45b80, 0x43832480, 0x551b8980, 0x441ca680,
@@ -568,7 +568,7 @@ const uint32_t buffer_30[128] = {
   0x4f65f100, 0x50111680, 0x4bb97880, 0x5ab79f00,
   0x78b92d00, 0x538f9d00, 0x56984500, 0x646bc300,
 };
-constexpr size_t size_30 = sizeof(buffer_30);
+constexpr size_t size_30 = 128;
 
 const uint32_t buffer_31[128] = {
   0xfffffff9, 0xfffffffa, 0xfffffff9, 0xfffffff9,
@@ -604,7 +604,7 @@ const uint32_t buffer_31[128] = {
   0xfffffff9, 0xfffffffa, 0xfffffff9, 0xfffffffa,
   0xfffffff9, 0xfffffff9, 0xfffffff9, 0xfffffff9,
 };
-constexpr size_t size_31 = sizeof(buffer_31);
+constexpr size_t size_31 = 128;
 
 const uint32_t buffer_32[128] = {
   0x463c1280, 0x5436fe80, 0x51984000, 0x50112980,
@@ -640,7 +640,7 @@ const uint32_t buffer_32[128] = {
   0x50d41180, 0x4d9cae00, 0x54671000, 0x55ab8c80,
   0x64280c00, 0x49610d00, 0x535e3e80, 0x5645e300,
 };
-constexpr size_t size_32 = sizeof(buffer_32);
+constexpr size_t size_32 = 128;
 
 const uint32_t buffer_33[128] = {
   0xfffffff8, 0xfffffff8, 0xfffffff8, 0xfffffff8,
@@ -676,7 +676,7 @@ const uint32_t buffer_33[128] = {
   0xfffffff8, 0xfffffff8, 0xfffffff8, 0xfffffff8,
   0xfffffff8, 0xfffffff8, 0xfffffff8, 0xfffffff8,
 };
-constexpr size_t size_33 = sizeof(buffer_33);
+constexpr size_t size_33 = 128;
 
 const uint32_t buffer_34[128] = {
   0x6cc52d00, 0x44e6af80, 0x49657a00, 0x5c00cb00,
@@ -712,7 +712,7 @@ const uint32_t buffer_34[128] = {
   0x418f0280, 0x76e04b80, 0x4be51900, 0x46872180,
   0x56c07700, 0x456c0680, 0x51ca8b80, 0x5f2b1100,
 };
-constexpr size_t size_34 = sizeof(buffer_34);
+constexpr size_t size_34 = 128;
 
 const uint32_t buffer_35[128] = {
   0xfffffff9, 0xfffffff9, 0xfffffff9, 0xfffffff9,
@@ -748,7 +748,7 @@ const uint32_t buffer_35[128] = {
   0xfffffffa, 0xfffffff8, 0xfffffff9, 0xfffffff9,
   0xfffffff9, 0xfffffff9, 0xfffffff9, 0xfffffff9,
 };
-constexpr size_t size_35 = sizeof(buffer_35);
+constexpr size_t size_35 = 128;
 
 const uint32_t buffer_36[128] = {
   0x474e1800, 0x5c227680, 0x492b7780, 0x545c7280,
@@ -784,7 +784,7 @@ const uint32_t buffer_36[128] = {
   0x7f3cab80, 0x57d3f980, 0x5dfe4a00, 0x7b96bc00,
   0x4ad68780, 0x50eb8e00, 0x51660700, 0x64c8b800,
 };
-constexpr size_t size_36 = sizeof(buffer_36);
+constexpr size_t size_36 = 128;
 
 const uint32_t buffer_37[128] = {
   0xfffffff8, 0xfffffff8, 0xfffffff8, 0xfffffff8,
@@ -820,7 +820,7 @@ const uint32_t buffer_37[128] = {
   0xfffffff8, 0xfffffff8, 0xfffffff8, 0xfffffff7,
   0xfffffff8, 0xfffffff8, 0xfffffff8, 0xfffffff8,
 };
-constexpr size_t size_37 = sizeof(buffer_37);
+constexpr size_t size_37 = 128;
 
 const uint32_t buffer_38[128] = {
   0x5c1be580, 0x617b2180, 0x74792200, 0x65614780,
@@ -856,7 +856,7 @@ const uint32_t buffer_38[128] = {
   0x7cb7b680, 0x61fa2780, 0x404fde80, 0x7a520780,
   0x498fb500, 0x41c0dd80, 0x7ae35780, 0x7bd0ae00,
 };
-constexpr size_t size_38 = sizeof(buffer_38);
+constexpr size_t size_38 = 128;
 
 const uint32_t buffer_39[128] = {
   0xfffffff9, 0xfffffff9, 0xfffffff9, 0xfffffff9,
@@ -892,7 +892,7 @@ const uint32_t buffer_39[128] = {
   0xfffffff8, 0xfffffff9, 0xfffffffa, 0xfffffff9,
   0xfffffffa, 0xfffffff9, 0xfffffff9, 0xfffffff9,
 };
-constexpr size_t size_39 = sizeof(buffer_39);
+constexpr size_t size_39 = 128;
 
 const uint32_t buffer_40[128] = {
   0x563b7800, 0x4f132600, 0x4ec29500, 0x4929d380,
@@ -928,7 +928,7 @@ const uint32_t buffer_40[128] = {
   0x52214700, 0x4b021880, 0x46358800, 0x4a56dc80,
   0x45af2b80, 0x65b2a900, 0x4bf91780, 0x4d4d3080,
 };
-constexpr size_t size_40 = sizeof(buffer_40);
+constexpr size_t size_40 = 128;
 
 const uint32_t buffer_41[128] = {
   0xfffffff8, 0xfffffff8, 0xfffffff8, 0xfffffff8,
@@ -964,7 +964,7 @@ const uint32_t buffer_41[128] = {
   0xfffffff8, 0xfffffff8, 0xfffffff8, 0xfffffff8,
   0xfffffff8, 0xfffffff8, 0xfffffff8, 0xfffffff8,
 };
-constexpr size_t size_41 = sizeof(buffer_41);
+constexpr size_t size_41 = 128;
 
 const uint32_t buffer_42[128] = {
   0x63da3000, 0x6ec27900, 0x4478a180, 0x5e57a200,
@@ -1000,7 +1000,7 @@ const uint32_t buffer_42[128] = {
   0x78c1bc00, 0x66a77480, 0x5a12e880, 0x74529c00,
   0x49426380, 0x5058de80, 0x5ad11780, 0x46f70180,
 };
-constexpr size_t size_42 = sizeof(buffer_42);
+constexpr size_t size_42 = 128;
 
 const uint32_t buffer_43[128] = {
   0xfffffff9, 0xfffffff9, 0xfffffffa, 0xfffffff9,
@@ -1036,7 +1036,7 @@ const uint32_t buffer_43[128] = {
   0xfffffff9, 0xfffffff9, 0xfffffff9, 0xfffffff9,
   0xfffffffa, 0xfffffffa, 0xfffffffa, 0xfffffffa,
 };
-constexpr size_t size_43 = sizeof(buffer_43);
+constexpr size_t size_43 = 128;
 
 const uint32_t buffer_44[128] = {
   0x69c56b80, 0x5ced9c00, 0x66cc9300, 0x496ab600,
@@ -1072,7 +1072,7 @@ const uint32_t buffer_44[128] = {
   0x5133fd00, 0x40b50680, 0x46edce80, 0x62e0b880,
   0x42d9f180, 0x51f82800, 0x667d7000, 0x4ed55b80,
 };
-constexpr size_t size_44 = sizeof(buffer_44);
+constexpr size_t size_44 = 128;
 
 const uint32_t buffer_45[128] = {
   0xfffffff8, 0xfffffff8, 0xfffffff8, 0xfffffff8,
@@ -1108,7 +1108,7 @@ const uint32_t buffer_45[128] = {
   0xfffffff8, 0xfffffff8, 0xfffffff8, 0xfffffff8,
   0xfffffff8, 0xfffffff8, 0xfffffff8, 0xfffffff8,
 };
-constexpr size_t size_45 = sizeof(buffer_45);
+constexpr size_t size_45 = 128;
 
 const uint32_t buffer_46[128] = {
   0x58468000, 0x4ac3f980, 0x4330d000, 0x6c446300,
@@ -1144,7 +1144,7 @@ const uint32_t buffer_46[128] = {
   0x6e45da80, 0x40705700, 0x5a1c6f80, 0x513a6b00,
   0x65f65c00, 0x548fd800, 0x461f7100, 0x42f09d00,
 };
-constexpr size_t size_46 = sizeof(buffer_46);
+constexpr size_t size_46 = 128;
 
 const uint32_t buffer_47[128] = {
   0xfffffff9, 0xfffffff9, 0xfffffffa, 0xfffffff9,
@@ -1180,7 +1180,7 @@ const uint32_t buffer_47[128] = {
   0xfffffff9, 0xfffffff9, 0xfffffff9, 0xfffffffa,
   0xfffffff8, 0xfffffff9, 0xfffffffa, 0xfffffffa,
 };
-constexpr size_t size_47 = sizeof(buffer_47);
+constexpr size_t size_47 = 128;
 
 const uint32_t buffer_48[256] = {
   0x47f0e600, 0x5fa60b80, 0x75018200, 0x6f79e600,
@@ -1248,7 +1248,7 @@ const uint32_t buffer_48[256] = {
   0x50ede980, 0x5c04c580, 0x46916b80, 0x7f549c80,
   0x73798d80, 0x431f0a80, 0x65759080, 0x61cbf980,
 };
-constexpr size_t size_48 = sizeof(buffer_48);
+constexpr size_t size_48 = 256;
 
 const uint32_t buffer_49[256] = {
   0xfffffff8, 0xfffffff7, 0xfffffff7, 0xfffffff7,
@@ -1316,7 +1316,7 @@ const uint32_t buffer_49[256] = {
   0xfffffff8, 0xfffffff8, 0xfffffff8, 0xfffffff7,
   0xfffffff7, 0xfffffff8, 0xfffffff8, 0xfffffff8,
 };
-constexpr size_t size_49 = sizeof(buffer_49);
+constexpr size_t size_49 = 256;
 
 const uint32_t buffer_50[256] = {
   0x60388700, 0x73ed7400, 0x6b5cf200, 0x7cb52a00,
@@ -1384,7 +1384,7 @@ const uint32_t buffer_50[256] = {
   0x4be94880, 0x4c8e6500, 0x4f188200, 0x76a16280,
   0x555a9480, 0x475c4400, 0x630dd680, 0x7fba6280,
 };
-constexpr size_t size_50 = sizeof(buffer_50);
+constexpr size_t size_50 = 256;
 
 const uint32_t buffer_51[256] = {
   0xfffffffa, 0xfffffff9, 0xfffffffa, 0xfffffff9,
@@ -1452,7 +1452,7 @@ const uint32_t buffer_51[256] = {
   0xfffffffa, 0xfffffffa, 0xfffffffa, 0xfffffff9,
   0xfffffff9, 0xfffffffa, 0xfffffff9, 0xfffffff9,
 };
-constexpr size_t size_51 = sizeof(buffer_51);
+constexpr size_t size_51 = 256;
 
 const uint32_t buffer_52[256] = {
   0x45c7a776, 0x6c10bdbb, 0x5e4cf241, 0x56e76f1c,
@@ -1520,7 +1520,7 @@ const uint32_t buffer_52[256] = {
   0x710b3ab6, 0x7bc31134, 0x74c7524b, 0x4496bd36,
   0x68ea16bc, 0x5590502f, 0x434b7bfa, 0x558225eb,
 };
-constexpr size_t size_52 = sizeof(buffer_52);
+constexpr size_t size_52 = 256;
 
 const uint32_t buffer_53[256] = {
   0xfffffff7, 0xfffffff7, 0xfffffff7, 0xfffffff6,
@@ -1588,75 +1588,75 @@ const uint32_t buffer_53[256] = {
   0xfffffff6, 0xfffffff7, 0xfffffff6, 0xfffffff7,
   0xfffffff7, 0xfffffff7, 0xfffffff7, 0xfffffff7,
 };
-constexpr size_t size_53 = sizeof(buffer_53);
+constexpr size_t size_53 = 256;
 
 const uint32_t buffer_54[2] = {
   0x474b09cc, 0x43f2946c,
 };
-constexpr size_t size_54 = sizeof(buffer_54);
+constexpr size_t size_54 = 2;
 
 const uint32_t buffer_55[2] = {
   0xfffffff8, 0xfffffff8,
 };
-constexpr size_t size_55 = sizeof(buffer_55);
+constexpr size_t size_55 = 2;
 
 const int32_t* buffers[] = {
-  reinterpret_cast<const int32_t*>(buffer_0),
-  reinterpret_cast<const int32_t*>(buffer_1),
-  reinterpret_cast<const int32_t*>(buffer_2),
-  reinterpret_cast<const int32_t*>(buffer_3),
-  reinterpret_cast<const int32_t*>(buffer_4),
-  reinterpret_cast<const int32_t*>(buffer_5),
-  reinterpret_cast<const int32_t*>(buffer_6),
-  reinterpret_cast<const int32_t*>(buffer_7),
-  reinterpret_cast<const int32_t*>(buffer_8),
-  reinterpret_cast<const int32_t*>(buffer_9),
-  reinterpret_cast<const int32_t*>(buffer_10),
-  reinterpret_cast<const int32_t*>(buffer_11),
-  reinterpret_cast<const int32_t*>(buffer_12),
-  reinterpret_cast<const int32_t*>(buffer_13),
-  reinterpret_cast<const int32_t*>(buffer_14),
-  reinterpret_cast<const int32_t*>(buffer_15),
-  reinterpret_cast<const int32_t*>(buffer_16),
-  reinterpret_cast<const int32_t*>(buffer_17),
-  reinterpret_cast<const int32_t*>(buffer_18),
-  reinterpret_cast<const int32_t*>(buffer_19),
-  reinterpret_cast<const int32_t*>(buffer_20),
-  reinterpret_cast<const int32_t*>(buffer_21),
-  reinterpret_cast<const int32_t*>(buffer_22),
-  reinterpret_cast<const int32_t*>(buffer_23),
-  reinterpret_cast<const int32_t*>(buffer_24),
-  reinterpret_cast<const int32_t*>(buffer_25),
-  reinterpret_cast<const int32_t*>(buffer_26),
-  reinterpret_cast<const int32_t*>(buffer_27),
-  reinterpret_cast<const int32_t*>(buffer_28),
-  reinterpret_cast<const int32_t*>(buffer_29),
-  reinterpret_cast<const int32_t*>(buffer_30),
-  reinterpret_cast<const int32_t*>(buffer_31),
-  reinterpret_cast<const int32_t*>(buffer_32),
-  reinterpret_cast<const int32_t*>(buffer_33),
-  reinterpret_cast<const int32_t*>(buffer_34),
-  reinterpret_cast<const int32_t*>(buffer_35),
-  reinterpret_cast<const int32_t*>(buffer_36),
-  reinterpret_cast<const int32_t*>(buffer_37),
-  reinterpret_cast<const int32_t*>(buffer_38),
-  reinterpret_cast<const int32_t*>(buffer_39),
-  reinterpret_cast<const int32_t*>(buffer_40),
-  reinterpret_cast<const int32_t*>(buffer_41),
-  reinterpret_cast<const int32_t*>(buffer_42),
-  reinterpret_cast<const int32_t*>(buffer_43),
-  reinterpret_cast<const int32_t*>(buffer_44),
-  reinterpret_cast<const int32_t*>(buffer_45),
-  reinterpret_cast<const int32_t*>(buffer_46),
-  reinterpret_cast<const int32_t*>(buffer_47),
-  reinterpret_cast<const int32_t*>(buffer_48),
-  reinterpret_cast<const int32_t*>(buffer_49),
-  reinterpret_cast<const int32_t*>(buffer_50),
-  reinterpret_cast<const int32_t*>(buffer_51),
-  reinterpret_cast<const int32_t*>(buffer_52),
-  reinterpret_cast<const int32_t*>(buffer_53),
-  reinterpret_cast<const int32_t*>(buffer_54),
-  reinterpret_cast<const int32_t*>(buffer_55),
+  reinterpret_cast<const int32_t *>(buffer_0),
+  reinterpret_cast<const int32_t *>(buffer_1),
+  reinterpret_cast<const int32_t *>(buffer_2),
+  reinterpret_cast<const int32_t *>(buffer_3),
+  reinterpret_cast<const int32_t *>(buffer_4),
+  reinterpret_cast<const int32_t *>(buffer_5),
+  reinterpret_cast<const int32_t *>(buffer_6),
+  reinterpret_cast<const int32_t *>(buffer_7),
+  reinterpret_cast<const int32_t *>(buffer_8),
+  reinterpret_cast<const int32_t *>(buffer_9),
+  reinterpret_cast<const int32_t *>(buffer_10),
+  reinterpret_cast<const int32_t *>(buffer_11),
+  reinterpret_cast<const int32_t *>(buffer_12),
+  reinterpret_cast<const int32_t *>(buffer_13),
+  reinterpret_cast<const int32_t *>(buffer_14),
+  reinterpret_cast<const int32_t *>(buffer_15),
+  reinterpret_cast<const int32_t *>(buffer_16),
+  reinterpret_cast<const int32_t *>(buffer_17),
+  reinterpret_cast<const int32_t *>(buffer_18),
+  reinterpret_cast<const int32_t *>(buffer_19),
+  reinterpret_cast<const int32_t *>(buffer_20),
+  reinterpret_cast<const int32_t *>(buffer_21),
+  reinterpret_cast<const int32_t *>(buffer_22),
+  reinterpret_cast<const int32_t *>(buffer_23),
+  reinterpret_cast<const int32_t *>(buffer_24),
+  reinterpret_cast<const int32_t *>(buffer_25),
+  reinterpret_cast<const int32_t *>(buffer_26),
+  reinterpret_cast<const int32_t *>(buffer_27),
+  reinterpret_cast<const int32_t *>(buffer_28),
+  reinterpret_cast<const int32_t *>(buffer_29),
+  reinterpret_cast<const int32_t *>(buffer_30),
+  reinterpret_cast<const int32_t *>(buffer_31),
+  reinterpret_cast<const int32_t *>(buffer_32),
+  reinterpret_cast<const int32_t *>(buffer_33),
+  reinterpret_cast<const int32_t *>(buffer_34),
+  reinterpret_cast<const int32_t *>(buffer_35),
+  reinterpret_cast<const int32_t *>(buffer_36),
+  reinterpret_cast<const int32_t *>(buffer_37),
+  reinterpret_cast<const int32_t *>(buffer_38),
+  reinterpret_cast<const int32_t *>(buffer_39),
+  reinterpret_cast<const int32_t *>(buffer_40),
+  reinterpret_cast<const int32_t *>(buffer_41),
+  reinterpret_cast<const int32_t *>(buffer_42),
+  reinterpret_cast<const int32_t *>(buffer_43),
+  reinterpret_cast<const int32_t *>(buffer_44),
+  reinterpret_cast<const int32_t *>(buffer_45),
+  reinterpret_cast<const int32_t *>(buffer_46),
+  reinterpret_cast<const int32_t *>(buffer_47),
+  reinterpret_cast<const int32_t *>(buffer_48),
+  reinterpret_cast<const int32_t *>(buffer_49),
+  reinterpret_cast<const int32_t *>(buffer_50),
+  reinterpret_cast<const int32_t *>(buffer_51),
+  reinterpret_cast<const int32_t *>(buffer_52),
+  reinterpret_cast<const int32_t *>(buffer_53),
+  reinterpret_cast<const int32_t *>(buffer_54),
+  reinterpret_cast<const int32_t *>(buffer_55),
 };
 const size_t sizes[] = {
   size_0,
@@ -1716,5 +1716,9 @@ const size_t sizes[] = {
   size_54,
   size_55,
 };
-} // anonymous namespace 
-calculate_once::Cache pdti8_cache(model_hash, 56, buffers, sizes);
+} // anonymous namespace
+
+calculate_once::Cache *GetCachePdti8() {
+  static calculate_once::Cache cache(model_hash, 56, buffers, sizes);
+  return &cache;
+};
