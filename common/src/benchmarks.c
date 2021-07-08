@@ -23,8 +23,12 @@
 #include "perf.h"
 #include "generated/mem.h"
 
-#ifdef PLATFORM_hps
+#if defined(PLATFORM_hps)
 #define BUF_SIZE (32 * 1024)  // must be at least 1024
+#elif defined(MAIN_RAM_SIZE) && (MAIN_RAM_SIZE < 256 * 1024)
+#define BUF_SIZE (2 * 1024)  // must be at least 1024
+#elif defined(SRAM_SIZE) && (SRAM_SIZE < 256 * 1024)
+#define BUF_SIZE (2 * 1024)  // must be at least 1024
 #else
 #define BUF_SIZE (128 * 1024)  // must be at least 1024
 #endif
