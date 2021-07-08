@@ -49,17 +49,17 @@ MicroSpeechResult micro_speech_classify() {
   // Process the inference results.
   int8_t* output = tflite_get_output();
   return (MicroSpeechResult){
-      output[0] + 128,
-      output[1] + 128,
-      output[2] + 128,
-      output[3] + 128,
+      static_cast<uint8_t>(output[0] + 128),
+      static_cast<uint8_t>(output[1] + 128),
+      static_cast<uint8_t>(output[2] + 128),
+      static_cast<uint8_t>(output[3] + 128),
   };
 }
 
 static void do_classify_zeros() {
   tflite_set_input_zeros();
   MicroSpeechResult res = micro_speech_classify();
-  printf("  results-- silence: %ld, unkown: %ld, yes: %ld, no: %ld\n",
+  printf("  results-- silence: %d, unkown: %d, yes: %d, no: %d\n",
          res.silence_score, res.unknown_score, res.yes_score, res.no_score);
 }
 
@@ -67,7 +67,7 @@ static void do_classify_no() {
   puts("Classify \"no\"");
   tflite_set_input(g_no_micro_f9643d42_nohash_4_data);
   MicroSpeechResult res = micro_speech_classify();
-  printf("  results-- silence: %ld, unkown: %ld, yes: %ld, no: %ld\n",
+  printf("  results-- silence: %d, unkown: %d, yes: %d, no: %d\n",
          res.silence_score, res.unknown_score, res.yes_score, res.no_score);
 }
 
@@ -75,7 +75,7 @@ static void do_classify_yes() {
   puts("Classify \"yes\"");
   tflite_set_input(g_yes_micro_f2e59fea_nohash_1_data);
   MicroSpeechResult res = micro_speech_classify();
-  printf("  results-- silence: %ld, unkown: %ld, yes: %ld, no: %ld\n",
+  printf("  results-- silence: %d, unkown: %d, yes: %d, no: %d\n",
          res.silence_score, res.unknown_score, res.yes_score, res.no_score);
 }
 
@@ -105,9 +105,9 @@ static void do_golden_tests() {
         res.yes_score != exp.yes_score || res.no_score != exp.no_score) {
       failed = true;
       printf("*** Golden test %d failed: \n", i);
-      printf("actual-- silence: %ld, unkown: %ld, yes: %ld, no: %ld\n",
+      printf("actual-- silence: %d, unkown: %d, yes: %d, no: %d\n",
              res.silence_score, res.unknown_score, res.yes_score, res.no_score);
-      printf("expected-- silence: %ld, unkown: %ld, yes: %ld, no: %ld\n",
+      printf("expected-- silence: %d, unkown: %d, yes: %d, no: %d\n",
              exp.silence_score, exp.unknown_score, exp.yes_score, exp.no_score);
     }
   }

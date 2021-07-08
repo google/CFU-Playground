@@ -55,7 +55,7 @@ int32_t vww_classify() {
   static void name() {                                                 \
     puts(#name);                                                       \
     tflite_set_input(mlcommons_tiny_v01_vww_dataset[test_index].data); \
-    printf("  result-- score: %d\n", vww_classify());                  \
+    printf("  result-- score: %ld\n", vww_classify());                 \
   }
 
 MLCOMMONS_TINY_V01_VWW_TEST(do_classify_no_person, 0);
@@ -72,8 +72,8 @@ static void do_golden_tests() {
     if (res != exp) {
       failed = true;
       printf("*** Golden test %d failed: \n", i);
-      printf("actual-- score: %d\n", res);
-      printf("expected-- score: %d\n", exp);
+      printf("actual-- score: %ld\n", res);
+      printf("expected-- score: %ld\n", exp);
     }
   }
 

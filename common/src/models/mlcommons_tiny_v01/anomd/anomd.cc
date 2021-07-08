@@ -44,12 +44,12 @@ static void anomd_init(void) { tflite_load_model(ad01_int8, ad01_int8_len); }
 
 // 32 bit xor reduction used because comparing 640 outputs is unwieldy.
 uint32_t uint32_xor_reduction(int8_t* output, unsigned int length) {
-  uint32_t xor = 0;
+  uint32_t x = 0;
   int8_t j = 0;
   for (size_t i = 0; i < length; i++) {
-    xor ^= output[i] << ((j++ & 0x3) << 3);
+    x ^= output[i] << ((j++ & 0x3) << 3);
   }
-  return xor;
+  return x;
 }
 
 uint32_t anomd_classify() {
@@ -66,7 +66,7 @@ uint32_t anomd_classify() {
   static void name() {                                                \
     puts(#name);                                                      \
     tflite_set_input(mlcommons_tiny_v01_ad_dataset[test_index].data); \
-    printf("  result-- 32 bit xor: 0x%x\n", anomd_classify());        \
+    printf("  result-- 32 bit xor: 0x%lx\n", anomd_classify());       \
   }
 
 // Smattering of tests for the menu, more can be easily added/removed.
@@ -87,8 +87,8 @@ static void do_golden_tests() {
     if (res != exp) {
       failed = true;
       printf("*** Golden test %d failed: \n", i);
-      printf("actual: 32 bit xor: 0x%x\n", res);
-      printf("expected: 32 bit xor: 0x%x\n", exp);
+      printf("actual: 32 bit xor: 0x%lx\n", res);
+      printf("expected: 32 bit xor: 0x%lx\n", exp);
     }
   }
 

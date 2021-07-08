@@ -86,8 +86,8 @@ V01ImageClassificationResult image_classify() {
 static void print_imgc_result(const char* prefix,
                               V01ImageClassificationResult res) {
   printf(
-      "%s-- airplane: %ld, car: %ld, bird: %ld, cat: %ld, deer: %ld, dog: %ld, "
-      "frog: %ld, horse: %ld, ship: %ld, truck: %ld\n",
+      "%s-- airplane: %d, car: %d, bird: %d, cat: %d, deer: %d, dog: %d, "
+      "frog: %d, horse: %d, ship: %d, truck: %d\n",
       prefix, res.airplane_score, res.car_score, res.bird_score, res.cat_score,
       res.deer_score, res.dog_score, res.frog_score, res.horse_score,
       res.ship_score, res.truck_score);

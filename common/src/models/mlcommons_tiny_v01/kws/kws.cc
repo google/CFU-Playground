@@ -104,8 +104,8 @@ V01KeywordSpottingResult kws_classify() {
 static void print_keyword_spotting_result(const char* prefix,
                                           V01KeywordSpottingResult res) {
   printf(
-      "%s-- down: %ld, go: %ld, left: %ld, no: %ld, off: %ld, on: %ld, right: "
-      "%ld, stop: %ld, up: %ld, yes: %ld, silence: %ld, unkown: %ld\n",
+      "%s-- down: %d, go: %d, left: %d, no: %d, off: %d, on: %d, right: "
+      "%d, stop: %d, up: %d, yes: %d, silence: %d, unkown: %d\n",
       prefix, res.down_score, res.go_score, res.left_score, res.no_score,
       res.off_score, res.on_score, res.right_score, res.stop_score,
       res.up_score, res.yes_score, res.silence_score, res.unknown_score);

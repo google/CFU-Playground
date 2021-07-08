@@ -89,7 +89,7 @@ static void do_golden_tests() {
     int expected = golden_tests[i].expected;
     if (actual != expected) {
       failed = true;
-      printf("*** Golden test %d failed: %ld (actual) != %ld (expected))\n", i,
+      printf("*** Golden test %d failed: %d (actual) != %d (expected))\n", i,
              actual, expected);
     }
   }
