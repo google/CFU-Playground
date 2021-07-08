@@ -14,6 +14,8 @@
 
 #include "tflite.h"
 
+#include <cstdint>
+
 #include "perf.h"
 #include "playground_util/random.h"
 #include "proj_tflite.h"
@@ -238,16 +240,18 @@ void tflite_classify() {
   // Run the model on this input and make sure it succeeds.
   profiler->ClearEvents();
   perf_reset_all_counters();
-  perf_set_mcycle(0);
+
+  // perf_set_mcycle is a no-op for some boards, start and end used instead.
+  uint32_t start = perf_get_mcycle();
   if (kTfLiteOk != interpreter->Invoke()) {
     puts("Invoke failed.");
   }
-  unsigned int cyc = perf_get_mcycle();
+  uint32_t end = perf_get_mcycle();
 #ifndef NPROFILE
   profiler->Log();
 #endif
   perf_print_all_counters();
-  perf_print_value(cyc);
+  perf_print_value(end - start); // Possible overflow is intentional here.
   printf(" cycles total\n");
 }
 
