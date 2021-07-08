@@ -104,6 +104,7 @@ COMMON_DIR         := $(CFU_ROOT)/common
 COMMON_FILES	   := $(shell find $(COMMON_DIR) -type f)
 MLCOMMONS_SRC_DIR  := $(CFU_ROOT)/third_party/mlcommons
 SAXON_SRC_DIR      := $(CFU_ROOT)/third_party/SaxonSoc
+RENODE_DIR         := $(CFU_ROOT)/third_party/renode
 SRC_DIR            := $(abspath $(PROJ_DIR)/src)
 
 TFLM_SRC_DIR       := $(CFU_ROOT)/third_party/tflite-micro
@@ -162,7 +163,7 @@ endif
 renode: $(SOFTWARE_ELF) 
 	@echo Running interactively under renode
 	$(COPY) $(SOFTWARE_ELF) $(PROJ_DIR)/renode/
-	pushd $(PROJ_DIR)/renode/ && renode -e "s @litex-vexriscv-tflite.resc" && popd
+	pushd $(PROJ_DIR)/renode/ && $(RENODE_DIR)/renode -e "s @litex-vexriscv-tflite.resc" && popd
 
 .PHONY: clean
 clean:
