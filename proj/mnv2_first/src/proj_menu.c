@@ -39,16 +39,6 @@ static void do_b64_samples() {
       "of knowledge, exceeds the short vehemence of any carnal pleasure.");
 }
 
-// See
-// https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
-const int64_t rand_a = 6364136223846793005;
-const int64_t rand_c = 1442695040888963407;
-int32_t next_random(int64_t* r) {
-  *r = (*r) * rand_a + rand_c;
-  // Use higher order bits
-  return *r >> 28;
-}
-
 #ifdef PLATFORM_sim
 static void do_start_trace() {
   printf("Start trace\n");
