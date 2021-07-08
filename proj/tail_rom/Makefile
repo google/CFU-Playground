@@ -23,7 +23,7 @@ export DEFINES := TF_LITE_SHOW_MEMORY_USE TAIL_CAPTURE
 DEFINES += NDEBUG
 
 # Uncomment this line to skip individual profiling output (has minor effect on performance).
-#DEFINES += NPROFILE
+DEFINES += NPROFILE
 
 # Uncomment to include pdti8 in built binary
 DEFINES += INCLUDE_MODEL_PDTI8
