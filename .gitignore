@@ -78,6 +78,9 @@ csr.csv
 *.code-workspace
 .vscode/*
 
+# Renode setup
+third_party/renode
+
 # Robot test results
 log.html
 report.html
