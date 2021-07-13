@@ -128,7 +128,6 @@ TFLM_COPY_SRC_DIRS := \
 TFLM_FIND_PARAMS := \
 	-maxdepth 1 -type f \
 	-not -name '*_test*' \
-	-not -name 'space_to_depth.*' \
 	-regex '.*\.\(h\|c\|cc\)'
 
 # Just copy data files from these dirs
