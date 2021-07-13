@@ -41,7 +41,7 @@ void ConvPerChannel(const ConvParams& params, const int32_t* output_multiplier,
 
 // Fixed-point per-channel-quantization convolution reference kernel.
 // 16-bit data and 8-bit filter
-inline void ConvPerChannel(
+void ConvPerChannel(
     const ConvParams& params, const int32_t* output_multiplier,
     const int32_t* output_shift, const RuntimeShape& input_shape,
     const int16_t* input_data, const RuntimeShape& filter_shape,
