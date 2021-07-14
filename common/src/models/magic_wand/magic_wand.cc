@@ -42,9 +42,9 @@ static void magic_wand_init(void) {
 // Run classification, after input has been loaded
 MagicWandResult magic_wand_classify() {
   printf("Running magic_wand\n");
-  DCACHE_SETUP_METRICS;
+  PERF_SETUP_METRICS;
   tflite_classify();
-  DCACHE_PRINT_METRICS;
+  PERF_PRINT_METRICS;
 
   // Process the inference results.
   float* output = tflite_get_output_float();

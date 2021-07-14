@@ -54,9 +54,9 @@ uint32_t uint32_xor_reduction(int8_t* output, unsigned int length) {
 
 uint32_t anomd_classify() {
   printf("Running anomd\n");
-  DCACHE_SETUP_METRICS;
+  PERF_SETUP_METRICS;
   tflite_classify();
-  DCACHE_PRINT_METRICS;
+  PERF_PRINT_METRICS;
 
   int8_t* output = tflite_get_output();
   return uint32_xor_reduction(output, 640);
