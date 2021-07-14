@@ -17,7 +17,7 @@
 module Cfu (
   input               cmd_valid,
   output              cmd_ready,
-  input      [2:0]    cmd_payload_function_id,
+  input      [9:0]    cmd_payload_function_id,
   input      [31:0]   cmd_payload_inputs_0,
   input      [31:0]   cmd_payload_inputs_1,
   output              rsp_valid,
