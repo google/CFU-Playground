@@ -17,6 +17,7 @@ limitations under the License.
 
 #include "playground_util/print_params.h"
 #include "tensorflow/lite/kernels/internal/common.h"
+#include "tensorflow/lite/kernels/internal/reference/integer_ops/conv_accel.h"
 
 namespace tflite {
 namespace reference_integer_ops {
@@ -65,6 +66,21 @@ inline void ConvPerChannel(
   const int filter_width = filter_shape.Dims(2);
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
+
+#ifdef ACCEL_CONV
+  // Use specialised implementation if possible.
+  if (filter_width == 4 &&
+      filter_height == 4 &&
+      dilation_width_factor == 1 &&
+      dilation_height_factor == 1) {
+    return ConvPerChannel4x4(params, output_multiplier, output_shift,
+      input_shape, input_data, filter_shape, filter_data,
+      bias_shape, bias_data, output_shape, output_data);
+  } else {
+    printf("ConvPerChannel() not accelerated!\n");
+  }
+#endif
+
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
       const int in_y_origin = (out_y * stride_height) - pad_height;

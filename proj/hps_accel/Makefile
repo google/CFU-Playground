@@ -16,6 +16,9 @@
 # This variable lists symbols to define to the C preprocessor
 export DEFINES :=
 
+# Uncomment this line to use the custom accelerated convolution operation
+DEFINES += ACCEL_CONV
+
 # Uncomment this line to use software defined CFU functions in software_cfu.cc
 #DEFINES += CFU_SOFTWARE_DEFINED
 
