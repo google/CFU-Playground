@@ -26,7 +26,7 @@ DEFINES += NDEBUG
 #DEFINES += NPROFILE
 
 # Uncomment to include pdti8 in built binary
-DEFINES += INCLUDE_MODEL_PDTI8
+#DEFINES += INCLUDE_MODEL_PDTI8
 
 # Uncomment to include micro_speech in built binary
 #DEFINES += INCLUDE_MODEL_MICRO_SPEECH
@@ -38,7 +38,7 @@ DEFINES += INCLUDE_MODEL_PDTI8
 #DEFINES += INCLUDE_MODEL_MNV2
 
 # Uncomment to include hps_model in built binary (adds ~600kB to binary)
-#DEFINES += INCLUDE_MODEL_HPS
+DEFINES += INCLUDE_MODEL_HPS
 
 # Uncomment to include  mlcommons tiny v0.1 v0.1 anomaly detection in built binary
 #DEFINES += INLCUDE_MODEL_MLCOMMONS_TINY_V01_ANOMD
