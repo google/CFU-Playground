@@ -19,6 +19,7 @@
 #include <stdio.h>
 
 #include "menu.h"
+#include "models/hps_model/hps_model.h"
 #include "models/magic_wand/magic_wand.h"
 #include "models/micro_speech/micro_speech.h"
 #include "models/mlcommons_tiny_v01/anomd/anomd.h"
@@ -50,6 +51,9 @@ static struct Menu MENU = {
 #endif
 #if defined(INCLUDE_MODEL_MNV2)
         MENU_ITEM(AUTO_INC_CHAR, "Mobile Net v2 models", mnv2_menu),
+#endif
+#if defined(INCLUDE_MODEL_HPS)
+        MENU_ITEM(AUTO_INC_CHAR, "HPS models", hps_model_menu),
 #endif
 #if defined(INLCUDE_MODEL_MLCOMMONS_TINY_V01_ANOMD)
         MENU_ITEM(AUTO_INC_CHAR, "MLCommons Tiny V0.1 Anomaly Detection",

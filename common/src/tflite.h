@@ -30,11 +30,13 @@
 // Sets up TfLite with a given model
 void tflite_load_model(const unsigned char* model_data,
                        unsigned int model_length);
-void tflite_set_input_zeros();
+void tflite_set_input_zeros(void);
 void tflite_set_input_zeros_float();
 void tflite_set_input(const void* data);
 void tflite_set_input_unsigned(const unsigned char* data);
 void tflite_set_input_float(const float* data);
+void tflite_randomize_input(int64_t seed);
+void tflite_set_grid_input(void);
 
 // Run classification with data already set into input.
 void tflite_classify();

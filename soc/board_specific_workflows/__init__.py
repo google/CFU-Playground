@@ -16,6 +16,7 @@
 from digilent_arty import DigilentArtySoCWorkflow
 from general import GeneralSoCWorkflow
 from icebreaker import IcebreakerSoCWorkflow
+from lattice_crosslink_nx_evn import LatticeCrossLinkNXEVNSoCWorkflow
 from workflow_args import parse_workflow_args
 
 
@@ -32,6 +33,7 @@ def workflow_factory(target: str) -> GeneralSoCWorkflow:
     return {
         'digilent_arty': DigilentArtySoCWorkflow,
         '1bitsquared_icebreaker': IcebreakerSoCWorkflow,
+        'lattice_crosslink_nx_evn': LatticeCrossLinkNXEVNSoCWorkflow,
     }.get(target, GeneralSoCWorkflow)
 
 
@@ -39,6 +41,7 @@ __all__ = [
     'DigilentArtySoCWorkflow',
     'GeneralSoCWorkflow',
     'IcebreakerSoCWorkflow',
+    'LatticeCrossLinkNXEVNSoCWorkflow',
     'parse_workflow_args'
     'workflow_factory',
 ]

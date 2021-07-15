@@ -2,7 +2,7 @@
 set -e
 git submodule update --init
 
-
+CFU_ROOT="$(dirname $(dirname $(realpath ${BASH_SOURCE[0]})))"
 
 # Verify dependencies that can be installed with apt (if available)
 missing=()
@@ -63,9 +63,30 @@ fi
 # Build flashrom after installing dependencies
 echo "BUILDING FLASHROM"
 (
-  cd third_party/flashrom
+  cd ${CFU_ROOT}/third_party/flashrom
   make -j4 CONFIG_ENABLE_LIBPCI_PROGRAMMERS=no
 )
+
+RENODE_VERSION="1.12.0+20210705gita5fe374a"
+RENODE_VERSION_SPLIT=${RENODE_VERSION//"+"/ }
+RENODE_VERSION_SPLIT=${RENODE_VERSION_SPLIT//"git"/ }
+IFS=' ' read -r RENODE_VERSION_NO x RENODE_VERSION_SHA <<<"$RENODE_VERSION_SPLIT"
+RENODE_DIR=${CFU_ROOT}/third_party/renode
+# Get Renode if not installed
+if [ ! -e "${RENODE_DIR}/renode" ]; then
+    wget "https://dl.antmicro.com/projects/renode/builds/renode-${RENODE_VERSION}.linux-portable.tar.gz"
+    mkdir ${RENODE_DIR}
+    tar xf  renode-*.linux-portable.tar.gz -C ${RENODE_DIR} --strip-components=1
+    rm renode-${RENODE_VERSION}.linux-portable.tar.gz
+    echo "To use Renode from any location add it to system path:"
+    echo "export PATH=${RENODE_DIR}:\$PATH\""
+    echo ""
+    echo "If you wish to run automated Robot tests using Renode, run:"
+    echo "python3 -m pip install -r ${RENODE_DIR}/tests/requirements.txt"
+    echo ""
+elif ! ${RENODE_DIR}/renode --version | grep "${RENODE_VERSION_NO}.*${RENODE_VERSION_SHA}" >/dev/null; then
+    echo "Warning: Your Renode version does not match the required one (${RENODE_VERSION})"
+fi
 
 # Check GCC
 if ! which riscv64-unknown-elf-gcc >/dev/null; then

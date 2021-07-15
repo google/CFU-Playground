@@ -14,8 +14,10 @@
 
 #include "tflite.h"
 
+#include <cstdint>
+
 #include "perf.h"
-#include "playground_util/murmurhash.h"
+#include "playground_util/random.h"
 #include "proj_tflite.h"
 #include "tensorflow/lite/micro/all_ops_resolver.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
@@ -38,6 +40,7 @@ void* __dso_handle = &__dso_handle;
 //
 // TfLM global objects
 namespace {
+
 tflite::ErrorReporter* error_reporter = nullptr;
 tflite::MicroOpResolver* op_resolver = nullptr;
 tflite::MicroProfiler* profiler = nullptr;
@@ -71,6 +74,9 @@ constexpr int kTensorArenaSize = const_max<int>(
 #ifdef INCLUDE_MODEL_MNV2
     800 * 1024,
 #endif
+#ifdef INCLUDE_MODEL_HPS
+    1024 * 1024,
+#endif
 #ifdef INLCUDE_MODEL_MLCOMMONS_TINY_V01_ANOMD
     3 * 1024,
 #endif
@@ -87,7 +93,7 @@ constexpr int kTensorArenaSize = const_max<int>(
 );
 
 static uint8_t tensor_arena[kTensorArenaSize];
-}  // namespace
+}  // anonymous namespace
 
 static void tflite_init() {
   static bool initialized = false;
@@ -175,7 +181,7 @@ void tflite_load_model(const unsigned char* model_data,
   tflite_postload();
 }
 
-void tflite_set_input_zeros() {
+void tflite_set_input_zeros(void) {
   auto input = interpreter->input(0);
   memset(input->data.int8, 0, input->bytes);
   printf("Zeroed %d bytes at 0x%p\n", input->bytes, input->data.int8);
@@ -207,20 +213,48 @@ void tflite_set_input_float(const float* data) {
   printf("Copied %d bytes at 0x%p\n", input->bytes, input->data.f);
 }
 
+void tflite_randomize_input(int64_t seed) {
+  int64_t r = seed;
+  auto input = interpreter->input(0);
+  for (size_t i = 0; i < input->bytes; i++) {
+    input->data.int8[i] = static_cast<int8_t>(next_pseudo_random(&r));
+  }
+  printf("Set %d bytes at 0x%p\n", input->bytes, input->data.int8);
+}
+
+void tflite_set_grid_input(void) {
+  auto input = interpreter->input(0);
+  size_t height = input->dims->data[1];
+  size_t width = input->dims->data[2];
+  for (size_t y = 0; y < height; y++) {
+    for (size_t x = 0; x < width; x++) {
+      int8_t val = (y & 0x20) & (x & 0x20) ? -128 : 127;
+      input->data.int8[x + y * width] = val;
+    }
+  }
+  printf("Set %d bytes at 0x%p\n", input->bytes, input->data.int8);
+}
+
 int8_t* tflite_get_output() { return interpreter->output(0)->data.int8; }
 
 float* tflite_get_output_float() { return interpreter->output(0)->data.f; }
 
 void tflite_classify() {
   // Run the model on this input and make sure it succeeds.
+  profiler->ClearEvents();
   perf_reset_all_counters();
-  perf_set_mcycle(0);
+
+  // perf_set_mcycle is a no-op for some boards, start and end used instead.
+  uint32_t start = perf_get_mcycle();
   if (kTfLiteOk != interpreter->Invoke()) {
-    TF_LITE_REPORT_ERROR(error_reporter, "Invoke failed.");
+    puts("Invoke failed.");
   }
-  unsigned int cyc = perf_get_mcycle();
+  uint32_t end = perf_get_mcycle();
+#ifndef NPROFILE
+  profiler->Log();
+#endif
   perf_print_all_counters();
-  perf_print_value(cyc);
+  perf_print_value(end - start); // Possible overflow is intentional here.
   printf(" cycles total\n");
 }
 
