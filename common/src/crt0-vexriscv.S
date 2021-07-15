@@ -37,7 +37,7 @@ _start:
 .section .text
 .global  trap_entry
 trap_entry:
-#ifdef CONFIG_CPU_VARIANT_FOMU
+#ifdef CONFIG_CPU_DIV_UNIMPLEMENTED
   // Need to save all registers for the illegal instruction handler.
 
   sw x1, -1 * 4(sp)
@@ -144,7 +144,7 @@ trap_entry:
   lw x30,  1*4(sp)
   lw x31,  0*4(sp)
   addi sp,sp,16*4
-#endif // CONFIG_CPU_VARIANT_FOMU
+#endif // CONFIG_CPU_DIV_UNIMPLEMENTED
   mret
   .text
 
