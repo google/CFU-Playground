@@ -263,10 +263,11 @@ void tflite_classify() {
   }
   uint32_t end = perf_get_mcycle();
 #ifndef NPROFILE
+  printf("\n");
   profiler->LogCsv();
   perf_print_all_counters();
 #endif
-  perf_print_value(end - start); // Possible overflow is intentional here.
+  perf_print_value(end - start);  // Possible overflow is intentional here.
   printf(" cycles total\n");
 }
 
