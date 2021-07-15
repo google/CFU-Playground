@@ -19,12 +19,23 @@
 #include "calc_once_data.h"
 #include "playground_util/murmurhash.h"
 
-// Empty hooks to be overridden per-project
+// Perform capture, if requested
 void tflite_preload(const unsigned char* model_data,
                     unsigned int model_length) {
   // Begin capturing for this model, if eabled by preprocessor define.
-#ifdef TAIL_CAPTURE
-  calculate_once::capturer.Enable(true);
+#ifdef TAIL_ROM_CAPTURE
+  calculate_once::capturer.Start(model_data, model_length);
 #endif
-  calculate_once::capturer.Reset(model_data, model_length);
+
+  // Use captured data, if available
+#ifdef TAIL_ROM_USE
+  if (calculate_once::GetCache()->InitForModel(model_data, model_length)) {
+    puts("Cached data matches model. Will use cached data.\n");
+  } else {
+    puts("Cached data does not match model\n");
+  }
+#endif
 }
+
+// Finish capture
+void tflite_postload() { calculate_once::capturer.Finish(); }

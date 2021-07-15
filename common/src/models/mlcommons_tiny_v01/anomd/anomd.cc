@@ -39,7 +39,9 @@ struct {
     {quant_normal_1, 0x2bc9ce4a},  {quant_normal_2, 0xe7251f32},
 };
 
-static void anomd_init(void) { tflite_load_model(ad01_int8, ad01_int8_len); }
+static void anomd_init(void) {
+  tflite_load_model(ad01_int8, ad01_int8_len);
+}
 
 // 32 bit xor reduction used because comparing 640 outputs is unwieldy.
 uint32_t uint32_xor_reduction(int8_t* output, unsigned int length) {

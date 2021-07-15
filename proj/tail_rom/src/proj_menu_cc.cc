@@ -14,18 +14,38 @@
  * limitations under the License.
  */
 
-#ifndef PROJ_MENU_H
-#define PROJ_MENU_H
+#include <stdio.h>
 
-#ifdef __cplusplus
-extern "C" {
+#include "calc_once_data.h"
+#include "menu.h"
+#include "proj_menu.h"
+
+#ifdef TAIL_ROM_USE
+#include "pdti8_cache.h"
 #endif
 
-// Project-specific menu
-void do_proj_menu();
+namespace {
 
-#ifdef __cplusplus
+void do_reset_cache() { calculate_once::SetCache(NULL); }
+
+void do_set_pdti8() {
+#ifdef TAIL_ROM_USE
+  calculate_once::SetCache(GetCachePdti8());
+#else
+  puts("Not configured to use tail rom.");
+#endif
 }
-#endif
 
-#endif  // !_PROJ_MENU_H
+}  // anonymous namespace
+
+static struct Menu MENU = {
+    "Project Menu",
+    "project",
+    {
+        MENU_ITEM('0', "reset cache", do_reset_cache),
+        MENU_ITEM('1', "Set cache for pdti8", do_set_pdti8),
+        MENU_END,
+    },
+};
+
+void do_proj_menu() { menu_run(&MENU); }

@@ -18,16 +18,32 @@
 
 #include <cstdio>
 
+#include "playground_util/pause.h"
+
 // Dump len bytes of data
 void dump_hex(const uint8_t* data, size_t len) {
   for (size_t i = 0; i < len; i++) {
-    printf("0x%02x,%c", data[i], (i & 0xf) == 0xf ? '\n' : ' ');
+    if ((i & 0x3ff) == 0) {
+      pause();
+    }
+    printf((i & 0xf) == 0 ? "  " : " ");
+    printf("0x%02x,", data[i]);
+    if ((i & 0xf) == 0xf || (i == len - 1)) {
+      printf("\n");
+    }
   }
 }
 
 // Dump len words of data
 void dump_hex(const int32_t* data, size_t len) {
   for (size_t i = 0; i < len; i++) {
-    printf("0x%08lx,%c", data[i], (i & 0x3) == 0x3 ? '\n' : ' ');
+    if ((i & 0xff) == 0) {
+      pause();
+    }
+    printf((i & 0x3) == 0 ? "  " : " ");
+    printf("0x%08lx,", data[i]);
+    if ((i & 0x3) == 0x3 || (i == len - 1)) {
+      printf("\n");
+    }
   }
 }
