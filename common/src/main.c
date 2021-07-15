@@ -17,11 +17,13 @@
 #include <console.h>
 #include <generated/csr.h>
 #include <generated/mem.h>
+#include <generated/soc.h>
 #include <stdio.h>
 
 #include "base.h"
 #include "benchmarks.h"
 #include "functional_cfu_tests.h"
+#include "instruction_handler.h"
 #include "menu.h"
 #include "models/models.h"
 #include "perf.h"
@@ -54,6 +56,9 @@ static struct Menu MENU = {
         MENU_ITEM('7', "Util Tests", do_util_tests_menu),
 #ifdef SPIFLASH_BASE
         MENU_ITEM('8', "SPI Flash Debugging", spiflash_menu),
+#endif
+#ifdef CONFIG_CPU_DIV_UNIMPLEMENTED
+        MENU_ITEM('I', "Illegal Instruction Tests", do_instruction_tests),
 #endif
 #ifdef PLATFORM_sim
         MENU_ITEM('t', "trace (only works in simulation)", trace_sim),
