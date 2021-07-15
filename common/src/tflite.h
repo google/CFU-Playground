@@ -17,6 +17,7 @@
 /*
  * Defines tflite functions for evaluating models
  */
+#include <stddef.h>
 #include <stdint.h>
 
 #ifndef _TFLITE_H

@@ -25,6 +25,7 @@
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/micro/micro_profiler.h"
 #include "tensorflow/lite/schema/schema_generated.h"
+#include "tflite_unit_tests.h"
 
 #ifdef TF_LITE_SHOW_MEMORY_USE
 #include "tensorflow/lite/micro/recording_micro_interpreter.h"
@@ -176,6 +177,8 @@ void tflite_load_model(const unsigned char* model_data,
     printf(" %d", dims->data[ii]);
   }
   puts("\n");
+
+  tflite_postload();
 }
 
 void tflite_set_input_zeros(void) {

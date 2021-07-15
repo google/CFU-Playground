@@ -16,3 +16,4 @@
 
 // Empty hooks to be overridden per-project
 void tflite_preload(const unsigned char* model_data, unsigned int model_length) {}
+void tflite_postload() {}

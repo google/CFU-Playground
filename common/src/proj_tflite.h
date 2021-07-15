@@ -22,4 +22,7 @@
 // Called before the model is loaded
 void tflite_preload(const unsigned char* model_data, unsigned int model_length);
 
+// Called after model successfully loaded
+void tflite_postload();
+
 #endif  // _PROJ_TFLITE_H
