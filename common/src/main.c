@@ -57,7 +57,7 @@ static struct Menu MENU = {
 #ifdef SPIFLASH_BASE
         MENU_ITEM('8', "SPI Flash Debugging", spiflash_menu),
 #endif
-#ifdef CONFIG_CPU_VARIANT_FOMU
+#ifdef CONFIG_CPU_DIV_UNIMPLEMENTED
         MENU_ITEM('I', "Illegal Instruction Tests", do_instruction_tests),
 #endif
 #ifdef PLATFORM_sim
