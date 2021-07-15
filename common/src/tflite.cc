@@ -41,6 +41,18 @@ void* __dso_handle = &__dso_handle;
 // TfLM global objects
 namespace {
 
+// A profiler that prints a "." for each profile event begun
+class ProgressProfiler : public tflite::MicroProfiler {
+ public:
+  virtual uint32_t BeginEvent(const char* tag) {
+    printf(".");
+    return tflite::MicroProfiler::BeginEvent(tag);
+  }
+
+ private:
+  TF_LITE_REMOVE_VIRTUAL_DELETE;
+};
+
 tflite::ErrorReporter* error_reporter = nullptr;
 tflite::MicroOpResolver* op_resolver = nullptr;
 tflite::MicroProfiler* profiler = nullptr;
@@ -133,7 +145,7 @@ static void tflite_init() {
   // op_resolver = &micro_op_resolver;
 
   // profiler
-  static tflite::MicroProfiler micro_profiler;
+  static ProgressProfiler micro_profiler;
   profiler = &micro_profiler;
 }
 
