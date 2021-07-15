@@ -202,7 +202,7 @@ void tflite_set_input(const void* data) {
 void tflite_set_input_unsigned(const unsigned char* data) {
   auto input = interpreter->input(0);
   for (size_t i = 0; i < input->bytes; i++) {
-    input->data.int8[i] = (int)data[i] - 127;
+    input->data.int8[i] = static_cast<int>(data[i]) - 128;
   }
   printf("Set %d bytes at %p\n", input->bytes, input->data.int8);
 }
