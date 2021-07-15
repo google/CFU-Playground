@@ -16,7 +16,9 @@
 
 #ifndef METRICS_H
 #define METRICS_H
+//#include <generated/mem.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,6 +45,29 @@ void get_csr_metrics(uint32_t *acc, uint32_t *refill, uint32_t *stall);
            stall_pre, stall_cnt, stall_cnt - stall_pre); \
   } while (0)
 
+void spi_flash_counter_prepare(void);
+void spi_flash_counter_stop(void);
+void spi_flash_counter_restart(void);
+void spi_flash_counter_print_ticks(void);
+
+#define FLASH_SETUP_METRICS \
+  spi_flash_counter_prepare()
+
+#define FLASH_PRINT_METRICS \
+  do { \
+    spi_flash_counter_stop(); \
+    spi_flash_counter_print_ticks(); \
+    spi_flash_counter_restart(); \
+  } while (0)
+
+#define PERF_SETUP_METRICS \
+    DCACHE_SETUP_METRICS; \
+    FLASH_SETUP_METRICS
+
+#define PERF_PRINT_METRICS \
+    DCACHE_PRINT_METRICS; \
+    FLASH_PRINT_METRICS
+  
 #ifdef __cplusplus
 }
 #endif

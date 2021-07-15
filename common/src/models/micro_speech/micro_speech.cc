@@ -42,9 +42,9 @@ static void micro_speech_init(void) {
 // Run classification, after input has been loaded
 MicroSpeechResult micro_speech_classify() {
   printf("Running micro_speech\n");
-  DCACHE_SETUP_METRICS;
+  PERF_SETUP_METRICS;
   tflite_classify();
-  DCACHE_PRINT_METRICS;
+  PERF_PRINT_METRICS;
 
   // Process the inference results.
   int8_t* output = tflite_get_output();

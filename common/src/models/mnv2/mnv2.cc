@@ -48,9 +48,9 @@ static void mnv2_init(void) {
 // Run classification, after input has been loaded
 static int32_t mnv2_classify() {
   printf("Running mnv2\n");
-  DCACHE_SETUP_METRICS;
+  PERF_SETUP_METRICS;
   tflite_classify();
-  DCACHE_PRINT_METRICS;
+  PERF_PRINT_METRICS;
 
   // Process the inference results.
   int8_t* output = tflite_get_output();

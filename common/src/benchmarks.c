@@ -46,7 +46,7 @@ static void __attribute__((noinline)) do_loads_cached(void) {
     acc += buf[j];
   }
 
-  DCACHE_SETUP_METRICS;
+  PERF_SETUP_METRICS;
   int start_time = perf_get_mcycle();
   for (int i = 0; i < 1024; ++i) {
     for (int j = 0; j < 1024; ++j) {
@@ -55,7 +55,7 @@ static void __attribute__((noinline)) do_loads_cached(void) {
     buf[i] = acc;  // inhibit optimization
   }
   int end_time = perf_get_mcycle();
-  DCACHE_PRINT_METRICS;
+  PERF_PRINT_METRICS;
 
   int total_iters = 1024 * 1024;
   printf("Val:%d  Cycles: %d   Cycles/load: %d\n", acc,
@@ -70,7 +70,7 @@ static void __attribute__((noinline)) do_loads_strided(void) {
   int acc = 0;
   int start_time = perf_get_mcycle();
 
-  DCACHE_SETUP_METRICS;
+  PERF_SETUP_METRICS;
   for (int i = 0; i < 64; ++i) {
     // 32 bytes per cache line, so stride by 8 4-byte ints
     for (int j = 0; j < BUF_SIZE; j += 8) {
@@ -79,7 +79,7 @@ static void __attribute__((noinline)) do_loads_strided(void) {
     buf[i] = acc;  // inhibit optimization
   }
   int end_time = perf_get_mcycle();
-  DCACHE_PRINT_METRICS;
+  PERF_PRINT_METRICS;
 
   int total_iters = 64 * BUF_SIZE / 8;
   printf("Val:%d  Cycles: %d   Cycles/load: %d\n", acc,
@@ -95,14 +95,14 @@ static void __attribute__((noinline)) do_flash_loads(void) {
   int*  buf = (int*)((void*)(SPIFLASH_BASE));
   int acc = 0;
 
-  DCACHE_SETUP_METRICS;
+  PERF_SETUP_METRICS;
   unsigned int start_time = perf_get_mcycle();
   int total_iters = 64*1024;
   for (int j = 0; j<total_iters; j++) {
     acc += buf[j];
   }
   unsigned int end_time = perf_get_mcycle();
-  DCACHE_PRINT_METRICS;
+  PERF_PRINT_METRICS;
 
   unsigned int delta_cycles = end_time - start_time;
   printf("Val:%d  Cycles: %u   Cycles/load: %u\n", acc,
@@ -116,14 +116,14 @@ static void __attribute__((noinline)) do_flash_loads_strided(void) {
   int*  buf = (int*)((void*)(SPIFLASH_BASE));
   int acc = 0;
 
-  DCACHE_SETUP_METRICS;
+  PERF_SETUP_METRICS;
   unsigned int start_time = perf_get_mcycle();
   int total_iters = 64*1024;
   for (int j = 0; j<total_iters; j++) {
     acc += buf[j*2];    // 2x stride
   }
   unsigned int end_time = perf_get_mcycle();
-  DCACHE_PRINT_METRICS;
+  PERF_PRINT_METRICS;
 
   unsigned int delta_cycles = end_time - start_time;
   printf("Val:%d  Cycles: %u   Cycles/load: %u\n", acc,
@@ -138,7 +138,7 @@ static void __attribute__((noinline)) do_loads(void) {
   int buf[BUF_SIZE];
   int acc = 0;
 
-  DCACHE_SETUP_METRICS;
+  PERF_SETUP_METRICS;
   int start_time = perf_get_mcycle();
   for (int i = 0; i < 8; ++i) {
     for (int j = 0; j < BUF_SIZE; ++j) {
@@ -147,7 +147,7 @@ static void __attribute__((noinline)) do_loads(void) {
     buf[i] = acc;  // inhibit optimization
   }
   int end_time = perf_get_mcycle();
-  DCACHE_PRINT_METRICS;
+  PERF_PRINT_METRICS;
 
   int total_iters = 8 * BUF_SIZE;
   printf("Val:%d  Cycles: %d   Cycles/load: %d\n", acc,
@@ -161,7 +161,7 @@ static void __attribute__((noinline)) do_stores(void) {
   int buf[BUF_SIZE];
   int acc = 0;
 
-  DCACHE_SETUP_METRICS;
+  PERF_SETUP_METRICS;
   int start_time = perf_get_mcycle();
   for (int i = 0; i < 8; ++i) {
     for (int j = 0; j < BUF_SIZE; ++j) {
@@ -170,7 +170,7 @@ static void __attribute__((noinline)) do_stores(void) {
     acc += buf[i];  // inhibit optimization
   }
   int end_time = perf_get_mcycle();
-  DCACHE_PRINT_METRICS;
+  PERF_PRINT_METRICS;
 
   int total_iters = 8 * BUF_SIZE;
   printf("Val:%d  Cycles: %d   Cycles/store: %d\n", acc,
@@ -184,7 +184,7 @@ static void __attribute__((noinline)) do_increment_mem(void) {
   int buf[BUF_SIZE];
   int acc = 0;
 
-  DCACHE_SETUP_METRICS;
+  PERF_SETUP_METRICS;
   int start_time = perf_get_mcycle();
   for (int i = 0; i < 8; ++i) {
     for (int j = 0; j < BUF_SIZE; ++j) {
@@ -193,7 +193,7 @@ static void __attribute__((noinline)) do_increment_mem(void) {
     acc += buf[i];  // inhibit optimization
   }
   int end_time = perf_get_mcycle();
-  DCACHE_PRINT_METRICS;
+  PERF_PRINT_METRICS;
 
   int total_iters = 8 * BUF_SIZE;
   printf("Val:%d  Cycles: %d   Cycles/(load-add-store): %d\n", acc,

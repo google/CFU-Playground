@@ -43,9 +43,9 @@ static void vww_init(void) { tflite_load_model(vww_96_int8, vww_96_int8_len); }
 
 int32_t vww_classify() {
   printf("Running vww\n");
-  DCACHE_SETUP_METRICS;
+  PERF_SETUP_METRICS;
   tflite_classify();
-  DCACHE_PRINT_METRICS;
+  PERF_PRINT_METRICS;
 
   int8_t* output = tflite_get_output();
   return (int32_t)output[1] - output[0];

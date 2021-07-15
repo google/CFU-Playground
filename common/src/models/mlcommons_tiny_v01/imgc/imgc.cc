@@ -72,9 +72,9 @@ static void imgc_init(void) {
 
 V01ImageClassificationResult image_classify() {
   printf("Running imgc\n");
-  DCACHE_SETUP_METRICS;
+  PERF_SETUP_METRICS;
   tflite_classify();
-  DCACHE_PRINT_METRICS;
+  PERF_PRINT_METRICS;
 
   int8_t* output = tflite_get_output();
   return (V01ImageClassificationResult){
