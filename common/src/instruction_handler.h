@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-#ifndef PROJ_MENU_H
-#define PROJ_MENU_H
+#ifndef _INSTRUCTION_HANDLER_H
+#define _INSTRUCTION_HANDLER_H
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Project-specific menu
-void do_proj_menu();
+// Handler for illegal instructions, called in trap.
+void instruction_handler(uint32_t* reg_base);
+
+// Tests for illegal instruction handlers.
+void do_instruction_tests();
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif  // !_PROJ_MENU_H
+#endif  // !_INSTRUCTION_HANDLER_H

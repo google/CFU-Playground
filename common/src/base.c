@@ -25,6 +25,9 @@
 #include <string.h>
 #include <uart.h>
 
+#include "instruction_handler.h"
+#include "riscv.h"
+
 void isr(void) {
   __attribute__((unused)) unsigned int irqs;
 
@@ -32,6 +35,14 @@ void isr(void) {
 
   if (irqs & (1 << UART_INTERRUPT)) {
     uart_isr();
+  }
+}
+
+void trap_handler(uint32_t* reg_base) {
+  if (csr_read(mcause) == CAUSE_ILLEGAL_INSTRUCTION) {
+    instruction_handler(reg_base);
+  } else {
+    isr();
   }
 }
 

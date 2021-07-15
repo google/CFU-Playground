@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-#ifndef PROJ_MENU_H
-#define PROJ_MENU_H
+#include <stdint.h>
+#include "cfu.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-// Project-specific menu
-void do_proj_menu();
-
-#ifdef __cplusplus
+//
+// In this function, place C code to emulate your CFU. You can switch between
+// hardware and emulated CFU by setting the CFU_SOFTWARE_DEFINED DEFINE in
+// the Makefile.
+uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2)
+{
+  if (funct3 == 0)
+  {
+    return rs1 + rs2;
+  }
+  return rs1;
 }
-#endif
-
-#endif  // !_PROJ_MENU_H

@@ -14,14 +14,10 @@
 # limitations under the License.
 
 # This variable lists symbols to define to the C preprocessor
-export DEFINES := TF_LITE_SHOW_MEMORY_USE
+export DEFINES :=
 
-# Conditionally enable tail capture
-ifdef TAIL_CAPTURE
-DEFINES += TAIL_ROM_CAPTURE
-else
-DEFINES += TAIL_ROM_USE
-endif
+# Uncomment this line to use the custom accelerated convolution operation
+DEFINES += ACCEL_CONV
 
 # Uncomment this line to use software defined CFU functions in software_cfu.cc
 #DEFINES += CFU_SOFTWARE_DEFINED
@@ -30,19 +26,25 @@ endif
 DEFINES += NDEBUG
 
 # Uncomment this line to skip individual profiling output (has minor effect on performance).
-DEFINES += NPROFILE
+#DEFINES += NPROFILE
+
+# Uncomment to show the parameters used for each convolution step when evaluating a model
+DEFINES += SHOW_CONV_PARAMS
 
 # Uncomment to include pdti8 in built binary
-DEFINES += INCLUDE_MODEL_PDTI8
+#DEFINES += INCLUDE_MODEL_PDTI8
 
 # Uncomment to include micro_speech in built binary
-DEFINES += INCLUDE_MODEL_MICRO_SPEECH
+#DEFINES += INCLUDE_MODEL_MICRO_SPEECH
 
 # Uncomment to include magic_wand in built binary
 #DEFINES += INCLUDE_MODEL_MAGIC_WAND
 
 # Uncomment to include mnv2 in built binary (adds ~500kB to binary)
 #DEFINES += INCLUDE_MODEL_MNV2
+
+# Uncomment to include hps_model in built binary (adds ~600kB to binary)
+DEFINES += INCLUDE_MODEL_HPS
 
 # Uncomment to include  mlcommons tiny v0.1 v0.1 anomaly detection in built binary
 #DEFINES += INLCUDE_MODEL_MLCOMMONS_TINY_V01_ANOMD

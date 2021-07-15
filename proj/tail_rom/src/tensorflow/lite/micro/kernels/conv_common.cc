@@ -147,12 +147,25 @@ TfLiteStatus ConvPrepare(TfLiteContext* context, TfLiteNode* node) {
 
   // Dynamically allocate per-channel quantization parameters.
   const int num_channels = filter->dims->data[kConvQuantizedDimension];
+
+  // CFU-Playground: attempt to fetch stored buffers
+  int32_t* cached_output_multiplier =
+      calculate_once::GetCache()->FetchNextBuffer(num_channels);
+  int32_t* cached_output_shift =
+      calculate_once::GetCache()->FetchNextBuffer(num_channels);
+
+  // CFU-Playground: If there were stored buffers, then save them for later,
+  // otherwise allocate storage
   data->per_channel_output_multiplier =
-      static_cast<int32_t*>(context->AllocatePersistentBuffer(
-          context, num_channels * sizeof(int32_t)));
+      cached_output_multiplier
+          ? NULL
+          : static_cast<int32_t*>(context->AllocatePersistentBuffer(
+                context, num_channels * sizeof(int32_t)));
   data->per_channel_output_shift =
-      static_cast<int32_t*>(context->AllocatePersistentBuffer(
-          context, num_channels * sizeof(int32_t)));
+      cached_output_shift
+          ? NULL
+          : static_cast<int32_t*>(context->AllocatePersistentBuffer(
+                context, num_channels * sizeof(int32_t)));
 
   // All per-channel quantized tensors need valid zero point and scale arrays.
   if (input->type == kTfLiteInt8) {
@@ -176,6 +189,14 @@ TfLiteStatus ConvPrepare(TfLiteContext* context, TfLiteNode* node) {
   TF_LITE_ENSURE_STATUS(CalculateOpDataConv(
       context, node, params, input_width, input_height, filter_width,
       filter_height, output_width, output_height, input->type, data));
+
+  // CFU-Playground: Set the stored buffers we had been saving
+  if (cached_output_multiplier) {
+    data->per_channel_output_multiplier = cached_output_multiplier;
+  }
+  if (cached_output_shift) {
+    data->per_channel_output_shift = cached_output_shift;
+  }
 
   // CFU-Playground: capture, if required
   calculate_once::capturer.Capture(data->per_channel_output_multiplier,
