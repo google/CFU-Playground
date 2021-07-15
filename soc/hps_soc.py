@@ -23,6 +23,7 @@ from litex.soc.integration.common import get_mem_data
 from litex.soc.integration.soc import SoCRegion
 from litex.soc.integration.builder import Builder, builder_args, builder_argdict
 from litex.soc.integration.soc import LiteXSoC, SoCRegion
+from litex.soc.interconnect.csr import AutoCSR, CSRField, CSRStatus, CSRStorage
 from litex.soc.cores.led import LedChaser
 from litex.soc.cores.spi_flash import SpiFlash
 from litex.soc.cores.bitbang import I2CMaster
@@ -34,6 +35,7 @@ from litespi.modules import GD25LQ128D
 from litespi.opcodes import SpiNorFlashOpCodes as Codes
 from litespi.phy.generic import LiteSPIPHY
 from litespi import LiteSPI
+from migen import Signal, If, Module
 
 from patch import Patch
 # from cam_control import CameraControl
@@ -48,6 +50,39 @@ UART_SPEED = 115200
 RAM_SIZE = 320 * KB
 
 SOC_DIR = os.path.dirname(os.path.realpath(__file__))
+
+
+class SpiFlashCounter(Module, AutoCSR):
+    def __init__(self, pads):
+        self.control = CSRStorage(description="Counter control register",
+            fields=[
+                CSRField("enable", size=1, description="enable counter"),
+                CSRField("reset",  size=1, description="reset counter", pulse=1)
+            ])
+
+        self.cs_ticks = CSRStatus(size=32, reset=0,
+            description="Count the system ticks when the counter is active and CS# line is asserted")
+        self.clk_ticks = CSRStatus(size=32, reset=0,
+            description="Count the system ticks when the counter is active")
+        cnt_cs = Signal(32)
+        cnt_clk = Signal(32)
+
+        self.sync += [
+            If(self.control.fields.reset,
+                cnt_cs.eq(0),
+                cnt_clk.eq(0),
+            ).Elif(self.control.fields.enable,
+                cnt_clk.eq(cnt_clk + 1),
+                If(~pads.cs_n,
+                    cnt_cs.eq(cnt_cs + 1),
+                )
+            )
+        ]
+
+        self.comb += [
+            self.cs_ticks.status.eq(cnt_cs),
+            self.clk_ticks.status.eq(cnt_clk),
+        ]
 
 
 class HpsSoC(LiteXSoC):
@@ -155,19 +190,29 @@ class HpsSoC(LiteXSoC):
         self.integrated_rom_size = region.size
 
     def setup_flash(self):
-        self.submodules.spiflash = SpiFlash(self.platform.request("spiflash"), dummy=8,
+        pads = self.platform.request("spiflash")
+        self.submodules.spiflash = SpiFlash(pads, dummy=8,
                                             endianness="little", div=4)
         self.bus.add_slave("spiflash", self.spiflash.bus, self.spiflash_region)
         self.csr.add("spiflash")
-        
+
+        self.submodules.spi_flash_counter = SpiFlashCounter(pads)
+        self.csr.add("spi_flash_counter")
+        self.constants["LITESPI_CS_COUNTER"] = 1
+
     def setup_litespi_flash(self):
-        self.submodules.spiflash_phy  = LiteSPIPHY(self.platform.request("spiflash"), GD25LQ128D(Codes.READ_1_1_1), default_divisor=1)
+        pads = self.platform.request("spiflash")
+        self.submodules.spiflash_phy  = LiteSPIPHY(pads, GD25LQ128D(Codes.READ_1_1_1), default_divisor=1)
         self.submodules.spiflash_mmap  = LiteSPI(phy=self.spiflash_phy,
             clk_freq        = self.platform.sys_clk_freq,
             mmap_endianness = self.cpu.endianness)
         self.csr.add("spiflash_mmap")
         self.csr.add("spiflash_phy")
         self.bus.add_slave(name="spiflash", slave=self.spiflash_mmap.bus, region=self.spiflash_region)
+
+        self.submodules.spi_flash_counter = SpiFlashCounter(pads)
+        self.csr.add("spi_flash_counter")
+        self.constants["LITESPI_CS_COUNTER"] = 1
 
     def setup_rom_in_flash(self):
         region = SoCRegion(self.spiflash_region.origin + self.rom_offset,
