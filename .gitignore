@@ -68,6 +68,9 @@ soc/csr.csv
 soc/build
 soc/prog
 
+# proj/my_first_cfu is part of our docs walkthrough
+proj/my_first_cfu
+
 # cfu.v, if present, must be added explicitly
 proj/*/cfu.v
 

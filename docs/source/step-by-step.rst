@@ -145,9 +145,11 @@ this:
        183M (   183087673) cycles total
 
 The comma-separated lines at the top signify the TensorFlow operation and the
-number of cycles it took to complete. The table at the bottom shows statistics
-from the performance CSRs (if you turned them on), the final line shows the
-total number of cycles spent during inference.
+number of cycles it took to complete. For easier analysis, you can copy and
+paste these values into a spreadsheet that you maintain whilst performing
+optimizations. The table at the bottom shows statistics from the performance
+CSRs (if you turned them on), the final line shows the total number of cycles
+spent during inference.
 
 Summing up all the cycle counts for the tensorFlow operations we see that
 about 75% of the time is spent inside the ``CONV_2D`` operation. That seems
@@ -246,10 +248,13 @@ Step 3: Software Specialization
 Before we write any hardware let's perform some simple, model-specific
 optimizations in software. In order to understand what optimizations we can
 make with our specific model, let's print out the parameters of the ``CONV_2D``
-op. At the top of the function add the following:
+operation. Include "playground_util/print_params.h" and add the following to
+the top of the function:
 
 .. code-block:: C++
 
+    #include "playground_util/print_params.h"
+    /* ... */
     inline void ConvPerChannel(
         const ConvParams& params, const int32_t* output_multiplier,
         const int32_t* output_shift, const RuntimeShape& input_shape,
@@ -257,23 +262,16 @@ op. At the top of the function add the following:
         const int8_t* filter_data, const RuntimeShape& bias_shape,
         const int32_t* bias_data, const RuntimeShape& output_shape,
         int8_t* output_data) {
-      printf("input_offset: %ld, ", params.input_offset);
-      printf("stride_width: %d, ", params.stride_width);
-      printf("stride_height: %d, ", params.stride_height);
-      printf("dilation_width_factor: %d, ", params.dilation_width_factor);
-      printf("dilation_height_factor: %d, ", params.dilation_height_factor);
-      printf("pad_width: %d, ", params.padding_values.width);
-      printf("pad_height: %d, ", params.padding_values.height);
-      printf("output_offset: %ld, ", params.output_offset);
-      printf("output_activation_min: %ld, ", params.quantized_activation_min);
-      printf("output_activation_max: %ld, ", params.quantized_activation_max);
-      printf("input_depth: %d, ", input_depth);
-      printf("input_height: %d, ", input_shape.Dims(1));
-      printf("input_width: %d, ", input_shape.Dims(2));
-      printf("filter_height: %d, ", filter_shape.Dims(1));
-      printf("filter_width: %d, ", filter_shape.Dims(2));
-      printf("output_height: %d, ", output_shape.Dims(1));
-      printf("output_width: %d, ", output_shape.Dims(2));
+      // Format is:
+      // "padding_type", "padding_width", "padding_height", "padding_width_offset",
+      // "padding_height_offset", "stride_width", "stride_height",
+      // "dilation_width_factor", "dilation_height_factor", "input_offset",
+      // "weights_offset", "output_offset", "output_multiplier", "output_shift",
+      // "quantized_activation_min", "quantized_activation_max",
+      // "input_batches", "input_height", "input_width", "input_depth",
+      // "filter_output_depth", "filter_height", "filter_width", "filter_input_depth",
+      // "output_batches", "output_height", "output_width", "output_depth",
+      print_conv_params(params, input_shape, filter_shape, output_shape);
       
       /* ... */
 
@@ -361,7 +359,8 @@ After this change we get another significant speed-up in our golden tests:
        117M (   117297894) cycles total
 
 Even with the simplest possible software specialization, we've already seen
-massive gains in performance.
+massive gains in performance. Our innermost loop is now twice as fast and
+the total number of cycles spent in inference has decreased by 36%.
 
 -----------------------------------
 Step 4: Simple Calculation Gateware
@@ -479,7 +478,13 @@ framework through this example.
                 (0, pack_vals(0, 0, 0, 0), pack_vals(-5, 0, 0, 0), 0xffffff84),
                 (1, 0, 0, 0),  # reset
                 (0, pack_vals(-12, -128, -88, -128), pack_vals(-1, -7, -16,
-                                                            15), 0xfffffd0c),
+                                                               15), 0xfffffd0c),
+                (1, 0, 0, 0),  # reset
+                (0, pack_vals(127, 127, 127, 127), pack_vals(127, 127, 127,
+                                                             127), 129540),
+                (1, 0, 0, 0),  # reset
+                (0, pack_vals(127, 127, 127,
+                              127), pack_vals(-128, -128, -128, -128), 0xfffe0200),
             ])
 
 
@@ -671,9 +676,13 @@ pass and then note the cycle count.
         7    |     0  |     0  |   n/a   |            0
         86M (    85771518) cycles total
 
-What an improvement! For extra analysis you can look at the ``build`` folder
-in your project directory. In there you can inspect disassemblies of your
-software to see how the addition of your CFU improved the code.
+What an improvement! Compared to the unoptimized version, the innermost loop is
+five times faster and the total number of cycles spent in inference has
+decreased by 47%. 
+
+For extra analysis you can look at the ``build`` folder in your project
+directory. In there you can inspect disassemblies of your software to see how
+the addition of your CFU improved the code.
 
 Before adding the CFU this is what the assembly of our innermost loop looked
 like:
