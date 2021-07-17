@@ -48,4 +48,8 @@ DEFINES += INCLUDE_MODEL_HPS
 # Uncomment to include all TFLM examples (pdti8, micro_speech, magic_wand)
 #DEFINES += INCLUDE_ALL_TFLM_EXAMPLES
 
+# How to respond to run and test
+RUN_MENU_ITEMS=1 1 c
+TEST_MENU_ITEMS=5
+
 include ../proj.mk
