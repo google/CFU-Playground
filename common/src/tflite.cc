@@ -41,6 +41,18 @@ void* __dso_handle = &__dso_handle;
 // TfLM global objects
 namespace {
 
+// A profiler that prints a "." for each profile event begun
+class ProgressProfiler : public tflite::MicroProfiler {
+ public:
+  virtual uint32_t BeginEvent(const char* tag) {
+    printf(".");
+    return tflite::MicroProfiler::BeginEvent(tag);
+  }
+
+ private:
+  TF_LITE_REMOVE_VIRTUAL_DELETE;
+};
+
 tflite::ErrorReporter* error_reporter = nullptr;
 tflite::MicroOpResolver* op_resolver = nullptr;
 tflite::MicroProfiler* profiler = nullptr;
@@ -133,7 +145,7 @@ static void tflite_init() {
   // op_resolver = &micro_op_resolver;
 
   // profiler
-  static tflite::MicroProfiler micro_profiler;
+  static ProgressProfiler micro_profiler;
   profiler = &micro_profiler;
 }
 
@@ -184,33 +196,33 @@ void tflite_load_model(const unsigned char* model_data,
 void tflite_set_input_zeros(void) {
   auto input = interpreter->input(0);
   memset(input->data.int8, 0, input->bytes);
-  printf("Zeroed %d bytes at 0x%p\n", input->bytes, input->data.int8);
+  printf("Zeroed %d bytes at %p\n", input->bytes, input->data.int8);
 }
 
 void tflite_set_input_zeros_float() {
   auto input = interpreter->input(0);
   memset(input->data.f, 0, input->bytes);
-  printf("Zeroed %d bytes at 0x%p\n", input->bytes, input->data.f);
+  printf("Zeroed %d bytes at %p\n", input->bytes, input->data.f);
 }
 
 void tflite_set_input(const void* data) {
   auto input = interpreter->input(0);
   memcpy(input->data.int8, data, input->bytes);
-  printf("Copied %d bytes at 0x%p\n", input->bytes, input->data.int8);
+  printf("Copied %d bytes at %p\n", input->bytes, input->data.int8);
 }
 
 void tflite_set_input_unsigned(const unsigned char* data) {
   auto input = interpreter->input(0);
   for (size_t i = 0; i < input->bytes; i++) {
-    input->data.int8[i] = (int)data[i] - 127;
+    input->data.int8[i] = static_cast<int>(data[i]) - 128;
   }
-  printf("Set %d bytes at 0x%p\n", input->bytes, input->data.int8);
+  printf("Set %d bytes at %p\n", input->bytes, input->data.int8);
 }
 
 void tflite_set_input_float(const float* data) {
   auto input = interpreter->input(0);
   memcpy(input->data.f, data, input->bytes);
-  printf("Copied %d bytes at 0x%p\n", input->bytes, input->data.f);
+  printf("Copied %d bytes at %p\n", input->bytes, input->data.f);
 }
 
 void tflite_randomize_input(int64_t seed) {
@@ -219,7 +231,7 @@ void tflite_randomize_input(int64_t seed) {
   for (size_t i = 0; i < input->bytes; i++) {
     input->data.int8[i] = static_cast<int8_t>(next_pseudo_random(&r));
   }
-  printf("Set %d bytes at 0x%p\n", input->bytes, input->data.int8);
+  printf("Set %d bytes at %p\n", input->bytes, input->data.int8);
 }
 
 void tflite_set_grid_input(void) {
@@ -232,7 +244,7 @@ void tflite_set_grid_input(void) {
       input->data.int8[x + y * width] = val;
     }
   }
-  printf("Set %d bytes at 0x%p\n", input->bytes, input->data.int8);
+  printf("Set %d bytes at %p\n", input->bytes, input->data.int8);
 }
 
 int8_t* tflite_get_output() { return interpreter->output(0)->data.int8; }

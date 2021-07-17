@@ -35,8 +35,8 @@ struct golden_test {
 };
 
 struct golden_test golden_tests[] = {
-    {input_00001_7281, -106}, {input_00001_7425, 66}, {input_00002_2532, -106},
-    {input_00002_25869, 144}, {input_00004_970, 110},
+    {input_00001_7281, -148}, {input_00001_7425, 68}, {input_00002_2532, -112},
+    {input_00002_25869, 134}, {input_00004_970, 128},
 };
 // Initialize everything once
 // deallocate tensors when done
