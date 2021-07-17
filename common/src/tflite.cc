@@ -45,7 +45,9 @@ namespace {
 class ProgressProfiler : public tflite::MicroProfiler {
  public:
   virtual uint32_t BeginEvent(const char* tag) {
+#ifndef HIDE_PROGRESS_DOTS
     printf(".");
+#endif
     return tflite::MicroProfiler::BeginEvent(tag);
   }
 
