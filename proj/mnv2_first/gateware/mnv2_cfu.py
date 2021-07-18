@@ -15,7 +15,7 @@
 
 from nmigen import Signal
 from nmigen.lib.fifo import SyncFIFOBuffered
-from nmigen_cfu import Cfu, DualPortMemory, is_pysim_run
+from nmigen_cfu import SimpleCfu, DualPortMemory, is_pysim_run
 
 from . import config
 from .macc import Accumulator, ByteToWordShifter, Madd4Pipeline
@@ -230,7 +230,7 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         ]
 
 
-class Mnv2Cfu(Cfu):
+class Mnv2Cfu(SimpleCfu):
     """Simple CFU for Mnv2.
 
     Most functionality is provided through a single set of registers.

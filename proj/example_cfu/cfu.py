@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from nmigen import *
-from nmigen_cfu import InstructionBase, InstructionTestBase, Cfu, CfuTestBase
+from nmigen_cfu import InstructionBase, InstructionTestBase, SimpleCfu, CfuTestBase
 
 import unittest
 
@@ -122,7 +122,7 @@ class ReverseBytesInstruction(InstructionBase):
 
     def elab(self, m):
         for n in range(4):
-            m.d.comb += self.output.word_select(3-n, 8).eq(
+            m.d.comb += self.output.word_select(3 - n, 8).eq(
                 self.in0.word_select(n, 8))
         m.d.comb += self.done.eq(1)
 
@@ -148,7 +148,7 @@ class ReverseBitsInstruction(InstructionBase):
 
     def elab(self, m):
         for n in range(32):
-            m.d.comb += self.output[31-n].eq(self.in0[n])
+            m.d.comb += self.output[31 - n].eq(self.in0[n])
         m.d.comb += self.done.eq(1)
 
 
@@ -193,7 +193,7 @@ class FibInstruction2Test(InstructionTestBase):
 
 
 def make_cfu():
-    return Cfu({
+    return SimpleCfu({
         0: SumBytesInstruction(),
         1: ReverseBytesInstruction(),
         2: ReverseBitsInstruction(),
@@ -208,12 +208,12 @@ class CfuTest(CfuTestBase):
     def test(self):
         DATA = [
             ((0, 0x01020304, 0x0a0b0c0d), 56),
-            ((1, 0x01020304, 0),          0x04030201),
-            ((2, 0x01020304, 0),          0x20c04080),
-            ((3, 0x05,       0),          5),
-            ((3, 0x06,       0),          8),
-            ((3, 46,         0),          1836311903),  # Max input
-            ((3, 47,         0),          0),           # Input too large
+            ((1, 0x01020304, 0), 0x04030201),
+            ((2, 0x01020304, 0), 0x20c04080),
+            ((3, 0x05, 0), 5),
+            ((3, 0x06, 0), 8),
+            ((3, 46, 0), 1836311903),  # Max input
+            ((3, 47, 0), 0),           # Input too large
         ]
         return self.run_ops(DATA)
 

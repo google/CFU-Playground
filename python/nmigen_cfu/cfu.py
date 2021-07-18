@@ -16,6 +16,7 @@
 __package__ = 'nmigen_cfu'
 
 from nmigen import Array, Signal, signed
+from nmigen.hdl.dsl import Module
 from .util import SimpleElaboratable, TestBase
 from nmigen.hdl import ResetSignal
 
@@ -149,11 +150,6 @@ class Cfu(SimpleElaboratable):
     We use funct3 bits of function ID to distinguish 8 separate "instructions".
     funct7 is passed to the instruction.
 
-    Parameters
-    ----------
-    instructions: A map from opcode (start from 0) to instructions (instances of
-                  subclasses of InstructionBase).
-
     Attributes
     ----------
     Attribute public names and types form the Verilog module interface:
@@ -171,11 +167,7 @@ class Cfu(SimpleElaboratable):
         input               reset
     """
 
-    def __init__(self, instructions):
-        self.instructions = instructions
-        for i in range(8):
-            if i not in self.instructions:
-                self.instructions[i] = _FallbackInstruction()
+    def __init__(self):
         self.cmd_valid = Signal(name='cmd_valid')
         self.cmd_ready = Signal(name='cmd_ready')
         self.cmd_function_id = Signal(
@@ -200,6 +192,29 @@ class Cfu(SimpleElaboratable):
             self.reset
         ]
 
+    def elab_instructions(self, m: Module) -> dict[int, InstructionBase]:
+        """Make instructions this CFU will execute.
+
+        Returns:
+          A dictionary with keys in range(8) containing the CFU's instructions.
+        """
+        return dict()
+
+    def __build_instructions(self, m: Module) -> list[InstructionBase]:
+        """Builds the list of eight instructions"""
+        instruction_dict = self.elab_instructions(m)
+
+        assert all(k in range(8) for k in instruction_dict.keys()), \
+            "Instruction IDs must be integers from 0 to 7"
+
+        # Add fallback instructions where needed
+        for i in range(8):
+            if i not in instruction_dict:
+                m.submodules[f"fallback{i}"] = fb = _FallbackInstruction()
+                instruction_dict[i] = fb
+
+        return list(instruction_dict[i] for i in range(8))
+
     def elab(self, m):
         # break out the functionid
         funct3 = Signal(3)
@@ -216,10 +231,11 @@ class Cfu(SimpleElaboratable):
         # Response is always OK.
         m.d.comb += self.rsp_ok.eq(1)
 
+        instructions = self.__build_instructions(m)
         instruction_outputs = Array(Signal(32) for _ in range(8))
         instruction_dones = Array(Signal() for _ in range(8))
         instruction_starts = Array(Signal() for _ in range(8))
-        for (i, instruction) in self.instructions.items():
+        for (i, instruction) in enumerate(instructions):
             m.d.comb += instruction_outputs[i].eq(instruction.output)
             m.d.comb += instruction_dones[i].eq(instruction.done)
             m.d.comb += instruction.start.eq(instruction_starts[i])
@@ -265,18 +281,16 @@ class Cfu(SimpleElaboratable):
                 with m.If(self.rsp_ready):
                     m.next = "WAIT_CMD"
 
-        for (i, instruction) in self.instructions.items():
+        for instruction in instructions:
             m.d.comb += [
                 instruction.in0.eq(self.cmd_in0),
                 instruction.in1.eq(self.cmd_in1),
                 instruction.funct7.eq(funct7),
             ]
-            m.submodules[f"fn{i}"] = instruction
 
         # tie "reset" and "rst" together (issue #110)
         rst = ResetSignal('sync')
         m.d.comb += rst.eq(self.reset)
-
 
 
 class CfuTestBase(TestBase):
@@ -325,3 +339,25 @@ class CfuTestBase(TestBase):
                 yield
 
         self.run_sim(process, write_trace)
+
+
+class SimpleCfu(Cfu):
+    """Simplified API for CFUs.
+
+    This provides simplified API suitable for use when each CFU instruction
+    is independent of the others. This API breaks several conventions
+
+    Parameters
+    ----------
+    instructions: A map from opcode (start from 0) to instructions (instances of
+                  subclasses of InstructionBase).
+    """
+
+    def __init__(self, instructions):
+        super().__init__()
+        self._saved_instructions = instructions
+
+    def elab_instructions(self, m: Module) -> dict[int, InstructionBase]:
+        for i, instruction in self._saved_instructions.items():
+            m.submodules[f"fn{i}"] = instruction
+        return self._saved_instructions

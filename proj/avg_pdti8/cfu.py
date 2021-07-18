@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from nmigen import Mux, Signal, signed
-from nmigen_cfu import InstructionBase, SimpleElaboratable, TestBase, Cfu, CfuTestBase
+from nmigen_cfu import InstructionBase, SimpleElaboratable, TestBase, SimpleCfu, CfuTestBase
 import unittest
 
 
@@ -350,7 +350,7 @@ class SaturatingRoundingDoubleHighMulInstruction(InstructionBase):
         ]
 
 
-class AvgPdti8Cfu(Cfu):
+class AvgPdti8Cfu(SimpleCfu):
     def __init__(self):
         self.write = WriteInstruction()
         self.read = ReadInstruction()

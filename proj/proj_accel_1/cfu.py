@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from nmigen import *
-from nmigen_cfu import SimpleElaboratable, InstructionBase, TestBase, InstructionTestBase, Cfu, CfuTestBase
+from nmigen_cfu import InstructionBase, TestBase, SimpleCfu, CfuTestBase
 
 import unittest
 
@@ -330,7 +330,7 @@ class MultiplyAccumulateFourInstructionTest(TestBase):
         self.run_sim(process, True)
 
 
-class ProjAccel1Cfu(Cfu):
+class ProjAccel1Cfu(SimpleCfu):
     def __init__(self):
         self.dc = DoubleCompareInstruction()
         self.store = StoreInstruction()
