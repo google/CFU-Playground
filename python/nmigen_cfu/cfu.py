@@ -341,23 +341,27 @@ class CfuTestBase(TestBase):
         self.run_sim(process, write_trace)
 
 
-class SimpleCfu(Cfu):
+def simple_cfu(instructions):
     """Simplified API for CFUs.
 
-    This provides simplified API suitable for use when each CFU instruction
-    is independent of the others. This API breaks several conventions
+    This provides simplified API suitable for use only when each CFU
+    instruction is independent of the others. This API breaks nmigen
+    conventions, and should only be used in very simple cases.
+
+    For more complex cases, subclass Cfu directly.
 
     Parameters
     ----------
-    instructions: A map from opcode (start from 0) to instructions (instances of
-                  subclasses of InstructionBase).
+    instructions: A map from opcode (start from 0) to instructions (instances
+                  of subclasses of InstructionBase).
     """
+    saved_instructions = instructions.copy()
 
-    def __init__(self, instructions):
-        super().__init__()
-        self._saved_instructions = instructions
+    class _ASimpleCfu(Cfu):
+        def elab_instructions(self, m: Module) -> dict[int, InstructionBase]:
 
-    def elab_instructions(self, m: Module) -> dict[int, InstructionBase]:
-        for i, instruction in self._saved_instructions.items():
-            m.submodules[f"fn{i}"] = instruction
-        return self._saved_instructions
+            for i, instruction in saved_instructions.items():
+                m.submodules[f"fn{i}"] = instruction
+            return saved_instructions
+
+    return _ASimpleCfu()

@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from nmigen import *
-from nmigen_cfu import InstructionBase, InstructionTestBase, SimpleCfu, CfuTestBase
+from nmigen_cfu import InstructionBase, InstructionTestBase, simple_cfu, CfuTestBase
 
 import unittest
 
@@ -193,7 +193,7 @@ class FibInstruction2Test(InstructionTestBase):
 
 
 def make_cfu():
-    return SimpleCfu({
+    return simple_cfu({
         0: SumBytesInstruction(),
         1: ReverseBytesInstruction(),
         2: ReverseBitsInstruction(),
