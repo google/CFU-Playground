@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from nmigen import *
-from nmigen_cfu import InstructionBase, TestBase, SimpleCfu, CfuTestBase
+from nmigen_cfu import InstructionBase, TestBase, Cfu, CfuTestBase
 
 import unittest
 
@@ -53,7 +53,8 @@ class StoreInstructionTest(TestBase):
             # Only set max_width and max_height when start is 1.
             ((1, 10, 5), (1, 1, 0, 0)),
             ((1, 11, 6), (1, 1, 5, 0)),
-            # Check that when start is 0, max_width and max_height remains the same.
+            # Check that when start is 0, max_width and max_height remains the
+            # same.
             ((0, 5, 7), (0, 0, 5, 6)),
             ((0, 1, 1), (0, 0, 5, 6)),
             ((1, 10, 7), (1, 1, 5, 6)),
@@ -208,7 +209,8 @@ class MultiplyAccumulateInstructionTest(TestBase):
     def test_multiply_accumulate(self):
         DATA = [
             # start, reset_acc, filter_val, input_val, input_offset
-            # When start or reset_acc is set, calculations or reset happens next cycle
+            # When start or reset_acc is set, calculations or reset happens
+            # next cycle
             ((0, 1, 2, 3, 4), 0),
             ((0, 0, 2, 3, 4), 0),
             ((1, 0, 2, 3, 4), 0),
@@ -278,7 +280,8 @@ class MultiplyAccumulateFourInstructionTest(TestBase):
     def test_multiply_accumulate_four(self):
         DATA = [
             # start, reset_acc, filter_val, input_val, input_offset
-            # When start or reset_acc is set, calculations or reset happens next cycle
+            # When start or reset_acc is set, calculations or reset happens
+            # next cycle
             ((0, 1, 2, 3, 4), 0),
             ((0, 0, 2, 3, 4), 0),
             ((1, 0, 2, 3, 4), 0),
@@ -330,31 +333,28 @@ class MultiplyAccumulateFourInstructionTest(TestBase):
         self.run_sim(process, True)
 
 
-class ProjAccel1Cfu(SimpleCfu):
-    def __init__(self):
-        self.dc = DoubleCompareInstruction()
-        self.store = StoreInstruction()
-        self.read = ReadInstruction()
-        self.macc = MultiplyAccumulateInstruction()
-        super().__init__({
-            0: self.dc,
-            1: self.store,
-            2: self.read,
-            3: self.macc
-        })
-
-    def elab(self, m):
-        super().elab(m)
+class ProjAccel1Cfu(Cfu):
+    def elab_instructions(self, m):
+        m.submodules["dc"] = dc = DoubleCompareInstruction()
+        m.submodules["store"] = store = StoreInstruction()
+        m.submodules["read"] = read = ReadInstruction()
+        m.submodules["macc"] = macc = MultiplyAccumulateInstruction()
         m.d.comb += [
-            self.dc.max_height.eq(self.store.max_height),
-            self.dc.max_width.eq(self.store.max_width),
-            self.read.max_height.eq(self.store.max_height),
-            self.read.max_width.eq(self.store.max_width),
-            self.macc.input_offset.eq(self.store.input_offset),
-            self.macc.reset_acc.eq(self.store.reset_acc),
-            self.read.acc.eq(self.macc.acc),
-            self.read.input_offset.eq(self.store.input_offset),
+            dc.max_height.eq(store.max_height),
+            dc.max_width.eq(store.max_width),
+            read.max_height.eq(store.max_height),
+            read.max_width.eq(store.max_width),
+            macc.input_offset.eq(store.input_offset),
+            macc.reset_acc.eq(store.reset_acc),
+            read.acc.eq(macc.acc),
+            read.input_offset.eq(store.input_offset),
         ]
+        return {
+            0: dc,
+            1: store,
+            2: read,
+            3: macc
+        }
 
 
 class ProjAccel1CfuTest(CfuTestBase):
@@ -419,7 +419,7 @@ class ProjAccel1CfuTest(CfuTestBase):
             ((3, -6, 5), 0),
             # Read the accumulate result. # 2**32-102 due to rsp_payload_outputs_0 being unsigned.
             # This is to test for -ve acc values
-            ((2, 12, 0), 2**32-102),
+            ((2, 12, 0), 2**32 - 102),
             # 2**32 - 102 + (-1000) * (14 + 12)
             ((3, -1000, 14), 0),
             ((2, 12, 0), 4294941194),
