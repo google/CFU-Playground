@@ -192,7 +192,7 @@ class Cfu(SimpleElaboratable):
             self.reset
         ]
 
-    def elab_instructions(self, m: Module) -> dict[int, InstructionBase]:
+    def elab_instructions(self, m):
         """Make instructions this CFU will execute.
 
         Returns:
@@ -200,7 +200,7 @@ class Cfu(SimpleElaboratable):
         """
         return dict()
 
-    def __build_instructions(self, m: Module) -> list[InstructionBase]:
+    def __build_instructions(self, m):
         """Builds the list of eight instructions"""
         instruction_dict = self.elab_instructions(m)
 
@@ -358,7 +358,7 @@ def simple_cfu(instructions):
     saved_instructions = instructions.copy()
 
     class _ASimpleCfu(Cfu):
-        def elab_instructions(self, m: Module) -> dict[int, InstructionBase]:
+        def elab_instructions(self, m):
 
             for i, instruction in saved_instructions.items():
                 m.submodules[f"fn{i}"] = instruction
