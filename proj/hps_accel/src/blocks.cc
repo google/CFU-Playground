@@ -16,6 +16,8 @@
 
 #include "blocks.h"
 
+namespace hps_accel {
+
 namespace {
 
 inline uint32_t pack32(int8_t a, int8_t b, int8_t c, int8_t d) {
@@ -29,9 +31,14 @@ int32_t multiply_1(int8_t input, int8_t filter, int32_t input_offset) {
   return (input_offset + input) * filter;
 }
 
-};  // anonymous namespace
+// Data storage for the filter
+uint32_t filter_storage[MAX_FILTER_WORDS];
+size_t filter_index;
 
-namespace hps_accel {
+// Guaranteed to be divisible by 4
+size_t filter_words;
+
+};  // anonymous namespace
 
 Vector16 Vector16::build(int8_t a, int8_t b, int8_t c, int8_t d, int8_t e,
                          int8_t f, int8_t g, int8_t h, int8_t i, int8_t j,
@@ -43,13 +50,37 @@ Vector16 Vector16::build(int8_t a, int8_t b, int8_t c, int8_t d, int8_t e,
 
 Vector16 Vector16::zeroes() { return Vector16{{0, 0, 0, 0}}; }
 
-// Performs a 4x4 matrix multiplication
+// Performs a 16 x 16 vector multiplication
 int32_t multiply_accumulate(Vector16 input, Vector16 filter,
                             int32_t input_offset) {
   int32_t result = 0;
   // NOTE: obvious optimization is to unroll these loops
   for (size_t n = 0; n < 16; n++) {
     result += multiply_1(input.get(n), filter.get(n), input_offset);
+  }
+  return result;
+}
+
+void LoadFilter(size_t in_channels, size_t out_channels, const uint32_t* values) {
+  filter_words = FILTER_WIDTH * FILTER_HEIGHT / 4 * in_channels * out_channels;
+  uint32_t* dest = filter_storage;
+  uint32_t* end = filter_storage + filter_words;
+  while (dest != end) {
+    *dest++ = *values++;
+  }
+  filter_index = 0;
+}
+
+Vector16 GetFilter() {
+  Vector16 result {
+    {
+      filter_storage[filter_index + 0], filter_storage[filter_index + 1],
+          filter_storage[filter_index + 2], filter_storage[filter_index + 3]
+    }
+  };
+  filter_index += 4;
+  if (filter_index >= filter_words) {
+    filter_index = 0;
   }
   return result;
 }

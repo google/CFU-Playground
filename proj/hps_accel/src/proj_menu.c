@@ -27,6 +27,7 @@ static struct Menu MENU = {
     "project",
     {
         MENU_ITEM('m', "test blocks Multiply", do_test_blocks_multiply_accumulate),
+        MENU_ITEM('f', "test blocks Filter", do_test_blocks_filter),
         MENU_END,
     },
 };

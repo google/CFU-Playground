@@ -21,7 +21,12 @@
 extern "C" {
 #endif
 
+
+// Tests the multiply-accumulate function
 void do_test_blocks_multiply_accumulate(void);
+
+// Tests the filter value load/get functions
+void do_test_blocks_filter(void);
 
 #ifdef __cplusplus
 }

@@ -22,20 +22,36 @@
 #include <cstdint>
 
 namespace hps_accel {
-// Encodes 16 signed 8-bit values in a 4x4 matrix
+
+// All filters are 4x4
+constexpr size_t FILTER_WIDTH = 4;
+constexpr size_t FILTER_HEIGHT = 4;
+
+// Maximum number of words in filter
+// TODO: this has to come down to ~ 2k and then change code to make batches to
+// match
+constexpr size_t MAX_FILTER_WORDS = 16384;
+
+// Encodes 16 signed 8-bit values in a 4x32 bit words
 struct Vector16 {
-  // values is indexed by y. Each 32 bit value holds 4 values, in little endian
-  // order
+  // Each 32 bit value holds four 8 bit signed values, in little endian order.
   uint32_t values[4];
 
   // Fetches a single 8bit value
-  inline int8_t get(size_t n) {
+  inline int8_t get(size_t n) const {
     uint32_t col = n & 0x3;
     size_t shift = col * 8;
     uint32_t byte_mask = 0xff << shift;
     uint32_t val = values[n >> 2];
     uint32_t byte_value = (val & byte_mask) >> shift;
     return static_cast<int8_t>(byte_value);
+  }
+
+  inline bool same_values(Vector16 other) const {
+    for (size_t i = 0; i < 16; i++) {
+      if (get(i) != other.get(i)) return false;
+    }
+    return true;
   }
 
   static Vector16 build(int8_t a, int8_t b, int8_t c, int8_t d, int8_t e,
@@ -59,7 +75,8 @@ int32_t multiply_accumulate(Vector16 input, Vector16 filter,
 // The number of 32 bit values loaded is:
 //   in_channels * 4*4 * out_channels / 4
 //
-void LoadFilter(size_t in_channels, size_t out_channels, uint32_t* values);
+void LoadFilter(size_t in_channels, size_t out_channels,
+                const uint32_t* values);
 
 // Returns the filter to use for the next multiplication
 // Iterates through filters for each input channel within x, within y within

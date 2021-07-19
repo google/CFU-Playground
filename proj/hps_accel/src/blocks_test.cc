@@ -52,6 +52,51 @@ bool test_multiply(Vector16 input, Vector16 filter, int32_t input_offset,
   return false;
 }
 
+// 1474 bytes of Shakespeare
+const char* DATA =
+    "SHYLOCK\n"
+    "This kindness will I show.\n"
+    "Go with me to a notary, seal me there\n"
+    "Your single bond; and, in a merry sport,\n"
+    "If you repay me not on such a day,\n"
+    "In such a place, such sum or sums as are\n"
+    "Express'd in the condition, let the forfeit\n"
+    "Be nominated for an equal pound\n"
+    "Of your fair flesh, to be cut off and taken\n"
+    "In what part of your body pleaseth me.\n"
+    "ANTONIO\n"
+    "Content, i' faith: I'll seal to such a bond\n"
+    "And say there is much kindness in the Jew.\n"
+    "BASSANIO\n"
+    "You shall not seal to such a bond for me:\n"
+    "I'll rather dwell in my necessity.\n"
+    "ANTONIO\n"
+    "Why, fear not, man; I will not forfeit it:\n"
+    "Within these two months, that's a month before\n"
+    "This bond expires, I do expect return\n"
+    "Of thrice three times the value of this bond.\n"
+    "SHYLOCK\n"
+    "O father Abram, what these Christians are,\n"
+    "Whose own hard dealings teaches them suspect\n"
+    "The thoughts of others! Pray you, tell me this;\n"
+    "If he should break his day, what should I gain\n"
+    "By the exaction of the forfeiture?\n"
+    "A pound of man's flesh taken from a man\n"
+    "Is not so estimable, profitable neither,\n"
+    "As flesh of muttons, beefs, or goats. I say,\n"
+    "To buy his favour, I extend this friendship:\n"
+    "If he will take it, so; if not, adieu;\n"
+    "And, for my love, I pray you wrong me not.\n"
+    "ANTONIO\n"
+    "Yes Shylock, I will seal unto this bond.\n"
+    "SHYLOCK\n"
+    "Then meet me forthwith at the notary's;\n"
+    "Give him direction for this merry bond,\n"
+    "And I will go and purse the ducats straight,\n"
+    "See to my house, left in the fearful guard\n"
+    "Of an unthrifty knave, and presently\n"
+    "I will be with you.\n";
+
 };  // anonymous namespace
 
 extern "C" void do_test_blocks_multiply_accumulate(void) {
@@ -89,6 +134,39 @@ extern "C" void do_test_blocks_multiply_accumulate(void) {
     cases++;
     if (!test_multiply(m.input, m.filter, m.input_offset, m.expected))
       failures++;
+  }
+  printf("\n%s: %d cases with %d failures\n", failures ? "FAIL" : "OK", cases,
+         failures);
+}
+
+extern "C" void do_test_blocks_filter(void) {
+  const size_t in_channels = 16;
+  const size_t out_channels = 8;
+  const uint32_t* values =
+      static_cast<const uint32_t*>(static_cast<const void*>(DATA));
+  hps_accel::LoadFilter(in_channels, out_channels, values);
+
+  const size_t num_vectors = in_channels * out_channels;
+  const int8_t* first =
+      static_cast<const int8_t*>(static_cast<const void*>(DATA));
+
+  size_t cases = 0;
+  size_t failures = 0;
+  for (size_t i = 0; i < num_vectors * 3; i++) {
+    cases++;
+    const int8_t* p = first + ((i % num_vectors) * 16);
+    Vector16 expected =
+        Vector16::build(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8],
+                        p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
+    Vector16 actual = hps_accel::GetFilter();
+    if (!actual.same_values(expected)) {
+      printf("\n FAIL\nexpected:\n");
+      print(expected);
+      printf("actual:\n");
+      print(actual);
+      printf("case: %4u\n", i);
+      failures++;
+    }
   }
   printf("\n%s: %d cases with %d failures\n", failures ? "FAIL" : "OK", cases,
          failures);
