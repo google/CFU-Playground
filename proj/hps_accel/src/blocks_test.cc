@@ -34,6 +34,19 @@ void print(Vector16 m) {
   }
 }
 
+bool check_vector_same(Vector16 actual, Vector16 expected, size_t n) {
+  if (actual.same_values(expected)) {
+    return true;
+  }
+
+  printf("\n FAIL\nexpected:\n");
+  print(expected);
+  printf("actual:\n");
+  print(actual);
+  printf("case: %4u\n", n);
+  return false;
+}
+
 bool test_multiply(Vector16 input, Vector16 filter, int32_t input_offset,
                    int32_t expected) {
   printf(".");
@@ -53,7 +66,7 @@ bool test_multiply(Vector16 input, Vector16 filter, int32_t input_offset,
 }
 
 // 1474 bytes of Shakespeare
-const char* DATA =
+char const* const DATA =
     "SHYLOCK\n"
     "This kindness will I show.\n"
     "Go with me to a notary, seal me there\n"
@@ -158,15 +171,40 @@ extern "C" void do_test_blocks_filter(void) {
     Vector16 expected =
         Vector16::build(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8],
                         p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
-    Vector16 actual = hps_accel::GetFilter();
-    if (!actual.same_values(expected)) {
-      printf("\n FAIL\nexpected:\n");
-      print(expected);
-      printf("actual:\n");
-      print(actual);
-      printf("case: %4u\n", i);
-      failures++;
-    }
+    if (!check_vector_same(hps_accel::GetFilter(), expected, i)) failures++;
+  }
+  printf("\n%s: %d cases with %d failures\n", failures ? "FAIL" : "OK", cases,
+         failures);
+}
+
+extern "C" void do_test_blocks_input(void) {
+  const size_t width = 9;
+  const size_t in_channels = 8;
+  const uint32_t* values =
+      static_cast<const uint32_t*>(static_cast<const void*>(DATA));
+  hps_accel::LoadInput(width, in_channels, values);
+
+  const int8_t* data_int8 =
+      static_cast<const int8_t*>(static_cast<const void*>(DATA));
+
+  const size_t num_vectors = 16 * in_channels / 16;
+  const size_t vectors_per_row = num_vectors / 4;
+  const size_t row_offset = width * in_channels;
+
+  size_t cases = 0;
+  size_t failures = 0;
+  for (size_t i = 0; i < num_vectors * 3; i++) {
+    cases++;
+
+    // Find location of expected data and build a vector from it
+    const int8_t* p = data_int8;
+    const size_t v = i % num_vectors;
+    p += row_offset * (v / vectors_per_row);
+    p += 16 * (v % vectors_per_row);
+    Vector16 expected =
+        Vector16::build(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8],
+                        p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
+    if (!check_vector_same(hps_accel::GetInput(), expected, i)) failures++;
   }
   printf("\n%s: %d cases with %d failures\n", failures ? "FAIL" : "OK", cases,
          failures);

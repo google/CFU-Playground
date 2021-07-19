@@ -33,10 +33,21 @@ int32_t multiply_1(int8_t input, int8_t filter, int32_t input_offset) {
 
 // Data storage for the filter
 uint32_t filter_storage[MAX_FILTER_WORDS];
+
+// Current index from which to fetch next Vector16 for filter
 size_t filter_index;
 
-// Guaranteed to be divisible by 4
+// Words in filter storage. Guaranteed to be divisible by 4
 size_t filter_words;
+
+// Data storage for input
+uint32_t input_storage[MAX_INPUT_WORDS];
+
+// Current index from which to fetch next Vector16 for input
+size_t input_index;
+
+// Words in input_storage. Guaranteed to be divisible by 4
+size_t input_words;
 
 };  // anonymous namespace
 
@@ -61,7 +72,8 @@ int32_t multiply_accumulate(Vector16 input, Vector16 filter,
   return result;
 }
 
-void LoadFilter(size_t in_channels, size_t out_channels, const uint32_t* values) {
+void LoadFilter(size_t in_channels, size_t out_channels,
+                const uint32_t* values) {
   filter_words = FILTER_WIDTH * FILTER_HEIGHT / 4 * in_channels * out_channels;
   uint32_t* dest = filter_storage;
   uint32_t* end = filter_storage + filter_words;
@@ -72,15 +84,41 @@ void LoadFilter(size_t in_channels, size_t out_channels, const uint32_t* values)
 }
 
 Vector16 GetFilter() {
-  Vector16 result {
-    {
-      filter_storage[filter_index + 0], filter_storage[filter_index + 1],
-          filter_storage[filter_index + 2], filter_storage[filter_index + 3]
-    }
-  };
+  Vector16 result{
+      {filter_storage[filter_index + 0], filter_storage[filter_index + 1],
+       filter_storage[filter_index + 2], filter_storage[filter_index + 3]}};
   filter_index += 4;
   if (filter_index >= filter_words) {
     filter_index = 0;
+  }
+  return result;
+}
+
+void LoadInput(size_t width, size_t in_channels, const uint32_t* values) {
+  // TODO: make this work when in_channels = 1
+  const size_t words_per_pixel = in_channels / 4;
+  const size_t words_per_vector_row = words_per_pixel * 4;
+  const size_t words_per_width = words_per_pixel * width;
+  input_words = FILTER_WIDTH * FILTER_HEIGHT * words_per_pixel;
+  uint32_t* dest = input_storage;
+
+  // For each of four consecutive rows, take date from four consecutive pixels
+  for (size_t row_index = 0; row_index < 4; row_index++) {
+    const uint32_t* source = values + (row_index * words_per_width);
+    for (size_t i = 0; i < words_per_vector_row; i++) {
+      *dest++ = *source++;
+    }
+  }
+  input_index = 0;
+}
+
+Vector16 GetInput() {
+  Vector16 result{
+      {input_storage[input_index + 0], input_storage[input_index + 1],
+       input_storage[input_index + 2], input_storage[input_index + 3]}};
+  input_index += 4;
+  if (input_index >= input_words) {
+    input_index = 0;
   }
   return result;
 }

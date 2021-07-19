@@ -32,6 +32,9 @@ constexpr size_t FILTER_HEIGHT = 4;
 // match
 constexpr size_t MAX_FILTER_WORDS = 16384;
 
+// Maximum number of words in input
+constexpr size_t MAX_INPUT_WORDS = 256;
+
 // Encodes 16 signed 8-bit values in a 4x32 bit words
 struct Vector16 {
   // Each 32 bit value holds four 8 bit signed values, in little endian order.
@@ -83,16 +86,16 @@ void LoadFilter(size_t in_channels, size_t out_channels,
 // output_channel and restarts from beginning when it reaches the end
 Vector16 GetFilter();
 
-// Loads input values into global input storage.
+// Loads 4x4 pixels of input values into global input storage.
 //
-// - width is length of row
+// - width is length of row, in pixels
 // - in_channels are the number of input channels. Must be divisible by 4.
 // - values is address of first word to load. It is the top left pixel.
-void LoadValues(size_t width, size_t in_channels, uint32_t values);
+void LoadInput(size_t width, size_t in_channels, const uint32_t* values);
 
 // Returns next matrix of input values to use.
 // Iterates through each input channel, then returns to start
-Vector16 GetValue();
+Vector16 GetInput();
 
 };  // namespace hps_accel
 
