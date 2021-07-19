@@ -101,38 +101,39 @@ this:
 
 ::
 
-    0,DEPTHWISE_CONV_2D,8074244
-    1,DEPTHWISE_CONV_2D,8261757
-    2,CONV_2D,11953686
-    3,DEPTHWISE_CONV_2D,4215107
-    4,CONV_2D,8476340
-    5,DEPTHWISE_CONV_2D,8176370
-    6,CONV_2D,13542375
-    7,DEPTHWISE_CONV_2D,2088669
-    8,CONV_2D,6907128
-    9,DEPTHWISE_CONV_2D,4107783
-    10,CONV_2D,11811746
-    11,DEPTHWISE_CONV_2D,1038518
-    12,CONV_2D,6088804
-    13,DEPTHWISE_CONV_2D,2003871
-    14,CONV_2D,11876651
-    15,DEPTHWISE_CONV_2D,1965732
-    16,CONV_2D,11839822
-    17,DEPTHWISE_CONV_2D,1950569
-    18,CONV_2D,11905968
-    19,DEPTHWISE_CONV_2D,1956535
-    20,CONV_2D,11883747
-    21,DEPTHWISE_CONV_2D,1989537
-    22,CONV_2D,11876834
-    23,DEPTHWISE_CONV_2D,515060
-    24,CONV_2D,6001072
-    25,DEPTHWISE_CONV_2D,941504
-    26,CONV_2D,11530926
-    27,AVERAGE_POOL_2D,55078
-    28,CONV_2D,13185
-    29,RESHAPE,1147
-    30,SOFTMAX,10300
-    Counter |  Total | Starts | Average |     Raw
+    "Event","Tag","Ticks"
+    0,DEPTHWISE_CONV_2D,7892
+    1,DEPTHWISE_CONV_2D,8063
+    2,CONV_2D,11703
+    3,DEPTHWISE_CONV_2D,4089
+    4,CONV_2D,8264
+    5,DEPTHWISE_CONV_2D,8045
+    6,CONV_2D,13234
+    7,DEPTHWISE_CONV_2D,2041
+    8,CONV_2D,6618
+    9,DEPTHWISE_CONV_2D,4065
+    10,CONV_2D,11637
+    11,DEPTHWISE_CONV_2D,1011
+    12,CONV_2D,5955
+    13,DEPTHWISE_CONV_2D,1923
+    14,CONV_2D,11611
+    15,DEPTHWISE_CONV_2D,1919
+    16,CONV_2D,11601
+    17,DEPTHWISE_CONV_2D,1939
+    18,CONV_2D,11628
+    19,DEPTHWISE_CONV_2D,1943
+    20,CONV_2D,11619
+    21,DEPTHWISE_CONV_2D,1925
+    22,CONV_2D,11624
+    23,DEPTHWISE_CONV_2D,509
+    24,CONV_2D,5859
+    25,DEPTHWISE_CONV_2D,922
+    26,CONV_2D,11257
+    27,AVERAGE_POOL_2D,51
+    28,CONV_2D,14
+    29,RESHAPE,1
+    30,SOFTMAX,11
+     Counter |  Total | Starts | Average |     Raw
     ---------+--------+--------+---------+--------------
         0    |     0  |     0  |   n/a   |            0
         1    |     0  |     0  |   n/a   |            0
@@ -142,14 +143,16 @@ this:
         5    |     0  |     0  |   n/a   |            0
         6    |     0  |     0  |   n/a   |            0
         7    |     0  |     0  |   n/a   |            0
-       183M (   183087673) cycles total
+       183M (   183328857) cycles total
 
 The comma-separated lines at the top signify the TensorFlow operation and the
-number of cycles it took to complete. For easier analysis, you can copy and
-paste these values into a spreadsheet that you maintain whilst performing
-optimizations. The table at the bottom shows statistics from the performance
-CSRs (if you turned them on), the final line shows the total number of cycles
-spent during inference.
+number of "ticks" it took to complete. Each tick counted by the profiler is
+1024 clock cycles. For easier analysis, you can copy and paste these values
+into a spreadsheet that you maintain whilst performing optimizations.
+
+The table at the bottom shows statistics from the performance CSRs (if you
+turned them on), the final line shows the total number of cycles spent during
+inference.
 
 Summing up all the cycle counts for the tensorFlow operations we see that
 about 75% of the time is spent inside the ``CONV_2D`` operation. That seems
