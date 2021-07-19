@@ -51,6 +51,7 @@ export PROJ       := $(lastword $(subst /, ,${CURDIR}))
 export CFU_ROOT   := $(realpath $(CURDIR)/../..)
 export PLATFORM   ?= common_soc
 export TARGET     ?= digilent_arty
+export TTY        ?= $(or $(wildcard /dev/ttyUSB?), $(wildcard /dev/ttyACM?))
 
 RUN_MENU_ITEMS    ?=1 1 1
 TEST_MENU_ITEMS   ?=5
@@ -76,7 +77,6 @@ export DEFINES    += PLATFORM_$(PLATFORM)
 export DEFINES    += PLATFORM=$(PLATFORM)
 
 SHELL           := /bin/bash
-TTY             := $(or $(wildcard /dev/ttyUSB?), $(wildcard /dev/ttyACM?))
 CRC             := 
 #CRC             := --no-crc
 
@@ -297,6 +297,7 @@ else
 $(RUN_TARGETS):
 	@echo Error: could not determine unique TTY
 	@echo TTY possibilities: $(TTY)
+	@echo Optionally, manually specify TTY= on the command line
 endif
 else
 # $(PLATFORM) == 'sim'
