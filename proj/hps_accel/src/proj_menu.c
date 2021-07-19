@@ -29,6 +29,7 @@ static struct Menu MENU = {
         MENU_ITEM('m', "test blocks Multiply", do_test_blocks_multiply_accumulate),
         MENU_ITEM('f', "test blocks Filter", do_test_blocks_filter),
         MENU_ITEM('i', "test blocks Input", do_test_blocks_input),
+        MENU_ITEM('a', "test blocks All", do_test_blocks_all),
         MENU_END,
     },
 };

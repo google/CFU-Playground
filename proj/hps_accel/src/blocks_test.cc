@@ -25,6 +25,9 @@ using hps_accel::Vector16;
 
 namespace {
 
+constexpr size_t BYTES_PER_WORD = 4;
+constexpr size_t BYTES_PER_VECTOR = 4 * BYTES_PER_WORD;
+
 void print(Vector16 m) {
   for (size_t y = 0; y < 4; y++) {
     for (size_t x = 0; x < 4; x++) {
@@ -110,6 +113,64 @@ char const* const DATA =
     "Of an unthrifty knave, and presently\n"
     "I will be with you.\n";
 
+void check_filters(size_t in_channels, size_t out_channels) {
+  const uint32_t* values =
+      static_cast<const uint32_t*>(static_cast<const void*>(DATA));
+  hps_accel::LoadFilter(in_channels, out_channels, values);
+
+  const size_t num_vectors = in_channels * out_channels *
+                             hps_accel::FILTER_WIDTH *
+                             hps_accel::FILTER_HEIGHT / BYTES_PER_VECTOR;
+  const int8_t* first =
+      static_cast<const int8_t*>(static_cast<const void*>(DATA));
+
+  size_t cases = 0;
+  size_t failures = 0;
+
+  // Read filters 3 times to ensure wrap-around works
+  for (size_t i = 0; i < num_vectors * 3; i++) {
+    cases++;
+    const int8_t* p = first + ((i % num_vectors) * 16);
+    Vector16 expected =
+        Vector16::build(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8],
+                        p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
+    if (!check_vector_same(hps_accel::GetFilter(), expected, i)) failures++;
+  }
+  printf("%s %2u,%2u: %3d cases with %1d failures\n", failures ? "FAIL" : "OK",
+         in_channels, out_channels, cases, failures);
+}
+
+void check_inputs(size_t width, size_t in_channels) {
+  const uint32_t* values =
+      static_cast<const uint32_t*>(static_cast<const void*>(DATA));
+  hps_accel::LoadInput(width, in_channels, values);
+
+  const int8_t* data_int8 =
+      static_cast<const int8_t*>(static_cast<const void*>(DATA));
+
+  const size_t num_vectors = 16 * in_channels / 16;
+  const size_t vectors_per_row = num_vectors / 4;
+  const size_t row_offset = width * in_channels;
+
+  size_t cases = 0;
+  size_t failures = 0;
+  for (size_t i = 0; i < num_vectors * 3; i++) {
+    cases++;
+
+    // Find location of expected data and build a vector from it
+    const int8_t* p = data_int8;
+    const size_t v = i % num_vectors;
+    p += row_offset * (v / vectors_per_row);
+    p += 16 * (v % vectors_per_row);
+    Vector16 expected =
+        Vector16::build(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8],
+                        p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
+    if (!check_vector_same(hps_accel::GetInput(), expected, i)) failures++;
+  }
+  printf("%s %2u,%2u: %3d cases with %1d failures\n", failures ? "FAIL" : "OK",
+         width, in_channels, cases, failures);
+}
+
 };  // anonymous namespace
 
 extern "C" void do_test_blocks_multiply_accumulate(void) {
@@ -153,59 +214,25 @@ extern "C" void do_test_blocks_multiply_accumulate(void) {
 }
 
 extern "C" void do_test_blocks_filter(void) {
-  const size_t in_channels = 16;
-  const size_t out_channels = 8;
-  const uint32_t* values =
-      static_cast<const uint32_t*>(static_cast<const void*>(DATA));
-  hps_accel::LoadFilter(in_channels, out_channels, values);
-
-  const size_t num_vectors = in_channels * out_channels;
-  const int8_t* first =
-      static_cast<const int8_t*>(static_cast<const void*>(DATA));
-
-  size_t cases = 0;
-  size_t failures = 0;
-  for (size_t i = 0; i < num_vectors * 3; i++) {
-    cases++;
-    const int8_t* p = first + ((i % num_vectors) * 16);
-    Vector16 expected =
-        Vector16::build(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8],
-                        p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
-    if (!check_vector_same(hps_accel::GetFilter(), expected, i)) failures++;
-  }
-  printf("\n%s: %d cases with %d failures\n", failures ? "FAIL" : "OK", cases,
-         failures);
+  check_filters(16, 8);
+  check_filters(4, 4);
+  check_filters(32, 4);
+  check_filters(1, 4);
+  check_filters(1, 20);
+  check_filters(1, 32);
 }
 
 extern "C" void do_test_blocks_input(void) {
-  const size_t width = 9;
-  const size_t in_channels = 8;
-  const uint32_t* values =
-      static_cast<const uint32_t*>(static_cast<const void*>(DATA));
-  hps_accel::LoadInput(width, in_channels, values);
+  check_inputs(9, 8);
+  check_inputs(10, 12);
+  // check_inputs(100, 1);
+}
 
-  const int8_t* data_int8 =
-      static_cast<const int8_t*>(static_cast<const void*>(DATA));
-
-  const size_t num_vectors = 16 * in_channels / 16;
-  const size_t vectors_per_row = num_vectors / 4;
-  const size_t row_offset = width * in_channels;
-
-  size_t cases = 0;
-  size_t failures = 0;
-  for (size_t i = 0; i < num_vectors * 3; i++) {
-    cases++;
-
-    // Find location of expected data and build a vector from it
-    const int8_t* p = data_int8;
-    const size_t v = i % num_vectors;
-    p += row_offset * (v / vectors_per_row);
-    p += 16 * (v % vectors_per_row);
-    Vector16 expected =
-        Vector16::build(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8],
-                        p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
-    if (!check_vector_same(hps_accel::GetInput(), expected, i)) failures++;
-  }
-  printf("\n%s: %d cases with %d failures\n", failures ? "FAIL" : "OK", cases,
-         failures);
+extern "C" void do_test_blocks_all(void) {
+  printf("multiply_accumulate\n");
+  do_test_blocks_multiply_accumulate();
+  printf("filter\n");
+  do_test_blocks_filter();
+  printf("input\n");
+  do_test_blocks_input();
 }
