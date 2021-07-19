@@ -22,7 +22,7 @@
 #include <cstdint>
 
 namespace hps_accel {
-// Enocodes 16 signed 8-bit values in a 4x4 matrix
+// Encodes 16 signed 8-bit values in a 4x4 matrix
 struct Matrix4x4 {
   // values is indexed by y. Each 32 bit value holds 4 values, in little endian
   // order
@@ -36,15 +36,23 @@ struct Matrix4x4 {
     uint32_t byte_value = (row & byte_mask) >> shift;
     return static_cast<int8_t>(byte_value);
   }
+
+  static Matrix4x4 build(int8_t a, int8_t b, int8_t c, int8_t d, int8_t e,
+                         int8_t f, int8_t g, int8_t h, int8_t i, int8_t j,
+                         int8_t k, int8_t l, int8_t m, int8_t n, int8_t o,
+                         int8_t p);
+ static Matrix4x4 zeroes();
 };
 
-// Performs a 4x4 matrix multiplication
-Matrix4x4 multiply(Matrix4x4 input, Matrix4x4 filter, int32_t input_offset);
+// Performs a 4x4 matrix multiply-accumulate operation
+int32_t multiply_accumulate(Matrix4x4 input, Matrix4x4 filter,
+                            int32_t input_offset);
 
 // Loads 4x4 filter values into global filter storage.
 //
-// - in_channels and outchannels are the number of input and output channels for
-//   this filter. Both must be divisible by 4.
+// - in_channels: the number of input channels. Must either be 1 or a number
+//   divisible by 4.
+// - outchannels: the number of output channels. Must be divisible by 4.
 // - filter width & height are assumed to be 4.
 //
 // The number of 32 bit values loaded is:

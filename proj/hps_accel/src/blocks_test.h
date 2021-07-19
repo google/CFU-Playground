@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-#include "proj_menu.h"
+#ifndef _BLOCKS_TEST_H
+#define _BLOCKS_TEST_H
 
-#include <stdio.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "blocks_test.h"
-#include "cfu.h"
-#include "menu.h"
+void do_test_blocks_multiply_accumulate(void);
 
-static struct Menu MENU = {
-    "Project Menu",
-    "project",
-    {
-        MENU_ITEM('m', "test blocks Multiply", do_test_blocks_multiply_accumulate),
-        MENU_END,
-    },
-};
-
-void do_proj_menu() { menu_run(&MENU); }
+#ifdef __cplusplus
+}
+#endif
+#endif  // _BLOCKS_TEST_H
