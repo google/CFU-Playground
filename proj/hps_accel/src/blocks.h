@@ -23,29 +23,30 @@
 
 namespace hps_accel {
 // Encodes 16 signed 8-bit values in a 4x4 matrix
-struct Matrix4x4 {
+struct Vector16 {
   // values is indexed by y. Each 32 bit value holds 4 values, in little endian
   // order
   uint32_t values[4];
 
   // Fetches a single 8bit value
-  inline int8_t get(size_t y, size_t x) {
-    uint32_t row = values[y];
-    size_t shift = x * 8;
+  inline int8_t get(size_t n) {
+    uint32_t col = n & 0x3;
+    size_t shift = col * 8;
     uint32_t byte_mask = 0xff << shift;
-    uint32_t byte_value = (row & byte_mask) >> shift;
+    uint32_t val = values[n >> 2];
+    uint32_t byte_value = (val & byte_mask) >> shift;
     return static_cast<int8_t>(byte_value);
   }
 
-  static Matrix4x4 build(int8_t a, int8_t b, int8_t c, int8_t d, int8_t e,
-                         int8_t f, int8_t g, int8_t h, int8_t i, int8_t j,
-                         int8_t k, int8_t l, int8_t m, int8_t n, int8_t o,
-                         int8_t p);
- static Matrix4x4 zeroes();
+  static Vector16 build(int8_t a, int8_t b, int8_t c, int8_t d, int8_t e,
+                        int8_t f, int8_t g, int8_t h, int8_t i, int8_t j,
+                        int8_t k, int8_t l, int8_t m, int8_t n, int8_t o,
+                        int8_t p);
+  static Vector16 zeroes();
 };
 
 // Performs a 4x4 matrix multiply-accumulate operation
-int32_t multiply_accumulate(Matrix4x4 input, Matrix4x4 filter,
+int32_t multiply_accumulate(Vector16 input, Vector16 filter,
                             int32_t input_offset);
 
 // Loads 4x4 filter values into global filter storage.
@@ -61,9 +62,9 @@ int32_t multiply_accumulate(Matrix4x4 input, Matrix4x4 filter,
 void LoadFilter(size_t in_channels, size_t out_channels, uint32_t* values);
 
 // Returns the filter to use for the next multiplication
-// Iterates through filters for each input channel within output channel and
-// restarts from beginning when it reaches the end
-Matrix4x4 GetFilter();
+// Iterates through filters for each input channel within x, within y within
+// output_channel and restarts from beginning when it reaches the end
+Vector16 GetFilter();
 
 // Loads input values into global input storage.
 //
@@ -74,7 +75,7 @@ void LoadValues(size_t width, size_t in_channels, uint32_t values);
 
 // Returns next matrix of input values to use.
 // Iterates through each input channel, then returns to start
-Matrix4x4 GetValue();
+Vector16 GetValue();
 
 };  // namespace hps_accel
 

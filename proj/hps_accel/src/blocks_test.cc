@@ -20,21 +20,21 @@
 
 #include "blocks.h"
 
-using hps_accel::Matrix4x4;
 using hps_accel::multiply_accumulate;
+using hps_accel::Vector16;
 
 namespace {
 
-void print(Matrix4x4 m) {
+void print(Vector16 m) {
   for (size_t y = 0; y < 4; y++) {
     for (size_t x = 0; x < 4; x++) {
-      printf(" %4d", m.get(y, x));
+      printf(" %4d", m.get(y * 4 + x));
     }
     printf("\n");
   }
 }
 
-bool test_multiply(Matrix4x4 input, Matrix4x4 filter, int32_t input_offset,
+bool test_multiply(Vector16 input, Vector16 filter, int32_t input_offset,
                    int32_t expected) {
   printf(".");
   int32_t actual = multiply_accumulate(input, filter, input_offset);
@@ -56,30 +56,30 @@ bool test_multiply(Matrix4x4 input, Matrix4x4 filter, int32_t input_offset,
 
 extern "C" void do_test_blocks_multiply_accumulate(void) {
   struct {
-    Matrix4x4 input;
-    Matrix4x4 filter;
+    Vector16 input;
+    Vector16 filter;
     int32_t input_offset;
     int32_t expected;
   } multiply_cases[]{
       // Sum 0^2..15^2
-      {Matrix4x4::build(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
-       Matrix4x4::build(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
-       0, 1240},
+      {Vector16::build(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
+       Vector16::build(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15), 0,
+       1240},
       // Introduce input offset
-      {Matrix4x4::build(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
-       Matrix4x4::build(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
+      {Vector16::build(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
+       Vector16::build(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15),
        12, 2680},
       // Arbitary numbers: case 1
-      {Matrix4x4::build(-64, -94, -28, -5, -50, 113, -38, -104, 15, -103, 101,
-                        -30, -40, -48, -88, -40),
-       Matrix4x4::build(-123, -77, 2, 100, 118, -45, 3, 97, 66, -16, -88, 0, 49,
-                        94, 68, 116),
+      {Vector16::build(-64, -94, -28, -5, -50, 113, -38, -104, 15, -103, 101,
+                       -30, -40, -48, -88, -40),
+       Vector16::build(-123, -77, 2, 100, 118, -45, 3, 97, 66, -16, -88, 0, 49,
+                       94, 68, 116),
        22, -21971},
       // Arbitary numbers: case 2
-      {Matrix4x4::build(-93, 46, -5, -32, -28, 79, 84, 57, 124, 114, 47, -75,
-                        -77, -91, 7, 92),
-       Matrix4x4::build(-86, 39, 120, -60, 10, -7, 2, -88, -23, -69, 106, 36,
-                        -52, -36, -80, -31),
+      {Vector16::build(-93, 46, -5, -32, -28, 79, 84, 57, 124, 114, 47, -75,
+                       -77, -91, 7, 92),
+       Vector16::build(-86, 39, 120, -60, 10, -7, 2, -88, -23, -69, 106, 36,
+                       -52, -36, -80, -31),
        93, -19504},
   };
 
