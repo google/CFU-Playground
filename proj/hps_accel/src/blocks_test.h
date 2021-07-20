@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-#include "proj_menu.h"
+#ifndef _BLOCKS_TEST_H
+#define _BLOCKS_TEST_H
 
-#include <stdio.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "blocks_test.h"
-#include "cfu.h"
-#include "menu.h"
+// Tests the multiply-accumulate function
+void do_test_blocks_multiply_accumulate(void);
 
-static struct Menu MENU = {
-    "Project Menu",
-    "project",
-    {
-        MENU_ITEM('m', "test blocks Multiply", do_test_blocks_multiply_accumulate),
-        MENU_ITEM('f', "test blocks Filter", do_test_blocks_filter),
-        MENU_ITEM('i', "test blocks Input", do_test_blocks_input),
-        MENU_ITEM('a', "test blocks All", do_test_blocks_all),
-        MENU_END,
-    },
-};
+// Tests the filter value load/get functions
+void do_test_blocks_filter(void);
 
-void do_proj_menu() { menu_run(&MENU); }
+// Tests the input value load/get functions
+void do_test_blocks_input(void);
+
+// Runs all the tests
+void do_test_blocks_all(void);
+
+#ifdef __cplusplus
+}
+#endif
+#endif  // _BLOCKS_TEST_H
