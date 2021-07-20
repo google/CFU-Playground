@@ -14,6 +14,26 @@
  * limitations under the License.
  */
 
+#include "software_cfu.h"
 
-// See software_cfu_cc.cc.
-// This file exists simply to override from common/src/software_cfu.c.
+#include <stdint.h>
+
+#include "hps_cfu.h"
+
+namespace {
+
+uint32_t SetRegister(int funct7, uint32_t rs1, uint32_t rs2) { return 0; }
+uint32_t GetRegister(int funct7, uint32_t rs1, uint32_t rs2) { return 0; }
+
+};  // namespace
+
+extern "C" uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
+  switch (funct3) {
+    case 0:
+      return SetRegister(funct7, rs1, rs2);
+    case 1:
+      return GetRegister(funct7, rs1, rs2);
+    default:
+      return 0;
+  }
+}
