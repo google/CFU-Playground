@@ -15,7 +15,7 @@
 
 from nmigen import Signal
 from nmigen.lib.fifo import SyncFIFOBuffered
-from nmigen_cfu import Cfu, DualPortMemory, is_pysim_run
+from nmigen_cfu import simple_cfu, DualPortMemory, is_pysim_run
 
 from . import config
 from .macc import Accumulator, ByteToWordShifter, Madd4Pipeline
@@ -87,7 +87,8 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         return dps, fvset.count, fvset.updated
 
     def _make_input_store(self, m, name, restart_signal, input_depth_words):
-        m.submodules[f'{name}'] = ins = InputStore(config.MAX_PER_PIXEL_INPUT_WORDS)
+        m.submodules[f'{name}'] = ins = InputStore(
+            config.MAX_PER_PIXEL_INPUT_WORDS)
         m.submodules[f'{name}_set'] = insset = InputStoreSetter()
         m.d.comb += insset.connect(ins)
         self.register_xetter(25, insset)
@@ -158,7 +159,8 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
         fv_mems, fv_count, fv_updated = self._make_filter_value_store(
             m, 24, 'store_filter_values', restart)
 
-        m.submodules['fvf'] = fvf = FilterValueFetcher(config.FILTER_DATA_MEM_DEPTH)
+        m.submodules['fvf'] = fvf = FilterValueFetcher(
+            config.FILTER_DATA_MEM_DEPTH)
         m.d.comb += fvf.connect_read_ports(fv_mems)
         m.d.comb += [
             # fetcher only works for multiples of 4, and only for multiples of
@@ -229,21 +231,7 @@ class Mnv2RegisterInstruction(RegisterFileInstruction):
             oq_enable.eq(seq.out_word_done),
         ]
 
-
-class Mnv2Cfu(Cfu):
-    """Simple CFU for Mnv2.
-
-    Most functionality is provided through a single set of registers.
-    """
-
-    def __init__(self):
-        super().__init__({
+def make_cfu():
+    return simple_cfu({
             0: Mnv2RegisterInstruction(),
         })
-
-    def elab(self, m):
-        super().elab(m)
-
-
-def make_cfu():
-    return Mnv2Cfu()

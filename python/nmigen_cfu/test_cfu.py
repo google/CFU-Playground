@@ -22,7 +22,7 @@ import math
 from nmigen import Signal
 from nmigen.sim import Delay
 
-from .cfu import Cfu, InstructionBase, InstructionTestBase
+from .cfu import simple_cfu, InstructionBase, InstructionTestBase
 from .util import TestBase
 
 
@@ -135,7 +135,7 @@ class _SyncAddInstruction(InstructionBase):
 
 class _CfuTest(TestBase):
     def create_dut(self):
-        return Cfu({
+        return simple_cfu({
             0: _SumBytesInstruction(),
             1: _ReverseBytesInstruction(),
             2: _ReverseBitsInstruction(),

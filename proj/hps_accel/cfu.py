@@ -14,14 +14,16 @@
 # limitations under the License.
 
 from nmigen import *
-from nmigen_cfu import InstructionBase, InstructionTestBase, Cfu, CfuTestBase
+from nmigen_cfu import InstructionBase, InstructionTestBase, simple_cfu, CfuTestBase
 import unittest
 
 # See proj_example for further example instructions
 
+
 class TemplateInstruction(InstructionBase):
     """Template instruction
     """
+
     def elab(self, m):
         with m.If(self.start):
             m.d.sync += self.output.eq(self.in0 + self.in1)
@@ -43,7 +45,7 @@ class TemplateInstructionTest(InstructionTestBase):
 
 
 def make_cfu():
-    return Cfu({
+    return simple_cfu({
         # Add instructions here...
         0: TemplateInstruction(),
     })

@@ -351,26 +351,25 @@ class SaturatingRoundingDoubleHighMulInstruction(InstructionBase):
 
 
 class AvgPdti8Cfu(Cfu):
-    def __init__(self):
-        self.write = WriteInstruction()
-        self.read = ReadInstruction()
-        self.macc = MaccInstruction()
-        super().__init__({
-            0: self.write,
-            1: self.read,
-            2: self.macc,
-            6: RoundingDividebyPOTInstruction(),
-            7: SaturatingRoundingDoubleHighMulInstruction(),
-        })
-
-    def elab(self, m):
-        super().elab(m)
+    def elab_instructions(self, m):
+        m.submodules['write'] = write = WriteInstruction()
+        m.submodules['read'] = read = ReadInstruction()
+        m.submodules['macc'] = macc = MaccInstruction()
+        m.submodules['rdpot'] = rdpot = RoundingDividebyPOTInstruction()
+        m.submodules['srdhm'] = srdhm = SaturatingRoundingDoubleHighMulInstruction()
         m.d.comb += [
-            self.read.input_offset.eq(self.write.input_offset),
-            self.read.accumulator.eq(self.macc.accumulator),
-            self.macc.reset_acc.eq(self.write.reset_acc),
-            self.macc.input_offset.eq(self.write.input_offset),
+            read.input_offset.eq(write.input_offset),
+            read.accumulator.eq(macc.accumulator),
+            macc.reset_acc.eq(write.reset_acc),
+            macc.input_offset.eq(write.input_offset),
         ]
+        return {
+            0: write,
+            1: read,
+            2: macc,
+            6: rdpot,
+            7: srdhm,
+        }
 
 
 def make_cfu():
