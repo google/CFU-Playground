@@ -114,23 +114,19 @@ char const* const DATA =
     "I will be with you.\n";
 
 void check_filters(size_t in_channels, size_t out_channels) {
-  const uint32_t* values =
-      static_cast<const uint32_t*>(static_cast<const void*>(DATA));
-  hps_accel::LoadFilter(in_channels, out_channels, values);
+  const int8_t* data_int8 = reinterpret_cast<const int8_t*>(DATA);
+  hps_accel::LoadFilter(in_channels, out_channels, data_int8);
 
   const size_t num_vectors = in_channels * out_channels *
                              hps_accel::FILTER_WIDTH *
                              hps_accel::FILTER_HEIGHT / BYTES_PER_VECTOR;
-  const int8_t* first =
-      static_cast<const int8_t*>(static_cast<const void*>(DATA));
-
   size_t cases = 0;
   size_t failures = 0;
 
   // Read filters 3 times to ensure wrap-around works
   for (size_t i = 0; i < num_vectors * 3; i++) {
     cases++;
-    const int8_t* p = first + ((i % num_vectors) * 16);
+    const int8_t* p = data_int8 + ((i % num_vectors) * 16);
     Vector16 expected =
         Vector16::build(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8],
                         p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
@@ -141,15 +137,9 @@ void check_filters(size_t in_channels, size_t out_channels) {
 }
 
 void check_inputs(size_t width, size_t in_channels) {
-  const uint32_t* values =
-      static_cast<const uint32_t*>(static_cast<const void*>(DATA));
-  hps_accel::LoadInput(width, in_channels, values);
-
-  const int8_t* data_int8 =
-      static_cast<const int8_t*>(static_cast<const void*>(DATA));
-
+  const int8_t* data_int8 = reinterpret_cast<const int8_t*>(DATA);
+  hps_accel::LoadInput(width, in_channels, data_int8);
   const size_t num_vectors = 16 * in_channels / 16;
-  const size_t vectors_per_row = num_vectors / 4;
   const size_t row_offset = width * in_channels;
 
   size_t cases = 0;
@@ -160,11 +150,22 @@ void check_inputs(size_t width, size_t in_channels) {
     // Find location of expected data and build a vector from it
     const int8_t* p = data_int8;
     const size_t v = i % num_vectors;
-    p += row_offset * (v / vectors_per_row);
-    p += 16 * (v % vectors_per_row);
-    Vector16 expected =
-        Vector16::build(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8],
-                        p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
+    Vector16 expected;
+    if (in_channels == 1) {
+      const size_t r = row_offset;
+      expected = Vector16::build(
+          p[r * 0 + 0], p[r * 0 + 1], p[r * 0 + 2], p[r * 0 + 3],  //
+          p[r * 1 + 0], p[r * 1 + 1], p[r * 1 + 2], p[r * 1 + 3],  //
+          p[r * 2 + 0], p[r * 2 + 1], p[r * 2 + 2], p[r * 2 + 3],  //
+          p[r * 3 + 0], p[r * 3 + 1], p[r * 3 + 2], p[r * 3 + 3]);
+    } else {
+      const size_t vectors_per_row = num_vectors / 4;
+      p += row_offset * (v / vectors_per_row);
+      p += 16 * (v % vectors_per_row);
+      expected =
+          Vector16::build(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8],
+                          p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
+    }
     if (!check_vector_same(hps_accel::GetInput(), expected, i)) failures++;
   }
   printf("%s %2u,%2u: %3d cases with %1d failures\n", failures ? "FAIL" : "OK",
@@ -225,7 +226,8 @@ extern "C" void do_test_blocks_filter(void) {
 extern "C" void do_test_blocks_input(void) {
   check_inputs(9, 8);
   check_inputs(10, 12);
-  // check_inputs(100, 1);
+  check_inputs(99, 1);
+  check_inputs(49, 4);
 }
 
 extern "C" void do_test_blocks_all(void) {

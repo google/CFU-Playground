@@ -57,6 +57,7 @@ struct Vector16 {
     return true;
   }
 
+  // Convenience function: builds a new vector from int8_t's
   static Vector16 build(int8_t a, int8_t b, int8_t c, int8_t d, int8_t e,
                         int8_t f, int8_t g, int8_t h, int8_t i, int8_t j,
                         int8_t k, int8_t l, int8_t m, int8_t n, int8_t o,
@@ -78,8 +79,7 @@ int32_t multiply_accumulate(Vector16 input, Vector16 filter,
 // The number of 32 bit values loaded is:
 //   in_channels * 4*4 * out_channels / 4
 //
-void LoadFilter(size_t in_channels, size_t out_channels,
-                const uint32_t* values);
+void LoadFilter(size_t in_channels, size_t out_channels, const int8_t* values);
 
 // Returns the filter to use for the next multiplication
 // Iterates through filters for each input channel within x, within y within
@@ -91,7 +91,7 @@ Vector16 GetFilter();
 // - width is length of row, in pixels
 // - in_channels are the number of input channels. Must be divisible by 4.
 // - values is address of first word to load. It is the top left pixel.
-void LoadInput(size_t width, size_t in_channels, const uint32_t* values);
+void LoadInput(size_t width, size_t in_channels, const int8_t* values);
 
 // Returns next matrix of input values to use.
 // Iterates through each input channel, then returns to start

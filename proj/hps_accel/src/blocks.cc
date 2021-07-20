@@ -15,10 +15,13 @@
  */
 
 #include "blocks.h"
+#include <cstdio>
 
 namespace hps_accel {
 
 namespace {
+
+constexpr size_t BYTES_PER_WORD = 4;
 
 inline uint32_t pack32(int8_t a, int8_t b, int8_t c, int8_t d) {
   return static_cast<uint32_t>(static_cast<uint8_t>(a)) |
@@ -49,6 +52,40 @@ size_t input_index;
 // Words in input_storage. Guaranteed to be divisible by 4
 size_t input_words;
 
+// Load input when in_channels = 1
+void LoadInput1(size_t width, const int8_t* values) {
+  input_words = 4;
+  uint32_t* dest = input_storage;
+
+  // For each of four consecutive rows, take data from four consecutive pixels
+  for (size_t row_index = 0; row_index < 4; row_index++) {
+    const int8_t* source = values + (row_index * width);
+    *dest++ = pack32(source[0], source[1], source[2], source[3]);
+  }
+  input_index = 0;
+}
+
+// Load input when in_channels is divisible by 4
+void LoadInputN(size_t width, size_t in_channels, const int8_t* values) {
+  const size_t pixels_per_input_row = 4;
+  const size_t words_per_input_row =
+      pixels_per_input_row * in_channels / BYTES_PER_WORD;
+  const size_t bytes_per_width = width * in_channels;
+  input_words = FILTER_WIDTH * FILTER_HEIGHT * in_channels / BYTES_PER_WORD;
+  uint32_t* dest = input_storage;
+
+  // For each of four consecutive rows, take data from four consecutive pixels
+  for (size_t row_index = 0; row_index < 4; row_index++) {
+    const uint32_t* source = reinterpret_cast<const uint32_t*>(
+        values + (row_index * bytes_per_width));
+    for (size_t i = 0; i < words_per_input_row; i++) {
+      *dest++ = *source++;
+    }
+  }
+  input_index = 0;
+}
+
+
 };  // anonymous namespace
 
 Vector16 Vector16::build(int8_t a, int8_t b, int8_t c, int8_t d, int8_t e,
@@ -72,13 +109,13 @@ int32_t multiply_accumulate(Vector16 input, Vector16 filter,
   return result;
 }
 
-void LoadFilter(size_t in_channels, size_t out_channels,
-                const uint32_t* values) {
+void LoadFilter(size_t in_channels, size_t out_channels, const int8_t* values) {
+  const uint32_t* values_as_words = reinterpret_cast<const uint32_t*>(values);
   filter_words = FILTER_WIDTH * FILTER_HEIGHT / 4 * in_channels * out_channels;
   uint32_t* dest = filter_storage;
   uint32_t* end = filter_storage + filter_words;
   while (dest != end) {
-    *dest++ = *values++;
+    *dest++ = *values_as_words++;
   }
   filter_index = 0;
 }
@@ -94,22 +131,14 @@ Vector16 GetFilter() {
   return result;
 }
 
-void LoadInput(size_t width, size_t in_channels, const uint32_t* values) {
-  // TODO: make this work when in_channels = 1
-  const size_t words_per_pixel = in_channels / 4;
-  const size_t words_per_vector_row = words_per_pixel * 4;
-  const size_t words_per_width = words_per_pixel * width;
-  input_words = FILTER_WIDTH * FILTER_HEIGHT * words_per_pixel;
-  uint32_t* dest = input_storage;
-
-  // For each of four consecutive rows, take date from four consecutive pixels
-  for (size_t row_index = 0; row_index < 4; row_index++) {
-    const uint32_t* source = values + (row_index * words_per_width);
-    for (size_t i = 0; i < words_per_vector_row; i++) {
-      *dest++ = *source++;
+void LoadInput(size_t width, size_t in_channels, const int8_t* values) {
+    if (in_channels == 1) {
+        LoadInput1(width, values);
+    } else if ((in_channels & 0x3) == 0) {
+        LoadInputN(width, in_channels, values);
+    } else {
+        printf("Failed to load\n");
     }
-  }
-  input_index = 0;
 }
 
 Vector16 GetInput() {
