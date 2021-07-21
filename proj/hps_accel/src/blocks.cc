@@ -15,8 +15,10 @@
  */
 
 #include "blocks.h"
-#include "hps_cfu.h"
+
 #include <cstdio>
+
+#include "hps_cfu.h"
 
 namespace hps_accel {
 
@@ -30,15 +32,6 @@ inline uint32_t pack32(int8_t a, int8_t b, int8_t c, int8_t d) {
          (static_cast<uint32_t>(static_cast<uint8_t>(c)) << 16) |
          (static_cast<uint32_t>(static_cast<uint8_t>(d)) << 24);
 }
-
-// Data storage for the filter
-uint32_t filter_storage[MAX_FILTER_WORDS];
-
-// Current index from which to fetch next Vector16 for filter
-size_t filter_index;
-
-// Words in filter storage. Guaranteed to be divisible by 4
-size_t filter_words;
 
 // Data storage for input
 uint32_t input_storage[MAX_INPUT_WORDS];
@@ -82,7 +75,6 @@ void LoadInputN(size_t width, size_t in_channels, const int8_t* values) {
   input_index = 0;
 }
 
-
 };  // anonymous namespace
 
 Vector16 Vector16::build(int8_t a, int8_t b, int8_t c, int8_t d, int8_t e,
@@ -99,47 +91,44 @@ Vector16 Vector16::zeroes() { return Vector16{{0, 0, 0, 0}}; }
 int32_t multiply_accumulate(Vector16 input, Vector16 filter,
                             int32_t input_offset) {
   cfu_set(REG_INPUT_OFFSET, input_offset);
-  cfu_set(REG_INPUT_0, input.values[0]);
-  cfu_set(REG_INPUT_1, input.values[1]);
-  cfu_set(REG_INPUT_2, input.values[2]);
-  cfu_set(REG_INPUT_3, input.values[3]);
-  cfu_set(REG_FILTER_0, filter.values[0]);
-  cfu_set(REG_FILTER_1, filter.values[1]);
-  cfu_set(REG_FILTER_2, filter.values[2]);
-  cfu_set(REG_FILTER_3, filter.values[3]);
+  cfu_set(REG_MACC_INPUT_0, input.values[0]);
+  cfu_set(REG_MACC_INPUT_1, input.values[1]);
+  cfu_set(REG_MACC_INPUT_2, input.values[2]);
+  cfu_set(REG_MACC_INPUT_3, input.values[3]);
+  cfu_set(REG_MACC_FILTER_0, filter.values[0]);
+  cfu_set(REG_MACC_FILTER_1, filter.values[1]);
+  cfu_set(REG_MACC_FILTER_2, filter.values[2]);
+  cfu_set(REG_MACC_FILTER_3, filter.values[3]);
   return cfu_get(REG_MACC_OUT);
 }
 
 void LoadFilter(size_t in_channels, size_t out_channels, const int8_t* values) {
   const uint32_t* values_as_words = reinterpret_cast<const uint32_t*>(values);
-  filter_words = FILTER_WIDTH * FILTER_HEIGHT / 4 * in_channels * out_channels;
-  uint32_t* dest = filter_storage;
-  uint32_t* end = filter_storage + filter_words;
-  while (dest != end) {
-    *dest++ = *values_as_words++;
+  size_t filter_words =
+      FILTER_WIDTH * FILTER_HEIGHT / 4 * in_channels * out_channels;
+  cfu_set(REG_FILTER_NUM_WORDS, filter_words);
+  const uint32_t* end = values_as_words + filter_words;
+  while (values_as_words != end) {
+    cfu_set(REG_SET_FILTER, *values_as_words++);
   }
-  filter_index = 0;
 }
 
 Vector16 GetFilter() {
-  Vector16 result{
-      {filter_storage[filter_index + 0], filter_storage[filter_index + 1],
-       filter_storage[filter_index + 2], filter_storage[filter_index + 3]}};
-  filter_index += 4;
-  if (filter_index >= filter_words) {
-    filter_index = 0;
-  }
-  return result;
+  uint32_t word0 = cfu_get(REG_FILTER_0);
+  uint32_t word1 = cfu_get(REG_FILTER_1);
+  uint32_t word2 = cfu_get(REG_FILTER_2);
+  uint32_t word3 = cfu_get(REG_FILTER_3);
+  return Vector16{{word0, word1, word2, word3}};
 }
 
 void LoadInput(size_t width, size_t in_channels, const int8_t* values) {
-    if (in_channels == 1) {
-        LoadInput1(width, values);
-    } else if ((in_channels & 0x3) == 0) {
-        LoadInputN(width, in_channels, values);
-    } else {
-        printf("Failed to load\n");
-    }
+  if (in_channels == 1) {
+    LoadInput1(width, values);
+  } else if ((in_channels & 0x3) == 0) {
+    LoadInputN(width, in_channels, values);
+  } else {
+    printf("Failed to load\n");
+  }
 }
 
 Vector16 GetInput() {

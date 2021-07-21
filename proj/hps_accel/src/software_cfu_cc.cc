@@ -23,17 +23,12 @@
 
 namespace {
 
-// General global state
-uint32_t in_channels;
-uint32_t out_channels;
-
 // Multiply-accumulate unit
 int32_t macc_input_offset;
 int8_t macc_input[16];
 int8_t macc_filter[16];
 
 void Unpack32(int8_t* dest, uint32_t value) {
-  printf("%lu\n", value);
   dest[0] = (value & 0x000000ff);
   dest[1] = (value & 0x0000ff00) >> 8;
   dest[2] = (value & 0x00ff0000) >> 16;
@@ -57,41 +52,78 @@ int32_t Macc() {
   return macc_out;
 }
 
+// Very simple storage class.
+// TODO: wrap around at calculated point instead of at end of data
+// TODO: allow input data to be double-buffered
+#define MAX_STORAGE_WORDS 16384
+class Storage {
+ public:
+  void Reset(size_t num_words) {
+    len = num_words;
+    index = 0;
+  }
+  void Store(uint32_t value) {
+    data[index++] = value;
+  }
+  uint32_t Get(size_t n) {
+    if (index >= len) {
+      index = 0;
+    }
+    uint32_t result = data[index + n];
+    if (n == 3) {
+      index += 4;
+    }
+    return result;
+  }
+
+ private:
+  uint32_t data[MAX_STORAGE_WORDS];
+  size_t len;
+  size_t index;
+};
+
+Storage filter_storage;
+// Storage input_storage;
+
 uint32_t SetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
   switch (funct7) {
     case REG_RESET:
+      filter_storage.Reset(0);
       return 0;
-    case REG_NUM_IN_CHANNELS:
-      in_channels = rs1;
+    case REG_FILTER_NUM_WORDS:
+      filter_storage.Reset(rs1);
       return 0;
-    case REG_NUM_OUT_CHANNELS:
-      out_channels = rs1;
+    case REG_INPUT_NUM_WORDS:
+      //
       return 0;
     case REG_INPUT_OFFSET:
       macc_input_offset = rs1;
       return 0;
-    case REG_INPUT_0:
+    case REG_SET_FILTER:
+      filter_storage.Store(rs1);
+      return 0;
+    case REG_MACC_INPUT_0:
       SetMaccInput(0, rs1);
       return 0;
-    case REG_INPUT_1:
+    case REG_MACC_INPUT_1:
       SetMaccInput(1, rs1);
       return 0;
-    case REG_INPUT_2:
+    case REG_MACC_INPUT_2:
       SetMaccInput(2, rs1);
       return 0;
-    case REG_INPUT_3:
+    case REG_MACC_INPUT_3:
       SetMaccInput(3, rs1);
       return 0;
-    case REG_FILTER_0:
+    case REG_MACC_FILTER_0:
       SetMaccFilter(0, rs1);
       return 0;
-    case REG_FILTER_1:
+    case REG_MACC_FILTER_1:
       SetMaccFilter(1, rs1);
       return 0;
-    case REG_FILTER_2:
+    case REG_MACC_FILTER_2:
       SetMaccFilter(2, rs1);
       return 0;
-    case REG_FILTER_3:
+    case REG_MACC_FILTER_3:
       SetMaccFilter(3, rs1);
       return 0;
 
@@ -104,6 +136,14 @@ uint32_t SetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
 
 uint32_t GetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
   switch (funct7) {
+    case REG_FILTER_0:
+      return filter_storage.Get(0);
+    case REG_FILTER_1:
+      return filter_storage.Get(1);
+    case REG_FILTER_2:
+      return filter_storage.Get(2);
+    case REG_FILTER_3:
+      return filter_storage.Get(3);
     case REG_MACC_OUT:
       return Macc();
     default:

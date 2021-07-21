@@ -26,11 +26,11 @@
 // and lose all state
 #define REG_RESET 0
 
-// Number of input channels
-#define REG_NUM_IN_CHANNELS 1
+// Number of 32 bit filter words
+#define REG_FILTER_NUM_WORDS 1
 
-// Number of output channels
-#define REG_NUM_OUT_CHANNELS 2
+// Number of 32 bit input words
+#define REG_INPUT_NUM_WORDS 2
 
 // Input offset for multiply-accumulate unit
 #define REG_INPUT_OFFSET 3
@@ -54,13 +54,19 @@
 #define REG_INPUT_3 0x1b
 
 // Set input values to multiply-accumulate unit
-#define REG_MACC_IN_0 0x20
-#define REG_MACC_IN_1 0x21
-#define REG_MACC_IN_2 0x22
-#define REG_MACC_IN_3 0x23
+#define REG_MACC_INPUT_0 0x20
+#define REG_MACC_INPUT_1 0x21
+#define REG_MACC_INPUT_2 0x22
+#define REG_MACC_INPUT_3 0x23
+
+// Set input values to multiply-accumulate unit
+#define REG_MACC_FILTER_0 0x28
+#define REG_MACC_FILTER_1 0x29
+#define REG_MACC_FILTER_2 0x2a
+#define REG_MACC_FILTER_3 0x2b
 
 // Retrieve result from multiply-accumulate unit
-#define REG_MACC_OUT 0x24
+#define REG_MACC_OUT 0x30
 
 //  Convenience macros for get/set
 #define cfu_set(reg, val) cfu_op0(reg, val, 0)
