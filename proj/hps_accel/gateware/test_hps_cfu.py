@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from .hps_cfu import PingInstruction, make_cfu
+from .constants import Constants
 
 from nmigen_cfu import CfuTestBase, InstructionTestBase
 
@@ -34,9 +35,10 @@ class HpsCfuTest(CfuTestBase):
         return make_cfu()
 
     def test(self):
+        PING = Constants.INS_PING
         DATA = [
             # verify that can use ping
-            ((7, 1, 2), 0),
-            ((7, 0, 0), 3),
+            ((PING, 1, 2), 0),
+            ((PING, 0, 0), 3),
         ]
         return self.run_ops(DATA)

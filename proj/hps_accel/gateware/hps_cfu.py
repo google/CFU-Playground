@@ -15,6 +15,7 @@
 from nmigen import *
 from nmigen_cfu import InstructionBase, Cfu
 
+from .constants import Constants
 
 class PingInstruction(InstructionBase):
     """An instruction used to verify simple CFU functionality.
@@ -39,7 +40,7 @@ class HpsCfu(Cfu):
     def elab_instructions(self, m):
         m.submodules['ping'] = ping = PingInstruction()
         return {
-            7: ping,
+            Constants.INS_PING: ping,
         }
 
 
