@@ -15,6 +15,7 @@
  */
 
 #include "blocks.h"
+#include "hps_cfu.h"
 #include <cstdio>
 
 namespace hps_accel {
@@ -28,10 +29,6 @@ inline uint32_t pack32(int8_t a, int8_t b, int8_t c, int8_t d) {
          (static_cast<uint32_t>(static_cast<uint8_t>(b)) << 8) |
          (static_cast<uint32_t>(static_cast<uint8_t>(c)) << 16) |
          (static_cast<uint32_t>(static_cast<uint8_t>(d)) << 24);
-}
-
-int32_t multiply_1(int8_t input, int8_t filter, int32_t input_offset) {
-  return (input_offset + input) * filter;
 }
 
 // Data storage for the filter
@@ -101,12 +98,16 @@ Vector16 Vector16::zeroes() { return Vector16{{0, 0, 0, 0}}; }
 // Performs a 16 x 16 vector multiplication
 int32_t multiply_accumulate(Vector16 input, Vector16 filter,
                             int32_t input_offset) {
-  int32_t result = 0;
-  // NOTE: obvious optimization is to unroll these loops
-  for (size_t n = 0; n < 16; n++) {
-    result += multiply_1(input.get(n), filter.get(n), input_offset);
-  }
-  return result;
+  cfu_set(REG_INPUT_OFFSET, input_offset);
+  cfu_set(REG_INPUT_0, input.values[0]);
+  cfu_set(REG_INPUT_1, input.values[1]);
+  cfu_set(REG_INPUT_2, input.values[2]);
+  cfu_set(REG_INPUT_3, input.values[3]);
+  cfu_set(REG_FILTER_0, filter.values[0]);
+  cfu_set(REG_FILTER_1, filter.values[1]);
+  cfu_set(REG_FILTER_2, filter.values[2]);
+  cfu_set(REG_FILTER_3, filter.values[3]);
+  return cfu_get(REG_MACC_OUT);
 }
 
 void LoadFilter(size_t in_channels, size_t out_channels, const int8_t* values) {

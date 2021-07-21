@@ -19,6 +19,8 @@
 #include "cfu.h"
 
 // Register IDs
+// For convenience, readable and writable register IDs are allocated from a
+// shared pool of values 0-127.
 
 // A write of any value to REG_RESET causes the accelerator gateware to be reset
 // and lose all state
@@ -34,17 +36,10 @@
 #define REG_INPUT_OFFSET 3
 
 // Set next filter word
-#define REG_SET_FILTER 8
-
-// A write of any value to this register indicates values has been read and CFU
-// TODO: can this be replaced by read of REG_FILTER_3 ?
-#define REG_FILTER_NEXT 9
+#define REG_SET_FILTER 4
 
 // Set next input word
-#define REG_SET_INPUT 9
-
-// Indicates that input has been read
-#define REG_INPUT_NEXT 10
+#define REG_SET_INPUT 5
 
 // These registers contain values 0-3 of the current filter word
 #define REG_FILTER_0 0x10
@@ -66,5 +61,9 @@
 
 // Retrieve result from multiply-accumulate unit
 #define REG_MACC_OUT 0x24
+
+//  Convenience macros for get/set
+#define cfu_set(reg, val) cfu_op0(reg, val, 0)
+#define cfu_get(reg) cfu_op1(reg, 0, 0)
 
 #endif  // _HPS_CFU_H
