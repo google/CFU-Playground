@@ -33,26 +33,16 @@ inline uint32_t pack32(int8_t a, int8_t b, int8_t c, int8_t d) {
          (static_cast<uint32_t>(static_cast<uint8_t>(d)) << 24);
 }
 
-// Data storage for input
-uint32_t input_storage[MAX_INPUT_WORDS];
-
-// Current index from which to fetch next Vector16 for input
-size_t input_index;
-
-// Words in input_storage. Guaranteed to be divisible by 4
-size_t input_words;
-
 // Load input when in_channels = 1
 void LoadInput1(size_t width, const int8_t* values) {
-  input_words = 4;
-  uint32_t* dest = input_storage;
+  size_t input_words = 4;
+  cfu_set(REG_INPUT_NUM_WORDS, input_words);
 
   // For each of four consecutive rows, take data from four consecutive pixels
   for (size_t row_index = 0; row_index < 4; row_index++) {
     const int8_t* source = values + (row_index * width);
-    *dest++ = pack32(source[0], source[1], source[2], source[3]);
+    cfu_set(REG_SET_INPUT, pack32(source[0], source[1], source[2], source[3]));
   }
-  input_index = 0;
 }
 
 // Load input when in_channels is divisible by 4
@@ -61,18 +51,18 @@ void LoadInputN(size_t width, size_t in_channels, const int8_t* values) {
   const size_t words_per_input_row =
       pixels_per_input_row * in_channels / BYTES_PER_WORD;
   const size_t bytes_per_width = width * in_channels;
-  input_words = FILTER_WIDTH * FILTER_HEIGHT * in_channels / BYTES_PER_WORD;
-  uint32_t* dest = input_storage;
+  size_t input_words =
+      FILTER_WIDTH * FILTER_HEIGHT * in_channels / BYTES_PER_WORD;
+  cfu_set(REG_INPUT_NUM_WORDS, input_words);
 
   // For each of four consecutive rows, take data from four consecutive pixels
   for (size_t row_index = 0; row_index < 4; row_index++) {
     const uint32_t* source = reinterpret_cast<const uint32_t*>(
         values + (row_index * bytes_per_width));
     for (size_t i = 0; i < words_per_input_row; i++) {
-      *dest++ = *source++;
+      cfu_set(REG_SET_INPUT, *source++);
     }
   }
-  input_index = 0;
 }
 
 };  // anonymous namespace
@@ -132,14 +122,11 @@ void LoadInput(size_t width, size_t in_channels, const int8_t* values) {
 }
 
 Vector16 GetInput() {
-  Vector16 result{
-      {input_storage[input_index + 0], input_storage[input_index + 1],
-       input_storage[input_index + 2], input_storage[input_index + 3]}};
-  input_index += 4;
-  if (input_index >= input_words) {
-    input_index = 0;
-  }
-  return result;
+  uint32_t word0 = cfu_get(REG_INPUT_0);
+  uint32_t word1 = cfu_get(REG_INPUT_1);
+  uint32_t word2 = cfu_get(REG_INPUT_2);
+  uint32_t word3 = cfu_get(REG_INPUT_3);
+  return Vector16{{word0, word1, word2, word3}};
 }
 
 };  // namespace hps_accel

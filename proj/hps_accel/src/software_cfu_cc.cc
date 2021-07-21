@@ -62,9 +62,7 @@ class Storage {
     len = num_words;
     index = 0;
   }
-  void Store(uint32_t value) {
-    data[index++] = value;
-  }
+  void Store(uint32_t value) { data[index++] = value; }
   uint32_t Get(size_t n) {
     if (index >= len) {
       index = 0;
@@ -83,7 +81,7 @@ class Storage {
 };
 
 Storage filter_storage;
-// Storage input_storage;
+Storage input_storage;
 
 uint32_t SetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
   switch (funct7) {
@@ -94,13 +92,16 @@ uint32_t SetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
       filter_storage.Reset(rs1);
       return 0;
     case REG_INPUT_NUM_WORDS:
-      //
+      input_storage.Reset(rs1);
       return 0;
     case REG_INPUT_OFFSET:
       macc_input_offset = rs1;
       return 0;
     case REG_SET_FILTER:
       filter_storage.Store(rs1);
+      return 0;
+    case REG_SET_INPUT:
+      input_storage.Store(rs1);
       return 0;
     case REG_MACC_INPUT_0:
       SetMaccInput(0, rs1);
@@ -144,6 +145,14 @@ uint32_t GetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
       return filter_storage.Get(2);
     case REG_FILTER_3:
       return filter_storage.Get(3);
+    case REG_INPUT_0:
+      return input_storage.Get(0);
+    case REG_INPUT_1:
+      return input_storage.Get(1);
+    case REG_INPUT_2:
+      return input_storage.Get(2);
+    case REG_INPUT_3:
+      return input_storage.Get(3);
     case REG_MACC_OUT:
       return Macc();
     default:
