@@ -90,6 +90,10 @@ class KosagiFomuSoCWorkflow(ice40up5k.Ice40UP5KWorkflow):
         # Fomu requires larger flash offset -- first 0x40000 bytes are reserved
         self.bios_flash_offset = 0x60000
 
+    def make_soc(self, **kwargs) -> litex_soc.LiteXSoC:
+        """Makes the Fomu SoC without a LedChaser to save LCs."""
+        return super().make_soc(with_led_chaser=False, **kwargs)
+
     def load(self,
              soc: litex_soc.LiteXSoC,
              soc_builder: builder.Builder,

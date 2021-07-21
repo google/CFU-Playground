@@ -32,7 +32,7 @@ class CreateImageTest(unittest.TestCase):
                          gateware.getvalue())
         self.assertEqual(output[offset:offset + len(software.getvalue())],
                          software.getvalue())
-    
+
     def test_max_gateware(self):
         gateware = io.BytesIO(b'gateware')
         software = io.BytesIO(b'software')
@@ -50,12 +50,22 @@ class CreateImageTest(unittest.TestCase):
 
 class KosagiFomuSoCWorkflowWorkflowTest(unittest.TestCase):
     """TestCase for the KosagiFomuSoCWorkflow."""
+    def setUp(self):
+        self.soc_constructor = mock.MagicMock()
+
     def simple_init(self):
         return kosagi_fomu.KosagiFomuSoCWorkflow(mock.MagicMock(),
-                                                 mock.MagicMock,
+                                                 self.soc_constructor,
                                                  mock.create_autospec(
                                                      builder.Builder),
                                                  warn=False)
+
+    def test_make_soc(self):
+        self.simple_init().make_soc()
+
+        call_kwargs = self.soc_constructor.call_args.kwargs
+        self.assertFalse(call_kwargs['with_led_chaser'])
+        pass
 
     def test_software_load(self):
         workflow = self.simple_init()
