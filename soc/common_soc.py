@@ -15,17 +15,20 @@
 
 import argparse
 import importlib
+import pkgutil
 from board_specific_workflows import workflow_factory, parse_workflow_args
 from litex.soc.integration import soc
+from litex_boards import targets
 from typing import Callable
 
 
 def get_soc_constructor(target: str) -> Callable[..., soc.LiteXSoC]:
     """Returns the constructor for the target SoC from litex-boards module."""
-    try:
-        module = importlib.import_module(f'litex_boards.targets.{target}')
-    except:
-        raise ModuleNotFoundError(f'Could not load {target} target.')
+    boards = {m.name for m in pkgutil.walk_packages(targets.__path__)}
+    if target not in boards:
+        s = ', '.join(sorted(boards))
+        raise ValueError(f'Could not find "{target}" in supported boards: {s}')
+    module = importlib.import_module(f'litex_boards.targets.{target}')
     return module.BaseSoC
 
 
