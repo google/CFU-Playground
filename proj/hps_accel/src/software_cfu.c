@@ -14,18 +14,6 @@
  * limitations under the License.
  */
 
-#include <stdint.h>
-#include "cfu.h"
 
-//
-// In this function, place C code to emulate your CFU. You can switch between
-// hardware and emulated CFU by setting the CFU_SOFTWARE_DEFINED DEFINE in
-// the Makefile.
-uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2)
-{
-  if (funct3 == 0)
-  {
-    return rs1 + rs2;
-  }
-  return rs1;
-}
+// See software_cfu_cc.cc.
+// This file exists simply to override from common/src/software_cfu.c.

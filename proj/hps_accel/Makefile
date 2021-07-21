@@ -20,7 +20,7 @@ export DEFINES :=
 DEFINES += ACCEL_CONV
 
 # Uncomment this line to use software defined CFU functions in software_cfu.cc
-#DEFINES += CFU_SOFTWARE_DEFINED
+DEFINES += CFU_SOFTWARE_DEFINED
 
 # Uncomment this line to skip debug code (large effect on performance)
 DEFINES += NDEBUG
@@ -29,10 +29,10 @@ DEFINES += NDEBUG
 #DEFINES += NPROFILE
 
 # Uncomment to show the parameters used for each convolution step when evaluating a model
-DEFINES += SHOW_CONV_PARAMS
+#DEFINES += SHOW_CONV_PARAMS
 
 # Hide progress dots (they mess up the formatting of CONV_PARAMS)
-DEFINES += HIDE_PROGRESS_DOTS
+#DEFINES += HIDE_PROGRESS_DOTS
 
 # Uncomment to include specified model in built binary
 #DEFINES += INCLUDE_MODEL_PDTI8
@@ -50,6 +50,6 @@ DEFINES += INCLUDE_MODEL_HPS
 
 # How to respond to run and test
 RUN_MENU_ITEMS=1 1 c
-TEST_MENU_ITEMS=5
+TEST_MENU_ITEMS=3 a
 
 include ../proj.mk
