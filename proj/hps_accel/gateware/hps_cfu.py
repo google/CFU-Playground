@@ -1,5 +1,4 @@
-#!/bin/env python
-# Copyright 2020 Google LLC
+# Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,54 +13,35 @@
 # limitations under the License.
 
 from nmigen import *
-from nmigen_cfu import InstructionBase, InstructionTestBase, simple_cfu, CfuTestBase
-import unittest
-
-# See proj_example for further example instructions
+from nmigen_cfu import InstructionBase, Cfu
 
 
-class TemplateInstruction(InstructionBase):
-    """Template instruction
+class PingInstruction(InstructionBase):
+    """An instruction used to verify simple CFU functionality.
+
+    Adds the two arguments and stores the result. The previously stored value
+    is returned.
     """
 
     def elab(self, m):
+        stored_value = Signal(32)
         with m.If(self.start):
-            m.d.sync += self.output.eq(self.in0 + self.in1)
-            m.d.sync += self.done.eq(1)
+            m.d.sync += [
+                stored_value.eq(self.in0 + self.in1),
+                self.output.eq(stored_value),
+                self.done.eq(1),
+            ]
         with m.Else():
             m.d.sync += self.done.eq(0)
 
 
-class TemplateInstructionTest(InstructionTestBase):
-    def create_dut(self):
-        return TemplateInstruction()
-
-    def test(self):
-        self.verify([
-            (0, 0, 0),
-            (4, 5, 9),
-            (0xffffffff, 0xffffffff, 0xfffffffe),
-        ])
+class HpsCfu(Cfu):
+    def elab_instructions(self, m):
+        m.submodules['ping'] = ping = PingInstruction()
+        return {
+            7: ping,
+        }
 
 
 def make_cfu():
-    return simple_cfu({
-        # Add instructions here...
-        0: TemplateInstruction(),
-    })
-
-
-class CfuTest(CfuTestBase):
-    def create_dut(self):
-        return make_cfu()
-
-    def test(self):
-        DATA = [
-            # Test CFU calls here...
-            ((0, 22, 22), 44),
-        ]
-        return self.run_ops(DATA)
-
-
-if __name__ == '__main__':
-    unittest.main()
+    return HpsCfu()

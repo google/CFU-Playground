@@ -68,8 +68,11 @@
 // Retrieve result from multiply-accumulate unit
 #define REG_MACC_OUT 0x30
 
-//  Convenience macros for get/set
+// Convenience macros for get/set
 #define cfu_set(reg, val) cfu_op0(reg, val, 0)
 #define cfu_get(reg) cfu_op1(reg, 0, 0)
+
+// Ping instructions for checking CFU is available
+#define cfu_ping(val1, val2) cfu_op7(0, val1, val2)
 
 #endif  // _HPS_CFU_H
