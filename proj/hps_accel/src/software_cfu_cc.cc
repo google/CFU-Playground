@@ -161,15 +161,24 @@ uint32_t GetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
   }
 }
 
+uint32_t Ping(uint32_t rs1, uint32_t rs2) {
+  static uint32_t storage = 0;
+  uint32_t result = storage;
+  storage = rs1 + rs2;
+  return result;
+}
+
 };  // namespace
 
 extern "C" uint32_t software_cfu(int funct3, int funct7, uint32_t rs1,
                                  uint32_t rs2) {
   switch (funct3) {
-    case 0:
+    case INS_SET:
       return SetRegister(funct7, rs1, rs2);
-    case 1:
+    case INS_GET:
       return GetRegister(funct7, rs1, rs2);
+    case INS_PING:
+      return Ping(rs1, rs2);
     default:
       return 0;
   }

@@ -20,7 +20,7 @@ export DEFINES :=
 DEFINES += ACCEL_CONV
 
 # Uncomment this line to use software defined CFU functions in software_cfu.cc
-DEFINES += CFU_SOFTWARE_DEFINED
+#DEFINES += CFU_SOFTWARE_DEFINED
 
 # Uncomment this line to skip debug code (large effect on performance)
 DEFINES += NDEBUG
@@ -52,4 +52,8 @@ DEFINES += INCLUDE_MODEL_HPS
 RUN_MENU_ITEMS=1 1 c
 TEST_MENU_ITEMS=3 a
 
+BUILD_DIR_EXTRA_DEP = $(BUILD_DIR)/src/gateware_constants.h
 include ../proj.mk
+
+$(BUILD_DIR)/src/gateware_constants.h: $(BUILD_DIR)/src $(PROJ_DIR)/gateware/constants.py
+	$(PYRUN) -m gateware.constants $@

@@ -100,6 +100,9 @@ CFU_VERILOG     := $(PROJ_DIR)/cfu.v
 BUILD_DIR       := $(PROJ_DIR)/build
 PYRUN           := $(CFU_ROOT)/scripts/pyrun
 
+# Additional dependencies for assembling the build directory
+BUILD_DIR_EXTRA_DEP ?=
+
 COMMON_DIR         := $(CFU_ROOT)/common
 COMMON_FILES	   := $(shell find $(COMMON_DIR) -type f)
 MLCOMMONS_SRC_DIR  := $(CFU_ROOT)/third_party/mlcommons
@@ -211,7 +214,7 @@ $(BUILD_DIR)/src:
 	@mkdir -p $(BUILD_DIR)/src
 
 .PHONY: tflite-micro-src
-tflite-micro-src: 
+tflite-micro-src: $(BUILD_DIR)/src
 	@echo "Copying tflite-micro files"
 	for d in $(TFLM_COPY_SRC_DIRS); do \
 		mkdir -p $(BUILD_DIR)/src/$$d; \
@@ -239,7 +242,7 @@ tflite-micro-src:
 	$(COPY) $(TFLM_MAKE_DIR)/downloads/person_model_int8/* $(BUILD_DIR)/src/tensorflow/lite/micro/examples/person_detection
 
 .PHONY: build-dir
-build-dir: $(BUILD_DIR)/src tflite-micro-src
+build-dir: $(BUILD_DIR)/src tflite-micro-src $(BUILD_DIR_EXTRA_DEP) 
 	@echo "build-dir: copying source to build dir"
 	$(COPY) $(COMMON_DIR)/*              $(BUILD_DIR)
 	$(COPY) $(MLCOMMONS_SRC_DIR)/*       $(BUILD_DIR)/src
