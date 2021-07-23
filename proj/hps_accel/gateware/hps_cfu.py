@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Signal, unsigned
+from nmigen import Cat, Signal, unsigned
 from nmigen_cfu import Cfu, InstructionBase
+from util import all_words
 
 from .constants import Constants
 from .get import GetInstruction
+from .macc import MultiplyAccumulate
 from .set import SetInstruction
 from .stream import BinaryCombinatorialActor
 
@@ -64,11 +66,37 @@ class HpsCfu(Cfu):
             add_one.source.connect(get_sink)
         ]
 
+    def connect_macc(self, m, set, macc, get):
+        m.d.comb += macc.offset.eq(set.values[Constants.REG_INPUT_OFFSET])
+
+        inputs = Cat(set.values[Constants.REG_MACC_INPUT_0],
+                     set.values[Constants.REG_MACC_INPUT_1],
+                     set.values[Constants.REG_MACC_INPUT_2],
+                     set.values[Constants.REG_MACC_INPUT_3])
+        for n, val in enumerate(all_words(inputs, 8)):
+            m.d.comb += macc.inputs[n].eq(val)
+        filters = Cat(set.values[Constants.REG_MACC_FILTER_0],
+                      set.values[Constants.REG_MACC_FILTER_1],
+                      set.values[Constants.REG_MACC_FILTER_2],
+                      set.values[Constants.REG_MACC_FILTER_3])
+        for n, val in enumerate(all_words(filters, 8)):
+            m.d.comb += macc.filters[n].eq(val)
+
+        result_sink = get.sinks[Constants.REG_MACC_OUT]
+        m.d.comb += [
+            result_sink.valid.eq(1),
+            result_sink.payload.eq(macc.result),
+        ]
+
     def elab_instructions(self, m):
         m.submodules['set'] = set = SetInstruction()
         m.submodules['get'] = get = GetInstruction()
 
         self.connect_verify_register(m, set, get)
+
+        m.submodules['macc'] = macc = MultiplyAccumulate(16)
+        m.d.comb += macc.enable.eq(1)
+        self.connect_macc(m, set, macc, get)
 
         m.submodules['ping'] = ping = PingInstruction()
         return {
