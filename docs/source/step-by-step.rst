@@ -431,7 +431,7 @@ framework through this example.
 .. code-block:: python
 
     from nmigen import C, Module, Signal, signed
-    from nmigen_cfu import all_words, Cfu, InstructionBase, InstructionTestBase, pack_vals
+    from nmigen_cfu import all_words, InstructionBase, InstructionTestBase, pack_vals, simple_cfu
     import unittest
 
 
@@ -491,16 +491,10 @@ framework through this example.
             ])
 
 
-    # Custom CFU class inherits from Cfu base class.
-    class FirstCfu(Cfu):
-        def __init__(self) -> None:
-            # Associate cfu_op0 with SimdMac. 
-            super().__init__({0: SimdMac()})
-
-
     # Expose make_cfu function for cfu_gen.py
     def make_cfu():
-        return FirstCfu()
+        # Associate cfu_op0 with SimdMac.
+        return simple_cfu({0: SimdMac()})
 
 
     # Use `../../scripts/pyrun cfu.py` to run unit tests.
