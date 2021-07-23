@@ -16,6 +16,10 @@
  */
 
 #include "tensorflow/lite/kernels/internal/reference/integer_ops/conv_accel.h"
+#include "blocks.h"
+
+using hps_accel::Vector16;
+using hps_accel::multiply_accumulate;
 
 namespace tflite {
 namespace reference_integer_ops {
@@ -32,9 +36,7 @@ void ConvPerChannel4x4(
   const int stride_width = params.stride_width;
   const int stride_height = params.stride_height;
   TFLITE_DCHECK_EQ(params.dilation_width_factor, 1);
-  const int dilation_width_factor = 1;
   TFLITE_DCHECK_EQ(params.dilation_height_factor, 1);
-  const int dilation_height_factor = 1;
   TFLITE_DCHECK_EQ(params.padding_type, PaddingType::kValid);
   TFLITE_DCHECK_EQ(params.padding_values.width, 0);
   TFLITE_DCHECK_EQ(params.padding_values.height, 0);
@@ -51,6 +53,7 @@ void ConvPerChannel4x4(
   TFLITE_DCHECK_EQ(output_shape.DimensionsCount(), 4);
   const int batches = MatchingDim(input_shape, 0, output_shape, 0);
   const int input_depth = MatchingDim(input_shape, 3, filter_shape, 3);
+  TFLITE_DCHECK(input_depth == 1 || input_depth % 4 == 0);
   const int output_depth = MatchingDim(filter_shape, 0, output_shape, 3);
   if (bias_data) {
     TFLITE_DCHECK_EQ(bias_shape.FlatSize(), output_depth);
@@ -66,6 +69,7 @@ void ConvPerChannel4x4(
 
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
+  hps_accel::LoadFilter(input_depth, output_depth, filter_data);
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
       const int in_y_origin = out_y * stride_height;
@@ -75,36 +79,15 @@ void ConvPerChannel4x4(
         const int in_x_origin = out_x * stride_width;
         // Check bounds for input buffer. This assumes "valid" padding type.
         TFLITE_DCHECK_LE(in_x_origin + filter_width, input_width);
+        const int8_t *current_input_data = input_data +
+            Offset(input_shape, batch, in_y_origin, in_x_origin, 0);
+        hps_accel::LoadInput(input_width, input_depth, current_input_data);
         for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
           int32_t acc = 0;
-          for (int filter_y = 0; filter_y < filter_height; ++filter_y) {
-            const int in_y = in_y_origin + dilation_height_factor * filter_y;
-            for (int filter_x = 0; filter_x < filter_width; ++filter_x) {
-              const int in_x = in_x_origin + dilation_width_factor * filter_x;
-              for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-                int32_t input_val = input_data[Offset(input_shape, batch, in_y,
-                                                      in_x, in_channel)];
-                int32_t filter_val = filter_data[Offset(
-                    filter_shape, out_channel, filter_y, filter_x, in_channel)];
-                // Accumulate with 32 bits accumulator.
-                // In the nudging process during model quantization, we force
-                // real value of 0.0 be represented by a quantized value. This
-                // guarantees that the input_offset is a int8_t, even though
-                // it is represented using int32_t. int32_t += int8_t *
-                // (int8_t - int8_t) so the highest value we can get from each
-                // accumulation is [-127, 127] * ([-128, 127] -
-                // [-128, 127]), which is [-32512, 32512]. log2(32512)
-                // = 14.98, which means we can accumulate at least 2^16
-                // multiplications without overflow. The accumulator is
-                // applied to a filter so the accumulation logic will hold as
-                // long as the filter size (filter_y * filter_x * in_channel)
-                // does not exceed 2^16, which is the case in all the models
-                // we have seen so far.
-                // TODO(b/174275578): Add a check to make sure the
-                // accumulator depth is smaller than 2^16.
-                acc += filter_val * (input_val + input_offset);
-              }
-            }
+          for (int i = 0; i < filter_height * filter_width * input_depth / 16; ++i) {
+            Vector16 input = hps_accel::GetInput();
+            Vector16 filter = hps_accel::GetFilter();
+            acc += multiply_accumulate(input, filter, input_offset);
           }
 
           if (bias_data) {
