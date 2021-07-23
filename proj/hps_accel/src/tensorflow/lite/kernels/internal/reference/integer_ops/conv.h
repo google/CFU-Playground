@@ -69,7 +69,8 @@ inline void ConvPerChannel(
 
 #ifdef ACCEL_CONV
   // Use specialised implementation if possible.
-  if (filter_width == 4 &&
+  if (params.padding_type == PaddingType::kValid &&
+      filter_width == 4 &&
       filter_height == 4 &&
       dilation_width_factor == 1 &&
       dilation_height_factor == 1) {
