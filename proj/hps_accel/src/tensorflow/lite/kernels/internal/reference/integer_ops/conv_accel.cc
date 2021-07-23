@@ -35,8 +35,9 @@ void ConvPerChannel4x4(
   const int dilation_width_factor = 1;
   TFLITE_DCHECK_EQ(params.dilation_height_factor, 1);
   const int dilation_height_factor = 1;
-  const int pad_width = params.padding_values.width;
-  const int pad_height = params.padding_values.height;
+  TFLITE_DCHECK_EQ(params.padding_type, PaddingType::kValid);
+  TFLITE_DCHECK_EQ(params.padding_values.width, 0);
+  TFLITE_DCHECK_EQ(params.padding_values.height, 0);
   const int32_t output_offset = params.output_offset;
 
   // Set min and max value of the output.
@@ -67,25 +68,19 @@ void ConvPerChannel4x4(
   const int output_width = output_shape.Dims(2);
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
-      const int in_y_origin = (out_y * stride_height) - pad_height;
+      const int in_y_origin = out_y * stride_height;
+      // Check bounds for input buffer. This assumes "valid" padding type.
+      TFLITE_DCHECK_LE(in_y_origin + filter_height, input_height);
       for (int out_x = 0; out_x < output_width; ++out_x) {
-        const int in_x_origin = (out_x * stride_width) - pad_width;
+        const int in_x_origin = out_x * stride_width;
+        // Check bounds for input buffer. This assumes "valid" padding type.
+        TFLITE_DCHECK_LE(in_x_origin + filter_width, input_width);
         for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
           int32_t acc = 0;
           for (int filter_y = 0; filter_y < filter_height; ++filter_y) {
             const int in_y = in_y_origin + dilation_height_factor * filter_y;
             for (int filter_x = 0; filter_x < filter_width; ++filter_x) {
               const int in_x = in_x_origin + dilation_width_factor * filter_x;
-
-              // Zero padding by omitting the areas outside the image.
-              const bool is_point_inside_image =
-                  (in_x >= 0) && (in_x < input_width) && (in_y >= 0) &&
-                  (in_y < input_height);
-
-              if (!is_point_inside_image) {
-                continue;
-              }
-
               for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
                 int32_t input_val = input_data[Offset(input_shape, batch, in_y,
                                                       in_x, in_channel)];
