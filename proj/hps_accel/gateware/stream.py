@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from migen.fhdl.module import Module
 from nmigen import Signal, Shape
 from nmigen.hdl.rec import Record, DIR_FANIN, DIR_FANOUT
+from util import SimpleElaboratable
 
 __doc__ = """A Stream abstraction
 ====================
@@ -66,12 +68,13 @@ Major differences from LiteX Streams:
 class _Endpoint:
     """Abstract base class for Sinks and Sources."""
 
-    def __init__(self, payload_layout):
+    def __init__(self, payload_type):
+        self.payload_type = payload_type
         self._record = Record([
             ("valid", Shape(), DIR_FANOUT),
             ("ready", Shape(), DIR_FANIN),
             ("last", Shape(), DIR_FANOUT),
-            ("payload", payload_layout, DIR_FANOUT),
+            ("payload", payload_type, DIR_FANOUT),
         ])
         self.valid = self._record.valid
         self.ready = self._record.ready
@@ -89,20 +92,21 @@ class Source(_Endpoint):
     Parameters
     ----------
 
-    payload: Shape(N) or Layout
+    payload_type: Shape(N) or Layout
       The payload transferred from this Source.
 
     Attributes:
     -----------
 
+    payload_type: Shape(N) or Layout
     valid: Signal(1), out
     ready: Signal(1), in
     last: Signal(1), out
     payload: Signal(N) or Record, out
     """
 
-    def __init__(self, payload):
-        super().__init__(payload)
+    def __init__(self, payload_type):
+        super().__init__(payload_type)
 
     def connect(self, sink):
         """Returns a list of statements that connects this source to a sink.
@@ -125,11 +129,25 @@ class Sink(_Endpoint):
     Attributes:
     -----------
 
+    payload_type: Shape(N) or Layout
     valid: Signal(1), in
     ready: Signal(1), out
     last: Signal(1), in
     payload: Signal(N) or Record, in
     """
 
-    def __init__(self, payload):
-        super().__init__(payload)
+    def __init__(self, payload_type):
+        super().__init__(payload_type)
+
+
+def flowcontrol_passthrough(sink, source):
+    """Returns statments to pass flow control from a sink to source.
+
+    Useful in cases where a component acts on a stream completely
+    combinatorially.
+    """
+    return [
+        sink.ready.eq(source.ready),
+        source.valid.eq(sink.valid),
+        source.last.eq(sink.last),
+    ]
