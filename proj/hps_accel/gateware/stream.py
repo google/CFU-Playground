@@ -114,6 +114,7 @@ class Source(_Endpoint):
         Parameters:
           sink: This Sink to which to connect.
         """
+        assert isinstance(sink, Sink)
         return self._record.connect(sink._record)
 
 
@@ -151,3 +152,46 @@ def flowcontrol_passthrough(sink, source):
         source.valid.eq(sink.valid),
         source.last.eq(sink.last),
     ]
+
+
+class BinaryCombinatorialActor(SimpleElaboratable):
+    """Base for a combinatorial binary actor.
+
+    Performs a combinatorial operation on a sink payload and routes it to a
+    source.
+
+    Parameters
+    ----------
+
+    input_type: The Shape or Layout for the sink
+
+    output_type: The Shape or Layout for the source.
+
+    Attributes:
+
+    sink: Sink(input_type), in
+      Sink for incoming data
+
+    source: Source(source_type), out
+      Source for outgoing data
+    """
+
+    def __init__(self, input_type, output_type):
+        self.input_type = input_type
+        self.output_type = output_type
+        self.sink = Sink(input_type)
+        self.source = Source(output_type)
+
+    def elab(self, m: Module):
+        m.d.comb += flowcontrol_passthrough(self.sink, self.source)
+        self.transform(m, self.sink.payload, self.source.payload)
+
+    def transform(self, m, input, output):
+        """Transforms input to output.
+        
+        input: self.input_type, in
+        output: self.output_type, out
+        """
+        raise NotImplemented()
+
+

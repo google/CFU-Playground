@@ -12,10 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import *
-from nmigen_cfu import InstructionBase, Cfu
+from nmigen import Signal, unsigned
+from nmigen_cfu import Cfu, InstructionBase
 
 from .constants import Constants
+from .get import GetInstruction
+from .set import SetInstruction
+from .stream import BinaryCombinatorialActor
+
 
 class PingInstruction(InstructionBase):
     """An instruction used to verify simple CFU functionality.
@@ -36,10 +40,40 @@ class PingInstruction(InstructionBase):
             m.d.sync += self.done.eq(0)
 
 
+class AddOneActor(BinaryCombinatorialActor):
+    """A binary actor that adds one to a stream of integers.
+
+    Used to implement the verification register.
+    """
+
+    def __init__(self):
+        super().__init__(unsigned(32), unsigned(32))
+
+    def transform(self, m, input, output):
+        m.d.comb += output.eq(input + 1)
+
+
 class HpsCfu(Cfu):
+
+    def connect_verify_register(self, m, set, get):
+        set_source = set.sources[Constants.REG_VERIFY]
+        get_sink = get.sinks[Constants.REG_VERIFY]
+        m.submodules["add_one"] = add_one = AddOneActor()
+        m.d.comb += [
+            set_source.connect(add_one.sink),
+            add_one.source.connect(get_sink)
+        ]
+
     def elab_instructions(self, m):
+        m.submodules['set'] = set = SetInstruction()
+        m.submodules['get'] = get = GetInstruction()
+
+        self.connect_verify_register(m, set, get)
+
         m.submodules['ping'] = ping = PingInstruction()
         return {
+            Constants.INS_GET: get,
+            Constants.INS_SET: set,
             Constants.INS_PING: ping,
         }
 
