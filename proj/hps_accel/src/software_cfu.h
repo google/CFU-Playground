@@ -85,6 +85,9 @@ class Storage {
 extern Storage filter_storage;
 extern Storage input_storage;
 
+// Verify register storage
+extern uint32_t reg_verify;
+
 inline uint32_t SetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
   switch (funct7) {
     case REG_RESET:
@@ -129,6 +132,9 @@ inline uint32_t SetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
     case REG_MACC_FILTER_3:
       SetMaccFilter(3, rs1);
       return 0;
+    case REG_VERIFY:
+      reg_verify = rs1;
+      return 0;
 
     default:
       printf("\nInvalid SetRegister number %d\n", funct7);
@@ -157,6 +163,8 @@ inline uint32_t GetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
       return input_storage.Get(3);
     case REG_MACC_OUT:
       return Macc();
+    case REG_VERIFY:
+      return reg_verify + 1;
     default:
       printf("\nInvalid GetRegister number %d\n", funct7);
       return 0;

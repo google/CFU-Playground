@@ -30,5 +30,6 @@ int8_t macc_filter[16];
 Storage filter_storage;
 Storage input_storage;
 
+uint32_t reg_verify;
 uint32_t ping_storage;
 };  // namespace soft_cfu
