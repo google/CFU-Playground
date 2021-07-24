@@ -15,7 +15,7 @@
  */
 
 #include <stdint.h>
-#include "cfu.h"
+#include "software_cfu.h"
 
 //
 // In this function, place C code to emulate your CFU. You can switch between

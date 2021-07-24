@@ -21,10 +21,10 @@
 #include "menu.h"
 
 // Each project should make their own proj_menu.c, which will replace this one.
+namespace {
+void do_hello_world(void) { puts("Hello, World!\n"); }
 
-static void do_hello_world(void) { puts("Hello, World!\n"); }
-
-static struct Menu MENU = {
+struct Menu MENU = {
     "Project Menu",
     "project",
     {
@@ -32,5 +32,6 @@ static struct Menu MENU = {
         MENU_END,
     },
 };
+};  // namespace
 
-void do_proj_menu() { menu_run(&MENU); }
+extern "C" void do_proj_menu() { menu_run(&MENU); }
