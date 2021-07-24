@@ -40,7 +40,7 @@ runs:
       run:
         pwd && source environment && cd proj/${{ inputs.proj-name }} &&
         make ${{ inputs.build-params }} PLATFORM=${{ inputs.platform }} TARGET=${{ matrix.target }} -j8 software &&
-        make renode-scripts TARGET=${{ matrix.target }}
+        make renode-scripts ${{ inputs.build-params }} PLATFORM=${{ inputs.platform }} TARGET=${{ matrix.target }}
 
     - name: Run tests
       timeout-minutes: 5
