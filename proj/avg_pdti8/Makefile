@@ -16,7 +16,7 @@
 # This variable lists symbols to define to the C preprocessor
 export DEFINES :=
 
-# Uncomment this line to use software defined CFU functions in software_cfu.cc
+# avg_pdti8 does not have a working software defined CFU
 #DEFINES += CFU_SOFTWARE_DEFINED
 
 # Uncomment this line to skip debug code (large effect on performance)
