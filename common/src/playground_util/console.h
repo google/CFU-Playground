@@ -14,24 +14,16 @@
  * limitations under the License.
  */
 
-#ifndef BASE_H
-#define BASE_H
-#include <stdint.h>
+// This include file contans declarations of functions defined in libbase's
+// console.c. console.c is linked with C++ code, but the LiteX console.h file is
+// not accessible to C++.
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/** Initializes the runtime. */
-void init_runtime();
-
-// Read value from console
-// Uses strtol. Can accept values in hex or decimal. Also allows negative
-// values.
-uint32_t read_val(const char* prompt);
+char readchar(void);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif  // !BASE_H
