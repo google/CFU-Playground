@@ -47,7 +47,7 @@ inline void SetMaccFilter(size_t n, uint32_t value) {
 // Do the macc
 inline int32_t Macc() {
   int32_t macc_out = 0;
-  // NOTE: obvious optimization is to unroll these loops
+  // NOTE: unrolling this resulted in slower execution
   for (size_t n = 0; n < 16; n++) {
     macc_out += (macc_input[n] + macc_input_offset) * macc_filter[n];
   }
@@ -66,7 +66,7 @@ class Storage {
   }
   void Store(uint32_t value) { data[index++] = value; }
   uint32_t Get(size_t n) {
-    if (index >= len) {
+    if (n == 0 && index >= len) {
       index = 0;
     }
     uint32_t result = data[index + n];
