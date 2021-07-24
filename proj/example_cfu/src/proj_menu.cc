@@ -16,14 +16,38 @@
 
 #include "proj_menu.h"
 
+#include <stdio.h>
+
+#include "cfu.h"
 #include "menu.h"
 
-static struct Menu MENU = {
+namespace {
+
+// Template Fn
+void do_hello_world(void) { puts("Hello, World!!!\n"); }
+
+// Print fibonacci numbers
+void do_print_fib(void) {
+  puts("Fibonnaci Numbers");
+  puts("-----------------");
+  for (int i = 0; i < 8; i++) {
+    printf("%2d:", i * 6);
+    for (int j = 0; j < 6; j++) {
+      printf(" %11lu", cfu_op3(0, i * 6 + j, 0));
+    }
+    puts("");
+  }
+}
+
+struct Menu MENU = {
     "Project Menu",
-    "kws_micro_accel",
+    "project",
     {
+        MENU_ITEM('0', "print fibonacci numbers", do_print_fib),
+        MENU_ITEM('h', "say Hello", do_hello_world),
         MENU_END,
     },
 };
+};  // anonymous namespace
 
-void do_proj_menu() { menu_run(&MENU); }
+extern "C" void do_proj_menu() { menu_run(&MENU); }

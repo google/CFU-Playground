@@ -170,7 +170,7 @@ uint32_t Ping(uint32_t rs1, uint32_t rs2) {
 
 };  // namespace
 
-extern "C" uint32_t software_cfu(int funct3, int funct7, uint32_t rs1,
+uint32_t software_cfu(int funct3, int funct7, uint32_t rs1,
                                  uint32_t rs2) {
   switch (funct3) {
     case INS_SET:

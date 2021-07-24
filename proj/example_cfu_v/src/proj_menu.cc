@@ -14,41 +14,37 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-#include "cfu.h"
-#include "menu.h"
 #include "proj_menu.h"
 
+#include <stdio.h>
+
+#include "cfu.h"
+#include "menu.h"
+
+namespace {
+
 // Template Fn
-static void do_hello_world(void)
-{
-    puts("Hello, World!!!\n");
-}
+void do_hello_world(void) { puts("Hello, World!!!\n"); }
 
 // Test template instruction
-static void do_exercise_cfu_op0(void)
-{
-    puts("\nExercise CFU Op0 aka ADD\n");
-    int count = 0;
-    for (int a = -0x71234567; a < 0x68000000; a += 0x10012345)
-    {
-
-        for (int b = -0x7edcba98; b < 0x68000000; b += 0x10770077)
-        {
-            int cfu = cfu_op0(0, a, b);
-            printf("a: %08x b:%08x a+b=%08x cfu= %08x\n", a, b, a + b, cfu);
-            if (cfu != a + b) 
-            {
-                printf("\n***FAIL\n");
-                return;
-            }
-            count++;
-        }
+void do_exercise_cfu_op0(void) {
+  puts("\nExercise CFU Op0 aka ADD\n");
+  int count = 0;
+  for (int a = -0x71234567; a < 0x68000000; a += 0x10012345) {
+    for (int b = -0x7edcba98; b < 0x68000000; b += 0x10770077) {
+      int cfu = cfu_op0(0, a, b);
+      printf("a: %08x b:%08x a+b=%08x cfu= %08x\n", a, b, a + b, cfu);
+      if (cfu != a + b) {
+        printf("\n***FAIL\n");
+        return;
+      }
+      count++;
     }
-    printf("Performed %d comparisons", count);
+  }
+  printf("Performed %d comparisons", count);
 }
 
-static struct Menu MENU = {
+struct Menu MENU = {
     "Project Menu",
     "project",
     {
@@ -57,8 +53,6 @@ static struct Menu MENU = {
         MENU_END,
     },
 };
+};  // anonymous namespace
 
-void do_proj_menu()
-{
-    menu_run(&MENU);
-}
+extern "C" void do_proj_menu() { menu_run(&MENU); }

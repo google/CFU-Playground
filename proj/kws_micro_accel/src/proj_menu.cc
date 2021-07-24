@@ -14,6 +14,20 @@
  * limitations under the License.
  */
 
+#include "proj_menu.h"
 
-// See software_cfu_cc.cc.
-// This file exists simply to override from common/src/software_cfu.c.
+#include "menu.h"
+
+namespace {
+
+struct Menu MENU = {
+    "Project Menu",
+    "kws_micro_accel",
+    {
+        MENU_END,
+    },
+};
+
+};  // anonymous namespace
+
+extern "C" void do_proj_menu() { menu_run(&MENU); }

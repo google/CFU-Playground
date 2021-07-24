@@ -15,43 +15,37 @@
  */
 
 #include <stdio.h>
-#include "cfu.h"
+
+#include "calc_once_data.h"
 #include "menu.h"
 #include "proj_menu.h"
 
-// Template Fn
-static void do_hello_world(void)
-{
-    puts("Hello, World!!!\n");
+#ifdef TAIL_ROM_USE
+#include "pdti8_cache.h"
+#endif
+
+namespace {
+
+void do_reset_cache() { calculate_once::SetCache(NULL); }
+
+void do_set_pdti8() {
+#ifdef TAIL_ROM_USE
+  calculate_once::SetCache(GetCachePdti8());
+#else
+  puts("Not configured to use tail rom.");
+#endif
 }
 
-// Print fibonacci numbers
-static void do_print_fib(void)
-{
-    puts("Fibonnaci Numbers");
-    puts("-----------------");
-    for (int i = 0; i < 8; i++)
-    {
-        printf("%2d:", i * 6);
-        for (int j = 0; j < 6; j++)
-        {
-            printf(" %11u", cfu_op3(0, i * 6 + j, 0));
-        }
-        puts("");
-    }
-}
-
-static struct Menu MENU = {
+struct Menu MENU = {
     "Project Menu",
     "project",
     {
-        MENU_ITEM('0', "print fibonacci numbers", do_print_fib),
-        MENU_ITEM('h', "say Hello", do_hello_world),
+        MENU_ITEM('0', "reset cache", do_reset_cache),
+        MENU_ITEM('1', "Set cache for pdti8", do_set_pdti8),
         MENU_END,
     },
 };
 
-void do_proj_menu()
-{
-    menu_run(&MENU);
-}
+}  // anonymous namespace
+
+extern "C" void do_proj_menu() { menu_run(&MENU); }

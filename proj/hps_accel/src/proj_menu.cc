@@ -22,9 +22,11 @@
 #include "hps_cfu.h"
 #include "menu.h"
 
+namespace {
+
 #define CHECK_VALUE(actual, expected)                            \
   if (actual != expected) {                                      \
-    printf("FAIL Actual %d != Expected %d\n", actual, expected); \
+    printf("FAIL Actual %ld != Expected %d\n", actual, expected); \
     return;                                                      \
   }
 
@@ -51,5 +53,6 @@ static struct Menu MENU = {
         MENU_END,
     },
 };
+}; // anonymous namespace
 
-void do_proj_menu() { menu_run(&MENU); }
+extern "C" void do_proj_menu() { menu_run(&MENU); }
