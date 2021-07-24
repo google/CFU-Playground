@@ -49,6 +49,12 @@ else
 ifdef USE_VIVADO
 LITEX_ARGS += --toolchain vivado
 endif
+ifdef USE_VIDEO_FRAMEBUFFER
+LITEX_ARGS += --with-video-framebuffer
+endif
+ifdef USE_SPI_SDCARD
+LITEX_ARGS += --with-spi-sdcard
+endif
 endif
 
 PYRUN:=     $(CFU_ROOT)/scripts/pyrun

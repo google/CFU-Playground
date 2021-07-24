@@ -22,6 +22,7 @@
 
 #include "base.h"
 #include "benchmarks.h"
+#include "fb_util.h"
 #include "functional_cfu_tests.h"
 #include "instruction_handler.h"
 #include "menu.h"
@@ -59,6 +60,9 @@ static struct Menu MENU = {
 #endif
 #ifdef CONFIG_CPU_DIV_UNIMPLEMENTED
         MENU_ITEM('I', "Illegal Instruction Tests", do_instruction_tests),
+#endif
+#ifdef CSR_VIDEO_FRAMEBUFFER_BASE
+        MENU_ITEM('9', "Framebuffer Debugging", framebuffer_menu),
 #endif
 #ifdef PLATFORM_sim
         MENU_ITEM('t', "trace (only works in simulation)", trace_sim),
