@@ -5,10 +5,12 @@ __DYNAMIC = 0;
 
 INCLUDE regions.ld
 
+FBI_LITEX_OFFSET = 0x8;
+
 
 SECTIONS
 {
-	.text :
+	.text (ORIGIN(spiflash) + FBI_LITEX_OFFSET) :
 	{
 		_ftext = .;
 		*(.text.start)

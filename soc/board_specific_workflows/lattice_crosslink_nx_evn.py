@@ -14,11 +14,12 @@
 # limitations under the License.
 
 import general
+from collections import namedtuple
 from litex.soc.integration import builder
 from litex.soc.integration import soc as litex_soc
 from litex.soc.integration.soc import SoCRegion
 
-from litespi.modules import MX25L12835F
+from litespi.modules import MX25L12833F
 from litespi.opcodes import SpiNorFlashOpCodes as Codes
 from litespi.phy.generic import LiteSPIPHY
 from litespi import LiteSPI
@@ -68,27 +69,16 @@ class SpiFlashCounter(Module, AutoCSR):
 
 class LatticeCrossLinkNXEVNSoCWorkflow(general.GeneralSoCWorkflow):
     def make_soc(self, **kwargs) -> litex_soc.LiteXSoC:
-        soc = super().make_soc(
-            integrated_rom_size=0,
-            integrated_rom_init=[],
-            **kwargs
+        soc = super().make_soc(**kwargs)
+        soc.mem_map["spiflash"] = 0x20000000
+        soc.add_spi_flash(
+            module=MX25L12833F(Codes.READ_4_4_4, program_cmd=Codes.PP_1_1_1),
+            mode="4x",
+            clk_freq=soc.sys_clk_freq
         )
+        soc.constants['FLASH_BOOT_ADDRESS'] = soc.mem_map["spiflash"]
 
-        soc.spiflash_region = SoCRegion(0x00000000, 16 * MB, mode="r", cached=True, linker=True)
-        spi_platform = soc.platform.request("spiflash")
-        soc.submodules.spiflash_phy = LiteSPIPHY(
-            spi_platform,
-            MX25L12835F(Codes.READ_1_1_1),
-            default_divisor=1)
-        soc.submodules.spiflash_mmap = LiteSPI(phy=soc.spiflash_phy,
-            clk_freq        = soc.sys_clk_freq,
-            mmap_endianness = soc.cpu.endianness)
-
-        soc.csr.add("spiflash_mmap")
-        soc.csr.add("spiflash_phy")
-        soc.bus.add_slave(name="spiflash", slave=soc.spiflash_mmap.bus, region=soc.spiflash_region)
-        soc.bus.add_region("rom", soc.spiflash_region)
-
+        spi_platform = namedtuple("Pads", ["cs_n"])(cs_n=~soc.spiflash_phy.cs)
         soc.submodules.spi_flash_counter = SpiFlashCounter(spi_platform)
         soc.csr.add("spi_flash_counter")
         soc.constants['LITESPI_CS_COUNTER'] = 1
