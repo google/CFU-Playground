@@ -36,9 +36,7 @@ void do_set_pdti8() {
 #endif
 }
 
-}  // anonymous namespace
-
-static struct Menu MENU = {
+struct Menu MENU = {
     "Project Menu",
     "project",
     {
@@ -48,4 +46,6 @@ static struct Menu MENU = {
     },
 };
 
-void do_proj_menu() { menu_run(&MENU); }
+}  // anonymous namespace
+
+extern "C" void do_proj_menu() { menu_run(&MENU); }

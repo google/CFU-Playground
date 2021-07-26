@@ -14,34 +14,32 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-#include "cfu.h"
-#include "menu.h"
 #include "proj_menu.h"
 
+#include <stdio.h>
+
+#include "cfu.h"
+#include "menu.h"
+
+namespace {
+
 // Template Fn
-static void do_hello_world(void)
-{
-    puts("Hello, World!!!\n");
-}
+void do_hello_world(void) { puts("Hello, World!!!\n"); }
 
 // Print fibonacci numbers
-static void do_print_fib(void)
-{
-    puts("Fibonnaci Numbers");
-    puts("-----------------");
-    for (int i = 0; i < 8; i++)
-    {
-        printf("%2d:", i * 6);
-        for (int j = 0; j < 6; j++)
-        {
-            printf(" %11u", cfu_op3(0, i * 6 + j, 0));
-        }
-        puts("");
+void do_print_fib(void) {
+  puts("Fibonnaci Numbers");
+  puts("-----------------");
+  for (int i = 0; i < 8; i++) {
+    printf("%2d:", i * 6);
+    for (int j = 0; j < 6; j++) {
+      printf(" %11lu", cfu_op3(0, i * 6 + j, 0));
     }
+    puts("");
+  }
 }
 
-static struct Menu MENU = {
+struct Menu MENU = {
     "Project Menu",
     "project",
     {
@@ -50,8 +48,6 @@ static struct Menu MENU = {
         MENU_END,
     },
 };
+};  // anonymous namespace
 
-void do_proj_menu()
-{
-    menu_run(&MENU);
-}
+extern "C" void do_proj_menu() { menu_run(&MENU); }

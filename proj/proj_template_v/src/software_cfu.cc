@@ -15,7 +15,7 @@
  */
 
 #include <stdint.h>
-#include "cfu.h"
+#include "software_cfu.h"
 
 //
 // In this function, place C code to emulate your CFU. You can switch between
@@ -23,9 +23,5 @@
 // the Makefile.
 uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2)
 {
-  if (funct3 == 0)
-  {
-    return rs1 + rs2;
-  }
-  return rs1;
+  return (funct3 & 1) ? rs2 : rs1;
 }

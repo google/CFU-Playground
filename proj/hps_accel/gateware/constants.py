@@ -83,6 +83,15 @@ class Constants:
     INS_PING = 7
 
 
+CC_FILE_HEADER = """// Generated file
+// Shared constants generated from gateware/constants.py
+#ifndef _GATEWARE_CONSTANTS_H
+#define _GATEWARE_CONSTANTS_H
+"""
+
+CC_FILE_TAIL = """#endif"""
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Write C header file with constants')
@@ -93,12 +102,11 @@ def main():
     args = parser.parse_args()
 
     with args.output as f:
-        print("// Generated file", file=f)
-        print("// Shared constants generated from gateware/constants.py",
-              file=f)
+        print(CC_FILE_HEADER, file=f)
         for name, value in vars(Constants).items():
             if not name.startswith('_'):
                 print(f"#define {name} {value}", file=f)
+        print(CC_FILE_TAIL, file=f)
 
 
 if __name__ == "__main__":

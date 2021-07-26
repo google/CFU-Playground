@@ -14,6 +14,24 @@
  * limitations under the License.
  */
 
+#include "proj_menu.h"
 
-// See software_cfu_cc.cc.
-// This file exists simply to override from common/src/software_cfu.c.
+#include <stdio.h>
+
+#include "menu.h"
+
+// Each project should make their own proj_menu.c, which will replace this one.
+namespace {
+void do_hello_world(void) { puts("Hello, World!\n"); }
+
+struct Menu MENU = {
+    "Project Menu",
+    "project",
+    {
+        MENU_ITEM('h', "say Hello", do_hello_world),
+        MENU_END,
+    },
+};
+};  // namespace
+
+extern "C" void do_proj_menu() { menu_run(&MENU); }

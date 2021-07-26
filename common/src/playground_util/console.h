@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-#include "proj_menu.h"
+// This include file contans declarations of functions defined in libbase's
+// console.c. console.c is linked with C++ code, but the LiteX console.h file is
+// not accessible to C++.
 
-#include "menu.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-static struct Menu MENU = {
-    "Project Menu",
-    "kws_micro_accel",
-    {
-        MENU_END,
-    },
-};
+char readchar(void);
 
-void do_proj_menu() { menu_run(&MENU); }
+#ifdef __cplusplus
+}
+#endif

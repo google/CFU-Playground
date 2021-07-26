@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-#include "proj_menu.h"
+#include "software_cfu.h"
 
-#include <stdio.h>
+#include <cstddef>
+#include <cstdint>
+#include <cstdio>
 
-#include "menu.h"
+namespace soft_cfu {
 
-// Each project should make their own proj_menu.c, which will replace this one.
+// Just defines state - all functions are inline
+int32_t macc_input_offset;
+int8_t macc_input[16];
+int8_t macc_filter[16];
 
-static void do_hello_world(void) { puts("Hello, World!\n"); }
+Storage filter_storage;
+Storage input_storage;
 
-static struct Menu MENU = {
-    "Project Menu",
-    "project",
-    {
-        MENU_ITEM('h', "say Hello", do_hello_world),
-        MENU_END,
-    },
-};
-
-void do_proj_menu() { menu_run(&MENU); }
+uint32_t ping_storage;
+};  // namespace soft_cfu

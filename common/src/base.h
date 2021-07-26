@@ -18,6 +18,10 @@
 #define BASE_H
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** Initializes the runtime. */
 void init_runtime();
 
@@ -25,5 +29,9 @@ void init_runtime();
 // Uses strtol. Can accept values in hex or decimal. Also allows negative
 // values.
 uint32_t read_val(const char* prompt);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // !BASE_H

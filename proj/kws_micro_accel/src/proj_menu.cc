@@ -14,5 +14,20 @@
  * limitations under the License.
  */
 
-// Empty file to override common/src/proj_menu.c
-// See proj_menu_cc.cc in this directory
+#include "proj_menu.h"
+
+#include "menu.h"
+
+namespace {
+
+struct Menu MENU = {
+    "Project Menu",
+    "kws_micro_accel",
+    {
+        MENU_END,
+    },
+};
+
+};  // anonymous namespace
+
+extern "C" void do_proj_menu() { menu_run(&MENU); }
