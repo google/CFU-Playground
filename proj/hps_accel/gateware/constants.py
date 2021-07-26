@@ -29,6 +29,9 @@ class Constants:
     # Register IDs
     # For convenience, readable and writable register IDs are allocated from a
     # shared pool of values 0-127.
+    #
+    # Generally registers are only writable or readable. Exceptions are noted
+    # in the register description.
 
     # A write of any value to REG_RESET causes the accelerator gateware to be
     # reset and lose all state
@@ -75,6 +78,13 @@ class Constants:
 
     # Retrieve result from multiply-accumulate unit
     REG_MACC_OUT = 0x30
+
+    # Registers for gateware verification
+    # Any value set into this register will be negated on readback
+    REG_VERIFY = 0x70
+
+    # ID is guaranteed to not be a register ID
+    REG_INVALID = 0x7f
 
     ###########################################################################
     # Funct3 codes - used to route CFU to instructions

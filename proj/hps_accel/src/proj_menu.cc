@@ -21,16 +21,17 @@
 #include "blocks_test.h"
 #include "hps_cfu.h"
 #include "menu.h"
+#include "playground_util/random.h"
 
 namespace {
 
-#define CHECK_VALUE(actual, expected)                            \
-  if (actual != expected) {                                      \
+#define CHECK_VALUE(actual, expected)                             \
+  if (actual != expected) {                                       \
     printf("FAIL Actual %ld != Expected %d\n", actual, expected); \
-    return;                                                      \
+    return;                                                       \
   }
 
-static void do_test_ping(void) {
+void do_test_ping(void) {
   uint32_t val = cfu_ping(1, 2);
   CHECK_VALUE(val, 0);
   val = cfu_ping(12, 4);
@@ -40,11 +41,31 @@ static void do_test_ping(void) {
   printf("OK\n");
 }
 
-static struct Menu MENU = {
+void do_verify_register(void) {
+  int64_t r = 0x1234567890abcdef;
+
+  int tests = 0;
+  int failures = 0;
+  for (int i = 0; i < 10; i++) {
+    tests += 1;
+    uint32_t input = next_pseudo_random(&r);
+    cfu_set(REG_VERIFY, input);
+    uint32_t output = cfu_get(REG_VERIFY);
+    if (output != input + 1) {
+      failures += 1;
+      printf("input = %08lx, output = %08lx - FAIL\n", input, output);
+    }
+  }
+  printf("%4s: %d failures out of %d tests\n", failures ? "FAIL" : "OK",
+         failures, tests);
+}
+
+struct Menu MENU = {
     "Project Menu",
     "project",
     {
         MENU_ITEM('p', "Ping CFU", do_test_ping),
+        MENU_ITEM('v', "Verify register tests", do_verify_register),
         MENU_ITEM('m', "test blocks Multiply",
                   do_test_blocks_multiply_accumulate),
         MENU_ITEM('f', "test blocks Filter", do_test_blocks_filter),
@@ -53,6 +74,6 @@ static struct Menu MENU = {
         MENU_END,
     },
 };
-}; // anonymous namespace
+};  // anonymous namespace
 
 extern "C" void do_proj_menu() { menu_run(&MENU); }
