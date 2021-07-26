@@ -3,7 +3,7 @@
 	url = https://github.com/m-labs/migen.git
 [submodule "soc/deps/litex"]
 	path = third_party/python/litex
-	url = https://github.com/tcal-x/litex.git
+	url = https://github.com/antmicro/litex.git
 [submodule "soc/deps/litedram"]
 	path = third_party/python/litedram
 	url = https://github.com/enjoy-digital/litedram.git
