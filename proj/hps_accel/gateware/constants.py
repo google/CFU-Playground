@@ -80,7 +80,7 @@ class Constants:
     REG_MACC_OUT = 0x30
 
     # Registers for gateware verification
-    # Any value set into this register will be negated on readback
+    # Any value n set into this register will be read back as n+1
     REG_VERIFY = 0x70
 
     # ID is guaranteed to not be a register ID
