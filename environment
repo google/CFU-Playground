@@ -29,3 +29,11 @@ for i in "${CFU_ROOT}/third_party/python"/* "${CFU_ROOT}/python/"* "${CFU_ROOT}/
 done
 export PYTHONPATH
 
+
+if [ -d "${CFU_ROOT}/third_party/usr/local/bin" ] ; then
+    if [ ! `echo ${PATH} | grep third_party/usr/local/bin` ] ; then
+        PATH="${CFU_ROOT}/third_party/usr/local/bin:${PATH}"
+        echo UPDATED PATH: ${PATH}
+        export PATH
+    fi
+fi

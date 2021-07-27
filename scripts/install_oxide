@@ -1,0 +1,81 @@
+#!/bin/bash
+set -e
+
+CFU_ROOT="$(dirname $(dirname $(realpath ${BASH_SOURCE[0]})))"
+
+
+UPDATE=
+if [ $# -gt 1 ] ; then
+  echo "Usage: install_oxide [update]"
+  exit 1
+fi
+if [ $# -gt 0 ] ; then
+  if [ $1 == "update" ] ; then
+    UPDATE=1
+  else
+    echo "Usage: install_oxide [update]"
+    exit 1
+  fi
+fi
+
+
+
+if [ -z "$UPDATE" ] ; then
+
+  echo -n "Install Project Oxide open source toolchain? (ctrl-C to exit)" >&2
+  echo
+  echo "CLONING REPOSITORIES"
+  cd ${CFU_ROOT}/third_party
+  if [ ! -d yosys ]; then
+    git clone --recursive https://github.com/YosysHQ/yosys.git
+    git -C yosys pull --ff-only origin master
+    git -C yosys submodule update
+  fi
+  if [ ! -d prjoxide ]; then
+    git clone --recursive https://github.com/gatecat/prjoxide.git
+    git -C prjoxide pull --ff-only origin master
+    git -C prjoxide submodule update
+  fi
+  if [ ! -d nextpnr ]; then
+    git clone --recursive https://github.com/YosysHQ/nextpnr.git
+    git -C nextpnr pull --ff-only origin master
+    git -C nextpnr submodule update
+  fi
+
+else
+
+  echo
+  echo "UPDATING REPOSITORIES"
+  cd ${CFU_ROOT}/third_party
+  git -C yosys pull --ff-only origin master
+  git -C yosys submodule update
+  git -C prjoxide pull --ff-only origin master
+  git -C prjoxide submodule update
+  git -C nextpnr pull --ff-only origin master
+  git -C nextpnr submodule update
+
+fi
+
+DESTDIR=${CFU_ROOT}/third_party
+
+echo
+echo "BUILDING YOSYS"
+cd ${CFU_ROOT}/third_party/yosys
+make -j
+make DESTDIR=${DESTDIR} install
+
+echo
+echo "BUILDING PRJOXIDE"
+OXIDE_INSTALL_PREFIX=${CFU_ROOT}/third_party/.cargo
+mkdir -p ${OXIDE_INSTALL_PREFIX}
+cd ${CFU_ROOT}/third_party/prjoxide/libprjoxide
+cargo install --path prjoxide --root ${OXIDE_INSTALL_PREFIX}
+cp ${CFU_ROOT}/third_party/.cargo/bin/prjoxide ${DESTDIR}/usr/local/bin
+
+echo
+echo "BUILDING NEXTPNR-NEXUS"
+cd ${CFU_ROOT}/third_party/nextpnr
+cmake -DARCH=nexus -DOXIDE_INSTALL_PREFIX=${OXIDE_INSTALL_PREFIX} .
+make -j
+make DESTDIR=${DESTDIR} install
+
