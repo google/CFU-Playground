@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import unsigned, Signal
+from nmigen import Signal, unsigned
 from nmigen.hdl.dsl import Module
 from nmigen_cfu import InstructionBase
 from util import SimpleElaboratable
+
 from .constants import Constants
 from .stream import Sink, Source, flowcontrol_passthrough
 
@@ -75,7 +76,17 @@ class SetInstruction(InstructionBase):
     """
 
     # The list of all register IDs that may be set
-    REGISTER_IDS = [Constants.REG_VERIFY]
+    REGISTER_IDS = [
+        Constants.REG_INPUT_OFFSET,
+        Constants.REG_MACC_INPUT_0,
+        Constants.REG_MACC_INPUT_1,
+        Constants.REG_MACC_INPUT_2,
+        Constants.REG_MACC_INPUT_3,
+        Constants.REG_MACC_FILTER_0,
+        Constants.REG_MACC_FILTER_1,
+        Constants.REG_MACC_FILTER_2,
+        Constants.REG_MACC_FILTER_3,
+        Constants.REG_VERIFY]
 
     def __init__(self):
         super().__init__()

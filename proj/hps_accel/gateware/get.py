@@ -63,8 +63,8 @@ class GetInstruction(InstructionBase):
       Asserted for one cycle when the corresponding register id is read.
     """
 
-    # The list of all register IDs that may be set
-    REGISTER_IDS = [Constants.REG_VERIFY]
+    # The list of all register IDs that may be fetched
+    REGISTER_IDS = [Constants.REG_MACC_OUT, Constants.REG_VERIFY]
 
     def __init__(self):
         super().__init__()
@@ -72,6 +72,7 @@ class GetInstruction(InstructionBase):
         self.read_strobes = {i: Signal() for i in self.REGISTER_IDS}
 
     def elab(self, m: Module):
+        # Make registers and plumb sinks and read_strobes through
         registers = {i: StatusRegister() for i in self.REGISTER_IDS}
         for i, register in registers.items():
             m.submodules[f"reg_{i:02x}"] = register
