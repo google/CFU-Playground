@@ -46,16 +46,17 @@ between Source and Sink.
 
 This implementation was heavily influenced by the discussion at
 https://github.com/nmigen/nmigen/issues/317, and especially the existing design
-of LiteX streams.
+of LiteX streams. It relies heavily on the nmigen Record class for payload
+manipulation.
 
 Major differences from LiteX Streams:
 
+-  Source and Sink are distinct types. They share a common superclass for
+   implementation purposes, but this is not exposed in the API.
+-  A "payload_type" attribute contains the type of the payload.
 -  "Parameters" are omitted. The value of parameters as a general mechanism is
    unclear.
 -  "first" is omitted. A "first" signal can be derived from the "last" signal.
--  Source and Sink are distinct types. They share a common superclass for
-   implementation purposes, but this is not exposed in the API.
-
 """
 
 from .actor import BinaryCombinatorialActor
