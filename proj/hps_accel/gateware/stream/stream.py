@@ -157,16 +157,3 @@ def glue_sinks(sink_in: Sink, sink_out: Sink):
         sink_out.last.eq(sink_in.last),
         sink_out.payload.eq(sink_in.payload),
     ]
-
-
-def flowcontrol_passthrough(sink, source):
-    """Returns statments to pass flow control from a sink to source.
-
-    Useful in cases where a component acts on a stream completely
-    combinatorially.
-    """
-    return [
-        sink.ready.eq(source.ready),
-        source.valid.eq(sink.valid),
-        source.last.eq(sink.last),
-    ]

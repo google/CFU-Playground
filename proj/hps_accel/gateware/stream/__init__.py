@@ -59,4 +59,4 @@ Major differences from LiteX Streams:
 """
 
 from .actor import BinaryCombinatorialActor
-from .stream import Sink, Source, flowcontrol_passthrough, glue_sources, glue_sinks
+from .stream import Sink, Source, glue_sources, glue_sinks

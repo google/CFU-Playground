@@ -16,7 +16,7 @@
 from migen import Module
 from util import SimpleElaboratable
 
-from .stream import Sink, Source, flowcontrol_passthrough
+from .stream import Sink, Source
 
 
 class BinaryActor(SimpleElaboratable):
@@ -41,12 +41,12 @@ class BinaryActor(SimpleElaboratable):
     source: Source(source_type), out
       Source for outgoing data
     """
+
     def __init__(self, input_type, output_type):
         self.input_type = input_type
         self.output_type = output_type
         self.sink = Sink(input_type)
         self.source = Source(output_type)
-
 
     def elab(self, m: Module):
         self.control(m)
@@ -93,7 +93,11 @@ class BinaryCombinatorialActor(BinaryActor):
         super().__init__(input_type, output_type)
 
     def control(self, m: Module):
-        m.d.comb += flowcontrol_passthrough(self.sink, self.source)
+        m.d.comb += [
+            self.sink.ready.eq(self.source.ready),
+            self.source.valid.eq(self.sink.valid),
+            self.source.last.eq(self.sink.last),
+        ]
 
     def transform(self, m, input, output):
         """Transforms input to output.
