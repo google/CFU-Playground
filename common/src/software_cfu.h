@@ -19,14 +19,7 @@
 
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // =============== Software implementation of custom op codes
 uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2);
 
-#ifdef __cplusplus
-}
-#endif
 #endif  // SOFTWARE_CFU_H

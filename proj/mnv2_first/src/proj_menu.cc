@@ -20,16 +20,16 @@
 #include <string.h>
 
 #include "b64_util.h"
-#include "generated/csr.h"
 #include "golden_op_tests.h"
 #include "menu.h"
 
-static void print_sample(char* s) {
+namespace {
+void print_sample(const char* s) {
   printf("in = %s\n", s);
-  b64_dump(s, strlen(s));
+  b64_dump(static_cast<const int8_t*>(static_cast<const void*>(s)), strlen(s));
 }
 
-static void do_b64_samples() {
+void do_b64_samples() {
   print_sample("1234");
   // See https://en.wikipedia.org/wiki/Base64#Examples
   print_sample(
@@ -39,33 +39,18 @@ static void do_b64_samples() {
       "of knowledge, exceeds the short vehemence of any carnal pleasure.");
 }
 
-#ifdef PLATFORM_sim
-static void do_start_trace() {
-  printf("Start trace\n");
-  sim_trace_enable_write(1);
-}
-
-static void do_quit_sim() {
-  printf("BYE\n");
-  sim_finish_finish_write(1);
-}
-#endif
-
-static struct Menu MENU = {
+struct Menu MENU = {
     "Project Menu",
     "mnv2_first",
     {
         MENU_ITEM('1', "1x1 conv2d golden tests", golden_op_run_1x1conv),
         MENU_ITEM('2', "base64 samples", do_b64_samples),
-#ifdef PLATFORM_sim
-        MENU_ITEM('t', "Trace sim", do_start_trace),
-        MENU_ITEM('Q', "Quit sim", do_quit_sim),
-#endif
         MENU_END,
     },
 };
+};  // anonymous namespace
 
-void do_proj_menu() {
+extern "C" void do_proj_menu() {
   // sim_trace_enable_write(1);
   menu_run(&MENU);
 }

@@ -14,6 +14,22 @@
  * limitations under the License.
  */
 
+#include "software_cfu.h"
 
-// See software_cfu_cc.cc.
-// This file exists simply to override from common/src/software_cfu.c.
+#include <cstddef>
+#include <cstdint>
+#include <cstdio>
+
+namespace soft_cfu {
+
+// Just defines state - all functions are inline
+int32_t macc_input_offset;
+int8_t macc_input[16];
+int8_t macc_filter[16];
+
+Storage filter_storage;
+Storage input_storage;
+
+uint32_t reg_verify;
+uint32_t ping_storage;
+};  // namespace soft_cfu

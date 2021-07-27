@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-#include "proj_menu.h"
+#include <stdint.h>
+#include "software_cfu.h"
 
-#include <stdio.h>
-
-#include "menu.h"
-
-// Each project should make their own proj_menu.c, which will replace this one.
-
-static void do_hello_world(void) { puts("Hello, World!\n"); }
-
-static struct Menu MENU = {
-    "Project Menu",
-    "project",
-    {
-        MENU_ITEM('h', "say Hello", do_hello_world),
-        MENU_END,
-    },
-};
-
-void do_proj_menu() { menu_run(&MENU); }
+//
+// In this function, place C code to emulate your CFU. You can switch between
+// hardware and emulated CFU by setting the CFU_SOFTWARE_DEFINED DEFINE in
+// the Makefile.
+uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2)
+{
+  if (funct3 == 0)
+  {
+    return rs1 + rs2;
+  }
+  return rs1;
+}

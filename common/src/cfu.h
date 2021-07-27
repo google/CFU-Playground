@@ -22,10 +22,6 @@
 #include "riscv.h"
 #include "software_cfu.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* riscv.h defines a macro:
 
     #define opcode_R(opcode, funct3, funct7, rs1, rs2)
@@ -81,7 +77,4 @@ extern "C" {
 #define cfu_op(funct3, funct7, rs1, rs2) cfu_op_hw(funct3, funct7, rs1, rs2)
 #endif
 
-#ifdef __cplusplus
-}
-#endif
 #endif  // CFU_H

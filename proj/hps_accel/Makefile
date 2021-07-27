@@ -20,7 +20,7 @@ export DEFINES :=
 DEFINES += ACCEL_CONV
 
 # Uncomment this line to use software defined CFU functions in software_cfu.cc
-#DEFINES += CFU_SOFTWARE_DEFINED
+DEFINES += CFU_SOFTWARE_DEFINED
 
 # Uncomment this line to skip debug code (large effect on performance)
 DEFINES += NDEBUG

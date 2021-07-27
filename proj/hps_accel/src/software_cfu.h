@@ -14,38 +14,40 @@
  * limitations under the License.
  */
 
+#ifndef SOFTWARE_CFU_H
+#define SOFTWARE_CFU_H
+
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
 
-#include "hps_cfu.h"
-#include "software_cfu.h"
+#include "gateware_constants.h"
 
-namespace {
+namespace soft_cfu {
 
 // Multiply-accumulate unit
-int32_t macc_input_offset;
-int8_t macc_input[16];
-int8_t macc_filter[16];
+extern int32_t macc_input_offset;
+extern int8_t macc_input[16];
+extern int8_t macc_filter[16];
 
-void Unpack32(int8_t* dest, uint32_t value) {
+inline void Unpack32(int8_t* dest, uint32_t value) {
   dest[0] = (value & 0x000000ff);
   dest[1] = (value & 0x0000ff00) >> 8;
   dest[2] = (value & 0x00ff0000) >> 16;
   dest[3] = (value & 0xff000000) >> 24;
 }
 
-void SetMaccInput(size_t n, uint32_t value) {
+inline void SetMaccInput(size_t n, uint32_t value) {
   Unpack32(macc_input + (4 * n), value);
 }
-void SetMaccFilter(size_t n, uint32_t value) {
+inline void SetMaccFilter(size_t n, uint32_t value) {
   Unpack32(macc_filter + (4 * n), value);
 }
 
 // Do the macc
-int32_t Macc() {
+inline int32_t Macc() {
   int32_t macc_out = 0;
-  // NOTE: obvious optimization is to unroll these loops
+  // NOTE: unrolling this resulted in slower execution
   for (size_t n = 0; n < 16; n++) {
     macc_out += (macc_input[n] + macc_input_offset) * macc_filter[n];
   }
@@ -64,7 +66,7 @@ class Storage {
   }
   void Store(uint32_t value) { data[index++] = value; }
   uint32_t Get(size_t n) {
-    if (index >= len) {
+    if (n == 0 && index >= len) {
       index = 0;
     }
     uint32_t result = data[index + n];
@@ -80,10 +82,13 @@ class Storage {
   size_t index;
 };
 
-Storage filter_storage;
-Storage input_storage;
+extern Storage filter_storage;
+extern Storage input_storage;
 
-uint32_t SetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
+// Verify register storage
+extern uint32_t reg_verify;
+
+inline uint32_t SetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
   switch (funct7) {
     case REG_RESET:
       filter_storage.Reset(0);
@@ -127,6 +132,9 @@ uint32_t SetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
     case REG_MACC_FILTER_3:
       SetMaccFilter(3, rs1);
       return 0;
+    case REG_VERIFY:
+      reg_verify = rs1;
+      return 0;
 
     default:
       printf("\nInvalid SetRegister number %d\n", funct7);
@@ -135,7 +143,7 @@ uint32_t SetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
   return 0;
 }
 
-uint32_t GetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
+inline uint32_t GetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
   switch (funct7) {
     case REG_FILTER_0:
       return filter_storage.Get(0);
@@ -155,31 +163,36 @@ uint32_t GetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
       return input_storage.Get(3);
     case REG_MACC_OUT:
       return Macc();
+    case REG_VERIFY:
+      return reg_verify + 1;
     default:
       printf("\nInvalid GetRegister number %d\n", funct7);
       return 0;
   }
 }
 
-uint32_t Ping(uint32_t rs1, uint32_t rs2) {
-  static uint32_t storage = 0;
-  uint32_t result = storage;
-  storage = rs1 + rs2;
+extern uint32_t ping_storage;
+
+inline uint32_t Ping(uint32_t rs1, uint32_t rs2) {
+  uint32_t result = ping_storage;
+  ping_storage = rs1 + rs2;
   return result;
 }
 
-};  // namespace
+};  // namespace soft_cfu
 
-extern "C" uint32_t software_cfu(int funct3, int funct7, uint32_t rs1,
-                                 uint32_t rs2) {
+inline uint32_t software_cfu(int funct3, int funct7, uint32_t rs1,
+                             uint32_t rs2) {
   switch (funct3) {
     case INS_SET:
-      return SetRegister(funct7, rs1, rs2);
+      return soft_cfu::SetRegister(funct7, rs1, rs2);
     case INS_GET:
-      return GetRegister(funct7, rs1, rs2);
+      return soft_cfu::GetRegister(funct7, rs1, rs2);
     case INS_PING:
-      return Ping(rs1, rs2);
+      return soft_cfu::Ping(rs1, rs2);
     default:
       return 0;
   }
 }
+
+#endif  // SOFTWARE_CFU_H

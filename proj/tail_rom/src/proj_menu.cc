@@ -14,24 +14,38 @@
  * limitations under the License.
  */
 
-#ifndef BASE_H
-#define BASE_H
-#include <stdint.h>
+#include <stdio.h>
 
-#ifdef __cplusplus
-extern "C" {
+#include "calc_once_data.h"
+#include "menu.h"
+#include "proj_menu.h"
+
+#ifdef TAIL_ROM_USE
+#include "pdti8_cache.h"
 #endif
 
-/** Initializes the runtime. */
-void init_runtime();
+namespace {
 
-// Read value from console
-// Uses strtol. Can accept values in hex or decimal. Also allows negative
-// values.
-uint32_t read_val(const char* prompt);
+void do_reset_cache() { calculate_once::SetCache(NULL); }
 
-#ifdef __cplusplus
+void do_set_pdti8() {
+#ifdef TAIL_ROM_USE
+  calculate_once::SetCache(GetCachePdti8());
+#else
+  puts("Not configured to use tail rom.");
+#endif
 }
-#endif
 
-#endif  // !BASE_H
+struct Menu MENU = {
+    "Project Menu",
+    "project",
+    {
+        MENU_ITEM('0', "reset cache", do_reset_cache),
+        MENU_ITEM('1', "Set cache for pdti8", do_set_pdti8),
+        MENU_END,
+    },
+};
+
+}  // anonymous namespace
+
+extern "C" void do_proj_menu() { menu_run(&MENU); }

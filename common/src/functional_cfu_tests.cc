@@ -23,9 +23,9 @@
 #include "menu.h"
 #include "riscv.h"
 
-static inline void nop() { __asm__ __volatile__("add zero, zero, zero"); }
+namespace {
 
-static void do_fixed_tests(void) {
+void do_fixed_tests(void) {
   puts("CFU TEST for op0, 1 and 2:");
   puts("arg0        arg1        op0         op1         op2");
   for (uint32_t i = 0; i < 0x50505; i += 0x8103) {
@@ -33,11 +33,11 @@ static void do_fixed_tests(void) {
     uint32_t v0 = cfu_op0(0, i, j);
     uint32_t v1 = cfu_op1(0, i, j);
     uint32_t v2 = cfu_op2(0, i, j);
-    printf("0x%08x, 0x%08x: 0x%08x, 0x%08x, 0x%08x\n", i, j, v0, v1, v2);
+    printf("0x%08lx, 0x%08lx: 0x%08lx, 0x%08lx, 0x%08lx\n", i, j, v0, v1, v2);
   }
 }
 
-static void do_compare_tests(void) {
+void do_compare_tests(void) {
   puts("CFU COMPARE TEST for op0, 1, and 2:");
   int count = 0;
   for (uint32_t i = 0; i < 0xff000000u; i += 0x710005u) {
@@ -53,7 +53,8 @@ static void do_compare_tests(void) {
             "arg0        arg1            fn0               fn1              "
             "fn2");
         printf(
-            "0x%08x, 0x%08x: 0x%08x:0x%08x, 0x%08x:0x%08x, 0x%08x:0x%08x <<=== "
+            "0x%08lx, 0x%08lx: 0x%08lx:0x%08lx, 0x%08lx:0x%08lx, "
+            "0x%08lx:0x%08lx <<=== "
             "MISMATCH!\n",
             i, j, hw0, sw0, hw1, sw1, hw2, sw2);
       }
@@ -64,12 +65,13 @@ static void do_compare_tests(void) {
   printf("Ran %d comparisons.\n", count);
 }
 
-static void print_result(int op, uint32_t v0, uint32_t v1, uint32_t r) {
-  printf("cfu_op%1d(%08x, %08x) = %08x (hex), %d (signed), %u (unsigned)\n", op,
-         v0, v1, r, r, r);
+void print_result(int op, uint32_t v0, uint32_t v1, uint32_t r) {
+  printf(
+      "cfu_op%1d(%08lx, %08lx) = %08lx (hex), %ld (signed), %lu (unsigned)\n",
+      op, v0, v1, r, r, r);
 }
 
-static void do_interactive_tests(void) {
+void do_interactive_tests(void) {
   puts("CFU Interactive Test:");
 
   uint32_t v0 = read_val("  First operand value  ");
@@ -84,7 +86,7 @@ static void do_interactive_tests(void) {
   print_result(7, v0, v1, cfu_op7(0, v0, v1));
 }
 
-static struct Menu MENU = {
+struct Menu MENU = {
     "Tests for Functional CFUs",
     "functional",
     {
@@ -95,4 +97,6 @@ static struct Menu MENU = {
     },
 };
 
-void do_functional_cfu_tests() { menu_run(&MENU); }
+};  // anonymous namespace
+
+extern "C" void do_functional_cfu_tests() { menu_run(&MENU); }

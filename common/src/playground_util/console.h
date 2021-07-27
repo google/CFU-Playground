@@ -14,5 +14,16 @@
  * limitations under the License.
  */
 
-// Empty file to override common/src/proj_menu.c
-// See proj_menu_cc.cc in this directory
+// This include file contans declarations of functions defined in libbase's
+// console.c. console.c is linked with C++ code, but the LiteX console.h file is
+// not accessible to C++.
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+char readchar(void);
+
+#ifdef __cplusplus
+}
+#endif

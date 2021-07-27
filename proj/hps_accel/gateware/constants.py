@@ -29,6 +29,9 @@ class Constants:
     # Register IDs
     # For convenience, readable and writable register IDs are allocated from a
     # shared pool of values 0-127.
+    #
+    # Generally registers are only writable or readable. Exceptions are noted
+    # in the register description.
 
     # A write of any value to REG_RESET causes the accelerator gateware to be
     # reset and lose all state
@@ -76,11 +79,27 @@ class Constants:
     # Retrieve result from multiply-accumulate unit
     REG_MACC_OUT = 0x30
 
+    # Registers for gateware verification
+    # Any value n set into this register will be read back as n+1
+    REG_VERIFY = 0x70
+
+    # ID is guaranteed to not be a register ID
+    REG_INVALID = 0x7f
+
     ###########################################################################
     # Funct3 codes - used to route CFU to instructions
     INS_SET = 0
     INS_GET = 1
     INS_PING = 7
+
+
+CC_FILE_HEADER = """// Generated file
+// Shared constants generated from gateware/constants.py
+#ifndef _GATEWARE_CONSTANTS_H
+#define _GATEWARE_CONSTANTS_H
+"""
+
+CC_FILE_TAIL = """#endif"""
 
 
 def main():
@@ -93,12 +112,11 @@ def main():
     args = parser.parse_args()
 
     with args.output as f:
-        print("// Generated file", file=f)
-        print("// Shared constants generated from gateware/constants.py",
-              file=f)
+        print(CC_FILE_HEADER, file=f)
         for name, value in vars(Constants).items():
             if not name.startswith('_'):
                 print(f"#define {name} {value}", file=f)
+        print(CC_FILE_TAIL, file=f)
 
 
 if __name__ == "__main__":

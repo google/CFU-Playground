@@ -165,20 +165,16 @@ endif
 TARGET_REPL := $(BUILD_DIR)/renode/$(TARGET)_generated.repl
 
 .PHONY:	renode 
-renode: $(SOFTWARE_ELF) renode-scripts
+renode: renode-scripts
 	@echo Running interactively under renode
 	$(COPY) $(SOFTWARE_ELF) $(PROJ_DIR)/renode/
 	pushd $(PROJ_DIR)/build/renode/ && $(RENODE_DIR)/renode -e "s @$(TARGET).resc" && popd
 
 .PHONY: renode-scripts
-renode-scripts:
-ifneq ("$(wildcard $(SOC_BUILD_DIR)/csr.csv)","")
+renode-scripts: $(SOFTWARE_ELF)
 	@mkdir -p $(BUILD_DIR)/renode
 	$(CFU_ROOT)/scripts/generate_renode_scripts.py $(SOC_BUILD_DIR)/csr.csv $(TARGET) $(BUILD_DIR)/renode/ --repl $(TARGET_REPL)
 	@echo Generating Renode scripts finished
-else
-	@echo $(SOC_BUILD_DIR)/csr.csv not found
-endif
 
 .PHONY: clean
 clean:

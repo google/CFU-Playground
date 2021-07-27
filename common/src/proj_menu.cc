@@ -16,14 +16,22 @@
 
 #include "proj_menu.h"
 
+#include <stdio.h>
+
 #include "menu.h"
 
-static struct Menu MENU = {
+// Each project should make their own proj_menu.c, which will replace this one.
+namespace {
+void do_hello_world(void) { puts("Hello, World!\n"); }
+
+struct Menu MENU = {
     "Project Menu",
-    "kws_micro_accel",
+    "project",
     {
+        MENU_ITEM('h', "say Hello", do_hello_world),
         MENU_END,
     },
 };
+};  // namespace
 
-void do_proj_menu() { menu_run(&MENU); }
+extern "C" void do_proj_menu() { menu_run(&MENU); }
