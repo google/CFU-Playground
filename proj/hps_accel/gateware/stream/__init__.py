@@ -58,4 +58,5 @@ Major differences from LiteX Streams:
 
 """
 
-from .stream import BinaryCombinatorialActor, Sink, Source, flowcontrol_passthrough
+from .actor import BinaryCombinatorialActor
+from .stream import Sink, Source, flowcontrol_passthrough
