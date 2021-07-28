@@ -10,8 +10,15 @@ The CFU Playground is a collection of software, gateware and hardware configured
 make it easy to:
 
 * Run ML models
+
 * Benchmark and profile performance
+
 * Make incremental improvements
+
+  * In software by modifying source code
+
+  * In gateware with a Custom Function Unit (CFU)
+
 * Measure the results of changes
 
 ML acceleration on microcontroller-class hardware is a new area, and one that, due
