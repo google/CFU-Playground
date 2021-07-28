@@ -81,4 +81,4 @@ class GetInstructionTest(TestBase):
                     self.assertEqual((yield self.dut.output), output)
                     self.assertEqual((yield self.dut.read_strobes[VER]), strobe)
                     yield
-        self.run_sim(process, True)
+        self.run_sim(process, False)

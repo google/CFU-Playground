@@ -75,7 +75,7 @@ class _Endpoint:
             ("ready", Shape(), DIR_FANIN),
             ("last", Shape(), DIR_FANOUT),
             ("payload", payload_type, DIR_FANOUT),
-        ])
+        ], src_loc_at=3)
         self.valid = self._record.valid
         self.ready = self._record.ready
         self.last = self._record.last
@@ -188,10 +188,8 @@ class BinaryCombinatorialActor(SimpleElaboratable):
 
     def transform(self, m, input, output):
         """Transforms input to output.
-        
+
         input: self.input_type, in
         output: self.output_type, out
         """
         raise NotImplemented()
-
-

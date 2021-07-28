@@ -101,4 +101,4 @@ class SetInstructionTest(TestBase):
                     yield # one cycle to let verify value flow through
                     self.assertEqual((yield self.dut.values[VER]), expected)
                     yield
-        self.run_sim(process, True)
+        self.run_sim(process, False)
