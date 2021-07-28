@@ -43,6 +43,13 @@ OUT_DIR:=   build/$(SOC_NAME)
 UART_ARGS=  --uart-baudrate $(UART_SPEED)
 LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv $(OUT_DIR)/csr.csv $(CFU_ARGS) $(UART_ARGS) $(TARGET_ARGS)
 
+ifdef USE_OXIDE
+LITEX_ARGS += --toolchain oxide --yosys-abc9
+endif
+ifdef USE_YOSYS
+LITEX_ARGS += --synth-mode yosys
+endif
+
 ifdef USE_SYMBIFLOW
 LITEX_ARGS += --toolchain symbiflow
 else 

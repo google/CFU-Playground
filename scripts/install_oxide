@@ -22,7 +22,6 @@ fi
 
 if [ -z "$UPDATE" ] ; then
 
-  echo -n "Install Project Oxide open source toolchain? (ctrl-C to exit)" >&2
   echo
   echo "CLONING REPOSITORIES"
   cd ${CFU_ROOT}/third_party

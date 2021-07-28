@@ -29,11 +29,10 @@ for i in "${CFU_ROOT}/third_party/python"/* "${CFU_ROOT}/python/"* "${CFU_ROOT}/
 done
 export PYTHONPATH
 
-
-if [ -d "${CFU_ROOT}/third_party/usr/local/bin" ] ; then
-    if [ ! `echo ${PATH} | grep third_party/usr/local/bin` ] ; then
-        PATH="${CFU_ROOT}/third_party/usr/local/bin:${PATH}"
-        echo UPDATED PATH: ${PATH}
-        export PATH
+pathadd() {
+    if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
+        export PATH="${1}${PATH:+":$PATH"}"
+        echo "Updated PATH: ${PATH}"
     fi
-fi
+}
+pathadd "${CFU_ROOT}/third_party/usr/local/bin"
