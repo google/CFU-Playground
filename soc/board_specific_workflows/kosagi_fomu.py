@@ -92,7 +92,9 @@ class KosagiFomuSoCWorkflow(ice40up5k.Ice40UP5KWorkflow):
 
     def make_soc(self, **kwargs) -> litex_soc.LiteXSoC:
         """Makes the Fomu SoC without a LedChaser to save LCs."""
-        return super().make_soc(with_led_chaser=False, **kwargs)
+        return super().make_soc(with_led_chaser=False,
+                                spi_flash_module='W25Q128JV',
+                                **kwargs)
 
     def load(self,
              soc: litex_soc.LiteXSoC,
