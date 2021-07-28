@@ -17,6 +17,7 @@
 
 #include "tensorflow/lite/kernels/internal/reference/integer_ops/conv_accel.h"
 #include "blocks.h"
+#include "gateware_constants.h"
 
 using hps_accel::Vector16;
 using hps_accel::multiply_accumulate;
@@ -71,8 +72,8 @@ void ConvPerChannel4x4(
   const int output_width = output_shape.Dims(2);
 
   TFLITE_DCHECK_LE(
-      (size_t) input_depth * filter_height * filter_width * output_depth / 4,
-      hps_accel::MAX_FILTER_WORDS);
+      input_depth * filter_height * filter_width * output_depth / 4,
+      MAX_FILTER_WORDS);
   hps_accel::LoadFilter(input_depth, output_depth, filter_data);
 
   for (int batch = 0; batch < batches; ++batch) {
@@ -88,8 +89,8 @@ void ConvPerChannel4x4(
             Offset(input_shape, batch, in_y_origin, in_x_origin, 0);
 
         TFLITE_DCHECK_LE(
-            (size_t) input_depth * filter_height * filter_width / 4,
-            hps_accel::MAX_INPUT_WORDS);
+            input_depth * filter_height * filter_width / 4,
+            MAX_INPUT_WORDS);
         hps_accel::LoadInput(input_width, input_depth, current_input_data);
 
         for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
