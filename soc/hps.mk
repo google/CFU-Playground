@@ -51,12 +51,7 @@ endif
 
 #==== Specify complete open source toolchain: Yosys + NextPnR
 ifdef USE_OXIDE
-LITEX_ARGS += --toolchain oxide
-ifndef IGNORE_TIMING
-LITEX_ARGS += --nextpnr-timingstrict
-endif
-else ifdef USE_SYMBIFLOW
-LITEX_ARGS += --toolchain oxide
+LITEX_ARGS += --toolchain oxide --yosys-abc9
 ifndef IGNORE_TIMING
 LITEX_ARGS += --nextpnr-timingstrict
 endif
