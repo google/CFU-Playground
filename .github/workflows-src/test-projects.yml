@@ -47,6 +47,7 @@ jobs:
     strategy:
       matrix:
         target: [
+          1bitsquared_icebreaker,
           antmicro_lpddr4_test_board,
           camlink_4k,
           colorlight_i5,
