@@ -4,6 +4,11 @@
 // Font size    : 16x16 pixels
 // Memory usage : 3044 bytes
 
+// Statement from the source web page:
+//   Font license:
+//     All fonts on this page are considered Public Domain. This means that you
+//     are free to use them as you see fit in any project, commercial or not.
+
 #if defined(__AVR__)
 	#include <avr/pgmspace.h>
 	#define fontdatatype const uint8_t

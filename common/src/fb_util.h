@@ -27,29 +27,34 @@
 #include <generated/mem.h>
 
 struct font_basis {
-	uint8_t data[8];
+    uint8_t data[8];
 };
 
 struct dotfont_info {
-	uint8_t font_width;
-	uint8_t font_height;
-	uint8_t font_length;
-	uint8_t font_counts;
-	struct font_basis f_basis[256];
-	const uint8_t *font_data;
+    uint8_t font_width;
+    uint8_t font_height;
+    uint8_t font_length;
+    uint8_t font_counts;
+    struct font_basis f_basis[256];
+    const uint8_t *font_data;
 };
 
 void fb_init();
 void fb_clear();
 void fb_close();
 
-int32_t fb_fill_rect(uint32_t left, uint32_t top, uint32_t width, uint32_t height, uint32_t color);
-int32_t fb_draw_rect(uint32_t left, uint32_t top, uint32_t width, uint32_t height, uint32_t color);
-int32_t fb_draw_buffer(uint32_t left, uint32_t top, uint32_t width, uint32_t height, const uint8_t *src_buff, uint32_t color_channels);
-int32_t fb_draw_line(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32_t color, int32_t width);
-int32_t fb_draw_string(uint32_t x, uint32_t y, uint32_t color, const char *msg_str);
+int32_t fb_fill_rect(uint32_t left, uint32_t top, uint32_t width,
+                     uint32_t height, uint32_t color);
+int32_t fb_draw_rect(uint32_t left, uint32_t top, uint32_t width,
+                     uint32_t height, uint32_t color);
+int32_t fb_draw_buffer(uint32_t left, uint32_t top, uint32_t width,
+                       uint32_t height, const uint8_t * src_buff,
+                       uint32_t color_channels);
+int32_t fb_draw_line(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1,
+                     uint32_t color, int32_t width);
+int32_t fb_draw_string(uint32_t x, uint32_t y, uint32_t color,
+                       const char *msg_str);
 
 void framebuffer_menu(void);
 
-#endif  // FB_UTIL_H
-
+#endif                          // FB_UTIL_H
