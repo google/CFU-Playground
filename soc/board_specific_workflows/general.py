@@ -65,6 +65,8 @@ class GeneralSoCWorkflow():
             'with_ethernet': self.args.with_ethernet,
             'with_etherbone': self.args.with_etherbone,
             'with_mapped_flash': self.args.with_mapped_flash,
+            'with_spi_sdcard': self.args.with_spi_sdcard,
+            'with_video_framebuffer': self.args.with_video_framebuffer,
         }
         base_soc_kwargs.update(soc_core.soc_core_argdict(self.args))
         if self.args.toolchain:

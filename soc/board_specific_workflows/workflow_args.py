@@ -50,6 +50,12 @@ def parse_workflow_args(input: List[str] = None) -> argparse.Namespace:
     parser.add_argument('--with-mapped-flash',
                         action='store_true',
                         help='Add litespi SPI flash')
+    parser.add_argument("--with-spi-sdcard",
+                        action="store_true",
+                        help="Enable SPI-mode SDCard support")
+    parser.add_argument("--with-video-framebuffer", 
+                        action="store_true", 
+                        help="Enable Video Framebuffer (HDMI)")
     parser.add_argument('--target',
                         default='digilent_arty',
                         help='Specify target board')

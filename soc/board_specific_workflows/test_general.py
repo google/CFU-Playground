@@ -79,6 +79,10 @@ class GeneralSoCWorkflowTest(unittest.TestCase):
                          soc_kwargs['with_etherbone'])
         self.assertEqual(self.args.with_mapped_flash,
                          soc_kwargs['with_mapped_flash'])
+        self.assertEqual(self.args.with_spi_sdcard,
+                         soc_kwargs['with_spi_sdcard'])
+        self.assertEqual(self.args.with_video_framebuffer,
+                         soc_kwargs['with_video_framebuffer'])
 
         # Check the return value of soc_core_argdict is used.
         mock_soc_core_argdict.assert_called_once()
