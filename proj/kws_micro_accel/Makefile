@@ -25,6 +25,12 @@ DEFINES += NDEBUG
 # Uncomment this line to skip individual profiling output (has minor effect on performance).
 #DEFINES += NPROFILE
 
+# Uncomment to include specific optimizations
+#DEFINES += OPT_LINK_OPS_IN_SRAM
+
+# Uncomment this line to apply all optimizations
+DEFINES += ALL_OPTIMIZATIONS
+
 # Uncomment to include specified model in built binary
 #DEFINES += INCLUDE_MODEL_PDTI8
 #DEFINES += INCLUDE_MODEL_MICRO_SPEECH
