@@ -20,14 +20,14 @@ from nmigen.hdl.rec import Record, DIR_FANIN, DIR_FANOUT
 class _Endpoint:
     """Abstract base class for Sinks and Sources."""
 
-    def __init__(self, payload_type, name):
+    def __init__(self, payload_type, name, src_loc_at):
         self.payload_type = payload_type
         self._record = Record([
             ("valid", Shape(), DIR_FANOUT),
             ("ready", Shape(), DIR_FANIN),
             ("last", Shape(), DIR_FANOUT),
             ("payload", payload_type, DIR_FANOUT),
-        ], src_loc_at=3, name=name)
+        ], src_loc_at=2+src_loc_at, name=name)
         self.valid = self._record.valid
         self.ready = self._record.ready
         self.last = self._record.last
@@ -59,8 +59,8 @@ class Source(_Endpoint):
     payload: Signal(N) or Record, out
     """
 
-    def __init__(self, payload_type, name=None):
-        super().__init__(payload_type, name)
+    def __init__(self, payload_type, name=None, src_loc_at=0):
+        super().__init__(payload_type, name, src_loc_at)
 
     def connect(self, sink):
         """Returns a list of statements that connects this source to a sink.
@@ -93,8 +93,8 @@ class Sink(_Endpoint):
     payload: Signal(N) or Record, in
     """
 
-    def __init__(self, payload_type, name=None):
-        super().__init__(payload_type, name)
+    def __init__(self, payload_type, name=None, src_loc_at=0):
+        super().__init__(payload_type, name, src_loc_at)
 
 
 def glue_sources(source_in: Source, source_out: Source):

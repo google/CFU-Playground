@@ -56,22 +56,22 @@ class MemoryParameters:
         ])
 
     def make_write_sink(self):
-        return Sink(self.write_stream_payload_type())
+        return Sink(self.write_stream_payload_type(), src_loc_at=1)
 
     def make_write_source(self):
-        return Source(self.write_stream_payload_type())
+        return Source(self.write_stream_payload_type(), src_loc_at=1)
 
     def make_read_addr_sink(self):
-        return Sink(self.addr_shape())
+        return Sink(self.addr_shape(), src_loc_at=1)
 
     def make_read_addr_source(self):
-        return Source(self.addr_shape())
+        return Source(self.addr_shape(), src_loc_at=1)
 
     def make_read_data_sink(self):
-        return Sink(self.data_shape())
+        return Sink(self.data_shape(), src_loc_at=1)
 
     def make_read_data_source(self):
-        return Source(self.data_shape())
+        return Source(self.data_shape(), src_loc_at=1)
 
 
 class SinglePortMemory(SimpleElaboratable):
