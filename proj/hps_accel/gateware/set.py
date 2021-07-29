@@ -18,7 +18,7 @@ from nmigen_cfu import InstructionBase
 from util import SimpleElaboratable
 
 from .constants import Constants
-from .stream import Sink, Source, flowcontrol_passthrough
+from .stream import Sink, Source, glue_sources
 
 
 class ConfigurationRegister(SimpleElaboratable):
@@ -97,10 +97,7 @@ class SetInstruction(InstructionBase):
         registers = {i: ConfigurationRegister() for i in self.REGISTER_IDS}
         for i, register in registers.items():
             m.submodules[f"reg_{i:02x}"] = register
-            sink = Sink(register.source.payload_type)
-            m.d.comb += register.source.connect(sink)
-            m.d.comb += flowcontrol_passthrough(sink, self.sources[i])
-            m.d.comb += self.sources[i].payload.eq(sink.payload)
+            m.d.comb += glue_sources(register.source, self.sources[i])
             m.d.comb += self.values[i].eq(register.value)
 
         with m.If(self.start):

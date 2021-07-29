@@ -17,7 +17,7 @@ from nmigen.hdl.dsl import Module
 from nmigen_cfu import InstructionBase
 from util import SimpleElaboratable
 from .constants import Constants
-from .stream import Sink, Source, flowcontrol_passthrough
+from .stream import Sink, Source, glue_sinks
 
 
 class StatusRegister(SimpleElaboratable):
@@ -68,7 +68,8 @@ class GetInstruction(InstructionBase):
 
     def __init__(self):
         super().__init__()
-        self.sinks = {i: Sink(unsigned(32)) for i in self.REGISTER_IDS}
+        self.sinks = {i: Sink(unsigned(32), name=f"sink_{i:02x}")
+                      for i in self.REGISTER_IDS}
         self.read_strobes = {i: Signal() for i in self.REGISTER_IDS}
 
     def elab(self, m: Module):
@@ -76,10 +77,7 @@ class GetInstruction(InstructionBase):
         registers = {i: StatusRegister() for i in self.REGISTER_IDS}
         for i, register in registers.items():
             m.submodules[f"reg_{i:02x}"] = register
-            source = Source(register.sink.payload_type)
-            m.d.comb += source.connect(register.sink)
-            m.d.comb += flowcontrol_passthrough(self.sinks[i], source)
-            m.d.comb += source.payload.eq(self.sinks[i].payload)
+            m.d.comb += glue_sinks(self.sinks[i], register.sink)
 
         # By default, all strobes off, and not done
         m.d.sync += [s.eq(0) for s in self.read_strobes.values()]
