@@ -18,6 +18,7 @@ from util import all_words
 
 from .constants import Constants
 from .get import GetInstruction
+from .input_store import InputStore
 from .macc import MultiplyAccumulate
 from .set import SetInstruction
 from .stream import BinaryCombinatorialActor
@@ -88,6 +89,18 @@ class HpsCfu(Cfu):
             result_sink.payload.eq(macc.result),
         ]
 
+    def connect_input_store(self, m, set, get, input_store):
+        m.d.comb += [
+            set.sources[Constants.REG_INPUT_NUM_WORDS].connect(
+                input_store.num_words),
+            set.sources[Constants.REG_SET_INPUT].connect(input_store.input),
+            input_store.output[0].connect(get.sinks[Constants.REG_INPUT_0]),
+            input_store.output[1].connect(get.sinks[Constants.REG_INPUT_1]),
+            input_store.output[2].connect(get.sinks[Constants.REG_INPUT_2]),
+            input_store.output[3].connect(get.sinks[Constants.REG_INPUT_3]),
+            input_store.next.eq(get.read_strobes[Constants.REG_INPUT_3]),
+        ]
+
     def elab_instructions(self, m):
         m.submodules['set'] = set = SetInstruction()
         m.submodules['get'] = get = GetInstruction()
@@ -97,6 +110,9 @@ class HpsCfu(Cfu):
         m.submodules['macc'] = macc = MultiplyAccumulate(16)
         m.d.comb += macc.enable.eq(1)
         self.connect_macc(m, set, macc, get)
+
+        m.submodules['input_store'] = input_store = InputStore()
+        self.connect_input_store(m, set, get, input_store)
 
         m.submodules['ping'] = ping = PingInstruction()
         return {
