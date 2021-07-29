@@ -40,7 +40,7 @@ class Constants:
     # Number of 32 bit filter words
     REG_FILTER_NUM_WORDS = 1
 
-    # Number of 32 bit input words
+    # Number of 32 bit input words - must be divisible by 4
     REG_INPUT_NUM_WORDS = 2
 
     # Input offset for multiply-accumulate unit
