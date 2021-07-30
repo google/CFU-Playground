@@ -20,19 +20,19 @@
 
 unsigned CFU_start_counts[NUM_PERF_COUNTERS];
 
-void perf_print_human(unsigned n) {
+void perf_print_human(uint64_t n) {
   if (n > 9999999) {
-    printf("%6uM", (n + 500000) / 1000000);
+    printf("%6lluM", (n + 500000) / 1000000);
   } else if (n > 9999) {
-    printf("%6uk", (n + 500) / 1000);
+    printf("%6lluk", (n + 500) / 1000);
   } else {
-    printf("%6u ", n);
+    printf("%6llu ", n);
   }
 }
 
-void perf_print_value(unsigned n) {
+void perf_print_value(uint64_t n) {
   perf_print_human(n);
-  printf(" (%12u)", n);
+  printf(" (%12llu)", n);
 }
 
 // Set each individual perf counter to zero
