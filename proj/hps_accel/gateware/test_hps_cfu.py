@@ -93,9 +93,16 @@ class HpsCfuTest(CfuTestBase):
                                            [randint(-128, 127) for _ in range(16)])
         self.run_ops(op_generator())
 
+    def test_simple_input_store(self):
+        """Tests simple input use case"""
+        def op_generator():
+            yield ((SET, Constants.REG_INPUT_NUM_WORDS, 20, 0), 0)
+            for n in range(100, 120):
+                yield ((SET, Constants.REG_SET_INPUT, n, 0), 0)
+            for n in range(100, 120, 4):
+                yield ((GET, Constants.REG_INPUT_0, 0, 0), n+0)
+                yield ((GET, Constants.REG_INPUT_1, 0, 0), n+1)
+                yield ((GET, Constants.REG_INPUT_2, 0, 0), n+2)
+                yield ((GET, Constants.REG_INPUT_3, 0, 0), n+3)
 
-class InputStoreTest(CfuTestBase):
-    """Tests Input Store functionality"""
-
-    def create_dut(self):
-        return make_cfu()
+        self.run_ops(op_generator(), True)

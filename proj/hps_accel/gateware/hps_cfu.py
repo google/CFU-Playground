@@ -90,6 +90,7 @@ class HpsCfu(Cfu):
         ]
 
     def connect_input_store(self, m, set, get, input_store):
+        next = get.read_strobes[Constants.REG_INPUT_3]
         m.d.comb += [
             set.sources[Constants.REG_INPUT_NUM_WORDS].connect(
                 input_store.num_words),
@@ -98,7 +99,11 @@ class HpsCfu(Cfu):
             input_store.output[1].connect(get.sinks[Constants.REG_INPUT_1]),
             input_store.output[2].connect(get.sinks[Constants.REG_INPUT_2]),
             input_store.output[3].connect(get.sinks[Constants.REG_INPUT_3]),
-            input_store.next.eq(get.read_strobes[Constants.REG_INPUT_3]),
+            input_store.next.eq(next),
+            get.invalidates[Constants.REG_INPUT_0].eq(next),
+            get.invalidates[Constants.REG_INPUT_1].eq(next),
+            get.invalidates[Constants.REG_INPUT_2].eq(next),
+            get.invalidates[Constants.REG_INPUT_3].eq(next),
         ]
 
     def elab_instructions(self, m):
