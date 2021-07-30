@@ -41,6 +41,7 @@ class Constants:
     REG_FILTER_NUM_WORDS = 1
 
     # Number of 32 bit input words - must be divisible by 4
+    # Setting this register resets the input store state.
     REG_INPUT_NUM_WORDS = 2
 
     # Input offset for multiply-accumulate unit
@@ -49,7 +50,7 @@ class Constants:
     # Set next filter word
     REG_SET_FILTER = 4
 
-    # Set next input word
+    # Sets next input word and advances the write index.
     REG_SET_INPUT = 5
 
     # These registers contain values 0-3 of the current filter word
@@ -59,6 +60,7 @@ class Constants:
     REG_FILTER_3 = 0x13
 
     # These registers contain values 0-3 of the current input word
+    # Reading REG_INPUT_3 will advance the input store.
     REG_INPUT_0 = 0x18
     REG_INPUT_1 = 0x19
     REG_INPUT_2 = 0x1a
