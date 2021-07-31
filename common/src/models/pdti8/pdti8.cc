@@ -92,7 +92,6 @@ static void do_classify_person() {
 static int32_t golden_results[NUM_GOLDEN] = {-144, 50, 226};
 
 static void do_golden_tests() {
-  char msg_buff[256] = { 0 };
   int32_t actual[NUM_GOLDEN];
 
   tflite_set_input_zeros();
@@ -102,6 +101,8 @@ static void do_golden_tests() {
   actual[1] = pdti8_classify();
 
 #ifdef CSR_VIDEO_FRAMEBUFFER_BASE
+  char msg_buff[256] = { 0 };
+
   fb_clear();
   fb_draw_string(0,  10, 0x007FFF00, "Classify Not Person");
   fb_draw_buffer(0,  50, 96, 96, (const uint8_t *)g_no_person_data, 1);

@@ -120,7 +120,11 @@ static void do_classify_special() {
 
 static void do_golden_tests() {
   bool failed = false;
+
+#ifdef CSR_VIDEO_FRAMEBUFFER_BASE
   char msg_buff[256] = { 0 };
+#endif  
+
   for (size_t i = 0; i < NUM_GOLDEN; i++) {
     tflite_set_input_unsigned(golden_tests[i].data);
     int actual = mnv2_classify();
