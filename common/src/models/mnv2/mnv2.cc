@@ -28,6 +28,10 @@
 #include "models/mnv2/model_mobilenetv2_160_035.h"
 #include "tflite.h"
 
+extern "C" {
+#include "fb_util.h"
+};
+
 #define NUM_GOLDEN 5
 struct golden_test {
   const unsigned char* data;
@@ -64,22 +68,59 @@ static void do_classify_0() {
   tflite_set_input_unsigned(golden_tests[0].data);
   int32_t result = mnv2_classify();
   printf("Result is %ld\n", result);
+
+#ifdef CSR_VIDEO_FRAMEBUFFER_BASE
+  char msg_buff[256] = { 0 };
+
+  snprintf(msg_buff, sizeof(msg_buff), "Result is %ld", result);
+  fb_clear();
+  fb_draw_string(0,  10, 0x007FFF00, "Run test 0");
+  fb_draw_buffer(0,  50, 160, 160, (const uint8_t *)golden_tests[0].data, 3);
+  fb_draw_string(0, 220, 0x007FFF00, (const char *)msg_buff);
+  flush_cpu_dcache();
+  flush_l2_cache();
+#endif
 }
 
 static void do_classify_1() {
   tflite_set_input_unsigned(golden_tests[1].data);
   int32_t result = mnv2_classify();
   printf("Result is %ld\n", result);
+
+#ifdef CSR_VIDEO_FRAMEBUFFER_BASE
+  char msg_buff[256] = { 0 };
+
+  snprintf(msg_buff, sizeof(msg_buff), "Result is %ld", result);
+  fb_clear();
+  fb_draw_string(0,  10, 0x007FFF00, "Run test 1");
+  fb_draw_buffer(0,  50, 160, 160, (const uint8_t *)golden_tests[1].data, 3);
+  fb_draw_string(0, 220, 0x007FFF00, (const char *)msg_buff);
+  flush_cpu_dcache();
+  flush_l2_cache();
+#endif
 }
 
 static void do_classify_special() {
   tflite_set_input_unsigned(input_00001_18027);
   int32_t result = mnv2_classify();
   printf("Result is %ld\n", result);
+
+#ifdef CSR_VIDEO_FRAMEBUFFER_BASE
+  char msg_buff[256] = { 0 };
+
+  snprintf(msg_buff, sizeof(msg_buff), "Result is %ld", result);
+  fb_clear();
+  fb_draw_string(0, 10, 0x007FFF00, "Run special test");
+  fb_draw_buffer(0, 50, 160, 160, (const uint8_t *)input_00001_18027, 3);
+  fb_draw_string(0, 220, 0x007FFF00, (const char *)msg_buff);
+  flush_cpu_dcache();
+  flush_l2_cache();
+#endif
 }
 
 static void do_golden_tests() {
   bool failed = false;
+  char msg_buff[256] = { 0 };
   for (size_t i = 0; i < NUM_GOLDEN; i++) {
     tflite_set_input_unsigned(golden_tests[i].data);
     int actual = mnv2_classify();
@@ -89,6 +130,21 @@ static void do_golden_tests() {
       printf("*** Golden test %d failed: %d (actual) != %d (expected))\n", i,
              actual, expected);
     }
+
+#ifdef CSR_VIDEO_FRAMEBUFFER_BASE
+    fb_clear();
+    memset(msg_buff, 0x00, sizeof(msg_buff));
+    snprintf(msg_buff, sizeof(msg_buff), "Run golden tests %d", i);
+    fb_draw_string(0, 10, 0x007FFF00, (const char *)msg_buff);
+
+    fb_draw_buffer(0, 50, 160, 160, (const uint8_t *)golden_tests[i].data, 3);
+
+    memset(msg_buff, 0x00, sizeof(msg_buff));
+    snprintf(msg_buff, sizeof(msg_buff), "Result is %d, Expected is %d", actual, expected);
+    fb_draw_string(0, 220, 0x007FFF00, (const char *)msg_buff);
+    flush_cpu_dcache();
+    flush_l2_cache();
+#endif  
   }
 
   if (failed) {
@@ -114,5 +170,12 @@ static struct Menu MENU = {
 // For integration into menu system
 void mnv2_menu() {
   mnv2_init();
+
+#ifdef CSR_VIDEO_FRAMEBUFFER_BASE
+  fb_init();
+  flush_cpu_dcache();
+  flush_l2_cache();
+#endif
+
   menu_run(&MENU);
 }
