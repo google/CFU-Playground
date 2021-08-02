@@ -23,9 +23,16 @@
 #include "tensorflow/lite/micro/examples/person_detection_experimental/no_person_image_data.h"
 #include "tensorflow/lite/micro/examples/person_detection_experimental/person_image_data.h"
 #include "tflite.h"
+#include "tflite.h"
+#include <generated/csr.h>
 
-const char shades[16] = {' ', '.', ',', '-', '+', '/', 'x', 'L',
-                         'r', 'n', 'm', '0', 'O', 'M', '#', '@'};
+#define ADJUST_128 1
+
+//const char shades[16] = {' ', '.', ',', '-', '+', '/', 'x', 'L',
+//                         'r', 'n', 'm', '0', 'O', 'M', '#', '@'};
+const char shades[16] = {' ', '\'', ',', '-', '"', '/', 'x', 'r',
+                          'L', 'n', 'm', '0', 'O', 'M', '@', 255};
+
 
 // Initialize everything once
 // deallocate tensors when done
@@ -42,28 +49,37 @@ int8_t get_pixel(size_t x, size_t y)
 // Load image from frame buffer and show
 void show_hires() {
   printf("start\n");
-  int min=0;
-  int max=0;
+  int min=255;
+  int max=-255;
   for (size_t in_y = 0; in_y < 96; in_y+=2) {
     for (size_t in_x = 0; in_x < 96; in_x++) {
       int val = get_pixel(in_x, in_y);
+#ifdef ADJUST_128
+      if (val == -128) val = 127;
+#endif
       if (val<min) min = val;
       if (val>max) max = val;
     }
   }
   int stepsize = (max-min) / 16;
 
-  for (size_t in_y = 0; in_y < 96; in_y+=2) {
-    char line[100];
-    line[96] = 0;
+  for (size_t in_y = 0; in_y < 96; in_y++) {
+    char line[200];
+    line[192] = 0;
     for (size_t in_x = 0; in_x < 96; in_x++) {
       int val = get_pixel(in_x, in_y);
+#ifdef ADJUST_128
+      if (val == -128) val = 127;
+#endif
       int s = ((val - min) / stepsize);
       if (s<0) s=0;
       if (s>15) s=15;
-      line[in_x] = shades[s];
+      line[2*in_x] = shades[s];
+      line[2*in_x+1] = shades[s];
     }
+    //printf("%8d ", get_pixel(0, in_y));
     puts(line);
+    busy_wait(10);
   }
   printf("end\n");
 }
