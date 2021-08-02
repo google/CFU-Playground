@@ -24,9 +24,6 @@
 #include "tensorflow/lite/micro/examples/person_detection/person_image_data.h"
 #include "tflite.h"
 #include "tflite.h"
-#include <generated/csr.h>
-
-#define ADJUST_128 1
 
 //const char shades[16] = {' ', '.', ',', '-', '+', '/', 'x', 'L',
 //                         'r', 'n', 'm', '0', 'O', 'M', '#', '@'};
@@ -37,6 +34,14 @@ extern "C" {
 #include "fb_util.h"
 };
 
+
+// Busy wait a short while.
+inline static void pause()
+{
+  for (size_t i = 0; i < 100000; i++) {
+    asm volatile("nop");
+  }
+}
 
 // Initialize everything once
 // deallocate tensors when done
@@ -60,9 +65,6 @@ void show_hires() {
   for (size_t in_y = 0; in_y < 96; in_y+=2) {
     for (size_t in_x = 0; in_x < 96; in_x++) {
       int val = get_pixel(in_x, in_y);
-#ifdef ADJUST_128
-      if (val == -128) val = 127;
-#endif
       if (val<min) min = val;
       if (val>max) max = val;
     }
@@ -74,9 +76,6 @@ void show_hires() {
     line[192] = 0;
     for (size_t in_x = 0; in_x < 96; in_x++) {
       int val = get_pixel(in_x, in_y);
-#ifdef ADJUST_128
-      if (val == -128) val = 127;
-#endif
       int s = ((val - min) / stepsize);
       if (s<0) s=0;
       if (s>15) s=15;
@@ -85,7 +84,7 @@ void show_hires() {
     }
     //printf("%8d ", get_pixel(0, in_y));
     puts(line);
-    busy_wait(10);
+    pause();
   }
   printf("end\n");
 }

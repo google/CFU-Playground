@@ -27,10 +27,12 @@ for i in range(len(lines)):
     lin = lines[i]
     lin = lin.replace('\r','')
     lin = lin.replace('\n','')
-    m = re.match(r".*PROFILER\", \"(.*)\", (\d+)", lin)
+    #m = re.match(r".*PROFILER\", \"(.*)\", (\d+)", lin)
+    m = re.match(r"(\d+),(.*),(\d+)", lin)
     if m:
-        tfop = m.group(1)
-        cyc = m.group(2)
+        layer = m.group(1)
+        tfop = m.group(2)
+        cyc = m.group(3)
         print(n, ",", tfop, ",", cyc)
         n = n+1
         if tfop not in totals:
@@ -41,7 +43,7 @@ keys = sorted(totals, key=totals.get)
 
 print("\nTotals\n")
 for k in list(keys):
-    print("%30s  %12d   (%3.1fM)" % (k, totals[k], totals[k]/1e6))
+    print("%30s  %12d   (%3.1fM)" % (k, totals[k], totals[k]/1e3))
 
 
 print("\n\n")
