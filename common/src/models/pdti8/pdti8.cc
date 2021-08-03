@@ -24,6 +24,10 @@
 #include "tensorflow/lite/micro/examples/person_detection/person_image_data.h"
 #include "tflite.h"
 
+extern "C" {
+#include "fb_util.h"
+};
+
 // Initialize everything once
 // deallocate tensors when done
 static void pdti8_init(void) {
@@ -51,6 +55,18 @@ static void do_classify_no_person() {
   tflite_set_input(g_no_person_data);
   int32_t result = pdti8_classify();
   printf("  result is %ld\n", result);
+  
+#ifdef CSR_VIDEO_FRAMEBUFFER_BASE
+  char msg_buff[256] = { 0 };
+
+  snprintf(msg_buff, sizeof(msg_buff), "Result is %ld", result);
+  fb_clear();
+  fb_draw_string(0,  10, 0x007FFF00, "Classify Not Person");
+  fb_draw_buffer(0,  50, 96, 96, (const uint8_t *)g_no_person_data, 1);
+  fb_draw_string(0, 220, 0x007FFF00, (const char *)msg_buff);
+  flush_cpu_dcache();
+  flush_l2_cache();
+#endif  
 }
 
 static void do_classify_person() {
@@ -58,6 +74,18 @@ static void do_classify_person() {
   tflite_set_input(g_person_data);
   int32_t result = pdti8_classify();
   printf("  result is %ld\n", result);
+
+#ifdef CSR_VIDEO_FRAMEBUFFER_BASE
+  char msg_buff[256] = { 0 };
+
+  snprintf(msg_buff, sizeof(msg_buff), "Result is %ld", result);
+  fb_clear();
+  fb_draw_string(0,  10, 0x007FFF00, "Classify Person");
+  fb_draw_buffer(0,  50, 96, 96, (const uint8_t *)g_person_data, 1);
+  fb_draw_string(0, 220, 0x007FFF00, (const char *)msg_buff);
+  flush_cpu_dcache();
+  flush_l2_cache();
+#endif  
 }
 
 #define NUM_GOLDEN 3
@@ -65,12 +93,39 @@ static int32_t golden_results[NUM_GOLDEN] = {-144, 50, 226};
 
 static void do_golden_tests() {
   int32_t actual[NUM_GOLDEN];
+
   tflite_set_input_zeros();
   actual[0] = pdti8_classify();
+
   tflite_set_input(g_no_person_data);
   actual[1] = pdti8_classify();
+
+#ifdef CSR_VIDEO_FRAMEBUFFER_BASE
+  char msg_buff[256] = { 0 };
+
+  fb_clear();
+  fb_draw_string(0,  10, 0x007FFF00, "Classify Not Person");
+  fb_draw_buffer(0,  50, 96, 96, (const uint8_t *)g_no_person_data, 1);
+  memset(msg_buff, 0x00, sizeof(msg_buff));
+  snprintf(msg_buff, sizeof(msg_buff), "Result is %ld, Expected is %ld", actual[1], golden_results[1]);
+  fb_draw_string(0, 220, 0x007FFF00, (const char *)msg_buff);
+  flush_cpu_dcache();
+  flush_l2_cache();
+#endif 
+  
   tflite_set_input(g_person_data);
   actual[2] = pdti8_classify();
+
+#ifdef CSR_VIDEO_FRAMEBUFFER_BASE
+  fb_clear();
+  fb_draw_string(0,  10, 0x007FFF00, "Classify Person");
+  fb_draw_buffer(0,  50, 96, 96, (const uint8_t *)g_person_data, 1);
+  memset(msg_buff, 0x00, sizeof(msg_buff));
+  snprintf(msg_buff, sizeof(msg_buff), "Result is %ld, Expected is %ld", actual[2], golden_results[2]);
+  fb_draw_string(0, 220, 0x007FFF00, (const char *)msg_buff);
+  flush_cpu_dcache();
+  flush_l2_cache();
+#endif 
 
   bool failed = false;
   for (size_t i = 0; i < NUM_GOLDEN; i++) {
@@ -104,5 +159,12 @@ static struct Menu MENU = {
 // For integration into menu system
 void pdti8_menu() {
   pdti8_init();
+
+#ifdef CSR_VIDEO_FRAMEBUFFER_BASE
+  fb_init();
+  flush_cpu_dcache();
+  flush_l2_cache();
+#endif
+  
   menu_run(&MENU);
 }

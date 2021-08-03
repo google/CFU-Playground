@@ -22,6 +22,7 @@
 #include <generated/csr.h>
 #include <generated/soc.h>
 #include <generated/mem.h>
+#include <system.h>
 
 #include "menu.h"
 #include "perf.h"
@@ -71,7 +72,6 @@ static void dotfont_init()
 
     dotfont_initilized = 1;
 }
-
 
 void fb_init()
 {
@@ -439,12 +439,16 @@ void fb_fill(void)
 {
     fb_fill_rect(0, 0, 320, 240, 0x00FF0000);
     fb_fill_rect(320, 240, 320, 240, 0x00FF0000);
+    flush_cpu_dcache();
+    flush_l2_cache();
 }
 
 void fb_draw(void)
 {
     fb_draw_rect(0, 0, 320, 240, 0x00FFFF00);
     fb_draw_rect(320, 240, 320, 240, 0x00FF0000);
+    flush_cpu_dcache();
+    flush_l2_cache();
 }
 
 void fb_line(void)
@@ -454,6 +458,8 @@ void fb_line(void)
     fb_draw_line(0, 100, 100, 100, 0x0000FFFF, 1);
     fb_draw_line(0, 0, 320, 240, 0x000FFFFF, 1);
     fb_draw_line(0, 240, 320, 0, 0x00FFFFFF, 1);
+    flush_cpu_dcache();
+    flush_l2_cache();
 }
 
 void fb_msg(void)
@@ -466,6 +472,8 @@ void fb_msg(void)
     if (x == 0)
         fb_clear();
     color += 0x1234;
+    flush_cpu_dcache();
+    flush_l2_cache();
 }
 
 /*

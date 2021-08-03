@@ -27,6 +27,7 @@ BUILD_DIR      := $(abspath .)
 LIBBASE_DIR    := $(SOC_SOFTWARE_DIR)/libbase
 LITEX_DIR      := $(CFU_ROOT)/third_party/python/litex/litex
 VEX_SRC_DIR    := $(LITEX_DIR)/soc/cores/cpu/vexriscv
+LITEX_HW_DIR   := $(LITEX_DIR)/soc/software/include
 PYRUN          := $(CFU_ROOT)/scripts/pyrun
 FIX_CFU_DIS    := $(PYRUN) $(CFU_ROOT)/scripts/fix_cfu_dis.py
 XXD            := $(PYRUN) $(CFU_ROOT)/scripts/xxd.py
@@ -53,6 +54,8 @@ SHARED_FLAGS := \
 	-I$(SRC_DIR)/third_party/ruy \
 	-I$(SRC_DIR)/third_party/kissfft \
 	-I$(SOC_SOFTWARE_DIR)/include \
+    -I$(LITEX_HW_DIR) \
+    -I$(VEX_SRC_DIR) \
 	-ffunction-sections \
 	-fdata-sections \
 	-fno-common \
@@ -75,12 +78,11 @@ SHARED_FLAGS := \
 	-g \
 	-O3 \
 	-fno-builtin 
-	
+
 CFLAGS  := \
 	$(SHARED_FLAGS)\
 	-I$(LITEX_DIR)/soc/software/include/base \
-	-I$(LITEX_DIR)/soc/software/include \
-	-I$(VEX_SRC_DIR) 
+	-I$(LITEX_DIR)/soc/software/include
 
 CXXFLAGS   := \
 	$(SHARED_FLAGS) \
