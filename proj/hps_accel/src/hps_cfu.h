@@ -23,10 +23,6 @@
 #define cfu_set(reg, val) cfu_op(INS_SET, reg, val, 0)
 #define cfu_get(reg) cfu_op(INS_GET, reg, 0, 0)
 
-// Get/set, but force software CFU
-#define cfu_set_sw(reg, val) cfu_op_sw(INS_SET, reg, val, 0)
-#define cfu_get_sw(reg) cfu_op_sw(INS_GET, reg, 0, 0)
-
 // Ping instructions for checking CFU is available
 #define cfu_ping(val1, val2) cfu_op(INS_PING, 0, val1, val2)
 
