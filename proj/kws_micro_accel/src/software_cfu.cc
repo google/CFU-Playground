@@ -16,6 +16,18 @@
 
 #include "software_cfu.h"
 
+// Emulates [SIMD] MAC CFU in software.
 uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
-  return 0;  // Nothing implemented.
+  static int32_t acc = 0;
+  if (funct7 & 0x1) {
+    acc = 0;
+  } else {
+    int8_t end_idx = funct3 & 0x1 ? 1 : 4;
+
+    for (int i = 0; i < end_idx; i++) {
+      acc += ((int8_t)((rs1 >> i * 8) & 0xFF) + 128) *
+             (int8_t)((rs2 >> i * 8) & 0xFF);
+    }
+  }
+  return (uint32_t)acc;
 }
