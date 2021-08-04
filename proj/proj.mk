@@ -96,7 +96,7 @@ BITSTREAM    := $(SOC_GATEWARE_DIR)/$(PLATFORM).bit
 
 PROJ_DIR        := $(realpath .)
 CFU_GEN         := $(PROJ_DIR)/cfu_gen.py
-CFU_VERILOG     := $(PROJ_DIR)/cfu.v
+CFU_VERILOG     := $(if $(wildcard $(PROJ_DIR)/cfu.sv), $(PROJ_DIR)/cfu.sv, $(PROJ_DIR)/cfu.v)
 BUILD_DIR       := $(PROJ_DIR)/build
 PYRUN           := $(CFU_ROOT)/scripts/pyrun
 
