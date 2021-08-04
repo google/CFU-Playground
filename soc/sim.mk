@@ -33,7 +33,7 @@ ifndef SOFTWARE_BIN
 endif
 
 PROJ_DIR:=  $(CFU_ROOT)/proj/$(PROJ)
-CFU_V:=     $(PROJ_DIR)/cfu.v
+CFU_V:=     $(if $(wildcard $(PROJ_DIR)/cfu.sv), $(PROJ_DIR)/cfu.sv, $(PROJ_DIR)/cfu.v)
 CFU_ARGS:=  --cpu-cfu $(CFU_V)
 
 SOC_NAME:=  sim.$(PROJ)
