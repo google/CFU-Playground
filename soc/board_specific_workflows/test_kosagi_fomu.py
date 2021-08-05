@@ -64,9 +64,10 @@ class KosagiFomuSoCWorkflowWorkflowTest(unittest.TestCase):
         self.simple_init().make_soc()
 
         call_kwargs = self.soc_constructor.call_args.kwargs
-        self.assertFalse(call_kwargs['with_led_chaser'])
+        self.assertNotEqual(call_kwargs['integrated_rom_init'], [])
         self.assertEqual(call_kwargs['spi_flash_module'], 'W25Q128JV')
-        pass
+        self.assertFalse(call_kwargs['with_led_chaser'])
+        self.assertFalse(call_kwargs['with_timer'])
 
     def test_software_load(self):
         workflow = self.simple_init()
