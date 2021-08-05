@@ -13,18 +13,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
 import general
 from litex.soc.integration import soc as litex_soc
 from litex.soc.integration import builder
 from litex.build.xilinx import vivado
+from typing import Callable
 
 
 class DigilentArtySoCWorkflow(general.GeneralSoCWorkflow):
     """Specializes the general workflow for the Digilent Arty."""
+    def __init__(
+        self,
+        args: argparse.Namespace,
+        soc_constructor: Callable[..., litex_soc.LiteXSoC],
+        builder_constructor: Callable[..., builder.Builder] = None,
+    ) -> None:
+        """Initializes the Arty workflow with an extra --variant argument.
+        
+        Args:
+            args: An argparse Namespace that holds SoC and build options.
+            soc_constructor: The constructor for the LiteXSoC.
+            builder_constructor: The constructor for the LiteX Builder. If
+              omitted, litex.soc.integration.builder.Builder will be used.
+        """
+        parser = argparse.ArgumentParser(description='Digilent Arty args.')
+        parser.add_argument('--variant',
+                            default='a7-35',
+                            help='Arty variant: a7-35 (default) or a7-100')
+        arty_args = parser.parse_known_args()[0]
+        args = argparse.Namespace(**vars(arty_args), **vars(args))
+        super().__init__(args, soc_constructor, builder_constructor)
+
     def make_soc(self, **kwargs) -> litex_soc.LiteXSoC:
-        """Runs the general make_soc with a l2_size parameter,"""
-        """   and jtagbone disabled.                          """
-        return super().make_soc(l2_size=8 * 1024, with_jtagbone = False, **kwargs)
+        """Runs make_soc with a l2_size parameter and jtagbone disabled."""
+        return super().make_soc(l2_size=8 * 1024,
+                                variant=self.args.variant,
+                                with_jtagbone=False,
+                                **kwargs)
 
     def build_soc(self, soc: litex_soc.LiteXSoC, **kwargs) -> builder.Builder:
         """Specializes build_soc to add Vivado args if needed."""
