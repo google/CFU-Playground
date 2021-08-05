@@ -18,6 +18,7 @@
 #define CFU_PLAYGROUND_PERF_H_
 
 #include "generated/soc.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,6 +42,30 @@ inline unsigned perf_get_mcycle() {
   unsigned result;
   asm volatile("csrr %0, mcycle" : "=r"(result));
   return result;
+}
+
+// Reads both halves of the cycle counter.
+//
+// The value of the counter is stored across two 32-bit registers: `mcycle` and
+// `mcycleh`. This function is guaranteed to return a valid 64-bit cycle
+// counter value, even if `mcycle` overflows before reading `mcycleh`.
+//
+// Adapted from: The RISC-V Instruction Set Manual, Volume I: Unprivileged ISA
+// V20191213, pp. 61.
+static inline uint64_t perf_get_mcycle64() {
+  uint32_t cycle_low = 0;
+  uint32_t cycle_high = 0;
+  uint32_t cycle_high_2 = 0;
+  asm volatile(
+      "read%=:"
+      "  csrr %0, mcycleh;"     // Read `mcycleh`.
+      "  csrr %1, mcycle;"      // Read `mcycle`.
+      "  csrr %2, mcycleh;"     // Read `mcycleh` again.
+      "  bne  %0, %2, read%=;"  // Try again if `mcycle` overflowed before
+                                // reading `mcycleh`.
+      : "+r"(cycle_high), "=r"(cycle_low), "+r"(cycle_high_2)
+      :);
+  return (uint64_t) cycle_high << 32 | cycle_low;
 }
 
 inline void perf_set_mcycle(unsigned cyc) {
@@ -199,11 +224,11 @@ inline void perf_disable_counter(int counter_num) {
 }
 
 // Print a human readable number (useful for perf counters)
-void perf_print_human(unsigned n);
+void perf_print_human(uint64_t n);
 
 // Print a value in both human readable and precise forms (also useful for perf
 // counters)
-void perf_print_value(unsigned n);
+void perf_print_value(uint64_t n);
 
 // Set each individual perf counter to zero
 void perf_reset_all_counters();
