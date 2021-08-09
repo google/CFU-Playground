@@ -25,7 +25,6 @@ from litex.soc.integration.builder import Builder, builder_args, builder_argdict
 from litex.soc.integration.soc import LiteXSoC, SoCRegion
 from litex.soc.cores.led import LedChaser
 from litex.soc.cores.spi_flash import SpiFlash
-from litex.soc.cores.bitbang import I2CMaster
 
 from litex.build.lattice.radiant import radiant_build_args, radiant_build_argdict
 from litex.build.lattice.oxide import oxide_args, oxide_argdict
@@ -133,12 +132,6 @@ class HpsSoC(LiteXSoC):
         self.add_timer(name="timer0")
         self.timer0.add_uptime()
 
-
-        # i2c1
-        self.submodules.i2c = self.create_i2c_controller(
-            self.platform.request("i2c", 1))
-        self.csr.add("i2c")
-
     def setup_ram(self, size):
         region = SoCRegion(self.sram_origin, size, cached=True, linker=True)
         self.submodules.lram = self.platform.create_ram(32, size)
@@ -179,9 +172,6 @@ class HpsSoC(LiteXSoC):
 
     def add_serial(self):
         self.add_uart("serial", baudrate=UART_SPEED)
-
-    def create_i2c_controller(self, pads):
-        return I2CMaster(pads)
 
     # This method is defined on SoCCore and the builder assumes it exists.
     def initialize_rom(self, data):
