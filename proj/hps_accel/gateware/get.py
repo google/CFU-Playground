@@ -13,9 +13,10 @@
 # limitations under the License.
 
 from nmigen import unsigned, Signal
+from nmigen.hdl.ast import Mux
 from nmigen.hdl.dsl import Module
 from nmigen_cfu import InstructionBase
-from util import SimpleElaboratable
+from util import SimpleElaboratable, ValueBuffer
 from .constants import Constants
 from .stream import Sink, Source, glue_sinks
 
@@ -23,7 +24,14 @@ from .stream import Sink, Source, glue_sinks
 class StatusRegister(SimpleElaboratable):
     """A register set by gateware.
 
-    Allows gateware to provide data to a CPU
+    Allows gateware to provide data to a CPU.
+
+    Parameters
+    ----------
+
+    valid_at_reset: bool
+      Whether payload is valid at reset or register ought to wait
+      to transfer a value from its sink.
 
     Attributes
     ----------
@@ -32,20 +40,32 @@ class StatusRegister(SimpleElaboratable):
       A sink for new values. "ready" is always asserted because the
       register is always ready to receive new data.
 
-    value: unsigned(32), out
+    invalidate: Signal(), in
+      Causes valid to be deassserted.
+
+    value: Signal(32), out
       The value held by the register. Received from sink.payload.
+
+    valid: Signal(), out
+      Deasserted when clear is asserted. Asserted when new value
+      received at sink.
 
     """
 
-    def __init__(self):
+    def __init__(self, valid_at_reset=True):
         super().__init__()
         self.sink = Sink(unsigned(32))
+        self.invalidate = Signal()
+        self.valid = Signal(reset=valid_at_reset)
         self.value = Signal(32)
 
     def elab(self, m):
         m.d.comb += self.sink.ready.eq(1)
+        with m.If(self.invalidate):
+            m.d.sync += self.valid.eq(0)
         with m.If(self.sink.is_transferring()):
             m.d.sync += self.value.eq(self.sink.payload)
+            m.d.sync += self.valid.eq(1)
 
 
 class GetInstruction(InstructionBase):
@@ -64,30 +84,67 @@ class GetInstruction(InstructionBase):
     """
 
     # The list of all register IDs that may be fetched
-    REGISTER_IDS = [Constants.REG_MACC_OUT, Constants.REG_VERIFY]
+    REGISTER_IDS = [
+        Constants.REG_INPUT_0,
+        Constants.REG_INPUT_1,
+        Constants.REG_INPUT_2,
+        Constants.REG_INPUT_3,
+        Constants.REG_MACC_OUT,
+        Constants.REG_VERIFY,
+    ]
+
+    VALID_AT_RESET = {
+        Constants.REG_MACC_OUT,
+        Constants.REG_VERIFY,
+    }
 
     def __init__(self):
         super().__init__()
-        self.sinks = {i: Sink(unsigned(32), name=f"sink_{i:02x}")
-                      for i in self.REGISTER_IDS}
-        self.read_strobes = {i: Signal() for i in self.REGISTER_IDS}
+        self.sinks = {}
+        self.invalidates = {}
+        self.read_strobes = {}
+        for i in self.REGISTER_IDS:
+            self.sinks[i] = Sink(unsigned(32), name=f"sink_{i:02x}")
+            self.invalidates[i] = Signal(name=f"clear_{i:02x}")
+            self.read_strobes[i] = Signal(name=f"read_strobe_{i:02x}")
+
+    def read_reg(self, m, registers, register_num,
+                 continue_state, finish_state):
+        with m.Switch(register_num):
+            for i in self.REGISTER_IDS:
+                with m.Case(i):
+                    with m.If(registers[i].valid):
+                        # Get value and finish only if register value is valid
+                        m.d.sync += self.output.eq(registers[i].value)
+                        m.d.sync += self.read_strobes[i].eq(1)
+                        m.d.sync += self.done.eq(1)
+                        m.next = finish_state
+                    with m.Else():
+                        m.next = continue_state
+            with m.Default():
+                m.d.sync += self.output.eq(0)
+                m.d.sync += self.done.eq(1)
+                m.next = finish_state
 
     def elab(self, m: Module):
         # Make registers and plumb sinks and read_strobes through
-        registers = {i: StatusRegister() for i in self.REGISTER_IDS}
+        registers = {i: StatusRegister(i in self.VALID_AT_RESET)
+                     for i in self.REGISTER_IDS}
         for i, register in registers.items():
             m.submodules[f"reg_{i:02x}"] = register
             m.d.comb += glue_sinks(self.sinks[i], register.sink)
+            m.d.comb += register.invalidate.eq(self.invalidates[i])
+            m.d.sync += self.read_strobes[i].eq(0)  # strobes off by default
 
-        # By default, all strobes off, and not done
-        m.d.sync += [s.eq(0) for s in self.read_strobes.values()]
-        m.d.sync += self.done.eq(0)
-        with m.If(self.start):
-            m.d.sync += self.done.eq(1)
-            with m.Switch(self.funct7):
-                for i, register in registers.items():
-                    with m.Case(i):
-                        m.d.sync += self.output.eq(registers[i].value)
-                        m.d.sync += self.read_strobes[i].eq(1)
-                with m.Default():
-                    m.d.sync += self.output.eq(0)
+        # Handle CFU start
+        f7_buf = Signal(7)
+        with m.FSM():
+            with m.State("WAIT_START"):
+                with m.If(self.start):
+                    m.d.sync += f7_buf.eq(self.funct7)
+                    self.read_reg(m, registers, self.funct7, "GETTING", "DONE")
+            with m.State("GETTING"):
+                self.read_reg(m, registers, f7_buf, "GETTING", "DONE")
+            with m.State("DONE"):
+                m.d.sync += self.done.eq(0)
+                m.next = "WAIT_START"

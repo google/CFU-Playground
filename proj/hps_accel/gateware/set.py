@@ -77,7 +77,9 @@ class SetInstruction(InstructionBase):
 
     # The list of all register IDs that may be set
     REGISTER_IDS = [
+        Constants.REG_INPUT_NUM_WORDS,
         Constants.REG_INPUT_OFFSET,
+        Constants.REG_SET_INPUT,
         Constants.REG_MACC_INPUT_0,
         Constants.REG_MACC_INPUT_1,
         Constants.REG_MACC_INPUT_2,

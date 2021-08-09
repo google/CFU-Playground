@@ -36,12 +36,12 @@ inline uint32_t pack32(int8_t a, int8_t b, int8_t c, int8_t d) {
 // Load input when in_channels = 1
 void LoadInput1(size_t width, const int8_t* values) {
   size_t input_words = 4;
-  cfu_set_sw(REG_INPUT_NUM_WORDS, input_words);
+  cfu_set(REG_INPUT_NUM_WORDS, input_words);
 
   // For each of four consecutive rows, take data from four consecutive pixels
   for (size_t row_index = 0; row_index < 4; row_index++) {
     const int8_t* source = values + (row_index * width);
-    cfu_set_sw(REG_SET_INPUT, pack32(source[0], source[1], source[2], source[3]));
+    cfu_set(REG_SET_INPUT, pack32(source[0], source[1], source[2], source[3]));
   }
 }
 
@@ -53,14 +53,14 @@ void LoadInputN(size_t width, size_t in_channels, const int8_t* values) {
   const size_t bytes_per_width = width * in_channels;
   size_t input_words =
       FILTER_WIDTH * FILTER_HEIGHT * in_channels / BYTES_PER_WORD;
-  cfu_set_sw(REG_INPUT_NUM_WORDS, input_words);
+  cfu_set(REG_INPUT_NUM_WORDS, input_words);
 
   // For each of four consecutive rows, take data from four consecutive pixels
   for (size_t row_index = 0; row_index < 4; row_index++) {
     const uint32_t* source = reinterpret_cast<const uint32_t*>(
         values + (row_index * bytes_per_width));
     for (size_t i = 0; i < words_per_input_row; i++) {
-      cfu_set_sw(REG_SET_INPUT, *source++);
+      cfu_set(REG_SET_INPUT, *source++);
     }
   }
 }
@@ -125,10 +125,10 @@ void LoadInput(size_t width, size_t in_channels, const int8_t* values) {
 }
 
 Vector16 GetInput() {
-  uint32_t word0 = cfu_get_sw(REG_INPUT_0);
-  uint32_t word1 = cfu_get_sw(REG_INPUT_1);
-  uint32_t word2 = cfu_get_sw(REG_INPUT_2);
-  uint32_t word3 = cfu_get_sw(REG_INPUT_3);
+  uint32_t word0 = cfu_get(REG_INPUT_0);
+  uint32_t word1 = cfu_get(REG_INPUT_1);
+  uint32_t word2 = cfu_get(REG_INPUT_2);
+  uint32_t word3 = cfu_get(REG_INPUT_3);
   return Vector16{{word0, word1, word2, word3}};
 }
 
