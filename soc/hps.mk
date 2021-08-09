@@ -40,7 +40,7 @@ SOC_NAME:=  hps.$(PROJ)
 OUT_DIR:=   build/$(SOC_NAME)
 # UART_ARGS=  --uart-baudrate $(UART_SPEED)
 # LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv $(OUT_DIR)/csr.csv $(CFU_ARGS) $(UART_ARGS)
-LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv $(OUT_DIR)/csr.csv $(CFU_ARGS)
+LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv $(OUT_DIR)/csr.csv $(CFU_ARGS) $(EXTRA_LITEX_ARGS)
 
 #==== Specify a different synth tool; still uses Radiant PnR
 ifdef USE_YOSYS
