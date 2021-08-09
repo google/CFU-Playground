@@ -66,7 +66,7 @@ class HpsSoC(LiteXSoC):
 
     cpu_type = "vexriscv"
 
-    def __init__(self, platform, debug, litespi_flash=False, variant=None,
+    def __init__(self, platform, debug, litespi_flash=True, variant=None,
                  cpu_cfu=None, execute_from_lram=False,
                  integrated_rom_init=[]):
         LiteXSoC.__init__(self,
@@ -225,7 +225,9 @@ def main():
                         help="Which toolchain to use, radiant (default) or oxide")
     parser.add_argument("--synth_mode", default="radiant",
                         help="Which synthesis to use, radiant/synplify (default), lse, or yosys")
-    parser.add_argument("--litespi-flash", action="store_true", help="Use litespi flash")
+    parser.add_argument("--no-litespi-flash", dest="litespi_flash",
+                        action="store_false", default=True,
+                        help="Use Litex minimal SPI flash instead of Litespi")
     parser.add_argument("--cpu-cfu", default=None, help="Specify file containing CFU Verilog module")
     parser.add_argument("--execute-from-lram", action="store_true",
                         help="Make the CPU execute from integrated ROM stored in LRAM instead of flash")

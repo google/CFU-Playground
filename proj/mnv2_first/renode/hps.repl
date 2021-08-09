@@ -25,11 +25,11 @@ cpu: CPU.VexRiscv @ sysbus
 ctrl: Miscellaneous.LiteX_SoC_Controller @ { sysbus 0xf0000000 }
 
 
-uart: UART.LiteX_UART @ { sysbus 0xf0002000 }
+uart: UART.LiteX_UART @ { sysbus 0xf0002800 }
     -> cpu@0
 
 
-timer0: Timers.LiteX_Timer @ { sysbus 0xf0001800 }
+timer0: Timers.LiteX_Timer @ { sysbus 0xf0002000 }
     -> cpu@1
     frequency: 56250000
 
@@ -42,7 +42,7 @@ sram: Memory.MappedMemory @ { sysbus 0x40000000 }
 //    size: 0x01000000
 
 
-spi: SPI.LiteX_SPI_Flash @ { sysbus 0xf0001000 }
+spi: SPI.LiteX_SPI_Flash @ { sysbus 0xf0001800 }
 
 
 //mt25q: SPI.Micron_MT25Q @ spi
