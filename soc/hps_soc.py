@@ -221,10 +221,11 @@ def main():
                         help="Use slimmer VexRiscv (required for mnv2_first)")
     parser.add_argument("--build", action="store_true",
                         help="Whether to do a full build, including the bitstream")
-    parser.add_argument("--toolchain", default="radiant",
-                        help="Which toolchain to use, radiant (default) or oxide")
+    parser.add_argument("--toolchain", default="oxide",
+                        help="Which toolchain to use: oxide (default) or radiant")
     parser.add_argument("--synth_mode", default="radiant",
-                        help="Which synthesis to use, radiant/synplify (default), lse, or yosys")
+                        help="Which synthesis mode to use with Radiant toolchain: "
+                        "radiant/synplify (default), lse, or yosys")
     parser.add_argument("--no-litespi-flash", dest="litespi_flash",
                         action="store_false", default=True,
                         help="Use Litex minimal SPI flash instead of Litespi")
