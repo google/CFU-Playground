@@ -17,7 +17,7 @@
 # Disable pylint's E1101, which breaks completely on migen
 # pylint:disable=E1101
 
-from hps_platform import Platform
+from hps_proto0_platform import Platform
 from litex.soc.cores.clock import S7PLL
 from litex.soc.integration.common import get_mem_data
 from litex.soc.integration.soc import SoCRegion

@@ -65,7 +65,7 @@ PYRUN:=     $(CFU_ROOT)/scripts/pyrun
 HPS_RUN:=   MAKEFLAGS=-j8 $(PYRUN) ./hps_soc.py $(LITEX_ARGS)
 
 BIOS_BIN := $(OUT_DIR)/software/bios/bios.bin
-BITSTREAM:= $(OUT_DIR)/gateware/hps_platform.bit
+BITSTREAM:= $(OUT_DIR)/gateware/hps_proto0_platform.bit
 
 .PHONY: bitstream litex-software prog clean
 
