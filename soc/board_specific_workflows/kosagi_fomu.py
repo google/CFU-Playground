@@ -91,10 +91,11 @@ class KosagiFomuSoCWorkflow(ice40up5k.Ice40UP5KWorkflow):
         self.bios_flash_offset = 0x60000
 
     def make_soc(self, **kwargs) -> litex_soc.LiteXSoC:
-        """Makes the Fomu SoC without a LedChaser or timer to save LCs."""
+        """Makes the Fomu SoC without many LiteX peripherals to save LCs."""
         # integrated_rom_init required to avoid compiler errors building bios.
         return super().make_soc(integrated_rom_init=[None],
                                 spi_flash_module='W25Q128JV',
+                                with_ctrl=False,
                                 with_led_chaser=False,
                                 with_timer=False,
                                 **kwargs)
