@@ -16,18 +16,38 @@
 
 #include "software_cfu.h"
 
-// Emulates [SIMD] MAC CFU in software.
+#include "fixedpoint/fixedpoint.h"
+
 uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
   static int32_t acc = 0;
-  if (funct7 & 0x1) {
-    acc = 0;
-  } else {
-    int8_t end_idx = funct3 & 0x1 ? 1 : 4;
 
-    for (int i = 0; i < end_idx; i++) {
-      acc += ((int8_t)((rs1 >> i * 8) & 0xFF) + 128) *
-             (int8_t)((rs2 >> i * 8) & 0xFF);
+  switch (funct3) {
+    case 0x1: {  // Optionally SIMD MAC.
+      int8_t end_idx = funct7 & 0x1 ? 4 : 1;
+      int32_t input_offset = funct7 & 0x2 ? -83 : 128;
+      for (int i = 0; i < end_idx; i++) {
+        acc += (static_cast<int8_t>((rs1 >> i * 8) & 0xff) + input_offset) *
+               static_cast<int8_t>((rs2 >> i * 8) & 0xff);
+      }
+      break;
+    }
+    case 0x2: {  // Half of gemmlowp::SaturatingRoundingDoublingHighMul.
+      int64_t acc_64 = static_cast<int64_t>(rs1) << 32 | rs2;
+      int32_t nudge = acc_64 >= 0 ? (1 << 30) : (1 - (1 << 30));
+      acc = static_cast<int32_t>((acc_64 + nudge) / (1ll << 31));
+      break;
+    }
+    case 0x4: {  // Rounding, clamping divide by power of two.
+      acc = gemmlowp::RoundingDivideByPOT(acc, -static_cast<int>(rs2));
+      acc -= 128;
+      acc = (acc > 127) ? 127 : (acc < -128) ? -128 : acc;
+      break;
+    }
+    default: {  // Reset.
+      acc = 0;
+      break;
     }
   }
-  return (uint32_t)acc;
+
+  return static_cast<uint32_t>(acc);
 }
