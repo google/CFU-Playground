@@ -35,23 +35,19 @@ Step 2: Install Vivado and Renode
 Step 3: Install RISCV toolchain
 -------------------------------
 
-1. Download the `April 2020`_ toolchain from freedom-tools and unpack the binaries to a directory:
+1. Download the `April 2020`_ toolchain from freedom-tools and unpack the binaries to your home directory:
 
 .. _`April 2020`: https://github.com/sifive/freedom-tools/releases/tag/v2020.04.0-Toolchain.Only
 
 .. code-block:: bash
 
-   $ mkdir ~/bin
-   $ cd ~/bin
    $ tar xvfz ~/Downloads/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14.tar.gz
 
-
-2. Add the RISCV_DIR environment variable to your ``.bashrc`` script:
+2. Add the toolchain to your `PATH` in your ``.bashrc`` script:
 
 .. code-block:: bash
 
-   RISCV_DIR=/home/<your name>/bin/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14/bin
-
+   export PATH=$PATH:$HOME/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14/bin
 
 
 Step 4: Clone the CFU-Playground Repository
@@ -69,26 +65,27 @@ Step 5: Setup python virtual environment + setup
 
 Python virtualenv ensures that you have the correct python and modules needed by this code.
 
-If you don't have ``virtualenv``, install it; for example, on a Debian-based Linux such as Ubuntu, use:
+If you don't have the python ``venv`` module, install it; for example, on a Debian-based Linux such as Ubuntu, use:
 
 .. code-block:: bash
 
-   $ apt install python3-virtualenv
+   $ apt install python3-venv
 
 
 Once you have virtualenv, do the following:
 
 .. code-block:: bash
 
-   $ virtualenv CFU-Playground
+  
    $ cd CFU-Playground
-   $ source bin/activate   # start python3 virtualenv
+   $ python3 -m venv env
+   $ source env/bin/activate  # activate the python virtualenv
    $ # Check that you have the correct gcc in path
-   $ (CFU-Playground) sauron:~/fpga/CFU-Playground$ type riscv64-unknown-elf-gcc
+   $ (env) CFU-Playground $ type riscv64-unknown-elf-gcc
    riscv64-unknown-elf-gcc is hashed (/home/merlin/fpga/riscv64-unknown-elf-gcc/bin/riscv64-unknown-elf-gcc)
-   $ (CFU-Playground) sauron:~/fpga/CFU-Playground$ riscv64-unknown-elf-gcc --version |he
+   $ (env) CFU-Playground $ riscv64-unknown-elf-gcc --version
    riscv64-unknown-elf-gcc (SiFive GCC 8.3.0-2020.04.1) 8.3.0
-   $ scripts/setup         # install prerequisites
+   $ (env) CFU-Playground $ scripts/setup  # install prerequisites
    
 Step 6: Test Run
 ----------------
