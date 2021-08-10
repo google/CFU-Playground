@@ -66,6 +66,7 @@ class KosagiFomuSoCWorkflowWorkflowTest(unittest.TestCase):
         call_kwargs = self.soc_constructor.call_args.kwargs
         self.assertNotEqual(call_kwargs['integrated_rom_init'], [])
         self.assertEqual(call_kwargs['spi_flash_module'], 'W25Q128JV')
+        self.assertFalse(call_kwargs['with_ctrl'])
         self.assertFalse(call_kwargs['with_led_chaser'])
         self.assertFalse(call_kwargs['with_timer'])
 
