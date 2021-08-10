@@ -34,6 +34,8 @@ from litespi.opcodes import SpiNorFlashOpCodes as Codes
 from litespi.phy.generic import LiteSPIPHY
 from litespi import LiteSPI
 
+from migen import Module, Instance
+
 from patch import Patch
 # from cam_control import CameraControl
 
@@ -49,19 +51,59 @@ RAM_SIZE = 320 * KB
 SOC_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
+def patch_oxide():
+    """Patches the LatticeOxideToolchain class.
+
+       This is a workaround while waiting for
+       https://github.com/enjoy-digital/litex/pull/987 to land.
+    """
+    # NX SDR Input and Output via regular flip-flops -------------------------
+    # This is a workaround for IO-specific primitives IFD1P3BX / OFD1P3BX being unsupported in nextpnr:
+    # https://github.com/YosysHQ/nextpnr/issues/698
+
+    class LatticeNXSDRFFImpl(Module):
+        def __init__(self, i, o, clk):
+            self.specials += Instance("FD1P3BX",
+                                      i_CK=clk,
+                                      i_PD=0,
+                                      i_SP=1,
+                                      i_D=i,
+                                      o_Q=o,
+                                      )
+
+    class LatticeNXSDRInputViaFlipFlop:
+        @staticmethod
+        def lower(dr):
+            return LatticeNXSDRFFImpl(dr.i, dr.o, dr.clk)
+
+    class LatticeNXSDROutputViaFlipFlop:
+        @staticmethod
+        def lower(dr):
+            return LatticeNXSDRFFImpl(dr.i, dr.o, dr.clk)
+
+    from litex.build.lattice.oxide import LatticeOxideToolchain
+    from litex.build.io import SDRInput, SDROutput
+    LatticeOxideToolchain.special_overrides = dict(
+        LatticeOxideToolchain.special_overrides)
+    LatticeOxideToolchain.special_overrides.update({
+        SDRInput: LatticeNXSDRInputViaFlipFlop,
+        SDROutput: LatticeNXSDROutputViaFlipFlop,
+    })
+
+
 class HpsSoC(LiteXSoC):
     # Memory layout
     csr_origin = 0xf0000000
-    spiflash_region = SoCRegion(0x20000000, 16*MB, cached=True)
+    spiflash_region = SoCRegion(0x20000000, 16 * MB, cached=True)
     # The start of the SPI Flash contains the FPGA gateware. Our ROM is after
     # that.
-    rom_offset = 2*MB
+    rom_offset = 2 * MB
     sram_origin = 0x40000000
     vexriscv_region = SoCRegion(origin=0xf00f0000, size=0x100)
 
     mem_map = {
         "sram": sram_origin,
-        "csr":  csr_origin,
+        "csr": csr_origin,
     }
 
     cpu_type = "vexriscv"
@@ -73,7 +115,7 @@ class HpsSoC(LiteXSoC):
                           platform=platform,
                           sys_clk_freq=platform.sys_clk_freq,
                           csr_data_width=(32 if litespi_flash else 8))
-        if variant == None:
+        if variant is None:
             variant = "full+debug" if debug else "full"
 
         # Clock, Controller, CPU
@@ -91,7 +133,7 @@ class HpsSoC(LiteXSoC):
         # RAM
         if execute_from_lram:
             # Leave one LRAM free for ROM
-            ram_size = RAM_SIZE - 64*KB
+            ram_size = RAM_SIZE - 64 * KB
         else:
             ram_size = RAM_SIZE
         self.setup_ram(size=ram_size)
@@ -117,7 +159,6 @@ class HpsSoC(LiteXSoC):
             pads=platform.request_all("user_led"),
             sys_clk_freq=platform.sys_clk_freq)
         self.csr.add("leds")
-
 
         # UART
         self.add_serial()
@@ -152,15 +193,20 @@ class HpsSoC(LiteXSoC):
                                             endianness="little", div=4)
         self.bus.add_slave("spiflash", self.spiflash.bus, self.spiflash_region)
         self.csr.add("spiflash")
-        
+
     def setup_litespi_flash(self):
-        self.submodules.spiflash_phy  = LiteSPIPHY(self.platform.request("spiflash"), GD25LQ128D(Codes.READ_1_1_1), default_divisor=1)
-        self.submodules.spiflash_mmap  = LiteSPI(phy=self.spiflash_phy,
-            clk_freq        = self.platform.sys_clk_freq,
-            mmap_endianness = self.cpu.endianness)
+        self.submodules.spiflash_phy = LiteSPIPHY(
+            self.platform.request("spiflash"), GD25LQ128D(
+                Codes.READ_1_1_1), default_divisor=1)
+        self.submodules.spiflash_mmap = LiteSPI(phy=self.spiflash_phy,
+                                                clk_freq=self.platform.sys_clk_freq,
+                                                mmap_endianness=self.cpu.endianness)
         self.csr.add("spiflash_mmap")
         self.csr.add("spiflash_phy")
-        self.bus.add_slave(name="spiflash", slave=self.spiflash_mmap.bus, region=self.spiflash_region)
+        self.bus.add_slave(
+            name="spiflash",
+            slave=self.spiflash_mmap.bus,
+            region=self.spiflash_region)
 
     def setup_rom_in_flash(self):
         region = SoCRegion(self.spiflash_region.origin + self.rom_offset,
@@ -199,6 +245,7 @@ def hps_soc_args(parser: argparse.ArgumentParser):
     radiant_build_args(parser)
     oxide_args(parser)
 
+
 def create_builder(soc, args):
     builder = Builder(soc, **builder_argdict(args))
     # builder.output_dir = args.output_dir
@@ -229,7 +276,10 @@ def main():
     parser.add_argument("--no-litespi-flash", dest="litespi_flash",
                         action="store_false", default=True,
                         help="Use Litex minimal SPI flash instead of Litespi")
-    parser.add_argument("--cpu-cfu", default=None, help="Specify file containing CFU Verilog module")
+    parser.add_argument(
+        "--cpu-cfu",
+        default=None,
+        help="Specify file containing CFU Verilog module")
     parser.add_argument("--execute-from-lram", action="store_true",
                         help="Make the CPU execute from integrated ROM stored in LRAM instead of flash")
     parser.add_argument("--integrated-rom-init", metavar="FILE",
@@ -256,7 +306,8 @@ def main():
             #  -- this is a hack needed because litex/.../vexriscv/core.py doesn't know about the Slim versions.
             vexriscv = "../third_party/python/pythondata_cpu_vexriscv/pythondata_cpu_vexriscv"
             var = "SlimCfuDebug" if args.debug else "SlimCfu"
-            soc.cpu.use_external_variant(f"{vexriscv}/verilog/VexRiscv_{var}.v")
+            soc.cpu.use_external_variant(
+                f"{vexriscv}/verilog/VexRiscv_{var}.v")
     else:
         variant = "full+debug" if args.debug else "full"
         soc = HpsSoC(Platform(args.toolchain),
@@ -271,6 +322,7 @@ def main():
     if args.toolchain == "radiant":
         builder_kwargs.update(radiant_build_argdict(args))
     elif args.toolchain == "oxide":
+        patch_oxide()
         builder_kwargs.update(oxide_argdict(args))
     vns = builder.build(**builder_kwargs, run=args.build)
     soc.do_exit(vns)
