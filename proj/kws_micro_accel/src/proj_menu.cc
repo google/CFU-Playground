@@ -21,6 +21,7 @@
 #include <cstdio>
 
 #include "cfu.h"
+#include "kws_cfu.h"
 #include "menu.h"
 
 namespace {
@@ -38,21 +39,25 @@ constexpr uint32_t pack_vals(int8_t w, int8_t x, int8_t y, int8_t z) {
   return (w << 24) | (x << 16) | (y << 8) | z;
 }
 
-KwsCfuTestCase reset() { return {0, 1, 0, 0, 0}; }
+KwsCfuTestCase reset() { return {0, 0, 0, 0, 0}; }
 
 KwsCfuTestCase mac_case(uint32_t rs1, uint32_t rs2, uint32_t expected) {
   return {1, 0, rs1, rs2, expected};
 }
 
-KwsCfuTestCase simd_mac_case(uint32_t rs1, uint32_t rs2, uint32_t expected) {
-  return {0, 0, rs1, rs2, expected};
+KwsCfuTestCase mac_layer_1_case(uint32_t rs1, uint32_t rs2, uint32_t expected) {
+  return {1, 2, rs1, rs2, expected};
 }
 
-// Tests hardware and software CFU against a set of test cases.
-static void do_cfu_tests() {
+KwsCfuTestCase simd_mac_case(uint32_t rs1, uint32_t rs2, uint32_t expected) {
+  return {1, 1, rs1, rs2, expected};
+}
+
+// Tests hardware and software [SIMD] MAC against a set of test cases.
+static void do_mac_tests() {
   bool all_passed = true;
 
-  /* Test cases for the CFU. */
+  /* Test cases for the [SIMD] MAC. */
   static KwsCfuTestCase cases[] = {
       reset(),
 
@@ -64,6 +69,9 @@ static void do_cfu_tests() {
 
       // Test MAC multiplication and addition of input offset.
       mac_case(1, 1, 129),
+
+      // Test MAC for layer one uses different input offset.
+      mac_layer_1_case(1, 1, 47),
 
       reset(),
 
@@ -93,8 +101,10 @@ static void do_cfu_tests() {
 
     // Silly if statement required because cfu_op_hw is inline asm.
     uint32_t hw;
-    if (t.funct7) {
-      hw = cfu_op_hw(0, 1, t.rs1, t.rs2);
+    if (t.funct7 == 0x1) {
+      hw = cfu_op_hw(1, 1, t.rs1, t.rs2);
+    } else if (t.funct7 == 0x2) {
+      hw = cfu_op_hw(1, 2, t.rs1, t.rs2);
     } else if (t.funct3) {
       hw = cfu_op_hw(1, 0, t.rs1, t.rs2);
     } else {
@@ -111,9 +121,43 @@ static void do_cfu_tests() {
   }
 
   if (all_passed) {
-    puts("PASS: All CFU tests passed.");
+    puts("PASS: All [SIMD] MAC CFU tests passed.");
   } else {
-    puts("FAIL: Not all CFU tests passed.");
+    puts("FAIL: Not all [SIMD] MAC CFU tests passed.");
+  }
+}
+
+// Tests hardware arithmetic CFU ops.
+static void do_arithmetic_tests() {
+  bool all_passed = true;
+
+  // For loops iterate over the delta of values seen during inference.
+  for (int shift = -9; shift < -4; shift++) {
+    printf("Starting shift: %d.\n", shift);
+    for (int32_t top = -7737; top < 10260; top += 30) {
+      for (int32_t bottom = -2146395217; bottom < 2146454171;
+           bottom += 1000000) {
+        int32_t sw = ROUNDING_DOUBLE_HIGH_SW(top, bottom);
+        int32_t hw = ROUNDING_DOUBLE_HIGH_HW(top, bottom);
+        if (sw != hw) {
+          all_passed = false;
+          printf("FAIL: ROUNDING_DOUBLE_HIGH(%ld, %ld).\n", top, bottom);
+          printf("      Software: %ld, Hardware %ld.\n", sw, hw);
+        }
+        sw = ROUNDING_CLAMPING_DIVIDE_BY_POT_SW(shift);
+        hw = ROUNDING_CLAMPING_DIVIDE_BY_POT_HW(shift);
+        if (sw != hw) {
+          all_passed = false;
+          printf("FAIL: ROUNDING_CLAMPING_DIVIDE_BY_POT(%d).\n", shift);
+          printf("      Software: %ld, Hardware %ld.\n", sw, hw);
+        }
+      }
+    }
+  }
+  if (all_passed) {
+    puts("PASS: All arithmetic CFU tests passed.");
+  } else {
+    puts("FAIL: Not all arithmetic CFU tests passed.");
   }
 }
 
@@ -129,7 +173,8 @@ struct Menu MENU = {
     "kws_micro_accel",
     {
         MENU_ITEM('s', "Peform Setup", perform_setup),
-        MENU_ITEM('t', "Run CFU Tests", do_cfu_tests),
+        MENU_ITEM('m', "Run [SIMD] MAC CFU Tests", do_mac_tests),
+        MENU_ITEM('a', "Run Arithmetic CFU Tests", do_arithmetic_tests),
         MENU_END,
     },
 };

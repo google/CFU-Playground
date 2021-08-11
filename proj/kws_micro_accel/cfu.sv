@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+`include "mac.sv"
+`include "rcdbpot.sv"
+`include "rdh.sv"
+
 module Cfu (
   input logic clk,
   input logic reset,
@@ -31,26 +35,42 @@ module Cfu (
   output logic rsp_valid,
   input  logic rsp_ready
 );
-  localparam logic signed [8:0] InputOffest = 9'd128;
+  // Optionally SIMD multiply and accumulate with input offset.
+  logic [31:0] mac_output;
+  mac kws_mac (
+      .layer_one_en(cmd_payload_function_id[4]),
+      .simd_en(cmd_payload_function_id[3]),
+      .input_vals(cmd_payload_inputs_0),
+      .filter_vals(cmd_payload_inputs_1),
+      .curr_acc(rsp_payload_outputs_0),
+      .out(mac_output)
+  );
 
-  // Explicit rather than generated; saves LCs with current Yosys.
-  logic signed [15:0] prod_0, prod_1, prod_2, prod_3;
-  assign prod_0 = ( signed'(cmd_payload_inputs_0[7 :0 ]) + InputOffest)
-                  * signed'(cmd_payload_inputs_1[7 :0 ]);
-  assign prod_1 = ( signed'(cmd_payload_inputs_0[15:8 ]) + InputOffest)
-                  * signed'(cmd_payload_inputs_1[15:8 ]);
-  assign prod_2 = ( signed'(cmd_payload_inputs_0[23:16]) + InputOffest)
-                  * signed'(cmd_payload_inputs_1[23:16]);
-  assign prod_3 = ( signed'(cmd_payload_inputs_0[31:24]) + InputOffest)
-                  * signed'(cmd_payload_inputs_1[31:24]);
+  // Rounding doubling high 32 bits.
+  logic [31:0] rdh_output;
+  rdh kws_rdh (
+      .top(cmd_payload_inputs_0),
+      .bottom(cmd_payload_inputs_1),
+      .out(rdh_output)
+  );
 
-  // Conditionally MAC or SIMD MAC.
-  logic signed [31:0] sum_prods;
-  always_comb begin
-    if (cmd_payload_function_id[0]) begin
-      sum_prods = prod_0;
-    end else begin
-      sum_prods = prod_0 + prod_1 + prod_2 + prod_3;
+  // Rounding clamping divide by power of two.
+  logic [31:0] rcdbpot_output;
+  rcdbpot kws_rcdbpot (
+      .dividend(rsp_payload_outputs_0),
+      .negative_exponent(cmd_payload_inputs_1),
+      .out(rcdbpot_output)
+  );
+
+  // Output selection (one-hot encoding).
+  always_ff @(posedge clk) begin
+    if (cmd_valid) begin
+      casez (cmd_payload_function_id[2:0])
+        3'b??1 : rsp_payload_outputs_0 <= mac_output;
+        3'b?1? : rsp_payload_outputs_0 <= rdh_output;
+        3'b1?? : rsp_payload_outputs_0 <= rcdbpot_output;
+        default: rsp_payload_outputs_0 <= '0;
+      endcase
     end
   end
 
@@ -58,21 +78,15 @@ module Cfu (
   assign cmd_ready = ~rsp_valid;
   assign rsp_payload_response_ok = '1;
 
-  // Handshaking and accumulation.
+  // Single cycle CFU handshaking.
   always_ff @(posedge clk) begin
     if (reset) begin
-      rsp_payload_outputs_0 <= '0;
       rsp_valid <= '0;
     end else if (rsp_valid) begin
       // Waiting to hand off response to CPU.
       rsp_valid <= ~rsp_ready;
     end else if (cmd_valid) begin
       rsp_valid <= '1;
-      if (cmd_payload_function_id[3]) begin
-        rsp_payload_outputs_0 <= 0;
-      end else begin
-        rsp_payload_outputs_0 <= sum_prods + rsp_payload_outputs_0;
-      end
     end
   end
 endmodule
