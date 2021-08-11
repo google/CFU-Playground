@@ -40,20 +40,20 @@ SOC_NAME:=  hps.$(PROJ)
 OUT_DIR:=   build/$(SOC_NAME)
 # UART_ARGS=  --uart-baudrate $(UART_SPEED)
 # LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv $(OUT_DIR)/csr.csv $(CFU_ARGS) $(UART_ARGS)
-LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv $(OUT_DIR)/csr.csv $(CFU_ARGS)
+LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv $(OUT_DIR)/csr.csv $(CFU_ARGS) $(EXTRA_LITEX_ARGS)
 
-#==== Specify a different synth tool; still uses Radiant PnR
+# Open source toolchain (Yosys + Nextpnr) is used by default
+LITEX_ARGS += --yosys-abc9
+ifndef IGNORE_TIMING
+LITEX_ARGS += --nextpnr-timingstrict
+endif
+
+ifdef USE_RADIANT
+LITEX_ARGS += --toolchain radiant
 ifdef USE_YOSYS
 LITEX_ARGS += --synth_mode yosys
 else ifdef USE_LSE
 LITEX_ARGS += --synth_mode lse
-endif
-
-#==== Specify complete open source toolchain: Yosys + NextPnR
-ifdef USE_OXIDE
-LITEX_ARGS += --toolchain oxide --yosys-abc9
-ifndef IGNORE_TIMING
-LITEX_ARGS += --nextpnr-timingstrict
 endif
 endif
 
