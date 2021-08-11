@@ -34,6 +34,8 @@ from litespi.opcodes import SpiNorFlashOpCodes as Codes
 from litespi.phy.generic import LiteSPIPHY
 from litespi import LiteSPI
 
+from migen import Module, Instance
+
 from patch import Patch
 # from cam_control import CameraControl
 
@@ -47,6 +49,46 @@ UART_SPEED = 115200
 RAM_SIZE = 320 * KB
 
 SOC_DIR = os.path.dirname(os.path.realpath(__file__))
+
+
+def patch_oxide():
+    """Patches the LatticeOxideToolchain class.
+
+       This is a workaround while waiting for
+       https://github.com/enjoy-digital/litex/pull/987 to land.
+    """
+    # NX SDR Input and Output via regular flip-flops -------------------------
+    # This is a workaround for IO-specific primitives IFD1P3BX / OFD1P3BX being unsupported in nextpnr:
+    # https://github.com/YosysHQ/nextpnr/issues/698
+
+    class LatticeNXSDRFFImpl(Module):
+        def __init__(self, i, o, clk):
+            self.specials += Instance("FD1P3BX",
+                                      i_CK=clk,
+                                      i_PD=0,
+                                      i_SP=1,
+                                      i_D=i,
+                                      o_Q=o,
+                                      )
+
+    class LatticeNXSDRInputViaFlipFlop:
+        @staticmethod
+        def lower(dr):
+            return LatticeNXSDRFFImpl(dr.i, dr.o, dr.clk)
+
+    class LatticeNXSDROutputViaFlipFlop:
+        @staticmethod
+        def lower(dr):
+            return LatticeNXSDRFFImpl(dr.i, dr.o, dr.clk)
+
+    from litex.build.lattice.oxide import LatticeOxideToolchain
+    from litex.build.io import SDRInput, SDROutput
+    LatticeOxideToolchain.special_overrides = dict(
+        LatticeOxideToolchain.special_overrides)
+    LatticeOxideToolchain.special_overrides.update({
+        SDRInput: LatticeNXSDRInputViaFlipFlop,
+        SDROutput: LatticeNXSDROutputViaFlipFlop,
+    })
 
 
 class HpsSoC(LiteXSoC):
@@ -271,6 +313,7 @@ def main():
     if args.toolchain == "radiant":
         builder_kwargs.update(radiant_build_argdict(args))
     elif args.toolchain == "oxide":
+        patch_oxide()
         builder_kwargs.update(oxide_argdict(args))
     vns = builder.build(**builder_kwargs, run=args.build)
     soc.do_exit(vns)
