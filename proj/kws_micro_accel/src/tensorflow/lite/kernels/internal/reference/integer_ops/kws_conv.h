@@ -153,6 +153,7 @@ inline void KwsConvPerChannel(
   const int filter_width = filter_shape.Dims(2);
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
+
   if (input_depth == 1 && input_offset == -83 && filter_width == 4 &&
       filter_height == 10) {
     KwsConvPerChannelLayerOne(params, output_multiplier, output_shift,
