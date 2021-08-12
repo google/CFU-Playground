@@ -21,13 +21,6 @@ namespace tflite {
 namespace reference_integer_ops {
 
 // Fixed-point per-channel-quantization convolution reference kernel.
-#if defined(OPT_LINK_OPS_IN_SRAM) || defined(ALL_OPTIMIZATIONS)
-inline void ConvPerChannel(
-    const ConvParams&, const int32_t*, const int32_t*, const RuntimeShape&,
-    const int8_t*, const RuntimeShape&, const int8_t*, const RuntimeShape&,
-    const int32_t*, const RuntimeShape&, int8_t*
-    ) __attribute__((always_inline));  // Must be inlined to be in SRAM.
-#endif
 inline void ConvPerChannel(
     const ConvParams& params, const int32_t* output_multiplier,
     const int32_t* output_shift, const RuntimeShape& input_shape,
