@@ -18,6 +18,7 @@ import os
 import re
 import sys
 from importlib import import_module
+from shutil import copy
 
 sys.path.append((os.path.join(os.path.dirname(__file__),
                 "..", "third_party", "python", "litex-renode")))
@@ -110,24 +111,37 @@ def main():
     litex_renode_repl_filepath = args.build_path + args.target + "_generated.repl"
     robot_filepath = args.build_path + args.target + ".robot"
 
-    with open(resc_filepath, "w") as f:
-        f.write(generate_resc(args.target))
-
-    etherbone_peripherals = litex_renode.check_etherbone_peripherals(args.etherbone_peripherals)
-
-    with open(litex_renode_repl_filepath, "w") as f:
-        f.write(generate_litex_renode_repl(args.conf_file, etherbone_peripherals, args.autoalign_memor_regions))
-
-    with open(repl_filepath, "w") as f:
-        f.write(generate_repl(args.target, args.build_path))
-
     proj_name = re.search("proj/(.*)/build", args.build_path)
     proj_name = proj_name.group(1)
 
     proj_path = os.path.abspath(os.path.join(args.build_path, "../.."))
+    predefined_resc_path = os.path.join(proj_path, "renode", args.target + ".resc")
+    predefined_repl_path = os.path.join(proj_path, "renode", args.target + ".repl")
+    predefined_robot_path = os.path.join(proj_path, "renode", args.target + ".robot")
     robot_template_path = os.path.join(proj_path, proj_name + ".robot")
 
-    if os.path.isfile(robot_template_path):
+    if os.path.isfile(predefined_resc_path):
+        copy(predefined_resc_path, args.build_path)
+    else:
+        with open(resc_filepath, "w") as f:
+            f.write(generate_resc(args.target))
+
+    etherbone_peripherals = litex_renode.check_etherbone_peripherals(args.etherbone_peripherals)
+
+    # if there is a predefined Renode platform script for a target, copy it to build directory,
+    # otherwise generate a new one with LiteX-Renode
+    if os.path.isfile(predefined_repl_path):
+        copy(predefined_repl_path, args.build_path)
+    else:
+        with open(litex_renode_repl_filepath, "w") as f:
+            f.write(generate_litex_renode_repl(args.conf_file, etherbone_peripherals, args.autoalign_memor_regions))
+
+        with open(repl_filepath, "w") as f:
+            f.write(generate_repl(args.target, args.build_path))
+
+    if os.path.isfile(predefined_robot_path):
+        copy(predefined_robot_path, args.build_path)
+    elif os.path.isfile(robot_template_path):
         with open(robot_filepath, "w") as f:
             f.write(generate_robot(robot_template_path, args.target))
     else:
