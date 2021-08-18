@@ -17,9 +17,38 @@ import argparse
 import general
 import warnings
 from litex.build import generic_programmer
+from litex.soc.cores.cpu.vexriscv import core
 from litex.soc.integration import soc as litex_soc
 from litex.soc.integration import builder
 from typing import Callable
+
+
+def patch_cpu_variant():
+    """Monkey patches the fomu variant into LiteX."""
+    core.CPU_VARIANTS.update({
+        'fomu': 'VexRiscv_Fomu',
+        'fomu+cfu': 'VexRiscv_FomuCfu'
+    })
+    core.GCC_FLAGS.update({
+        'fomu': '    -march=rv32im -mabi=ilp32 -mno-div',
+        'fomu+cfu': '-march=rv32im -mabi=ilp32 -mno-div',
+    })
+
+    def new_add_soc_components(self, soc, soc_region_cls):
+        if 'debug' in self.variant:
+            soc.bus.add_slave('vexriscv_debug',
+                              self.debug_bus,
+                              region=soc_region_cls(
+                                  origin=soc.mem_map.get('vexriscv_debug'),
+                                  size=0x100,
+                                  cached=False))
+        if 'fomu' in self.variant:
+            soc.add_config('CPU_DIV_UNIMPLEMENTED')
+
+            # This is here to avoid the dcache flush instruction (system.h).
+            soc.add_config('CPU_VARIANT_LITE')
+
+    core.VexRiscv.add_soc_components = new_add_soc_components
 
 
 class Ice40UP5KWorkflow(general.GeneralSoCWorkflow):
@@ -34,6 +63,9 @@ class Ice40UP5KWorkflow(general.GeneralSoCWorkflow):
                  soc_constructor: Callable[..., litex_soc.LiteXSoC],
                  builder_constructor: Callable[..., builder.Builder] = None,
                  warn: bool = True) -> None:
+
+        # Remove if/when the new CPU variant is upstreamed.
+        patch_cpu_variant()
 
         if warn and args.cpu_variant != 'fomu+cfu':
             warnings.warn('Only fomu+cfu variant of Vexriscv supported for' +
