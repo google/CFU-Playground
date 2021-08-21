@@ -35,8 +35,8 @@ class StatusRegisterTest(TestBase):
             for n, (inputs, expected) in enumerate(DATA):
                 with self.subTest(n=n, inputs=inputs, expected=expected):
                     valid, payload = inputs
-                    yield self.dut.sink.valid.eq(valid)
-                    yield self.dut.sink.payload.eq(payload)
+                    yield self.dut.input.valid.eq(valid)
+                    yield self.dut.input.payload.eq(payload)
                     yield Delay(0.25)
                     self.assertEqual((yield self.dut.value), expected)
                     yield
@@ -64,16 +64,16 @@ class GetInstructionTest(TestBase):
         ]
 
         def process():
-            ver_sink = self.dut.sinks[VER]
+            verify_value_stream = self.dut.input_streams[VER]
             for n, (inputs, expected) in enumerate(DATA):
                 #print(f"{n=}, {inputs=}, {expected=}")
                 funct7, valid, payload = inputs
                 yield self.dut.funct7.eq(funct7)
-                yield ver_sink.valid.eq(valid)
-                yield ver_sink.payload.eq(payload)
+                yield verify_value_stream.valid.eq(valid)
+                yield verify_value_stream.payload.eq(payload)
                 yield self.dut.start.eq(1)
                 yield
-                yield ver_sink.valid.eq(0)
+                yield verify_value_stream.valid.eq(0)
                 yield self.dut.start.eq(0)
                 while not (yield self.dut.done):
                     yield
@@ -100,11 +100,11 @@ class GetInstructionTest(TestBase):
             yield from toggle(sink.valid)
 
         def process():
-            ver_sink = self.dut.sinks[Constants.REG_VERIFY]
+            verify_value_stream = self.dut.input_streams[Constants.REG_VERIFY]
             invalidate = self.dut.invalidates[Constants.REG_VERIFY]
 
             # send a value, start an instruction and read it immediately
-            yield from send_sink(ver_sink, 1111)
+            yield from send_sink(verify_value_stream, 1111)
             yield from start(Constants.REG_VERIFY)
             yield
             self.assertTrue((yield self.dut.done))
@@ -119,7 +119,7 @@ class GetInstructionTest(TestBase):
             for _ in range(5):
                 self.assertFalse((yield self.dut.done))
                 yield
-            yield from send_sink(ver_sink, 2222)
+            yield from send_sink(verify_value_stream, 2222)
             self.assertFalse((yield self.dut.done))
             yield
             self.assertFalse((yield self.dut.done))

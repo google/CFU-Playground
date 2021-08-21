@@ -22,7 +22,7 @@ from .get import GetInstruction
 from .input_store import InputStore
 from .macc import MultiplyAccumulate
 from .set import SetInstruction
-from .stream import BinaryCombinatorialActor
+from .stream import BinaryCombinatorialActor, connect
 
 
 class PingInstruction(InstructionBase):
@@ -64,17 +64,14 @@ class HpsCfu(Cfu):
         self.filter_store_depth = filter_store_depth
 
     def connect_verify_register(self, m, set, get):
-        set_source = set.sources[Constants.REG_VERIFY]
-        get_sink = get.sinks[Constants.REG_VERIFY]
+        set_stream = set.output_streams[Constants.REG_VERIFY]
+        get_stream = get.input_streams[Constants.REG_VERIFY]
         m.submodules["add_one"] = add_one = AddOneActor()
-        m.d.comb += [
-            set_source.connect(add_one.sink),
-            add_one.source.connect(get_sink)
-        ]
+        m.d.comb += connect(set_stream, add_one.input)
+        m.d.comb += connect(add_one.output, get_stream)
 
     def connect_macc(self, m, set, macc, get):
         m.d.comb += macc.offset.eq(set.values[Constants.REG_INPUT_OFFSET])
-
         inputs = Cat(set.values[Constants.REG_MACC_INPUT_0],
                      set.values[Constants.REG_MACC_INPUT_1],
                      set.values[Constants.REG_MACC_INPUT_2],
@@ -87,46 +84,42 @@ class HpsCfu(Cfu):
                       set.values[Constants.REG_MACC_FILTER_3])
         for n, val in enumerate(all_words(filters, 8)):
             m.d.comb += macc.filters[n].eq(val)
-
-        result_sink = get.sinks[Constants.REG_MACC_OUT]
+        result_stream = get.input_streams[Constants.REG_MACC_OUT]
         m.d.comb += [
-            result_sink.valid.eq(1),
-            result_sink.payload.eq(macc.result),
+            result_stream.valid.eq(1),
+            result_stream.payload.eq(macc.result),
         ]
 
     def connect_input_store(self, m, set, get, input_store):
+        m.d.comb += connect(set.output_streams[Constants.REG_INPUT_NUM_WORDS],
+                            input_store.num_words)
+        m.d.comb += connect(set.output_streams[Constants.REG_SET_INPUT],
+                            input_store.input)
         next = get.read_strobes[Constants.REG_INPUT_3]
-        m.d.comb += [
-            set.sources[Constants.REG_INPUT_NUM_WORDS].connect(
-                input_store.num_words),
-            set.sources[Constants.REG_SET_INPUT].connect(input_store.input),
-            input_store.output[0].connect(get.sinks[Constants.REG_INPUT_0]),
-            input_store.output[1].connect(get.sinks[Constants.REG_INPUT_1]),
-            input_store.output[2].connect(get.sinks[Constants.REG_INPUT_2]),
-            input_store.output[3].connect(get.sinks[Constants.REG_INPUT_3]),
-            input_store.next.eq(next),
-            get.invalidates[Constants.REG_INPUT_0].eq(next),
-            get.invalidates[Constants.REG_INPUT_1].eq(next),
-            get.invalidates[Constants.REG_INPUT_2].eq(next),
-            get.invalidates[Constants.REG_INPUT_3].eq(next),
-        ]
+        m.d.comb += input_store.next.eq(next)
+        INPUT_REGISTERS = [Constants.REG_INPUT_0,
+                           Constants.REG_INPUT_1,
+                           Constants.REG_INPUT_2,
+                           Constants.REG_INPUT_3]
+        for n, reg in enumerate(INPUT_REGISTERS):
+            m.d.comb += connect(input_store.output[n], get.input_streams[reg])
+            m.d.comb += get.invalidates[reg].eq(next),
 
     def connect_filter_store(self, m, set, get, filter_store):
+        m.d.comb += connect(set.output_streams[Constants.REG_FILTER_NUM_WORDS],
+                            filter_store.num_words)
+        m.d.comb += connect(set.output_streams[Constants.REG_SET_FILTER],
+                            filter_store.input)
         next = get.read_strobes[Constants.REG_FILTER_3]
-        m.d.comb += [
-            set.sources[Constants.REG_FILTER_NUM_WORDS].connect(
-                filter_store.num_words),
-            set.sources[Constants.REG_SET_FILTER].connect(filter_store.input),
-            filter_store.output[0].connect(get.sinks[Constants.REG_FILTER_0]),
-            filter_store.output[1].connect(get.sinks[Constants.REG_FILTER_1]),
-            filter_store.output[2].connect(get.sinks[Constants.REG_FILTER_2]),
-            filter_store.output[3].connect(get.sinks[Constants.REG_FILTER_3]),
-            filter_store.next.eq(next),
-            get.invalidates[Constants.REG_FILTER_0].eq(next),
-            get.invalidates[Constants.REG_FILTER_1].eq(next),
-            get.invalidates[Constants.REG_FILTER_2].eq(next),
-            get.invalidates[Constants.REG_FILTER_3].eq(next),
-        ]
+        m.d.comb += filter_store.next.eq(next)
+        FILTER_REGISTERS = [Constants.REG_FILTER_0,
+                            Constants.REG_FILTER_1,
+                            Constants.REG_FILTER_2,
+                            Constants.REG_FILTER_3]
+        for n, reg in enumerate(FILTER_REGISTERS):
+            m.d.comb += connect(filter_store.output[n],
+                                get.input_streams[reg])
+            m.d.comb += get.invalidates[reg].eq(next),
 
     def elab_instructions(self, m):
         m.submodules['set'] = set = SetInstruction()

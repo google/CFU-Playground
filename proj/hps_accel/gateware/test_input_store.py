@@ -26,22 +26,22 @@ class InputStoreTest(TestBase):
     def create_dut(self):
         return InputStore()
 
-    def sink_send(self, sink, payload):
-        yield sink.payload.eq(payload)
-        yield sink.valid.eq(1)
+    def send(self, stream, payload):
+        yield stream.payload.eq(payload)
+        yield stream.valid.eq(1)
         yield
-        while not (yield sink.ready):
+        while not (yield stream.ready):
             yield
-        yield sink.valid.eq(0)
+        yield stream.valid.eq(0)
 
-    def source_receive(self, source, expected):
-        yield source.ready.eq(1)
+    def receive(self, stream, expected):
+        yield stream.ready.eq(1)
         yield
-        while not (yield source.valid):
+        while not (yield stream.valid):
             yield
-        payload = (yield source.payload)
+        payload = (yield stream.payload)
         self.assertEqual(payload, expected)
-        yield source.ready.eq(0)
+        yield stream.ready.eq(0)
         yield
 
     def toggle(self, signal):
@@ -50,14 +50,14 @@ class InputStoreTest(TestBase):
         yield signal.eq(0)
 
     def set_num_words(self, n):
-        yield from self.sink_send(self.dut.num_words, n)
+        yield from self.send(self.dut.num_words, n)
 
     def set_input(self, n):
-        yield from self.sink_send(self.dut.input, n)
+        yield from self.send(self.dut.input, n)
 
     def check_outputs(self, vals):
         for n in range(4):
-            yield from self.source_receive(self.dut.output[n], vals[n])
+            yield from self.receive(self.dut.output[n], vals[n])
         yield from self.toggle(self.dut.next)
         yield
         yield self.dut.next.eq(0)

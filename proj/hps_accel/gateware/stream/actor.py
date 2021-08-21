@@ -90,11 +90,8 @@ class BinaryCombinatorialActor(BinaryActor):
         super().__init__(input_type, output_type)
 
     def control(self, m: Module):
-        m.d.comb += [
-            self.sink.ready.eq(self.source.ready),
-            self.source.valid.eq(self.sink.valid),
-            self.source.last.eq(self.sink.last),
-        ]
+        m.d.comb += self.input.ready.eq(self.output.ready)
+        m.d.comb += self.output.valid.eq(self.input.valid)
 
     def transform(self, m, input, output):
         """Transforms input to output.

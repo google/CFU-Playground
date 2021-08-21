@@ -18,7 +18,7 @@ from nmigen_cfu import InstructionBase
 from util import SimpleElaboratable
 
 from .constants import Constants
-from .stream import Sink, Source, glue_sources
+from .stream import Stream, connect
 
 
 class ConfigurationRegister(SimpleElaboratable):
@@ -29,14 +29,12 @@ class ConfigurationRegister(SimpleElaboratable):
     Attributes
     ----------
 
-    source: Source(unsigned(32))
-      A source of values. Asserts "valid" whenever a new value is set into
-      the register and deasserts "valid" after "ready" is also asserted.
-      Will continue to present the value of the register as the source payload
-      after the read.
+    output: Source(unsigned(32))
+      An output stream of values. A new value onto the stream whenever
+      the register is set.
 
     value: unsigned(32), out
-      The value held by the register. Alias for source.payload.
+      The value held by the register.
 
     new_en: Signal(1), in
       Indicates to register that a new value is being presented on new_value
@@ -47,18 +45,18 @@ class ConfigurationRegister(SimpleElaboratable):
 
     def __init__(self):
         super().__init__()
-        self.source = Source(unsigned(32))
-        self.value = self.source.payload
+        self.output = Stream(unsigned(32))
+        self.value = self.output.payload
         self.new_en = Signal()
         self.new_value = Signal(32)
 
     def elab(self, m):
-        with m.If(self.source.is_transferring()):
-            m.d.sync += self.source.valid.eq(0)
+        with m.If(self.output.is_transferring()):
+            m.d.sync += self.output.valid.eq(0)
 
         with m.If(self.new_en):
             m.d.sync += self.value.eq(self.new_value)
-            m.d.sync += self.source.valid.eq(1)
+            m.d.sync += self.output.valid.eq(1)
 
 
 class SetInstruction(InstructionBase):
@@ -69,8 +67,8 @@ class SetInstruction(InstructionBase):
     Attributes
     ----------
 
-    sources: dict[id, Source[unsigned(32)]], out
-      Value sources for each register.
+    output_streams: dict[id, Source[unsigned(32)]], out
+      Value output for each register.
     values: dict[id, unsigned(32)], out
       Values as set into registers.
     """
@@ -94,17 +92,18 @@ class SetInstruction(InstructionBase):
 
     def __init__(self):
         super().__init__()
-        self.sources = {i: Source(unsigned(32)) for i in self.REGISTER_IDS}
+        self.output_streams = {i: Stream(unsigned(32)) for i in self.REGISTER_IDS}
         self.values = {i: Signal(32) for i in self.REGISTER_IDS}
 
     def elab(self, m: Module):
         registers = {i: ConfigurationRegister() for i in self.REGISTER_IDS}
         for i, register in registers.items():
             m.submodules[f"reg_{i:02x}"] = register
-            m.d.comb += glue_sources(register.source, self.sources[i])
+            m.d.comb += connect(register.output, self.output_streams[i])
             m.d.comb += self.values[i].eq(register.value)
 
         with m.If(self.start):
+            # Consider making self.done.eq(1) combinatorial
             m.d.sync += self.done.eq(1)
             with m.Switch(self.funct7):
                 for i, register in registers.items():
