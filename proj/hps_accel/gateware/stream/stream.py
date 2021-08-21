@@ -14,146 +14,106 @@
 # limitations under the License.
 
 from nmigen import Shape
-from nmigen.hdl.rec import Record, DIR_FANIN, DIR_FANOUT
+from nmigen.hdl.rec import Layout, Record
+
+__all__ = ['StreamDefinition', 'Stream', 'connect']
 
 
-class _Endpoint:
-    """Abstract base class for Sinks and Sources."""
+class StreamDefinition:
+    """Defines a stream and the guarantees that it makes.
 
-    def __init__(self, payload_type, name, src_loc_at):
+    ignores_valid:
+      Stream may use payload without valid being set.
+
+    ignores_ready:
+      Stream may present a new payload while valid is asserted
+      and before ready is asserted.
+    """
+
+    @staticmethod
+    def cast(obj, src_loc_at=0, ignores_ready=False, ignores_valid=False):
+        if isinstance(obj, StreamDefinition):
+            return StreamDefinition(
+                paylad_type=obj.payload_type,
+                ignores_ready=obj.ignores_ready,
+                ignores_valid=obj.ignores_valid)
+        else:
+            return StreamDefinition(
+                payload_type=obj, src_loc_at=1 + src_loc_at)
+
+    def __init__(self, *, payload_type,
+                 ignores_ready=False, ignores_valid=False, src_loc_at=0):
+        self.ignores_ready = ignores_ready
+        self.ignores_valid = ignores_valid
         self.payload_type = payload_type
-        self._record = Record([
-            ("valid", Shape(), DIR_FANOUT),
-            ("ready", Shape(), DIR_FANIN),
-            ("last", Shape(), DIR_FANOUT),
-            ("payload", payload_type, DIR_FANOUT),
-        ], src_loc_at=2+src_loc_at, name=name)
+        self.layout = Layout([
+            ("valid", Shape()),
+            ("ready", Shape()),
+            ("payload", payload_type),
+        ],
+            src_loc_at=1 + src_loc_at
+        )
+
+
+class Stream:
+    """Interface to a stream
+    
+    Parameters
+    ----------
+
+    definition: StreamDefintion
+      Specifies the payload type and other parameters of this type.
+    
+    """
+
+    def __init__(self, definition=None, *, payload_type=None, name=None, src_loc_at=0):
+        if definition is None:
+            self.definition = StreamDefinition(
+                payload_type=payload_type,
+                src_loc_at=src_loc_at + 1)
+        else:
+            self.definition = StreamDefinition.cast(definition)
+        self._record = Record(
+            self.definition.layout,
+            name=name,
+            src_loc_at=1 + src_loc_at)
         self.valid = self._record.valid
         self.ready = self._record.ready
-        self.last = self._record.last
         self.payload = self._record.payload
 
+    @staticmethod
+    def like(other):
+        return Stream(other.definition)
+
     def is_transferring(self):
-        """Returns an expression that is true when a transfer takes place."""
-        return (self.valid & self.ready)
+        """Is a transfer taking place this cycle?
 
-
-class Source(_Endpoint):
-    """A stream source.
-
-    Parameters
-    ----------
-
-    payload_type: Shape(N) or Layout
-      The payload transferred from this Source.
-    name: str
-      Base for signal names.
-
-    Attributes:
-    -----------
-
-    payload_type: Shape(N) or Layout
-    valid: Signal(1), out
-    ready: Signal(1), in
-    last: Signal(1), out
-    payload: Signal(N) or Record, out
-    """
-
-    def __init__(self, payload_type, name=None, src_loc_at=0):
-        super().__init__(payload_type, name, src_loc_at)
-
-    def connect(self, sink):
-        """Returns a list of statements that connects this source to a sink.
-
-        Parameters:
-          sink: This Sink to which to connect.
+        True iff valid and ready are both asserted.
         """
-        assert isinstance(sink, Sink)
-        return self._record.connect(sink._record)
+        return self.valid & self.ready
 
 
-class Sink(_Endpoint):
-    """A stream sink
+def connect(from_stream, to_stream):
+    """Convenience function for connecting an upstream to a downstream.
 
-    Parameters
-    ----------
+    Examples:
 
-    payload: Signal(N) or Record
-      The payload transferred to this Sink.
-    name: str
-      Base for signal names.
+    m.d.comb += connect(one_components_output, another_components_input)
+    m.d.comb += connect(my_input, child_input)
 
-    Attributes:
-    -----------
+    Arguments
+    ---------
+    from_stream:
+        The upstream side of the stream. Presents payload and valid.
+    to_stream:
+        The downstream side of the stream. Presents ready.
 
-    payload_type: Shape(N) or Layout
-    valid: Signal(1), in
-    ready: Signal(1), out
-    last: Signal(1), in
-    payload: Signal(N) or Record, in
+    Result
+    ------
+    A list of statements.
     """
-
-    def __init__(self, payload_type, name=None, src_loc_at=0):
-        super().__init__(payload_type, name, src_loc_at)
-
-
-def glue_sources(source_in: Source, source_out: Source):
-    """Combinatorially glues two sources together.
-
-    source_in is combinatorially glued to source_out. This is useful when
-    exposing a submodule's Source as part of the interface of the current
-    module.
-
-    The two sources must have identical payload types.
-
-    Parameters:
-      source_in:
-        The source that forms part of the submodule's interface.
-      source_out:
-        The source that forms part of the current module's interface.
-
-    Result:
-      A sequence of statements that connects the two sources.
-    """
-    # Checking to catch simple mistakes
-    assert isinstance(source_in, Source)
-    assert isinstance(source_out, Source)
-    assert source_in.payload_type == source_out.payload_type
-
     return [
-        source_in.ready.eq(source_out.ready),
-        source_out.valid.eq(source_in.valid),
-        source_out.last.eq(source_in.last),
-        source_out.payload.eq(source_in.payload),
-    ]
-
-
-def glue_sinks(sink_in: Sink, sink_out: Sink):
-    """Combinatorially glues two sinks together.
-
-    sink_in is combinatorially glued to sink_out. This is useful when
-    exposing a submodule's Sink as part of the interface of the current
-    module.
-
-    The two sinks must have identical payload types.
-
-    Parameters:
-      sink_in:
-        The sink that forms part of the current module's interface.
-      sink_out:
-        The sink that forms part of the submodule's interface.
-
-    Result:
-      A sequence of statements that connects the two sinks.
-    """
-    # Checking to catch simple mistakes
-    assert isinstance(sink_in, Sink)
-    assert isinstance(sink_out, Sink)
-    assert sink_in.payload_type == sink_out.payload_type
-
-    return [
-        sink_in.ready.eq(sink_out.ready),
-        sink_out.valid.eq(sink_in.valid),
-        sink_out.last.eq(sink_in.last),
-        sink_out.payload.eq(sink_in.payload),
+        to_stream.valid.eq(from_stream.valid),
+        to_stream.payload.eq(from_stream.payload),
+        from_stream.ready.eq(to_stream.ready),
     ]
