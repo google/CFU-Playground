@@ -85,6 +85,10 @@ class GetInstruction(InstructionBase):
 
     # The list of all register IDs that may be fetched
     REGISTER_IDS = [
+        Constants.REG_FILTER_0,
+        Constants.REG_FILTER_1,
+        Constants.REG_FILTER_2,
+        Constants.REG_FILTER_3,
         Constants.REG_INPUT_0,
         Constants.REG_INPUT_1,
         Constants.REG_INPUT_2,

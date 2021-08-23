@@ -43,7 +43,7 @@ VERIFY = Constants.REG_VERIFY
 class HpsCfuTest(CfuTestBase):
 
     def create_dut(self):
-        return make_cfu()
+        return make_cfu(filter_store_depth=100)
 
     def test_simple(self):
         """Tests some simple cases"""
@@ -105,4 +105,17 @@ class HpsCfuTest(CfuTestBase):
                 yield ((GET, Constants.REG_INPUT_2, 0, 0), n+2)
                 yield ((GET, Constants.REG_INPUT_3, 0, 0), n+3)
 
+        self.run_ops(op_generator(), True)
+
+    def test_simple_filter_store(self):
+        """Tests simple filter store use case"""
+        def op_generator():
+            yield ((SET, Constants.REG_FILTER_NUM_WORDS, 20, 0), 0)
+            for n in range(100, 120):
+                yield ((SET, Constants.REG_SET_FILTER, n, 0), 0)
+            for n in range(100, 120, 4):
+                yield ((GET, Constants.REG_FILTER_0, 0, 0), n + 0)
+                yield ((GET, Constants.REG_FILTER_1, 0, 0), n + 1)
+                yield ((GET, Constants.REG_FILTER_2, 0, 0), n + 2)
+                yield ((GET, Constants.REG_FILTER_3, 0, 0), n + 3)
         self.run_ops(op_generator(), True)
