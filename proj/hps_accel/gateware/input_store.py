@@ -16,6 +16,7 @@
 from nmigen_cfu.util import SimpleElaboratable
 from nmigen import unsigned, Signal, Module, Array, Mux
 
+from .constants import Constants
 from .stream import Sink, Source, glue_sources
 from .sp_mem import MemoryParameters, SinglePortMemory
 
@@ -45,7 +46,6 @@ class InputStore(SimpleElaboratable):
       The four words of output.
 
     """
-    MAX_WORDS = 2048
 
     def __init__(self):
         self.input = Sink(unsigned(32))
@@ -55,13 +55,13 @@ class InputStore(SimpleElaboratable):
                        for i in range(4)]
 
     def elab(self, m: Module):
-        max_index = Signal(range(self.MAX_WORDS))
-        write_index = Signal(range(self.MAX_WORDS))
-        read_index = Signal(range(self.MAX_WORDS))
+        max_index = Signal(range(Constants.MAX_INPUT_WORDS))
+        write_index = Signal(range(Constants.MAX_INPUT_WORDS))
+        read_index = Signal(range(Constants.MAX_INPUT_WORDS))
         read_required = Signal()  # Set whenever read_index is updated to initiate a read
 
         # Create four memories
-        memory_params = MemoryParameters(width=32, depth=self.MAX_WORDS // 4)
+        memory_params = MemoryParameters(width=32, depth=Constants.MAX_INPUT_WORDS // 4)
         memories = Array([SinglePortMemory(params=memory_params)
                          for _ in range(4)])
         for n, memory in enumerate(memories):
