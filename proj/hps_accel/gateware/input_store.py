@@ -74,7 +74,7 @@ class InputStore(SimpleElaboratable):
             m.d.comb += memory.write_sink.payload.data.eq(self.input.payload),
         with m.If(self.input.is_transferring()):
             m.d.comb += memories[write_index[:2]].write_sink.valid.eq(1),
-            with m.If(write_index == max_index - 1):
+            with m.If(write_index == max_index):
                 # On last word write, wrap back to zero and cause a pre-emptive
                 # read
                 m.d.sync += write_index.eq(0)
@@ -97,14 +97,14 @@ class InputStore(SimpleElaboratable):
         with m.If(self.next):
             m.d.sync += read_required.eq(1)
             m.d.sync += read_index.eq(Mux(read_index ==
-                                      max_index - 4, 0, read_index + 4))
+                                      max_index - 3, 0, read_index + 4))
 
         # Read the value of max_index from num_words sink
         # Reset read and write index too
         m.d.comb += self.num_words.ready.eq(1)
         with m.If(self.num_words.valid):
             m.d.sync += [
-                max_index.eq(self.num_words.payload),
+                max_index.eq(self.num_words.payload - 1),
                 write_index.eq(0),
                 read_index.eq(0),
             ]
