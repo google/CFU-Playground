@@ -87,11 +87,12 @@ class InputStoreTest(TestBase):
         # Fill once and read many times
         def process():
             for i in range(3):
-                yield from self.set_num_words(12 + i * 4)
-                for n in range(100, 100 + i * 4):
+                num_words = 12 + i * 4
+                yield from self.set_num_words(num_words)
+                for n in range(100, 100 + num_words):
                     yield from self.set_input(n)
                 for j in range(5):
-                    for n in range(100, +i * 4, 4):
+                    for n in range(100, 100 + num_words, 4):
                         yield from self.check_outputs(list(range(n, n + 4)))
 
         self.run_sim(process, False)
