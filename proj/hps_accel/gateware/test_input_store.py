@@ -14,17 +14,19 @@
 # limitations under the License.
 
 
+from nmigen import ResetInserter
 from nmigen.sim import Delay
 from nmigen_cfu import TestBase
 
-from .input_store import InputStore
+from .input_store import Signal, InputStore
 
 SETTLE_DELAY = Delay(0.25)
 
 
 class InputStoreTest(TestBase):
     def create_dut(self):
-        return InputStore()
+        self.reset_sig = Signal()
+        return ResetInserter(self.reset_sig)(InputStore())
 
     def send(self, stream, payload):
         yield stream.payload.eq(payload)
@@ -50,14 +52,14 @@ class InputStoreTest(TestBase):
         yield signal.eq(0)
 
     def set_num_words(self, n):
-        yield from self.send(self.dut.num_words, n)
+        yield from self.send(self.dut.num_words_input, n)
 
     def set_input(self, n):
-        yield from self.send(self.dut.input, n)
+        yield from self.send(self.dut.data_input, n)
 
     def check_outputs(self, vals):
         for n in range(4):
-            yield from self.receive(self.dut.output[n], vals[n])
+            yield from self.receive(self.dut.data_output[n], vals[n])
         yield from self.toggle(self.dut.next)
         yield
         yield self.dut.next.eq(0)
@@ -88,6 +90,7 @@ class InputStoreTest(TestBase):
         def process():
             for i in range(3):
                 num_words = 12 + i * 4
+                yield from self.toggle(self.reset_sig)
                 yield from self.set_num_words(num_words)
                 for n in range(100, 100 + num_words):
                     yield from self.set_input(n)
