@@ -103,3 +103,17 @@ class SetInstructionTest(TestBase):
                     self.assertEqual((yield self.dut.values[VER]), expected)
                     yield
         self.run_sim(process, False)
+
+    def test_write_strobe(self):
+        VER = Constants.REG_VERIFY
+        def process():
+            yield self.dut.funct7.eq(VER)
+            yield self.dut.in0.eq(123)
+            yield self.dut.in1.eq(456)
+            yield self.dut.start.eq(1)
+            yield
+            self.assertEqual((yield self.dut.write_strobes[VER]), 1)
+            yield self.dut.start.eq(0)
+            yield
+            self.assertEqual((yield self.dut.write_strobes[VER]), 0)
+        self.run_sim(process, False)
