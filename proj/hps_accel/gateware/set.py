@@ -68,8 +68,12 @@ class SetInstruction(InstructionBase):
 
     output_streams: dict[id, Endpoint[unsigned(32)]], out
       Value output for each register.
+
     values: dict[id, unsigned(32)], out
       Values as set into registers.
+
+    write_strobes: dict[id, Signal(1)], out
+      Asserted for one cycle when the corresponding register id is written.
     """
 
     # The list of all register IDs that may be set
@@ -93,6 +97,7 @@ class SetInstruction(InstructionBase):
         super().__init__()
         self.output_streams = {i: Endpoint(unsigned(32)) for i in self.REGISTER_IDS}
         self.values = {i: Signal(32) for i in self.REGISTER_IDS}
+        self.write_strobes = {i: Signal(1) for i in self.REGISTER_IDS}
 
     def elab(self, m: Module):
         registers = {i: ConfigurationRegister() for i in self.REGISTER_IDS}
@@ -100,6 +105,7 @@ class SetInstruction(InstructionBase):
             m.submodules[f"reg_{i:02x}"] = register
             m.d.comb += connect(register.output, self.output_streams[i])
             m.d.comb += self.values[i].eq(register.value)
+            m.d.comb += self.write_strobes[i].eq(0)  # strobes off by default
 
         with m.If(self.start):
             # Consider making self.done.eq(1) combinatorial
@@ -109,5 +115,6 @@ class SetInstruction(InstructionBase):
                     with m.Case(i):
                         m.d.comb += register.new_en.eq(1)
                         m.d.comb += register.new_value.eq(self.in0)
+                        m.d.comb += self.write_strobes[i].eq(1)
         with m.Else():
             m.d.sync += self.done.eq(0)
