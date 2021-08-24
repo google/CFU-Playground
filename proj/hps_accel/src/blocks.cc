@@ -78,9 +78,7 @@ Vector16 Vector16::build(int8_t a, int8_t b, int8_t c, int8_t d, int8_t e,
 Vector16 Vector16::zeroes() { return Vector16{{0, 0, 0, 0}}; }
 
 // Performs a 16 x 16 vector multiplication
-int32_t multiply_accumulate(Vector16 input, Vector16 filter,
-                            int32_t input_offset) {
-  cfu_set(REG_INPUT_OFFSET, input_offset);
+int32_t multiply_accumulate(Vector16 input, Vector16 filter) {
   cfu_set(REG_MACC_INPUT_0, input.values[0]);
   cfu_set(REG_MACC_INPUT_1, input.values[1]);
   cfu_set(REG_MACC_INPUT_2, input.values[2]);
@@ -112,6 +110,10 @@ Vector16 GetFilter() {
   uint32_t word2 = cfu_get(REG_FILTER_2);
   uint32_t word3 = cfu_get(REG_FILTER_3);
   return Vector16{{word0, word1, word2, word3}};
+}
+
+void LoadInputOffset(int32_t value) {
+  cfu_set(REG_INPUT_OFFSET, value);
 }
 
 void LoadInput(size_t width, size_t in_channels, const int8_t* values) {

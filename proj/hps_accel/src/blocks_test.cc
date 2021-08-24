@@ -53,7 +53,8 @@ bool check_vector_same(Vector16 actual, Vector16 expected, size_t n) {
 bool test_multiply(Vector16 input, Vector16 filter, int32_t input_offset,
                    int32_t expected) {
   printf(".");
-  int32_t actual = multiply_accumulate(input, filter, input_offset);
+  hps_accel::LoadInputOffset(input_offset);
+  int32_t actual = multiply_accumulate(input, filter);
   if (actual == expected) {
     return true;
   }
