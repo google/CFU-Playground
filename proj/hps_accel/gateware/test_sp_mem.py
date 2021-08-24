@@ -58,7 +58,7 @@ class SinglePortMemoryTest(TestBase):
             # Idle
             ((0, XX, X, 0, XX, 1), (1, 0, X)),
             # Bust read, but data consumer not always ready
-            ((0, XX, X, 1, 11, 0), (1, 0, X)),
+            ((0, XX, X, 1, 11, 1), (1, 0, X)),
             ((0, XX, X, 1, 12, 0), (0, 1, A)),
             ((0, XX, X, 1, 12, 0), (0, 1, A)),
             ((0, XX, X, 1, 12, 1), (1, 1, A)),
@@ -70,11 +70,12 @@ class SinglePortMemoryTest(TestBase):
             ((0, XX, X, 0, XX, 1), (1, 0, X)),
             # Read blocked by single write
             ((1, 14, D, 1, 11, 1), (0, 0, X)),
+            ((0, XX, X, 1, 11, 0), (0, 0, X)),
             ((0, XX, X, 1, 11, 1), (1, 0, X)),
             # Burst write blocks read
             ((1, 15, E, 1, 12, 1), (0, 1, A)),
             ((1, 16, F, 1, 12, 0), (0, 0, X)),
-            ((0, XX, X, 1, 12, 0), (1, 0, X)),
+            ((0, XX, X, 1, 12, 1), (1, 0, X)),
             # Consumer takes read data while write is happening
             # New read starts while write still underway
             ((1, 17, G, 0, XX, 0), (0, 1, B)),
@@ -110,4 +111,4 @@ class SinglePortMemoryTest(TestBase):
                     if rds_data is not None:
                         self.assertEqual((yield self.dut.read_data_output.payload), rds_data)
                     yield
-        self.run_sim(process, False)
+        self.run_sim(process, True)

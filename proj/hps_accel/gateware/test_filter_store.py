@@ -42,6 +42,10 @@ class FilterStoreTest(TestBase):
 
     def read_out(self):
         for i in range(0, len(self.filter_values), 4):
+            yield self.dut.output[0].ready.eq(1)
+            yield self.dut.output[1].ready.eq(1)
+            yield self.dut.output[2].ready.eq(1)
+            yield self.dut.output[3].ready.eq(1)
             while (yield self.dut.output[0].valid) != 1:
                 yield
             self.assertEqual((yield self.dut.output[0].valid), 1)
@@ -52,10 +56,6 @@ class FilterStoreTest(TestBase):
             self.assertEqual((yield self.dut.output[1].payload), self.filter_values[i + 1])
             self.assertEqual((yield self.dut.output[2].payload), self.filter_values[i + 2])
             self.assertEqual((yield self.dut.output[3].payload), self.filter_values[i + 3])
-            yield self.dut.output[0].ready.eq(1)
-            yield self.dut.output[1].ready.eq(1)
-            yield self.dut.output[2].ready.eq(1)
-            yield self.dut.output[3].ready.eq(1)
             yield self.dut.next.eq(1)
             yield
             yield self.dut.next.eq(0)
@@ -70,7 +70,8 @@ class FilterStoreTest(TestBase):
     def test_it_can_stream_output(self):
         def process():
             yield from self.reset_and_fill()
-            # Set up for streaming output. We will receive four output words every cycle.
+            # Set up for streaming output. We will receive four output words
+            # every cycle.
             yield self.dut.output[0].ready.eq(1)
             yield self.dut.output[1].ready.eq(1)
             yield self.dut.output[2].ready.eq(1)
@@ -131,7 +132,12 @@ class FilterStoreTest(TestBase):
                 # bugs, since the store contains an even number of elements)
                 for _ in range(13):
                     yield
-                self.assertEqual((yield self.dut.output[0].valid), 1)
+                yield self.dut.output[0].ready.eq(1)
+                yield self.dut.output[1].ready.eq(1)
+                yield self.dut.output[2].ready.eq(1)
+                yield self.dut.output[3].ready.eq(1)
+                while not (yield self.dut.output[0].valid):
+                    yield
                 self.assertEqual((yield self.dut.output[1].valid), 1)
                 self.assertEqual((yield self.dut.output[2].valid), 1)
                 self.assertEqual((yield self.dut.output[3].valid), 1)
@@ -139,10 +145,6 @@ class FilterStoreTest(TestBase):
                 self.assertEqual((yield self.dut.output[1].payload), self.filter_values[i + 1])
                 self.assertEqual((yield self.dut.output[2].payload), self.filter_values[i + 2])
                 self.assertEqual((yield self.dut.output[3].payload), self.filter_values[i + 3])
-                yield self.dut.output[0].ready.eq(1)
-                yield self.dut.output[1].ready.eq(1)
-                yield self.dut.output[2].ready.eq(1)
-                yield self.dut.output[3].ready.eq(1)
                 yield self.dut.next.eq(1)
                 yield
         self.run_sim(process)

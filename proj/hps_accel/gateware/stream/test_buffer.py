@@ -70,7 +70,6 @@ class TestBuffer(TestBase):
         def process():
             dut = self.dut
             for n, (inputs, outputs) in enumerate(DATA):
-                print(f"{n} {inputs}, {outputs}")
                 in_valid, in_payload, expected_in_ready = inputs
                 expected_out_valid, expected_out_payload, out_ready = outputs
                 yield dut.input.valid.eq(in_valid)
