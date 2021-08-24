@@ -105,7 +105,7 @@ class HpsCfuTest(CfuTestBase):
                 yield ((GET, Constants.REG_INPUT_2, 0, 0), n+2)
                 yield ((GET, Constants.REG_INPUT_3, 0, 0), n+3)
 
-        self.run_ops(op_generator(), True)
+        self.run_ops(op_generator(), False)
 
     def test_simple_filter_store(self):
         """Tests simple filter store use case"""
@@ -118,4 +118,4 @@ class HpsCfuTest(CfuTestBase):
                 yield ((GET, Constants.REG_FILTER_1, 0, 0), n + 1)
                 yield ((GET, Constants.REG_FILTER_2, 0, 0), n + 2)
                 yield ((GET, Constants.REG_FILTER_3, 0, 0), n + 3)
-        self.run_ops(op_generator(), True)
+        self.run_ops(op_generator(), False)
