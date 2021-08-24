@@ -17,6 +17,7 @@ from nmigen_cfu import Cfu, InstructionBase
 from util import all_words
 
 from .constants import Constants
+from .filter_store import FilterStore
 from .get import GetInstruction
 from .input_store import InputStore
 from .macc import MultiplyAccumulate
@@ -57,6 +58,10 @@ class AddOneActor(BinaryCombinatorialActor):
 
 
 class HpsCfu(Cfu):
+
+    def __init__(self, filter_store_depth=Constants.MAX_FILTER_WORDS):
+        super().__init__()
+        self.filter_store_depth = filter_store_depth
 
     def connect_verify_register(self, m, set, get):
         set_source = set.sources[Constants.REG_VERIFY]
@@ -106,6 +111,23 @@ class HpsCfu(Cfu):
             get.invalidates[Constants.REG_INPUT_3].eq(next),
         ]
 
+    def connect_filter_store(self, m, set, get, filter_store):
+        next = get.read_strobes[Constants.REG_FILTER_3]
+        m.d.comb += [
+            set.sources[Constants.REG_FILTER_NUM_WORDS].connect(
+                filter_store.num_words),
+            set.sources[Constants.REG_SET_FILTER].connect(filter_store.input),
+            filter_store.output[0].connect(get.sinks[Constants.REG_FILTER_0]),
+            filter_store.output[1].connect(get.sinks[Constants.REG_FILTER_1]),
+            filter_store.output[2].connect(get.sinks[Constants.REG_FILTER_2]),
+            filter_store.output[3].connect(get.sinks[Constants.REG_FILTER_3]),
+            filter_store.next.eq(next),
+            get.invalidates[Constants.REG_FILTER_0].eq(next),
+            get.invalidates[Constants.REG_FILTER_1].eq(next),
+            get.invalidates[Constants.REG_FILTER_2].eq(next),
+            get.invalidates[Constants.REG_FILTER_3].eq(next),
+        ]
+
     def elab_instructions(self, m):
         m.submodules['set'] = set = SetInstruction()
         m.submodules['get'] = get = GetInstruction()
@@ -119,6 +141,10 @@ class HpsCfu(Cfu):
         m.submodules['input_store'] = input_store = InputStore()
         self.connect_input_store(m, set, get, input_store)
 
+        filter_store = FilterStore(depth=self.filter_store_depth)
+        m.submodules['filter_store'] = filter_store
+        self.connect_filter_store(m, set, get, filter_store)
+
         m.submodules['ping'] = ping = PingInstruction()
         return {
             Constants.INS_GET: get,
@@ -127,5 +153,5 @@ class HpsCfu(Cfu):
         }
 
 
-def make_cfu():
-    return HpsCfu()
+def make_cfu(**kwargs):
+    return HpsCfu(**kwargs)

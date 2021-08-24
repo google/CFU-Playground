@@ -99,18 +99,18 @@ void LoadFilter(size_t in_channels, size_t out_channels, const int8_t* values) {
   const uint32_t* values_as_words = reinterpret_cast<const uint32_t*>(values);
   size_t filter_words =
       FILTER_WIDTH * FILTER_HEIGHT / 4 * in_channels * out_channels;
-  cfu_set_sw(REG_FILTER_NUM_WORDS, filter_words);
+  cfu_set(REG_FILTER_NUM_WORDS, filter_words);
   const uint32_t* end = values_as_words + filter_words;
   while (values_as_words != end) {
-    cfu_set_sw(REG_SET_FILTER, *values_as_words++);
+    cfu_set(REG_SET_FILTER, *values_as_words++);
   }
 }
 
 Vector16 GetFilter() {
-  uint32_t word0 = cfu_get_sw(REG_FILTER_0);
-  uint32_t word1 = cfu_get_sw(REG_FILTER_1);
-  uint32_t word2 = cfu_get_sw(REG_FILTER_2);
-  uint32_t word3 = cfu_get_sw(REG_FILTER_3);
+  uint32_t word0 = cfu_get(REG_FILTER_0);
+  uint32_t word1 = cfu_get(REG_FILTER_1);
+  uint32_t word2 = cfu_get(REG_FILTER_2);
+  uint32_t word3 = cfu_get(REG_FILTER_3);
   return Vector16{{word0, word1, word2, word3}};
 }
 

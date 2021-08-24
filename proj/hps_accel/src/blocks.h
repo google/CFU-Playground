@@ -27,14 +27,6 @@ namespace hps_accel {
 constexpr size_t FILTER_WIDTH = 4;
 constexpr size_t FILTER_HEIGHT = 4;
 
-// Maximum number of words in filter
-// TODO: this has to come down to ~ 2k and then change code to make batches to
-// match
-constexpr size_t MAX_FILTER_WORDS = 16384;
-
-// Maximum number of words in input
-constexpr size_t MAX_INPUT_WORDS = 256;
-
 // Encodes 16 signed 8-bit values in a 4x32 bit words
 struct Vector16 {
   // Each 32 bit value holds four 8 bit signed values, in little endian order.
