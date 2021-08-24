@@ -89,6 +89,8 @@ void ConvPerChannel4x4(
     filter_load_needed = true;
   }
 
+  hps_accel::LoadInputOffset(input_offset);
+
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
       const int in_y_origin = out_y * stride_height;
@@ -119,7 +121,7 @@ void ConvPerChannel4x4(
           for (int i = 0; i < filter_height * filter_width * input_depth / 16; ++i) {
             Vector16 input = hps_accel::GetInput();
             Vector16 filter = hps_accel::GetFilter();
-            acc += multiply_accumulate(input, filter, input_offset);
+            acc += multiply_accumulate(input, filter);
             hps_accel::AdvanceFilterInput();
           }
 

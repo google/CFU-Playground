@@ -58,8 +58,7 @@ struct Vector16 {
 };
 
 // Performs a 4x4 matrix multiply-accumulate operation
-int32_t multiply_accumulate(Vector16 input, Vector16 filter,
-                            int32_t input_offset);
+int32_t multiply_accumulate(Vector16 input, Vector16 filter);
 
 // Loads 4x4 filter values into global filter storage.
 //
@@ -77,6 +76,10 @@ void LoadFilter(size_t in_channels, size_t out_channels, const int8_t* values);
 // Iterates through filters for each input channel within x, within y within
 // output_channel and restarts from beginning when it reaches the end
 Vector16 GetFilter();
+
+// Loads a single input offset value into global storage.
+// This offset is applied to every multiply_accumulate() operation.
+void LoadInputOffset(int32_t value);
 
 // Loads 4x4 pixels of input values into global input storage.
 //
