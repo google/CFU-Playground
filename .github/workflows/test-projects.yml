@@ -77,7 +77,7 @@ jobs:
 
     - name: Run tests
       timeout-minutes: 5
-      uses: antmicro/renode-actions/test-in-renode@main
+      uses: antmicro/renode-test-action@v1.0.0
       with:
         renode-version: '1.12.0+20210403git44d6786'
         tests-to-run: proj/${{ matrix.proj_name }}/build/renode/${{ matrix.target }}.robot
