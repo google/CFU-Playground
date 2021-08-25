@@ -99,6 +99,10 @@ class SinglePortMemory(SimpleElaboratable):
       For each packet sent on this sink, one word will be read.
 
     read_data_output: Stream[data], out
+      Data that has been read.
+
+    reset: Signal, in
+      Toggle high to reset all state, excepting actual content of memry.
 
     TODO: This same interface would work for pseudo-dual port memory.
           Refactor.
@@ -109,6 +113,7 @@ class SinglePortMemory(SimpleElaboratable):
         self.write_input = params.make_write_stream()
         self.read_addr_input = params.make_read_addr_stream()
         self.read_data_output = params.make_read_data_stream()
+        self.reset = Signal()
 
     def elab(self, m: Module):
         memory = Memory(depth=self.params.depth, width=self.params.width)
@@ -143,3 +148,6 @@ class SinglePortMemory(SimpleElaboratable):
         # Only accept reads if no write in progress and able to output
         m.d.comb += self.read_addr_input.ready.eq(
             ~self.write_input.valid & self.read_data_output.ready)
+
+        # Pass through reset signal
+        m.d.comb += buffer.reset.eq(self.reset)

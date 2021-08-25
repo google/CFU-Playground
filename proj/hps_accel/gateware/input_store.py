@@ -120,7 +120,8 @@ class InputStore(SimpleElaboratable):
                 m.d.sync += num_words.eq(0)
                 m.d.sync += index.eq(0)
                 m.d.sync += read_required.eq(0)
-                # TODO: reset memories
+                for mem in memories:
+                    m.d.comb += mem.reset.eq(1)
                 m.next = "NUM_WORDS"
             with m.State("NUM_WORDS"):
                 m.d.comb += self.num_words_input.ready.eq(1)

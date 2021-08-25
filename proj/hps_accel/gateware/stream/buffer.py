@@ -28,11 +28,31 @@ class Buffer(SimpleElaboratable):
 
     Typically, such a buffer might be placed after a single cycle
     pipeline process.
+
+    Parameters
+    ----------
+
+    payload_type:
+      Type of the payload. Typically a Shape or Layout.
+
+
+    Attributes
+    ----------
+
+    input: Endpoint(payload_type), in
+      Inbound stream.
+
+    output: Endpoint(payload_type), out
+      Outbound stream.
+
+    reset: Signal()
+      Set high to reset this buffer. Set low to enable buffer.
     """
 
     def __init__(self, payload_type):
         self.input = Endpoint(payload_type)
         self.output = Endpoint(payload_type)
+        self.reset = Signal()
 
     def elab(self, m: Module):
         buffering = Signal()  # True if there is a value being buffered
@@ -57,3 +77,8 @@ class Buffer(SimpleElaboratable):
                 m.d.sync += buffered_value.eq(self.input.payload)
             with m.Else():
                 m.d.sync += buffering.eq(False)
+
+        # Reset all state
+        with m.If(self.reset):
+            m.d.sync += buffering.eq(False)
+            m.d.sync += buffered_value.eq(0)
