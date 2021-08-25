@@ -18,7 +18,7 @@ from nmigen.hdl.dsl import Module
 from nmigen.hdl.rec import Layout, Record
 from nmigen.sim.core import Delay
 
-from .stream import StreamDefinition, Stream, connect
+from .stream import Endpoint, connect
 
 from nmigen_cfu.util import SimpleElaboratable, TestBase
 
@@ -35,7 +35,7 @@ class DataProducer(SimpleElaboratable):
     def __init__(self):
         self.next = Signal()
         self.test_data = Record(TEST_PAYLOAD_LAYOUT)
-        self.output = Stream(payload_type=TEST_PAYLOAD_LAYOUT)
+        self.output = Endpoint(TEST_PAYLOAD_LAYOUT)
 
     def elab(self, m):
         # Assert valid if new test_data available
@@ -58,7 +58,7 @@ class DataConsumer(SimpleElaboratable):
     def __init__(self):
         self.ready = Signal()
         self.transferred = Signal()
-        self.input = Stream(payload_type=TEST_PAYLOAD_LAYOUT)
+        self.input = Endpoint(TEST_PAYLOAD_LAYOUT)
         self.one_out = Signal(32)
         self.two_out = Signal(32)
 

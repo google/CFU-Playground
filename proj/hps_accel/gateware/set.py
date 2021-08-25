@@ -18,7 +18,7 @@ from nmigen_cfu import InstructionBase
 from util import SimpleElaboratable
 
 from .constants import Constants
-from .stream import Stream, connect
+from .stream import Endpoint, connect
 
 
 class ConfigurationRegister(SimpleElaboratable):
@@ -29,7 +29,7 @@ class ConfigurationRegister(SimpleElaboratable):
     Attributes
     ----------
 
-    output: Source(unsigned(32))
+    output: Endpoint(unsigned(32))
       An output stream of values. A new value onto the stream whenever
       the register is set.
 
@@ -45,7 +45,7 @@ class ConfigurationRegister(SimpleElaboratable):
 
     def __init__(self):
         super().__init__()
-        self.output = Stream(unsigned(32))
+        self.output = Endpoint(unsigned(32))
         self.value = self.output.payload
         self.new_en = Signal()
         self.new_value = Signal(32)
@@ -67,7 +67,7 @@ class SetInstruction(InstructionBase):
     Attributes
     ----------
 
-    output_streams: dict[id, Source[unsigned(32)]], out
+    output_streams: dict[id, Endpoint[unsigned(32)]], out
       Value output for each register.
     values: dict[id, unsigned(32)], out
       Values as set into registers.
@@ -92,7 +92,7 @@ class SetInstruction(InstructionBase):
 
     def __init__(self):
         super().__init__()
-        self.output_streams = {i: Stream(unsigned(32)) for i in self.REGISTER_IDS}
+        self.output_streams = {i: Endpoint(unsigned(32)) for i in self.REGISTER_IDS}
         self.values = {i: Signal(32) for i in self.REGISTER_IDS}
 
     def elab(self, m: Module):

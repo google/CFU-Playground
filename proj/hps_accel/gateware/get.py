@@ -18,7 +18,7 @@ from nmigen.hdl.dsl import Module
 from nmigen_cfu import InstructionBase
 from util import SimpleElaboratable, ValueBuffer
 from .constants import Constants
-from .stream import Stream, connect
+from .stream import Endpoint, connect
 
 
 class StatusRegister(SimpleElaboratable):
@@ -36,7 +36,7 @@ class StatusRegister(SimpleElaboratable):
     Attributes
     ----------
 
-    input: Stream(unsigned(32)), in
+    input: Endpoint(unsigned(32)), in
       A stream of new values. "ready" is always asserted because the
       register is always ready to receive new data.
 
@@ -54,7 +54,7 @@ class StatusRegister(SimpleElaboratable):
 
     def __init__(self, valid_at_reset=True):
         super().__init__()
-        self.input = Stream(unsigned(32))
+        self.input = Endpoint(unsigned(32))
         self.invalidate = Signal()
         self.valid = Signal(reset=valid_at_reset)
         self.value = Signal(32)
@@ -76,7 +76,7 @@ class GetInstruction(InstructionBase):
     Attributes
     ----------
 
-    input_streams: dict[id, Stream[unsigned(32)]], in
+    input_streams: dict[id, Endpoint[unsigned(32)]], in
       Input value streams for each register.
 
     read_strobes: dict[id, Signal(1)], out
@@ -108,7 +108,7 @@ class GetInstruction(InstructionBase):
         self.invalidates = {}
         self.read_strobes = {}
         for i in self.REGISTER_IDS:
-            self.input_streams[i] = Stream(unsigned(32), name=f"sink_{i:02x}")
+            self.input_streams[i] = Endpoint(unsigned(32), name=f"sink_{i:02x}")
             self.invalidates[i] = Signal(name=f"clear_{i:02x}")
             self.read_strobes[i] = Signal(name=f"read_strobe_{i:02x}")
 

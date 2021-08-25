@@ -61,4 +61,4 @@ Major differences from LiteX Streams:
 """
 
 from .actor import BinaryCombinatorialActor
-from .stream import Stream, StreamDefinition, connect
+from .stream import Endpoint, PayloadDefinition, connect

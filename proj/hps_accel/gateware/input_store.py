@@ -17,7 +17,7 @@ from nmigen_cfu.util import SimpleElaboratable
 from nmigen import unsigned, Signal, Module, Array, Mux
 
 from .constants import Constants
-from .stream import Stream, connect
+from .stream import Endpoint, connect
 from .sp_mem import MemoryParameters, SinglePortMemory
 
 
@@ -33,25 +33,25 @@ class InputStore(SimpleElaboratable):
     Attributes
     ----------
 
-    input: Stream(unsigned(32)), in
+    input: Endpoint(unsigned(32)), in
       Words written to input are set into the input store.
 
     next: Signal(), in
       Causes the next four words to be displayed at the output.
 
-    num_words: Stream(unsigned(32)), in
+    num_words: Endpoint(unsigned(32)), in
       Number of words in input. When set, resets internal storage.
 
-    output: list of 4 Stream(unsigned(32)), out
+    output: list of 4 Endpoint(unsigned(32)), out
       The four words of output.
 
     """
 
     def __init__(self):
-        self.input = Stream(unsigned(32))
+        self.input = Endpoint(unsigned(32))
         self.next = Signal()
-        self.num_words = Stream(unsigned(32))
-        self.output = [Stream(unsigned(32), name=f"output_{i}")
+        self.num_words = Endpoint(unsigned(32))
+        self.output = [Endpoint(unsigned(32), name=f"output_{i}")
                        for i in range(4)]
 
     def elab(self, m: Module):

@@ -16,7 +16,7 @@
 from migen import Module
 from util import SimpleElaboratable
 
-from .stream import StreamDefinition, Stream
+from .stream import PayloadDefinition, Endpoint
 
 
 class BinaryActor(SimpleElaboratable):
@@ -43,11 +43,10 @@ class BinaryActor(SimpleElaboratable):
     """
 
     def __init__(self, input_type, output_type):
-        self.input_type = StreamDefinition.cast(input_type, ignores_valid=True)
-        self.output_type = StreamDefinition.cast(
-            output_type, ignores_ready=True)
-        self.input = Stream(input_type)
-        self.output = Stream(output_type)
+        self.input_type = PayloadDefinition.cast(input_type)
+        self.output_type = PayloadDefinition.cast(output_type)
+        self.input = Endpoint(input_type)
+        self.output = Endpoint(output_type)
 
     def elab(self, m: Module):
         self.control(m)

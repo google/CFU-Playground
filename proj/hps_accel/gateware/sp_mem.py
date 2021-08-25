@@ -20,7 +20,7 @@ from nmigen.hdl.mem import Memory
 from nmigen.hdl.rec import DIR_FANOUT, Layout
 from nmigen_cfu.util import SimpleElaboratable, ValueBuffer
 
-from .stream import Stream, StreamDefinition
+from .stream import Endpoint
 
 
 class MemoryParameters:
@@ -57,13 +57,13 @@ class MemoryParameters:
         ])
 
     def make_write_stream(self):
-        return Stream(self.write_stream_payload_type(), src_loc_at=1)
+        return Endpoint(self.write_stream_payload_type(), src_loc_at=1)
 
     def make_read_addr_stream(self):
-        return Stream(self.addr_shape(), src_loc_at=1)
+        return Endpoint(self.addr_shape(), src_loc_at=1)
 
     def make_read_data_stream(self):
-        return Stream(self.data_shape(), src_loc_at=1)
+        return Endpoint(self.data_shape(), src_loc_at=1)
 
 
 class SinglePortMemory(SimpleElaboratable):
