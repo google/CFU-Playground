@@ -71,10 +71,23 @@ void ConvPerChannel4x4(
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
 
+  // Our filter store is of limited size.
+  // First, figure out how many output channels' worth we can fit.
+  bool filter_load_needed;
   TFLITE_DCHECK_LE(
-      input_depth * filter_height * filter_width * output_depth / 4,
+      input_depth * filter_height * filter_width / 4,
       MAX_FILTER_WORDS);
-  hps_accel::LoadFilter(input_depth, output_depth, filter_data);
+  const int out_channels_per_filter_load = MAX_FILTER_WORDS /
+      (input_depth * filter_height * filter_width / 4);
+  if (out_channels_per_filter_load >= output_depth) {
+    // We can fit everything in at once.
+    // Load filter values now and reuse them for every iteration.
+    hps_accel::LoadFilter(input_depth, output_depth, filter_data);
+    filter_load_needed = false;
+  } else {
+    // We must periodically load filter values inside the loop below.
+    filter_load_needed = true;
+  }
 
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
@@ -94,6 +107,14 @@ void ConvPerChannel4x4(
         hps_accel::LoadInput(input_width, input_depth, current_input_data);
 
         for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
+          if (filter_load_needed &&
+              out_channel % out_channels_per_filter_load == 0) {
+            const int8_t *current_filter_data = filter_data +
+                Offset(filter_shape, out_channel, 0, 0, 0);
+            hps_accel::LoadFilter(input_depth, out_channels_per_filter_load,
+                                  current_filter_data);
+          }
+
           int32_t acc = 0;
           for (int i = 0; i < filter_height * filter_width * input_depth / 16; ++i) {
             Vector16 input = hps_accel::GetInput();

@@ -98,9 +98,7 @@ class Constants:
     # Size limits
 
     # Maximum number of words in filter
-    # TODO: this has to come down to ~ 2k and then change code to make batches
-    # to match
-    MAX_FILTER_WORDS = 16384
+    MAX_FILTER_WORDS = 2048
 
     # Maximum number of words in input
     MAX_INPUT_WORDS = 256
