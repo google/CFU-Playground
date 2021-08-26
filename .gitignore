@@ -80,6 +80,7 @@ csr.csv
 # VSCode files
 *.code-workspace
 .vscode/*
+.env
 
 # Renode setup
 third_party/renode
