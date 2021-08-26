@@ -14,8 +14,7 @@
 
 from nmigen import Signal, unsigned
 from nmigen.hdl.dsl import Module
-from nmigen_cfu import InstructionBase
-from util import SimpleElaboratable
+from nmigen_cfu import InstructionBase, SimpleElaboratable
 
 from .constants import Constants
 from .stream import Sink, Source, glue_sources

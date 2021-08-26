@@ -15,8 +15,7 @@
 
 from nmigen import Array, Signal, Mux, Cat
 
-from nmigen_cfu import SimpleElaboratable, is_pysim_run
-from util import DualPortMemory, SequentialMemoryReader
+from nmigen_cfu import SimpleElaboratable, is_pysim_run, DualPortMemory, SequentialMemoryReader
 
 from .registerfile import Xetter
 

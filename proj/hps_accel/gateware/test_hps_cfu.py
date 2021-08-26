@@ -14,8 +14,7 @@
 
 from random import seed, randint
 
-from nmigen_cfu import CfuTestBase, InstructionTestBase
-from util import pack_vals
+from nmigen_cfu import CfuTestBase, InstructionTestBase, pack_vals
 
 from .constants import Constants
 from .hps_cfu import PingInstruction, make_cfu

@@ -13,8 +13,7 @@
 # limitations under the License.
 
 from nmigen import Cat, Signal, unsigned
-from nmigen_cfu import Cfu, InstructionBase
-from util import all_words
+from nmigen_cfu import Cfu, InstructionBase, all_words
 
 from .constants import Constants
 from .filter_store import FilterStore

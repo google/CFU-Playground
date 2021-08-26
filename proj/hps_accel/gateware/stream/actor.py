@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from migen import Module
-from util import SimpleElaboratable
+from nmigen_cfu import SimpleElaboratable
 
 from .stream import Sink, Source
 
