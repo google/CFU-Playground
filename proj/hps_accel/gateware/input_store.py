@@ -38,7 +38,7 @@ class InputStore(SimpleElaboratable):
     Attributes
     ----------
 
-    data-input: Endpoint(unsigned(32)), in
+    data_input: Endpoint(unsigned(32)), in
       Words written to input are set into the input store.
 
     next: Signal(), in

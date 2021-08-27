@@ -111,4 +111,4 @@ class SinglePortMemoryTest(TestBase):
                     if rds_data is not None:
                         self.assertEqual((yield self.dut.read_data_output.payload), rds_data)
                     yield
-        self.run_sim(process, True)
+        self.run_sim(process, False)

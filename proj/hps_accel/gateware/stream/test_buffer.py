@@ -23,11 +23,7 @@ from .buffer import Buffer
 
 
 class TestBuffer(TestBase):
-    """Tests for basic Sink and Source functionality.
-
-    There's really not much functionality to test so this test mostly functions
-    as a proof of concept of the API.
-    """
+    """Tests the Buffer class. """
 
     def create_dut(self):
         return Buffer(unsigned(32))
