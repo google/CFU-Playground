@@ -54,7 +54,9 @@ bool test_multiply(Vector16 input, Vector16 filter, int32_t input_offset,
                    int32_t expected) {
   printf(".");
   hps_accel::LoadInputOffset(input_offset);
-  int32_t actual = multiply_accumulate(input, filter);
+  hps_accel::LoadFilter(1, 1, reinterpret_cast<const int8_t *>(filter.values));
+  hps_accel::LoadInput(1, 4, reinterpret_cast<const int8_t *>(input.values));
+  int32_t actual = multiply_accumulate();
   if (actual == expected) {
     return true;
   }

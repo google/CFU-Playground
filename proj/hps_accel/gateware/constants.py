@@ -69,18 +69,6 @@ class Constants:
     # for both the filter store and the input store.
     REG_FILTER_INPUT_NEXT = 0x1f
 
-    # Set input values to multiply-accumulate unit
-    REG_MACC_INPUT_0 = 0x20
-    REG_MACC_INPUT_1 = 0x21
-    REG_MACC_INPUT_2 = 0x22
-    REG_MACC_INPUT_3 = 0x23
-
-    # Set input values to multiply-accumulate unit
-    REG_MACC_FILTER_0 = 0x28
-    REG_MACC_FILTER_1 = 0x29
-    REG_MACC_FILTER_2 = 0x2a
-    REG_MACC_FILTER_3 = 0x2b
-
     # Retrieve result from multiply-accumulate unit
     REG_MACC_OUT = 0x30
 
