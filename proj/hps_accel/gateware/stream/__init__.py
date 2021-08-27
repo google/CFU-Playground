@@ -17,32 +17,37 @@ __doc__ = """A Stream abstraction
 
 Streams allows data to be transferred from one component to another.
 
-A stream of data consists of a series of packets transferred from a Source
-to a Sink. Each packet contains one Payload. A stream of packets may optionally
-be organized into Frames.
+A stream of data consists of a series of payloads transferred from an
+upstream (aka producer or source) to a downstream (aka consumer or
+sink). Each packet contains one payload. 
 
-Source and Sink operate in the same clock domain. They communicate with these
-signals:
+The upstream and downstream must operate in the same clock domain. They
+communicate with these signals:
 
-- payload: The data to be transferred. This may be a simple Signal or else a
-           Record.
-- valid: Set by source to indicate that a valid payload is being presented.
-- ready: Set by sink to indicate that it is ready to accept a packet.
-- last: Indicates the end of a frame.
+- payload: The data to be transferred. This may be a simple Signal or
+  else a Record. Set by upstream.
+- valid: Set by upstream to indicate that a valid payload is being
+  presented.
+- ready: Set by downstream to indicate that it is ready to accept a
+  packet.
 
-A transfer takes place when both of the valid and ready signals are asserted on
-the same clock cycle. This handshake allows for a simple flow control - Sources
-are able to request that Sinks wait for data, and Sinks are able to request for
-Sources to temporarily stop producing data.
+A transfer takes place when both of the valid and ready signals are
+asserted on the same clock cycle. This handshake allows for a simple
+flow control - upstreams are able to request that downstreams wait for
+data, and downstreams are able to request for upstreams to pause data
+production.
 
-There are cases where a Source or a Sink may not be able to wait for a
-valid-ready handshake. For example, a video phy sink may require valid data be
-presented at every clock cycle in order to generate a signal for a monitor. If
-a Source or Sink cannot wait for a transfer, it should be make the behavior
-clear in its interface documentation.
+In order to ensure that there are no combinatorial cycles between
+pipelines, the valid signal of a stream must not combinatorially
+depend on the stream's ready signal. As a general principle, it is
+also useful to avoid having ready combinatorially depend on the
+stream's valid Signal.
 
-The use of frames - and hence the "last" signal, is optional and must be agreed
-between Source and Sink.
+There are cases where an upstream or downstream may not be able to
+wait for a valid-ready handshake. For example, a video phy sink may
+require valid data be presented at every clock cycle in order to
+generate a signal for a monitor. If an upstream or downstream cannot
+wait for a handshake, it declares this in its Definition.
 
 This implementation was heavily influenced by the discussion at
 https://github.com/nmigen/nmigen/issues/317, and especially the existing design
@@ -51,13 +56,9 @@ manipulation.
 
 Major differences from LiteX Streams:
 
--  Source and Sink are distinct types. They share a common superclass for
-   implementation purposes, but this is not exposed in the API.
--  A "payload_type" attribute contains the type of the payload.
--  "Parameters" are omitted. The value of parameters as a general mechanism is
-   unclear.
--  "first" is omitted. A "first" signal can be derived from the "last" signal.
+-  There are no "first" or "last" signals.
+-  The payload is a single signal or Record named "payload".
 """
 
 from .actor import BinaryCombinatorialActor
-from .stream import Sink, Source, glue_sources, glue_sinks
+from .stream import Endpoint, PayloadDefinition, connect

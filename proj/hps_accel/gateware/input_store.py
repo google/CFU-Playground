@@ -17,7 +17,7 @@ from nmigen_cfu.util import SimpleElaboratable
 from nmigen import unsigned, Signal, Module, Array, Mux
 
 from .constants import Constants
-from .stream import Sink, Source, glue_sources
+from .stream import Endpoint, connect
 from .sp_mem import MemoryParameters, SinglePortMemory
 
 
@@ -33,25 +33,25 @@ class InputStore(SimpleElaboratable):
     Attributes
     ----------
 
-    input: Sink(unsigned(32)), in
+    input: Endpoint(unsigned(32)), in
       Words written to input are set into the input store.
 
     next: Signal(), in
       Causes the next four words to be displayed at the output.
 
-    num_words: Sink(unsigned(32)), in
+    num_words: Endpoint(unsigned(32)), in
       Number of words in input. When set, resets internal storage.
 
-    output: list of 4 Source(unsigned(32)), out
+    output: list of 4 Endpoint(unsigned(32)), out
       The four words of output.
 
     """
 
     def __init__(self):
-        self.input = Sink(unsigned(32))
+        self.input = Endpoint(unsigned(32))
         self.next = Signal()
-        self.num_words = Sink(unsigned(32))
-        self.output = [Source(unsigned(32), name=f"output_{i}")
+        self.num_words = Endpoint(unsigned(32))
+        self.output = [Endpoint(unsigned(32), name=f"output_{i}")
                        for i in range(4)]
 
     def elab(self, m: Module):
@@ -67,13 +67,13 @@ class InputStore(SimpleElaboratable):
         for n, memory in enumerate(memories):
             m.submodules[f"mem_{n}"] = memory
 
-        # On read from input sink
+        # On read from input stream
         m.d.comb += self.input.ready.eq(1)
         for memory in memories:
-            m.d.comb += memory.write_sink.payload.addr.eq(write_index[2:])
-            m.d.comb += memory.write_sink.payload.data.eq(self.input.payload),
+            m.d.comb += memory.write_input.payload.addr.eq(write_index[2:])
+            m.d.comb += memory.write_input.payload.data.eq(self.input.payload),
         with m.If(self.input.is_transferring()):
-            m.d.comb += memories[write_index[:2]].write_sink.valid.eq(1),
+            m.d.comb += memories[write_index[:2]].write_input.valid.eq(1),
             with m.If(write_index == max_index - 1):
                 # On last word write, wrap back to zero and cause a pre-emptive
                 # read
@@ -82,16 +82,16 @@ class InputStore(SimpleElaboratable):
             with m.Else():
                 m.d.sync += write_index.eq(write_index + 1)
 
-        # When read_required, push new values down output sinks
+        # When read_required, push new values to output streams
         for n, memory in enumerate(memories):
-            m.d.comb += glue_sources(memory.read_data_source, self.output[n])
-            addr_sink = memory.read_addr_sink
-            m.d.sync += addr_sink.payload.eq(read_index[2:])
+            m.d.comb += connect(memory.read_data_output, self.output[n])
+            addr_stream = memory.read_addr_input
+            m.d.sync += addr_stream.payload.eq(read_index[2:])
             with m.If(read_required):
-                m.d.sync += addr_sink.valid.eq(1)
+                m.d.sync += addr_stream.valid.eq(1)
                 m.d.sync += read_required.eq(0)
-            with m.Elif(addr_sink.is_transferring()):
-                m.d.sync += addr_sink.valid.eq(0)
+            with m.Elif(addr_stream.is_transferring()):
+                m.d.sync += addr_stream.valid.eq(0)
 
         # On "next" signal cause next words to be read by setting read_required
         with m.If(self.next):
@@ -99,7 +99,7 @@ class InputStore(SimpleElaboratable):
             m.d.sync += read_index.eq(Mux(read_index ==
                                       max_index - 4, 0, read_index + 4))
 
-        # Read the value of max_index from num_words sink
+        # Read the value of max_index from num_words stream
         # Reset read and write index too
         m.d.comb += self.num_words.ready.eq(1)
         with m.If(self.num_words.valid):

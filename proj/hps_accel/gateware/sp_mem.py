@@ -20,13 +20,14 @@ from nmigen.hdl.mem import Memory
 from nmigen.hdl.rec import DIR_FANOUT, Layout
 from nmigen_cfu.util import SimpleElaboratable, ValueBuffer
 
-from .stream import Sink, Source
+from .stream import Endpoint
 
 
 class MemoryParameters:
     """Defines a memory.
 
-    Also has convenience functions for defining the Sinks and Sources used in a Memory interface.
+    Also has convenience functions for defining the Streams used in the
+     Memory interface.
     """
 
     def __init__(self, *, width, depth):
@@ -55,37 +56,32 @@ class MemoryParameters:
             ("data", self.data_shape(), DIR_FANOUT),
         ])
 
-    def make_write_sink(self):
-        return Sink(self.write_stream_payload_type(), src_loc_at=1)
+    def make_write_stream(self):
+        return Endpoint(self.write_stream_payload_type(), src_loc_at=1)
 
-    def make_write_source(self):
-        return Source(self.write_stream_payload_type(), src_loc_at=1)
+    def make_read_addr_stream(self):
+        return Endpoint(self.addr_shape(), src_loc_at=1)
 
-    def make_read_addr_sink(self):
-        return Sink(self.addr_shape(), src_loc_at=1)
-
-    def make_read_addr_source(self):
-        return Source(self.addr_shape(), src_loc_at=1)
-
-    def make_read_data_sink(self):
-        return Sink(self.data_shape(), src_loc_at=1)
-
-    def make_read_data_source(self):
-        return Source(self.data_shape(), src_loc_at=1)
+    def make_read_data_stream(self):
+        return Endpoint(self.data_shape(), src_loc_at=1)
 
 
 class SinglePortMemory(SimpleElaboratable):
     """A single port memory with stream interfaces.
 
-    Data is written via the memory's write_sink, which has a payload of
+    Data is written via the memory's write_input, which has a payload of
     the data to write and the address to write it to.
 
-    Data is read via the memory's read_addr_sink and read_data_source.
-    For each address sent to the sink, one word is returned on the
-    source.
+    Data is read via the memory's read_addr_input and read_data_output.
+    For each address sent to the input, one word is returned on the
+    output.
 
-    Writes have priority over reads. The read addr sink will not become
-    ready if there is unread data waiting to be transferred.
+    Writes have priority over reads. The read addr input will not become
+    ready if there is a write in progress or unread data waiting to be
+    transferred. 
+    
+    TODO: change so that reads do on combinatorially block on writes - it
+    introduces a potentially long combinatorial path.
 
     Parameters
     ----------
@@ -95,14 +91,14 @@ class SinglePortMemory(SimpleElaboratable):
     Attributes
     ----------
 
-    write_sink: Sink[addr, data]
+    write_input: Stream[addr, data], in
       For each packet sent on this sink, one word will be written to
       the memory.
 
-    read_addr_sink: Sink[addr]
+    read_addr_input: Stream[addr], in
       For each packet sent on this sink, one word will be read.
 
-    read_data_source: Source[data]
+    read_data_output: Stream[data], out
 
     TODO: This same interface would work for pseudo-dual port memory.
           Refactor.
@@ -110,9 +106,9 @@ class SinglePortMemory(SimpleElaboratable):
 
     def __init__(self, params: MemoryParameters):
         self.params = params
-        self.write_sink = params.make_write_sink()
-        self.read_addr_sink = params.make_read_addr_sink()
-        self.read_data_source = params.make_read_data_source()
+        self.write_input = params.make_write_stream()
+        self.read_addr_input = params.make_read_addr_stream()
+        self.read_data_output = params.make_read_data_stream()
 
     def elab(self, m: Module):
         memory = Memory(depth=self.params.depth, width=self.params.width)
@@ -122,49 +118,49 @@ class SinglePortMemory(SimpleElaboratable):
 
         # Write sink always ready to write - set address and data directly
         # to memory.
-        m.d.comb += self.write_sink.ready.eq(1)
-        with m.If(self.write_sink.is_transferring()):
+        m.d.comb += self.write_input.ready.eq(1)
+        with m.If(self.write_input.is_transferring()):
             m.d.comb += [
                 write_port.en.eq(1),
-                write_port.addr.eq(self.write_sink.payload.addr),
-                write_port.data.eq(self.write_sink.payload.data),
+                write_port.addr.eq(self.write_input.payload.addr),
+                write_port.data.eq(self.write_input.payload.data),
             ]
 
         m.d.comb += read_port.en.eq(~write_port.en)
-        m.d.comb += read_port.addr.eq(self.read_addr_sink.payload)
+        m.d.comb += read_port.addr.eq(self.read_addr_input.payload)
 
         # Remember whether we got a new address
         read_addr_did_transfer = Signal()
         m.d.sync += read_addr_did_transfer.eq(
-            self.read_addr_sink.is_transferring())
+            self.read_addr_input.is_transferring())
 
         # If we got a new address last cycle, then we have new data on read_port.data.
         # Save data and mark it valid, if it was not immediately transferred
         # out the source
-        saved_data = Signal.like(self.read_data_source.payload)
+        saved_data = Signal.like(self.read_data_output.payload)
         saved_data_valid = Signal()
         with m.If(read_addr_did_transfer):
             m.d.sync += [
                 saved_data.eq(read_port.data),
-                saved_data_valid.eq(~self.read_data_source.is_transferring())
+                saved_data_valid.eq(~self.read_data_output.is_transferring())
             ]
 
         # If we got a new address last cycle, then we have new data on read_port.data.
-        # Present it on read_data_source and assert source valid.
+        # Present it on read_data_output and assert source valid.
         # Otherwise present saved_data.
         with m.If(read_addr_did_transfer):
-            m.d.comb += self.read_data_source.payload.eq(read_port.data)
-            m.d.comb += self.read_data_source.valid.eq(1)
+            m.d.comb += self.read_data_output.payload.eq(read_port.data)
+            m.d.comb += self.read_data_output.valid.eq(1)
         with m.Else():
-            m.d.comb += self.read_data_source.payload.eq(saved_data)
-            m.d.comb += self.read_data_source.valid.eq(saved_data_valid)
+            m.d.comb += self.read_data_output.payload.eq(saved_data)
+            m.d.comb += self.read_data_output.valid.eq(saved_data_valid)
 
         # If data transferred out without being new data, mark saved data not
         # valid
-        with m.If(~read_addr_did_transfer & self.read_data_source.is_transferring()):
+        with m.If(~read_addr_did_transfer & self.read_data_output.is_transferring()):
             m.d.sync += saved_data_valid.eq(0)
 
         # Can accept read address iff not writing and not have read data
         # already waiting, unless transferring it out this cycle
-        m.d.comb += self.read_addr_sink.ready.eq(~self.write_sink.is_transferring() & (
-            self.read_data_source.is_transferring() | ~self.read_data_source.valid))
+        m.d.comb += self.read_addr_input.ready.eq(~self.write_input.is_transferring() & (
+            self.read_data_output.is_transferring() | ~self.read_data_output.valid))

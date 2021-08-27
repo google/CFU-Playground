@@ -18,7 +18,7 @@ from nmigen.hdl.dsl import Module
 from nmigen_cfu import InstructionBase
 from util import SimpleElaboratable, ValueBuffer
 from .constants import Constants
-from .stream import Sink, Source, glue_sinks
+from .stream import Endpoint, connect
 
 
 class StatusRegister(SimpleElaboratable):
@@ -31,13 +31,13 @@ class StatusRegister(SimpleElaboratable):
 
     valid_at_reset: bool
       Whether payload is valid at reset or register ought to wait
-      to transfer a value from its sink.
+      to transfer a value from its input stream.
 
     Attributes
     ----------
 
-    sink: Sink(unsigned(32)), in
-      A sink for new values. "ready" is always asserted because the
+    input: Endpoint(unsigned(32)), in
+      A stream of new values. "ready" is always asserted because the
       register is always ready to receive new data.
 
     invalidate: Signal(), in
@@ -54,17 +54,17 @@ class StatusRegister(SimpleElaboratable):
 
     def __init__(self, valid_at_reset=True):
         super().__init__()
-        self.sink = Sink(unsigned(32))
+        self.input = Endpoint(unsigned(32))
         self.invalidate = Signal()
         self.valid = Signal(reset=valid_at_reset)
         self.value = Signal(32)
 
     def elab(self, m):
-        m.d.comb += self.sink.ready.eq(1)
+        m.d.comb += self.input.ready.eq(1)
         with m.If(self.invalidate):
             m.d.sync += self.valid.eq(0)
-        with m.If(self.sink.is_transferring()):
-            m.d.sync += self.value.eq(self.sink.payload)
+        with m.If(self.input.is_transferring()):
+            m.d.sync += self.value.eq(self.input.payload)
             m.d.sync += self.valid.eq(1)
 
 
@@ -76,8 +76,8 @@ class GetInstruction(InstructionBase):
     Attributes
     ----------
 
-    sinks: dict[id, Sink[unsigned(32)]], in
-      Value sinks for each register.
+    input_streams: dict[id, Endpoint[unsigned(32)]], in
+      Input value streams for each register.
 
     read_strobes: dict[id, Signal(1)], out
       Asserted for one cycle when the corresponding register id is read.
@@ -104,11 +104,11 @@ class GetInstruction(InstructionBase):
 
     def __init__(self):
         super().__init__()
-        self.sinks = {}
+        self.input_streams = {}
         self.invalidates = {}
         self.read_strobes = {}
         for i in self.REGISTER_IDS:
-            self.sinks[i] = Sink(unsigned(32), name=f"sink_{i:02x}")
+            self.input_streams[i] = Endpoint(unsigned(32), name=f"sink_{i:02x}")
             self.invalidates[i] = Signal(name=f"clear_{i:02x}")
             self.read_strobes[i] = Signal(name=f"read_strobe_{i:02x}")
 
@@ -136,7 +136,7 @@ class GetInstruction(InstructionBase):
                      for i in self.REGISTER_IDS}
         for i, register in registers.items():
             m.submodules[f"reg_{i:02x}"] = register
-            m.d.comb += glue_sinks(self.sinks[i], register.sink)
+            m.d.comb += connect(self.input_streams[i], register.input)
             m.d.comb += register.invalidate.eq(self.invalidates[i])
             m.d.sync += self.read_strobes[i].eq(0)  # strobes off by default
 

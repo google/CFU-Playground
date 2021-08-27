@@ -60,12 +60,13 @@ class ConfigurationRegisterTest(TestBase):
                     new_en, new_value, ready = inputs
                     yield self.dut.new_en.eq(new_en)
                     yield self.dut.new_value.eq(new_value)
-                    yield self.dut.source.ready.eq(ready)
+                    yield self.dut.output.ready.eq(ready)
                     yield Delay(0.25)
                     valid, value = expected
-                    self.assertEqual((yield self.dut.source.valid), valid)
+                    self.assertEqual((yield self.dut.output.valid), valid)
                     self.assertEqual((yield self.dut.value), value)
-                    self.assertEqual((yield self.dut.source.payload), value)
+                    if valid:
+                        self.assertEqual((yield self.dut.output.payload), value)
                     yield
         self.run_sim(process, False)
 

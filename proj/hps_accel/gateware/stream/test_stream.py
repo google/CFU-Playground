@@ -15,17 +15,17 @@
 
 from nmigen import Signal, Shape
 from nmigen.hdl.dsl import Module
-from nmigen.hdl.rec import Layout, DIR_FANOUT
+from nmigen.hdl.rec import Layout, Record
 from nmigen.sim.core import Delay
 
-from .stream import Source, Sink
+from .stream import Endpoint, connect
 
 from nmigen_cfu.util import SimpleElaboratable, TestBase
 
 
 TEST_PAYLOAD_LAYOUT = Layout([
-    ("one", Shape(32), DIR_FANOUT),
-    ("two", Shape(32), DIR_FANOUT),
+    ("one", Shape(32)),
+    ("two", Shape(32)),
 ])
 
 
@@ -34,21 +34,22 @@ class DataProducer(SimpleElaboratable):
 
     def __init__(self):
         self.next = Signal()
-        self.source = Source(TEST_PAYLOAD_LAYOUT)
-        self.payload = self.source.payload
+        self.test_data = Record(TEST_PAYLOAD_LAYOUT)
+        self.output = Endpoint(TEST_PAYLOAD_LAYOUT)
 
     def elab(self, m):
-        # Assert valid if new value available
+        # Assert valid if new test_data available
         # Deassert on transfer
         data_waiting_to_send = Signal()
+        m.d.comb += self.output.payload.eq(self.test_data)
 
         with m.If(self.next):
             m.d.sync += data_waiting_to_send.eq(1)
 
-        with m.If(self.source.is_transferring()):
+        with m.If(self.output.is_transferring()):
             m.d.sync += data_waiting_to_send.eq(0)
 
-        m.d.comb += self.source.valid.eq(self.next | data_waiting_to_send)
+        m.d.comb += self.output.valid.eq(self.next | data_waiting_to_send)
         
 
 class DataConsumer(SimpleElaboratable):
@@ -57,20 +58,19 @@ class DataConsumer(SimpleElaboratable):
     def __init__(self):
         self.ready = Signal()
         self.transferred = Signal()
-        self.sink = Sink(TEST_PAYLOAD_LAYOUT)
-        self.payload = self.sink.payload
+        self.input = Endpoint(TEST_PAYLOAD_LAYOUT)
         self.one_out = Signal(32)
         self.two_out = Signal(32)
 
     def elab(self, m):
         m.d.comb += [
-            self.sink.ready.eq(self.ready),
-            self.transferred.eq(self.sink.is_transferring()),
+            self.input.ready.eq(self.ready),
+            self.transferred.eq(self.input.is_transferring()),
         ]
         with m.If(self.transferred):
             m.d.sync += [
-                self.one_out.eq(self.payload.one),
-                self.two_out.eq(self.payload.two),
+                self.one_out.eq(self.input.payload.one),
+                self.two_out.eq(self.input.payload.two),
             ]
 
 
@@ -85,7 +85,7 @@ class TestSinkSource(TestBase):
         m = Module()
         m.submodules["producer"] = self.producer = DataProducer()
         m.submodules["consumer"] = self.consumer = DataConsumer()
-        m.d.comb += self.producer.source.connect(self.consumer.sink)
+        m.d.comb += connect(self.producer.output, self.consumer.input)
         return m
 
     def test(self):
@@ -104,8 +104,8 @@ class TestSinkSource(TestBase):
             for n, (inputs, outputs) in enumerate(DATA):
                 next, one_in, two_in, ready = inputs
                 yield self.producer.next.eq(next)
-                yield self.producer.payload.one.eq(one_in)
-                yield self.producer.payload.two.eq(two_in)
+                yield self.producer.test_data.one.eq(one_in)
+                yield self.producer.test_data.two.eq(two_in)
                 yield self.consumer.ready.eq(ready)
                 yield Delay(0.1)
                 transferred, one_out, two_out = outputs

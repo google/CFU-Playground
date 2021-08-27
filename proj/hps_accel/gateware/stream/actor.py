@@ -16,21 +16,21 @@
 from migen import Module
 from util import SimpleElaboratable
 
-from .stream import Sink, Source
+from .stream import PayloadDefinition, Endpoint
 
 
 class BinaryActor(SimpleElaboratable):
     """A binary actor is an object that transforms stream packets.
 
-    It has one sink and one source. Each packet received at the sink
-    has a corresponding packet sent from the source.
+    It has one input stream and one output stream. Each packet received
+    at the input has a corresponding packet sent from the output.
 
     Parameters
     ----------
 
-    input_type: The Shape or Layout for the sink
+    input_type: Defines input stream
 
-    output_type: The Shape or Layout for the source.
+    output_type: Defines output stream
 
     Attributes
     ----------
@@ -43,14 +43,14 @@ class BinaryActor(SimpleElaboratable):
     """
 
     def __init__(self, input_type, output_type):
-        self.input_type = input_type
-        self.output_type = output_type
-        self.sink = Sink(input_type)
-        self.source = Source(output_type)
+        self.input_type = PayloadDefinition.cast(input_type)
+        self.output_type = PayloadDefinition.cast(output_type)
+        self.input = Endpoint(input_type)
+        self.output = Endpoint(output_type)
 
     def elab(self, m: Module):
         self.control(m)
-        self.transform(m, self.sink.payload, self.source.payload)
+        self.transform(m, self.input.payload, self.output.payload)
 
     def control(self, m):
         """Adds flow control to sink and source."""
@@ -60,8 +60,12 @@ class BinaryActor(SimpleElaboratable):
     def transform(self, m, input, output):
         """Transforms input to output.
 
-        input: self.input_type, in
-        output: self.output_type, out
+        m: Module
+          The module for this elaboratable
+        input:
+          The input payload to be transformed
+        output:
+          The transformed value
         """
         raise NotImplementedError(
             "BinaryActor subclass must implement transform()")
@@ -70,8 +74,8 @@ class BinaryActor(SimpleElaboratable):
 class BinaryCombinatorialActor(BinaryActor):
     """Base for a combinatorial binary actor.
 
-    Performs a combinatorial operation on a sink payload and routes it to a
-    source.
+    Performs a combinatorial operation on a input payload to transform
+    it to an output.
 
     Parameters
     ----------
@@ -79,25 +83,14 @@ class BinaryCombinatorialActor(BinaryActor):
     input_type: The Shape or Layout for the sink
 
     output_type: The Shape or Layout for the source.
-
-    Attributes:
-
-    sink: Sink(input_type), in
-      Sink for incoming data
-
-    source: Source(source_type), out
-      Source for outgoing data
     """
 
     def __init__(self, input_type, output_type):
         super().__init__(input_type, output_type)
 
     def control(self, m: Module):
-        m.d.comb += [
-            self.sink.ready.eq(self.source.ready),
-            self.source.valid.eq(self.sink.valid),
-            self.source.last.eq(self.sink.last),
-        ]
+        m.d.comb += self.input.ready.eq(self.output.ready)
+        m.d.comb += self.output.valid.eq(self.input.valid)
 
     def transform(self, m, input, output):
         """Transforms input to output.

@@ -30,15 +30,15 @@ class SinglePortMemoryTest(TestBase):
         A, B, C, D, E, F, G, H, I = range(11, 20)
 
         # Description
-        # ((write_sink.valid,
-        #   write_sink.addr,
-        #   write_sink.data,
-        #   read_addr_sink.valid,
-        #   read_addr_sink.addr,
-        #   read_data_source.ready),
-        # (read_addr_sink.ready,
-        #  read_data_source.valid,
-        #  read_data_source.data)),
+        # ((write_input.valid,
+        #   write_input.addr,
+        #   write_input.data,
+        #   read_addr_input.valid,
+        #   read_addr_input.addr,
+        #   read_data_output.ready),
+        # (read_addr_input.ready,
+        #  read_data_output.valid,
+        #  read_data_output.data)),
         DATA = [
             # Write Addr 11
             ((1, 11, A, 0, XX, 1), (0, 0, X)),
@@ -93,21 +93,21 @@ class SinglePortMemoryTest(TestBase):
             for n, (inputs, expected) in enumerate(DATA):
                 with self.subTest(n=n, inputs=inputs, expected=expected):
                     ws_valid, ws_addr, ws_data, ras_valid, ras_addr, rds_ready = inputs
-                    yield self.dut.write_sink.valid.eq(ws_valid)
+                    yield self.dut.write_input.valid.eq(ws_valid)
                     if ws_addr is not None:
-                        yield self.dut.write_sink.payload.addr.eq(ws_addr)
+                        yield self.dut.write_input.payload.addr.eq(ws_addr)
                     if ws_data is not None:
-                        yield self.dut.write_sink.payload.data.eq(ws_data)
-                    yield self.dut.read_addr_sink.valid.eq(ras_valid)
+                        yield self.dut.write_input.payload.data.eq(ws_data)
+                    yield self.dut.read_addr_input.valid.eq(ras_valid)
                     if ras_addr is not None:
-                        yield self.dut.read_addr_sink.payload.eq(ras_addr)
-                    yield self.dut.read_data_source.ready.eq(rds_ready)
+                        yield self.dut.read_addr_input.payload.eq(ras_addr)
+                    yield self.dut.read_data_output.ready.eq(rds_ready)
                     yield Settle()
                     ras_ready, rds_valid, rds_data = expected
-                    self.assertTrue((yield self.dut.write_sink.ready))
-                    self.assertEqual((yield self.dut.read_addr_sink.ready), ras_ready)
-                    self.assertEqual((yield self.dut.read_data_source.valid), rds_valid)
+                    self.assertTrue((yield self.dut.write_input.ready))
+                    self.assertEqual((yield self.dut.read_addr_input.ready), ras_ready)
+                    self.assertEqual((yield self.dut.read_data_output.valid), rds_valid)
                     if rds_data is not None:
-                        self.assertEqual((yield self.dut.read_data_source.payload), rds_data)
+                        self.assertEqual((yield self.dut.read_data_output.payload), rds_data)
                     yield
         self.run_sim(process, False)
