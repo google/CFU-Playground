@@ -60,11 +60,14 @@ class Constants:
     REG_FILTER_3 = 0x13
 
     # These registers contain values 0-3 of the current input word
-    # Reading REG_INPUT_3 will advance the input store.
     REG_INPUT_0 = 0x18
     REG_INPUT_1 = 0x19
     REG_INPUT_2 = 0x1a
     REG_INPUT_3 = 0x1b
+
+    # A write of any value to this register advances the read index
+    # for both the filter store and the input store.
+    REG_FILTER_INPUT_NEXT = 0x1f
 
     # Set input values to multiply-accumulate unit
     REG_MACC_INPUT_0 = 0x20

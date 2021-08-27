@@ -64,16 +64,17 @@ class Storage {
     len = num_words;
     index = 0;
   }
-  void Store(uint32_t value) { data[index++] = value; }
-  uint32_t Get(size_t n) {
-    if (n == 0 && index >= len) {
+  void Store(uint32_t value) {
+    data[index++] = value;
+    if (index >= len) {
       index = 0;
     }
-    uint32_t result = data[index + n];
-    if (n == 3) {
-      index += 4;
-    }
-    return result;
+  }
+  uint32_t Get(size_t n) {
+    return data[index + n];
+  }
+  void Next() {
+    index = (index + 4) % len;
   }
 
  private:
@@ -107,6 +108,10 @@ inline uint32_t SetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
       return 0;
     case REG_SET_INPUT:
       input_storage.Store(rs1);
+      return 0;
+    case REG_FILTER_INPUT_NEXT:
+      filter_storage.Next();
+      input_storage.Next();
       return 0;
     case REG_MACC_INPUT_0:
       SetMaccInput(0, rs1);

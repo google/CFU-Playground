@@ -89,6 +89,8 @@ void LoadInput(size_t width, size_t in_channels, const int8_t* values);
 // Iterates through each input channel, then returns to start
 Vector16 GetInput();
 
+void AdvanceFilterInput();
+
 };  // namespace hps_accel
 
 #endif  // _BLOCKS_H

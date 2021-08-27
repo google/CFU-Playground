@@ -83,6 +83,7 @@ class SetInstruction(InstructionBase):
         Constants.REG_INPUT_OFFSET,
         Constants.REG_SET_FILTER,
         Constants.REG_SET_INPUT,
+        Constants.REG_FILTER_INPUT_NEXT,
         Constants.REG_MACC_INPUT_0,
         Constants.REG_MACC_INPUT_1,
         Constants.REG_MACC_INPUT_2,
