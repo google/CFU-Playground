@@ -69,18 +69,18 @@ class HpsCfu(Cfu):
         m.d.comb += connect(set_stream, add_one.input)
         m.d.comb += connect(add_one.output, get_stream)
 
-    def connect_macc(self, m, set, macc, get):
+    def connect_macc(self, m, set, input_store, filter_store, macc, get):
         m.d.comb += macc.offset.eq(set.values[Constants.REG_INPUT_OFFSET])
-        inputs = Cat(set.values[Constants.REG_MACC_INPUT_0],
-                     set.values[Constants.REG_MACC_INPUT_1],
-                     set.values[Constants.REG_MACC_INPUT_2],
-                     set.values[Constants.REG_MACC_INPUT_3])
+        inputs = Cat(input_store.data_output[0].payload,
+                     input_store.data_output[1].payload,
+                     input_store.data_output[2].payload,
+                     input_store.data_output[3].payload)
         for n, val in enumerate(all_words(inputs, 8)):
             m.d.comb += macc.inputs[n].eq(val)
-        filters = Cat(set.values[Constants.REG_MACC_FILTER_0],
-                      set.values[Constants.REG_MACC_FILTER_1],
-                      set.values[Constants.REG_MACC_FILTER_2],
-                      set.values[Constants.REG_MACC_FILTER_3])
+        filters = Cat(filter_store.output[0].payload,
+                      filter_store.output[1].payload,
+                      filter_store.output[2].payload,
+                      filter_store.output[3].payload)
         for n, val in enumerate(all_words(filters, 8)):
             m.d.comb += macc.filters[n].eq(val)
         result_stream = get.input_streams[Constants.REG_MACC_OUT]
@@ -126,16 +126,16 @@ class HpsCfu(Cfu):
 
         self.connect_verify_register(m, set, get)
 
-        m.submodules['macc'] = macc = MultiplyAccumulate(16)
-        m.d.comb += macc.enable.eq(1)
-        self.connect_macc(m, set, macc, get)
-
         m.submodules['input_store'] = input_store = InputStore()
         self.connect_input_store(m, set, get, input_store)
 
         filter_store = FilterStore(depth=self.filter_store_depth)
         m.submodules['filter_store'] = filter_store
         self.connect_filter_store(m, set, get, filter_store)
+
+        m.submodules['macc'] = macc = MultiplyAccumulate(16)
+        m.d.comb += macc.enable.eq(1)
+        self.connect_macc(m, set, input_store, filter_store, macc, get)
 
         m.submodules['ping'] = ping = PingInstruction()
         return {

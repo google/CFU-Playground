@@ -113,30 +113,6 @@ inline uint32_t SetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
       filter_storage.Next();
       input_storage.Next();
       return 0;
-    case REG_MACC_INPUT_0:
-      SetMaccInput(0, rs1);
-      return 0;
-    case REG_MACC_INPUT_1:
-      SetMaccInput(1, rs1);
-      return 0;
-    case REG_MACC_INPUT_2:
-      SetMaccInput(2, rs1);
-      return 0;
-    case REG_MACC_INPUT_3:
-      SetMaccInput(3, rs1);
-      return 0;
-    case REG_MACC_FILTER_0:
-      SetMaccFilter(0, rs1);
-      return 0;
-    case REG_MACC_FILTER_1:
-      SetMaccFilter(1, rs1);
-      return 0;
-    case REG_MACC_FILTER_2:
-      SetMaccFilter(2, rs1);
-      return 0;
-    case REG_MACC_FILTER_3:
-      SetMaccFilter(3, rs1);
-      return 0;
     case REG_VERIFY:
       reg_verify = rs1;
       return 0;
@@ -167,6 +143,14 @@ inline uint32_t GetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
     case REG_INPUT_3:
       return input_storage.Get(3);
     case REG_MACC_OUT:
+      SetMaccFilter(0, filter_storage.Get(0));
+      SetMaccFilter(1, filter_storage.Get(1));
+      SetMaccFilter(2, filter_storage.Get(2));
+      SetMaccFilter(3, filter_storage.Get(3));
+      SetMaccInput(0, input_storage.Get(0));
+      SetMaccInput(1, input_storage.Get(1));
+      SetMaccInput(2, input_storage.Get(2));
+      SetMaccInput(3, input_storage.Get(3));
       return Macc();
     case REG_VERIFY:
       return reg_verify + 1;

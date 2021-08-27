@@ -119,9 +119,7 @@ void ConvPerChannel4x4(
 
           int32_t acc = 0;
           for (int i = 0; i < filter_height * filter_width * input_depth / 16; ++i) {
-            Vector16 input = hps_accel::GetInput();
-            Vector16 filter = hps_accel::GetFilter();
-            acc += multiply_accumulate(input, filter);
+            acc += multiply_accumulate();
             hps_accel::AdvanceFilterInput();
           }
 

@@ -78,16 +78,7 @@ Vector16 Vector16::build(int8_t a, int8_t b, int8_t c, int8_t d, int8_t e,
 Vector16 Vector16::zeroes() { return Vector16{{0, 0, 0, 0}}; }
 
 // Performs a 16 x 16 vector multiplication
-int32_t multiply_accumulate(Vector16 input, Vector16 filter) {
-  cfu_set(REG_MACC_INPUT_0, input.values[0]);
-  cfu_set(REG_MACC_INPUT_1, input.values[1]);
-  cfu_set(REG_MACC_INPUT_2, input.values[2]);
-  cfu_set(REG_MACC_INPUT_3, input.values[3]);
-  cfu_set(REG_MACC_FILTER_0, filter.values[0]);
-  cfu_set(REG_MACC_FILTER_1, filter.values[1]);
-  cfu_set(REG_MACC_FILTER_2, filter.values[2]);
-  cfu_set(REG_MACC_FILTER_3, filter.values[3]);
-  asm volatile("nop"); // One cycle for last set to complete fully
+int32_t multiply_accumulate() {
   asm volatile("nop"); // Two more cycles for MACC to complete
   asm volatile("nop");
   return cfu_get(REG_MACC_OUT);

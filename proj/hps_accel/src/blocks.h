@@ -57,8 +57,8 @@ struct Vector16 {
   static Vector16 zeroes();
 };
 
-// Performs a 4x4 matrix multiply-accumulate operation
-int32_t multiply_accumulate(Vector16 input, Vector16 filter);
+// Returns the result of the current 4x4 matrix multiply-accumulate operation
+int32_t multiply_accumulate();
 
 // Loads 4x4 filter values into global filter storage.
 //
