@@ -132,4 +132,8 @@ Vector16 GetInput() {
   return Vector16{{word0, word1, word2, word3}};
 }
 
+void AdvanceFilterInput() {
+  cfu_set(REG_FILTER_INPUT_NEXT, 0);
+};
+
 };  // namespace hps_accel

@@ -120,6 +120,7 @@ void ConvPerChannel4x4(
             Vector16 input = hps_accel::GetInput();
             Vector16 filter = hps_accel::GetFilter();
             acc += multiply_accumulate(input, filter, input_offset);
+            hps_accel::AdvanceFilterInput();
           }
 
           if (bias_data) {

@@ -103,6 +103,7 @@ class HpsCfuTest(CfuTestBase):
                 yield ((GET, Constants.REG_INPUT_1, 0, 0), n+1)
                 yield ((GET, Constants.REG_INPUT_2, 0, 0), n+2)
                 yield ((GET, Constants.REG_INPUT_3, 0, 0), n+3)
+                yield ((SET, Constants.REG_FILTER_INPUT_NEXT, 1, 0), 0)
 
         self.run_ops(op_generator(), False)
 
@@ -117,4 +118,5 @@ class HpsCfuTest(CfuTestBase):
                 yield ((GET, Constants.REG_FILTER_1, 0, 0), n + 1)
                 yield ((GET, Constants.REG_FILTER_2, 0, 0), n + 2)
                 yield ((GET, Constants.REG_FILTER_3, 0, 0), n + 3)
+                yield ((SET, Constants.REG_FILTER_INPUT_NEXT, 1, 0), 0)
         self.run_ops(op_generator(), False)

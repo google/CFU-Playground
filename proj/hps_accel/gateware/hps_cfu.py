@@ -94,7 +94,7 @@ class HpsCfu(Cfu):
                             input_store.num_words_input)
         m.d.comb += connect(set.output_streams[Constants.REG_SET_INPUT],
                             input_store.data_input)
-        next = get.read_strobes[Constants.REG_INPUT_3]
+        next = set.write_strobes[Constants.REG_FILTER_INPUT_NEXT]
         m.d.comb += input_store.next.eq(next)
         INPUT_REGISTERS = [Constants.REG_INPUT_0,
                            Constants.REG_INPUT_1,
@@ -109,7 +109,7 @@ class HpsCfu(Cfu):
                             filter_store.num_words)
         m.d.comb += connect(set.output_streams[Constants.REG_SET_FILTER],
                             filter_store.input)
-        next = get.read_strobes[Constants.REG_FILTER_3]
+        next = set.write_strobes[Constants.REG_FILTER_INPUT_NEXT]
         m.d.comb += filter_store.next.eq(next)
         FILTER_REGISTERS = [Constants.REG_FILTER_0,
                             Constants.REG_FILTER_1,
