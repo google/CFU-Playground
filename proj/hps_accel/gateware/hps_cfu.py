@@ -92,9 +92,9 @@ class HpsCfu(Cfu):
 
     def connect_input_store(self, m, set, get, input_store):
         m.d.comb += connect(set.output_streams[Constants.REG_INPUT_NUM_WORDS],
-                            input_store.num_words)
+                            input_store.num_words_input)
         m.d.comb += connect(set.output_streams[Constants.REG_SET_INPUT],
-                            input_store.input)
+                            input_store.data_input)
         next = get.read_strobes[Constants.REG_INPUT_3]
         m.d.comb += input_store.next.eq(next)
         INPUT_REGISTERS = [Constants.REG_INPUT_0,
@@ -102,7 +102,7 @@ class HpsCfu(Cfu):
                            Constants.REG_INPUT_2,
                            Constants.REG_INPUT_3]
         for n, reg in enumerate(INPUT_REGISTERS):
-            m.d.comb += connect(input_store.output[n], get.input_streams[reg])
+            m.d.comb += connect(input_store.data_output[n], get.input_streams[reg])
             m.d.comb += get.invalidates[reg].eq(next),
 
     def connect_filter_store(self, m, set, get, filter_store):

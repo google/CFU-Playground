@@ -17,7 +17,7 @@
 from nmigen.sim import Delay
 from nmigen_cfu import TestBase
 
-from .input_store import InputStore
+from .input_store import Signal, InputStore
 
 SETTLE_DELAY = Delay(0.25)
 
@@ -50,14 +50,14 @@ class InputStoreTest(TestBase):
         yield signal.eq(0)
 
     def set_num_words(self, n):
-        yield from self.send(self.dut.num_words, n)
+        yield from self.send(self.dut.num_words_input, n)
 
     def set_input(self, n):
-        yield from self.send(self.dut.input, n)
+        yield from self.send(self.dut.data_input, n)
 
     def check_outputs(self, vals):
         for n in range(4):
-            yield from self.receive(self.dut.output[n], vals[n])
+            yield from self.receive(self.dut.data_output[n], vals[n])
         yield from self.toggle(self.dut.next)
         yield
         yield self.dut.next.eq(0)
@@ -87,11 +87,38 @@ class InputStoreTest(TestBase):
         # Fill once and read many times
         def process():
             for i in range(3):
-                yield from self.set_num_words(12 + i * 4)
-                for n in range(100, 100 + i * 4):
+                num_words = 12 + i * 4
+                yield from self.set_num_words(num_words)
+                for n in range(100, 100 + num_words):
                     yield from self.set_input(n)
                 for j in range(5):
-                    for n in range(100, +i * 4, 4):
+                    for n in range(100, 100 + num_words, 4):
                         yield from self.check_outputs(list(range(n, n + 4)))
 
+        self.run_sim(process, False)
+
+    def test_reset_during_write(self):
+        def process():
+            yield from self.set_num_words(24)
+            for n in range(100, 109):
+                yield from self.set_input(n)
+            yield from self.set_num_words(20)
+            for n in range(100, 120):
+                yield from self.set_input(n)
+            for n in range(100, 120, 4):
+                yield from self.check_outputs(list(range(n, n + 4)))
+        self.run_sim(process, False)
+
+    def test_reset_during_read(self):
+        def process():
+            yield from self.set_num_words(20)
+            for n in range(100, 120):
+                yield from self.set_input(n)
+            for n in range(100, 112, 4):
+                yield from self.check_outputs(list(range(n, n + 4)))
+            yield from self.set_num_words(20)
+            for n in range(100, 120):
+                yield from self.set_input(n)
+            for n in range(100, 120, 4):
+                yield from self.check_outputs(list(range(n, n + 4)))
         self.run_sim(process, False)
