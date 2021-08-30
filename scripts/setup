@@ -102,8 +102,18 @@ fi
 # Verify other dependencies
 
 if ! which vivado >/dev/null; then
-    echo "Please install vivado" >&2
-    exit
+    echo -e "\e[0;31mWARNING:\e[0;33m vivado not in path.\e[m"
 fi
+
+# Regenerate .env file for VSCode
+(
+    source "${CFU_ROOT}/environment"
+    cat > "${CFU_ROOT}/.env" << EOF
+# Generated file
+# Used by vscode Python plugins to find library code
+# Regenerate with scripts/update_env
+PYTHONPATH=${PYTHONPATH//${CFU_ROOT}\//}
+EOF
+)
 
 echo "Setup complete"

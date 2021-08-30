@@ -16,8 +16,7 @@
 from nmigen import Signal
 from nmigen.sim import Settle, Delay
 
-from nmigen_cfu import InstructionTestBase, DualPortMemory
-from util import TestBase
+from nmigen_cfu import InstructionTestBase, DualPortMemory, TestBase
 
 from .store import CircularIncrementer, InputStore, StoreSetter
 from .registerfile import RegisterSetter, Xetter, RegisterFileInstruction

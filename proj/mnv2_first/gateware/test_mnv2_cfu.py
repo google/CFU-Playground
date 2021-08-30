@@ -13,8 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen_cfu import CfuTestBase
-from util import pack_vals
+from nmigen_cfu import CfuTestBase, pack_vals
 
 from .mnv2_cfu import make_cfu
 

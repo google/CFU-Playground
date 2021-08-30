@@ -15,8 +15,7 @@
 from nmigen import unsigned, Signal
 from nmigen.hdl.ast import Mux
 from nmigen.hdl.dsl import Module
-from nmigen_cfu import InstructionBase
-from util import SimpleElaboratable, ValueBuffer
+from nmigen_cfu import InstructionBase, SimpleElaboratable, ValueBuffer
 from .constants import Constants
 from .stream import Endpoint, connect
 
