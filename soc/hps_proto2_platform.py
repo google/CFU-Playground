@@ -82,8 +82,8 @@ class _CRG(Module):
 
 
 class Platform(LatticePlatform):
-    # The NX-17 has a 450 MHz clock. Our system clock should be a divisor of that.
-    clk_divisor = 7
+    # The NX-17 has a 450 MHz oscillator. Our system clock should be a divisor of that.
+    clk_divisor = 12
     sys_clk_freq = int(450e6 / clk_divisor)
 
     def __init__(self, toolchain="radiant"):
