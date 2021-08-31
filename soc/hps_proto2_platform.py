@@ -5,7 +5,7 @@
 from migen import Module, ClockDomain, Signal, If, log2_int
 from migen.genlib.resetsync import AsyncResetSynchronizer
 from litex.build.generic_platform import Pins, Subsignal, IOStandard
-from litex.build.lattice import LatticePlatform
+from litex.build.lattice import LatticePlatform, oxide
 from litex.build.lattice.programmer import LatticeProgrammer
 from litex.soc.cores.ram import NXLRAM
 from litex.soc.cores.clock import NXOSCA
@@ -25,10 +25,10 @@ hps_io = [
     # SPI flash, defined two ways
     ("spiflash", 0,
         Subsignal("cs_n", Pins("A3")),
-        Subsignal("clk",  Pins("B4")),
+        Subsignal("clk", Pins("B4")),
         Subsignal("mosi", Pins("B5")),
         Subsignal("miso", Pins("C4")),
-        Subsignal("wp",   Pins("B3")),
+        Subsignal("wp", Pins("B3")),
         Subsignal("hold", Pins("B2")),
         IOStandard("LVCMOS18")
      ),
@@ -74,26 +74,41 @@ class _CRG(Module):
 
         # Power On Reset
         por_cycles = 4096
-        por_counter = Signal(log2_int(por_cycles), reset=por_cycles-1)
+        por_counter = Signal(log2_int(por_cycles), reset=por_cycles - 1)
         self.comb += self.cd_por.clk.eq(self.cd_sys.clk)
         self.sync.por += If(por_counter != 0, por_counter.eq(por_counter - 1))
         self.specials += AsyncResetSynchronizer(
             self.cd_sys, (por_counter != 0))
 
 
+# Template for build script that uses parallel-nextpnr-nexus to run many copies
+# of nextpnr-nexus in parallel
+_build_template = [
+    "yosys -l {build_name}.rpt {build_name}.ys",
+    "parallel-nextpnr-nexus {build_name}.json {build_name}.pdc {build_name}.fasm \
+        $(nproc)",
+    "prjoxide pack {build_name}.fasm {build_name}.bit"
+]
+
+
 class Platform(LatticePlatform):
-    # The NX-17 has a 450 MHz oscillator. Our system clock should be a divisor of that.
+    # The NX-17 has a 450 MHz oscillator. Our system clock should be a divisor
+    # of that.
     clk_divisor = 12
     sys_clk_freq = int(450e6 / clk_divisor)
 
-    def __init__(self, toolchain="radiant"):
+    def __init__(self, toolchain="radiant", parallel_pnr=True):
         LatticePlatform.__init__(self,
                                  # The HPS actually has the LIFCL-17-7UWG72C, but that doesn't
-                                 # seem to be available in Radiant 2.2, at least on Linux.
+                                 # seem to be available in Radiant 2.2, at
+                                 # least on Linux.
                                  device="LIFCL-17-8UWG72C",
                                  io=hps_io + hps_nx17_debug_io + hps_debug_common,
                                  connectors=[],
                                  toolchain=toolchain)
+        # Override toolchain to process nextpnr in a quite parallel way
+        if toolchain == "oxide" and parallel_pnr:
+            self.toolchain.build_template = _build_template
 
     def create_crg(self):
         return _CRG(self, self.sys_clk_freq)
