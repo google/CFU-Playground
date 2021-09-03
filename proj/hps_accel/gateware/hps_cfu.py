@@ -71,23 +71,21 @@ class HpsCfu(Cfu):
 
     def connect_macc(self, m, set, input_store, filter_store, macc, get):
         m.d.comb += macc.offset.eq(set.values[Constants.REG_INPUT_OFFSET])
-        inputs = Cat(input_store.data_output[0].payload,
-                     input_store.data_output[1].payload,
-                     input_store.data_output[2].payload,
-                     input_store.data_output[3].payload)
-        for n, val in enumerate(all_words(inputs, 8)):
-            m.d.comb += macc.inputs[n].eq(val)
-        filters = Cat(filter_store.output[0].payload,
-                      filter_store.output[1].payload,
-                      filter_store.output[2].payload,
-                      filter_store.output[3].payload)
-        for n, val in enumerate(all_words(filters, 8)):
-            m.d.comb += macc.filters[n].eq(val)
+
+        m.d.comb += macc.operands.valid.eq(1)
+        m.d.comb += macc.operands.payload['inputs'].eq(Cat(
+                input_store.data_output[0].payload,
+                input_store.data_output[1].payload,
+                input_store.data_output[2].payload,
+                input_store.data_output[3].payload))
+        m.d.comb += macc.operands.payload['filters'].eq(Cat(
+                filter_store.output[0].payload,
+                filter_store.output[1].payload,
+                filter_store.output[2].payload,
+                filter_store.output[3].payload))
+
         result_stream = get.input_streams[Constants.REG_MACC_OUT]
-        m.d.comb += [
-            result_stream.valid.eq(1),
-            result_stream.payload.eq(macc.result),
-        ]
+        m.d.comb += connect(macc.result, result_stream)
 
     def connect_input_store(self, m, set, get, input_store):
         m.d.comb += connect(set.output_streams[Constants.REG_INPUT_NUM_WORDS],
