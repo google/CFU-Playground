@@ -49,8 +49,10 @@ void perf_print_all_counters() {
   for (int i = 0; i < NUM_PERF_COUNTERS; ++i) {
     perf_disable_counter(i);
   }
-  printf(" Counter |  Total | Starts | Average |     Raw\n");
-  printf("---------+--------+--------+---------+--------------\n");
+  if (NUM_PERF_COUNTERS > 0) {
+    printf(" Counter |  Total | Starts | Average |     Raw\n");
+    printf("---------+--------+--------+---------+--------------\n");
+  }
   for (int i = 0; i < NUM_PERF_COUNTERS; ++i) {
     unsigned total = perf_get_counter(i);
     unsigned starts = perf_get_start_count(i);
