@@ -118,6 +118,7 @@ class HpsCfuTest(CfuTestBase):
             for n in range(100, 120):
                 yield ((SET, Constants.REG_SET_INPUT, n, 0), 0)
             for n in range(100, 120, 4):
+                yield ((PING, 0, 0, 0), 0)  # wait for regs to update
                 yield ((GET, Constants.REG_INPUT_0, 0, 0), n+0)
                 yield ((GET, Constants.REG_INPUT_1, 0, 0), n+1)
                 yield ((GET, Constants.REG_INPUT_2, 0, 0), n+2)
@@ -133,6 +134,7 @@ class HpsCfuTest(CfuTestBase):
             for n in range(100, 120):
                 yield ((SET, Constants.REG_SET_FILTER, n, 0), 0)
             for n in range(100, 120, 4):
+                yield ((PING, 0, 0, 0), 0)  # wait for regs to update
                 yield ((GET, Constants.REG_FILTER_0, 0, 0), n + 0)
                 yield ((GET, Constants.REG_FILTER_1, 0, 0), n + 1)
                 yield ((GET, Constants.REG_FILTER_2, 0, 0), n + 2)
