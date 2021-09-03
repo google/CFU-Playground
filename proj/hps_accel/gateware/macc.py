@@ -14,8 +14,11 @@
 # limitations under the License.
 
 
-from nmigen import Array, Signal, signed
+from nmigen import Array, Shape, Signal, signed
+from nmigen.hdl.rec import Layout
 from nmigen_cfu.util import all_words, tree_sum, SimpleElaboratable
+
+from .stream import Endpoint
 
 
 class MultiplyAccumulate(SimpleElaboratable):
@@ -39,12 +42,12 @@ class MultiplyAccumulate(SimpleElaboratable):
         When enabled, calculation resumes from when last disabled.
     offset: Signal(signed(9)) input
         Offset to be added to all inputs.
-    inputs: list[Signal(signed(8))] input
-        The N input values
-    filters: list[Signal(signed(8))] input
-        The N filter values
-    result: Signal(signed(32)) output
-        Result of the multiply and add operation
+    operands: Endpoint() input
+        Stream of operands. The payload of this stream is a layout with two
+        fields, 'inputs' and 'filters'. Each field is N 8-bit signed values.
+    result: Endpoint(signed(32)) output
+        Stream of results from the multiply and add operation.
+        For each input and filter packet, a result packet is produced.
     """
     PIPELINE_CYCLES = 2
 
@@ -52,15 +55,21 @@ class MultiplyAccumulate(SimpleElaboratable):
         self._n = n
         self.enable = Signal()
         self.offset = Signal(signed(9))
-
-        def sig8(name, idx):
-            return Signal(signed(8), name=f"{name}_{idx:02x}")
-
-        self.inputs = [sig8("input", i) for i in range(n)]
-        self.filters = [sig8("filter", i) for i in range(n)]
-        self.result = Signal(signed(32))
+        self.operands = Endpoint(Layout([
+                ('inputs', Shape(8 * n)), ('filters', Shape(8 * n))]))
+        self.result = Endpoint(signed(32))
 
     def elab(self, m):
+        # TODO(dcallagh): add pipeline flow control
+        m.d.comb += self.operands.ready.eq(1)
+        m.d.comb += self.result.valid.eq(1)
+
+        # Chop operands payload into 8-bit signed signals
+        inputs = [self.operands.payload['inputs'][i:i + 8].as_signed()
+                  for i in range(0, 8 * self._n, 8)]
+        filters = [self.operands.payload['filters'][i:i + 8].as_signed()
+                   for i in range(0, 8 * self._n, 8)]
+
         # Product is 17 bits: 8 bits * 9 bits = 17 bits
         products = [
             Signal(
@@ -68,8 +77,7 @@ class MultiplyAccumulate(SimpleElaboratable):
                 name=f"product_{i:02x}") for i in range(
                 self._n)]
         with m.If(self.enable):
-            for i_val, f_val, product in zip(
-                    self.inputs, self.filters, products):
+            for i_val, f_val, product in zip(inputs, filters, products):
                 f_tmp = Signal(signed(9))
                 m.d.sync += f_tmp.eq(f_val)
                 i_tmp = Signal(signed(9))
@@ -77,4 +85,4 @@ class MultiplyAccumulate(SimpleElaboratable):
                 # TODO: consider whether to register output of multiplication
                 m.d.comb += product.eq(i_tmp * f_tmp)
 
-            m.d.sync += self.result.eq(tree_sum(products))
+            m.d.sync += self.result.payload.eq(tree_sum(products))

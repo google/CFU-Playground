@@ -14,6 +14,7 @@
 # limitations under the License.
 
 
+from nmigen.hdl.ast import Cat, Const, signed
 from nmigen.sim import Delay
 
 from nmigen_cfu import TestBase
@@ -47,12 +48,16 @@ class MultiplyAccumulateTest(TestBase):
                 enable, offset, in_vals, filter_vals = inputs
                 yield self.dut.enable.eq(enable)
                 yield self.dut.offset.eq(offset)
-                for i, v in zip(self.dut.inputs, in_vals):
-                    yield i.eq(v)
-                for f, v in zip(self.dut.filters, filter_vals):
-                    yield f.eq(v)
+                self.assertEqual((yield self.dut.operands.ready), 1, f"case={n}")
+                yield self.dut.operands.payload['inputs'].eq(
+                        Cat(*[Const(v, signed(8)) for v in in_vals]))
+                yield self.dut.operands.payload['filters'].eq(
+                        Cat(*[Const(v, signed(8)) for v in filter_vals]))
+                yield self.dut.operands.valid.eq(1)
+                yield self.dut.result.ready.eq(1)
                 yield Delay(0.25)
                 if expected is not None:
-                    self.assertEqual((yield self.dut.result), expected, f"case={n}")
+                    self.assertEqual((yield self.dut.result.valid), 1, f"case={n}")
+                    self.assertEqual((yield self.dut.result.payload), expected, f"case={n}")
                 yield
         self.run_sim(process, False)
