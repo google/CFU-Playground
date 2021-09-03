@@ -15,7 +15,7 @@
 
 
 from nmigen.hdl.ast import Cat, Const, signed
-from nmigen.sim import Delay
+from nmigen.sim import Settle, Tick
 
 from nmigen_cfu import TestBase
 
@@ -26,38 +26,136 @@ class MultiplyAccumulateTest(TestBase):
     def create_dut(self):
         return MultiplyAccumulate(3)
 
-    def test(self):
-        DATA = [
-            # (enable, offset, (input 0, 1, 2), (filter 0, 1, 2)), expected output
-            ((1, 0, (0, 0, 0), (0, 0, 0)), 0),
-            ((1, 10, (0, 1, 2), (10, 10, 10)), 0),
-            ((1, 10, (0, 1, 2), (12, 12, 12)), 0),
-            
-            # nb: results from 2 cycles ago
-            ((1, 128, (-128, 127, 0), (-128, 127, 12)), 330),
-            ((0, 128, (-128, 127, 1), (127, -77, -15)), 396),  # disabled
-            ((1, 128, (-128, 127, -8), (-128, 127, 23)), 396),
-            ((1, 128, (33, 45, 2), (-55, -66, -77)), 33921),
-            ((1, 0, (0, 0, 0), (0, 0, 0)), 35145),
-            ((1, 0, (0, 0, 0), (0, 0, 0)), -30283),
-            ((1, 0, (0, 0, 0), (0, 0, 0)), 0),
-            ]
-
+    def test_one_operation(self):
         def process():
-            for n, (inputs, expected) in enumerate(DATA):
-                enable, offset, in_vals, filter_vals = inputs
-                yield self.dut.enable.eq(enable)
-                yield self.dut.offset.eq(offset)
-                self.assertEqual((yield self.dut.operands.ready), 1, f"case={n}")
-                yield self.dut.operands.payload['inputs'].eq(
-                        Cat(*[Const(v, signed(8)) for v in in_vals]))
-                yield self.dut.operands.payload['filters'].eq(
-                        Cat(*[Const(v, signed(8)) for v in filter_vals]))
+            yield self.dut.enable.eq(1)
+            yield self.dut.offset.eq(10)
+            yield self.dut.operands.payload['inputs'].eq(Cat(
+                    Const(0, signed(8)),
+                    Const(1, signed(8)),
+                    Const(2, signed(8))))
+            yield self.dut.operands.payload['filters'].eq(Cat(
+                    Const(10, signed(8)),
+                    Const(10, signed(8)),
+                    Const(10, signed(8))))
+            yield self.dut.operands.valid.eq(1)
+            yield
+            self.assertEqual((yield self.dut.operands.ready), 1)
+            # Results take 2 cycles to appear
+            self.assertEqual((yield self.dut.result.valid), 0)
+            yield
+            self.assertEqual((yield self.dut.result.valid), 0)
+            yield
+            self.assertEqual((yield self.dut.result.valid), 1)
+            self.assertEqual((yield self.dut.result.payload), 330)
+        self.run_sim(process, True)
+
+    def operand_producer(self, inputs, filters):
+        """
+        Returns a simulation generator function which feeds the given input and
+        filter values to the dut's operands stream.
+        """
+        def process():
+            for i, f in zip(inputs, filters):
                 yield self.dut.operands.valid.eq(1)
-                yield self.dut.result.ready.eq(1)
-                yield Delay(0.25)
-                if expected is not None:
-                    self.assertEqual((yield self.dut.result.valid), 1, f"case={n}")
-                    self.assertEqual((yield self.dut.result.payload), expected, f"case={n}")
+                yield self.dut.operands.payload['inputs'].eq(
+                        Cat(*[Const(x, signed(8)) for x in i]))
+                yield self.dut.operands.payload['filters'].eq(
+                        Cat(*[Const(x, signed(8)) for x in f]))
+                yield Tick()
+                while (yield self.dut.operands.ready) != 1:
+                    yield Tick()
+            yield self.dut.operands.valid.eq(0)
+        return process
+
+    def test_pipelined(self):
+        offset = 128
+        inputs = [
+            (-128, 127, 0),
+            (-128, 127, -8),
+            (33, 45, 2),
+        ]
+        filters = [
+            (-128, 127, 12),
+            (-128, 127, 23),
+            (-55, -66, -77),
+        ]
+        expected_results = [33921, 35145, -30283]
+        self.sim.add_process(self.operand_producer(inputs, filters))
+        def process():
+            yield self.dut.offset.eq(offset)
+            yield self.dut.enable.eq(1)
+            yield self.dut.result.ready.eq(1)
+            yield
+            # Results take 2 cycles to appear
+            self.assertEqual((yield self.dut.result.valid), 0)
+            yield
+            self.assertEqual((yield self.dut.result.valid), 0)
+            yield
+            for result in expected_results:
+                self.assertEqual((yield self.dut.result.valid), 1)
+                self.assertEqual((yield self.dut.result.payload), result)
                 yield
-        self.run_sim(process, False)
+            self.assertEqual((yield self.dut.result.valid), 0)
+        self.run_sim(process, True)
+
+    def test_pipeline_pauses_when_disabled(self):
+        offset = 128
+        inputs = [
+            (-128, -127, -128),
+            (-128, -128, -127),
+            (-127, -128, -128),
+            (-127, -127, -127),
+        ]
+        filters = [
+            (1, 2, 3),
+            (4, 5, 6),
+            (7, 8, 9),
+            (10, 11, 12),
+        ]
+        expected_results = [2, 6, 7, 33]
+        self.sim.add_process(self.operand_producer(inputs, filters))
+        def process():
+            yield self.dut.offset.eq(offset)
+            yield self.dut.result.ready.eq(1)
+            # Pipeline doesn't start while enable is low
+            for cycle in range(10):
+                self.assertEqual((yield self.dut.operands.ready), 0)
+                self.assertEqual((yield self.dut.result.valid), 0)
+                yield
+            # Let values enter first stage of pipeline
+            yield self.dut.enable.eq(1)
+            yield
+            yield self.dut.enable.eq(0)
+            for cycle in range(10):
+                self.assertEqual((yield self.dut.result.valid), 0)
+                yield
+            # Let values move to second stage of pipeline
+            yield self.dut.enable.eq(1)
+            yield
+            yield self.dut.enable.eq(0)
+            for cycle in range(10):
+                self.assertEqual((yield self.dut.result.valid), 0)
+                yield
+            # Let first result pop out
+            yield self.dut.enable.eq(1)
+            yield Settle()
+            self.assertEqual((yield self.dut.result.valid), 1)
+            self.assertEqual((yield self.dut.result.payload), expected_results[0])
+            yield
+            yield self.dut.enable.eq(0)
+            yield Settle()
+            for cycle in range(10):
+                self.assertEqual((yield self.dut.result.valid), 0)
+                yield
+            # Let it run, remaining results should pop out
+            yield self.dut.enable.eq(1)
+            yield
+            for result in expected_results[1:]:
+                self.assertEqual((yield self.dut.result.valid), 1)
+                self.assertEqual((yield self.dut.result.payload), result)
+                yield
+            for cycle in range(10):
+                self.assertEqual((yield self.dut.result.valid), 0)
+                yield
+        self.run_sim(process, True)
