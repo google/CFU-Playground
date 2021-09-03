@@ -99,8 +99,9 @@ class HpsCfu(Cfu):
                            Constants.REG_INPUT_2,
                            Constants.REG_INPUT_3]
         for n, reg in enumerate(INPUT_REGISTERS):
-            m.d.comb += connect(input_store.data_output[n], get.input_streams[reg])
-            m.d.comb += get.invalidates[reg].eq(next),
+            m.d.comb += get.input_streams[reg].valid.eq(1)
+            m.d.comb += get.input_streams[reg].payload.eq(
+                    input_store.data_output[n].payload)
 
     def connect_filter_store(self, m, set, get, filter_store):
         m.d.comb += connect(set.output_streams[Constants.REG_FILTER_NUM_WORDS],
@@ -114,9 +115,9 @@ class HpsCfu(Cfu):
                             Constants.REG_FILTER_2,
                             Constants.REG_FILTER_3]
         for n, reg in enumerate(FILTER_REGISTERS):
-            m.d.comb += connect(filter_store.output[n],
-                                get.input_streams[reg])
-            m.d.comb += get.invalidates[reg].eq(next),
+            m.d.comb += get.input_streams[reg].valid.eq(1)
+            m.d.comb += get.input_streams[reg].payload.eq(
+                    filter_store.output[n].payload)
 
     def elab_instructions(self, m):
         m.submodules['set'] = set = SetInstruction()
