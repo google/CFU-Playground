@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from nmigen import Cat, Signal, unsigned
+from nmigen.hdl.rec import Layout
 from nmigen_cfu import Cfu, InstructionBase, all_words
 
 from .constants import Constants
@@ -21,7 +22,7 @@ from .get import GetInstruction
 from .input_store import InputStore
 from .macc import MultiplyAccumulate
 from .set import SetInstruction
-from .stream import BinaryCombinatorialActor, connect
+from .stream import BinaryCombinatorialActor, ConcatenatingBuffer, connect
 
 
 class PingInstruction(InstructionBase):
@@ -72,17 +73,39 @@ class HpsCfu(Cfu):
     def connect_macc(self, m, set, input_store, filter_store, macc, get):
         m.d.comb += macc.offset.eq(set.values[Constants.REG_INPUT_OFFSET])
 
-        m.d.comb += macc.operands.valid.eq(1)
-        m.d.comb += macc.operands.payload['inputs'].eq(Cat(
-                input_store.data_output[0].payload,
-                input_store.data_output[1].payload,
-                input_store.data_output[2].payload,
-                input_store.data_output[3].payload))
-        m.d.comb += macc.operands.payload['filters'].eq(Cat(
-                filter_store.output[0].payload,
-                filter_store.output[1].payload,
-                filter_store.output[2].payload,
-                filter_store.output[3].payload))
+        # Join all 4 input value streams and all 4 filter value streams
+        # into a single stream holding all operands.
+        # Then connect that to the macc.
+        operands_buffer = ConcatenatingBuffer([
+            ('input_0', unsigned(32)),
+            ('input_1', unsigned(32)),
+            ('input_2', unsigned(32)),
+            ('input_3', unsigned(32)),
+            ('filter_0', unsigned(32)),
+            ('filter_1', unsigned(32)),
+            ('filter_2', unsigned(32)),
+            ('filter_3', unsigned(32)),
+        ])
+        m.submodules['operands_buffer'] = operands_buffer
+        m.d.comb += [
+            connect(input_store.data_output[0],
+                    operands_buffer.inputs['input_0']),
+            connect(input_store.data_output[1],
+                    operands_buffer.inputs['input_1']),
+            connect(input_store.data_output[2],
+                    operands_buffer.inputs['input_2']),
+            connect(input_store.data_output[3],
+                    operands_buffer.inputs['input_3']),
+            connect(filter_store.output[0],
+                    operands_buffer.inputs['filter_0']),
+            connect(filter_store.output[1],
+                    operands_buffer.inputs['filter_1']),
+            connect(filter_store.output[2],
+                    operands_buffer.inputs['filter_2']),
+            connect(filter_store.output[3],
+                    operands_buffer.inputs['filter_3']),
+            connect(operands_buffer.output, macc.operands),
+        ]
 
         result_stream = get.input_streams[Constants.REG_MACC_OUT]
         m.d.comb += connect(macc.result, result_stream)

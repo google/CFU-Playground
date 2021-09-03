@@ -60,9 +60,24 @@ class MultiplyAccumulate(SimpleElaboratable):
         self.result = Endpoint(signed(32))
 
     def elab(self, m):
-        # TODO(dcallagh): add pipeline flow control
-        m.d.comb += self.operands.ready.eq(1)
-        m.d.comb += self.result.valid.eq(1)
+        # Pipeline flow control:
+        pipe_flowing = Signal()
+        # We have a sequence of valid signals for each stage in our pipeline.
+        # When the pipe is flowing, the signals tick along through the pipe.
+        valid = self.operands.valid
+        for _ in range(self.PIPELINE_CYCLES):
+            next_valid = Signal()
+            with m.If(pipe_flowing):
+                m.d.sync += next_valid.eq(valid)
+            valid = next_valid
+        m.d.comb += self.result.valid.eq(self.enable & valid)
+        # The pipe flows as long as we are transferring out the end this cycle,
+        # or a valid value hasn't yet made it to the end.
+        m.d.comb += pipe_flowing.eq(self.enable &
+                                    (self.result.is_transferring() | ~valid))
+        # We are ready to receive new values at the start of the pipe
+        # as long as it's flowing.
+        m.d.comb += self.operands.ready.eq(pipe_flowing)
 
         # Chop operands payload into 8-bit signed signals
         inputs = [self.operands.payload['inputs'][i:i + 8].as_signed()
@@ -76,7 +91,7 @@ class MultiplyAccumulate(SimpleElaboratable):
                 signed(17),
                 name=f"product_{i:02x}") for i in range(
                 self._n)]
-        with m.If(self.enable):
+        with m.If(pipe_flowing):
             for i_val, f_val, product in zip(inputs, filters, products):
                 f_tmp = Signal(signed(9))
                 m.d.sync += f_tmp.eq(f_val)
