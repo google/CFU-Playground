@@ -13,6 +13,9 @@ fi
 if ! which make >/dev/null; then
     missing+=(make)
 fi
+if ! which cmake >/dev/null; then
+    missing+=(cmake)
+fi
 if ! which openocd >/dev/null; then
     missing+=(openocd)
 fi
@@ -85,7 +88,22 @@ if [ ! -e "${RENODE_DIR}/renode" ]; then
     echo "python3 -m pip install -r ${RENODE_DIR}/tests/requirements.txt"
     echo ""
 elif ! ${RENODE_DIR}/renode --version | grep "${RENODE_VERSION_NO}.*${RENODE_VERSION_SHA}" >/dev/null; then
-    echo "Warning: Your Renode version does not match the required one (${RENODE_VERSION})"
+    echo "Warning: Your Renode version (in ${RENODE_DIR}) does not match the required one (${RENODE_VERSION})"
+fi
+
+# Get necessary files from Renode VerilatorPlugin to build CFU library for Renode tests
+# It is a temporary workaround as long as the sources are not present in Renode portable
+VIL_DIR=${RENODE_DIR}/verilator-integration-library
+if [ ! -e "${VIL_DIR}" ]; then
+    mkdir -p ${VIL_DIR}/src/buses
+    wget -O ${VIL_DIR}/renode_imports.h https://raw.githubusercontent.com/renode/renode-infrastructure/master/src/Emulator/Cores/renode/include/renode_imports.h
+    wget -O ${VIL_DIR}/renode_imports_generated.h https://raw.githubusercontent.com/renode/renode-infrastructure/master/src/Emulator/Cores/renode/include/renode_imports_generated.h
+    wget -O ${VIL_DIR}/src/renode_cfu.cpp https://raw.githubusercontent.com/renode/renode/master/src/Plugins/VerilatorPlugin/VerilatorIntegrationLibrary/src/renode_cfu.cpp
+    wget -O ${VIL_DIR}/src/renode_cfu.h https://raw.githubusercontent.com/renode/renode/master/src/Plugins/VerilatorPlugin/VerilatorIntegrationLibrary/src/renode_cfu.h
+    wget -O ${VIL_DIR}/src/renode.h https://raw.githubusercontent.com/renode/renode/master/src/Plugins/VerilatorPlugin/VerilatorIntegrationLibrary/src/renode.h
+    wget -O ${VIL_DIR}/src/buses/cfu.cpp https://raw.githubusercontent.com/renode/renode/master/src/Plugins/VerilatorPlugin/VerilatorIntegrationLibrary/src/buses/cfu.cpp
+    wget -O ${VIL_DIR}/src/buses/cfu.h https://raw.githubusercontent.com/renode/renode/master/src/Plugins/VerilatorPlugin/VerilatorIntegrationLibrary/src/buses/cfu.h
+    patch -p1 ${VIL_DIR}/src/renode.h ${CFU_ROOT}/common/renode-verilator-integration/renode_h.patch
 fi
 
 # Check GCC

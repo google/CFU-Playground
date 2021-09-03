@@ -104,10 +104,13 @@ PYRUN           := $(CFU_ROOT)/scripts/pyrun
 BUILD_DIR_EXTRA_DEP ?=
 
 COMMON_DIR         := $(CFU_ROOT)/common
-COMMON_FILES	   := $(shell find $(COMMON_DIR) -type f)
+RVI_DIR            := $(COMMON_DIR)/renode-verilator-integration
+COMMON_FILES       := $(shell find $(COMMON_DIR) -type f)
 MLCOMMONS_SRC_DIR  := $(CFU_ROOT)/third_party/mlcommons
 SAXON_SRC_DIR      := $(CFU_ROOT)/third_party/SaxonSoc
 RENODE_DIR         := $(CFU_ROOT)/third_party/renode
+VIL_DIR            := $(RENODE_DIR)/verilator-integration-library
+LITEX_RENODE_DIR   := $(CFU_ROOT)/third_party/python/litex-renode
 SRC_DIR            := $(abspath $(PROJ_DIR)/src)
 
 TFLM_SRC_DIR       := $(CFU_ROOT)/third_party/tflite-micro
@@ -175,7 +178,12 @@ renode-headless: renode-scripts
 .PHONY: renode-scripts
 renode-scripts: $(SOFTWARE_ELF)
 	@mkdir -p $(BUILD_DIR)/renode
+ifneq '$(SW_ONLY)' '1'
+	pushd $(BUILD_DIR)/renode && cmake -DCMAKE_BUILD_TYPE=Release -DVTOP="$(PROJ_DIR)/cfu.v" -DVIL_DIR="$(VIL_DIR)" $${VERILATOR_PATH:+"-DUSER_VERILATOR_DIR=$$VERILATOR_PATH"} "$(RVI_DIR)" && make libVtop && popd
 	$(CFU_ROOT)/scripts/generate_renode_scripts.py $(SOC_BUILD_DIR)/csr.json $(TARGET) $(BUILD_DIR)/renode/ --repl $(TARGET_REPL)
+else
+	$(CFU_ROOT)/scripts/generate_renode_scripts.py $(SOC_BUILD_DIR)/csr.json $(TARGET) $(BUILD_DIR)/renode/ --repl $(TARGET_REPL) --sw-only
+endif
 	@echo Generating Renode scripts finished
 
 .PHONY: clean
