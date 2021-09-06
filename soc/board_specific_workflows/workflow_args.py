@@ -38,6 +38,8 @@ def parse_workflow_args(input: List[str] = None) -> argparse.Namespace:
     parser.add_argument('--toolchain',
                         help=('Specify toolchain for implementing '
                               'gateware (\'vivado\' or \'symbiflow\')'))
+    parser.add_argument('--sys-clk-freq', type=float,
+                        help='System clock frequency')
     builder_args(parser)
     soc_core_args(parser)
     vivado_build_args(parser)

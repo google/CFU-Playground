@@ -71,6 +71,8 @@ class GeneralSoCWorkflow():
         base_soc_kwargs.update(soc_core.soc_core_argdict(self.args))
         if self.args.toolchain:
             base_soc_kwargs['toolchain'] = self.args.toolchain
+        if self.args.sys_clk_freq:
+            base_soc_kwargs['sys_clk_freq'] = self.args.sys_clk_freq
 
         base_soc_kwargs.update(kwargs)
         return self.soc_constructor(**base_soc_kwargs)
