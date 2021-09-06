@@ -52,6 +52,13 @@ DEFINES += INCLUDE_MODEL_HPS
 RUN_MENU_ITEMS=1 1 c
 TEST_MENU_ITEMS=3 a
 
+# Customise arguments to Litex:
+export EXTRA_LITEX_ARGS
+ifeq '$(TARGET)' 'digilent_arty'
+# Cannot meet timing at 100MHz, reduce to 80MHz
+EXTRA_LITEX_ARGS += --sys-clk-freq 80000000
+endif
+
 BUILD_DIR_EXTRA_DEP = $(BUILD_DIR)/src/gateware_constants.h
 include ../proj.mk
 
