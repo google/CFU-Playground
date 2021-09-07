@@ -56,8 +56,12 @@ def generate_litex_renode_repl(conf_file, etherbone_peripherals, autoalign):
     return result
 
 
-def generate_repl(target, path, cfu_lib_filepath):
-    result = "using \"" + str(path) + str(target) + "_generated.repl\""
+def generate_repl(target, path, cfu_lib_filepath, predefined=False):
+    if predefined:
+        result = "using \"" + str(path) + str(target) + "_predefined.repl\""
+    else:
+        result = "using \"" + str(path) + str(target) + "_generated.repl\""
+
     result += """
 
 cpu:
@@ -150,7 +154,10 @@ def main():
     # if there is a predefined Renode platform script for a target, copy it to build directory,
     # otherwise generate a new one with LiteX-Renode
     if os.path.isfile(predefined_repl_path):
-        copy(predefined_repl_path, args.build_path)
+        copy(predefined_repl_path, os.path.join(args.build_path, f"{args.target}_predefined.repl"))
+
+        with open(repl_filepath, "w") as f:
+            f.write(generate_repl(args.target, args.build_path, cfu_lib_filepath, predefined=True))
     else:
         with open(litex_renode_repl_filepath, "w") as f:
             f.write(generate_litex_renode_repl(args.conf_file, etherbone_peripherals, args.autoalign_memor_regions))
