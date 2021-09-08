@@ -61,7 +61,7 @@ class HpsCfuTest(CfuTestBase):
         ]
         self.run_ops(DATA)
 
-    def check_macc(self, offset, input, filter):
+    def prepare_macc(self, offset, input, filter):
         # Fill input store
         yield ((SET, Constants.REG_INPUT_NUM_WORDS, len(input) // 4, 0), 0)
         for i in range(0, len(input), 4):
@@ -77,6 +77,7 @@ class HpsCfuTest(CfuTestBase):
         # Set input offset
         yield ((SET, Constants.REG_INPUT_OFFSET, offset, 0), 0)
 
+    def check_macc(self, offset, input, filter):
         for i in range(0, len(input), 16):
             yield ((PING, 0, 0, 0), 0)  # pipeline delay
             expected = sum((offset + i) * f for (i, f) in
@@ -98,8 +99,9 @@ class HpsCfuTest(CfuTestBase):
 
     def test_multiply_accumulate_one_iteration(self):
         def op_generator():
+            yield from self.prepare_macc(12, range(16), range(16))
             yield from self.check_macc(12, range(16), range(16))
-        self.run_ops(op_generator())
+        self.run_ops(op_generator(), True)
 
     def test_multiply_accumulate(self):
         """Tests Multiply-Accumulate functionality"""
@@ -108,6 +110,26 @@ class HpsCfuTest(CfuTestBase):
             offset = randint(-128, 127)
             input = [randint(-128, 127) for _ in range(160)]
             filter = [randint(-128, 127) for _ in range(160)]
+            yield from self.prepare_macc(offset, input, filter)
+            yield from self.check_macc(offset, input, filter)
+        self.run_ops(op_generator())
+
+    def test_multiply_accumulate_with_store_reset(self):
+        def op_generator():
+            seed(4321)
+            offset = randint(-128, 127)
+            # Let it run through the stores once first
+            input = [randint(-128, 127) for _ in range(160)]
+            filter = [randint(-128, 127) for _ in range(160)]
+            yield from self.prepare_macc(offset, input, filter)
+            yield from self.check_macc(offset, input, filter)
+            # Reset the input store with new values, leave the filter store
+            input = [randint(-128, 127) for _ in range(160)]
+            yield ((SET, Constants.REG_INPUT_NUM_WORDS, len(input) // 4, 0), 0)
+            for i in range(0, len(input), 4):
+                packed = pack_vals(*input[i:i + 4])
+                yield ((SET, Constants.REG_SET_INPUT, packed, 0), 0)
+            # Let it run through once more with new input values
             yield from self.check_macc(offset, input, filter)
         self.run_ops(op_generator())
 
