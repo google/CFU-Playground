@@ -67,7 +67,7 @@ class Storage {
   void Store(uint32_t value) {
     data[index++] = value;
     if (index >= len) {
-      index = 0;
+      index = len - 4;
     }
   }
   uint32_t Get(size_t n) {

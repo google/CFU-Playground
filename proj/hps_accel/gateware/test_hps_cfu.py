@@ -79,12 +79,12 @@ class HpsCfuTest(CfuTestBase):
 
     def check_macc(self, offset, input, filter):
         for i in range(0, len(input), 16):
+            # Turn the crank
+            yield ((SET, Constants.REG_FILTER_INPUT_NEXT, 1, 0), 0)
             yield ((PING, 0, 0, 0), 0)  # pipeline delay
             expected = sum((offset + i) * f for (i, f) in
                            zip(input[i:i + 16], filter[i:i + 16]))
             yield ((GET, Constants.REG_MACC_OUT, 0, 0), expected)
-            # Turn the crank
-            yield ((SET, Constants.REG_FILTER_INPUT_NEXT, 1, 0), 0)
 
     def test_multiply_accumulate_empty_inputs(self):
         def op_generator():
@@ -140,12 +140,12 @@ class HpsCfuTest(CfuTestBase):
             for n in range(100, 120):
                 yield ((SET, Constants.REG_SET_INPUT, n, 0), 0)
             for n in range(100, 120, 4):
+                yield ((SET, Constants.REG_FILTER_INPUT_NEXT, 1, 0), 0)
                 yield ((PING, 0, 0, 0), 0)  # wait for regs to update
                 yield ((GET, Constants.REG_INPUT_0, 0, 0), n+0)
                 yield ((GET, Constants.REG_INPUT_1, 0, 0), n+1)
                 yield ((GET, Constants.REG_INPUT_2, 0, 0), n+2)
                 yield ((GET, Constants.REG_INPUT_3, 0, 0), n+3)
-                yield ((SET, Constants.REG_FILTER_INPUT_NEXT, 1, 0), 0)
 
         self.run_ops(op_generator(), False)
 
@@ -156,10 +156,10 @@ class HpsCfuTest(CfuTestBase):
             for n in range(100, 120):
                 yield ((SET, Constants.REG_SET_FILTER, n, 0), 0)
             for n in range(100, 120, 4):
+                yield ((SET, Constants.REG_FILTER_INPUT_NEXT, 1, 0), 0)
                 yield ((PING, 0, 0, 0), 0)  # wait for regs to update
                 yield ((GET, Constants.REG_FILTER_0, 0, 0), n + 0)
                 yield ((GET, Constants.REG_FILTER_1, 0, 0), n + 1)
                 yield ((GET, Constants.REG_FILTER_2, 0, 0), n + 2)
                 yield ((GET, Constants.REG_FILTER_3, 0, 0), n + 3)
-                yield ((SET, Constants.REG_FILTER_INPUT_NEXT, 1, 0), 0)
         self.run_ops(op_generator(), False)

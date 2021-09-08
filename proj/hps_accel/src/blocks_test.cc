@@ -56,6 +56,7 @@ bool test_multiply(Vector16 input, Vector16 filter, int32_t input_offset,
   hps_accel::LoadInputOffset(input_offset);
   hps_accel::LoadFilter(1, 1, reinterpret_cast<const int8_t *>(filter.values));
   hps_accel::LoadInput(1, 4, reinterpret_cast<const int8_t *>(input.values));
+  hps_accel::AdvanceFilterInput();
   int32_t actual = multiply_accumulate();
   if (actual == expected) {
     return true;
@@ -133,8 +134,8 @@ void check_filters(size_t in_channels, size_t out_channels) {
     Vector16 expected =
         Vector16::build(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8],
                         p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
-    if (!check_vector_same(hps_accel::GetFilter(), expected, i)) failures++;
     hps_accel::AdvanceFilterInput();
+    if (!check_vector_same(hps_accel::GetFilter(), expected, i)) failures++;
   }
   printf("%s %2u,%2u: %3d cases with %1d failures\n", failures ? "FAIL" : "OK",
          in_channels, out_channels, cases, failures);
@@ -170,8 +171,8 @@ void check_inputs(size_t width, size_t in_channels) {
           Vector16::build(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8],
                           p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
     }
-    if (!check_vector_same(hps_accel::GetInput(), expected, i)) failures++;
     hps_accel::AdvanceFilterInput();
+    if (!check_vector_same(hps_accel::GetInput(), expected, i)) failures++;
   }
   printf("%s %2u,%2u: %3d cases with %1d failures\n", failures ? "FAIL" : "OK",
          width, in_channels, cases, failures);

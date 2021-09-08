@@ -97,8 +97,7 @@ class InputStore(SimpleElaboratable):
         with m.If(self.data_input.is_transferring()):
             m.d.sync += index.eq(index + 1)
             with m.If(index == num_words - 1):
-                m.d.sync += index.eq(0)
-                m.d.sync += read_required.eq(1)
+                m.d.sync += index.eq(num_words - 4)
                 m.next = "READING"
 
     def handle_reading(self, m, num_words, index, read_required):

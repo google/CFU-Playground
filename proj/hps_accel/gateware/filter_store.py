@@ -85,7 +85,7 @@ class FilterStore(SimpleElaboratable):
                 # On last word write, wrap back to zero and cause a pre-emptive
                 # read
                 m.d.sync += write_index.eq(0)
-                m.d.sync += read_required.eq(1)
+                m.d.sync += read_index.eq(max_index - 3)
             with m.Else():
                 m.d.sync += write_index.eq(write_index + 1)
 

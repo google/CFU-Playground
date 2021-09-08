@@ -112,8 +112,8 @@ void ConvPerChannel4x4(const ConvParams& params,
           int32_t acc = 0;
           for (int i = 0; i < filter_height * filter_width * input_depth / 16;
                ++i) {
-            acc += multiply_accumulate();
             hps_accel::AdvanceFilterInput();
+            acc += multiply_accumulate();
           }
 
           if (bias_data) {
