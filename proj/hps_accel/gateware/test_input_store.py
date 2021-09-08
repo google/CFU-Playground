@@ -56,11 +56,9 @@ class InputStoreTest(TestBase):
         yield from self.send(self.dut.data_input, n)
 
     def check_outputs(self, vals):
+        yield from self.toggle(self.dut.next)
         for n in range(4):
             yield from self.receive(self.dut.data_output[n], vals[n])
-        yield from self.toggle(self.dut.next)
-        yield
-        yield self.dut.next.eq(0)
 
     def test_simple(self):
         # Fill once and read once

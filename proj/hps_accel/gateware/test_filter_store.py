@@ -42,6 +42,9 @@ class FilterStoreTest(TestBase):
 
     def read_out(self):
         for i in range(0, len(self.filter_values), 4):
+            yield self.dut.next.eq(1)
+            yield
+            yield self.dut.next.eq(0)
             yield self.dut.output[0].ready.eq(1)
             yield self.dut.output[1].ready.eq(1)
             yield self.dut.output[2].ready.eq(1)
@@ -56,10 +59,6 @@ class FilterStoreTest(TestBase):
             self.assertEqual((yield self.dut.output[1].payload), self.filter_values[i + 1])
             self.assertEqual((yield self.dut.output[2].payload), self.filter_values[i + 2])
             self.assertEqual((yield self.dut.output[3].payload), self.filter_values[i + 3])
-            yield self.dut.next.eq(1)
-            yield
-            yield self.dut.next.eq(0)
-            yield
 
     def test_it(self):
         def process():
@@ -78,6 +77,7 @@ class FilterStoreTest(TestBase):
             yield self.dut.output[3].ready.eq(1)
             yield self.dut.next.eq(1)
             # Currently 3 cycle delay before streaming starts
+            yield
             yield
             yield
             for i in range(0, len(self.filter_values), 4):
@@ -126,6 +126,8 @@ class FilterStoreTest(TestBase):
                 yield self.dut.output[1].ready.eq(0)
                 yield self.dut.output[2].ready.eq(0)
                 yield self.dut.output[3].ready.eq(0)
+                yield self.dut.next.eq(1)
+                yield
                 yield self.dut.next.eq(0)
                 # Delay before consuming each value
                 # (Delaying for an odd number of cycles is more likely to catch
@@ -145,8 +147,6 @@ class FilterStoreTest(TestBase):
                 self.assertEqual((yield self.dut.output[1].payload), self.filter_values[i + 1])
                 self.assertEqual((yield self.dut.output[2].payload), self.filter_values[i + 2])
                 self.assertEqual((yield self.dut.output[3].payload), self.filter_values[i + 3])
-                yield self.dut.next.eq(1)
-                yield
         self.run_sim(process)
 
     def test_it_can_be_reset_while_filling(self):
