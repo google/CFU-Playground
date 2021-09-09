@@ -40,6 +40,7 @@ SOC_NAME:=  sim.$(PROJ)
 OUT_DIR:=   build/$(SOC_NAME)
 LITEX_ARGS= --output-dir $(OUT_DIR) \
 	--csr-csv $(OUT_DIR)/csr.csv \
+	--csr-json $(OUT_DIR)/csr.json \
 	$(CFU_ARGS) \
 	--bin $(SOFTWARE_BIN) \
 	--sim-trace
