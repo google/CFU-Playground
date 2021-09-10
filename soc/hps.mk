@@ -24,9 +24,6 @@ ifndef PROJ
   $(error PROJ must be set. $(HELP_MESSAGE))
 endif
 
-#ifndef UART_SPEED
-#  $(error UART_SPEED must be set. $(HELP_MESSAGE))
-#endif
 
 ifndef CFU_ROOT
   $(error CFU_ROOT must be set. $(HELP_MESSAGE))
@@ -38,9 +35,8 @@ CFU_ARGS:=  --cpu-cfu $(CFU_V)
 
 SOC_NAME:=  hps.$(PROJ)
 OUT_DIR:=   build/$(SOC_NAME)
-# UART_ARGS=  --uart-baudrate $(UART_SPEED)
-# LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv $(OUT_DIR)/csr.csv $(CFU_ARGS) $(UART_ARGS)
-LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv $(OUT_DIR)/csr.csv $(CFU_ARGS) $(EXTRA_LITEX_ARGS)
+LITEX_ARGS= --output-dir $(OUT_DIR) \
+        --csr-json $(OUT_DIR)/csr.json $(CFU_ARGS) $(EXTRA_LITEX_ARGS)
 
 # Open source toolchain (Yosys + Nextpnr) is used by default
 LITEX_ARGS += --yosys-abc9

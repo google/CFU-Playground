@@ -173,7 +173,7 @@ renode: renode-scripts
 .PHONY: renode-scripts
 renode-scripts: $(SOFTWARE_ELF)
 	@mkdir -p $(BUILD_DIR)/renode
-	$(CFU_ROOT)/scripts/generate_renode_scripts.py $(SOC_BUILD_DIR)/csr.csv $(TARGET) $(BUILD_DIR)/renode/ --repl $(TARGET_REPL)
+	$(CFU_ROOT)/scripts/generate_renode_scripts.py $(SOC_BUILD_DIR)/csr.json $(TARGET) $(BUILD_DIR)/renode/ --repl $(TARGET_REPL)
 	@echo Generating Renode scripts finished
 
 .PHONY: clean
