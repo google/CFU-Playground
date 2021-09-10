@@ -42,7 +42,7 @@ SOC_NAME:=  $(TARGET).$(PROJ)
 OUT_DIR:=   build/$(SOC_NAME)
 UART_ARGS=  --uart-baudrate $(UART_SPEED)
 LITEX_ARGS= --output-dir $(OUT_DIR) \
-        --csr-csv $(OUT_DIR)/csr.csv --csr-json $(OUT_DIR)/csr.json \
+        --csr-json $(OUT_DIR)/csr.json \
         $(CFU_ARGS) $(UART_ARGS) $(TARGET_ARGS) $(EXTRA_LITEX_ARGS)
 
 ifdef USE_OXIDE

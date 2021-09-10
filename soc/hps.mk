@@ -35,7 +35,7 @@ CFU_ARGS:=  --cpu-cfu $(CFU_V)
 
 SOC_NAME:=  hps.$(PROJ)
 OUT_DIR:=   build/$(SOC_NAME)
-LITEX_ARGS= --output-dir $(OUT_DIR) --csr-csv $(OUT_DIR)/csr.csv \
+LITEX_ARGS= --output-dir $(OUT_DIR) \
         --csr-json $(OUT_DIR)/csr.json $(CFU_ARGS) $(EXTRA_LITEX_ARGS)
 
 # Open source toolchain (Yosys + Nextpnr) is used by default
