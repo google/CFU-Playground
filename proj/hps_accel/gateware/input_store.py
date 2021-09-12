@@ -109,7 +109,7 @@ class InputStore(SimpleElaboratable):
 
     def elab(self, m: Module):
         num_words = Signal(range(Constants.MAX_INPUT_WORDS + 1))
-        index = Signal(Constants.MAX_INPUT_WORDS)
+        index = Signal(range(Constants.MAX_INPUT_WORDS))
         reset = Signal()
         read_required = Signal()
         m.d.comb += reset.eq(self.num_words_input.valid)
