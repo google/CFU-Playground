@@ -72,7 +72,7 @@ inline void ConvPerChannel(
   if (params.padding_type == PaddingType::kValid &&
       (input_depth == 1 || input_depth % 4 == 0) && filter_width == 4 &&
       filter_height == 4 && dilation_width_factor == 1 &&
-      dilation_height_factor == 1) {
+      dilation_height_factor == 1 && batches == 1) {
     return ConvPerChannel4x4(params, output_multiplier, output_shift,
                              input_shape, input_data, filter_shape, filter_data,
                              bias_shape, bias_data, output_shape, output_data);

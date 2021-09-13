@@ -56,6 +56,7 @@ void ConvPerChannel4x4(const ConvParams& params,
   TFLITE_DCHECK_EQ(filter_shape.DimensionsCount(), 4);
   TFLITE_DCHECK_EQ(output_shape.DimensionsCount(), 4);
   const int batches = MatchingDim(input_shape, 0, output_shape, 0);
+  TFLITE_DCHECK_EQ(batches, 1);
   const int input_depth = MatchingDim(input_shape, 3, filter_shape, 3);
   TFLITE_DCHECK(input_depth == 1 || input_depth % 4 == 0);
   const int output_depth = MatchingDim(filter_shape, 0, output_shape, 3);
@@ -93,50 +94,47 @@ void ConvPerChannel4x4(const ConvParams& params,
 
   hps_accel::LoadInputOffset(input_offset);
 
-  for (int batch = 0; batch < batches; ++batch) {
-    for (int out_y = 0; out_y < output_height; ++out_y) {
-      const int in_y_origin = out_y * stride_height;
+  for (int out_y = 0; out_y < output_height; ++out_y) {
+    const int in_y_origin = out_y * stride_height;
+    // Check bounds for input buffer. This assumes "valid" padding type.
+    TFLITE_DCHECK_LE(in_y_origin + filter_height, input_height);
+    for (int out_x = 0; out_x < output_width; ++out_x) {
+      const int in_x_origin = out_x * stride_width;
       // Check bounds for input buffer. This assumes "valid" padding type.
-      TFLITE_DCHECK_LE(in_y_origin + filter_height, input_height);
-      for (int out_x = 0; out_x < output_width; ++out_x) {
-        const int in_x_origin = out_x * stride_width;
-        // Check bounds for input buffer. This assumes "valid" padding type.
-        TFLITE_DCHECK_LE(in_x_origin + filter_width, input_width);
-        const int8_t* current_input_data =
-            input_data +
-            Offset(input_shape, batch, in_y_origin, in_x_origin, 0);
+      TFLITE_DCHECK_LE(in_x_origin + filter_width, input_width);
+      const int8_t* current_input_data =
+          input_data + Offset(input_shape, 0, in_y_origin, in_x_origin, 0);
 
-        TFLITE_DCHECK_LE(input_depth * filter_height * filter_width / 4,
-                         MAX_INPUT_WORDS);
-        hps_accel::LoadInput(input_width, input_depth, current_input_data);
+      TFLITE_DCHECK_LE(input_depth * filter_height * filter_width / 4,
+                       MAX_INPUT_WORDS);
+      hps_accel::LoadInput(input_width, input_depth, current_input_data);
 
-        for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
-          if (filter_load_needed &&
-              out_channel % out_channels_per_filter_load == 0) {
-            const int8_t* current_filter_data =
-                filter_data + Offset(filter_shape, out_channel, 0, 0, 0);
-            hps_accel::LoadFilter(input_depth, out_channels_per_filter_load,
-                                  current_filter_data);
-          }
-
-          int32_t acc = 0;
-          for (int i = 0; i < filter_height * filter_width * input_depth / 16;
-               ++i) {
-            acc += multiply_accumulate();
-            hps_accel::AdvanceFilterInput();
-          }
-
-          if (bias_data) {
-            acc += bias_data[out_channel];
-          }
-          acc = MultiplyByQuantizedMultiplier(
-              acc, output_multiplier[out_channel], output_shift[out_channel]);
-          acc += output_offset;
-          acc = std::max(acc, output_activation_min);
-          acc = std::min(acc, output_activation_max);
-          output_data[Offset(output_shape, batch, out_y, out_x, out_channel)] =
-              static_cast<int8_t>(acc);
+      for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
+        if (filter_load_needed &&
+            out_channel % out_channels_per_filter_load == 0) {
+          const int8_t* current_filter_data =
+              filter_data + Offset(filter_shape, out_channel, 0, 0, 0);
+          hps_accel::LoadFilter(input_depth, out_channels_per_filter_load,
+                                current_filter_data);
         }
+
+        int32_t acc = 0;
+        for (int i = 0; i < filter_height * filter_width * input_depth / 16;
+             ++i) {
+          acc += multiply_accumulate();
+          hps_accel::AdvanceFilterInput();
+        }
+
+        if (bias_data) {
+          acc += bias_data[out_channel];
+        }
+        acc = MultiplyByQuantizedMultiplier(acc, output_multiplier[out_channel],
+                                            output_shift[out_channel]);
+        acc += output_offset;
+        acc = std::max(acc, output_activation_min);
+        acc = std::min(acc, output_activation_max);
+        output_data[Offset(output_shape, 0, out_y, out_x, out_channel)] =
+            static_cast<int8_t>(acc);
       }
     }
   }
