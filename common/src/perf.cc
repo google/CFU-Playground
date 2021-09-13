@@ -44,7 +44,7 @@ void perf_reset_all_counters() {
   perf_zero_start_counts();
 }
 
-// Prints cycle and enable counts for every perf coutner
+// Prints cycle and enable counts for every perf counter
 void perf_print_all_counters() {
   for (int i = 0; i < NUM_PERF_COUNTERS; ++i) {
     perf_disable_counter(i);
@@ -56,6 +56,11 @@ void perf_print_all_counters() {
   for (int i = 0; i < NUM_PERF_COUNTERS; ++i) {
     unsigned total = perf_get_counter(i);
     unsigned starts = perf_get_start_count(i);
+
+    // Adjust for overmeasurement per start
+    // There is an additional overhead per start of 8 cycles which is
+    // not measured by the counter.
+    total -= starts * 3;
 
     printf("  %3d    |", i);
     perf_print_human(total);
@@ -108,6 +113,53 @@ static void do_perf_show(void) {
   printf("  mcycle: %8d\n", perf_get_mcycle());
 }
 
+static void do_perf_measure(void) {
+  perf_reset_all_counters();
+
+  // Warm up
+  for (int i = 0; i < 1000000; i++) {
+    asm volatile(" nop ");
+  }
+
+  // Measure empty loop
+  perf_enable_counter(0);
+  for (int i = 0; i < 1000000; i++) {
+    asm volatile(" nop ");
+  }
+  perf_disable_counter(0);
+
+  // Measure 1M measurements
+  perf_enable_counter(1);
+  for (int i = 0; i < 1000000; i++) {
+    perf_enable_counter(2);
+    perf_disable_counter(2);
+  }
+  perf_disable_counter(1);
+
+  // Measure 1M measurements of measurements
+  perf_enable_counter(3);
+  for (int i = 0; i < 1000000; i++) {
+    perf_enable_counter(4);
+    perf_enable_counter(5);
+    asm volatile(" nop ");
+    perf_disable_counter(5);
+    perf_disable_counter(4);
+  }
+  perf_disable_counter(3);
+
+  printf("1 x 1M iterations:    %7u\n", perf_get_counter(0));
+  printf("1M x measure nothing: %7u\n", perf_get_counter(2));
+  printf("1M x measure nop:     %7u\n", perf_get_counter(5));
+  printf("1M x measure 1 x nop: %7u\n", perf_get_counter(4));
+  printf("1M measurements:      %7u\n",
+         perf_get_counter(4) - perf_get_counter(5));
+  printf("\n\n");
+  printf("All measurements add        %2u cycles per start\n",
+         perf_get_counter(2) / 1000000);
+  printf("Counter enable+disable adds %2u cycles per start\n",
+         (perf_get_counter(4) - perf_get_counter(5)) / 1000000);
+}
+
 static struct Menu MENU = {
     "Performance Counter Tests",
     "perf counter",
@@ -120,6 +172,7 @@ static struct Menu MENU = {
         MENU_ITEM('p', "Pause current perf counter", do_perf_pause),
         MENU_ITEM('z', "Zero current perf counter and mcycle", do_perf_zero),
         MENU_ITEM('s', "Show perf counters and mcycle values", do_perf_show),
+        MENU_ITEM('m', "Measure counter overhead", do_perf_measure),
         MENU_END,
     },
 };
