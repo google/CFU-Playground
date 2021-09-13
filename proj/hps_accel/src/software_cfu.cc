@@ -26,6 +26,7 @@ namespace soft_cfu {
 int32_t macc_input_offset;
 int8_t macc_input[16];
 int8_t macc_filter[16];
+bool macc_valid;
 
 Storage filter_storage;
 Storage input_storage;
