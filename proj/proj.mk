@@ -167,7 +167,6 @@ TARGET_REPL := $(BUILD_DIR)/renode/$(TARGET)_generated.repl
 .PHONY:	renode 
 renode: renode-scripts
 	@echo Running interactively under renode
-	$(COPY) $(SOFTWARE_ELF) $(PROJ_DIR)/renode/
 	pushd $(PROJ_DIR)/build/renode/ && $(RENODE_DIR)/renode -e "s @$(TARGET).resc" && popd
 
 .PHONY: renode-scripts
