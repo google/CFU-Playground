@@ -136,6 +136,8 @@ void check_filters(size_t in_channels, size_t out_channels) {
                         p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
     hps_accel::AdvanceFilterInput();
     if (!check_vector_same(hps_accel::GetFilter(), expected, i)) failures++;
+    // Consume the macc output to prevent values getting stuck
+    multiply_accumulate();
   }
   printf("%s %2u,%2u: %3d cases with %1d failures\n", failures ? "FAIL" : "OK",
          in_channels, out_channels, cases, failures);
@@ -173,6 +175,8 @@ void check_inputs(size_t width, size_t in_channels) {
     }
     hps_accel::AdvanceFilterInput();
     if (!check_vector_same(hps_accel::GetInput(), expected, i)) failures++;
+    // Consume the macc output to prevent values getting stuck
+    multiply_accumulate();
   }
   printf("%s %2u,%2u: %3d cases with %1d failures\n", failures ? "FAIL" : "OK",
          width, in_channels, cases, failures);

@@ -81,21 +81,9 @@ class HpsCfuTest(CfuTestBase):
         for i in range(0, len(input), 16):
             # Turn the crank
             yield ((SET, Constants.REG_FILTER_INPUT_NEXT, 1, 0), 0)
-            yield ((PING, 0, 0, 0), 0)  # pipeline delay
             expected = sum((offset + i) * f for (i, f) in
                            zip(input[i:i + 16], filter[i:i + 16]))
             yield ((GET, Constants.REG_MACC_OUT, 0, 0), expected)
-
-    def test_multiply_accumulate_empty_inputs(self):
-        def op_generator():
-            yield ((SET, Constants.REG_INPUT_NUM_WORDS, 0, 0), 0)
-            yield ((SET, Constants.REG_FILTER_NUM_WORDS, 0, 0), 0)
-            yield ((SET, Constants.REG_INPUT_OFFSET, 0, 0), 0)
-            for _ in range(10):
-                for _ in range(10):
-                    yield ((GET, Constants.REG_MACC_OUT, 0, 0), 0)
-                yield ((SET, Constants.REG_FILTER_INPUT_NEXT, 1, 0), 0)
-        self.run_ops(op_generator())
 
     def test_multiply_accumulate_one_iteration(self):
         def op_generator():

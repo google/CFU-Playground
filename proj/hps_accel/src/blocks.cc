@@ -79,8 +79,6 @@ Vector16 Vector16::zeroes() { return Vector16{{0, 0, 0, 0}}; }
 
 // Performs a 16 x 16 vector multiplication
 int32_t multiply_accumulate() {
-  asm volatile("nop"); // Two more cycles for MACC to complete
-  asm volatile("nop");
   return cfu_get(REG_MACC_OUT);
 }
 

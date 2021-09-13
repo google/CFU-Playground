@@ -32,12 +32,18 @@ class StatusRegister(SimpleElaboratable):
       Whether payload is valid at reset or register ought to wait
       to transfer a value from its input stream.
 
+    ready_when_valid: bool
+      Whether the register should allow overwriting valid values
+      with new values from its input stream.
+      If true, the register is unconditionally ready to accept new values.
+      If false, the register will only accept new values when it is not
+      already holding a valid value.
+
     Attributes
     ----------
 
     input: Endpoint(unsigned(32)), in
-      A stream of new values. "ready" is always asserted because the
-      register is always ready to receive new data.
+      A stream of new values.
 
     invalidate: Signal(), in
       Causes valid to be deassserted.
@@ -51,15 +57,19 @@ class StatusRegister(SimpleElaboratable):
 
     """
 
-    def __init__(self, valid_at_reset=True):
+    def __init__(self, valid_at_reset=True, ready_when_valid=True):
         super().__init__()
+        self.ready_when_valid = ready_when_valid
         self.input = Endpoint(unsigned(32))
         self.invalidate = Signal()
         self.valid = Signal(reset=valid_at_reset)
         self.value = Signal(32)
 
     def elab(self, m):
-        m.d.comb += self.input.ready.eq(1)
+        if self.ready_when_valid:
+            m.d.comb += self.input.ready.eq(1)
+        else:
+            m.d.comb += self.input.ready.eq(~self.valid)
         with m.If(self.invalidate):
             m.d.sync += self.valid.eq(0)
         with m.If(self.input.is_transferring()):
@@ -105,8 +115,15 @@ class GetInstruction(InstructionBase):
         Constants.REG_INPUT_1,
         Constants.REG_INPUT_2,
         Constants.REG_INPUT_3,
-        Constants.REG_MACC_OUT,
         Constants.REG_VERIFY,
+    }
+
+    # Registers which the CPU must read every value from exactly once:
+    # The register won't accept new values from its input stream until the
+    # existing value has been read out.
+    # The CPU will block until a value has been received from the input stream.
+    READ_EXACTLY_ONCE = {
+        Constants.REG_MACC_OUT,
     }
 
     def __init__(self):
@@ -139,12 +156,19 @@ class GetInstruction(InstructionBase):
 
     def elab(self, m: Module):
         # Make registers and plumb sinks and read_strobes through
-        registers = {i: StatusRegister(i in self.VALID_AT_RESET)
+        registers = {i: StatusRegister(valid_at_reset=(i in self.VALID_AT_RESET),
+                                       ready_when_valid=(i not in self.READ_EXACTLY_ONCE))
                      for i in self.REGISTER_IDS}
         for i, register in registers.items():
             m.submodules[f"reg_{i:02x}"] = register
             m.d.comb += connect(self.input_streams[i], register.input)
-            m.d.comb += register.invalidate.eq(self.invalidates[i])
+            if i in self.READ_EXACTLY_ONCE:
+                # Reading from it invalidates the value, in preparation for
+                # receiving the next one.
+                m.d.comb += register.invalidate.eq(self.read_strobes[i] |
+                                                   self.invalidates[i])
+            else:
+                m.d.comb += register.invalidate.eq(self.invalidates[i])
             m.d.sync += self.read_strobes[i].eq(0)  # strobes off by default
 
         # Handle CFU start
