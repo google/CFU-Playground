@@ -16,22 +16,25 @@
  */
 
 #include "tensorflow/lite/kernels/internal/reference/integer_ops/conv_accel.h"
+
 #include "blocks.h"
 #include "gateware_constants.h"
 
-using hps_accel::Vector16;
 using hps_accel::multiply_accumulate;
+using hps_accel::Vector16;
 
 namespace tflite {
 namespace reference_integer_ops {
 
-void ConvPerChannel4x4(
-    const ConvParams& params, const int32_t* output_multiplier,
-    const int32_t* output_shift, const RuntimeShape& input_shape,
-    const int8_t* input_data, const RuntimeShape& filter_shape,
-    const int8_t* filter_data, const RuntimeShape& bias_shape,
-    const int32_t* bias_data, const RuntimeShape& output_shape,
-    int8_t* output_data) {
+void ConvPerChannel4x4(const ConvParams& params,
+                       const int32_t* output_multiplier,
+                       const int32_t* output_shift,
+                       const RuntimeShape& input_shape,
+                       const int8_t* input_data,
+                       const RuntimeShape& filter_shape,
+                       const int8_t* filter_data,
+                       const RuntimeShape& bias_shape, const int32_t* bias_data,
+                       const RuntimeShape& output_shape, int8_t* output_data) {
   // Get parameters.
   const int32_t input_offset = params.input_offset;  // r = s(q - Z)
   const int stride_width = params.stride_width;
@@ -74,11 +77,10 @@ void ConvPerChannel4x4(
   // Our filter store is of limited size.
   // First, figure out how many output channels' worth we can fit.
   bool filter_load_needed;
-  TFLITE_DCHECK_LE(
-      input_depth * filter_height * filter_width / 4,
-      MAX_FILTER_WORDS);
-  const int out_channels_per_filter_load = MAX_FILTER_WORDS /
-      (input_depth * filter_height * filter_width / 4);
+  TFLITE_DCHECK_LE(input_depth * filter_height * filter_width / 4,
+                   MAX_FILTER_WORDS);
+  const int out_channels_per_filter_load =
+      MAX_FILTER_WORDS / (input_depth * filter_height * filter_width / 4);
   if (out_channels_per_filter_load >= output_depth) {
     // We can fit everything in at once.
     // Load filter values now and reuse them for every iteration.
@@ -100,25 +102,26 @@ void ConvPerChannel4x4(
         const int in_x_origin = out_x * stride_width;
         // Check bounds for input buffer. This assumes "valid" padding type.
         TFLITE_DCHECK_LE(in_x_origin + filter_width, input_width);
-        const int8_t *current_input_data = input_data +
+        const int8_t* current_input_data =
+            input_data +
             Offset(input_shape, batch, in_y_origin, in_x_origin, 0);
 
-        TFLITE_DCHECK_LE(
-            input_depth * filter_height * filter_width / 4,
-            MAX_INPUT_WORDS);
+        TFLITE_DCHECK_LE(input_depth * filter_height * filter_width / 4,
+                         MAX_INPUT_WORDS);
         hps_accel::LoadInput(input_width, input_depth, current_input_data);
 
         for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
           if (filter_load_needed &&
               out_channel % out_channels_per_filter_load == 0) {
-            const int8_t *current_filter_data = filter_data +
-                Offset(filter_shape, out_channel, 0, 0, 0);
+            const int8_t* current_filter_data =
+                filter_data + Offset(filter_shape, out_channel, 0, 0, 0);
             hps_accel::LoadFilter(input_depth, out_channels_per_filter_load,
                                   current_filter_data);
           }
 
           int32_t acc = 0;
-          for (int i = 0; i < filter_height * filter_width * input_depth / 16; ++i) {
+          for (int i = 0; i < filter_height * filter_width * input_depth / 16;
+               ++i) {
             acc += multiply_accumulate();
             hps_accel::AdvanceFilterInput();
           }
