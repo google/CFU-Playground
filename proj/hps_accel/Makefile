@@ -62,6 +62,7 @@ ifeq '$(TARGET)' 'digilent_arty'
 EXTRA_LITEX_ARGS += --sys-clk-freq 80000000
 endif
 
+# Add constants defined in gateware/constants.py to C++ build
 BUILD_DIR_EXTRA_DEP = $(BUILD_DIR)/src/gateware_constants.h
 include ../proj.mk
 
