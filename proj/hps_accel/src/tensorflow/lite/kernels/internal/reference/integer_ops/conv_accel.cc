@@ -75,66 +75,58 @@ void ConvPerChannel4x4(const ConvParams& params,
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
 
-  // Our filter store is of limited size.
-  // First, figure out how many output channels' worth we can fit.
-  bool filter_load_needed;
-  TFLITE_DCHECK_LE(input_depth * filter_height * filter_width / 4,
-                   MAX_FILTER_WORDS);
-  const int out_channels_per_filter_load =
-      MAX_FILTER_WORDS / (input_depth * filter_height * filter_width / 4);
-  if (out_channels_per_filter_load >= output_depth) {
-    // We can fit everything in at once.
-    // Load filter values now and reuse them for every iteration.
-    hps_accel::LoadFilter(input_depth, output_depth, filter_data);
-    filter_load_needed = false;
-  } else {
-    // We must periodically load filter values inside the loop below.
-    filter_load_needed = true;
-  }
+  // Work out maximum output channels we can do per filter load
+  const int filter_words_per_output_channel =
+      input_depth * filter_height * filter_width / 4;
+  const int max_output_channels_per_load =
+      MAX_FILTER_WORDS / filter_words_per_output_channel;
 
   hps_accel::LoadInputOffset(input_offset);
 
-  for (int out_y = 0; out_y < output_height; ++out_y) {
-    const int in_y_origin = out_y * stride_height;
-    // Check bounds for input buffer. This assumes "valid" padding type.
-    TFLITE_DCHECK_LE(in_y_origin + filter_height, input_height);
-    for (int out_x = 0; out_x < output_width; ++out_x) {
-      const int in_x_origin = out_x * stride_width;
+  for (int out_channel_offset = 0; out_channel_offset < output_depth;
+       out_channel_offset += max_output_channels_per_load) {
+    const int output_channels = std::min(output_depth - out_channel_offset,
+                                         max_output_channels_per_load);
+    hps_accel::LoadFilter(
+        input_depth, output_channels,
+        filter_data + Offset(filter_shape, out_channel_offset, 0, 0, 0));
+
+    for (int out_y = 0; out_y < output_height; ++out_y) {
+      const int in_y_origin = out_y * stride_height;
       // Check bounds for input buffer. This assumes "valid" padding type.
-      TFLITE_DCHECK_LE(in_x_origin + filter_width, input_width);
-      const int8_t* current_input_data =
-          input_data + Offset(input_shape, 0, in_y_origin, in_x_origin, 0);
+      TFLITE_DCHECK_LE(in_y_origin + filter_height, input_height);
+      for (int out_x = 0; out_x < output_width; ++out_x) {
+        const int in_x_origin = out_x * stride_width;
+        // Check bounds for input buffer. This assumes "valid" padding type.
+        TFLITE_DCHECK_LE(in_x_origin + filter_width, input_width);
+        const int8_t* current_input_data =
+            input_data + Offset(input_shape, 0, in_y_origin, in_x_origin, 0);
 
-      TFLITE_DCHECK_LE(input_depth * filter_height * filter_width / 4,
-                       MAX_INPUT_WORDS);
-      hps_accel::LoadInput(input_width, input_depth, current_input_data);
+        TFLITE_DCHECK_LE(input_depth * filter_height * filter_width / 4,
+                         MAX_INPUT_WORDS);
+        hps_accel::LoadInput(input_width, input_depth, current_input_data);
 
-      for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
-        if (filter_load_needed &&
-            out_channel % out_channels_per_filter_load == 0) {
-          const int8_t* current_filter_data =
-              filter_data + Offset(filter_shape, out_channel, 0, 0, 0);
-          hps_accel::LoadFilter(input_depth, out_channels_per_filter_load,
-                                current_filter_data);
+        for (int out_channel = out_channel_offset;
+             out_channel < out_channel_offset + output_channels;
+             ++out_channel) {
+          int32_t acc = 0;
+          for (int i = 0; i < filter_height * filter_width * input_depth / 16;
+               ++i) {
+            acc += multiply_accumulate();
+            hps_accel::AdvanceFilterInput();
+          }
+
+          if (bias_data) {
+            acc += bias_data[out_channel];
+          }
+          acc = MultiplyByQuantizedMultiplier(
+              acc, output_multiplier[out_channel], output_shift[out_channel]);
+          acc += output_offset;
+          acc = std::max(acc, output_activation_min);
+          acc = std::min(acc, output_activation_max);
+          output_data[Offset(output_shape, 0, out_y, out_x, out_channel)] =
+              static_cast<int8_t>(acc);
         }
-
-        int32_t acc = 0;
-        for (int i = 0; i < filter_height * filter_width * input_depth / 16;
-             ++i) {
-          acc += multiply_accumulate();
-          hps_accel::AdvanceFilterInput();
-        }
-
-        if (bias_data) {
-          acc += bias_data[out_channel];
-        }
-        acc = MultiplyByQuantizedMultiplier(acc, output_multiplier[out_channel],
-                                            output_shift[out_channel]);
-        acc += output_offset;
-        acc = std::max(acc, output_activation_min);
-        acc = std::min(acc, output_activation_max);
-        output_data[Offset(output_shape, 0, out_y, out_x, out_channel)] =
-            static_cast<int8_t>(acc);
       }
     }
   }
