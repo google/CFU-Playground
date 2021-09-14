@@ -32,6 +32,13 @@ inline void ConvPerChannel(
     int8_t* output_data) {
 #ifdef SHOW_CONV_PARAMS
   print_conv_params(params, input_shape, filter_shape, output_shape);
+
+  printf("output_multiplier\n");
+  print_int32_array(output_multiplier, output_shape.Dims(3));
+  printf("output_shift\n");
+  print_int32_array(output_shift, output_shape.Dims(3));
+  printf("bias\n");
+  print_int32_array(bias_data, output_shape.Dims(3));
 #endif
   // Get parameters.
   const int32_t input_offset = params.input_offset;  // r = s(q - Z)
