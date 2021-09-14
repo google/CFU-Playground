@@ -32,7 +32,6 @@ export PYTHONPATH
 pathadd() {
     if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
         export PATH="${1}${PATH:+":$PATH"}"
-        echo "Updated PATH: ${PATH}"
     fi
 }
 pathadd "${CFU_ROOT}/third_party/usr/local/bin"
