@@ -41,8 +41,9 @@ def patch_cpu_fomu_variant():
         if 'fomu' in self.variant:
             soc.add_config('CPU_DIV_UNIMPLEMENTED')
 
+            # Fomu variant has *no* Dcache.
             # This is here to avoid the dcache flush instruction (system.h).
-            soc.add_config('CPU_VARIANT_LITE')
+            soc.constants.pop('CONFIG_CPU_HAS_DCACHE', None)
 
     core.VexRiscv.add_soc_components = new_add_soc_components
 

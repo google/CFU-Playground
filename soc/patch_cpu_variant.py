@@ -36,7 +36,7 @@ def patch_cpu_variant():
     print("general patch:\n", core.CPU_VARIANTS)
 
 
-    ########### ADD code to existing add_soc_components #######
+    ########### ADD code to existing add_soc_components() #######
     old_add_soc_components = core.VexRiscv.add_soc_components
 
     def new_add_soc_components(self, soc, soc_region_cls):
