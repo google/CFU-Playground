@@ -108,7 +108,6 @@ COMMON_FILES	   := $(shell find $(COMMON_DIR) -type f)
 MLCOMMONS_SRC_DIR  := $(CFU_ROOT)/third_party/mlcommons
 SAXON_SRC_DIR      := $(CFU_ROOT)/third_party/SaxonSoc
 RENODE_DIR         := $(CFU_ROOT)/third_party/renode
-LITEX_RENODE_DIR   := $(CFU_ROOT)/third_party/python/litex-renode
 SRC_DIR            := $(abspath $(PROJ_DIR)/src)
 
 TFLM_SRC_DIR       := $(CFU_ROOT)/third_party/tflite-micro

@@ -22,8 +22,9 @@ from importlib import import_module
 from shutil import copy
 
 sys.path.append((os.path.join(os.path.dirname(__file__),
-                "..", "third_party", "python", "litex-renode")))
-litex_renode = import_module("generate-renode-scripts")
+                "..", "third_party", "python", "litex", "litex", "tools")))
+
+litex_renode = import_module("litex_json2renode")
 
 def generate_resc(target):
     result = """
