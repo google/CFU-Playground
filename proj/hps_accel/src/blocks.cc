@@ -115,22 +115,20 @@ Vector16 GetInput() {
   return Vector16{{word0, word1, word2, word3}};
 }
 
-int32_t MultiplyByQuantizedMultiplier_01(int32_t x,
-                                         int32_t quantized_multiplier,
+int32_t MultiplyByQuantizedMultiplier_01(int32_t x, int32_t multiplier,
                                          int shift) {
   using gemmlowp::RoundingDivideByPOT;
   using gemmlowp::SaturatingRoundingDoublingHighMul;
   int right_shift = -shift;
-  int32_t product = SaturatingRoundingDoublingHighMul(x, quantized_multiplier);
+  int32_t product = SaturatingRoundingDoublingHighMul(x, multiplier);
   return RoundingDivideByPOT(product, right_shift);
 }
 
-int32_t MultiplyByQuantizedMultiplier_02(int32_t x,
-                                         int32_t quantized_multiplier,
+int32_t MultiplyByQuantizedMultiplier_02(int32_t x, int32_t multiplier,
                                          int shift) {
   using gemmlowp::SaturatingRoundingDoublingHighMul;
   int right_shift = -shift;
-  int32_t product = SaturatingRoundingDoublingHighMul(x, quantized_multiplier);
+  int32_t product = SaturatingRoundingDoublingHighMul(x, multiplier);
 
   // RoundingDivideByPOT implementation
   int32_t quotient = product >> right_shift;
@@ -141,12 +139,11 @@ int32_t MultiplyByQuantizedMultiplier_02(int32_t x,
   return quotient + rounding;
 }
 
-int32_t MultiplyByQuantizedMultiplier_03(int32_t x,
-                                         int32_t quantized_multiplier,
+int32_t MultiplyByQuantizedMultiplier_03(int32_t x, int32_t multiplier,
                                          int shift) {
   // Saturating Rounding Double High Mul
   int64_t a_64(x);
-  int64_t b_64(quantized_multiplier);
+  int64_t b_64(multiplier);
   int64_t ab_64 = a_64 * b_64;
   int32_t nudge = ab_64 >= 0 ? (1 << 30) : (1 - (1 << 30));
   int32_t product = static_cast<std::int32_t>((ab_64 + nudge) / (1ll << 31));
@@ -155,6 +152,75 @@ int32_t MultiplyByQuantizedMultiplier_03(int32_t x,
   int right_shift = -shift;
   int32_t quotient = product >> right_shift;
   int32_t mask = (1 << right_shift) - 1;
+  int32_t remainder = product & mask;
+  int32_t threshold = (mask >> 1) + ((x < 0) ? 1 : 0);
+  int32_t rounding = (remainder > threshold) ? 1 : 0;
+  return quotient + rounding;
+}
+
+int32_t MultiplyByQuantizedMultiplier_04(int32_t x, int32_t multiplier,
+                                         int shift) {
+  // Saturating Rounding Double High Mul
+  bool positive = x > 0;
+  int64_t a_64(positive ? x : -x);
+  int64_t b_64(multiplier);
+  int64_t ab_64 = a_64 * b_64;
+  if (positive) {
+    ab_64 += (1 << 30);
+  } else {
+    ab_64 += (1 << 30) - 1;
+  }
+  int64_t t = ab_64 >> 31;
+  int32_t product = static_cast<int32_t>(t);
+  if (!positive) {
+    product = -product;
+  }
+
+  // RoundingDivideByPOT implementation
+  int32_t quotient;
+  int32_t mask;
+  switch (shift) {
+    case -3:
+      quotient = product >> 3;
+      mask = (1 << 3) - 1;
+      break;
+    case -4:
+      quotient = product >> 4;
+      mask = (1 << 4) - 1;
+      break;
+    case -5:
+      quotient = product >> 5;
+      mask = (1 << 5) - 1;
+      break;
+    case -6:
+      quotient = product >> 6;
+      mask = (1 << 6) - 1;
+      break;
+    case -7:
+      quotient = product >> 7;
+      mask = (1 << 7) - 1;
+      break;
+    case -8:
+      quotient = product >> 8;
+      mask = (1 << 8) - 1;
+      break;
+    case -9:
+      quotient = product >> 9;
+      mask = (1 << 9) - 1;
+      break;
+    case -10:
+      quotient = product >> 10;
+      mask = (1 << 10) - 1;
+      break;
+    case -11:
+      quotient = product >> 11;
+      mask = (1 << 11) - 1;
+      break;
+    default:
+      quotient = 0;
+      mask = 0;
+      printf("***BAD SHIFT\n");
+  }
   int32_t remainder = product & mask;
   int32_t threshold = (mask >> 1) + ((x < 0) ? 1 : 0);
   int32_t rounding = (remainder > threshold) ? 1 : 0;
