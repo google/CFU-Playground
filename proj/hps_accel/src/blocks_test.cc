@@ -247,11 +247,12 @@ struct MbmqTest {
   int32_t (*fn)(int32_t, int32_t, int);
 } mbmq_tests[]{
     {"01", hps_accel::MultiplyByQuantizedMultiplier_01},
+    {"02", hps_accel::MultiplyByQuantizedMultiplier_02},
     {NULL, NULL},
 };
 
 extern "C" void do_test_blocks_math(void) {
-  const size_t NUM_TESTS = 1000;
+  const size_t NUM_TESTS = 100000;
   int64_t rand = 0;
 
   size_t failed = 0;

@@ -104,6 +104,13 @@ inline void AdvanceFilterInput() { cfu_set(REG_FILTER_INPUT_NEXT, 0); }
 int32_t MultiplyByQuantizedMultiplier_01(int32_t x,
                                          int32_t quantized_multiplier,
                                          int shift);
+
+// Same functionality. Reimplements RoundingDivideByPOT
+int32_t MultiplyByQuantizedMultiplier_02(int32_t x,
+                                         int32_t quantized_multiplier,
+                                         int shift);
+
+
 };  // namespace hps_accel
 
 #endif  // _BLOCKS_H

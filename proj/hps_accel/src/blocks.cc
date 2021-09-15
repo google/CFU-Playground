@@ -121,8 +121,24 @@ int32_t MultiplyByQuantizedMultiplier_01(int32_t x,
   using gemmlowp::RoundingDivideByPOT;
   using gemmlowp::SaturatingRoundingDoublingHighMul;
   int right_shift = -shift;
-  return RoundingDivideByPOT(
-      SaturatingRoundingDoublingHighMul(x, quantized_multiplier), right_shift);
+  int32_t product = SaturatingRoundingDoublingHighMul(x, quantized_multiplier);
+  return RoundingDivideByPOT(product, right_shift);
+}
+
+int32_t MultiplyByQuantizedMultiplier_02(int32_t x,
+                                         int32_t quantized_multiplier,
+                                         int shift) {
+  using gemmlowp::SaturatingRoundingDoublingHighMul;
+  int right_shift = -shift;
+  int32_t product = SaturatingRoundingDoublingHighMul(x, quantized_multiplier);
+
+  // RoundingDivideByPOT implementation
+  int32_t quotient = product >> right_shift;
+  int32_t mask = (1 << right_shift) - 1;
+  int32_t remainder = product & mask;
+  int32_t threshold = (mask >> 1) + ((x < 0) ? 1 : 0);
+  int32_t rounding = (remainder > threshold) ? 1 : 0;
+  return quotient + rounding;
 }
 
 };  // namespace hps_accel
