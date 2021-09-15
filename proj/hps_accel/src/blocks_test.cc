@@ -19,6 +19,8 @@
 #include <cstdio>
 
 #include "blocks.h"
+#include "playground_util/random.h"
+#include "tensorflow/lite/kernels/internal/common.h"
 
 using hps_accel::multiply_accumulate;
 using hps_accel::Vector16;
@@ -54,9 +56,8 @@ bool test_multiply(Vector16 input, Vector16 filter, int32_t input_offset,
                    int32_t expected) {
   printf(".");
   hps_accel::LoadInputOffset(input_offset);
-  hps_accel::LoadFilter(1, 1, reinterpret_cast<const int8_t *>(filter.values));
-  hps_accel::LoadInput(1, 4, reinterpret_cast<const int8_t *>(input.values));
-  hps_accel::AdvanceFilterInput();
+  hps_accel::LoadFilter(1, 1, reinterpret_cast<const int8_t*>(filter.values));
+  hps_accel::LoadInput(1, 4, reinterpret_cast<const int8_t*>(input.values));
   int32_t actual = multiply_accumulate();
   if (actual == expected) {
     return true;
@@ -240,6 +241,35 @@ extern "C" void do_test_blocks_input(void) {
   check_inputs(49, 4);
 }
 
+extern "C" void do_test_blocks_math(void) {
+  const size_t NUM_TESTS = 1000;
+  int64_t rand = 0;
+
+  size_t failed = 0;
+  for (size_t i = 0; i < NUM_TESTS; i++) {
+    // Range based on max input depth * filter_width * filter_height * 8 bits.
+    const int32_t VALUE_RANGE = 64 * 16 * 256;
+    int32_t value =
+        (next_pseudo_random(&rand) & (VALUE_RANGE - 1)) - VALUE_RANGE / 2;
+    // 0x4000_0000 to 0x7ffff_ffff
+    int32_t multiplier = (next_pseudo_random(&rand) & 0x7fffffff) | 0x40000000;
+    // between -3 and -11
+    int32_t shift = -11 + (next_pseudo_random(&rand) & 0x7);
+    int32_t expected =
+        tflite::MultiplyByQuantizedMultiplier(value, multiplier, shift);
+    int32_t actual =
+        hps_accel::MultiplyByQuantizedMultiplier_01(value, multiplier, shift);
+    if (actual != expected) {
+      printf("FAIL mbqm(%ld, %ld, %ld) = %ld\n", value, multiplier, shift,
+             expected);
+      failed++;
+    }
+  }
+  if (failed == 0) {
+    printf("OK\n");
+  }
+}
+
 extern "C" void do_test_blocks_all(void) {
   printf("multiply_accumulate\n");
   do_test_blocks_multiply_accumulate();
@@ -247,4 +277,6 @@ extern "C" void do_test_blocks_all(void) {
   do_test_blocks_filter();
   printf("input\n");
   do_test_blocks_input();
+  printf("math\n");
+  do_test_blocks_math();
 }

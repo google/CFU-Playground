@@ -96,6 +96,14 @@ Vector16 GetInput();
 
 inline void AdvanceFilterInput() { cfu_set(REG_FILTER_INPUT_NEXT, 0); }
 
+// Math functions
+
+// Same as tflite::MultiplyByQuantizedMultiplier but assumes:
+// shift is in the range -4 to -10 (inclusive)
+// multiplier is in the range 0x40000000 to 0x7fffffff
+int32_t MultiplyByQuantizedMultiplier_01(int32_t x,
+                                         int32_t quantized_multiplier,
+                                         int shift);
 };  // namespace hps_accel
 
 #endif  // _BLOCKS_H

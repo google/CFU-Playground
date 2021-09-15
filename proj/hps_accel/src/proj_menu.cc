@@ -70,6 +70,7 @@ struct Menu MENU = {
                   do_test_blocks_multiply_accumulate),
         MENU_ITEM('f', "test blocks Filter", do_test_blocks_filter),
         MENU_ITEM('i', "test blocks Input", do_test_blocks_input),
+        MENU_ITEM('q', "test blocks maths", do_test_blocks_math),
         MENU_ITEM('a', "test blocks All", do_test_blocks_all),
         MENU_END,
     },

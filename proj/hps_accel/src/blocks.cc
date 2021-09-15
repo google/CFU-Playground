@@ -19,6 +19,7 @@
 #include <cstdio>
 
 #include "hps_cfu.h"
+#include "tensorflow/lite/kernels/internal/common.h"
 
 namespace hps_accel {
 
@@ -112,6 +113,16 @@ Vector16 GetInput() {
   uint32_t word2 = cfu_get(REG_INPUT_2);
   uint32_t word3 = cfu_get(REG_INPUT_3);
   return Vector16{{word0, word1, word2, word3}};
+}
+
+int32_t MultiplyByQuantizedMultiplier_01(int32_t x,
+                                         int32_t quantized_multiplier,
+                                         int shift) {
+  using gemmlowp::RoundingDivideByPOT;
+  using gemmlowp::SaturatingRoundingDoublingHighMul;
+  int right_shift = -shift;
+  return RoundingDivideByPOT(
+      SaturatingRoundingDoublingHighMul(x, quantized_multiplier), right_shift);
 }
 
 };  // namespace hps_accel
