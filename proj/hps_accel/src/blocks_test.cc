@@ -250,6 +250,7 @@ struct MbmqTest {
     {"02", hps_accel::MultiplyByQuantizedMultiplier_02},
     {"03", hps_accel::MultiplyByQuantizedMultiplier_03},
     {"04", hps_accel::MultiplyByQuantizedMultiplier_04},
+    {"SW", hps_accel::MultiplyByQuantizedMultiplier_SW},
     {NULL, NULL},
 };
 

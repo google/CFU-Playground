@@ -160,6 +160,9 @@ int32_t MultiplyByQuantizedMultiplier_03(int32_t x, int32_t multiplier,
 
 int32_t MultiplyByQuantizedMultiplier_04(int32_t x, int32_t multiplier,
                                          int shift) {
+  TFLITE_DCHECK(multiplier >= 0x40000000 && multiplier <= 0x7fffffff);
+  TFLITE_DCHECK(shift >= -11 && shift <= -3);
+
   // Saturating Rounding Double High Mul
   bool positive = x > 0;
   int64_t a_64(positive ? x : -x);
@@ -225,6 +228,13 @@ int32_t MultiplyByQuantizedMultiplier_04(int32_t x, int32_t multiplier,
   int32_t threshold = (mask >> 1) + ((x < 0) ? 1 : 0);
   int32_t rounding = (remainder > threshold) ? 1 : 0;
   return quotient + rounding;
+}
+
+// Same functionality. Uses software CFU implementations of operation
+int32_t MultiplyByQuantizedMultiplier_SW(int32_t x, int32_t multiplier,
+                                         int shift) {
+  int32_t product = cfu_op2_sw(MATH_SRDHM, x, multiplier);
+  return cfu_op2_sw(MATH_RDBPOT, product, shift);
 }
 
 };  // namespace hps_accel

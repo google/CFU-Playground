@@ -72,12 +72,8 @@ class Storage {
       index = len - 4;
     }
   }
-  uint32_t Get(size_t n) {
-    return data[index + n];
-  }
-  void Next() {
-    index = (index + 4) % len;
-  }
+  uint32_t Get(size_t n) { return data[index + n]; }
+  void Next() { index = (index + 4) % len; }
 
  private:
   uint32_t data[MAX_STORAGE_WORDS];
@@ -166,6 +162,90 @@ inline uint32_t GetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
   }
 }
 
+inline uint32_t SaturatingRoundingDoubleHighMul(uint32_t rs1, uint32_t rs2) {
+  int32_t x = static_cast<int32_t>(rs1);
+  int32_t multiplier = static_cast<int32_t>(rs2);
+  bool positive = x > 0;
+  int64_t a_64(positive ? x : -x);
+  int64_t b_64(multiplier);
+  int64_t ab_64 = a_64 * b_64;
+  if (positive) {
+    ab_64 += (1 << 30);
+  } else {
+    ab_64 += (1 << 30) - 1;
+  }
+  int64_t t = ab_64 >> 31;
+  int32_t product = static_cast<int32_t>(t);
+  if (!positive) {
+    product = -product;
+  }
+  return static_cast<uint32_t>(product);
+}
+
+inline uint32_t RoundingDivideByPOT(uint32_t rs1, uint32_t rs2) {
+  int32_t product = static_cast<int32_t>(rs1);
+  int32_t shift = static_cast<int32_t>(rs2);
+  int32_t quotient;
+  int32_t mask;
+  switch (shift) {
+    case -3:
+      quotient = product >> 3;
+      mask = (1 << 3) - 1;
+      break;
+    case -4:
+      quotient = product >> 4;
+      mask = (1 << 4) - 1;
+      break;
+    case -5:
+      quotient = product >> 5;
+      mask = (1 << 5) - 1;
+      break;
+    case -6:
+      quotient = product >> 6;
+      mask = (1 << 6) - 1;
+      break;
+    case -7:
+      quotient = product >> 7;
+      mask = (1 << 7) - 1;
+      break;
+    case -8:
+      quotient = product >> 8;
+      mask = (1 << 8) - 1;
+      break;
+    case -9:
+      quotient = product >> 9;
+      mask = (1 << 9) - 1;
+      break;
+    case -10:
+      quotient = product >> 10;
+      mask = (1 << 10) - 1;
+      break;
+    case -11:
+      quotient = product >> 11;
+      mask = (1 << 11) - 1;
+      break;
+    default:
+      quotient = 0;
+      mask = 0;
+      printf("***BAD SHIFT\n");
+  }
+  int32_t remainder = product & mask;
+  int32_t threshold = (mask >> 1) + ((product < 0) ? 1 : 0);
+  int32_t rounding = (remainder > threshold) ? 1 : 0;
+  return quotient + rounding;
+}
+
+inline uint32_t CalculateMathOperation(int funct7, uint32_t rs1, uint32_t rs2) {
+  switch (funct7) {
+    case MATH_SRDHM:
+      return SaturatingRoundingDoubleHighMul(rs1, rs2);
+    case MATH_RDBPOT:
+      return RoundingDivideByPOT(rs1, rs2);
+    default:
+      return 0;
+  }
+}
+
 extern uint32_t ping_storage;
 
 inline uint32_t Ping(uint32_t rs1, uint32_t rs2) {
@@ -183,6 +263,8 @@ inline uint32_t software_cfu(int funct3, int funct7, uint32_t rs1,
       return soft_cfu::SetRegister(funct7, rs1, rs2);
     case INS_GET:
       return soft_cfu::GetRegister(funct7, rs1, rs2);
+    case INS_MATH:
+      return soft_cfu::CalculateMathOperation(funct7, rs1, rs2);
     case INS_PING:
       return soft_cfu::Ping(rs1, rs2);
     default:

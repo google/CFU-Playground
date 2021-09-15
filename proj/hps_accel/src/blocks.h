@@ -121,6 +121,10 @@ int32_t MultiplyByQuantizedMultiplier_04(int32_t x,
                                          int32_t multiplier,
                                          int shift);
 
+// Same functionality. Uses software CFU implementations of operation
+int32_t MultiplyByQuantizedMultiplier_SW(int32_t x,
+                                         int32_t multiplier,
+                                         int shift);
 };  // namespace hps_accel
 
 #endif  // _BLOCKS_H

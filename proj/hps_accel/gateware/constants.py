@@ -24,6 +24,12 @@ import sys
 
 class Constants:
     """Constants shared by C++ and Gateware."""
+    ###########################################################################
+    # Funct3 codes - used to route CFU to instructions
+    INS_SET = 0
+    INS_GET = 1
+    INS_MATH = 2
+    INS_PING = 7
 
     ###########################################################################
     # Register IDs
@@ -80,10 +86,9 @@ class Constants:
     REG_INVALID = 0x7f
 
     ###########################################################################
-    # Funct3 codes - used to route CFU to instructions
-    INS_SET = 0
-    INS_GET = 1
-    INS_PING = 7
+    # Math function codes
+    MATH_SRDHM = 0x01  # SaturatingRoundingDoubleHighMul
+    MATH_RDBPOT = 0x02  # RoundingDivideByPOT
 
     ###########################################################################
     # Size limits
