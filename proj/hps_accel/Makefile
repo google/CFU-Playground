@@ -29,7 +29,7 @@ DEFINES += NDEBUG
 #DEFINES += NPROFILE
 
 # Uncomment to show the parameters used for each convolution step when evaluating a model
-DEFINES += SHOW_CONV_PARAMS
+#DEFINES += SHOW_CONV_PARAMS
 
 # Hide progress dots (they mess up the formatting of CONV_PARAMS)
 #DEFINES += HIDE_PROGRESS_DOTS
