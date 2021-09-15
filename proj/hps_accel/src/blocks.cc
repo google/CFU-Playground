@@ -77,11 +77,6 @@ Vector16 Vector16::build(int8_t a, int8_t b, int8_t c, int8_t d, int8_t e,
 
 Vector16 Vector16::zeroes() { return Vector16{{0, 0, 0, 0}}; }
 
-// Performs a 16 x 16 vector multiplication
-int32_t multiply_accumulate() {
-  return cfu_get(REG_MACC_OUT);
-}
-
 void LoadFilter(size_t in_channels, size_t out_channels, const int8_t* values) {
   const uint32_t* values_as_words = reinterpret_cast<const uint32_t*>(values);
   size_t filter_words =
@@ -101,10 +96,6 @@ Vector16 GetFilter() {
   return Vector16{{word0, word1, word2, word3}};
 }
 
-void LoadInputOffset(int32_t value) {
-  cfu_set(REG_INPUT_OFFSET, value);
-}
-
 void LoadInput(size_t width, size_t in_channels, const int8_t* values) {
   if (in_channels == 1) {
     LoadInput1(width, values);
@@ -122,9 +113,5 @@ Vector16 GetInput() {
   uint32_t word3 = cfu_get(REG_INPUT_3);
   return Vector16{{word0, word1, word2, word3}};
 }
-
-void AdvanceFilterInput() {
-  cfu_set(REG_FILTER_INPUT_NEXT, 0);
-};
 
 };  // namespace hps_accel
