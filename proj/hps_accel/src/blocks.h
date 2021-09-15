@@ -110,6 +110,10 @@ int32_t MultiplyByQuantizedMultiplier_02(int32_t x,
                                          int32_t quantized_multiplier,
                                          int shift);
 
+// Same functionality. Reimplements SaturatingRoundingDoubleHighMul
+int32_t MultiplyByQuantizedMultiplier_03(int32_t x,
+                                         int32_t quantized_multiplier,
+                                         int shift);
 
 };  // namespace hps_accel
 

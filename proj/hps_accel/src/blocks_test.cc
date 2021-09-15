@@ -248,6 +248,7 @@ struct MbmqTest {
 } mbmq_tests[]{
     {"01", hps_accel::MultiplyByQuantizedMultiplier_01},
     {"02", hps_accel::MultiplyByQuantizedMultiplier_02},
+    {"03", hps_accel::MultiplyByQuantizedMultiplier_03},
     {NULL, NULL},
 };
 
@@ -256,7 +257,8 @@ extern "C" void do_test_blocks_math(void) {
   int64_t rand = 0;
 
   size_t failed = 0;
-  for (size_t i = 0; i < NUM_TESTS; i++) {
+  size_t executed = 0;
+  for (size_t i = 0; i < NUM_TESTS && failed < 100; i++) {
     // Range based on max input depth * filter_width * filter_height * 8 bits.
     const int32_t VALUE_RANGE = 64 * 16 * 256;
     int32_t value =
@@ -269,6 +271,7 @@ extern "C" void do_test_blocks_math(void) {
         tflite::MultiplyByQuantizedMultiplier(value, multiplier, shift);
     for (size_t j = 0; mbmq_tests[j].fn; j++) {
       int32_t actual = mbmq_tests[j].fn(value, multiplier, shift);
+      executed++;
       if (actual != expected) {
         printf("FAIL impl %s: mbqm(%ld, %ld, %ld) expected %ld but was %ld\n",
                mbmq_tests[j].name, value, multiplier, shift, expected, actual);
@@ -279,7 +282,7 @@ extern "C" void do_test_blocks_math(void) {
   if (failed == 0) {
     printf("OK\n");
   } else {
-    printf("%u FAILURES\n", failed);
+    printf("%u FAILURES from %u tests executed\n", failed, executed);
   }
 }
 

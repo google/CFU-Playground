@@ -141,4 +141,24 @@ int32_t MultiplyByQuantizedMultiplier_02(int32_t x,
   return quotient + rounding;
 }
 
+int32_t MultiplyByQuantizedMultiplier_03(int32_t x,
+                                         int32_t quantized_multiplier,
+                                         int shift) {
+  // Saturating Rounding Double High Mul
+  int64_t a_64(x);
+  int64_t b_64(quantized_multiplier);
+  int64_t ab_64 = a_64 * b_64;
+  int32_t nudge = ab_64 >= 0 ? (1 << 30) : (1 - (1 << 30));
+  int32_t product = static_cast<std::int32_t>((ab_64 + nudge) / (1ll << 31));
+
+  // RoundingDivideByPOT implementation
+  int right_shift = -shift;
+  int32_t quotient = product >> right_shift;
+  int32_t mask = (1 << right_shift) - 1;
+  int32_t remainder = product & mask;
+  int32_t threshold = (mask >> 1) + ((x < 0) ? 1 : 0);
+  int32_t rounding = (remainder > threshold) ? 1 : 0;
+  return quotient + rounding;
+}
+
 };  // namespace hps_accel
