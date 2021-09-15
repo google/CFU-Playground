@@ -19,6 +19,9 @@ export DEFINES :=
 # Uncomment this line to use the custom accelerated convolution operation
 DEFINES += ACCEL_CONV
 
+# Uncomment to perform post processing with CFU.
+DEFINES += CFU_POST_PROCESS
+
 # Uncomment this line to use software defined CFU functions in software_cfu.cc
 #DEFINES += CFU_SOFTWARE_DEFINED
 
