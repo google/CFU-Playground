@@ -241,6 +241,15 @@ extern "C" void do_test_blocks_input(void) {
   check_inputs(49, 4);
 }
 
+// Test caes for MultiplyByQuantizedMultiplier
+struct MbmqTest {
+  const char* name;
+  int32_t (*fn)(int32_t, int32_t, int);
+} mbmq_tests[]{
+    {"01", hps_accel::MultiplyByQuantizedMultiplier_01},
+    {NULL, NULL},
+};
+
 extern "C" void do_test_blocks_math(void) {
   const size_t NUM_TESTS = 1000;
   int64_t rand = 0;
@@ -257,16 +266,19 @@ extern "C" void do_test_blocks_math(void) {
     int32_t shift = -11 + (next_pseudo_random(&rand) & 0x7);
     int32_t expected =
         tflite::MultiplyByQuantizedMultiplier(value, multiplier, shift);
-    int32_t actual =
-        hps_accel::MultiplyByQuantizedMultiplier_01(value, multiplier, shift);
-    if (actual != expected) {
-      printf("FAIL mbqm(%ld, %ld, %ld) = %ld\n", value, multiplier, shift,
-             expected);
-      failed++;
+    for (size_t j = 0; mbmq_tests[j].fn; j++) {
+      int32_t actual = mbmq_tests[j].fn(value, multiplier, shift);
+      if (actual != expected) {
+        printf("FAIL impl %s: mbqm(%ld, %ld, %ld) expected %ld but was %ld\n",
+               mbmq_tests[j].name, value, multiplier, shift, expected, actual);
+        failed++;
+      }
     }
   }
   if (failed == 0) {
     printf("OK\n");
+  } else {
+    printf("%u FAILURES\n", failed);
   }
 }
 
