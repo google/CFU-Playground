@@ -21,6 +21,8 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "hps_cfu.h"
+
 namespace hps_accel {
 
 // All filters are 4x4
@@ -58,7 +60,7 @@ struct Vector16 {
 };
 
 // Returns the result of the current 4x4 matrix multiply-accumulate operation
-int32_t multiply_accumulate();
+inline int32_t multiply_accumulate() { return cfu_get(REG_MACC_OUT); }
 
 // Loads 4x4 filter values into global filter storage.
 //
@@ -79,7 +81,7 @@ Vector16 GetFilter();
 
 // Loads a single input offset value into global storage.
 // This offset is applied to every multiply_accumulate() operation.
-void LoadInputOffset(int32_t value);
+inline void LoadInputOffset(int32_t value) { cfu_set(REG_INPUT_OFFSET, value); }
 
 // Loads 4x4 pixels of input values into global input storage.
 //
@@ -92,7 +94,7 @@ void LoadInput(size_t width, size_t in_channels, const int8_t* values);
 // Iterates through each input channel, then returns to start
 Vector16 GetInput();
 
-void AdvanceFilterInput();
+inline void AdvanceFilterInput() { cfu_set(REG_FILTER_INPUT_NEXT, 0); }
 
 };  // namespace hps_accel
 
