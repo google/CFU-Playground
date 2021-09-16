@@ -34,7 +34,7 @@ def get_soc_constructor(target: str) -> Callable[..., soc.LiteXSoC]:
 
 def main():
     parser = argparse.ArgumentParser(
-        'Determine purpose (load software or hardware).')
+        'Determine purpose (load software or hardware).', add_help=False)
     parser.add_argument('--software-load',
                         action='store_true',
                         help='Perform pre-lxterm loading procedures.')
