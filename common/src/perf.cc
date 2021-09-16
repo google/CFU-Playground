@@ -46,13 +46,16 @@ void perf_reset_all_counters() {
 
 // Prints cycle and enable counts for every perf counter
 void perf_print_all_counters() {
+  if (NUM_PERF_COUNTERS == 0) {
+    printf("Perf counters not enabled.\n");
+    return;
+  }
   for (int i = 0; i < NUM_PERF_COUNTERS; ++i) {
     perf_disable_counter(i);
   }
-  if (NUM_PERF_COUNTERS > 0) {
-    printf(" Counter |  Total | Starts | Average |     Raw\n");
-    printf("---------+--------+--------+---------+--------------\n");
-  }
+
+  printf(" Counter |  Total | Starts | Average |     Raw\n");
+  printf("---------+--------+--------+---------+--------------\n");
   for (int i = 0; i < NUM_PERF_COUNTERS; ++i) {
     unsigned total = perf_get_counter(i);
     unsigned starts = perf_get_start_count(i);

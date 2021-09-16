@@ -52,6 +52,9 @@ DEFINES += INCLUDE_MODEL_HPS
 RUN_MENU_ITEMS=1 1 c
 TEST_MENU_ITEMS=3 a
 
+# Ensure perf_csrs logic is present
+DEFINES += CONFIG_CPU_PERF_CSRS
+
 # Customise arguments to Litex:
 export EXTRA_LITEX_ARGS
 ifeq '$(TARGET)' 'digilent_arty'
@@ -59,6 +62,7 @@ ifeq '$(TARGET)' 'digilent_arty'
 EXTRA_LITEX_ARGS += --sys-clk-freq 80000000
 endif
 
+# Add constants defined in gateware/constants.py to C++ build
 BUILD_DIR_EXTRA_DEP = $(BUILD_DIR)/src/gateware_constants.h
 include ../proj.mk
 
