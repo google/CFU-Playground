@@ -28,6 +28,12 @@ fi
 if ! which verilator >/dev/null; then
     missing+=(verilator libevent-dev libjson-c-dev)
 fi
+if ! which curl >/dev/null; then
+    missing+=(curl)
+fi
+if ! which unzip >/dev/null; then
+    missing+=(unzip)
+fi
 if ! (apt list -i | grep libusb-1.0-0-dev) ; then
     missing+=(libusb-1.0-0-dev libftdi1-dev)
 fi
