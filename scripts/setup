@@ -74,7 +74,7 @@ IFS=' ' read -r RENODE_VERSION_NO x RENODE_VERSION_SHA <<<"$RENODE_VERSION_SPLIT
 RENODE_DIR=${CFU_ROOT}/third_party/renode
 # Get Renode if not installed
 if [ ! -e "${RENODE_DIR}/renode" ]; then
-    wget "https://dl.antmicro.com/projects/renode/builds/renode-${RENODE_VERSION}.linux-portable.tar.gz"
+    wget --progress=dot:giga "https://dl.antmicro.com/projects/renode/builds/renode-${RENODE_VERSION}.linux-portable.tar.gz"
     mkdir ${RENODE_DIR}
     tar xf  renode-*.linux-portable.tar.gz -C ${RENODE_DIR} --strip-components=1
     rm renode-${RENODE_VERSION}.linux-portable.tar.gz
