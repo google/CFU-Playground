@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Cat, Signal, unsigned
+from nmigen import Signal, unsigned
 from nmigen.hdl.rec import Layout
 from nmigen_cfu import Cfu, InstructionBase, all_words
 
@@ -21,6 +21,7 @@ from .filter_store import FilterStore
 from .get import GetInstruction
 from .input_store import InputStore
 from .macc import MultiplyAccumulate
+from .math import MathInstruction
 from .set import SetInstruction
 from .stream import BinaryCombinatorialActor, ConcatenatingBuffer, connect
 
@@ -159,10 +160,12 @@ class HpsCfu(Cfu):
         m.d.comb += macc.enable.eq(1)
         self.connect_macc(m, set, input_store, filter_store, macc, get)
 
+        m.submodules['math'] = math = MathInstruction()
         m.submodules['ping'] = ping = PingInstruction()
         return {
             Constants.INS_GET: get,
             Constants.INS_SET: set,
+            Constants.INS_MATH: math,
             Constants.INS_PING: ping,
         }
 

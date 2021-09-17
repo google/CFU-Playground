@@ -101,30 +101,30 @@ inline void AdvanceFilterInput() { cfu_set(REG_FILTER_INPUT_NEXT, 0); }
 // Same as tflite::MultiplyByQuantizedMultiplier but assumes:
 // shift is in the range -4 to -10 (inclusive)
 // multiplier is in the range 0x40000000 to 0x7fffffff
-int32_t MultiplyByQuantizedMultiplier_01(int32_t x,
-                                         int32_t multiplier,
+int32_t MultiplyByQuantizedMultiplier_01(int32_t x, int32_t multiplier,
                                          int shift);
 
 // Same functionality. Reimplements RoundingDivideByPOT
-int32_t MultiplyByQuantizedMultiplier_02(int32_t x,
-                                         int32_t multiplier,
+int32_t MultiplyByQuantizedMultiplier_02(int32_t x, int32_t multiplier,
                                          int shift);
 
 // Same functionality. Reimplements SaturatingRoundingDoubleHighMul
-int32_t MultiplyByQuantizedMultiplier_03(int32_t x,
-                                         int32_t multiplier,
+int32_t MultiplyByQuantizedMultiplier_03(int32_t x, int32_t multiplier,
                                          int shift);
 
 // Same functionality. Simplifies operations to be more amenable to running on
 // FPGA
-int32_t MultiplyByQuantizedMultiplier_04(int32_t x,
-                                         int32_t multiplier,
+int32_t MultiplyByQuantizedMultiplier_04(int32_t x, int32_t multiplier,
                                          int shift);
 
 // Same functionality. Uses software CFU implementations of operation
-int32_t MultiplyByQuantizedMultiplier_SW(int32_t x,
-                                         int32_t multiplier,
+int32_t MultiplyByQuantizedMultiplier_SW(int32_t x, int32_t multiplier,
                                          int shift);
+
+// Same functionality. Uses hardware CFU implementations of component
+// operations.
+int32_t MultiplyByQuantizedMultiplier_HW1(int32_t x, int32_t multiplier,
+                                          int shift);
 };  // namespace hps_accel
 
 #endif  // _BLOCKS_H

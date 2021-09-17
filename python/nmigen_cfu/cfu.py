@@ -314,8 +314,8 @@ class CfuTestBase(TestBase):
                 function_id, funct7, in0, in1 = self._unpack(inputs)
                 # Set inputs and cmd_valid
                 yield self.dut.cmd_function_id.eq((funct7 << 3) | function_id)
-                yield self.dut.cmd_in0.eq(in0)
-                yield self.dut.cmd_in1.eq(in1)
+                yield self.dut.cmd_in0.eq(in0 & 0xffff_ffff)
+                yield self.dut.cmd_in1.eq(in1 & 0xffff_ffff)
                 yield self.dut.cmd_valid.eq(1)
                 yield self.dut.rsp_ready.eq(1)
                 yield

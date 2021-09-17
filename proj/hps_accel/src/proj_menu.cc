@@ -19,6 +19,7 @@
 #include <stdio.h>
 
 #include "blocks_test.h"
+#include "fixedpoint/fixedpoint.h"
 #include "hps_cfu.h"
 #include "menu.h"
 #include "playground_util/random.h"
@@ -60,6 +61,21 @@ void do_verify_register(void) {
          failures, tests);
 }
 
+void do_generated_srdhm(void) {
+  int64_t rand = 0x1234567890abcdef;
+  for (size_t i = 0; i < 100; i++) {
+    // Range based on max input depth * filter_width * filter_height * 8 bits.
+    const int32_t VALUE_RANGE = 64 * 16 * 256;
+    int32_t value =
+        (next_pseudo_random(&rand) & (VALUE_RANGE - 1)) - VALUE_RANGE / 2;
+    // 0x4000_0000 to 0x7ffff_ffff
+    int32_t multiplier = (next_pseudo_random(&rand) & 0x7fffffff) | 0x40000000;
+    int32_t result =
+        gemmlowp::SaturatingRoundingDoublingHighMul(value, multiplier);
+    printf("  (%ld, %ld, %ld),\n", value, multiplier, result);
+  }
+}
+
 struct Menu MENU = {
     "Project Menu",
     "project",
@@ -72,6 +88,7 @@ struct Menu MENU = {
         MENU_ITEM('i', "test blocks Input", do_test_blocks_input),
         MENU_ITEM('q', "test blocks maths", do_test_blocks_math),
         MENU_ITEM('a', "test blocks All", do_test_blocks_all),
+        MENU_ITEM('1', "generate SRDHM test cases", do_generated_srdhm),
         MENU_END,
     },
 };

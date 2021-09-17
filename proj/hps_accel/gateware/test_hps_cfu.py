@@ -35,6 +35,7 @@ class PingInstructionTest(InstructionTestBase):
 
 GET = Constants.INS_GET
 SET = Constants.INS_SET
+MATH = Constants.INS_MATH
 PING = Constants.INS_PING
 VERIFY = Constants.REG_VERIFY
 
@@ -130,10 +131,10 @@ class HpsCfuTest(CfuTestBase):
             for n in range(100, 120, 4):
                 yield ((SET, Constants.REG_FILTER_INPUT_NEXT, 1, 0), 0)
                 yield ((PING, 0, 0, 0), 0)  # wait for regs to update
-                yield ((GET, Constants.REG_INPUT_0, 0, 0), n+0)
-                yield ((GET, Constants.REG_INPUT_1, 0, 0), n+1)
-                yield ((GET, Constants.REG_INPUT_2, 0, 0), n+2)
-                yield ((GET, Constants.REG_INPUT_3, 0, 0), n+3)
+                yield ((GET, Constants.REG_INPUT_0, 0, 0), n + 0)
+                yield ((GET, Constants.REG_INPUT_1, 0, 0), n + 1)
+                yield ((GET, Constants.REG_INPUT_2, 0, 0), n + 2)
+                yield ((GET, Constants.REG_INPUT_3, 0, 0), n + 3)
 
         self.run_ops(op_generator(), False)
 
@@ -151,3 +152,12 @@ class HpsCfuTest(CfuTestBase):
                 yield ((GET, Constants.REG_FILTER_2, 0, 0), n + 2)
                 yield ((GET, Constants.REG_FILTER_3, 0, 0), n + 3)
         self.run_ops(op_generator(), False)
+
+    def test_math_srdhm(self):
+        """Tests math srdhm function"""
+        def op_generator():
+            yield ((MATH, Constants.MATH_SRDHM, -111628, 1342177280), -69767)
+            yield ((MATH, Constants.MATH_SRDHM, -96429, 1975242245), -88695)
+            yield ((MATH, Constants.MATH_SRDHM, 87873, 1815044516), 74270)
+
+        self.run_ops(op_generator(), True)

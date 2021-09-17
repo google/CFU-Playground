@@ -165,7 +165,7 @@ inline uint32_t GetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
 inline uint32_t SaturatingRoundingDoubleHighMul(uint32_t rs1, uint32_t rs2) {
   int32_t x = static_cast<int32_t>(rs1);
   int32_t multiplier = static_cast<int32_t>(rs2);
-  bool positive = x > 0;
+  bool positive = x >= 0;
   int64_t a_64(positive ? x : -x);
   int64_t b_64(multiplier);
   int64_t ab_64 = a_64 * b_64;
