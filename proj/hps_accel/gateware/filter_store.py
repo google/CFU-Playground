@@ -14,21 +14,26 @@
 
 
 from nmigen_cfu.util import SimpleElaboratable
-from nmigen import unsigned, Signal, Module, Array, Mux
+from nmigen import unsigned, Signal, Module, Mux
 
 from .constants import Constants
+from .mem import WideReadMemory
 from .stream import Endpoint, connect
-from .sp_mem import MemoryParameters, SinglePortMemory
 
 
 class FilterStore(SimpleElaboratable):
-    """Stores file values one word at a time and outputs four words at a time.
+    """Stores filter values one word at a time and outputs four words at a time.
 
-    Use in this sequence:
-    (1) Set num_words
+    Designed for use in this sequence:
+    (1) Set value of num_words
     (2) Set num_words words of filter values
     (3) Read outputs until done
-    (4) Go back to step 1
+    (4) Go back to step (1)
+
+    Will not accept input until num_words is set. Will not produce
+    output until num_words of input have been accepted. Will not
+    accept more than num_words of input. Setting num_words will
+    place FilterStore back in a mode where it is accepting input.
 
     Parameters
     ----------
@@ -40,78 +45,81 @@ class FilterStore(SimpleElaboratable):
     Attributes
     ----------
 
-    input: Endpoint(unsigned(32)), in
-      Words written to input are set into the filter store.
+    data_input: Endpoint(unsigned(32)), in
+      Words written to data_input are set into the filter store.
 
     next: Signal(), in
-      Causes the next four words to be displayed at the output.
+      Causes the next four words to be displayed at the data_output stream.
 
-    num_words: Endpoint(unsigned(32)), in
-      Number of words in input. When set, resets internal storage.
+    num_words_input: Endpoint(unsigned(32)), in
+      Number of words in input. When set, resets internal state.
 
-    output: list of 4 Endpoint(unsigned(32)), out
-      The four words of output.
+    data_output: Endpoint(unsigned(128)), out
+      The four words of output. Does not respect backpressure.
+      TODO(dcallagh): make it respect backpressure.
     """
 
     def __init__(self, depth=Constants.MAX_FILTER_WORDS):
         self.depth = depth
-        self.input = Endpoint(unsigned(32))
+        self.data_input = Endpoint(unsigned(32))
         self.next = Signal()
-        self.num_words = Endpoint(unsigned(32))
-        self.output = [Endpoint(unsigned(32), name=f"output_{i}")
-                       for i in range(4)]
+        self.num_words_input = Endpoint(unsigned(32))
+        self.data_output = Endpoint(unsigned(128))
+
+    def handle_writing(self, m, memory, num_words, index):
+        """Receives values into memory, 1 word at a time."""
+        # Connect data_input to memory
+        m.d.comb += [
+            memory.write_addr.eq(index),
+            memory.write_data.eq(self.data_input.payload),
+            memory.write_enable.eq(1),
+        ]
+
+        # On data transferred OK, increment index, check if finished
+        m.d.comb += self.data_input.ready.eq(1)
+        with m.If(self.data_input.is_transferring()):
+            m.d.sync += index.eq(index + 1)
+            with m.If(index == num_words - 1):
+                m.d.sync += index.eq(0)
+                m.next = "READING"
+
+    def handle_reading(self, m, memory, num_words, index):
+        """Handle stepping through memory on read."""
+        m.d.comb += [
+            memory.read_addr.eq(index[2:]),
+            self.data_output.payload.eq(memory.read_data),
+        ]
+        with m.If(self.next):
+            m.d.sync += self.data_output.valid.eq(1)
+        with m.If(~self.next & self.data_output.is_transferring()):
+            m.d.sync += self.data_output.valid.eq(0)
+        with m.If(self.data_output.is_transferring()):
+            m.d.sync += [index.eq(Mux(index == num_words - 4, 0, index + 4))]
 
     def elab(self, m: Module):
-        max_index = Signal(range(self.depth))
-        write_index = Signal(range(self.depth))
-        read_index = Signal(range(self.depth))
-        read_required = Signal()  # Set whenever read_index is updated to initiate a read
+        num_words = Signal(range(self.depth + 1))
+        index = Signal(range(self.depth))
+        reset = Signal()
+        m.d.comb += reset.eq(self.num_words_input.valid)
+        memory = WideReadMemory(depth=self.depth)
+        m.submodules['memory'] = memory
 
-        # Create four memories
-        memory_params = MemoryParameters(width=32, depth=self.depth // 4)
-        memories = Array([SinglePortMemory(params=memory_params)
-                         for _ in range(4)])
-        for n, memory in enumerate(memories):
-            m.submodules[f"mem_{n}"] = memory
-
-        # On read from input sink
-        m.d.comb += self.input.ready.eq(1)
-        for memory in memories:
-            m.d.comb += memory.write_input.payload.addr.eq(write_index[2:])
-            m.d.comb += memory.write_input.payload.data.eq(self.input.payload)
-        with m.If(self.input.is_transferring()):
-            m.d.comb += memories[write_index[:2]].write_input.valid.eq(1)
-            with m.If(write_index == max_index):
-                # On last word write, wrap back to zero and cause a pre-emptive
-                # read
-                m.d.sync += write_index.eq(0)
-                m.d.sync += read_index.eq(max_index - 3)
-            with m.Else():
-                m.d.sync += write_index.eq(write_index + 1)
-
-        # When read_required, push new values down output sinks
-        for n, memory in enumerate(memories):
-            m.d.comb += connect(memory.read_data_output, self.output[n])
-            addr_stream = memory.read_addr_input
-            m.d.sync += addr_stream.payload.eq(read_index[2:])
-            with m.If(read_required):
-                m.d.sync += addr_stream.valid.eq(1)
-                m.d.sync += read_required.eq(0)
-            with m.Elif(addr_stream.is_transferring()):
-                m.d.sync += addr_stream.valid.eq(0)
-
-        # On "next" signal cause next words to be read by setting read_required
-        with m.If(self.next):
-            m.d.sync += read_required.eq(1)
-            m.d.sync += read_index.eq(Mux(read_index == max_index - 3,
-                                          0, read_index + 4))
-
-        # Read the value of max_index from num_words sink
-        # Reset read and write index too
-        m.d.comb += self.num_words.ready.eq(1)
-        with m.If(self.num_words.valid):
-            m.d.sync += [
-                max_index.eq(self.num_words.payload - 1),
-                write_index.eq(0),
-                read_index.eq(0),
-            ]
+        with m.FSM(reset="RESET"):
+            with m.State("RESET"):
+                m.d.sync += num_words.eq(0)
+                m.d.sync += index.eq(0)
+                m.d.sync += self.data_output.valid.eq(0)
+                m.next = "NUM_WORDS"
+            with m.State("NUM_WORDS"):
+                m.d.comb += self.num_words_input.ready.eq(1)
+                with m.If(self.num_words_input.is_transferring()):
+                    m.d.sync += num_words.eq(self.num_words_input.payload)
+                    m.next = "WRITING"
+            with m.State("WRITING"):
+                self.handle_writing(m, memory, num_words, index)
+                with m.If(reset):
+                    m.next = "RESET"
+            with m.State("READING"):
+                self.handle_reading(m, memory, num_words, index)
+                with m.If(reset):
+                    m.next = "RESET"
