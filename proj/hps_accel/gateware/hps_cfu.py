@@ -79,22 +79,12 @@ class HpsCfu(Cfu):
         # Then connect that to the macc.
         operands_buffer = ConcatenatingBuffer([
             ('inputs', unsigned(128)),
-            ('filter_0', unsigned(32)),
-            ('filter_1', unsigned(32)),
-            ('filter_2', unsigned(32)),
-            ('filter_3', unsigned(32)),
+            ('filters', unsigned(128)),
         ])
         m.submodules['operands_buffer'] = operands_buffer
         m.d.comb += [
             connect(input_store.data_output, operands_buffer.inputs['inputs']),
-            connect(filter_store.output[0],
-                    operands_buffer.inputs['filter_0']),
-            connect(filter_store.output[1],
-                    operands_buffer.inputs['filter_1']),
-            connect(filter_store.output[2],
-                    operands_buffer.inputs['filter_2']),
-            connect(filter_store.output[3],
-                    operands_buffer.inputs['filter_3']),
+            connect(filter_store.data_output, operands_buffer.inputs['filters']),
             connect(operands_buffer.output, macc.operands),
         ]
 
@@ -111,9 +101,9 @@ class HpsCfu(Cfu):
 
     def connect_filter_store(self, m, set, get, filter_store):
         m.d.comb += connect(set.output_streams[Constants.REG_FILTER_NUM_WORDS],
-                            filter_store.num_words)
+                            filter_store.num_words_input)
         m.d.comb += connect(set.output_streams[Constants.REG_SET_FILTER],
-                            filter_store.input)
+                            filter_store.data_input)
         next = set.write_strobes[Constants.REG_FILTER_INPUT_NEXT]
         m.d.comb += filter_store.next.eq(next)
 
