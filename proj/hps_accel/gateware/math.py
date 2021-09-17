@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from nmigen import Cat, Mux, Signal, unsigned, signed
+from nmigen.hdl.ast import Const
 from nmigen.hdl.dsl import Module
 from nmigen_cfu import InstructionBase, SimpleElaboratable
 
@@ -22,6 +23,11 @@ from .stream import Endpoint, connect
 SRDHM_INPUT_LAYOUT = [
     ('a', signed(32)),
     ('b', signed(32)),
+]
+
+RDBPOT_INPUT_LAYOUT = [
+    ('dividend', signed(32)),
+    ('shift', unsigned(4))
 ]
 
 
@@ -92,6 +98,66 @@ class SaturatingRoundingDoubleHighMul(SimpleElaboratable):
         m.d.sync += self.output.payload.eq(with_sign)
 
 
+class RoundingDivideByPowerOfTwo(SimpleElaboratable):
+    """Divides its input by a power of two, rounding appropriately.
+
+    Attributes
+    ----------
+
+    input: Stream(RDBPOT_INPUT_LAYOUT), in
+      The calculation to perform.
+
+    output: Stream(signed(32)), out
+      The result.
+
+    This pipeline neither provides nor respects back pressure.
+    """
+    PIPELINE_CYCLES = 3
+
+    def __init__(self):
+        self.input = Endpoint(RDBPOT_INPUT_LAYOUT)
+        self.output = Endpoint(signed(32))
+
+    def delay(self, m, cycles, sig):
+        sr = Signal(cycles)
+        m.d.sync += sr.eq(Cat(sig, sr[:-1]))
+        return sr[-1]
+
+    def elab(self, m: Module):
+        # Input is always ready
+        m.d.comb += self.input.ready.eq(1)
+
+        # Output's valid is input's valid, but delayed
+        m.d.comb += self.output.valid.eq(
+            self.delay(m, self.PIPELINE_CYCLES, self.input.valid))
+
+        # Cycle 0: register inputs
+        dividend = Signal(signed(32))
+        shift = Signal(4)
+        m.d.sync += dividend.eq(self.input.payload.dividend)
+        m.d.sync += shift.eq(self.input.payload.shift)
+
+        # Cycle 1: calculate
+        result = Signal(signed(32))
+        remainder = Signal(signed(32))
+        threshold = Signal(signed(32))
+        quotient = Signal(signed(32))
+        rounding = Signal()
+        with m.Switch(shift):
+            for n in range(3, 12):
+                with m.Case(n):
+                    mask = (1 << n) - 1
+                    m.d.comb += remainder.eq(dividend & mask)
+                    m.d.comb += threshold.eq((mask >> 1) +
+                                             Mux(dividend < 0, 1, 0))
+                    m.d.comb += quotient.eq(dividend >> n)
+
+        m.d.sync += result.eq(quotient + Mux(remainder > threshold, 1, 0))
+
+        # Cycle 2: send output
+        m.d.sync += self.output.payload.eq(result)
+
+
 class MathInstruction(InstructionBase):
     """An instruction used to perform specialist math operations.
 
@@ -107,6 +173,8 @@ class MathInstruction(InstructionBase):
     def elab(self, m: Module):
         m.submodules.srdhm = srdhm = SaturatingRoundingDoubleHighMul()
         m.d.comb += srdhm.output.ready.eq(1)
+        m.submodules.rdbpot = rdbpot = RoundingDivideByPowerOfTwo()
+        m.d.comb += rdbpot.output.ready.eq(1)
 
         m.d.sync += self.done.eq(0)
         with m.FSM(reset="WAIT_START"):
@@ -114,16 +182,28 @@ class MathInstruction(InstructionBase):
                 with m.If(self.start):
                     with m.Switch(self.funct7):
                         with m.Case(Constants.MATH_SRDHM):
-                            m.d.comb += srdhm.input.valid.eq(1)
-                            m.d.comb += srdhm.input.payload.a.eq(self.in0s)
-                            m.d.comb += srdhm.input.payload.b.eq(self.in1s)
+                            m.d.comb += [
+                                srdhm.input.payload.a.eq(self.in0s),
+                                srdhm.input.payload.b.eq(self.in1s),
+                                srdhm.input.valid.eq(1),
+                            ]
                             m.next = "SRDHM_RUN"
                         with m.Case(Constants.MATH_RDBPOT):
-                            m.d.sync += self.done.eq(1)
+                            m.d.comb += [
+                                rdbpot.input.payload.dividend.eq(self.in0s),
+                                rdbpot.input.payload.shift.eq(-self.in1s),
+                                rdbpot.input.valid.eq(1),
+                            ]
+                            m.next = "RDBPOT_RUN"
                         with m.Default():
                             m.d.sync += self.done.eq(1)
             with m.State("SRDHM_RUN"):
                 with m.If(srdhm.output.valid):
                     m.d.sync += self.output.eq(srdhm.output.payload)
+                    m.d.sync += self.done.eq(1)
+                    m.next = "WAIT_START"
+            with m.State("RDBPOT_RUN"):
+                with m.If(rdbpot.output.valid):
+                    m.d.sync += self.output.eq(rdbpot.output.payload)
                     m.d.sync += self.done.eq(1)
                     m.next = "WAIT_START"

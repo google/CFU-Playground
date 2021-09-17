@@ -76,6 +76,31 @@ void do_generated_srdhm(void) {
   }
 }
 
+void make_rdbpot_example(int32_t value, int32_t shift) {
+  int32_t result = gemmlowp::RoundingDivideByPOT(value, shift);
+  printf("  (%ld, %ld, %ld),\n", value, shift, result);
+}
+
+void do_generated_rdbpot(void) {
+  // Make sure to test rounding
+  make_rdbpot_example(8, 3);
+  make_rdbpot_example(11, 3);
+  make_rdbpot_example(12, 3);
+  make_rdbpot_example(13, 3);
+  make_rdbpot_example(-8, 3);
+  make_rdbpot_example(-11, 3);
+  make_rdbpot_example(-12, 3);
+  make_rdbpot_example(-13, 3);
+
+  int64_t rand = 0x1234567890abcdef;
+  // Wide range
+  for (size_t i = 0; i < 100; i++) {
+    int32_t value = next_pseudo_random(&rand);
+    int32_t shift = 3 + (next_pseudo_random(&rand) & 0x7);
+    make_rdbpot_example(value, shift);
+  }
+}
+
 struct Menu MENU = {
     "Project Menu",
     "project",
@@ -89,6 +114,7 @@ struct Menu MENU = {
         MENU_ITEM('q', "test blocks maths", do_test_blocks_math),
         MENU_ITEM('a', "test blocks All", do_test_blocks_all),
         MENU_ITEM('1', "generate SRDHM test cases", do_generated_srdhm),
+        MENU_ITEM('2', "generate RDBPOT test cases", do_generated_rdbpot),
         MENU_END,
     },
 };

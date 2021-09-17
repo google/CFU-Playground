@@ -159,5 +159,12 @@ class HpsCfuTest(CfuTestBase):
             yield ((MATH, Constants.MATH_SRDHM, -111628, 1342177280), -69767)
             yield ((MATH, Constants.MATH_SRDHM, -96429, 1975242245), -88695)
             yield ((MATH, Constants.MATH_SRDHM, 87873, 1815044516), 74270)
+        self.run_ops(op_generator(), False)
 
-        self.run_ops(op_generator(), True)
+    def test_math_rdbpot(self):
+        """Tests math rdbpot function"""
+        def op_generator():
+            yield ((MATH, Constants.MATH_RDBPOT, -1714553096, -7), -13394946)
+            yield ((MATH, Constants.MATH_RDBPOT, -327118692, -3), -40889837)
+            yield ((MATH, Constants.MATH_RDBPOT, 584167932, -6), 9127624)
+        self.run_ops(op_generator(), False)
