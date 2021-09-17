@@ -60,6 +60,14 @@ def pack_vals(a, b, c, d, offset=0):
             + (((d - offset) & 0xff) << 24))
 
 
+def pack128(a, b, c, d):
+    """Packs 4 32-bit values into a 128-bit value."""
+    return ((a & 0xffffff)
+            + ((b & 0xffffffff) << 32)
+            + ((c & 0xffffffff) << 64)
+            + ((d & 0xffffffff) << 96))
+
+
 class SimpleElaboratable(Elaboratable):
     """Simplified Elaboratable interface
     Widely, but not generally applicable. Suitable for use with
