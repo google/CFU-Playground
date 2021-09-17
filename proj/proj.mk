@@ -163,10 +163,14 @@ endif
 
 TARGET_REPL := $(BUILD_DIR)/renode/$(TARGET)_generated.repl
 
-.PHONY:	renode 
+.PHONY:	renode
 renode: renode-scripts
 	@echo Running interactively under renode
 	pushd $(PROJ_DIR)/build/renode/ && $(RENODE_DIR)/renode -e "s @$(TARGET).resc" && popd
+
+.PHONY:	renode-headless
+renode-headless: renode-scripts
+	pushd $(PROJ_DIR)/build/renode/ && $(RENODE_DIR)/renode --console --disable-xwt --hide-log -e "s @$(TARGET).resc ; uart_connect sysbus.uart" && popd
 
 .PHONY: renode-scripts
 renode-scripts: $(SOFTWARE_ELF)
@@ -252,7 +256,7 @@ endif
 litex-software: $(CFU_VERILOG)
 	$(SOC_MK) litex-software
 
-RUN_TARGETS := load unit run
+RUN_TARGETS := load unit run unit-renode run-renode
 .PHONY: $(RUN_TARGETS) prog bitstream
 
 ifneq 'sim' '$(PLATFORM)'
@@ -271,6 +275,14 @@ run: $(SOFTWARE_BIN)
 unit: $(SOFTWARE_BIN)
 	@echo Running unit test on board
 	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) $(UART_SPEED) $(TEST_MENU_ITEMS) |& tee $(UNITTEST_LOG)
+
+run-renode: $(SOFTWARE_ELF) renode-scripts
+	@echo Running automated test in Renode
+	$(BUILD_DIR)/interact.expect r $(RUN_MENU_ITEMS) |& tee $(SOFTWARE_LOG)
+
+unit-renode: $(SOFTWARE_ELF) renode-scripts
+	@echo Running unit test in Renode simulation
+	$(BUILD_DIR)/interact.expect r $(TEST_MENU_ITEMS) |& tee $(UNITTEST_LOG)
 
 ifeq 'hps' '$(PLATFORM)'
 load: $(SOFTWARE_BIN)

@@ -19,6 +19,11 @@ if { [lindex $argv 0] == "s" } {
   set choices [lrange $argv 1 end]
   set simpid [spawn make PLATFORM=sim load]
   send_user "Sim PID $simpid\n"
+} elseif { [lindex $argv 0] == "r" } {
+  set choices [lrange $argv 1 end]
+  set simpid [spawn make TARGET=$env(TARGET) renode-headless]
+  send_user "Sim PID $simpid\n"
+  send "\n"
 } else {
   spawn ../../soc/bin/litex_term --speed [lindex $argv 2] --kernel [lindex $argv 0] [lindex $argv 1]
   set choices [lrange $argv 3 end]
