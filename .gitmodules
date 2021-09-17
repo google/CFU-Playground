@@ -61,6 +61,3 @@
 [submodule "third_party/python/litevideo"]
 	path = third_party/python/litevideo
 	url = https://github.com/enjoy-digital/litevideo.git
-[submodule "third_party/python/litex-renode"]
-	path = third_party/python/litex-renode
-	url = https://github.com/litex-hub/litex-renode.git
