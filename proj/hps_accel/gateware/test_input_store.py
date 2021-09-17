@@ -16,6 +16,7 @@
 
 from nmigen.sim import Delay
 from nmigen_cfu import TestBase
+from nmigen_cfu.util import pack128
 
 from .input_store import Signal, InputStore
 
@@ -57,8 +58,7 @@ class InputStoreTest(TestBase):
 
     def check_outputs(self, vals):
         yield from self.toggle(self.dut.next)
-        for n in range(4):
-            yield from self.receive(self.dut.data_output[n], vals[n])
+        yield from self.receive(self.dut.data_output, pack128(*vals))
 
     def test_simple(self):
         # Fill once and read once

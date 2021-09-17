@@ -74,14 +74,11 @@ class HpsCfu(Cfu):
     def connect_macc(self, m, set, input_store, filter_store, macc, get):
         m.d.comb += macc.offset.eq(set.values[Constants.REG_INPUT_OFFSET])
 
-        # Join all 4 input value streams and all 4 filter value streams
+        # Join all the input value stream and all 4 filter value streams
         # into a single stream holding all operands.
         # Then connect that to the macc.
         operands_buffer = ConcatenatingBuffer([
-            ('input_0', unsigned(32)),
-            ('input_1', unsigned(32)),
-            ('input_2', unsigned(32)),
-            ('input_3', unsigned(32)),
+            ('inputs', unsigned(128)),
             ('filter_0', unsigned(32)),
             ('filter_1', unsigned(32)),
             ('filter_2', unsigned(32)),
@@ -89,14 +86,7 @@ class HpsCfu(Cfu):
         ])
         m.submodules['operands_buffer'] = operands_buffer
         m.d.comb += [
-            connect(input_store.data_output[0],
-                    operands_buffer.inputs['input_0']),
-            connect(input_store.data_output[1],
-                    operands_buffer.inputs['input_1']),
-            connect(input_store.data_output[2],
-                    operands_buffer.inputs['input_2']),
-            connect(input_store.data_output[3],
-                    operands_buffer.inputs['input_3']),
+            connect(input_store.data_output, operands_buffer.inputs['inputs']),
             connect(filter_store.output[0],
                     operands_buffer.inputs['filter_0']),
             connect(filter_store.output[1],
