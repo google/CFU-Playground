@@ -269,22 +269,6 @@ inline uint32_t SetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
 
 inline uint32_t GetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
   switch (funct7) {
-    case REG_FILTER_0:
-      return filter_storage.Get(0);
-    case REG_FILTER_1:
-      return filter_storage.Get(1);
-    case REG_FILTER_2:
-      return filter_storage.Get(2);
-    case REG_FILTER_3:
-      return filter_storage.Get(3);
-    case REG_INPUT_0:
-      return input_storage.Get(0);
-    case REG_INPUT_1:
-      return input_storage.Get(1);
-    case REG_INPUT_2:
-      return input_storage.Get(2);
-    case REG_INPUT_3:
-      return input_storage.Get(3);
     case REG_MACC_OUT:
       assert(macc_valid);
       macc_valid = false;

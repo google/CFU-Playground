@@ -39,19 +39,6 @@ void print(Vector16 m) {
   }
 }
 
-bool check_vector_same(Vector16 actual, Vector16 expected, size_t n) {
-  if (actual.same_values(expected)) {
-    return true;
-  }
-
-  printf("\n FAIL\nexpected:\n");
-  print(expected);
-  printf("actual:\n");
-  print(actual);
-  printf("case: %4u\n", n);
-  return false;
-}
-
 bool test_multiply(Vector16 input, Vector16 filter, int32_t input_offset,
                    int32_t expected) {
   printf(".");
@@ -119,71 +106,6 @@ char const* const DATA =
     "Of an unthrifty knave, and presently\n"
     "I will be with you.\n";
 
-void check_filters(size_t in_channels, size_t out_channels) {
-  const int8_t* data_int8 = reinterpret_cast<const int8_t*>(DATA);
-  hps_accel::LoadFilter(in_channels, out_channels, data_int8);
-
-  const size_t num_vectors = in_channels * out_channels *
-                             hps_accel::FILTER_WIDTH *
-                             hps_accel::FILTER_HEIGHT / BYTES_PER_VECTOR;
-  size_t cases = 0;
-  size_t failures = 0;
-
-  // Read filters 3 times to ensure wrap-around works
-  for (size_t i = 0; i < num_vectors * 3; i++) {
-    cases++;
-    const int8_t* p = data_int8 + ((i % num_vectors) * 16);
-    Vector16 expected =
-        Vector16::build(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8],
-                        p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
-    hps_accel::AdvanceFilterInput();
-    if (!check_vector_same(hps_accel::GetFilter(), expected, i)) failures++;
-    // Consume the macc output to prevent values getting stuck
-    multiply_accumulate();
-  }
-  printf("%s %2u,%2u: %3d cases with %1d failures\n", failures ? "FAIL" : "OK",
-         in_channels, out_channels, cases, failures);
-}
-
-void check_inputs(size_t width, size_t in_channels) {
-  const int8_t* data_int8 = reinterpret_cast<const int8_t*>(DATA);
-  hps_accel::LoadInput(width, in_channels, data_int8);
-  const size_t num_vectors = 16 * in_channels / 16;
-  const size_t row_offset = width * in_channels;
-
-  size_t cases = 0;
-  size_t failures = 0;
-  for (size_t i = 0; i < num_vectors * 3; i++) {
-    cases++;
-
-    // Find location of expected data and build a vector from it
-    const int8_t* p = data_int8;
-    const size_t v = i % num_vectors;
-    Vector16 expected;
-    if (in_channels == 1) {
-      const size_t r = row_offset;
-      expected = Vector16::build(
-          p[r * 0 + 0], p[r * 0 + 1], p[r * 0 + 2], p[r * 0 + 3],  //
-          p[r * 1 + 0], p[r * 1 + 1], p[r * 1 + 2], p[r * 1 + 3],  //
-          p[r * 2 + 0], p[r * 2 + 1], p[r * 2 + 2], p[r * 2 + 3],  //
-          p[r * 3 + 0], p[r * 3 + 1], p[r * 3 + 2], p[r * 3 + 3]);
-    } else {
-      const size_t vectors_per_row = num_vectors / 4;
-      p += row_offset * (v / vectors_per_row);
-      p += 16 * (v % vectors_per_row);
-      expected =
-          Vector16::build(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8],
-                          p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
-    }
-    hps_accel::AdvanceFilterInput();
-    if (!check_vector_same(hps_accel::GetInput(), expected, i)) failures++;
-    // Consume the macc output to prevent values getting stuck
-    multiply_accumulate();
-  }
-  printf("%s %2u,%2u: %3d cases with %1d failures\n", failures ? "FAIL" : "OK",
-         width, in_channels, cases, failures);
-}
-
 };  // anonymous namespace
 
 extern "C" void do_test_blocks_multiply_accumulate(void) {
@@ -226,27 +148,7 @@ extern "C" void do_test_blocks_multiply_accumulate(void) {
          failures);
 }
 
-extern "C" void do_test_blocks_filter(void) {
-  check_filters(16, 8);
-  check_filters(4, 4);
-  check_filters(32, 4);
-  check_filters(1, 4);
-  check_filters(1, 20);
-  check_filters(1, 32);
-}
-
-extern "C" void do_test_blocks_input(void) {
-  check_inputs(9, 8);
-  check_inputs(10, 12);
-  check_inputs(99, 1);
-  check_inputs(49, 4);
-}
-
 extern "C" void do_test_blocks_all(void) {
   printf("multiply_accumulate\n");
   do_test_blocks_multiply_accumulate();
-  printf("filter\n");
-  do_test_blocks_filter();
-  printf("input\n");
-  do_test_blocks_input();
 }

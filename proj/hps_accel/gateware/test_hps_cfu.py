@@ -123,37 +123,6 @@ class HpsCfuTest(CfuTestBase):
             yield from self.check_macc(offset, input, filter)
         self.run_ops(op_generator())
 
-    def test_simple_input_store(self):
-        """Tests simple input use case"""
-        def op_generator():
-            yield ((SET, Constants.REG_INPUT_NUM_WORDS, 20, 0), 0)
-            for n in range(100, 120):
-                yield ((SET, Constants.REG_SET_INPUT, n, 0), 0)
-            for n in range(100, 120, 4):
-                yield ((SET, Constants.REG_FILTER_INPUT_NEXT, 1, 0), 0)
-                yield ((PING, 0, 0, 0), 0)  # wait for regs to update
-                yield ((GET, Constants.REG_INPUT_0, 0, 0), n + 0)
-                yield ((GET, Constants.REG_INPUT_1, 0, 0), n + 1)
-                yield ((GET, Constants.REG_INPUT_2, 0, 0), n + 2)
-                yield ((GET, Constants.REG_INPUT_3, 0, 0), n + 3)
-
-        self.run_ops(op_generator(), False)
-
-    def test_simple_filter_store(self):
-        """Tests simple filter store use case"""
-        def op_generator():
-            yield ((SET, Constants.REG_FILTER_NUM_WORDS, 20, 0), 0)
-            for n in range(100, 120):
-                yield ((SET, Constants.REG_SET_FILTER, n, 0), 0)
-            for n in range(100, 120, 4):
-                yield ((SET, Constants.REG_FILTER_INPUT_NEXT, 1, 0), 0)
-                yield ((PING, 0, 0, 0), 0)  # wait for regs to update
-                yield ((GET, Constants.REG_FILTER_0, 0, 0), n + 0)
-                yield ((GET, Constants.REG_FILTER_1, 0, 0), n + 1)
-                yield ((GET, Constants.REG_FILTER_2, 0, 0), n + 2)
-                yield ((GET, Constants.REG_FILTER_3, 0, 0), n + 3)
-        self.run_ops(op_generator(), False)
-
     def set_output_params_store(self, params):
         for bias, multiplier, shift in params:
             yield ((SET, Constants.REG_OUTPUT_BIAS, bias, 0), 0)
