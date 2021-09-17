@@ -24,12 +24,6 @@ extern "C" {
 // Tests the multiply-accumulate function
 void do_test_blocks_multiply_accumulate(void);
 
-// Tests the filter value load/get functions
-void do_test_blocks_filter(void);
-
-// Tests the input value load/get functions
-void do_test_blocks_input(void);
-
 // Runs all the tests
 void do_test_blocks_all(void);
 
