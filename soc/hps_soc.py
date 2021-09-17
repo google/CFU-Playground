@@ -235,6 +235,7 @@ def main():
                         action="store_false", default=True,
                         help="Use Litex minimal SPI flash instead of Litespi")
     parser.add_argument("--cpu-cfu", default=None, help="Specify file containing CFU Verilog module")
+    parser.add_argument("--cpu-variant", default=None, help="Which CPU variant to use")
     parser.add_argument("--execute-from-lram", action="store_true",
                         help="Make the CPU execute from integrated ROM stored in LRAM instead of flash")
     parser.add_argument("--integrated-rom-init", metavar="FILE",
@@ -248,7 +249,9 @@ def main():
         integrated_rom_init = []
 
     if args.cpu_cfu:
-        if args.slim_cpu:
+        if args.cpu_variant:
+            variant = args.cpu_variant
+        elif args.slim_cpu:
             variant = "slim+cfu+debug" if args.debug else "slim+cfu"
         else:
             variant = "full+cfu+debug" if args.debug else "full+cfu"
@@ -260,7 +263,10 @@ def main():
                      execute_from_lram=args.execute_from_lram,
                      integrated_rom_init=integrated_rom_init)
     else:
-        variant = "full+debug" if args.debug else "full"
+        if args.cpu_variant:
+            variant = args.cpu_variant
+        else:
+            variant = "full+debug" if args.debug else "full"
         soc = HpsSoC(Platform(args.toolchain),
                      debug=args.debug,
                      litespi_flash=args.litespi_flash,
