@@ -54,6 +54,7 @@ TEST_MENU_ITEMS=3 a
 
 # Customise arguments to Litex:
 export EXTRA_LITEX_ARGS
+EXTRA_LITEX_ARGS += --cpu-variant=slimperf+cfu
 ifeq '$(TARGET)' 'digilent_arty'
 # Cannot meet timing at 100MHz, reduce to 80MHz
 EXTRA_LITEX_ARGS += --sys-clk-freq 80000000
