@@ -238,10 +238,11 @@ int32_t MultiplyByQuantizedMultiplier_SW(int32_t x, int32_t multiplier,
 }
 
 // Same functionality. Uses hard CFU implementations of operations
-int32_t MultiplyByQuantizedMultiplier_HW1(int32_t x, int32_t multiplier,
+int32_t MultiplyByQuantizedMultiplier_HW(int32_t x, int32_t multiplier,
                                           int shift) {
   int32_t product = cfu_op2_hw(MATH_SRDHM, x, multiplier);
   return cfu_op2_hw(MATH_RDBPOT, product, shift);
 }
+
 
 };  // namespace hps_accel

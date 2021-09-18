@@ -101,6 +101,16 @@ inline void AdvanceFilterInput() { cfu_set(REG_FILTER_INPUT_NEXT, 0); }
 // Same as tflite::MultiplyByQuantizedMultiplier but assumes:
 // shift is in the range -4 to -10 (inclusive)
 // multiplier is in the range 0x40000000 to 0x7fffffff
+
+// Main implementation for use in code
+inline int32_t MultiplyByQuantizedMultiplier(int32_t x, int32_t multiplier,
+                                             int shift) {
+  int32_t product = cfu_op2(MATH_SRDHM, x, multiplier);
+  return cfu_op2(MATH_RDBPOT, product, shift);
+}
+
+// Same functionality. Uses software CFU implementations of component
+// operations.
 int32_t MultiplyByQuantizedMultiplier_01(int32_t x, int32_t multiplier,
                                          int shift);
 
@@ -123,8 +133,8 @@ int32_t MultiplyByQuantizedMultiplier_SW(int32_t x, int32_t multiplier,
 
 // Same functionality. Uses hardware CFU implementations of component
 // operations.
-int32_t MultiplyByQuantizedMultiplier_HW1(int32_t x, int32_t multiplier,
-                                          int shift);
+int32_t MultiplyByQuantizedMultiplier_HW(int32_t x, int32_t multiplier,
+                                         int shift);
 };  // namespace hps_accel
 
 #endif  // _BLOCKS_H
