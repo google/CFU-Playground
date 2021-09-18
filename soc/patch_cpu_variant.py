@@ -19,15 +19,16 @@
 
 from litex.soc.cores.cpu.vexriscv import core
 
+
 def patch_cpu_variant():
     """Monkey patches custom variants into LiteX."""
     core.CPU_VARIANTS.update({
-        'slim+cfu':       'VexRiscv_SlimCfu',
-        'slim+cfu+debug': 'VexRiscv_SlimCfuDebug',
-        'perf+cfu':       'VexRiscv_PerfCfu',
-        'perf+cfu+debug': 'VexRiscv_PerfCfuDebug',
-        'slimperf+cfu':       'VexRiscv_SlimPerfCfu',
-        'slimperf+cfu+debug': 'VexRiscv_SlimPerfCfuDebug',
+        'slim+cfu':             'VexRiscv_SlimCfu',
+        'slim+cfu+debug':       'VexRiscv_SlimCfuDebug',
+        'perf+cfu':             'VexRiscv_PerfCfu',
+        'perf+cfu+debug':       'VexRiscv_PerfCfuDebug',
+        'slimperf+cfu':         'VexRiscv_SlimPerfCfu',
+        'slimperf+cfu+debug':   'VexRiscv_SlimPerfCfuDebug',
     })
     core.GCC_FLAGS.update({
         'slim+cfu':             '-march=rv32im -mabi=ilp32',
@@ -38,7 +39,6 @@ def patch_cpu_variant():
         'slimperf+cfu+debug':   '-march=rv32im -mabi=ilp32',
     })
     print("general patch:\n", core.CPU_VARIANTS)
-
 
     ########### ADD code to existing add_soc_components() #######
     old_add_soc_components = core.VexRiscv.add_soc_components
