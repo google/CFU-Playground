@@ -117,13 +117,8 @@ void ConvPerChannel4x4(const ConvParams& params,
           }
 
           acc += bias_data[out_channel];
-#ifdef CFU_POST_PROCESS
-          acc = cfu_op2_sw(MATH_SRDHM, acc, output_multiplier[out_channel]);
-          acc = cfu_op2_sw(MATH_RDBPOT, acc, output_shift[out_channel]);
-#else
-          acc = MultiplyByQuantizedMultiplier(
+          acc = hps_accel::MultiplyByQuantizedMultiplier(
               acc, output_multiplier[out_channel], output_shift[out_channel]);
-#endif
           acc += output_offset;
           acc = std::max(acc, output_activation_min);
           acc = std::min(acc, output_activation_max);
