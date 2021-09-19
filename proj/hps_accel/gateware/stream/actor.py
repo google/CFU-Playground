@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from migen import Module
+from nmigen import Cat, Signal, Module
 from nmigen_cfu import SimpleElaboratable
 
 from .stream import PayloadDefinition, Endpoint
@@ -57,14 +57,14 @@ class BinaryActor(SimpleElaboratable):
         raise NotImplementedError(
             "BinaryActor subclass must implement control()")
 
-    def transform(self, m, input, output):
+    def transform(self, m, in_value, out_value):
         """Transforms input to output.
 
         m: Module
           The module for this elaboratable
-        input:
+        in_value:
           The input payload to be transformed
-        output:
+        out_value:
           The transformed value
         """
         raise NotImplementedError(
@@ -92,7 +92,48 @@ class BinaryCombinatorialActor(BinaryActor):
         m.d.comb += self.input.ready.eq(self.output.ready)
         m.d.comb += self.output.valid.eq(self.input.valid)
 
-    def transform(self, m, input, output):
+    def transform(self, m, in_value, out_value):
+        """Transforms input to output.
+
+        input: self.input_type, in
+        output: self.output_type, out
+        """
+        raise NotImplemented()
+
+
+class BinaryPipelineActor(BinaryActor):
+    """Base for a pipline actor.
+
+    Performs a calcultion over a fixed number of cycles.
+
+    Does not provide or respect backpressure over its streams.
+
+    Parameters
+    ----------
+
+    input_type: The Shape or Layout for the sink
+
+    output_type: The Shape or Layout for the source.
+
+    pipeline_cycles: the number of cycles the pipline takes to calculate
+    """
+
+    def __init__(self, input_type, output_type, pipeline_cycles):
+        super().__init__(input_type, output_type)
+        self.pipeline_cycles = pipeline_cycles
+
+    def delay(self, m, cycles, sig):
+        """Delays the given signal by a number of cycles"""
+        sr = Signal(cycles)
+        m.d.sync += sr.eq(Cat(sig, sr[:-1]))
+        return sr[-1]
+
+    def control(self, m: Module):
+        m.d.comb += self.input.ready.eq(self.output.ready)
+        m.d.comb += self.output.valid.eq(self.delay(m,
+                                         self.pipeline_cycles, self.input.valid))
+
+    def transform(self, m, in_value, out_value):
         """Transforms input to output.
 
         input: self.input_type, in

@@ -12,13 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Cat, Mux, Signal, unsigned, signed
-from nmigen.hdl.ast import Const
-from nmigen.hdl.dsl import Module
+from nmigen import Mux, Signal, unsigned, signed, Module
 from nmigen_cfu import InstructionBase, SimpleElaboratable
 
 from .constants import Constants
-from .stream import Endpoint, connect
+from .stream import Endpoint, BinaryPipelineActor
 
 SRDHM_INPUT_LAYOUT = [
     ('a', signed(32)),
@@ -31,7 +29,7 @@ RDBPOT_INPUT_LAYOUT = [
 ]
 
 
-class SaturatingRoundingDoubleHighMul(SimpleElaboratable):
+class SaturatingRoundingDoubleHighMul(BinaryPipelineActor):
     """Performs an SRDHM operation.
 
     This is approximately a 32x32 mulitiplication where only the high 32
@@ -61,28 +59,15 @@ class SaturatingRoundingDoubleHighMul(SimpleElaboratable):
     PIPELINE_CYCLES = 3
 
     def __init__(self):
-        self.input = Endpoint(SRDHM_INPUT_LAYOUT)
-        self.output = Endpoint(signed(32))
+        super().__init__(SRDHM_INPUT_LAYOUT, signed(32), self.PIPELINE_CYCLES)
 
-    def delay(self, m, cycles, sig):
-        sr = Signal(cycles)
-        m.d.sync += sr.eq(Cat(sig, sr[:-1]))
-        return sr[-1]
-
-    def elab(self, m):
-        # Input is always ready
-        m.d.comb += self.input.ready.eq(1)
-
-        # Output's valid is input's valid, but delayed
-        m.d.comb += self.output.valid.eq(
-            self.delay(m, self.PIPELINE_CYCLES, self.input.valid))
-
+    def transform(self, m, in_value, out_value):
         # Cycle 0: register inputs
-        a = self.input.payload.a
+        a = in_value.a
         reg_a = Signal(signed(32))
         reg_b = Signal(signed(32))
         m.d.sync += reg_a.eq(Mux(a >= 0, a, -a))
-        m.d.sync += reg_b.eq(self.input.payload.b)
+        m.d.sync += reg_b.eq(in_value.b)
 
         # Cycle 1: multiply to register
         # both operands are positive, so result always positive
@@ -90,15 +75,15 @@ class SaturatingRoundingDoubleHighMul(SimpleElaboratable):
         m.d.sync += reg_ab.eq(reg_a * reg_b)
 
         # Cycle 2: nudge, take high bits and sign
-        positive_2 = self.delay(m, 2, a >= 0)
+        positive_2 = self.delay(m, 2, a >= 0)  # Whether input positive
         nudged = reg_ab + Mux(positive_2, (1 << 30), (1 << 30) - 1)
         high_bits = Signal(signed(32))
         m.d.comb += high_bits.eq(nudged[31:])
         with_sign = Mux(positive_2, high_bits, -high_bits)
-        m.d.sync += self.output.payload.eq(with_sign)
+        m.d.sync += out_value.eq(with_sign)
 
 
-class RoundingDivideByPowerOfTwo(SimpleElaboratable):
+class RoundingDivideByPowerOfTwo(BinaryPipelineActor):
     """Divides its input by a power of two, rounding appropriately.
 
     Attributes
@@ -115,27 +100,14 @@ class RoundingDivideByPowerOfTwo(SimpleElaboratable):
     PIPELINE_CYCLES = 3
 
     def __init__(self):
-        self.input = Endpoint(RDBPOT_INPUT_LAYOUT)
-        self.output = Endpoint(signed(32))
+        super().__init__(RDBPOT_INPUT_LAYOUT, signed(32), self.PIPELINE_CYCLES)
 
-    def delay(self, m, cycles, sig):
-        sr = Signal(cycles)
-        m.d.sync += sr.eq(Cat(sig, sr[:-1]))
-        return sr[-1]
-
-    def elab(self, m: Module):
-        # Input is always ready
-        m.d.comb += self.input.ready.eq(1)
-
-        # Output's valid is input's valid, but delayed
-        m.d.comb += self.output.valid.eq(
-            self.delay(m, self.PIPELINE_CYCLES, self.input.valid))
-
+    def transform(self, m, in_value, out_value):
         # Cycle 0: register inputs
         dividend = Signal(signed(32))
         shift = Signal(4)
-        m.d.sync += dividend.eq(self.input.payload.dividend)
-        m.d.sync += shift.eq(self.input.payload.shift)
+        m.d.sync += dividend.eq(in_value.dividend)
+        m.d.sync += shift.eq(in_value.shift)
 
         # Cycle 1: calculate
         result = Signal(signed(32))
@@ -155,7 +127,7 @@ class RoundingDivideByPowerOfTwo(SimpleElaboratable):
         m.d.sync += result.eq(quotient + Mux(remainder > threshold, 1, 0))
 
         # Cycle 2: send output
-        m.d.sync += self.output.payload.eq(result)
+        m.d.sync += out_value.eq(result)
 
 
 class MathInstruction(InstructionBase):

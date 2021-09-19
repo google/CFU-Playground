@@ -60,6 +60,6 @@ Major differences from LiteX Streams:
 -  The payload is a single signal or Record named "payload".
 """
 
-from .actor import BinaryCombinatorialActor
+from .actor import BinaryCombinatorialActor, BinaryPipelineActor
 from .stream import Endpoint, PayloadDefinition, connect
 from .buffer import Buffer, ConcatenatingBuffer
