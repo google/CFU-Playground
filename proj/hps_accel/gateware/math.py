@@ -48,10 +48,10 @@ class SaturatingRoundingDoubleHighMul(BinaryPipelineActor):
     Attributes
     ----------
 
-    input: Stream(SRDHM_INPUT_LAYOUT), in
+    input: Endpoint(SRDHM_INPUT_LAYOUT), in
       The calculation to perform.
 
-    output: Stream(signed(32)), out
+    output: Endpoint(signed(32)), out
       The result.
 
     This pipeline neither provides nor respects back pressure.
@@ -89,10 +89,10 @@ class RoundingDivideByPowerOfTwo(BinaryPipelineActor):
     Attributes
     ----------
 
-    input: Stream(RDBPOT_INPUT_LAYOUT), in
+    input: Endpoint(RDBPOT_INPUT_LAYOUT), in
       The calculation to perform.
 
-    output: Stream(signed(32)), out
+    output: Endpoint(signed(32)), out
       The result.
 
     This pipeline neither provides nor respects back pressure.
