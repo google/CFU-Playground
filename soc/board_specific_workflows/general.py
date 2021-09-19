@@ -18,7 +18,9 @@ import os
 from litex.soc.integration import builder
 from litex.soc.integration import soc as litex_soc
 from litex.soc.integration import soc_core
+from litex.soc.cores.cpu.vexriscv import core
 from typing import Callable
+from patch_cpu_variant import patch_cpu_variant
 
 
 class GeneralSoCWorkflow():
@@ -50,6 +52,7 @@ class GeneralSoCWorkflow():
         self.args = args
         self.soc_constructor = soc_constructor
         self.builder_constructor = builder_constructor or builder.Builder
+        patch_cpu_variant()
 
     def make_soc(self, **kwargs) -> litex_soc.LiteXSoC:
         """Utilizes self.soc_constructor to make a LiteXSoC.

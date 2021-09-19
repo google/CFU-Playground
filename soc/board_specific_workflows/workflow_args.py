@@ -64,7 +64,7 @@ def parse_workflow_args(input: List[str] = None) -> argparse.Namespace:
     parser.set_defaults(csr_csv='csr.csv',
                         uart_name='serial',
                         uart_baudrate=921600,
-                        cpu_variant='full+cfu+debug',
+                        cpu_variant='full+cfu',
                         with_etherbone=False)
     # Return only the known args
     if input:

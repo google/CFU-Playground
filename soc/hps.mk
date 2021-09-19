@@ -54,7 +54,7 @@ endif
 endif
 
 ifdef SLIM_CPU
-LITEX_ARGS += --slim_cpu
+$(error SLIM_CPU no longer supported.   Instead use "EXTRA_LITEX_ARGS='--cpu-variant=slim+cfu'")
 endif
 
 PYRUN:=     $(CFU_ROOT)/scripts/pyrun

@@ -56,7 +56,7 @@ DEFINES += ACCEL_CONV
 # Used by soc/hps.mk
 # Choose the slimmer version of VexRiscv to fit with this large CFU
 ifeq 'hps' '$(PLATFORM)'
-export SLIM_CPU:=1
+export EXTRA_LITEX_ARGS='--cpu-variant=slim+cfu'
 endif
 
 include ../proj.mk

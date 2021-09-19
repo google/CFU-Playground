@@ -52,9 +52,6 @@ DEFINES += INCLUDE_MODEL_HPS
 RUN_MENU_ITEMS=1 1 c
 TEST_MENU_ITEMS=3 a
 
-# Ensure perf_csrs logic is present
-DEFINES += CONFIG_CPU_PERF_CSRS
-
 # Customise arguments to Litex:
 export EXTRA_LITEX_ARGS
 ifeq '$(TARGET)' 'digilent_arty'

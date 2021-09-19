@@ -39,6 +39,8 @@ from migen import Module, Instance
 from patch import Patch
 # from cam_control import CameraControl
 
+from patch_cpu_variant import patch_cpu_variant
+
 import argparse
 import os
 
@@ -214,12 +216,14 @@ def create_builder(soc, args):
 
 
 def main():
+    patch_cpu_variant()
+
     parser = argparse.ArgumentParser(description="HPS SoC")
     hps_soc_args(parser)
     parser.add_argument("--debug", action="store_true",
                         help="Enable debug mode")
     parser.add_argument("--slim_cpu", action="store_true",
-                        help="Use slimmer VexRiscv (required for mnv2_first)")
+                        help="DEPRECATED: use '--cpu-variant=slim+cfu' instead (Use slimmer VexRiscv (required for mnv2_first))")
     parser.add_argument("--build", action="store_true",
                         help="Whether to do a full build, including the bitstream")
     parser.add_argument("--toolchain", default="oxide",
@@ -231,6 +235,7 @@ def main():
                         action="store_false", default=True,
                         help="Use Litex minimal SPI flash instead of Litespi")
     parser.add_argument("--cpu-cfu", default=None, help="Specify file containing CFU Verilog module")
+    parser.add_argument("--cpu-variant", default=None, help="Which CPU variant to use")
     parser.add_argument("--execute-from-lram", action="store_true",
                         help="Make the CPU execute from integrated ROM stored in LRAM instead of flash")
     parser.add_argument("--integrated-rom-init", metavar="FILE",
@@ -244,7 +249,12 @@ def main():
         integrated_rom_init = []
 
     if args.cpu_cfu:
-        variant = "full+cfu+debug" if args.debug else "full+cfu"
+        if args.cpu_variant:
+            variant = args.cpu_variant
+        elif args.slim_cpu:
+            variant = "slim+cfu+debug" if args.debug else "slim+cfu"
+        else:
+            variant = "full+cfu+debug" if args.debug else "full+cfu"
         soc = HpsSoC(Platform(args.toolchain),
                      debug=args.debug,
                      litespi_flash=args.litespi_flash,
@@ -252,14 +262,11 @@ def main():
                      cpu_cfu=args.cpu_cfu,
                      execute_from_lram=args.execute_from_lram,
                      integrated_rom_init=integrated_rom_init)
-        if args.slim_cpu:
-            # override the actual source to get the Slim version
-            #  -- this is a hack needed because litex/.../vexriscv/core.py doesn't know about the Slim versions.
-            vexriscv = "../third_party/python/pythondata_cpu_vexriscv/pythondata_cpu_vexriscv"
-            var = "SlimCfuDebug" if args.debug else "SlimCfu"
-            soc.cpu.use_external_variant(f"{vexriscv}/verilog/VexRiscv_{var}.v")
     else:
-        variant = "full+debug" if args.debug else "full"
+        if args.cpu_variant:
+            variant = args.cpu_variant
+        else:
+            variant = "full+debug" if args.debug else "full"
         soc = HpsSoC(Platform(args.toolchain),
                      debug=args.debug,
                      litespi_flash=args.litespi_flash,
