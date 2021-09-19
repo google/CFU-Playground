@@ -223,7 +223,7 @@ def main():
     parser.add_argument("--debug", action="store_true",
                         help="Enable debug mode")
     parser.add_argument("--slim_cpu", action="store_true",
-                        help="Use slimmer VexRiscv (required for mnv2_first)")
+                        help="DEPRECATED: use '--cpu-variant=slim+cfu' instead (Use slimmer VexRiscv (required for mnv2_first))")
     parser.add_argument("--build", action="store_true",
                         help="Whether to do a full build, including the bitstream")
     parser.add_argument("--toolchain", default="oxide",
