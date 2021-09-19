@@ -90,7 +90,7 @@ class HpsCfuTest(CfuTestBase):
         def op_generator():
             yield from self.prepare_macc(12, range(16), range(16))
             yield from self.check_macc(12, range(16), range(16))
-        self.run_ops(op_generator(), True)
+        self.run_ops(op_generator(), False)
 
     def test_multiply_accumulate(self):
         """Tests Multiply-Accumulate functionality"""

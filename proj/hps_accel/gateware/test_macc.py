@@ -48,7 +48,7 @@ class MultiplyAccumulateTest(TestBase):
             yield
             self.assertEqual((yield self.dut.result.valid), 1)
             self.assertEqual((yield self.dut.result.payload), 330)
-        self.run_sim(process, True)
+        self.run_sim(process, False)
 
     def operand_producer(self, inputs, filters):
         """
@@ -97,7 +97,7 @@ class MultiplyAccumulateTest(TestBase):
                 self.assertEqual((yield self.dut.result.payload), result)
                 yield
             self.assertEqual((yield self.dut.result.valid), 0)
-        self.run_sim(process, True)
+        self.run_sim(process, False)
 
     def test_pipeline_pauses_when_disabled(self):
         offset = 128
@@ -158,4 +158,4 @@ class MultiplyAccumulateTest(TestBase):
             for cycle in range(10):
                 self.assertEqual((yield self.dut.result.valid), 0)
                 yield
-        self.run_sim(process, True)
+        self.run_sim(process, False)
