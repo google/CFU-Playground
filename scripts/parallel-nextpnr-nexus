@@ -1,0 +1,93 @@
+#!/bin/bash
+# Copyright 2021 The CFU-Playground Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Runs multiple nextpnrs, stopping on the first successful run
+
+# TODO: Better argument handling
+# TODO: Include support for device, timefailarg and ignoreloops parameters
+# TODO: Include support for setting seed (or baseseed in this case)
+if [[ $# -ne 4 ]]; then
+  echo "Expected 4 arguments"
+  exit 255
+fi
+
+JSON="$1"
+PDC="$2"
+RESULT_FASM="$3"
+SEED_COUNT="$4"
+
+4324declare -a CHILD_PIDS
+declare -A PID_TO_SEED
+
+# Launch a number of nextpnrs
+echo "$(basename $0): running ${SEED_COUNT} nextpnr-nexus instances."
+rm -rf runs 
+mkdir runs
+seed_base=$((RANDOM % 100 * 100))
+for s in $(seq ${SEED_COUNT}); do
+  seed=$((seed_base + s))
+  DIR="runs/seed-${seed}"
+  mkdir "${DIR}"
+  ( 
+    nextpnr-nexus \
+        --json "${JSON}" \
+        --pdc "${PDC}" \
+        --fasm "${DIR}/output.fasm" \
+        --device LIFCL-17-8UWG72C \
+        --seed "${seed}" 2>&1 | \
+      (while read line; do 
+        echo "$(date +%H:%M:%S) ${line}"; done
+      ) > "${DIR}/nextpnr-nexus.log"
+  ) &
+  PID=$!
+  CHILD_PIDS+=(${PID})
+  echo "Launched nextpnr with output to ${DIR}"
+  PID_TO_SEED[${PID}]="${seed}"
+done
+
+# Removes terminated PID from CHILD_PIDS variable
+update_pids() {
+  new_CHILD_PIDS=()
+  for p in "${CHILD_PIDS[@]}"; do
+    if [[ "${p}" -ne "${TERMINATED}" ]]; then
+      new_CHILD_PIDS+=("${p}")
+    fi
+  done
+  CHILD_PIDS=("${new_CHILD_PIDS[@]}")
+}
+
+# Wait for a child to finish then check for success or failure
+while [[ ${#CHILD_PIDS} -gt 1 ]]; do
+  wait -n -p TERMINATED "${CHILD_PIDS[@]}"
+  result=$?
+  update_pids
+  if [[ "${result}" -eq "0" ]]; then
+    # Child succeeded - copy result and finish
+    seed="${PID_TO_SEED[${TERMINATED}]}"
+    echo "SUCCESS: nextpnr with seed=${seed}"
+    cp "runs/seed-${seed}/output.fasm" $RESULT_FASM
+    cp "runs/seed-${seed}/nextpnr-nexus.log" nextpnr-nexus.log
+    # TODO: find a more elegant solution for halting all children
+    for p in "${CHILD_PIDS[@]}"; do pkill -P $p; done
+    exit 0
+  else
+    # Child failed - remove TERMINATED from list of PIDS
+    seed="${PID_TO_SEED[${TERMINATED}]}"
+    echo "FAIL: nextpnr with seed=${seed}"
+  fi
+done
+
+# No success found
+echo "All seeds failed"

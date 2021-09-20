@@ -35,3 +35,4 @@ pathadd() {
     fi
 }
 pathadd "${CFU_ROOT}/third_party/usr/local/bin"
+pathadd "${CFU_ROOT}/scripts"
