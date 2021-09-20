@@ -115,6 +115,25 @@ Vector16 GetInput() {
   return Vector16{{word0, word1, word2, word3}};
 }
 
+// Sets per-layer output parameters
+void SetOutputOffsets(int32_t output_offset, int32_t output_activation_min,
+                      int32_t output_activation_max) {
+  cfu_set(REG_OUTPUT_OFFSET, output_offset);
+  cfu_set(REG_OUTPUT_MIN, output_activation_min);
+  cfu_set(REG_OUTPUT_MAX, output_activation_max);
+}
+
+// Loads output parameters
+void LoadOutputParams(size_t offset, size_t count, const int32_t* bias_data,
+                      const int32_t* output_multiplier,
+                      const int32_t* output_shift) {
+  for (size_t i = offset; i < offset + count; i++) {
+    cfu_set(REG_OUTPUT_BIAS, bias_data[i]);
+    cfu_set(REG_OUTPUT_MULTIPLIER, output_multiplier[i]);
+    cfu_set(REG_OUTPUT_SHIFT, output_shift[i]);
+  }
+}
+
 int32_t MultiplyByQuantizedMultiplier_01(int32_t x, int32_t multiplier,
                                          int shift) {
   using gemmlowp::RoundingDivideByPOT;
@@ -239,10 +258,9 @@ int32_t MultiplyByQuantizedMultiplier_SW(int32_t x, int32_t multiplier,
 
 // Same functionality. Uses hard CFU implementations of operations
 int32_t MultiplyByQuantizedMultiplier_HW(int32_t x, int32_t multiplier,
-                                          int shift) {
+                                         int shift) {
   int32_t product = cfu_op2_hw(MATH_SRDHM, x, multiplier);
   return cfu_op2_hw(MATH_RDBPOT, product, shift);
 }
-
 
 };  // namespace hps_accel

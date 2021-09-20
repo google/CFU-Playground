@@ -59,6 +59,13 @@ class Constants:
     # Sets next input word and advances the write index.
     REG_SET_INPUT = 5
 
+    # Set output offset
+    REG_OUTPUT_OFFSET = 6
+
+    # Sets minimum and maximum activation value
+    REG_OUTPUT_MIN = 7
+    REG_OUTPUT_MAX = 8
+
     # These registers contain values 0-3 of the current filter word
     REG_FILTER_0 = 0x10
     REG_FILTER_1 = 0x11
@@ -77,6 +84,16 @@ class Constants:
 
     # Retrieve result from multiply-accumulate unit
     REG_MACC_OUT = 0x30
+
+    # Set bias, multiplier and shift.
+    # Setting shift causes the three values to be added to the store
+    REG_OUTPUT_BIAS = 0x40
+    REG_OUTPUT_MULTIPLIER = 0x41
+    REG_OUTPUT_SHIFT = 0x42
+
+    # Post processes an output. Acc value goes in in0, and result
+    # is the post processed value
+    REG_POST_PROCESS = 0x43
 
     # Registers for gateware verification
     # Any value n set into this register will be read back as n+1
@@ -98,6 +115,9 @@ class Constants:
 
     # Maximum number of words in input
     MAX_INPUT_WORDS = 256
+
+    # Maximum number of channels in a layer
+    MAX_CHANNELS = 64
 
 
 CC_FILE_HEADER = """// Generated file

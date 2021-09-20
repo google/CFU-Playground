@@ -96,6 +96,20 @@ Vector16 GetInput();
 
 inline void AdvanceFilterInput() { cfu_set(REG_FILTER_INPUT_NEXT, 0); }
 
+// Sets per-layer output parameters
+void SetOutputOffsets(int32_t output_offset, int32_t output_activation_min,
+                      int32_t output_activation_max);
+
+// Loads output parameters
+void LoadOutputParams(size_t offset, size_t count, const int32_t* bias_data,
+                      const int32_t* output_multiplier,
+                      const int32_t* output_shift);
+
+// Do the actual post-processing
+inline int32_t PostProcess(int32_t acc) {
+  return cfu_op1(REG_POST_PROCESS, acc, 0);
+}
+
 // Math functions
 
 // Same as tflite::MultiplyByQuantizedMultiplier but assumes:
@@ -135,6 +149,10 @@ int32_t MultiplyByQuantizedMultiplier_SW(int32_t x, int32_t multiplier,
 // operations.
 int32_t MultiplyByQuantizedMultiplier_HW(int32_t x, int32_t multiplier,
                                          int shift);
+
+// Reset all
+inline void Reset() { cfu_set(REG_RESET, 0); }
+
 };  // namespace hps_accel
 
 #endif  // _BLOCKS_H

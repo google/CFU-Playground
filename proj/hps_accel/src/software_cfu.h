@@ -17,6 +17,7 @@
 #ifndef SOFTWARE_CFU_H
 #define SOFTWARE_CFU_H
 
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -84,83 +85,39 @@ class Storage {
 extern Storage filter_storage;
 extern Storage input_storage;
 
+struct OutputParams {
+  int16_t bias;
+  int32_t multiplier;
+  uint8_t shift;  // range 3..11
+};
+
+class OutputParamsStorage {
+ public:
+  void Reset() { read_index_ = write_index_ = 0; }
+  void Store(int16_t bias, int32_t multiplier, uint8_t shift) {
+    params_[write_index_++] = OutputParams{bias, multiplier, shift};
+  }
+  const OutputParams& Fetch() {
+    auto& result = params_[read_index_];
+    read_index_ = (read_index_ + 1) % write_index_;
+    return result;
+  }
+
+ private:
+  OutputParams params_[MAX_CHANNELS];
+  int write_index_;
+  int read_index_;
+};
+
+extern OutputParamsStorage output_params_storage;
+extern int32_t reg_bias;
+extern int32_t reg_multiplier;
+extern int32_t reg_output_offset;
+extern int32_t reg_output_max;
+extern int32_t reg_output_min;
+
 // Verify register storage
 extern uint32_t reg_verify;
-
-inline uint32_t SetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
-  switch (funct7) {
-    case REG_RESET:
-      filter_storage.Reset(0);
-      return 0;
-    case REG_FILTER_NUM_WORDS:
-      filter_storage.Reset(rs1);
-      return 0;
-    case REG_INPUT_NUM_WORDS:
-      input_storage.Reset(rs1);
-      return 0;
-    case REG_INPUT_OFFSET:
-      macc_input_offset = rs1;
-      return 0;
-    case REG_SET_FILTER:
-      filter_storage.Store(rs1);
-      return 0;
-    case REG_SET_INPUT:
-      input_storage.Store(rs1);
-      return 0;
-    case REG_FILTER_INPUT_NEXT:
-      assert(!macc_valid);
-      filter_storage.Next();
-      input_storage.Next();
-      SetMaccFilter(0, filter_storage.Get(0));
-      SetMaccFilter(1, filter_storage.Get(1));
-      SetMaccFilter(2, filter_storage.Get(2));
-      SetMaccFilter(3, filter_storage.Get(3));
-      SetMaccInput(0, input_storage.Get(0));
-      SetMaccInput(1, input_storage.Get(1));
-      SetMaccInput(2, input_storage.Get(2));
-      SetMaccInput(3, input_storage.Get(3));
-      macc_valid = true;
-      return 0;
-    case REG_VERIFY:
-      reg_verify = rs1;
-      return 0;
-
-    default:
-      printf("\nInvalid SetRegister number %d\n", funct7);
-      return 0;
-  }
-  return 0;
-}
-
-inline uint32_t GetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
-  switch (funct7) {
-    case REG_FILTER_0:
-      return filter_storage.Get(0);
-    case REG_FILTER_1:
-      return filter_storage.Get(1);
-    case REG_FILTER_2:
-      return filter_storage.Get(2);
-    case REG_FILTER_3:
-      return filter_storage.Get(3);
-    case REG_INPUT_0:
-      return input_storage.Get(0);
-    case REG_INPUT_1:
-      return input_storage.Get(1);
-    case REG_INPUT_2:
-      return input_storage.Get(2);
-    case REG_INPUT_3:
-      return input_storage.Get(3);
-    case REG_MACC_OUT:
-      assert(macc_valid);
-      macc_valid = false;
-      return Macc();
-    case REG_VERIFY:
-      return reg_verify + 1;
-    default:
-      printf("\nInvalid GetRegister number %d\n", funct7);
-      return 0;
-  }
-}
 
 inline uint32_t SaturatingRoundingDoubleHighMul(uint32_t rs1, uint32_t rs2) {
   int32_t x = static_cast<int32_t>(rs1);
@@ -233,6 +190,115 @@ inline uint32_t RoundingDivideByPOT(uint32_t rs1, uint32_t rs2) {
   int32_t threshold = (mask >> 1) + ((product < 0) ? 1 : 0);
   int32_t rounding = (remainder > threshold) ? 1 : 0;
   return quotient + rounding;
+}
+
+inline uint32_t PostProcess(int32_t acc) {
+  const OutputParams& params = output_params_storage.Fetch();
+  acc += params.bias;
+  acc = static_cast<int32_t>(
+      SaturatingRoundingDoubleHighMul(acc, params.multiplier));
+  acc = static_cast<int32_t>(RoundingDivideByPOT(acc, -params.shift));
+  acc += reg_output_offset;
+  acc = std::max(acc, reg_output_min);
+  acc = std::min(acc, reg_output_max);
+  return acc;
+}
+
+inline uint32_t SetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
+  switch (funct7) {
+    case REG_RESET:
+      filter_storage.Reset(0);
+      output_params_storage.Reset();
+      return 0;
+    case REG_FILTER_NUM_WORDS:
+      filter_storage.Reset(rs1);
+      return 0;
+    case REG_INPUT_NUM_WORDS:
+      input_storage.Reset(rs1);
+      return 0;
+    case REG_INPUT_OFFSET:
+      macc_input_offset = rs1;
+      return 0;
+    case REG_SET_FILTER:
+      filter_storage.Store(rs1);
+      return 0;
+    case REG_SET_INPUT:
+      input_storage.Store(rs1);
+      return 0;
+    case REG_OUTPUT_OFFSET:
+      reg_output_offset = rs1;
+      return 0;
+    case REG_OUTPUT_MIN:
+      reg_output_min = rs1;
+      return 0;
+    case REG_OUTPUT_MAX:
+      reg_output_max = rs1;
+      return 0;
+    case REG_FILTER_INPUT_NEXT:
+      assert(!macc_valid);
+      filter_storage.Next();
+      input_storage.Next();
+      SetMaccFilter(0, filter_storage.Get(0));
+      SetMaccFilter(1, filter_storage.Get(1));
+      SetMaccFilter(2, filter_storage.Get(2));
+      SetMaccFilter(3, filter_storage.Get(3));
+      SetMaccInput(0, input_storage.Get(0));
+      SetMaccInput(1, input_storage.Get(1));
+      SetMaccInput(2, input_storage.Get(2));
+      SetMaccInput(3, input_storage.Get(3));
+      macc_valid = true;
+      return 0;
+    case REG_OUTPUT_BIAS:
+      reg_bias = rs1;
+      return 0;
+    case REG_OUTPUT_MULTIPLIER:
+      reg_multiplier = rs1;
+      return 0;
+    case REG_OUTPUT_SHIFT:
+      output_params_storage.Store(static_cast<int16_t>(reg_bias),
+                                  reg_multiplier, static_cast<uint8_t>(-rs1));
+      return 0;
+    case REG_VERIFY:
+      reg_verify = rs1;
+      return 0;
+
+    default:
+      printf("\nInvalid SetRegister number %d\n", funct7);
+      return 0;
+  }
+  return 0;
+}
+
+inline uint32_t GetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
+  switch (funct7) {
+    case REG_FILTER_0:
+      return filter_storage.Get(0);
+    case REG_FILTER_1:
+      return filter_storage.Get(1);
+    case REG_FILTER_2:
+      return filter_storage.Get(2);
+    case REG_FILTER_3:
+      return filter_storage.Get(3);
+    case REG_INPUT_0:
+      return input_storage.Get(0);
+    case REG_INPUT_1:
+      return input_storage.Get(1);
+    case REG_INPUT_2:
+      return input_storage.Get(2);
+    case REG_INPUT_3:
+      return input_storage.Get(3);
+    case REG_MACC_OUT:
+      assert(macc_valid);
+      macc_valid = false;
+      return Macc();
+    case REG_POST_PROCESS:
+      return PostProcess(rs1);
+    case REG_VERIFY:
+      return reg_verify + 1;
+    default:
+      printf("\nInvalid GetRegister number %d\n", funct7);
+      return 0;
+  }
 }
 
 inline uint32_t CalculateMathOperation(int funct7, uint32_t rs1, uint32_t rs2) {
