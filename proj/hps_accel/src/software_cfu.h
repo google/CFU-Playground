@@ -208,7 +208,6 @@ inline uint32_t SetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
   switch (funct7) {
     case REG_RESET:
       filter_storage.Reset(0);
-      output_params_storage.Reset();
       return 0;
     case REG_FILTER_NUM_WORDS:
       filter_storage.Reset(rs1);
@@ -224,6 +223,9 @@ inline uint32_t SetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
       return 0;
     case REG_SET_INPUT:
       input_storage.Store(rs1);
+      return 0;
+    case REG_OUTPUT_PARAMS_RESET:
+      output_params_storage.Reset();
       return 0;
     case REG_OUTPUT_OFFSET:
       reg_output_offset = rs1;
@@ -291,8 +293,6 @@ inline uint32_t GetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
       assert(macc_valid);
       macc_valid = false;
       return Macc();
-    case REG_POST_PROCESS:
-      return PostProcess(rs1);
     case REG_VERIFY:
       return reg_verify + 1;
     default:
@@ -307,6 +307,8 @@ inline uint32_t CalculateMathOperation(int funct7, uint32_t rs1, uint32_t rs2) {
       return SaturatingRoundingDoubleHighMul(rs1, rs2);
     case MATH_RDBPOT:
       return RoundingDivideByPOT(rs1, rs2);
+    case MATH_POST_PROCESS:
+      return PostProcess(rs1);
     default:
       return 0;
   }

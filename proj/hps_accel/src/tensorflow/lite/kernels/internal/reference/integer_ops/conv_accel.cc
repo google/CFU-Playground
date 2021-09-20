@@ -75,6 +75,10 @@ void ConvPerChannel4x4(const ConvParams& params,
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
 
+  hps_accel::LoadInputOffset(input_offset);
+  hps_accel::SetOutputOffsets(output_offset, output_activation_min,
+                              output_activation_max);
+
   // Work out maximum output channels we can do per filter load
   const int filter_words_per_output_channel =
       input_depth * filter_height * filter_width / 4;
@@ -85,16 +89,9 @@ void ConvPerChannel4x4(const ConvParams& params,
        out_channel_offset += max_output_channels_per_load) {
     const int output_channels = std::min(output_depth - out_channel_offset,
                                          max_output_channels_per_load);
-
-    // Set up accelerator
-    hps_accel::Reset();
-    hps_accel::LoadInputOffset(input_offset);
-    hps_accel::SetOutputOffsets(output_offset, output_activation_min,
-                                output_activation_max);
     hps_accel::LoadFilter(
         input_depth, output_channels,
         filter_data + Offset(filter_shape, out_channel_offset, 0, 0, 0));
-
     hps_accel::LoadOutputParams(out_channel_offset, output_channels, bias_data,
                                 output_multiplier, output_shift);
 

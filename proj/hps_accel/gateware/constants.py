@@ -40,7 +40,9 @@ class Constants:
     # in the register description.
 
     # A write of any value to REG_RESET causes the accelerator gateware to be
-    # reset and lose all state
+    # reset and lose all state.
+    #
+    # Not currently implemented
     REG_RESET = 0
 
     # Number of 32 bit filter words
@@ -86,14 +88,12 @@ class Constants:
     REG_MACC_OUT = 0x30
 
     # Set bias, multiplier and shift.
+    # Write to OUTPUT_PARAMS_RESET to reset the store.
     # Setting shift causes the three values to be added to the store
-    REG_OUTPUT_BIAS = 0x40
-    REG_OUTPUT_MULTIPLIER = 0x41
-    REG_OUTPUT_SHIFT = 0x42
-
-    # Post processes an output. Acc value goes in in0, and result
-    # is the post processed value
-    REG_POST_PROCESS = 0x43
+    REG_OUTPUT_PARAMS_RESET = 0x40
+    REG_OUTPUT_BIAS = 0x41
+    REG_OUTPUT_MULTIPLIER = 0x42
+    REG_OUTPUT_SHIFT = 0x43
 
     # Registers for gateware verification
     # Any value n set into this register will be read back as n+1
@@ -106,6 +106,7 @@ class Constants:
     # Math function codes
     MATH_SRDHM = 0x01  # SaturatingRoundingDoubleHighMul
     MATH_RDBPOT = 0x02  # RoundingDivideByPOT
+    MATH_POST_PROCESS = 0x03 # Post Process accumulator
 
     ###########################################################################
     # Size limits

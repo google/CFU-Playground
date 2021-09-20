@@ -127,6 +127,7 @@ void SetOutputOffsets(int32_t output_offset, int32_t output_activation_min,
 void LoadOutputParams(size_t offset, size_t count, const int32_t* bias_data,
                       const int32_t* output_multiplier,
                       const int32_t* output_shift) {
+  cfu_set(REG_OUTPUT_PARAMS_RESET, 1);
   for (size_t i = offset; i < offset + count; i++) {
     cfu_set(REG_OUTPUT_BIAS, bias_data[i]);
     cfu_set(REG_OUTPUT_MULTIPLIER, output_multiplier[i]);

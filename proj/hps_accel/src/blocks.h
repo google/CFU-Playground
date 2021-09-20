@@ -107,7 +107,7 @@ void LoadOutputParams(size_t offset, size_t count, const int32_t* bias_data,
 
 // Do the actual post-processing
 inline int32_t PostProcess(int32_t acc) {
-  return cfu_op1(REG_POST_PROCESS, acc, 0);
+  return cfu_op2(MATH_POST_PROCESS, acc, 0);
 }
 
 // Math functions
