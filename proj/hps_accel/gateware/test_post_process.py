@@ -18,7 +18,7 @@ import random
 from nmigen.sim import Delay
 from nmigen_cfu import TestBase
 
-from .post_process import OutputParamsStorage
+from .post_process import OutputParamsStorage, SaturateActivationPipeline
 
 SETTLE_DELAY = Delay(0.25)
 
@@ -97,3 +97,37 @@ class OutputParamsStorageTest(TestBase):
             for n in range(120, 128):
                 yield from self.check_read(n)
         self.run_sim(process, False)
+
+
+
+class SaturateActivationPipelineTest(TestBase):
+    def create_dut(self):
+        return SaturateActivationPipeline        ()
+
+    def test_it_works(self):
+        """Show store can be reset and reused."""
+        TEST_CASES = [
+            # (offset, min, max, input), expected result
+            ((0, 0, 0, 0), 0),
+            ((-128, -128, 127, 0), -128),
+            ((-128, -128, 127, 10), -118),
+            ((-128, -128, 127, -50), -128),
+            ((-128, -128, 127, 500), 127),
+        ]
+
+        def process():
+            yield self.dut.output.ready.eq(1)
+            for (offset, min, max, input_), expected in TEST_CASES:
+                yield self.dut.offset.eq(offset)
+                yield self.dut.min.eq(min)
+                yield self.dut.max.eq(max)
+                yield
+                yield self.dut.input.payload.eq(input_)
+                yield self.dut.input.valid.eq(1)
+                yield
+                yield self.dut.input.valid.eq(0)
+                while not (yield self.dut.output.valid):
+                    yield
+                self.assertEqual((yield self.dut.output.payload), expected)
+        self.run_sim(process, False)
+

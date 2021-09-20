@@ -16,6 +16,7 @@
 from nmigen_cfu.util import SimpleElaboratable
 from nmigen import signed, unsigned, Signal, Record, Memory
 
+from .stream import BinaryPipelineActor
 from .constants import Constants
 
 OUTPUT_PARAMS = [
@@ -79,4 +80,44 @@ class OutputParamsStorage(SimpleElaboratable):
             m.d.sync += write_index.eq(0)
             m.d.sync += read_index.eq(0)
         
+class SaturateActivationPipeline(BinaryPipelineActor):
+    """Fixes final result into signed(8) range.
+    
+    Attributes
+    ----------
+
+    input: Endpoint(signed(32)), in
+      The input accumulator value.
+    output: Endpoint(signed(8)), out
+      The output 8 bit number.
+
+    offset: signed(16), in
+      The output_offset
+    max: signed(8), in
+      Maximum allowed value
+    min: signed(8), in
+      Minimum allowed input value
+    """
+
+    PIPELINE_CYCLES = 1
+
+    def __init__(self):
+        super().__init__(signed(16), signed(8), self.PIPELINE_CYCLES)
+        self.offset = Signal(signed(16))
+        self.max = Signal(signed(8))
+        self.min = Signal(signed(8))
+
+    def transform(self, m, in_value, out_value):
+        # Cycle 0: add offset, saturate, register result into out_value
+        with_offset = Signal(signed(32))
+        m.d.comb += with_offset.eq(in_value + self.offset)
+        with m.If(with_offset > self.max):
+            m.d.sync += out_value.eq(self.max)
+        with m.Elif(with_offset < self.min):
+            m.d.sync += out_value.eq(self.min)
+        with m.Else():
+            m.d.sync += out_value.eq(with_offset)
+
+        
+
 
