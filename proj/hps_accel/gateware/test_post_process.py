@@ -18,7 +18,8 @@ import random
 from nmigen.sim import Delay
 from nmigen_cfu import TestBase
 
-from .post_process import OutputParamsStorage, SaturateActivationPipeline
+from .post_process import (OutputParamsStorage, SaturateActivationPipeline,
+                           PostProcessPipeline)
 
 SETTLE_DELAY = Delay(0.25)
 
@@ -99,10 +100,11 @@ class OutputParamsStorageTest(TestBase):
         self.run_sim(process, False)
 
 
-
 class SaturateActivationPipelineTest(TestBase):
+    """Tests the SaturateActivationPipeline"""
+
     def create_dut(self):
-        return SaturateActivationPipeline        ()
+        return SaturateActivationPipeline()
 
     def test_it_works(self):
         """Show store can be reset and reused."""
@@ -131,3 +133,41 @@ class SaturateActivationPipelineTest(TestBase):
                 self.assertEqual((yield self.dut.output.payload), expected)
         self.run_sim(process, False)
 
+
+class PostProcessPipelineTest(TestBase):
+    """Tests the entire post process pipeline"""
+
+    def create_dut(self):
+        return PostProcessPipeline()
+
+    def test_it_works(self):
+        TEST_CASES = [
+            # ((acc_in,bias,multiplier,shift), expected)
+            ((-15150, 2598, 1170510491, 8), -128),
+            ((-432, 2193, 2082838296, 9), -125),
+            ((37233, -18945, 1368877765, 9), -105),
+            ((-294, 1851, 1661334583, 8), -123),
+            ((3908, 1994, 1384690194, 8), -113),
+            ((153, 1467, 1177612918, 8), -125),
+        ]
+
+        def process():
+            yield self.dut.output.ready.eq(1)
+            yield self.dut.offset.eq(-128)
+            yield self.dut.activation_min.eq(-128)
+            yield self.dut.activation_max.eq(127)
+            yield
+            for (acc_in, bias, multiplier, shift), expected in TEST_CASES:
+                self.assertEqual((yield self.dut.read_strobe), 0)
+                yield self.dut.read_data.bias.eq(bias)
+                yield self.dut.read_data.multiplier.eq(multiplier)
+                yield self.dut.read_data.shift.eq(shift)
+                yield self.dut.input.payload.eq(acc_in)
+                yield self.dut.input.valid.eq(1)
+                yield
+                self.assertEqual((yield self.dut.read_strobe), 1)
+                yield self.dut.input.valid.eq(0)
+                while not (yield self.dut.output.valid):
+                    yield
+                self.assertEqual((yield self.dut.output.payload), expected)
+        self.run_sim(process, False)
