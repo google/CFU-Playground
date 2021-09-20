@@ -28,7 +28,7 @@ PDC="$2"
 RESULT_FASM="$3"
 SEED_COUNT="$4"
 
-4324declare -a CHILD_PIDS
+declare -a CHILD_PIDS
 declare -A PID_TO_SEED
 
 # Launch a number of nextpnrs

@@ -153,7 +153,7 @@ $(SOFTWARE_ELF): $(OBJECTS) $(LDSCRIPTS)
 	$(QUIET) $(OBJDUMP) -d -S -l $(SOFTWARE_ELF) | $(FIX_CFU_DIS) > $(SOFTWARE_ELF).dis_with_source
 	$(QUIET) $(OBJDUMP) -d $(SOFTWARE_ELF) | $(FIX_CFU_DIS) > $(SOFTWARE_ELF).dis
 	$(QUIET) echo "  OBJDUMP  $@.sym"
-	$(QUIET) $(OBJDUMP) -s $(SOFTWARE_ELF) > $(SOFTWARE_ELF).sym
+	$(QUIET) $(OBJDUMP) -t $(SOFTWARE_ELF) > $(SOFTWARE_ELF).sym
 
 %.h : %.tflite
 	$(QUIET) echo "  XXD  $(notdir $<) $(notdir $@)"

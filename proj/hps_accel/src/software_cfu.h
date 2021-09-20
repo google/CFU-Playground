@@ -59,7 +59,11 @@ inline int32_t Macc() {
 // Very simple storage class.
 // TODO: wrap around at calculated point instead of at end of data
 // TODO: allow input data to be double-buffered
+#ifdef PLATFORM_hps
+#define MAX_STORAGE_WORDS 512
+#else
 #define MAX_STORAGE_WORDS 16384
+#endif
 class Storage {
  public:
   void Reset(size_t num_words) {

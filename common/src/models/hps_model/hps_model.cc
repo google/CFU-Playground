@@ -20,21 +20,14 @@
 #include "models/hps_model/cat_picture.h"
 #include "models/hps_model/diagram.h"
 #include "models/hps_model/hps_model_2021_07_05_tiled.h"
-#include "models/hps_model/hps_model_2021_07_05_untiled.h"
 #include "tflite.h"
 
 namespace {
 
 // Initialize with the tiled version
-void init_tiled(void) {
+void init(void) {
   puts("Loading Tiled HPS model");
   tflite_load_model(hps_model_2021_07_05_tiled, hps_model_2021_07_05_tiled_len);
-}
-
-// Initialize with the untiled version
-void init_untiled(void) {
-  puts("Loading Untiled HPS model");
-  tflite_load_model(hps_model_2021_07_05_untiled, hps_model_2021_07_05_untiled_len);
 }
 
 // Run classification and interpret results
@@ -107,8 +100,6 @@ struct Menu MENU = {
     "Tests for HPS model",
     "hps",
     {
-        MENU_ITEM('t', "reinitialize with Tiled model", init_tiled),
-        MENU_ITEM('u', "reinitialize with Untiled model", init_untiled),
         MENU_ITEM('c', "Cat picture input", do_classify_cat),
         MENU_ITEM('d', "Diagram input", do_classify_diagram),
         MENU_ITEM('z', "Zeros input", do_classify_zeros),
@@ -122,6 +113,6 @@ struct Menu MENU = {
 
 // For integration into menu system
 extern "C" void hps_model_menu() {
-  init_tiled();
+  init();
   menu_run(&MENU);
 }
