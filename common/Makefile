@@ -150,8 +150,8 @@ $(SOFTWARE_ELF): $(OBJECTS) $(LDSCRIPTS)
 	$(QUIET) echo "  LD       $@"
 	$(QUIET) $(CXX) $(OBJECTS) $(LFLAGS) -o $@
 	$(QUIET) echo "  OBJDUMP  $@.dis"
-	$(QUIET) $(OBJDUMP) -d -S -l $(SOFTWARE_ELF) | $(FIX_CFU_DIS) > $(SOFTWARE_ELF).dis_with_source
-	$(QUIET) $(OBJDUMP) -d $(SOFTWARE_ELF) | $(FIX_CFU_DIS) > $(SOFTWARE_ELF).dis
+	$(QUIET) $(OBJDUMP) -d -S -l $(SOFTWARE_ELF) | c++filt | $(FIX_CFU_DIS) > $(SOFTWARE_ELF).dis_with_source
+	$(QUIET) $(OBJDUMP) -d $(SOFTWARE_ELF) | c++filt | $(FIX_CFU_DIS) > $(SOFTWARE_ELF).dis
 	$(QUIET) echo "  OBJDUMP  $@.sym"
 	$(QUIET) $(OBJDUMP) -s $(SOFTWARE_ELF) > $(SOFTWARE_ELF).sym
 
