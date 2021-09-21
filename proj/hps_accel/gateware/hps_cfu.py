@@ -21,7 +21,7 @@ from .filter_store import FilterStore
 from .get import GetInstruction
 from .input_store import InputStore
 from .macc import MultiplyAccumulate
-from .post_process import PostProcessInstruction
+from .post_process import OutputParamsStorage, PostProcessInstruction
 from .set import SetInstruction
 from .stream import BinaryCombinatorialActor, ConcatenatingBuffer, connect
 
@@ -143,6 +143,30 @@ class HpsCfu(Cfu):
             m.d.comb += get.input_streams[reg].payload.eq(
                 filter_store.output[n].payload)
 
+    def connect_op_store(self, m, op_store, set):
+        m.d.comb += [
+            op_store.write_data.bias.eq(set.values[Constants.REG_OUTPUT_BIAS]),
+            op_store.write_data.multiplier.eq(
+                set.values[Constants.REG_OUTPUT_MULTIPLIER]),
+            op_store.write_data.shift.eq(
+                -set.values[Constants.REG_OUTPUT_SHIFT]),
+        ]
+        # write strobe fires one cycle before new value is ready to be
+        # read, so we use m.d.sync to delay write_enable by one cycle
+        m.d.sync += op_store.write_enable.eq(
+            set.write_strobes[Constants.REG_OUTPUT_SHIFT])
+        m.d.comb += op_store.reset.eq(
+            set.write_strobes[Constants.REG_OUTPUT_PARAMS_RESET])
+
+    def connect_post_process(self, m, pp, set, op_store):
+        m.d.comb += [
+            pp.offset.eq(set.values[Constants.REG_OUTPUT_OFFSET]),
+            pp.activation_min.eq(set.values[Constants.REG_OUTPUT_MIN]),
+            pp.activation_max.eq(set.values[Constants.REG_OUTPUT_MAX]),
+            pp.read_data.eq(op_store.read_data),
+            op_store.read_enable.eq(pp.read_enable),
+        ]
+
     def elab_instructions(self, m):
         m.submodules['set'] = set = SetInstruction()
         m.submodules['get'] = get = GetInstruction()
@@ -160,7 +184,11 @@ class HpsCfu(Cfu):
         m.d.comb += macc.enable.eq(1)
         self.connect_macc(m, set, input_store, filter_store, macc, get)
 
+        m.submodules['op_store'] = op_store = OutputParamsStorage()
+        self.connect_op_store(m, op_store, set)
         m.submodules['pp'] = pp = PostProcessInstruction()
+        self.connect_post_process(m, pp, set, op_store)
+
         m.submodules['ping'] = ping = PingInstruction()
         return {
             Constants.INS_GET: get,

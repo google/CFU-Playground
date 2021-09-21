@@ -35,12 +35,13 @@ class PingInstructionTest(InstructionTestBase):
 
 GET = Constants.INS_GET
 SET = Constants.INS_SET
-POST_PROCESS = Constants.INS_POST_PROCESS
+PP = Constants.INS_POST_PROCESS
 PING = Constants.INS_PING
 VERIFY = Constants.REG_VERIFY
 
 
 class HpsCfuTest(CfuTestBase):
+    """Tests the whole CFU"""
 
     def create_dut(self):
         return make_cfu(filter_store_depth=100)
@@ -154,17 +155,77 @@ class HpsCfuTest(CfuTestBase):
         self.run_ops(op_generator(), False)
 
     def test_PP_SRDHM(self):
-        """Tests POST_PROCESS srdhm function"""
+        """Tests PP srdhm function"""
         def op_generator():
-            yield ((POST_PROCESS, Constants.PP_SRDHM, -111628, 1342177280), -69767)
-            yield ((POST_PROCESS, Constants.PP_SRDHM, -96429, 1975242245), -88695)
-            yield ((POST_PROCESS, Constants.PP_SRDHM, 87873, 1815044516), 74270)
+            yield ((PP, Constants.PP_SRDHM, -111628, 1342177280), -69767)
+            yield ((PP, Constants.PP_SRDHM, -96429, 1975242245), -88695)
+            yield ((PP, Constants.PP_SRDHM, 87873, 1815044516), 74270)
         self.run_ops(op_generator(), False)
 
     def test_PP_RDBPOT(self):
-        """Tests POST_PROCESS rdbpot function"""
+        """Tests PP rdbpot function"""
         def op_generator():
-            yield ((POST_PROCESS, Constants.PP_RDBPOT, -1714553096, -7), -13394946)
-            yield ((POST_PROCESS, Constants.PP_RDBPOT, -327118692, -3), -40889837)
-            yield ((POST_PROCESS, Constants.PP_RDBPOT, 584167932, -6), 9127624)
+            yield ((PP, Constants.PP_RDBPOT, -1714553096, -7), -13394946)
+            yield ((PP, Constants.PP_RDBPOT, -327118692, -3), -40889837)
+            yield ((PP, Constants.PP_RDBPOT, 584167932, -6), 9127624)
+        self.run_ops(op_generator(), False)
+
+    def set_output_params_store(self, params):
+        for bias, multiplier, shift in params:
+            yield ((SET, Constants.REG_OUTPUT_BIAS, bias, 0), 0)
+            yield ((SET,
+                    Constants.REG_OUTPUT_MULTIPLIER, multiplier, 0), 0)
+            yield ((SET, Constants.REG_OUTPUT_SHIFT, shift, 0), 0)
+
+    def check_post_process(self, data):
+        for inp, expected in data:
+            yield((PP, Constants.PP_POST_PROCESS, inp, 0), expected)
+
+    def test_PP_POST_PROCESS(self):
+        """Tests PP post process function"""
+        def op_generator():
+            # Set offset and activation min/max
+            yield ((SET, Constants.REG_OUTPUT_OFFSET, -128, 0), 0)
+            yield ((SET, Constants.REG_OUTPUT_MIN, -128, 0), 0)
+            yield ((SET, Constants.REG_OUTPUT_MAX, 127, 0), 0)
+
+            # Set Bias, Multipliers and shifts into store
+            yield from self.set_output_params_store([
+                (2598, 1170510491, -8),
+                (2193, 2082838296, -9),
+                (-18945, 1368877765, -9),
+                (1851, 1661334583, -8),
+            ])
+
+            # Check some input and output values - should use all params twice
+            yield from self.check_post_process([
+                (-15150, -128),
+                (-432, -125),
+                (37233, -105),
+                (-294, -123),
+                (-14403, -128),
+                (95, -124),
+                (37889, -104),
+                (-566, -124),
+            ])
+
+            # Reset store and do this again
+            yield ((SET, Constants.REG_OUTPUT_PARAMS_RESET, 0, 0), 0)
+            yield from self.set_output_params_store([
+                (1994, 1384690194, -8),
+                (1467, 1177612918, -8),
+                (1198, 1352351843, -8),
+                (-3353, 1708212360, -9),
+            ])
+            yield from self.check_post_process([
+                (3908, -113),
+                (153, -125),
+                (2981, -118),
+                (-9758, -128),
+                (3721, -114),
+                (-145, -125),
+                (2912, -118),
+                (-9791, -128),
+            ])
+
         self.run_ops(op_generator(), False)

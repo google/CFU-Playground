@@ -127,7 +127,6 @@ class RoundingDivideByPowerOfTwo(BinaryPipelineActor):
                     m.d.comb += threshold.eq((mask >> 1) +
                                              Mux(dividend < 0, 1, 0))
                     m.d.comb += quotient.eq(dividend >> n)
-
         m.d.sync += result.eq(quotient + Mux(remainder > threshold, 1, 0))
 
         # Cycle 2: send output
@@ -173,8 +172,7 @@ class OutputParamsStorage(SimpleElaboratable):
     def elab(self, m):
         memory = Memory(
             depth=Constants.MAX_CHANNELS,
-            width=len(
-                self.read_data))
+            width=len(self.read_data))
         m.submodules.write_port = write_port = memory.write_port()
         m.submodules.read_port = read_port = memory.read_port(
             transparent=False)
@@ -281,7 +279,7 @@ class PostProcessPipeline(SimpleElaboratable):
 
     read_data: Record(OUTPUT_PARAMS), in
       Data read from OutputStorageParams
-    read_strobe: Signal(), out
+    read_enable: Signal(), out
       Tells OutputStorageParams to read next
     """
 
@@ -298,7 +296,7 @@ class PostProcessPipeline(SimpleElaboratable):
         self.activation_min = Signal(signed(8))
         self.activation_max = Signal(signed(8))
         self.read_data = Record(OUTPUT_PARAMS)
-        self.read_strobe = Signal()
+        self.read_enable = Signal()
 
     def elab(self, m: Module):
         # Input always ready
@@ -315,7 +313,7 @@ class PostProcessPipeline(SimpleElaboratable):
             srdhm.input.valid.eq(self.input.valid),
             srdhm.input.payload.a.eq(self.input.payload + self.read_data.bias),
             srdhm.input.payload.b.eq(self.read_data.multiplier),
-            self.read_strobe.eq(self.input.valid),
+            self.read_enable.eq(self.input.valid),
         ]
 
         # Connect the output of srdhm to rdbpot, along with the shift
@@ -345,14 +343,43 @@ class PostProcessInstruction(InstructionBase):
     Attributes
     ----------
 
-    None additional.
+    offset: signed(9), in
+       The output offset
+    activation_min: signed(8), out
+        The minimum output value
+    activation_max: signed(8), out
+        The maximum output value
+
+    read_data: Record(OUTPUT_PARAMS), in
+      Data read from OutputStorageParams
+    read_enable: Signal(), out
+      Tells OutputStorageParams to read next
     """
+
+    def __init__(self):
+        super().__init__()
+        self.offset = Signal(signed(9))
+        self.activation_min = Signal(signed(8))
+        self.activation_max = Signal(signed(8))
+        self.read_data = Record(OUTPUT_PARAMS)
+        self.read_enable = Signal()
 
     def elab(self, m: Module):
         m.submodules.srdhm = srdhm = SaturatingRoundingDoubleHighMul()
         m.d.comb += srdhm.output.ready.eq(1)
         m.submodules.rdbpot = rdbpot = RoundingDivideByPowerOfTwo()
         m.d.comb += rdbpot.output.ready.eq(1)
+
+        # Connect the post process pipeline
+        m.submodules.ppp = ppp = PostProcessPipeline()
+        m.d.comb += ppp.output.ready.eq(1)
+        m.d.comb += [
+            ppp.offset.eq(self.offset),
+            ppp.activation_min.eq(self.activation_min),
+            ppp.activation_max.eq(self.activation_max),
+            ppp.read_data.eq(self.read_data),
+            self.read_enable.eq(ppp.read_enable),
+        ]
 
         m.d.sync += self.done.eq(0)
         with m.FSM(reset="WAIT_START"):
@@ -373,6 +400,12 @@ class PostProcessInstruction(InstructionBase):
                                 rdbpot.input.valid.eq(1),
                             ]
                             m.next = "RDBPOT_RUN"
+                        with m.Case(Constants.PP_POST_PROCESS):
+                            m.d.comb += [
+                                ppp.input.payload.eq(self.in0s),
+                                ppp.input.valid.eq(1),
+                            ]
+                            m.next = "POST_PROCESS_RUN"
                         with m.Default():
                             m.d.sync += self.done.eq(1)
             with m.State("SRDHM_RUN"):
@@ -383,5 +416,10 @@ class PostProcessInstruction(InstructionBase):
             with m.State("RDBPOT_RUN"):
                 with m.If(rdbpot.output.valid):
                     m.d.sync += self.output.eq(rdbpot.output.payload)
+                    m.d.sync += self.done.eq(1)
+                    m.next = "WAIT_START"
+            with m.State("POST_PROCESS_RUN"):
+                with m.If(ppp.output.valid):
+                    m.d.sync += self.output.eq(ppp.output.payload)
                     m.d.sync += self.done.eq(1)
                     m.next = "WAIT_START"

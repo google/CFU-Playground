@@ -425,14 +425,14 @@ class PostProcessPipelineTest(TestBase):
             yield self.dut.activation_max.eq(127)
             yield
             for (acc_in, bias, multiplier, shift), expected in TEST_CASES:
-                self.assertEqual((yield self.dut.read_strobe), 0)
+                self.assertEqual((yield self.dut.read_enable), 0)
                 yield self.dut.read_data.bias.eq(bias)
                 yield self.dut.read_data.multiplier.eq(multiplier)
                 yield self.dut.read_data.shift.eq(shift)
                 yield self.dut.input.payload.eq(acc_in)
                 yield self.dut.input.valid.eq(1)
                 yield
-                self.assertEqual((yield self.dut.read_strobe), 1)
+                self.assertEqual((yield self.dut.read_enable), 1)
                 yield self.dut.input.valid.eq(0)
                 while not (yield self.dut.output.valid):
                     yield

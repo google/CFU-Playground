@@ -83,12 +83,22 @@ class SetInstruction(InstructionBase):
         Constants.REG_INPUT_OFFSET,
         Constants.REG_SET_FILTER,
         Constants.REG_SET_INPUT,
+        Constants.REG_OUTPUT_OFFSET,
+        Constants.REG_OUTPUT_MIN,
+        Constants.REG_OUTPUT_MAX,
         Constants.REG_FILTER_INPUT_NEXT,
-        Constants.REG_VERIFY]
+        Constants.REG_VERIFY,
+        Constants.REG_OUTPUT_PARAMS_RESET,
+        Constants.REG_OUTPUT_BIAS,
+        Constants.REG_OUTPUT_MULTIPLIER,
+        Constants.REG_OUTPUT_SHIFT,
+    ]
 
     def __init__(self):
         super().__init__()
-        self.output_streams = {i: Endpoint(unsigned(32)) for i in self.REGISTER_IDS}
+        self.output_streams = {
+            i: Endpoint(
+                unsigned(32)) for i in self.REGISTER_IDS}
         self.values = {i: Signal(32) for i in self.REGISTER_IDS}
         self.write_strobes = {i: Signal(1) for i in self.REGISTER_IDS}
 
