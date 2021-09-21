@@ -1,5 +1,6 @@
 name: oxide_fmax
 on:
+  push:
   workflow_dispatch:
   schedule:
     - cron: "23 12 * * *"
