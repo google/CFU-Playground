@@ -1,5 +1,6 @@
 name: oxide_fmax
 on:
+  workflow_dispatch:
   schedule:
     - cron: "23 12 * * *"
 jobs:
@@ -16,12 +17,12 @@ jobs:
       - run: which pip3 && which python3 && which pip
       - run: riscv64-unknown-elf-gcc --version
       - run: bash scripts/install_oxide 
-      - run: pwd && source environment && cd proj/proj_template_v && ulimit -S -t 900 && ulimit -H -t 900 && time make PLATFORM=hps EXTRA_LITEX_ARGS="--cpu-variant=full     --nextpnr-seed=1"   bitstream
-      - run: pwd && source environment && cd proj/proj_template_v && ulimit -S -t 900 && ulimit -H -t 900 && time make PLATFORM=hps EXTRA_LITEX_ARGS="--cpu-variant=full     --nextpnr-seed=22"  bitstream
-      - run: pwd && source environment && cd proj/proj_template_v && ulimit -S -t 900 && ulimit -H -t 900 && time make PLATFORM=hps EXTRA_LITEX_ARGS="--cpu-variant=full     --nextpnr-seed=333" bitstream
-      - run: pwd && source environment && cd proj/proj_template_v && ulimit -S -t 900 && ulimit -H -t 900 && time make PLATFORM=hps EXTRA_LITEX_ARGS="--cpu-variant=slim+cfu --nextpnr-seed=1"   bitstream
-      - run: pwd && source environment && cd proj/proj_template_v && ulimit -S -t 900 && ulimit -H -t 900 && time make PLATFORM=hps EXTRA_LITEX_ARGS="--cpu-variant=slim+cfu --nextpnr-seed=22"  bitstream
-      - run: pwd && source environment && cd proj/proj_template_v && ulimit -S -t 900 && ulimit -H -t 900 && time make PLATFORM=hps EXTRA_LITEX_ARGS="--cpu-variant=slim+cfu --nextpnr-seed=333" bitstream
-      - run: pwd && source environment && cd proj/hps_accel       && ulimit -S -t 900 && ulimit -H -t 900 && time make PLATFORM=hps EXTRA_LITEX_ARGS="--cpu-variant=slim+cfu --nextpnr-seed=1"   bitstream
-      - run: pwd && source environment && cd proj/hps_accel       && ulimit -S -t 900 && ulimit -H -t 900 && time make PLATFORM=hps EXTRA_LITEX_ARGS="--cpu-variant=slim+cfu --nextpnr-seed=22"  bitstream
-      - run: pwd && source environment && cd proj/hps_accel       && ulimit -S -t 900 && ulimit -H -t 900 && time make PLATFORM=hps EXTRA_LITEX_ARGS="--cpu-variant=slim+cfu --nextpnr-seed=333" bitstream
+      - run: pwd && source environment && cd proj/proj_template_v && ulimit -S -t 900 && ulimit -H -t 900 && time make PLATFORM=hps EXTRA_LITEX_ARGS="--cpu-variant=full     --nextpnr-seed=1"   bitstream || true
+      - run: pwd && source environment && cd proj/proj_template_v && ulimit -S -t 900 && ulimit -H -t 900 && time make PLATFORM=hps EXTRA_LITEX_ARGS="--cpu-variant=full     --nextpnr-seed=22"  bitstream || true
+      - run: pwd && source environment && cd proj/proj_template_v && ulimit -S -t 900 && ulimit -H -t 900 && time make PLATFORM=hps EXTRA_LITEX_ARGS="--cpu-variant=full     --nextpnr-seed=333" bitstream || true
+      - run: pwd && source environment && cd proj/proj_template_v && ulimit -S -t 900 && ulimit -H -t 900 && time make PLATFORM=hps EXTRA_LITEX_ARGS="--cpu-variant=slim+cfu --nextpnr-seed=1"   bitstream || true
+      - run: pwd && source environment && cd proj/proj_template_v && ulimit -S -t 900 && ulimit -H -t 900 && time make PLATFORM=hps EXTRA_LITEX_ARGS="--cpu-variant=slim+cfu --nextpnr-seed=22"  bitstream || true
+      - run: pwd && source environment && cd proj/proj_template_v && ulimit -S -t 900 && ulimit -H -t 900 && time make PLATFORM=hps EXTRA_LITEX_ARGS="--cpu-variant=slim+cfu --nextpnr-seed=333" bitstream || true
+      - run: pwd && source environment && cd proj/hps_accel       && ulimit -S -t 900 && ulimit -H -t 900 && time make PLATFORM=hps EXTRA_LITEX_ARGS="--cpu-variant=slim+cfu --nextpnr-seed=1"   bitstream || true
+      - run: pwd && source environment && cd proj/hps_accel       && ulimit -S -t 900 && ulimit -H -t 900 && time make PLATFORM=hps EXTRA_LITEX_ARGS="--cpu-variant=slim+cfu --nextpnr-seed=22"  bitstream || true
+      - run: pwd && source environment && cd proj/hps_accel       && ulimit -S -t 900 && ulimit -H -t 900 && time make PLATFORM=hps EXTRA_LITEX_ARGS="--cpu-variant=slim+cfu --nextpnr-seed=333" bitstream || true
