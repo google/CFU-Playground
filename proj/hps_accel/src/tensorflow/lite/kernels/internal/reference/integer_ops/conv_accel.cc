@@ -18,6 +18,7 @@
 #include "tensorflow/lite/kernels/internal/reference/integer_ops/conv_accel.h"
 
 #include "blocks.h"
+#include "cfu.h"
 #include "gateware_constants.h"
 
 using hps_accel::multiply_accumulate;
@@ -60,9 +61,8 @@ void ConvPerChannel4x4(const ConvParams& params,
   const int input_depth = MatchingDim(input_shape, 3, filter_shape, 3);
   TFLITE_DCHECK(input_depth == 1 || input_depth % 4 == 0);
   const int output_depth = MatchingDim(filter_shape, 0, output_shape, 3);
-  if (bias_data) {
-    TFLITE_DCHECK_EQ(bias_shape.FlatSize(), output_depth);
-  }
+  TFLITE_DCHECK(bias_data);
+  TFLITE_DCHECK_EQ(bias_shape.FlatSize(), output_depth);
 
   // Check dimensions of the tensors.
   const int input_height = input_shape.Dims(1);
@@ -116,10 +116,8 @@ void ConvPerChannel4x4(const ConvParams& params,
             acc += multiply_accumulate();
           }
 
-          if (bias_data) {
-            acc += bias_data[out_channel];
-          }
-          acc = MultiplyByQuantizedMultiplier(
+          acc += bias_data[out_channel];
+          acc = hps_accel::MultiplyByQuantizedMultiplier(
               acc, output_multiplier[out_channel], output_shift[out_channel]);
           acc += output_offset;
           acc = std::max(acc, output_activation_min);

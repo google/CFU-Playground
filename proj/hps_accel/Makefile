@@ -50,7 +50,7 @@ DEFINES += INCLUDE_MODEL_HPS
 
 # How to respond to run and test
 RUN_MENU_ITEMS=1 1 c
-TEST_MENU_ITEMS=3 a
+TEST_MENU_ITEMS=3 q
 
 # Customise arguments to Litex:
 export EXTRA_LITEX_ARGS

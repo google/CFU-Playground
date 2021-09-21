@@ -169,3 +169,17 @@ void print_arithmetic_params(const char* op_name,
   print_shape(output_shape);
   printf("\n");
 }
+
+void print_int32_array(const int32_t* data, size_t count) {
+  // Print 8 numbers per line
+  for (size_t i = 0; i < count; i++) {
+    printf("%10ld, ", data[i]);
+    if (i % 8 == 7) {
+      printf("\n");
+    }
+  }
+  /// Final EOL, if needed
+  if ((count - 1) % 8 == 7) {
+    printf("\n");
+  }
+}

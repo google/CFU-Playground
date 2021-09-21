@@ -15,12 +15,45 @@ limitations under the License.
 #ifndef TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_CONV_H_
 #define TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_CONV_H_
 
+#include <limits>
+
 #include "playground_util/print_params.h"
 #include "tensorflow/lite/kernels/internal/common.h"
 #include "tensorflow/lite/kernels/internal/reference/integer_ops/conv_accel.h"
 
 namespace tflite {
 namespace reference_integer_ops {
+
+namespace {
+class CumulativeMinMax {
+ public:
+  CumulativeMinMax(const char* name)
+      : name_(name),
+        min_(std::numeric_limits<int32_t>::max()),
+        max_(std::numeric_limits<int32_t>::min()) {}
+
+  void update(const int32_t* data, size_t n) {
+    for (size_t i = 0; i < n; i++) {
+      if (data[i] < min_) {
+        min_ = data[i];
+      }
+      if (data[i] > max_) {
+        max_ = data[i];
+      }
+    }
+  }
+
+  void print() {
+    printf("%10s min: %10ld (0x%08lx) max: %10ld (0x%08lx)\n", name_, min_,
+           min_, max_, max_);
+  }
+
+ private:
+  const char* name_;
+  int32_t min_;
+  int32_t max_;
+};
+}  // namespace
 
 // Fixed-point per-channel-quantization convolution reference kernel.
 inline void ConvPerChannel(
@@ -32,6 +65,30 @@ inline void ConvPerChannel(
     int8_t* output_data) {
 #ifdef SHOW_CONV_PARAMS
   print_conv_params(params, input_shape, filter_shape, output_shape);
+
+// Uncomment to print values
+#if 0
+  printf("output_multiplier\n");
+  print_int32_array(output_multiplier, output_shape.Dims(3));
+  printf("output_shift\n");
+  print_int32_array(output_shift, output_shape.Dims(3));
+  printf("bias\n");
+  print_int32_array(bias_data, output_shape.Dims(3));
+#endif
+
+// Uncomment to show min/max values for each
+#if 0
+  static CumulativeMinMax multiplier_minmax("multiplier");
+  multiplier_minmax.update(output_multiplier, output_shape.Dims(3));
+  multiplier_minmax.print();
+  static CumulativeMinMax shift_minmax("shift");
+  shift_minmax.update(output_shift, output_shape.Dims(3));
+  shift_minmax.print();
+  static CumulativeMinMax bias_minmax("bias");
+  bias_minmax.update(bias_data, output_shape.Dims(3));
+  bias_minmax.print();
+#endif
+
 #endif
   // Get parameters.
   const int32_t input_offset = params.input_offset;  // r = s(q - Z)
@@ -72,7 +129,7 @@ inline void ConvPerChannel(
   if (params.padding_type == PaddingType::kValid &&
       (input_depth == 1 || input_depth % 4 == 0) && filter_width == 4 &&
       filter_height == 4 && dilation_width_factor == 1 &&
-      dilation_height_factor == 1 && batches == 1) {
+      dilation_height_factor == 1 && batches == 1 && bias_data != NULL) {
     return ConvPerChannel4x4(params, output_multiplier, output_shift,
                              input_shape, input_data, filter_shape, filter_data,
                              bias_shape, bias_data, output_shape, output_data);

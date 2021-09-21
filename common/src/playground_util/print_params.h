@@ -33,4 +33,6 @@ void print_arithmetic_params(const char* op_name,
                              const tflite::RuntimeShape& input2_shape,
                              const tflite::RuntimeShape& output_shape);
 
+void print_int32_array(const int32_t* data, size_t count);
+
 #endif  // _PRINT_PARAMS_H
