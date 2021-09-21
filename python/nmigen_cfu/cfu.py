@@ -161,7 +161,6 @@ class Cfu(SimpleElaboratable):
         input      [31:0]   cmd_payload_inputs_1,
         output              rsp_valid,
         input               rsp_ready,
-        output              rsp_payload_response_ok,
         output     [31:0]   rsp_payload_outputs_0,
         input               clk
         input               reset
@@ -176,7 +175,6 @@ class Cfu(SimpleElaboratable):
         self.cmd_in1 = Signal(32, name='cmd_payload_inputs_1')
         self.rsp_valid = Signal(name='rsp_valid')
         self.rsp_ready = Signal(name='rsp_ready')
-        self.rsp_ok = Signal(name='rsp_payload_response_ok')
         self.rsp_out = Signal(32, name='rsp_payload_outputs_0')
         self.reset = Signal(name='reset')
         self.ports = [
@@ -187,7 +185,6 @@ class Cfu(SimpleElaboratable):
             self.cmd_in1,
             self.rsp_valid,
             self.rsp_ready,
-            self.rsp_ok,
             self.rsp_out,
             self.reset
         ]
@@ -227,9 +224,6 @@ class Cfu(SimpleElaboratable):
         current_function_id = Signal(3)
         current_function_done = Signal()
         stored_output = Signal(32)
-
-        # Response is always OK.
-        m.d.comb += self.rsp_ok.eq(1)
 
         instructions = self.__build_instructions(m)
         instruction_outputs = Array(Signal(32) for _ in range(8))
@@ -328,8 +322,6 @@ class CfuTestBase(TestBase):
                 yield self.dut.rsp_ready.eq(0)
 
                 # Ensure no errors, and output as expected
-                ok = (yield self.dut.rsp_ok)
-                self.assertTrue(ok, f"op{n} response ok")
                 if expected is not None:
                     actual = (yield self.dut.rsp_out)
                     self.assertEqual(actual, expected & 0xffff_ffff,
