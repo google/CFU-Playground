@@ -13,6 +13,7 @@
 # limitations under the License.
 
 
+from nmigen.sim.core import Settle
 from nmigen_cfu import TestBase
 from nmigen_cfu.util import pack128
 
@@ -46,15 +47,15 @@ class FilterStoreTest(TestBase):
         yield self.dut.data_input.valid.eq(0)
 
     def read_out(self):
+        yield self.dut.data_output.ready.eq(1)
         for i in range(0, len(self.filter_values), 4):
-            yield self.dut.next.eq(1)
-            yield
-            yield self.dut.next.eq(0)
-            yield self.dut.data_output.ready.eq(1)
             while (yield self.dut.data_output.valid) != 1:
                 yield
             self.assertEqual((yield self.dut.data_output.payload),
                              pack128(*self.filter_values[i:i + 4]))
+            yield
+            yield Settle()
+        yield self.dut.data_output.ready.eq(0)
 
     def test_it(self):
         def process():
@@ -68,7 +69,6 @@ class FilterStoreTest(TestBase):
             yield from self.reset_and_fill()
             # Set up for streaming output. We will receive output every cycle.
             yield self.dut.data_output.ready.eq(1)
-            yield self.dut.next.eq(1)
             # Currently 1 cycle delay before streaming starts
             yield
             for i in range(0, len(self.filter_values), 4):
@@ -110,9 +110,6 @@ class FilterStoreTest(TestBase):
             yield from self.reset_and_fill()
             for i in range(0, len(self.filter_values), 4):
                 yield self.dut.data_output.ready.eq(0)
-                yield self.dut.next.eq(1)
-                yield
-                yield self.dut.next.eq(0)
                 # Delay before consuming each value
                 # (Delaying for an odd number of cycles is more likely to catch
                 # bugs, since the store contains an even number of elements)
@@ -157,9 +154,9 @@ class FilterStoreTest(TestBase):
         def process():
             yield from self.reset_and_fill()
             # Read past the first values
-            yield self.dut.next.eq(1)
+            yield self.dut.data_output.ready.eq(1)
             yield
-            yield self.dut.next.eq(0)
+            yield
             yield
             # Now reset and fill again from the start
             yield from self.reset_and_fill()
