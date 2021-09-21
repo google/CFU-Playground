@@ -1,5 +1,6 @@
 name: oxide_fmax
 on:
+  pull_request:
   push:
   workflow_dispatch:
   schedule:
