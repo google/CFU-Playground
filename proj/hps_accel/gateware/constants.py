@@ -28,7 +28,7 @@ class Constants:
     # Funct3 codes - used to route CFU to instructions
     INS_SET = 0
     INS_GET = 1
-    INS_MATH = 2
+    INS_POST_PROCESS = 2
     INS_PING = 7
 
     ###########################################################################
@@ -103,10 +103,10 @@ class Constants:
     REG_INVALID = 0x7f
 
     ###########################################################################
-    # Math function codes
-    MATH_SRDHM = 0x01  # SaturatingRoundingDoubleHighMul
-    MATH_RDBPOT = 0x02  # RoundingDivideByPOT
-    MATH_POST_PROCESS = 0x03 # Post Process accumulator
+    # Post Process Function codes
+    PP_SRDHM = 0x01  # SaturatingRoundingDoubleHighMul
+    PP_RDBPOT = 0x02  # RoundingDivideByPOT
+    PP_POST_PROCESS = 0x03 # Post Process accumulator
 
     ###########################################################################
     # Size limits

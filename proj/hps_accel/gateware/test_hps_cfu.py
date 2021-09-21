@@ -35,7 +35,7 @@ class PingInstructionTest(InstructionTestBase):
 
 GET = Constants.INS_GET
 SET = Constants.INS_SET
-MATH = Constants.INS_MATH
+POST_PROCESS = Constants.INS_POST_PROCESS
 PING = Constants.INS_PING
 VERIFY = Constants.REG_VERIFY
 
@@ -153,18 +153,18 @@ class HpsCfuTest(CfuTestBase):
                 yield ((GET, Constants.REG_FILTER_3, 0, 0), n + 3)
         self.run_ops(op_generator(), False)
 
-    def test_math_srdhm(self):
-        """Tests math srdhm function"""
+    def test_PP_SRDHM(self):
+        """Tests POST_PROCESS srdhm function"""
         def op_generator():
-            yield ((MATH, Constants.MATH_SRDHM, -111628, 1342177280), -69767)
-            yield ((MATH, Constants.MATH_SRDHM, -96429, 1975242245), -88695)
-            yield ((MATH, Constants.MATH_SRDHM, 87873, 1815044516), 74270)
+            yield ((POST_PROCESS, Constants.PP_SRDHM, -111628, 1342177280), -69767)
+            yield ((POST_PROCESS, Constants.PP_SRDHM, -96429, 1975242245), -88695)
+            yield ((POST_PROCESS, Constants.PP_SRDHM, 87873, 1815044516), 74270)
         self.run_ops(op_generator(), False)
 
-    def test_math_rdbpot(self):
-        """Tests math rdbpot function"""
+    def test_PP_RDBPOT(self):
+        """Tests POST_PROCESS rdbpot function"""
         def op_generator():
-            yield ((MATH, Constants.MATH_RDBPOT, -1714553096, -7), -13394946)
-            yield ((MATH, Constants.MATH_RDBPOT, -327118692, -3), -40889837)
-            yield ((MATH, Constants.MATH_RDBPOT, 584167932, -6), 9127624)
+            yield ((POST_PROCESS, Constants.PP_RDBPOT, -1714553096, -7), -13394946)
+            yield ((POST_PROCESS, Constants.PP_RDBPOT, -327118692, -3), -40889837)
+            yield ((POST_PROCESS, Constants.PP_RDBPOT, 584167932, -6), 9127624)
         self.run_ops(op_generator(), False)

@@ -301,13 +301,13 @@ inline uint32_t GetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
   }
 }
 
-inline uint32_t CalculateMathOperation(int funct7, uint32_t rs1, uint32_t rs2) {
+inline uint32_t CalculatePostProcessOperation(int funct7, uint32_t rs1, uint32_t rs2) {
   switch (funct7) {
-    case MATH_SRDHM:
+    case PP_SRDHM:
       return SaturatingRoundingDoubleHighMul(rs1, rs2);
-    case MATH_RDBPOT:
+    case PP_RDBPOT:
       return RoundingDivideByPOT(rs1, rs2);
-    case MATH_POST_PROCESS:
+    case PP_POST_PROCESS:
       return PostProcess(rs1);
     default:
       return 0;
@@ -331,8 +331,8 @@ inline uint32_t software_cfu(int funct3, int funct7, uint32_t rs1,
       return soft_cfu::SetRegister(funct7, rs1, rs2);
     case INS_GET:
       return soft_cfu::GetRegister(funct7, rs1, rs2);
-    case INS_MATH:
-      return soft_cfu::CalculateMathOperation(funct7, rs1, rs2);
+    case INS_POST_PROCESS:
+      return soft_cfu::CalculatePostProcessOperation(funct7, rs1, rs2);
     case INS_PING:
       return soft_cfu::Ping(rs1, rs2);
     default:

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-from nmigen_cfu.util import SimpleElaboratable
+from nmigen_cfu import SimpleElaboratable, InstructionBase
 from nmigen import signed, unsigned, Memory, Module, Mux, Record, Signal
 
 from .stream import BinaryPipelineActor
@@ -25,6 +25,7 @@ SRDHM_INPUT_LAYOUT = [
     ('a', signed(32)),
     ('b', signed(32)),
 ]
+
 
 class SaturatingRoundingDoubleHighMul(BinaryPipelineActor):
     """Performs an SRDHM operation.
@@ -85,6 +86,7 @@ RDBPOT_INPUT_LAYOUT = [
     ('shift', unsigned(4))
 ]
 
+
 class RoundingDivideByPowerOfTwo(BinaryPipelineActor):
     """Divides its input by a power of two, rounding appropriately.
 
@@ -130,6 +132,8 @@ class RoundingDivideByPowerOfTwo(BinaryPipelineActor):
 
         # Cycle 2: send output
         m.d.sync += out_value.eq(result)
+
+
 OUTPUT_PARAMS = [
     ('bias', signed(16)),
     ('multiplier', signed(32)),
@@ -333,3 +337,51 @@ class PostProcessPipeline(SimpleElaboratable):
         ]
         # Connect final state to output
         m.d.comb += connect(sap.output, self.output)
+
+
+class PostProcessInstruction(InstructionBase):
+    """An instruction used to perform post procesing tasks.
+
+    Attributes
+    ----------
+
+    None additional.
+    """
+
+    def elab(self, m: Module):
+        m.submodules.srdhm = srdhm = SaturatingRoundingDoubleHighMul()
+        m.d.comb += srdhm.output.ready.eq(1)
+        m.submodules.rdbpot = rdbpot = RoundingDivideByPowerOfTwo()
+        m.d.comb += rdbpot.output.ready.eq(1)
+
+        m.d.sync += self.done.eq(0)
+        with m.FSM(reset="WAIT_START"):
+            with m.State("WAIT_START"):
+                with m.If(self.start):
+                    with m.Switch(self.funct7):
+                        with m.Case(Constants.PP_SRDHM):
+                            m.d.comb += [
+                                srdhm.input.payload.a.eq(self.in0s),
+                                srdhm.input.payload.b.eq(self.in1s),
+                                srdhm.input.valid.eq(1),
+                            ]
+                            m.next = "SRDHM_RUN"
+                        with m.Case(Constants.PP_RDBPOT):
+                            m.d.comb += [
+                                rdbpot.input.payload.dividend.eq(self.in0s),
+                                rdbpot.input.payload.shift.eq(-self.in1s),
+                                rdbpot.input.valid.eq(1),
+                            ]
+                            m.next = "RDBPOT_RUN"
+                        with m.Default():
+                            m.d.sync += self.done.eq(1)
+            with m.State("SRDHM_RUN"):
+                with m.If(srdhm.output.valid):
+                    m.d.sync += self.output.eq(srdhm.output.payload)
+                    m.d.sync += self.done.eq(1)
+                    m.next = "WAIT_START"
+            with m.State("RDBPOT_RUN"):
+                with m.If(rdbpot.output.valid):
+                    m.d.sync += self.output.eq(rdbpot.output.payload)
+                    m.d.sync += self.done.eq(1)
+                    m.next = "WAIT_START"

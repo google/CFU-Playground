@@ -21,7 +21,7 @@ from .filter_store import FilterStore
 from .get import GetInstruction
 from .input_store import InputStore
 from .macc import MultiplyAccumulate
-from .math import MathInstruction
+from .post_process import PostProcessInstruction
 from .set import SetInstruction
 from .stream import BinaryCombinatorialActor, ConcatenatingBuffer, connect
 
@@ -125,7 +125,7 @@ class HpsCfu(Cfu):
         for n, reg in enumerate(INPUT_REGISTERS):
             m.d.comb += get.input_streams[reg].valid.eq(1)
             m.d.comb += get.input_streams[reg].payload.eq(
-                    input_store.data_output[n].payload)
+                input_store.data_output[n].payload)
 
     def connect_filter_store(self, m, set, get, filter_store):
         m.d.comb += connect(set.output_streams[Constants.REG_FILTER_NUM_WORDS],
@@ -141,7 +141,7 @@ class HpsCfu(Cfu):
         for n, reg in enumerate(FILTER_REGISTERS):
             m.d.comb += get.input_streams[reg].valid.eq(1)
             m.d.comb += get.input_streams[reg].payload.eq(
-                    filter_store.output[n].payload)
+                filter_store.output[n].payload)
 
     def elab_instructions(self, m):
         m.submodules['set'] = set = SetInstruction()
@@ -160,12 +160,12 @@ class HpsCfu(Cfu):
         m.d.comb += macc.enable.eq(1)
         self.connect_macc(m, set, input_store, filter_store, macc, get)
 
-        m.submodules['math'] = math = MathInstruction()
+        m.submodules['pp'] = pp = PostProcessInstruction()
         m.submodules['ping'] = ping = PingInstruction()
         return {
             Constants.INS_GET: get,
             Constants.INS_SET: set,
-            Constants.INS_MATH: math,
+            Constants.INS_POST_PROCESS: pp,
             Constants.INS_PING: ping,
         }
 

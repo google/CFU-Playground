@@ -107,7 +107,7 @@ void LoadOutputParams(size_t offset, size_t count, const int32_t* bias_data,
 
 // Do the actual post-processing
 inline int32_t PostProcess(int32_t acc) {
-  return cfu_op2(MATH_POST_PROCESS, acc, 0);
+  return cfu_op2(PP_POST_PROCESS, acc, 0);
 }
 
 // Math functions
@@ -119,8 +119,8 @@ inline int32_t PostProcess(int32_t acc) {
 // Main implementation for use in code
 inline int32_t MultiplyByQuantizedMultiplier(int32_t x, int32_t multiplier,
                                              int shift) {
-  int32_t product = cfu_op2(MATH_SRDHM, x, multiplier);
-  return cfu_op2(MATH_RDBPOT, product, shift);
+  int32_t product = cfu_op2(PP_SRDHM, x, multiplier);
+  return cfu_op2(PP_RDBPOT, product, shift);
 }
 
 // Same functionality. Uses software CFU implementations of component
