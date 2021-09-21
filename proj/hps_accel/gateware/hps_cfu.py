@@ -23,7 +23,8 @@ from .input_store import InputStore
 from .macc import MultiplyAccumulate
 from .post_process import OutputParamsStorage, PostProcessInstruction
 from .set import SetInstruction
-from .stream import BinaryCombinatorialActor, ConcatenatingBuffer, connect
+from .stream import BinaryCombinatorialActor, ConcatenatingBuffer, \
+    FlowRestrictor, connect
 
 
 class PingInstruction(InstructionBase):
@@ -74,8 +75,30 @@ class HpsCfu(Cfu):
     def connect_macc(self, m, set, input_store, filter_store, macc, get):
         m.d.comb += macc.offset.eq(set.values[Constants.REG_INPUT_OFFSET])
 
-        # Join all the input value stream and all 4 filter value streams
-        # into a single stream holding all operands.
+        # Connect the input store to a FlowRestrictor, which will let through
+        # N values at a time when signalled.
+        input_flow_restrictor = FlowRestrictor(128)
+        m.submodules['input_flow_restrictor'] = input_flow_restrictor
+        m.d.comb += connect(input_store.data_output,
+                            input_flow_restrictor.input)
+        next = set.output_streams[Constants.REG_FILTER_INPUT_NEXT]
+        m.d.comb += input_flow_restrictor.release.payload.eq(next.payload)
+        m.d.comb += input_flow_restrictor.release.valid.eq(next.valid)
+        # TODO(dcallagh): can we connect this properly somehow?
+        m.d.comb += next.ready.eq(1)
+
+        # Same for the filter store.
+        filter_flow_restrictor = FlowRestrictor(128)
+        m.submodules['filter_flow_restrictor'] = filter_flow_restrictor
+        m.d.comb += connect(filter_store.data_output,
+                            filter_flow_restrictor.input)
+        next = set.output_streams[Constants.REG_FILTER_INPUT_NEXT]
+        m.d.comb += filter_flow_restrictor.release.payload.eq(next.payload)
+        m.d.comb += filter_flow_restrictor.release.valid.eq(next.valid)
+        # TODO(dcallagh): can we connect this properly somehow?
+        m.d.comb += next.ready.eq(1)
+
+        # Join both streams into a single stream holding all operands.
         # Then connect that to the macc.
         operands_buffer = ConcatenatingBuffer([
             ('inputs', unsigned(128)),
@@ -83,8 +106,10 @@ class HpsCfu(Cfu):
         ])
         m.submodules['operands_buffer'] = operands_buffer
         m.d.comb += [
-            connect(input_store.data_output, operands_buffer.inputs['inputs']),
-            connect(filter_store.data_output, operands_buffer.inputs['filters']),
+            connect(input_flow_restrictor.output,
+                    operands_buffer.inputs['inputs']),
+            connect(filter_flow_restrictor.output,
+                    operands_buffer.inputs['filters']),
             connect(operands_buffer.output, macc.operands),
         ]
 
@@ -96,16 +121,12 @@ class HpsCfu(Cfu):
                             input_store.num_words_input)
         m.d.comb += connect(set.output_streams[Constants.REG_SET_INPUT],
                             input_store.data_input)
-        next = set.write_strobes[Constants.REG_FILTER_INPUT_NEXT]
-        m.d.comb += input_store.next.eq(next)
 
     def connect_filter_store(self, m, set, get, filter_store):
         m.d.comb += connect(set.output_streams[Constants.REG_FILTER_NUM_WORDS],
                             filter_store.num_words_input)
         m.d.comb += connect(set.output_streams[Constants.REG_SET_FILTER],
                             filter_store.data_input)
-        next = set.write_strobes[Constants.REG_FILTER_INPUT_NEXT]
-        m.d.comb += filter_store.next.eq(next)
 
     def connect_op_store(self, m, op_store, set):
         m.d.comb += [

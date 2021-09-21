@@ -31,7 +31,7 @@ namespace soft_cfu {
 extern int32_t macc_input_offset;
 extern int8_t macc_input[16];
 extern int8_t macc_filter[16];
-extern bool macc_valid;
+extern uint32_t iterations;
 
 inline void Unpack32(int8_t* dest, uint32_t value) {
   dest[0] = (value & 0x000000ff);
@@ -233,18 +233,8 @@ inline uint32_t SetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
       reg_output_max = rs1;
       return 0;
     case REG_FILTER_INPUT_NEXT:
-      assert(!macc_valid);
-      filter_storage.Next();
-      input_storage.Next();
-      SetMaccFilter(0, filter_storage.Get(0));
-      SetMaccFilter(1, filter_storage.Get(1));
-      SetMaccFilter(2, filter_storage.Get(2));
-      SetMaccFilter(3, filter_storage.Get(3));
-      SetMaccInput(0, input_storage.Get(0));
-      SetMaccInput(1, input_storage.Get(1));
-      SetMaccInput(2, input_storage.Get(2));
-      SetMaccInput(3, input_storage.Get(3));
-      macc_valid = true;
+      assert(iterations == 0);
+      iterations = rs1;
       return 0;
     case REG_OUTPUT_BIAS:
       reg_bias = rs1;
@@ -270,8 +260,18 @@ inline uint32_t SetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
 inline uint32_t GetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
   switch (funct7) {
     case REG_MACC_OUT:
-      assert(macc_valid);
-      macc_valid = false;
+      assert(iterations > 0);
+      filter_storage.Next();
+      input_storage.Next();
+      SetMaccFilter(0, filter_storage.Get(0));
+      SetMaccFilter(1, filter_storage.Get(1));
+      SetMaccFilter(2, filter_storage.Get(2));
+      SetMaccFilter(3, filter_storage.Get(3));
+      SetMaccInput(0, input_storage.Get(0));
+      SetMaccInput(1, input_storage.Get(1));
+      SetMaccInput(2, input_storage.Get(2));
+      SetMaccInput(3, input_storage.Get(3));
+      iterations -= 1;
       return Macc();
     case REG_VERIFY:
       return reg_verify + 1;

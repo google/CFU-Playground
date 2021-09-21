@@ -48,21 +48,16 @@ class FilterStore(SimpleElaboratable):
     data_input: Endpoint(unsigned(32)), in
       Words written to data_input are set into the filter store.
 
-    next: Signal(), in
-      Causes the next four words to be displayed at the data_output stream.
-
     num_words_input: Endpoint(unsigned(32)), in
       Number of words in input. When set, resets internal state.
 
     data_output: Endpoint(unsigned(128)), out
-      The four words of output. Does not respect backpressure.
-      TODO(dcallagh): make it respect backpressure.
+      The four words of output.
     """
 
     def __init__(self, depth=Constants.MAX_FILTER_WORDS):
         self.depth = depth
         self.data_input = Endpoint(unsigned(32))
-        self.next = Signal()
         self.num_words_input = Endpoint(unsigned(32))
         self.data_output = Endpoint(unsigned(128))
 
@@ -80,21 +75,34 @@ class FilterStore(SimpleElaboratable):
         with m.If(self.data_input.is_transferring()):
             m.d.sync += index.eq(index + 1)
             with m.If(index == num_words - 1):
-                m.d.sync += index.eq(0)
+                m.d.sync += index.eq(num_words - 4)
                 m.next = "READING"
 
-    def handle_reading(self, m, memory, num_words, index):
+    def handle_reading(self, m, memory, num_words, index, reset):
         """Handle stepping through memory on read."""
-        m.d.comb += [
-            memory.read_addr.eq(index[2:]),
-            self.data_output.payload.eq(memory.read_data),
-        ]
-        with m.If(self.next):
-            m.d.sync += self.data_output.valid.eq(1)
-        with m.If(~self.next & self.data_output.is_transferring()):
-            m.d.sync += self.data_output.valid.eq(0)
-        with m.If(self.data_output.is_transferring()):
-            m.d.sync += [index.eq(Mux(index == num_words - 4, 0, index + 4))]
+        m.d.comb += memory.read_addr.eq(index[2:])
+
+        read_port_valid = Signal()
+        read_started = Signal()
+
+        with m.If(~self.data_output.valid | self.data_output.is_transferring()):
+            m.d.sync += self.data_output.payload.eq(memory.read_data)
+            m.d.sync += self.data_output.valid.eq(read_port_valid)
+            m.d.sync += read_port_valid.eq(0)
+
+        with m.If(~read_port_valid & ~read_started):
+            m.d.sync += index.eq(Mux(index == num_words - 4, 0, index + 4))
+            m.d.sync += read_started.eq(1)
+        with m.Else():
+            m.d.sync += read_started.eq(0)
+
+        with m.If(read_started):
+            # Read port is valid next cycle if we started a new read this cycle
+            m.d.sync += read_port_valid.eq(1)
+
+        with m.If(reset):
+            m.d.sync += read_port_valid.eq(0)
+            m.d.sync += read_started.eq(0)
 
     def elab(self, m: Module):
         num_words = Signal(range(self.depth + 1))
@@ -120,6 +128,6 @@ class FilterStore(SimpleElaboratable):
                 with m.If(reset):
                     m.next = "RESET"
             with m.State("READING"):
-                self.handle_reading(m, memory, num_words, index)
+                self.handle_reading(m, memory, num_words, index, reset)
                 with m.If(reset):
                     m.next = "RESET"

@@ -80,9 +80,8 @@ class HpsCfuTest(CfuTestBase):
         yield ((SET, Constants.REG_INPUT_OFFSET, offset, 0), 0)
 
     def check_macc(self, offset, input, filter):
+        yield ((SET, Constants.REG_FILTER_INPUT_NEXT, len(input) // 16, 0), 0)
         for i in range(0, len(input), 16):
-            # Turn the crank
-            yield ((SET, Constants.REG_FILTER_INPUT_NEXT, 1, 0), 0)
             expected = sum((offset + i) * f for (i, f) in
                            zip(input[i:i + 16], filter[i:i + 16]))
             yield ((GET, Constants.REG_MACC_OUT, 0, 0), expected)

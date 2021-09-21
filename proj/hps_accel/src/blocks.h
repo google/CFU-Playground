@@ -85,7 +85,9 @@ inline void LoadInputOffset(int32_t value) { cfu_set(REG_INPUT_OFFSET, value); }
 // - values is address of first word to load. It is the top left pixel.
 void LoadInput(size_t width, size_t in_channels, const int8_t* values);
 
-inline void AdvanceFilterInput() { cfu_set(REG_FILTER_INPUT_NEXT, 0); }
+// Triggers the filter store and input store to send the next *n* sets of
+// values through the pipeline.
+inline void AdvanceFilterInput(int n) { cfu_set(REG_FILTER_INPUT_NEXT, n); }
 
 // Sets per-layer output parameters
 void SetOutputOffsets(int32_t output_offset, int32_t output_activation_min,
