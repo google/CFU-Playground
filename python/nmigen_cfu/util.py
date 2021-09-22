@@ -133,6 +133,9 @@ class TestBase(unittest.TestCase):
         if write_trace:
             with self.sim.write_vcd("zz.vcd", "zz.gtkw"):
                 self.sim.run()
+            # Discourage commiting code with tracing active
+            self.fail("Simulation tracing active. "
+                      "Turn off after debugging complete.")
         else:
             self.sim.run()
 

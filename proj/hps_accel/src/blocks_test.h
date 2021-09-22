@@ -30,9 +30,6 @@ void do_test_blocks_filter(void);
 // Tests the input value load/get functions
 void do_test_blocks_input(void);
 
-// Tests the math functions
-void do_test_blocks_math(void);
-
 // Runs all the tests
 void do_test_blocks_all(void);
 

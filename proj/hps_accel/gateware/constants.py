@@ -28,7 +28,7 @@ class Constants:
     # Funct3 codes - used to route CFU to instructions
     INS_SET = 0
     INS_GET = 1
-    INS_MATH = 2
+    INS_POST_PROCESS = 2
     INS_PING = 7
 
     ###########################################################################
@@ -40,7 +40,9 @@ class Constants:
     # in the register description.
 
     # A write of any value to REG_RESET causes the accelerator gateware to be
-    # reset and lose all state
+    # reset and lose all state.
+    #
+    # Not currently implemented
     REG_RESET = 0
 
     # Number of 32 bit filter words
@@ -58,6 +60,13 @@ class Constants:
 
     # Sets next input word and advances the write index.
     REG_SET_INPUT = 5
+
+    # Set output offset
+    REG_OUTPUT_OFFSET = 6
+
+    # Sets minimum and maximum activation value
+    REG_OUTPUT_MIN = 7
+    REG_OUTPUT_MAX = 8
 
     # These registers contain values 0-3 of the current filter word
     REG_FILTER_0 = 0x10
@@ -78,6 +87,14 @@ class Constants:
     # Retrieve result from multiply-accumulate unit
     REG_MACC_OUT = 0x30
 
+    # Set bias, multiplier and shift.
+    # Write to OUTPUT_PARAMS_RESET to reset the store.
+    # Setting shift causes the three values to be added to the store
+    REG_OUTPUT_PARAMS_RESET = 0x40
+    REG_OUTPUT_BIAS = 0x41
+    REG_OUTPUT_MULTIPLIER = 0x42
+    REG_OUTPUT_SHIFT = 0x43
+
     # Registers for gateware verification
     # Any value n set into this register will be read back as n+1
     REG_VERIFY = 0x70
@@ -86,9 +103,8 @@ class Constants:
     REG_INVALID = 0x7f
 
     ###########################################################################
-    # Math function codes
-    MATH_SRDHM = 0x01  # SaturatingRoundingDoubleHighMul
-    MATH_RDBPOT = 0x02  # RoundingDivideByPOT
+    # Post Process Function codes
+    PP_POST_PROCESS = 0x03 # Post Process accumulator
 
     ###########################################################################
     # Size limits
@@ -98,6 +114,9 @@ class Constants:
 
     # Maximum number of words in input
     MAX_INPUT_WORDS = 256
+
+    # Maximum number of channels in a layer
+    MAX_CHANNELS = 64
 
 
 CC_FILE_HEADER = """// Generated file

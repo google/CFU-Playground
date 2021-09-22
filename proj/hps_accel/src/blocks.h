@@ -96,45 +96,23 @@ Vector16 GetInput();
 
 inline void AdvanceFilterInput() { cfu_set(REG_FILTER_INPUT_NEXT, 0); }
 
-// Math functions
+// Sets per-layer output parameters
+void SetOutputOffsets(int32_t output_offset, int32_t output_activation_min,
+                      int32_t output_activation_max);
 
-// Same as tflite::MultiplyByQuantizedMultiplier but assumes:
-// shift is in the range -4 to -10 (inclusive)
-// multiplier is in the range 0x40000000 to 0x7fffffff
+// Loads output parameters
+void LoadOutputParams(size_t offset, size_t count, const int32_t* bias_data,
+                      const int32_t* output_multiplier,
+                      const int32_t* output_shift);
 
-// Main implementation for use in code
-inline int32_t MultiplyByQuantizedMultiplier(int32_t x, int32_t multiplier,
-                                             int shift) {
-  int32_t product = cfu_op2(MATH_SRDHM, x, multiplier);
-  return cfu_op2(MATH_RDBPOT, product, shift);
+// Do the actual post-processing
+inline int32_t PostProcess(int32_t acc) {
+  return cfu_op2(PP_POST_PROCESS, acc, 0);
 }
 
-// Same functionality. Uses software CFU implementations of component
-// operations.
-int32_t MultiplyByQuantizedMultiplier_01(int32_t x, int32_t multiplier,
-                                         int shift);
+// Reset all
+inline void Reset() { cfu_set(REG_RESET, 0); }
 
-// Same functionality. Reimplements RoundingDivideByPOT
-int32_t MultiplyByQuantizedMultiplier_02(int32_t x, int32_t multiplier,
-                                         int shift);
-
-// Same functionality. Reimplements SaturatingRoundingDoubleHighMul
-int32_t MultiplyByQuantizedMultiplier_03(int32_t x, int32_t multiplier,
-                                         int shift);
-
-// Same functionality. Simplifies operations to be more amenable to running on
-// FPGA
-int32_t MultiplyByQuantizedMultiplier_04(int32_t x, int32_t multiplier,
-                                         int shift);
-
-// Same functionality. Uses software CFU implementations of operation
-int32_t MultiplyByQuantizedMultiplier_SW(int32_t x, int32_t multiplier,
-                                         int shift);
-
-// Same functionality. Uses hardware CFU implementations of component
-// operations.
-int32_t MultiplyByQuantizedMultiplier_HW(int32_t x, int32_t multiplier,
-                                         int shift);
 };  // namespace hps_accel
 
 #endif  // _BLOCKS_H

@@ -75,13 +75,15 @@ void ConvPerChannel4x4(const ConvParams& params,
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
 
+  hps_accel::LoadInputOffset(input_offset);
+  hps_accel::SetOutputOffsets(output_offset, output_activation_min,
+                              output_activation_max);
+
   // Work out maximum output channels we can do per filter load
   const int filter_words_per_output_channel =
       input_depth * filter_height * filter_width / 4;
   const int max_output_channels_per_load =
       MAX_FILTER_WORDS / filter_words_per_output_channel;
-
-  hps_accel::LoadInputOffset(input_offset);
 
   for (int out_channel_offset = 0; out_channel_offset < output_depth;
        out_channel_offset += max_output_channels_per_load) {
@@ -90,6 +92,8 @@ void ConvPerChannel4x4(const ConvParams& params,
     hps_accel::LoadFilter(
         input_depth, output_channels,
         filter_data + Offset(filter_shape, out_channel_offset, 0, 0, 0));
+    hps_accel::LoadOutputParams(out_channel_offset, output_channels, bias_data,
+                                output_multiplier, output_shift);
 
     for (int out_y = 0; out_y < output_height; ++out_y) {
       const int in_y_origin = out_y * stride_height;
@@ -116,14 +120,8 @@ void ConvPerChannel4x4(const ConvParams& params,
             acc += multiply_accumulate();
           }
 
-          acc += bias_data[out_channel];
-          acc = hps_accel::MultiplyByQuantizedMultiplier(
-              acc, output_multiplier[out_channel], output_shift[out_channel]);
-          acc += output_offset;
-          acc = std::max(acc, output_activation_min);
-          acc = std::min(acc, output_activation_max);
-          output_data[Offset(output_shape, 0, out_y, out_x, out_channel)] =
-              static_cast<int8_t>(acc);
+          acc = hps_accel::PostProcess(acc);
+          output_data[Offset(output_shape, 0, out_y, out_x, out_channel)] = acc;
         }
       }
     }

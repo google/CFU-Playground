@@ -31,6 +31,14 @@ bool macc_valid;
 Storage filter_storage;
 Storage input_storage;
 
+OutputParamsStorage output_params_storage;
+int32_t reg_bias;
+int32_t reg_multiplier;
+
+int32_t reg_output_offset;
+int32_t reg_output_max;
+int32_t reg_output_min;
+
 uint32_t reg_verify;
 uint32_t ping_storage;
 };  // namespace soft_cfu
