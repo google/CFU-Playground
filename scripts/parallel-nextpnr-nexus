@@ -28,6 +28,21 @@ PDC="$2"
 RESULT_FASM="$3"
 SEED_COUNT="$4"
 
+
+### check if bash 5.1 for "wait -p"; if not, do plain run
+if ! [[ ${BASH_VERSION} =~ "5.1" ]]; then
+    echo Not doing parallel nextpnr run.
+    nextpnr-nexus \
+        --json "${JSON}" \
+        --pdc "${PDC}" \
+        --fasm "${RESULT_FASM}" \
+        --device LIFCL-17-8UWG72C \
+        --seed 1
+    echo Single nextpnr run done.
+    exit 0
+fi
+
+
 declare -a CHILD_PIDS
 declare -A PID_TO_SEED
 
