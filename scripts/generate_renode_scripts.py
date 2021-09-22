@@ -26,7 +26,7 @@ sys.path.append((os.path.join(os.path.dirname(__file__),
 
 litex_renode = import_module("litex_json2renode")
 
-def generate_resc(target):
+def generate_resc(target, cfu_lib_filepath):
     result = """
 using sysbus
 mach create \"""" + target + """\"
@@ -34,7 +34,13 @@ machine LoadPlatformDescription $ORIGIN/""" + target + """.repl
 machine StartGdbServer 10001
 showAnalyzer sysbus.uart
 showAnalyzer sysbus.uart Antmicro.Renode.Analyzers.LoggingUartAnalyzer
+"""
+    if cfu_lib_filepath:
+        result += """
+cpu.cfu0 SimulationFilePathLinux @""" + cfu_lib_filepath + """
+"""
 
+    result += """
 sysbus LoadELF $ORIGIN/../software.elf
 """
     return result
@@ -50,8 +56,12 @@ def generate_litex_renode_repl(conf_file, etherbone_peripherals, autoalign):
     return result
 
 
-def generate_repl(target, path):
-    result = "using \"" + str(path) + str(target) + "_generated.repl\""
+def generate_repl(target, path, cfu_lib_filepath, predefined=False):
+    if predefined:
+        result = "using \"" + str(path) + str(target) + "_predefined.repl\""
+    else:
+        result = "using \"" + str(path) + str(target) + "_generated.repl\""
+
     result += """
 
 cpu:
@@ -74,6 +84,11 @@ cpu:
         RegisterCustomCSR "BPM" 0xB13  User
         RegisterCustomCSR "BPM" 0xB14  User
         RegisterCustomCSR "BPM" 0xB15  User
+"""
+    if cfu_lib_filepath:
+        result += """
+cfu0: Verilated.CFUVerilatedPeripheral @ cpu 0
+    frequency: 100000000
 """
     return result
 
@@ -101,6 +116,7 @@ def parse_args():
     parser.add_argument("--auto-align", action="append", dest="autoalign_memor_regions",
                         default=[],
                         help="List of memory regions to align automatically (necessary due to limitations in Renode)")
+    parser.add_argument("--sw-only", action="store_true", help="Generate script without simulating hardware CFU")
     args = parser.parse_args()
 
     return args
@@ -123,24 +139,31 @@ def main():
     predefined_robot_path = os.path.join(proj_path, "renode", args.target + ".robot")
     robot_template_path = os.path.join(proj_path, proj_name + ".robot")
 
+    cfu_lib_filepath = os.path.join(args.build_path, "libVtop.so")
+    if not os.path.isfile(cfu_lib_filepath) or args.sw_only:
+        cfu_lib_filepath = None
+
     if os.path.isfile(predefined_resc_path):
         copy(predefined_resc_path, args.build_path)
     else:
         with open(resc_filepath, "w") as f:
-            f.write(generate_resc(args.target))
+            f.write(generate_resc(args.target, cfu_lib_filepath))
 
     etherbone_peripherals = litex_renode.check_etherbone_peripherals(args.etherbone_peripherals)
 
     # if there is a predefined Renode platform script for a target, copy it to build directory,
     # otherwise generate a new one with LiteX-Renode
     if os.path.isfile(predefined_repl_path):
-        copy(predefined_repl_path, args.build_path)
+        copy(predefined_repl_path, os.path.join(args.build_path, f"{args.target}_predefined.repl"))
+
+        with open(repl_filepath, "w") as f:
+            f.write(generate_repl(args.target, args.build_path, cfu_lib_filepath, predefined=True))
     else:
         with open(litex_renode_repl_filepath, "w") as f:
             f.write(generate_litex_renode_repl(args.conf_file, etherbone_peripherals, args.autoalign_memor_regions))
 
         with open(repl_filepath, "w") as f:
-            f.write(generate_repl(args.target, args.build_path))
+            f.write(generate_repl(args.target, args.build_path, cfu_lib_filepath))
 
     if os.path.isfile(predefined_robot_path):
         copy(predefined_robot_path, args.build_path)

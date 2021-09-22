@@ -76,10 +76,10 @@ jobs:
         make renode-scripts ${{ matrix.build_params }} PLATFORM=${{ matrix.platform }} TARGET=${{ matrix.target }}
 
     - name: Run tests
-      timeout-minutes: 5
+      timeout-minutes: 15
       uses: antmicro/renode-test-action@v1.0.0
       with:
-        renode-version: '1.12.0+20210403git44d6786'
+        renode-version: '1.12.0+20210903gitf7fcbdbd'
         tests-to-run: proj/${{ matrix.proj_name }}/build/renode/${{ matrix.target }}.robot
 
     - name: Archive results

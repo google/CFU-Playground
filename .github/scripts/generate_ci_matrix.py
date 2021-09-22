@@ -46,10 +46,11 @@ def read_proj_excluded_targets(projects_path, proj_name):
     return excluded_targets
 
 
-def read_proj_build_params(projects_path, proj_name):
+def read_proj_build_params(projects_path, proj_name, params_no):
     proj_path = os.path.join(projects_path, proj_name)
+    filename = "ci_build_params.txt." + str(params_no)
     try:
-        with open(os.path.join(proj_path, "ci", "ci_build_params.txt"), "r") as f:
+        with open(os.path.join(proj_path, "ci", filename), "r") as f:
             file_content = f.read()
             build_params = file_content.replace("\n", " ")
     except IOError:
@@ -95,8 +96,15 @@ def main():
     for project in projects_to_test:
         excluded_targets = read_proj_excluded_targets(projects_path, project)
         proj_targets = get_proj_supported_targets(all_targets, excluded_targets)
-        build_params = read_proj_build_params(projects_path, project)
-        append_to_json_list(project, proj_targets, build_params)
+
+        # Add default variant
+        append_to_json_list(project, proj_targets, "")
+
+        # Add custom variants
+        for i in range(10):
+            build_params = read_proj_build_params(projects_path, project, i)
+            if build_params != "":
+                append_to_json_list(project, proj_targets, build_params)
 
     json_str = list_to_json_str(json_list)
     print(json_str)
