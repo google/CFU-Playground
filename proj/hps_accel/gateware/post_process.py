@@ -365,11 +365,6 @@ class PostProcessInstruction(InstructionBase):
         self.read_enable = Signal()
 
     def elab(self, m: Module):
-        m.submodules.srdhm = srdhm = SaturatingRoundingDoubleHighMul()
-        m.d.comb += srdhm.output.ready.eq(1)
-        m.submodules.rdbpot = rdbpot = RoundingDivideByPowerOfTwo()
-        m.d.comb += rdbpot.output.ready.eq(1)
-
         # Connect the post process pipeline
         m.submodules.ppp = ppp = PostProcessPipeline()
         m.d.comb += ppp.output.ready.eq(1)
@@ -382,44 +377,19 @@ class PostProcessInstruction(InstructionBase):
         ]
 
         m.d.sync += self.done.eq(0)
-        with m.FSM(reset="WAIT_START"):
-            with m.State("WAIT_START"):
+        with m.FSM(reset="WAIT"):
+            with m.State("WAIT"):
                 with m.If(self.start):
-                    with m.Switch(self.funct7):
-                        with m.Case(Constants.PP_SRDHM):
-                            m.d.comb += [
-                                srdhm.input.payload.a.eq(self.in0s),
-                                srdhm.input.payload.b.eq(self.in1s),
-                                srdhm.input.valid.eq(1),
-                            ]
-                            m.next = "SRDHM_RUN"
-                        with m.Case(Constants.PP_RDBPOT):
-                            m.d.comb += [
-                                rdbpot.input.payload.dividend.eq(self.in0s),
-                                rdbpot.input.payload.shift.eq(-self.in1s),
-                                rdbpot.input.valid.eq(1),
-                            ]
-                            m.next = "RDBPOT_RUN"
-                        with m.Case(Constants.PP_POST_PROCESS):
-                            m.d.comb += [
-                                ppp.input.payload.eq(self.in0s),
-                                ppp.input.valid.eq(1),
-                            ]
-                            m.next = "POST_PROCESS_RUN"
-                        with m.Default():
-                            m.d.sync += self.done.eq(1)
-            with m.State("SRDHM_RUN"):
-                with m.If(srdhm.output.valid):
-                    m.d.sync += self.output.eq(srdhm.output.payload)
-                    m.d.sync += self.done.eq(1)
-                    m.next = "WAIT_START"
-            with m.State("RDBPOT_RUN"):
-                with m.If(rdbpot.output.valid):
-                    m.d.sync += self.output.eq(rdbpot.output.payload)
-                    m.d.sync += self.done.eq(1)
-                    m.next = "WAIT_START"
-            with m.State("POST_PROCESS_RUN"):
+                    with m.If(self.funct7 == Constants.PP_POST_PROCESS):
+                        m.d.comb += [
+                            ppp.input.payload.eq(self.in0s),
+                            ppp.input.valid.eq(1),
+                        ]
+                        m.next = "RUN"
+                    with m.Else():
+                        m.d.sync += self.done.eq(1)
+            with m.State("RUN"):
                 with m.If(ppp.output.valid):
                     m.d.sync += self.output.eq(ppp.output.payload)
                     m.d.sync += self.done.eq(1)
-                    m.next = "WAIT_START"
+                    m.next = "WAIT"

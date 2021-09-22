@@ -154,22 +154,6 @@ class HpsCfuTest(CfuTestBase):
                 yield ((GET, Constants.REG_FILTER_3, 0, 0), n + 3)
         self.run_ops(op_generator(), False)
 
-    def test_PP_SRDHM(self):
-        """Tests PP srdhm function"""
-        def op_generator():
-            yield ((PP, Constants.PP_SRDHM, -111628, 1342177280), -69767)
-            yield ((PP, Constants.PP_SRDHM, -96429, 1975242245), -88695)
-            yield ((PP, Constants.PP_SRDHM, 87873, 1815044516), 74270)
-        self.run_ops(op_generator(), False)
-
-    def test_PP_RDBPOT(self):
-        """Tests PP rdbpot function"""
-        def op_generator():
-            yield ((PP, Constants.PP_RDBPOT, -1714553096, -7), -13394946)
-            yield ((PP, Constants.PP_RDBPOT, -327118692, -3), -40889837)
-            yield ((PP, Constants.PP_RDBPOT, 584167932, -6), 9127624)
-        self.run_ops(op_generator(), False)
-
     def set_output_params_store(self, params):
         for bias, multiplier, shift in params:
             yield ((SET, Constants.REG_OUTPUT_BIAS, bias, 0), 0)

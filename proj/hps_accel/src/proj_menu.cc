@@ -61,46 +61,6 @@ void do_verify_register(void) {
          failures, tests);
 }
 
-void do_generated_srdhm(void) {
-  int64_t rand = 0x1234567890abcdef;
-  for (size_t i = 0; i < 100; i++) {
-    // Range based on max input depth * filter_width * filter_height * 8 bits.
-    const int32_t VALUE_RANGE = 64 * 16 * 256;
-    int32_t value =
-        (next_pseudo_random(&rand) & (VALUE_RANGE - 1)) - VALUE_RANGE / 2;
-    // 0x4000_0000 to 0x7ffff_ffff
-    int32_t multiplier = (next_pseudo_random(&rand) & 0x7fffffff) | 0x40000000;
-    int32_t result =
-        gemmlowp::SaturatingRoundingDoublingHighMul(value, multiplier);
-    printf("  (%ld, %ld, %ld),\n", value, multiplier, result);
-  }
-}
-
-void make_rdbpot_example(int32_t value, int32_t shift) {
-  int32_t result = gemmlowp::RoundingDivideByPOT(value, shift);
-  printf("  (%ld, %ld, %ld),\n", value, shift, result);
-}
-
-void do_generated_rdbpot(void) {
-  // Make sure to test rounding
-  make_rdbpot_example(8, 3);
-  make_rdbpot_example(11, 3);
-  make_rdbpot_example(12, 3);
-  make_rdbpot_example(13, 3);
-  make_rdbpot_example(-8, 3);
-  make_rdbpot_example(-11, 3);
-  make_rdbpot_example(-12, 3);
-  make_rdbpot_example(-13, 3);
-
-  int64_t rand = 0x1234567890abcdef;
-  // Wide range
-  for (size_t i = 0; i < 100; i++) {
-    int32_t value = next_pseudo_random(&rand);
-    int32_t shift = 3 + (next_pseudo_random(&rand) & 0x7);
-    make_rdbpot_example(value, shift);
-  }
-}
-
 struct Menu MENU = {
     "Project Menu",
     "project",
@@ -111,10 +71,7 @@ struct Menu MENU = {
                   do_test_blocks_multiply_accumulate),
         MENU_ITEM('f', "test blocks Filter", do_test_blocks_filter),
         MENU_ITEM('i', "test blocks Input", do_test_blocks_input),
-        MENU_ITEM('q', "test blocks maths", do_test_blocks_math),
         MENU_ITEM('a', "test blocks All", do_test_blocks_all),
-        MENU_ITEM('1', "generate SRDHM test cases", do_generated_srdhm),
-        MENU_ITEM('2', "generate RDBPOT test cases", do_generated_rdbpot),
         MENU_END,
     },
 };

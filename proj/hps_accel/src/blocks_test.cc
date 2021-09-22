@@ -242,55 +242,6 @@ extern "C" void do_test_blocks_input(void) {
   check_inputs(49, 4);
 }
 
-// Test caes for MultiplyByQuantizedMultiplier
-struct MbmqTest {
-  const char* name;
-  int32_t (*fn)(int32_t, int32_t, int);
-} mbmq_tests[]{
-    {"01", hps_accel::MultiplyByQuantizedMultiplier_01},
-    {"02", hps_accel::MultiplyByQuantizedMultiplier_02},
-    {"03", hps_accel::MultiplyByQuantizedMultiplier_03},
-    {"04", hps_accel::MultiplyByQuantizedMultiplier_04},
-    {"SW", hps_accel::MultiplyByQuantizedMultiplier_SW},
-    {"HW", hps_accel::MultiplyByQuantizedMultiplier_HW},
-    {"CFU", hps_accel::MultiplyByQuantizedMultiplier},
-    {NULL, NULL},
-};
-
-extern "C" void do_test_blocks_math(void) {
-  const size_t NUM_TESTS = 100000;
-  int64_t rand = 0;
-
-  size_t failed = 0;
-  size_t executed = 0;
-  for (size_t i = 0; i < NUM_TESTS && failed < 100; i++) {
-    // Range based on max input depth * filter_width * filter_height * 8 bits.
-    const int32_t VALUE_RANGE = 64 * 16 * 256;
-    int32_t value =
-        (next_pseudo_random(&rand) & (VALUE_RANGE - 1)) - VALUE_RANGE / 2;
-    // 0x4000_0000 to 0x7ffff_ffff
-    int32_t multiplier = (next_pseudo_random(&rand) & 0x7fffffff) | 0x40000000;
-    // between -3 and -11
-    int32_t shift = -11 + (next_pseudo_random(&rand) & 0x7);
-    int32_t expected =
-        tflite::MultiplyByQuantizedMultiplier(value, multiplier, shift);
-    for (size_t j = 0; mbmq_tests[j].fn; j++) {
-      int32_t actual = mbmq_tests[j].fn(value, multiplier, shift);
-      executed++;
-      if (actual != expected) {
-        printf("FAIL impl %s: mbqm(%ld, %ld, %ld) expected %ld but was %ld\n",
-               mbmq_tests[j].name, value, multiplier, shift, expected, actual);
-        failed++;
-      }
-    }
-  }
-  if (failed == 0) {
-    printf("OK\n");
-  } else {
-    printf("%u FAILURES from %u tests executed\n", failed, executed);
-  }
-}
-
 extern "C" void do_test_blocks_all(void) {
   printf("multiply_accumulate\n");
   do_test_blocks_multiply_accumulate();
@@ -298,6 +249,4 @@ extern "C" void do_test_blocks_all(void) {
   do_test_blocks_filter();
   printf("input\n");
   do_test_blocks_input();
-  printf("math\n");
-  do_test_blocks_math();
 }

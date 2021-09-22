@@ -104,8 +104,6 @@ class Constants:
 
     ###########################################################################
     # Post Process Function codes
-    PP_SRDHM = 0x01  # SaturatingRoundingDoubleHighMul
-    PP_RDBPOT = 0x02  # RoundingDivideByPOT
     PP_POST_PROCESS = 0x03 # Post Process accumulator
 
     ###########################################################################

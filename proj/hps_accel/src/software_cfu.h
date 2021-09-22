@@ -119,11 +119,9 @@ extern int32_t reg_output_min;
 // Verify register storage
 extern uint32_t reg_verify;
 
-inline uint32_t SaturatingRoundingDoubleHighMul(uint32_t rs1, uint32_t rs2) {
-  int32_t x = static_cast<int32_t>(rs1);
-  int32_t multiplier = static_cast<int32_t>(rs2);
-  bool positive = x >= 0;
-  int64_t a_64(positive ? x : -x);
+inline int32_t SaturatingRoundingDoubleHighMul(int32_t value, int32_t multiplier) {
+  bool positive = value >= 0;
+  int64_t a_64(positive ? value : -value);
   int64_t b_64(multiplier);
   int64_t ab_64 = a_64 * b_64;
   if (positive) {
@@ -136,49 +134,48 @@ inline uint32_t SaturatingRoundingDoubleHighMul(uint32_t rs1, uint32_t rs2) {
   if (!positive) {
     product = -product;
   }
-  return static_cast<uint32_t>(product);
+  return product;
 }
 
-inline uint32_t RoundingDivideByPOT(uint32_t rs1, uint32_t rs2) {
-  int32_t product = static_cast<int32_t>(rs1);
-  int32_t shift = static_cast<int32_t>(rs2);
+inline int32_t RoundingDivideByPOT(int32_t value, int32_t nshift) {
+  int32_t shift = static_cast<int32_t>(nshift);
   int32_t quotient;
   int32_t mask;
   switch (shift) {
     case -3:
-      quotient = product >> 3;
+      quotient = value >> 3;
       mask = (1 << 3) - 1;
       break;
     case -4:
-      quotient = product >> 4;
+      quotient = value >> 4;
       mask = (1 << 4) - 1;
       break;
     case -5:
-      quotient = product >> 5;
+      quotient = value >> 5;
       mask = (1 << 5) - 1;
       break;
     case -6:
-      quotient = product >> 6;
+      quotient = value >> 6;
       mask = (1 << 6) - 1;
       break;
     case -7:
-      quotient = product >> 7;
+      quotient = value >> 7;
       mask = (1 << 7) - 1;
       break;
     case -8:
-      quotient = product >> 8;
+      quotient = value >> 8;
       mask = (1 << 8) - 1;
       break;
     case -9:
-      quotient = product >> 9;
+      quotient = value >> 9;
       mask = (1 << 9) - 1;
       break;
     case -10:
-      quotient = product >> 10;
+      quotient = value >> 10;
       mask = (1 << 10) - 1;
       break;
     case -11:
-      quotient = product >> 11;
+      quotient = value >> 11;
       mask = (1 << 11) - 1;
       break;
     default:
@@ -186,8 +183,8 @@ inline uint32_t RoundingDivideByPOT(uint32_t rs1, uint32_t rs2) {
       mask = 0;
       printf("***BAD SHIFT\n");
   }
-  int32_t remainder = product & mask;
-  int32_t threshold = (mask >> 1) + ((product < 0) ? 1 : 0);
+  int32_t remainder = value & mask;
+  int32_t threshold = (mask >> 1) + ((value < 0) ? 1 : 0);
   int32_t rounding = (remainder > threshold) ? 1 : 0;
   return quotient + rounding;
 }
@@ -195,9 +192,8 @@ inline uint32_t RoundingDivideByPOT(uint32_t rs1, uint32_t rs2) {
 inline uint32_t PostProcess(int32_t acc) {
   const OutputParams& params = output_params_storage.Fetch();
   acc += params.bias;
-  acc = static_cast<int32_t>(
-      SaturatingRoundingDoubleHighMul(acc, params.multiplier));
-  acc = static_cast<int32_t>(RoundingDivideByPOT(acc, -params.shift));
+  acc = SaturatingRoundingDoubleHighMul(acc, params.multiplier);
+  acc = RoundingDivideByPOT(acc, -params.shift);
   acc += reg_output_offset;
   acc = std::max(acc, reg_output_min);
   acc = std::min(acc, reg_output_max);
@@ -301,12 +297,9 @@ inline uint32_t GetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
   }
 }
 
-inline uint32_t CalculatePostProcessOperation(int funct7, uint32_t rs1, uint32_t rs2) {
+inline uint32_t CalculatePostProcessOperation(int funct7, uint32_t rs1,
+                                              uint32_t rs2) {
   switch (funct7) {
-    case PP_SRDHM:
-      return SaturatingRoundingDoubleHighMul(rs1, rs2);
-    case PP_RDBPOT:
-      return RoundingDivideByPOT(rs1, rs2);
     case PP_POST_PROCESS:
       return PostProcess(rs1);
     default:
