@@ -116,7 +116,7 @@ LFLAGS     := \
 	-Wl,--build-id=none 
 	
 
-find_srcs = $(shell find $(SRC_DIR) -name \*.$(1))
+find_srcs = $(shell find $(SRC_DIR) -name \*.$(1) | LC_ALL=C sort)
 CSOURCES   := $(call find_srcs,c) 
 CPPSOURCES := $(call find_srcs,cpp)
 CCSOURCES  := $(call find_srcs,cc) 
@@ -195,4 +195,4 @@ $(OBJECTS): | $(MODEL_INCS) $(DATA_INCS)
 	$(QUIET) echo "  AS  $(notdir $<)	$(notdir $@)"
 	$(QUIET) $(CC) -x assembler-with-cpp -c $< $(CFLAGS) -o $@ -MMD
 
-include $(shell find src -name *.d)
+include $(call find_srcs,d)
