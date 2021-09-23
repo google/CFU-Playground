@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#ifdef CFU_SOFTWARE_DEFINED
+
 #include "software_cfu.h"
 
 #include <cstddef>
@@ -42,3 +44,9 @@ int32_t reg_output_min;
 uint32_t reg_verify;
 uint32_t ping_storage;
 };  // namespace soft_cfu
+
+#else  // CFU_SOFTWARE_DEFINED
+
+// Everything compiled out.
+
+#endif
