@@ -17,6 +17,8 @@
 #ifndef SOFTWARE_CFU_H
 #define SOFTWARE_CFU_H
 
+#ifdef CFU_SOFTWARE_DEFINED
+
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -332,5 +334,16 @@ inline uint32_t software_cfu(int funct3, int funct7, uint32_t rs1,
       return 0;
   }
 }
+
+#else  // CFU_SOFTWARE_DEFINED
+
+// Dummy implementation which returns zeroes. When software CFU is disabled, we
+// compile everything out in order to save memory.
+inline uint32_t software_cfu(int funct3, int funct7, uint32_t rs1,
+                             uint32_t rs2) {
+  return 0;
+}
+
+#endif  // CFU_SOFTWARE_DEFINED
 
 #endif  // SOFTWARE_CFU_H
