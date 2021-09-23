@@ -16,6 +16,8 @@
 
 #include "print_params.h"
 
+#include <cstdio>
+
 static const char* to_string(tflite::PaddingType type) {
   switch (type) {
     case (tflite::PaddingType::kSame):
