@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-// Dumps data for processing outside
-#ifndef _DUMP_H
-#define _DUMP_H
+#ifndef _CONV2D_20_H
+#define _CONV2D_20_H
 
-#include <stdint.h>
-#include <stddef.h>
+#include <cstdint>
 
-// Dump len bytes of data
-void dump_hex(const uint8_t* data, size_t len);
+#include "conv2d_call.h"
 
-// Dump len words of data
-void dump_hex(const int32_t* data, size_t len);
+extern Conv2DData conv2d_layer_20_data;
 
-// Dumps memory as a C array
-void dump_c_array(const char *name, const void *data, size_t len);
-
-#endif  // _DUMP_H
+#endif  // _CONV2D_20_H

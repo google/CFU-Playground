@@ -19,6 +19,10 @@ export DEFINES :=
 # Uncomment this line to use the custom accelerated convolution operation
 DEFINES += ACCEL_CONV
 
+# For development purposes, dump a layer in accelerated code
+# (Large effect on performance, much output)
+#DEFINES += DUMP_LAYER=20
+
 # Uncomment this line to use software defined CFU functions in software_cfu.cc
 #DEFINES += CFU_SOFTWARE_DEFINED
 
