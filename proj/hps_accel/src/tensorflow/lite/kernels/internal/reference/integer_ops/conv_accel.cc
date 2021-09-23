@@ -36,7 +36,6 @@ void ConvPerChannel4x4(const ConvParams& params,
                        const int8_t* filter_data,
                        const RuntimeShape& bias_shape, const int32_t* bias_data,
                        const RuntimeShape& output_shape, int8_t* output_data) {
-
   // Get parameters.
   const int32_t input_offset = params.input_offset;  // r = s(q - Z)
   const int stride_width = params.stride_width;
@@ -81,10 +80,13 @@ void ConvPerChannel4x4(const ConvParams& params,
                               output_activation_max);
 
   // Work out maximum output channels we can do per filter load
+  // First calculate how many filter words one output channel takes
+  // Then determine how many will fit in filter memory
+  // Finally, round down to a multiple of 4
   const int filter_words_per_output_channel =
       input_depth * filter_height * filter_width / 4;
   const int max_output_channels_per_load =
-      MAX_FILTER_WORDS / filter_words_per_output_channel;
+      (MAX_FILTER_WORDS / filter_words_per_output_channel) / 4 * 4;
 
   for (int out_channel_offset = 0; out_channel_offset < output_depth;
        out_channel_offset += max_output_channels_per_load) {
@@ -111,14 +113,25 @@ void ConvPerChannel4x4(const ConvParams& params,
                          MAX_INPUT_WORDS);
         hps_accel::LoadInput(input_width, input_depth, current_input_data);
 
+        // Calculate all outputs for a single output pixel
         for (int out_channel = out_channel_offset;
              out_channel < out_channel_offset + output_channels;
              ++out_channel) {
           int iterations = filter_height * filter_width * input_depth / 16;
           hps_accel::AdvanceFilterInput(iterations);
           int32_t acc = multiply_accumulate();
-          acc = hps_accel::PostProcess(acc);
-          output_data[Offset(output_shape, 0, out_y, out_x, out_channel)] = acc;
+          hps_accel::PostProcess(acc);
+        }
+
+        // Extract outputs and send to memory
+        for (int out_channel = out_channel_offset;
+             out_channel < out_channel_offset + output_channels;
+             out_channel += 4) {
+          // TODO: less pointer arithmetic
+          uint32_t* output_data_ptr = static_cast<uint32_t*>(
+              static_cast<void*>(output_data + Offset(output_shape, 0, out_y,
+                                                      out_x, out_channel)));
+          *output_data_ptr = hps_accel::GetOutputWord();
         }
       }
     }
