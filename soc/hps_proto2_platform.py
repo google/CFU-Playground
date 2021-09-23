@@ -107,8 +107,8 @@ class Platform(LatticePlatform):
                                  connectors=[],
                                  toolchain=toolchain)
         # Override toolchain to process nextpnr in a quite parallel way
-        if toolchain == "oxide" and parallel_pnr:
-            self.toolchain.build_template = _build_template
+        #if toolchain == "oxide" and parallel_pnr:
+        #    self.toolchain.build_template = _build_template
 
     def create_crg(self):
         return _CRG(self, self.sys_clk_freq)
