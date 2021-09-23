@@ -24,10 +24,13 @@ DEFINES += ACCEL_CONV
 #DEFINES += DUMP_LAYER=20
 
 # Uncomment this line to use software defined CFU functions in software_cfu.cc
-#DEFINES += CFU_SOFTWARE_DEFINED
+DEFINES += CFU_SOFTWARE_DEFINED
 
 # Uncomment this line to skip debug code (large effect on performance)
 DEFINES += NDEBUG
+
+# Show output from TF_LITE_ASSERTs
+DEFINES += TF_LITE_MCU_DEBUG_LOG
 
 # Uncomment this line to skip individual profiling output (has minor effect on performance).
 #DEFINES += NPROFILE
