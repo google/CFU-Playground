@@ -98,6 +98,9 @@ void ConvPerChannel4x4(const ConvParams& params,
     hps_accel::LoadOutputParams(out_channel_offset, output_channels, bias_data,
                                 output_multiplier, output_shift);
 
+    uint32_t* output_data32_base = static_cast<uint32_t*>(static_cast<void*>(
+        output_data + Offset(output_shape, 0, 0, 0, out_channel_offset)));
+
     for (int out_y = 0; out_y < output_height; ++out_y) {
       const int in_y_origin = out_y * stride_height;
       // Check bounds for input buffer. This assumes "valid" padding type.
@@ -123,16 +126,14 @@ void ConvPerChannel4x4(const ConvParams& params,
           hps_accel::PostProcess(acc);
         }
 
-        // Extract outputs and send to memory
-        for (int out_channel = out_channel_offset;
-             out_channel < out_channel_offset + output_channels;
-             out_channel += 4) {
-          // TODO: less pointer arithmetic
-          uint32_t* output_data_ptr = static_cast<uint32_t*>(
-              static_cast<void*>(output_data + Offset(output_shape, 0, out_y,
-                                                      out_x, out_channel)));
-          *output_data_ptr = hps_accel::GetOutputWord();
+        // Pull result data from output FIFO and place into memory, a word at a
+        // time.
+        uint32_t* output_data32 = output_data32_base;
+        for (int i = 0; i < output_channels; i += 4) {
+          *(output_data32++) = hps_accel::GetOutputWord();
         }
+        // Point to start of next pixel
+        output_data32_base += (output_depth / 4);
       }
     }
   }
