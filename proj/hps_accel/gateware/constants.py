@@ -83,6 +83,9 @@ class Constants:
     REG_OUTPUT_MULTIPLIER = 0x42
     REG_OUTPUT_SHIFT = 0x43
 
+    # Gets a word (four 8bit values) of post processed values
+    REG_OUTPUT_WORD = 0x44
+
     # Registers for gateware verification
     # Any value n set into this register will be read back as n+1
     REG_VERIFY = 0x70

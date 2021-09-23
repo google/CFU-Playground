@@ -41,6 +41,8 @@ int32_t reg_output_offset;
 int32_t reg_output_max;
 int32_t reg_output_min;
 
+OutputFIFO output_fifo;
+
 uint32_t reg_verify;
 uint32_t ping_storage;
 };  // namespace soft_cfu
