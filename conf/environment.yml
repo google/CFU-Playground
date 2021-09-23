@@ -5,14 +5,14 @@ channels:
 dependencies:
 #  - litex-hub::gcc-riscv64-elf-newlib
 #  - litex-hub::toolchain-riscv64-linux-musl
+#  - litex-hub::nextpnr-ecp5
+#  - litex-hub::nextpnr-ice40
+  - litex-hub::dfu-util
   - litex-hub::flterm
   - litex-hub::openocd
   - litex-hub::verilator
-  - litex-hub::yosys
   - litex-hub::nextpnr-nexus
-  - litex-hub::nextpnr-ice40
-  - litex-hub::dfu-util
-  - litex-hub::nextpnr-ecp5
+  - litex-hub::yosys
   - python=3.7
   - pip
   - pip:
