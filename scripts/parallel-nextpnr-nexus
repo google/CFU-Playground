@@ -18,8 +18,8 @@
 # TODO: Better argument handling
 # TODO: Include support for device, timefailarg and ignoreloops parameters
 # TODO: Include support for setting seed (or baseseed in this case)
-if [[ $# -ne 4 ]]; then
-  echo "Expected 4 arguments"
+if [[ $# -ne 5 ]]; then
+  echo "Expected 5 arguments"
   exit 255
 fi
 
@@ -27,6 +27,7 @@ JSON="$1"
 PDC="$2"
 RESULT_FASM="$3"
 SEED_COUNT="$4"
+SEED="$5"
 
 
 ### check if bash 5.1 for "wait -p"; if not, do plain run
@@ -37,7 +38,7 @@ if ! [[ ${BASH_VERSION} =~ "5.1" ]]; then
         --pdc "${PDC}" \
         --fasm "${RESULT_FASM}" \
         --device LIFCL-17-8UWG72C \
-        --seed 1
+        --seed "${SEED}"
     echo Single nextpnr run done.
     exit 0
 fi

@@ -61,3 +61,6 @@
 [submodule "third_party/python/litevideo"]
 	path = third_party/python/litevideo
 	url = https://github.com/enjoy-digital/litevideo.git
+[submodule "third_party/make-env"]
+	path = third_party/make-env
+	url = https://github.com/SymbiFlow/make-env.git

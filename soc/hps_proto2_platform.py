@@ -86,7 +86,7 @@ class _CRG(Module):
 _build_template = [
     "yosys -l {build_name}.rpt {build_name}.ys",
     "parallel-nextpnr-nexus {build_name}.json {build_name}.pdc {build_name}.fasm \
-        $(nproc)",
+        $(nproc) {seed}",
     "prjoxide pack {build_name}.fasm {build_name}.bit"
 ]
 
