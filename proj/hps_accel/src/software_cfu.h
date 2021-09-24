@@ -47,8 +47,8 @@ inline void SetMaccFilter(size_t n, uint32_t value) {
   Unpack32(macc_filter + (4 * n), value);
 }
 
-// Do the macc
-inline int32_t Macc() {
+// Do one macc operation
+inline int32_t MaccOne() {
   int32_t macc_out = 0;
   // NOTE: unrolling this resulted in slower execution
   for (size_t n = 0; n < 16; n++) {
@@ -84,6 +84,27 @@ class Storage {
 
 extern Storage filter_storage;
 extern Storage input_storage;
+
+// Run macc operations and return the accumulated output.
+inline int32_t Macc() {
+  assert(iterations > 0);
+  int32_t accumulator = 0;
+  while (iterations > 0) {
+    filter_storage.Next();
+    input_storage.Next();
+    SetMaccFilter(0, filter_storage.Get(0));
+    SetMaccFilter(1, filter_storage.Get(1));
+    SetMaccFilter(2, filter_storage.Get(2));
+    SetMaccFilter(3, filter_storage.Get(3));
+    SetMaccInput(0, input_storage.Get(0));
+    SetMaccInput(1, input_storage.Get(1));
+    SetMaccInput(2, input_storage.Get(2));
+    SetMaccInput(3, input_storage.Get(3));
+    accumulator += MaccOne();
+    iterations -= 1;
+  }
+  return accumulator;
+}
 
 struct OutputParams {
   int16_t bias;
@@ -260,18 +281,6 @@ inline uint32_t SetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
 inline uint32_t GetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
   switch (funct7) {
     case REG_MACC_OUT:
-      assert(iterations > 0);
-      filter_storage.Next();
-      input_storage.Next();
-      SetMaccFilter(0, filter_storage.Get(0));
-      SetMaccFilter(1, filter_storage.Get(1));
-      SetMaccFilter(2, filter_storage.Get(2));
-      SetMaccFilter(3, filter_storage.Get(3));
-      SetMaccInput(0, input_storage.Get(0));
-      SetMaccInput(1, input_storage.Get(1));
-      SetMaccInput(2, input_storage.Get(2));
-      SetMaccInput(3, input_storage.Get(3));
-      iterations -= 1;
       return Macc();
     case REG_VERIFY:
       return reg_verify + 1;
