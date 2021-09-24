@@ -103,6 +103,7 @@ class GetInstruction(InstructionBase):
         Constants.REG_INPUT_2,
         Constants.REG_INPUT_3,
         Constants.REG_MACC_OUT,
+        Constants.REG_OUTPUT_WORD,
         Constants.REG_VERIFY,
     ]
 
@@ -124,6 +125,7 @@ class GetInstruction(InstructionBase):
     # The CPU will block until a value has been received from the input stream.
     READ_EXACTLY_ONCE = {
         Constants.REG_MACC_OUT,
+        Constants.REG_OUTPUT_WORD,
     }
 
     def __init__(self):
