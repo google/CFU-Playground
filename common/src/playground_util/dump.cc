@@ -47,3 +47,20 @@ void dump_hex(const int32_t* data, size_t len) {
     }
   }
 }
+
+// Dumps memory as a C array
+void dump_c_array(const char* name, const void* data, size_t len) {
+  const uint8_t* ptr = static_cast<const uint8_t*>(data);
+  printf("const uint8_t %s[] = {", name);
+  for (size_t i = 0; i < len; i++) {
+    if ((i & 0x3ff) == 0) {
+      pause();
+    }
+    // 16 bytes per line
+    if ((i & 0xf) == 0) {
+      printf("\n  ");
+    }
+    printf("0x%02x,", ptr[i]);
+  }
+  printf("\n};\n");
+}

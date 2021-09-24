@@ -1,0 +1,42 @@
+/*
+ * Copyright 2021 The CFU-Playground Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef _CONV2D_CALL_H
+#define _CONV2D_CALL_H
+
+#include <cstdint>
+
+// Functionality for calling ConvPerChannel4x4 from test harnesses
+
+struct Conv2DData {
+  const char* name;
+  const uint8_t* params;
+  const uint8_t* output_multiplier;
+  const uint8_t* output_shift;
+  const uint8_t* input_shape;
+  const uint8_t* input_data;
+  const uint8_t* filter_shape;
+  const uint8_t* filter_data;
+  const uint8_t* bias_shape;
+  const uint8_t* bias_data;
+  const uint8_t* output_shape;
+  const uint8_t* output_data;
+};
+
+// Tests Conv2D with the data in the given structure
+void test_conv2d(const Conv2DData* data);
+
+#endif  // _CONV2D_CALL_H

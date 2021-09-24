@@ -36,6 +36,7 @@ void ConvPerChannel4x4(const ConvParams& params,
                        const int8_t* filter_data,
                        const RuntimeShape& bias_shape, const int32_t* bias_data,
                        const RuntimeShape& output_shape, int8_t* output_data) {
+
   // Get parameters.
   const int32_t input_offset = params.input_offset;  // r = s(q - Z)
   const int stride_width = params.stride_width;
