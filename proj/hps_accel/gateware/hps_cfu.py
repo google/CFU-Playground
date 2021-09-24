@@ -205,13 +205,14 @@ class HpsCfu(Cfu):
         m.d.comb += op_store.reset.eq(
             set.write_strobes[Constants.REG_OUTPUT_PARAMS_RESET])
 
-    def connect_post_process(self, m, pp, set, op_store):
+    def connect_post_process(self, m, pp, get, set, op_store):
         m.d.comb += [
             pp.offset.eq(set.values[Constants.REG_OUTPUT_OFFSET]),
             pp.activation_min.eq(set.values[Constants.REG_OUTPUT_MIN]),
             pp.activation_max.eq(set.values[Constants.REG_OUTPUT_MAX]),
             pp.read_data.eq(op_store.read_data),
             op_store.read_enable.eq(pp.read_enable),
+            connect(pp.result, get.input_streams[Constants.REG_OUTPUT_WORD])
         ]
 
     def elab_instructions(self, m):
@@ -238,7 +239,7 @@ class HpsCfu(Cfu):
         m.submodules['op_store'] = op_store = OutputParamsStorage()
         self.connect_op_store(m, op_store, set)
         m.submodules['pp'] = pp = PostProcessInstruction()
-        self.connect_post_process(m, pp, set, op_store)
+        self.connect_post_process(m, pp, get, set, op_store)
 
         m.submodules['ping'] = ping = PingInstruction()
         return {

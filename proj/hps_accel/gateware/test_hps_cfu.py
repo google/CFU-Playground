@@ -173,9 +173,11 @@ class HpsCfuTest(CfuTestBase):
                     Constants.REG_OUTPUT_MULTIPLIER, multiplier, 0), 0)
             yield ((SET, Constants.REG_OUTPUT_SHIFT, shift, 0), 0)
 
-    def check_post_process(self, data):
-        for inp, expected in data:
-            yield((PP, Constants.PP_POST_PROCESS, inp, 0), expected)
+    def check_post_process(self, inputs, expected_outputs):
+        for input_ in inputs:
+            yield((PP, Constants.PP_POST_PROCESS, input_, 0), 0)
+        for expected in expected_outputs:
+            yield ((GET, Constants.REG_OUTPUT_WORD, 0, 0), expected)
 
     def test_PP_POST_PROCESS(self):
         """Tests PP post process function"""
@@ -194,16 +196,11 @@ class HpsCfuTest(CfuTestBase):
             ])
 
             # Check some input and output values - should use all params twice
-            yield from self.check_post_process([
-                (-15150, -128),
-                (-432, -125),
-                (37233, -105),
-                (-294, -123),
-                (-14403, -128),
-                (95, -124),
-                (37889, -104),
-                (-566, -124),
-            ])
+            yield from self.check_post_process(
+                [-15150, -432, 37233, -294,
+                 -14403, 95, 37889, -566],
+                [pack_vals(-128, -125, -105, -123),
+                 pack_vals(-128, -124, -104, -124)])
 
             # Reset store and do this again
             yield ((SET, Constants.REG_OUTPUT_PARAMS_RESET, 0, 0), 0)
@@ -214,14 +211,9 @@ class HpsCfuTest(CfuTestBase):
                 (-3353, 1708212360, -9),
             ])
             yield from self.check_post_process([
-                (3908, -113),
-                (153, -125),
-                (2981, -118),
-                (-9758, -128),
-                (3721, -114),
-                (-145, -125),
-                (2912, -118),
-                (-9791, -128),
-            ])
+                3908, 153, 2981, -9758,
+                3721, -145, 2912, -9791, ],
+                [pack_vals(-113, -125, -118, -128),
+                 pack_vals(-114, -125, -118, -128)])
 
         self.run_ops(op_generator(), False)

@@ -95,6 +95,7 @@ class GetInstruction(InstructionBase):
     # The list of all register IDs that may be fetched
     REGISTER_IDS = [
         Constants.REG_MACC_OUT,
+        Constants.REG_OUTPUT_WORD,
         Constants.REG_VERIFY,
     ]
 
@@ -108,6 +109,7 @@ class GetInstruction(InstructionBase):
     # The CPU will block until a value has been received from the input stream.
     READ_EXACTLY_ONCE = {
         Constants.REG_MACC_OUT,
+        Constants.REG_OUTPUT_WORD,
     }
 
     def __init__(self):
