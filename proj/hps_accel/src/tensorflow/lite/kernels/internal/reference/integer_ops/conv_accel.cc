@@ -114,13 +114,9 @@ void ConvPerChannel4x4(const ConvParams& params,
         for (int out_channel = out_channel_offset;
              out_channel < out_channel_offset + output_channels;
              ++out_channel) {
-          int32_t acc = 0;
-          for (int i = 0; i < filter_height * filter_width * input_depth / 16;
-               ++i) {
-            hps_accel::AdvanceFilterInput();
-            acc += multiply_accumulate();
-          }
-
+          int iterations = filter_height * filter_width * input_depth / 16;
+          hps_accel::AdvanceFilterInput(iterations);
+          int32_t acc = multiply_accumulate();
           acc = hps_accel::PostProcess(acc);
           output_data[Offset(output_shape, 0, out_y, out_x, out_channel)] = acc;
         }

@@ -74,11 +74,6 @@ inline int32_t multiply_accumulate() { return cfu_get(REG_MACC_OUT); }
 //
 void LoadFilter(size_t in_channels, size_t out_channels, const int8_t* values);
 
-// Returns the filter to use for the next multiplication
-// Iterates through filters for each input channel within x, within y within
-// output_channel and restarts from beginning when it reaches the end
-Vector16 GetFilter();
-
 // Loads a single input offset value into global storage.
 // This offset is applied to every multiply_accumulate() operation.
 inline void LoadInputOffset(int32_t value) { cfu_set(REG_INPUT_OFFSET, value); }
@@ -90,11 +85,9 @@ inline void LoadInputOffset(int32_t value) { cfu_set(REG_INPUT_OFFSET, value); }
 // - values is address of first word to load. It is the top left pixel.
 void LoadInput(size_t width, size_t in_channels, const int8_t* values);
 
-// Returns next matrix of input values to use.
-// Iterates through each input channel, then returns to start
-Vector16 GetInput();
-
-inline void AdvanceFilterInput() { cfu_set(REG_FILTER_INPUT_NEXT, 0); }
+// Triggers the filter store and input store to send the next *n* sets of
+// values through the pipeline.
+inline void AdvanceFilterInput(int n) { cfu_set(REG_FILTER_INPUT_NEXT, n); }
 
 // Sets per-layer output parameters
 void SetOutputOffsets(int32_t output_offset, int32_t output_activation_min,

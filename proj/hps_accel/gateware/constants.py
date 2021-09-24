@@ -68,18 +68,6 @@ class Constants:
     REG_OUTPUT_MIN = 7
     REG_OUTPUT_MAX = 8
 
-    # These registers contain values 0-3 of the current filter word
-    REG_FILTER_0 = 0x10
-    REG_FILTER_1 = 0x11
-    REG_FILTER_2 = 0x12
-    REG_FILTER_3 = 0x13
-
-    # These registers contain values 0-3 of the current input word
-    REG_INPUT_0 = 0x18
-    REG_INPUT_1 = 0x19
-    REG_INPUT_2 = 0x1a
-    REG_INPUT_3 = 0x1b
-
     # A write of any value to this register advances the read index
     # for both the filter store and the input store.
     REG_FILTER_INPUT_NEXT = 0x1f

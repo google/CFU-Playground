@@ -89,14 +89,6 @@ void LoadFilter(size_t in_channels, size_t out_channels, const int8_t* values) {
   }
 }
 
-Vector16 GetFilter() {
-  uint32_t word0 = cfu_get(REG_FILTER_0);
-  uint32_t word1 = cfu_get(REG_FILTER_1);
-  uint32_t word2 = cfu_get(REG_FILTER_2);
-  uint32_t word3 = cfu_get(REG_FILTER_3);
-  return Vector16{{word0, word1, word2, word3}};
-}
-
 void LoadInput(size_t width, size_t in_channels, const int8_t* values) {
   if (in_channels == 1) {
     LoadInput1(width, values);
@@ -105,14 +97,6 @@ void LoadInput(size_t width, size_t in_channels, const int8_t* values) {
   } else {
     printf("Failed to load\n");
   }
-}
-
-Vector16 GetInput() {
-  uint32_t word0 = cfu_get(REG_INPUT_0);
-  uint32_t word1 = cfu_get(REG_INPUT_1);
-  uint32_t word2 = cfu_get(REG_INPUT_2);
-  uint32_t word3 = cfu_get(REG_INPUT_3);
-  return Vector16{{word0, word1, word2, word3}};
 }
 
 // Sets per-layer output parameters

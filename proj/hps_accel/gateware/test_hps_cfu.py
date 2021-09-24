@@ -14,10 +14,12 @@
 
 from random import seed, randint
 
+from nmigen.sim import Settle
 from nmigen_cfu import CfuTestBase, InstructionTestBase, pack_vals
+from nmigen_cfu.util import TestBase
 
 from .constants import Constants
-from .hps_cfu import PingInstruction, make_cfu
+from .hps_cfu import PingInstruction, ResultAccumulator, make_cfu
 
 
 class PingInstructionTest(InstructionTestBase):
@@ -31,6 +33,50 @@ class PingInstructionTest(InstructionTestBase):
             (12, 4, 3),
             (0, 0, 16),
         ])
+
+
+class ResultAccumulatorTest(TestBase):
+
+    def create_dut(self):
+        return ResultAccumulator()
+
+    def test_it(self):
+        def process():
+            # After reset, the accumulator does not accept new results.
+            for _ in range(10):
+                self.assertEqual((yield self.dut.results.ready), 0)
+                self.assertEqual((yield self.dut.accumulated.valid), 0)
+                self.assertEqual((yield self.dut.num_results.ready), 1)
+                yield
+            # Tell it to accumulate 5 results.
+            yield self.dut.num_results.payload.eq(5)
+            yield self.dut.num_results.valid.eq(1)
+            yield
+            yield Settle()
+            yield self.dut.num_results.valid.eq(0)
+            self.assertEqual((yield self.dut.num_results.ready), 0)
+            results = [11, 12, 13, 14, 15]
+            for result in results:
+                self.assertEqual((yield self.dut.results.ready), 1)
+                yield self.dut.results.payload.eq(result)
+                yield self.dut.results.valid.eq(1)
+                yield
+            yield self.dut.results.valid.eq(0)
+            yield Settle()
+            # After the fifth result, it should not accept any more.
+            self.assertEqual((yield self.dut.results.ready), 0)
+            # The accumulated value should be sent out after 2 cycles delay.
+            yield self.dut.accumulated.ready.eq(1)
+            yield
+            yield
+            self.assertEqual((yield self.dut.accumulated.valid), 1)
+            expected = sum(results)
+            self.assertEqual((yield self.dut.accumulated.payload), expected)
+            # It should be ready to be told to accumulate more results
+            # after 1 more cycle delay.
+            yield
+            self.assertEqual((yield self.dut.num_results.ready), 1)
+        self.run_sim(process)
 
 
 GET = Constants.INS_GET
@@ -80,12 +126,9 @@ class HpsCfuTest(CfuTestBase):
         yield ((SET, Constants.REG_INPUT_OFFSET, offset, 0), 0)
 
     def check_macc(self, offset, input, filter):
-        for i in range(0, len(input), 16):
-            # Turn the crank
-            yield ((SET, Constants.REG_FILTER_INPUT_NEXT, 1, 0), 0)
-            expected = sum((offset + i) * f for (i, f) in
-                           zip(input[i:i + 16], filter[i:i + 16]))
-            yield ((GET, Constants.REG_MACC_OUT, 0, 0), expected)
+        yield ((SET, Constants.REG_FILTER_INPUT_NEXT, len(input) // 16, 0), 0)
+        expected = sum((offset + i) * f for (i, f) in zip(input, filter))
+        yield ((GET, Constants.REG_MACC_OUT, 0, 0), expected)
 
     def test_multiply_accumulate_one_iteration(self):
         def op_generator():
@@ -122,37 +165,6 @@ class HpsCfuTest(CfuTestBase):
             # Let it run through once more with new input values
             yield from self.check_macc(offset, input, filter)
         self.run_ops(op_generator())
-
-    def test_simple_input_store(self):
-        """Tests simple input use case"""
-        def op_generator():
-            yield ((SET, Constants.REG_INPUT_NUM_WORDS, 20, 0), 0)
-            for n in range(100, 120):
-                yield ((SET, Constants.REG_SET_INPUT, n, 0), 0)
-            for n in range(100, 120, 4):
-                yield ((SET, Constants.REG_FILTER_INPUT_NEXT, 1, 0), 0)
-                yield ((PING, 0, 0, 0), 0)  # wait for regs to update
-                yield ((GET, Constants.REG_INPUT_0, 0, 0), n + 0)
-                yield ((GET, Constants.REG_INPUT_1, 0, 0), n + 1)
-                yield ((GET, Constants.REG_INPUT_2, 0, 0), n + 2)
-                yield ((GET, Constants.REG_INPUT_3, 0, 0), n + 3)
-
-        self.run_ops(op_generator(), False)
-
-    def test_simple_filter_store(self):
-        """Tests simple filter store use case"""
-        def op_generator():
-            yield ((SET, Constants.REG_FILTER_NUM_WORDS, 20, 0), 0)
-            for n in range(100, 120):
-                yield ((SET, Constants.REG_SET_FILTER, n, 0), 0)
-            for n in range(100, 120, 4):
-                yield ((SET, Constants.REG_FILTER_INPUT_NEXT, 1, 0), 0)
-                yield ((PING, 0, 0, 0), 0)  # wait for regs to update
-                yield ((GET, Constants.REG_FILTER_0, 0, 0), n + 0)
-                yield ((GET, Constants.REG_FILTER_1, 0, 0), n + 1)
-                yield ((GET, Constants.REG_FILTER_2, 0, 0), n + 2)
-                yield ((GET, Constants.REG_FILTER_3, 0, 0), n + 3)
-        self.run_ops(op_generator(), False)
 
     def set_output_params_store(self, params):
         for bias, multiplier, shift in params:

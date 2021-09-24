@@ -33,7 +33,7 @@ namespace soft_cfu {
 extern int32_t macc_input_offset;
 extern int8_t macc_input[16];
 extern int8_t macc_filter[16];
-extern bool macc_valid;
+extern uint32_t iterations;
 
 inline void Unpack32(int8_t* dest, uint32_t value) {
   dest[0] = (value & 0x000000ff);
@@ -49,8 +49,8 @@ inline void SetMaccFilter(size_t n, uint32_t value) {
   Unpack32(macc_filter + (4 * n), value);
 }
 
-// Do the macc
-inline int32_t Macc() {
+// Do one macc operation
+inline int32_t MaccOne() {
   int32_t macc_out = 0;
   // NOTE: unrolling this resulted in slower execution
   for (size_t n = 0; n < 16; n++) {
@@ -86,6 +86,27 @@ class Storage {
 
 extern Storage filter_storage;
 extern Storage input_storage;
+
+// Run macc operations and return the accumulated output.
+inline int32_t Macc() {
+  assert(iterations > 0);
+  int32_t accumulator = 0;
+  while (iterations > 0) {
+    filter_storage.Next();
+    input_storage.Next();
+    SetMaccFilter(0, filter_storage.Get(0));
+    SetMaccFilter(1, filter_storage.Get(1));
+    SetMaccFilter(2, filter_storage.Get(2));
+    SetMaccFilter(3, filter_storage.Get(3));
+    SetMaccInput(0, input_storage.Get(0));
+    SetMaccInput(1, input_storage.Get(1));
+    SetMaccInput(2, input_storage.Get(2));
+    SetMaccInput(3, input_storage.Get(3));
+    accumulator += MaccOne();
+    iterations -= 1;
+  }
+  return accumulator;
+}
 
 struct OutputParams {
   int16_t bias;
@@ -235,18 +256,8 @@ inline uint32_t SetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
       reg_output_max = rs1;
       return 0;
     case REG_FILTER_INPUT_NEXT:
-      assert(!macc_valid);
-      filter_storage.Next();
-      input_storage.Next();
-      SetMaccFilter(0, filter_storage.Get(0));
-      SetMaccFilter(1, filter_storage.Get(1));
-      SetMaccFilter(2, filter_storage.Get(2));
-      SetMaccFilter(3, filter_storage.Get(3));
-      SetMaccInput(0, input_storage.Get(0));
-      SetMaccInput(1, input_storage.Get(1));
-      SetMaccInput(2, input_storage.Get(2));
-      SetMaccInput(3, input_storage.Get(3));
-      macc_valid = true;
+      assert(iterations == 0);
+      iterations = rs1;
       return 0;
     case REG_OUTPUT_BIAS:
       reg_bias = rs1;
@@ -271,25 +282,7 @@ inline uint32_t SetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
 
 inline uint32_t GetRegister(int funct7, uint32_t rs1, uint32_t rs2) {
   switch (funct7) {
-    case REG_FILTER_0:
-      return filter_storage.Get(0);
-    case REG_FILTER_1:
-      return filter_storage.Get(1);
-    case REG_FILTER_2:
-      return filter_storage.Get(2);
-    case REG_FILTER_3:
-      return filter_storage.Get(3);
-    case REG_INPUT_0:
-      return input_storage.Get(0);
-    case REG_INPUT_1:
-      return input_storage.Get(1);
-    case REG_INPUT_2:
-      return input_storage.Get(2);
-    case REG_INPUT_3:
-      return input_storage.Get(3);
     case REG_MACC_OUT:
-      assert(macc_valid);
-      macc_valid = false;
       return Macc();
     case REG_VERIFY:
       return reg_verify + 1;

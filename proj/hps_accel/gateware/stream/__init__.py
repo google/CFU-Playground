@@ -61,5 +61,6 @@ Major differences from LiteX Streams:
 """
 
 from .actor import BinaryCombinatorialActor, BinaryPipelineActor
+from .flow import FlowRestrictor
 from .stream import Endpoint, PayloadDefinition, connect
 from .buffer import Buffer, ConcatenatingBuffer
