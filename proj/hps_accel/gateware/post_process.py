@@ -17,6 +17,8 @@ from nmigen_cfu import SimpleElaboratable, InstructionBase
 from nmigen import signed, unsigned, Memory, Module, Mux, Record, Signal
 
 from .stream import BinaryPipelineActor
+from .stream.gearbox import ByteToWord
+from .stream.fifo import StreamFifo
 from .constants import Constants
 from .stream import connect, Endpoint, BinaryPipelineActor
 
@@ -354,6 +356,9 @@ class PostProcessInstruction(InstructionBase):
       Data read from OutputStorageParams
     read_enable: Signal(), out
       Tells OutputStorageParams to read next
+
+    result: Endpoint(unsigned(32)), out
+      Word result from post process pipline
     """
 
     def __init__(self):
@@ -363,9 +368,10 @@ class PostProcessInstruction(InstructionBase):
         self.activation_max = Signal(signed(8))
         self.read_data = Record(OUTPUT_PARAMS)
         self.read_enable = Signal()
+        self.result = Endpoint(unsigned(32))
 
     def elab(self, m: Module):
-        # Connect the post process pipeline
+        # Oost process pipeline and its parameters
         m.submodules.ppp = ppp = PostProcessPipeline()
         m.d.comb += ppp.output.ready.eq(1)
         m.d.comb += [
@@ -376,20 +382,27 @@ class PostProcessInstruction(InstructionBase):
             self.read_enable.eq(ppp.read_enable),
         ]
 
-        m.d.sync += self.done.eq(0)
-        with m.FSM(reset="WAIT"):
-            with m.State("WAIT"):
-                with m.If(self.start):
-                    with m.If(self.funct7 == Constants.PP_POST_PROCESS):
-                        m.d.comb += [
-                            ppp.input.payload.eq(self.in0s),
-                            ppp.input.valid.eq(1),
-                        ]
-                        m.next = "RUN"
-                    with m.Else():
-                        m.d.sync += self.done.eq(1)
-            with m.State("RUN"):
-                with m.If(ppp.output.valid):
-                    m.d.sync += self.output.eq(ppp.output.payload)
-                    m.d.sync += self.done.eq(1)
-                    m.next = "WAIT"
+        # Make word gear box and fifo
+        m.submodules.gearbox = gearbox = ByteToWord()
+        m.submodules.fifo = fifo = StreamFifo(
+          type=unsigned(32), depth=Constants.MAX_CHANNELS)
+
+        m.d.comb += [
+            connect(ppp.output, gearbox.input),
+            connect(gearbox.output, fifo.input),
+            connect(fifo.output, self.result),
+        ]
+
+        # Begin processing asynchronously
+        m.d.sync += [
+            self.done.eq(0),
+            ppp.input.valid.eq(0),
+        ]
+        m.d.comb += self.output.eq(0)
+        with m.If(self.start):
+            with m.If(self.funct7 == Constants.PP_POST_PROCESS):
+                m.d.sync += [
+                    ppp.input.payload.eq(self.in0s),
+                    ppp.input.valid.eq(1),
+                ]
+            m.d.sync += self.done.eq(1)
