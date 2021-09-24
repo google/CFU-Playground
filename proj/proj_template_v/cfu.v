@@ -22,7 +22,6 @@ module Cfu (
   input      [31:0]   cmd_payload_inputs_1,
   output              rsp_valid,
   input               rsp_ready,
-  output              rsp_payload_response_ok,
   output     [31:0]   rsp_payload_outputs_0,
   input               reset,
   input               clk
@@ -31,7 +30,6 @@ module Cfu (
   // Trivial handshaking for a combinational CFU
   assign rsp_valid = cmd_valid;
   assign cmd_ready = rsp_ready;
-  assign rsp_payload_response_ok = 1'b1;
 
   //
   // select output -- note that we're not fully decoding the 3 function_id bits

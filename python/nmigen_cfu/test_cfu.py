@@ -250,10 +250,6 @@ class _CfuTest(TestBase):
                     self.assertEqual((yield self.dut.rsp_out), exp_result)
                 if exp_rsp_valid is not None:
                     self.assertEqual((yield self.dut.rsp_valid), exp_rsp_valid)
-                    # We don't currently support returning non-OK responses, so
-                    # if our response is valid, it must be OK.
-                    if exp_rsp_valid:
-                        self.assertTrue((yield self.dut.rsp_ok))
                 if exp_cmd_ready is not None:
                     self.assertEqual((yield self.dut.cmd_ready), exp_cmd_ready)
                 yield

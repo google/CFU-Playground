@@ -543,7 +543,6 @@ are high.
     CPU                                 CFU
         <--- rsp_valid ---------------<
         >--- rsp_ready --------------->
-        <--- rsp_response_ok ---------<
         <--- rsp_outputs_0[31:0] -----<
 
 With the previous specification in mind, here's an implementation of our
@@ -559,7 +558,6 @@ SIMD multiply-and-accumulate instruction:
       input      [31:0]   cmd_payload_inputs_1,
       output reg          rsp_valid,
       input               rsp_ready,
-      output              rsp_payload_response_ok,
       output reg [31:0]   rsp_payload_outputs_0,
       input               reset,
       input               clk
@@ -582,7 +580,6 @@ SIMD multiply-and-accumulate instruction:
     
       // Only not ready for a command when we have a response.
       assign cmd_ready = ~rsp_valid;
-      assign rsp_payload_response_ok = 1'b1;
     
       always @(posedge clk) begin
         if (reset) begin
