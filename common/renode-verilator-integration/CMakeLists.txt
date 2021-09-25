@@ -20,4 +20,4 @@ target_compile_options(libVtop PRIVATE ${FINAL_LIB_COMP_ARGS})
 target_link_libraries(libVtop PRIVATE ${FINAL_LIB_LINK_ARGS})
 set_target_properties(libVtop PROPERTIES OUTPUT_NAME Vtop)
 
-verilate(libVtop SOURCES ${VTOP} VERILATOR_ARGS ${VERI_LIB_ARGS})
+verilate(libVtop SOURCES ${VTOP} INCLUDE_DIRS ${INCLUDE_DIR} VERILATOR_ARGS ${VERI_LIB_ARGS})
