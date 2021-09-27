@@ -2,6 +2,9 @@
 set -e
 git submodule update --init
 
+# only this submodule needs a recursive update
+git submodule update --recursive third_party/python/pythondata-software-picolibc
+
 CFU_ROOT="$(dirname $(dirname $(realpath ${BASH_SOURCE[0]})))"
 
 # Verify dependencies that can be installed with apt (if available)

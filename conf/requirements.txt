@@ -3,3 +3,4 @@ termcolor
 tqdm
 yapf
 requests
+meson
