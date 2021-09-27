@@ -23,6 +23,8 @@ from litex.soc.cores.cpu.vexriscv import core
 def patch_cpu_variant():
     """Monkey patches custom variants into LiteX."""
     core.CPU_VARIANTS.update({
+        'custom':               'VexRiscv_Custom',
+        'custom+cfu':           'VexRiscv_CustomCfu',
         'slim+cfu':             'VexRiscv_SlimCfu',
         'slim+cfu+debug':       'VexRiscv_SlimCfuDebug',
         'perf+cfu':             'VexRiscv_PerfCfu',
@@ -31,6 +33,8 @@ def patch_cpu_variant():
         'slimperf+cfu+debug':   'VexRiscv_SlimPerfCfuDebug',
     })
     core.GCC_FLAGS.update({
+        'custom':               '-march=rv32im -mabi=ilp32',
+        'custom+cfu':           '-march=rv32im -mabi=ilp32',
         'slim+cfu':             '-march=rv32im -mabi=ilp32',
         'slim+cfu+debug':       '-march=rv32im -mabi=ilp32',
         'perf+cfu':             '-march=rv32im -mabi=ilp32',

@@ -251,31 +251,49 @@ def main():
     else:
         integrated_rom_init = []
 
-    if args.cpu_cfu:
-        if args.cpu_variant:
-            variant = args.cpu_variant
-        elif args.slim_cpu:
-            variant = "slim+cfu+debug" if args.debug else "slim+cfu"
-        else:
-            variant = "full+cfu+debug" if args.debug else "full+cfu"
-        soc = HpsSoC(Platform(args.toolchain),
-                     debug=args.debug,
-                     litespi_flash=args.litespi_flash,
-                     variant=variant,
-                     cpu_cfu=args.cpu_cfu,
-                     execute_from_lram=args.execute_from_lram,
-                     integrated_rom_init=integrated_rom_init)
+    # infer CFU / no CFU if an explicit variant is specified
+    if args.cpu_variant and "cfu" not in args.cpu_variant:
+        args.cpu_cfu = None
+
+    # final variant logic
+    if "custom" in args.cpu_variant:
+        variant = "custom"
+    elif args.slim_cpu:
+        variant = "slim"
+    elif args.cpu_variant:
+        variant = args.cpu_variant
     else:
-        if args.cpu_variant:
-            variant = args.cpu_variant
-        else:
-            variant = "full+debug" if args.debug else "full"
-        soc = HpsSoC(Platform(args.toolchain),
-                     debug=args.debug,
-                     litespi_flash=args.litespi_flash,
-                     variant=variant,
-                     execute_from_lram=args.execute_from_lram,
-                     integrated_rom_init=integrated_rom_init)
+        variant = "full"
+
+    if args.cpu_cfu and "cfu" not in variant:
+        variant += "+cfu"
+
+    if args.debug and "debug" not in variant:
+        variant += "+debug"
+
+    soc = HpsSoC(Platform(args.toolchain),
+                 debug=args.debug,
+                 litespi_flash=args.litespi_flash,
+                 variant=variant,
+                 cpu_cfu=args.cpu_cfu,
+                 execute_from_lram=args.execute_from_lram,
+                 integrated_rom_init=integrated_rom_init)
+
+    if "custom" in variant:
+        cfu_root = os.environ.get('CFU_ROOT')
+        proj = os.environ.get('PROJ')
+        ver = "VexRiscv_" + ''.join(word.title() for word in args.cpu_variant.split('+')) + ".v"
+        customdir = f"{cfu_root}/proj/{proj}/custom_vexriscv"
+        fullpath = f"{customdir}/{ver}"
+        # check if it exists, build if it doesn't.
+        if not os.path.exists(fullpath):
+            cmd = f"cd {customdir} && make {ver}"
+            print("Running \"", cmd, "\"")
+            if os.system(cmd) != 0:
+                raise OSError(f"Make/sbt failed to make target {ver}.")
+        if not os.path.exists(fullpath):
+            raise OSError(f"Unable to create {ver}.")
+        soc.cpu.use_external_variant(fullpath)
 
     builder = create_builder(soc, args)
     builder_kwargs = {}
