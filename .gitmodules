@@ -67,3 +67,6 @@
 [submodule "third_party/python/pythondata-software-picolibc"]
 	path = third_party/python/pythondata-software-picolibc
 	url = https://github.com/antmicro/pythondata-software-picolibc
+[submodule "third_party/python/meson"]
+	path = third_party/python/meson
+	url = https://github.com/mesonbuild/meson
