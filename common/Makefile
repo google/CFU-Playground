@@ -25,6 +25,7 @@ PATH_SEP   := /
 # Assumes current directory is the one containing the makefile
 BUILD_DIR      := $(abspath .)
 LIBBASE_DIR    := $(SOC_SOFTWARE_DIR)/libbase
+LIBC_DIR       := $(CFU_ROOT)/third_party/python/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc
 LITEX_DIR      := $(CFU_ROOT)/third_party/python/litex/litex
 VEX_SRC_DIR    := $(LITEX_DIR)/soc/cores/cpu/vexriscv
 LITEX_HW_DIR   := $(LITEX_DIR)/soc/software/include
@@ -46,6 +47,7 @@ DEFINE_FLAGS := $(DEFINES:%=-D %)
 SHARED_FLAGS := \
 	-march=rv32im  \
 	-mabi=ilp32 \
+	-fno-math-errno \
 	-D__vexriscv__ \
 	$(DEFINE_FLAGS) \
 	-I$(SRC_DIR) \
@@ -54,6 +56,8 @@ SHARED_FLAGS := \
 	-I$(SRC_DIR)/third_party/ruy \
 	-I$(SRC_DIR)/third_party/kissfft \
 	-I$(SOC_SOFTWARE_DIR)/include \
+	-I$(SOC_SOFTWARE_DIR)/libc \
+	-I$(LIBC_DIR)/include \
     -I$(LITEX_HW_DIR) \
     -I$(VEX_SRC_DIR) \
 	-ffunction-sections \
@@ -81,7 +85,7 @@ SHARED_FLAGS := \
 
 CFLAGS  := \
 	$(SHARED_FLAGS)\
-	-I$(LITEX_DIR)/soc/software/include/base \
+	-I$(LITEX_DIR)/soc/software/libbase \
 	-I$(LITEX_DIR)/soc/software/include
 
 CXXFLAGS   := \
@@ -101,9 +105,10 @@ LFLAGS     := \
 	$(CXXFLAGS) \
 	-L$(LD_DIR) \
 	-L$(GEN_LD_DIR) \
-	-L$(SOC_SOFTWARE_DIR)/libbase -lbase-nofloat \
+	-L$(SOC_SOFTWARE_DIR)/libc -lc \
+	-L$(SOC_SOFTWARE_DIR)/libbase -lbase \
 	-L$(SOC_SOFTWARE_DIR)/libcompiler_rt -lcompiler_rt \
-	-lm \
+	-L$(SOC_SOFTWARE_DIR)/libc/newlib -lm \
 	-nostartfiles \
 	-Wl,--gc-sections \
 	-Wl,--fatal-warnings \
