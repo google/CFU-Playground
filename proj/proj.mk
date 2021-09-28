@@ -46,7 +46,7 @@
 # To run in simulation:
 # $ make load PLATFORM=sim
 
-export UART_SPEED ?= 3686400
+export UART_SPEED ?= 1843200
 export PROJ       := $(lastword $(subst /, ,${CURDIR}))
 export CFU_ROOT   := $(realpath $(CURDIR)/../..)
 export PLATFORM   ?= common_soc
