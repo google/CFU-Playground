@@ -34,6 +34,9 @@ fi
 if ! which verilator >/dev/null; then
     missing+=(verilator libevent-dev libjson-c-dev)
 fi
+if ! which ninja >/dev/null; then
+    missing+=(ninja-build)
+fi
 if ! (apt list -i | grep libusb-1.0-0-dev) ; then
     missing+=(libusb-1.0-0-dev libftdi1-dev)
 fi
