@@ -47,7 +47,6 @@ DEFINE_FLAGS := $(DEFINES:%=-D %)
 SHARED_FLAGS := \
 	-march=rv32im  \
 	-mabi=ilp32 \
-	-fno-math-errno \
 	-D__vexriscv__ \
 	$(DEFINE_FLAGS) \
 	-I$(SRC_DIR) \
