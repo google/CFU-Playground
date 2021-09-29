@@ -98,9 +98,13 @@ void LoadOutputParams(size_t offset, size_t count, const int32_t* bias_data,
                       const int32_t* output_multiplier,
                       const int32_t* output_shift);
 
-// Do the actual post-processing
-inline int32_t PostProcess(int32_t acc) {
-  return cfu_op2(PP_POST_PROCESS, acc, 0);
+// Kicks off the actual post-processing
+inline void PostProcess(int32_t acc) {
+  cfu_op2(PP_POST_PROCESS, acc, 0);
+}
+
+inline uint32_t GetOutputWord() {
+  return cfu_get(REG_OUTPUT_WORD);
 }
 
 // Reset all

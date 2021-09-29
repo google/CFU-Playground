@@ -29,6 +29,9 @@ DEFINES += ACCEL_CONV
 # Uncomment this line to skip debug code (large effect on performance)
 DEFINES += NDEBUG
 
+# Show output from TF_LITE_ASSERTs
+DEFINES += TF_LITE_MCU_DEBUG_LOG
+
 # Uncomment this line to skip individual profiling output (has minor effect on performance).
 #DEFINES += NPROFILE
 
