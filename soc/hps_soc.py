@@ -256,7 +256,7 @@ def main():
         args.cpu_cfu = None
 
     # final variant logic
-    if "custom" in args.cpu_variant:
+    if args.cpu_variant and "custom" in args.cpu_variant:
         variant = "custom"
     elif args.slim_cpu:
         variant = "slim"
