@@ -83,11 +83,27 @@ class _CRG(Module):
 
 # Template for build script that uses parallel-nextpnr-nexus to run many copies
 # of nextpnr-nexus in parallel
-_build_template = [
+_oxide_parallel_build_template = [
     "yosys -l {build_name}.rpt {build_name}.ys",
     "parallel-nextpnr-nexus {build_name}.json {build_name}.pdc {build_name}.fasm \
         $(nproc) {seed}",
     "prjoxide pack {build_name}.fasm {build_name}.bit"
+]
+
+# Template for build script that passes --router router1
+_oxide_router1_build_template = [
+    'yosys -l {build_name}.rpt {build_name}.ys',
+    ('nextpnr-nexus '
+     '--json {build_name}.json '
+     '--pdc {build_name}.pdc '
+     '--fasm {build_name}.fasm '
+     '--device {device} '
+     '{timefailarg} '
+     '{ignoreloops} '
+     '--seed {seed} '
+     '--router router1'
+     ),
+    'prjoxide pack {build_name}.fasm {build_name}.bit',
 ]
 
 
@@ -97,7 +113,7 @@ class Platform(LatticePlatform):
     clk_divisor = 12
     sys_clk_freq = int(450e6 / clk_divisor)
 
-    def __init__(self, toolchain="radiant", parallel_pnr=True):
+    def __init__(self, toolchain="radiant", parallel_pnr=False):
         LatticePlatform.__init__(self,
                                  # The HPS actually has the LIFCL-17-7UWG72C, but that doesn't
                                  # seem to be available in Radiant 2.2, at
@@ -106,9 +122,11 @@ class Platform(LatticePlatform):
                                  io=hps_io + hps_nx17_debug_io + hps_debug_common,
                                  connectors=[],
                                  toolchain=toolchain)
-        # Override toolchain to process nextpnr in a quite parallel way
-        if toolchain == "oxide" and parallel_pnr:
-            self.toolchain.build_template = _build_template
+        if toolchain == "oxide":
+            if parallel_pnr:
+                self.toolchain.build_template = _oxide_parallel_build_template
+            else:
+                self.toolchain.build_template = _oxide_router1_build_template
 
     def create_crg(self):
         return _CRG(self, self.sys_clk_freq)
