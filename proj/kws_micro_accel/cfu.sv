@@ -26,7 +26,6 @@ module Cfu (
   input logic [31:0] cmd_payload_inputs_1,
 
   // CFU output signals
-  output logic        rsp_payload_response_ok,
   output logic [31:0] rsp_payload_outputs_0,
 
   // CFU <---> CPU handshaking
@@ -76,7 +75,6 @@ module Cfu (
 
   // Only not ready for a command when we have a response.
   assign cmd_ready = ~rsp_valid;
-  assign rsp_payload_response_ok = '1;
 
   // Single cycle CFU handshaking.
   always_ff @(posedge clk) begin

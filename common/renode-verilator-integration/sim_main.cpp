@@ -44,7 +44,6 @@ RenodeAgent *Init() {
     bus->req_data1 = (uint32_t *)&top->cmd_payload_inputs_1;
     bus->resp_valid = &top->rsp_valid;
     bus->resp_ready = &top->rsp_ready;
-    bus->resp_ok = &top->rsp_payload_response_ok;
     bus->resp_data = (uint32_t *)&top->rsp_payload_outputs_0;
     bus->rst = &top->reset;
     bus->clk = &top->clk;
