@@ -94,7 +94,7 @@ _build_template = [
 class Platform(LatticePlatform):
     # The NX-17 has a 450 MHz oscillator. Our system clock should be a divisor
     # of that.
-    clk_divisor = 12
+    clk_divisor = 7
     sys_clk_freq = int(450e6 / clk_divisor)
 
     def __init__(self, toolchain="radiant", parallel_pnr=True):
