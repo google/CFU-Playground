@@ -38,8 +38,6 @@ OUT_DIR:=   build/$(SOC_NAME)
 LITEX_ARGS= --output-dir $(OUT_DIR) \
         --csr-json $(OUT_DIR)/csr.json $(CFU_ARGS) $(EXTRA_LITEX_ARGS)
 
-# Open source toolchain (Yosys + Nextpnr) is used by default
-LITEX_ARGS += --yosys-abc9
 ifndef IGNORE_TIMING
 LITEX_ARGS += --nextpnr-timingstrict
 endif
