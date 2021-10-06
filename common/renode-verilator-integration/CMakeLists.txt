@@ -9,7 +9,6 @@ set(CSOURCES sim_main.cpp)
 # Additional compiling, linking or verilating arguments (respectively)
 set(VERI_LIB_ARGS -Wno-WIDTH -Wno-CASEINCOMPLETE -Wno-CASEOVERLAP)
 
-# CMake file doing the hard job
 find_package(verilator)
 
 file(GLOB_RECURSE RENODE_SOURCES ${VIL_DIR}/cfu.cpp ${VIL_DIR}/renode_cfu.cpp)

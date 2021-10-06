@@ -88,7 +88,6 @@ cpu:
     if cfu_lib_filepath:
         result += """
 cfu0: Verilated.CFUVerilatedPeripheral @ cpu 0
-    frequency: 100000000
 """
     return result
 
