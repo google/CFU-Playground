@@ -20,7 +20,8 @@ from litex.soc.integration import soc as litex_soc
 from litex.soc.integration import soc_core
 from litex.soc.cores.cpu.vexriscv import core
 from typing import Callable
-from patch_cpu_variant import patch_cpu_variant
+from patch_cpu_variant import patch_cpu_variant, copy_cpu_variant_if_needed
+
 
 
 class GeneralSoCWorkflow():
@@ -91,6 +92,7 @@ class GeneralSoCWorkflow():
         Returns:
             The LiteX Builder for the SoC.
         """
+        copy_cpu_variant_if_needed(self.args.cpu_variant)
         soc_builder = self.builder_constructor(
             soc, **builder.builder_argdict(self.args))
         soc_builder.build(run=self.args.build, **kwargs)

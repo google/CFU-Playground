@@ -1,0 +1,5 @@
+debug: !!vexriscv.DebugReport {hardwareBreakpointCount: 0}
+iBus: !!vexriscv.BusReport
+  flushInstructions: [4111, 19, 19, 19]
+  info: !!vexriscv.CacheReport {bytePerLine: 32, size: 2048}
+  kind: cached
