@@ -6,14 +6,10 @@ The VexRiscv Verilog files in this directory augment the one provided in
 with new variants of VexRiscv.
 
 
-* To build a custom CPU, just add a recipe in the Makefile in this directory.  The
-  target VexRiscv Verilog file must be named
-  `VexRiscv_SomethingCfu.v`
-  or
-  `VexRiscv_Something.v`,
-  for CPUs with and without a
-  CFU interface, respectively.
-  "Something" can be empty, or any CamelCasePhrase.
+* To build a custom CPU, add a recipe in the Makefile in this directory.  The
+  target VexRiscv Verilog file should be named
+  `VexRiscv_SomethingCfu.v` for CPUs with a CFU interface,
+  or `VexRiscv_Something.v` for CPUs without a CFU interface.
 
 
 * The Makefile recipe allows you to select the parameters for each
@@ -27,17 +23,16 @@ with new variants of VexRiscv.
 
 
 
-* Then **make** your processor with `make VexRiscv_SomethingCfu.v`.   You must have `sbt` installed.
+* **Make** your processor with the command `make VexRiscv_SomethingCfu.v`.   You must have `sbt` installed.
 
 
 
 * **ADD** your new variant to the patching routine in $CFU_ROOT/soc/patch_cpu_variants.py.
   Try to use a variant name that corresponds to the file name you just created,
-  for example "something+cfu" for `VexRiscv_SomethingCfu.v`.
+  for example "`something+cfu`" for `VexRiscv_SomethingCfu.v`.
   
 
-
-* To **USE** a custom variant, use the existing `--cpu-variant` flag.  The
+* To **USE** a custom variant, use the existing `--cpu-variant` option.  The
   The following specifies the use of `VexRiscv_SomethingCfu.v`.
   
 ```
