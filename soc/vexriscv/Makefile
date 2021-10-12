@@ -12,6 +12,9 @@ VexRiscv_Custom.v: $(SRC) Makefile
 VexRiscv_CustomCfu.v: $(SRC) Makefile
 	sbt compile "runMain vexriscv.GenCoreDefault --dCacheSize 4096 --iCacheSize 2048 --csrPluginConfig all --cfu true --outputFile VexRiscv_CustomCfu"
 
+VexRiscv_dbpl8Cfu.v: $(SRC) Makefile
+	sbt compile "runMain vexriscv.GenCoreDefault --dCacheSize 4096 --iCacheSize 2048 --csrPluginConfig all --cfu true --dBytesPerLine 8 --outputFile VexRiscv_dbpl8Cfu"
+
 #================================================================================================
 #======== standard CFU models already being used in CFU Playground.   They now live here. =======
 #================================================================================================
