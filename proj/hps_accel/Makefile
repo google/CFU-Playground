@@ -63,6 +63,11 @@ TEST_MENU_ITEMS=3 q
 export LDSCRIPT
 LDSCRIPT = $(PROJ_DIR)/linker.ld
 
+# Add constants defined in gateware/constants.py to C++ build
+BUILD_DIR_EXTRA_DEP = $(BUILD_DIR)/src/gateware_constants.h
+
+include ../proj.mk
+
 # Customise arguments to Litex:
 export EXTRA_LITEX_ARGS
 EXTRA_LITEX_ARGS += --cpu-variant slim+cfu
@@ -70,10 +75,6 @@ ifeq '$(TARGET)' 'digilent_arty'
 # Cannot meet timing at 100MHz, reduce to 75MHz
 EXTRA_LITEX_ARGS += --sys-clk-freq 75000000
 endif
-
-# Add constants defined in gateware/constants.py to C++ build
-BUILD_DIR_EXTRA_DEP = $(BUILD_DIR)/src/gateware_constants.h
-include ../proj.mk
 
 $(BUILD_DIR)/src/gateware_constants.h: $(BUILD_DIR)/src $(PROJ_DIR)/gateware/constants.py
 	$(PYRUN) -m gateware.constants $@
