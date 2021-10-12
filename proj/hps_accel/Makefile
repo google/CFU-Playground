@@ -59,6 +59,10 @@ DEFINES += INCLUDE_MODEL_HPS
 RUN_MENU_ITEMS=1 1 c
 TEST_MENU_ITEMS=3 q
 
+# Use a custom linker script for this project
+export LDSCRIPT
+LDSCRIPT = $(PROJ_DIR)/linker.ld
+
 # Customise arguments to Litex:
 export EXTRA_LITEX_ARGS
 EXTRA_LITEX_ARGS += --cpu-variant slim+cfu
