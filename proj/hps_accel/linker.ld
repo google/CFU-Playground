@@ -12,6 +12,8 @@ SECTIONS
 	{
 		_ftext = .;
 		*(.text.start)
+    /* Place the ConvPerChannel4x4() and LoadInput() functions sequentially
+     * to prevent one from evicting the other from the instruction cache. */
     */conv_accel.o(.text.*ConvPerChannel4x4*)
     */blocks.o(.text.*LoadInput*)
 		*(.text .stub .text.* .gnu.linkonce.t.*)
