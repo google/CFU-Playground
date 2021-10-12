@@ -39,7 +39,7 @@ from migen import Module, Instance
 from patch import Patch
 # from cam_control import CameraControl
 
-from patch_cpu_variant import patch_cpu_variant
+from patch_cpu_variant import patch_cpu_variant, copy_cpu_variant_if_needed
 
 import argparse
 import os
@@ -260,6 +260,7 @@ def main():
             variant = "slim+cfu+debug" if args.debug else "slim+cfu"
         else:
             variant = "full+cfu+debug" if args.debug else "full+cfu"
+        copy_cpu_variant_if_needed(variant)
         soc = HpsSoC(Platform(args.toolchain),
                      debug=args.debug,
                      litespi_flash=args.litespi_flash,
@@ -272,6 +273,7 @@ def main():
             variant = args.cpu_variant
         else:
             variant = "full+debug" if args.debug else "full"
+        copy_cpu_variant_if_needed(variant)
         soc = HpsSoC(Platform(args.toolchain),
                      debug=args.debug,
                      litespi_flash=args.litespi_flash,
