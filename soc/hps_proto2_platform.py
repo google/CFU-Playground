@@ -97,6 +97,8 @@ _oxide_router1_build_template = [
      '--json {build_name}.json '
      '--pdc {build_name}.pdc '
      '--fasm {build_name}.fasm '
+     '--report={build_name}-report.json '
+     '--detailed-timing-report '
      '--device {device} '
      '{timefailarg} '
      '{ignoreloops} '
