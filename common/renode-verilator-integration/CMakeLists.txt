@@ -6,8 +6,11 @@ project(cfu)
 # C/C++ source files to be compiled
 set(CSOURCES sim_main.cpp)
 
-# Additional compiling, linking or verilating arguments (respectively)
-set(VERI_LIB_ARGS -Wno-WIDTH -Wno-CASEINCOMPLETE -Wno-CASEOVERLAP)
+# Additional verilating arguments
+if(TRACE_DEPTH_VAL)
+    set(TRACE_DEPTH --trace-depth ${TRACE_DEPTH_VAL})
+endif()
+set(VERI_LIB_ARGS ${ENABLE_TRACE} ${TRACE_DEPTH} -Wno-WIDTH -Wno-CASEINCOMPLETE -Wno-CASEOVERLAP)
 
 find_package(verilator)
 

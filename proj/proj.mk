@@ -166,6 +166,10 @@ endif
 
 TARGET_REPL := $(BUILD_DIR)/renode/$(TARGET)_generated.repl
 
+ifneq '$(VERILATOR_TRACE_DEPTH)' ''
+	ENABLE_TRACE_ARG := --trace
+endif
+
 .PHONY:	renode
 renode: renode-scripts
 	@echo Running interactively under renode
@@ -179,7 +183,9 @@ renode-headless: renode-scripts
 renode-scripts: $(SOFTWARE_ELF)
 	@mkdir -p $(BUILD_DIR)/renode
 ifneq '$(SW_ONLY)' '1'
-	pushd $(BUILD_DIR)/renode && cmake -DCMAKE_BUILD_TYPE=Release -DINCLUDE_DIR="$(PROJ_DIR)" -DVTOP="$(CFU_VERILOG)" -DVIL_DIR="$(VIL_DIR)" $${VERILATOR_PATH:+"-DUSER_VERILATOR_DIR=$$VERILATOR_PATH"} "$(RVI_DIR)" && make libVtop && popd
+	pushd $(BUILD_DIR)/renode && cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_TRACE=$(ENABLE_TRACE_ARG) -DTRACE_DEPTH_VAL=$(VERILATOR_TRACE_DEPTH) \
+		-DINCLUDE_DIR="$(PROJ_DIR)" -DVTOP="$(CFU_VERILOG)" -DVIL_DIR="$(VIL_DIR)" $${VERILATOR_PATH:+"-DUSER_VERILATOR_DIR=$$VERILATOR_PATH"} \
+		"$(RVI_DIR)" && make libVtop && popd
 	$(CFU_ROOT)/scripts/generate_renode_scripts.py $(SOC_BUILD_DIR)/csr.json $(TARGET) $(BUILD_DIR)/renode/ --repl $(TARGET_REPL)
 else
 	$(CFU_ROOT)/scripts/generate_renode_scripts.py $(SOC_BUILD_DIR)/csr.json $(TARGET) $(BUILD_DIR)/renode/ --repl $(TARGET_REPL) --sw-only
