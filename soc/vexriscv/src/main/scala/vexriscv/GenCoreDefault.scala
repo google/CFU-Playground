@@ -26,6 +26,8 @@ case class ArgConfig(
   safe : Boolean = true,
   iCacheSize : Int = 4096,
   dCacheSize : Int = 4096,
+  iBPL : Int = 32,
+  dBPL : Int = 32,
   pmpRegions : Int = 0,
   pmpGranularity : Int = 256,
   mulDiv : Boolean = true,
@@ -66,8 +68,10 @@ object GenCoreDefault{
       opt[Unit]('d', "debug")    action { (_, c) => c.copy(debug = true)   } text("Enable debug")
       // ex : -iCacheSize=XXX
       opt[Int]("iCacheSize")     action { (v, c) => c.copy(iCacheSize = v) } text("Set instruction cache size, 0 mean no cache")
+      opt[Int]("iBytesPerLine")  action { (v, c) => c.copy(iBPL = v) }       text("Set instruction cache bytes per line")
       // ex : -dCacheSize=XXX
       opt[Int]("dCacheSize")     action { (v, c) => c.copy(dCacheSize = v) } text("Set data cache size, 0 mean no cache")
+      opt[Int]("dBytesPerLine")  action { (v, c) => c.copy(dBPL = v) }       text("Set data cache bytes per line")
       opt[Int]("pmpRegions")    action { (v, c) => c.copy(pmpRegions = v)   } text("Number of PMP regions, 0 disables PMP")
       opt[Int]("pmpGranularity")    action { (v, c) => c.copy(pmpGranularity = v)   } text("Granularity of PMP regions (in bytes)")
       opt[Boolean]("mulDiv")    action { (v, c) => c.copy(mulDiv = v)   } text("set RV32IM")
@@ -121,7 +125,7 @@ object GenCoreDefault{
             memoryTranslatorPortConfig = if(linux) MmuPortConfig(portTlbSize = 4) else null,
             config = InstructionCacheConfig(
               cacheSize = argConfig.iCacheSize,
-              bytePerLine = 32,
+              bytePerLine = argConfig.iBPL,
               wayCount = if(linux) ((argConfig.iCacheSize + 4095) / 4096) else 1,
               addressWidth = 32,
               cpuDataWidth = 32,
@@ -150,7 +154,7 @@ object GenCoreDefault{
             relaxedMemoryTranslationRegister = argConfig.dBusCachedRelaxedMemoryTranslationRegister,
             config = new DataCacheConfig(
               cacheSize = argConfig.dCacheSize,
-              bytePerLine = 32,
+              bytePerLine = argConfig.dBPL,
               wayCount = if(linux) ((argConfig.dCacheSize + 4095) / 4096) else 1,
               addressWidth = 32,
               cpuDataWidth = 32,

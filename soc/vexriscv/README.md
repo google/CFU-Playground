@@ -5,9 +5,18 @@ The VexRiscv Verilog files in this directory augment the one provided in
 `pythondata_cpu_vexriscv`.   This directory is a place to experiment
 with new variants of VexRiscv.
 
+PREREQUISITE 1: You must have the Scala build tool, `sbt`, installed and in your path.
 
-* To build a custom CPU, add a recipe in the Makefile in this directory.  The
-  target VexRiscv Verilog file should be named
+PREREQUISITE 2: Ensure that you have the VexRiscv source loaded:
+```
+cd $CFU_ROOT
+./scripts/setup
+```
+
+
+
+* To build a custom CPU, add a recipe to the Makefile in this directory.  
+  The target VexRiscv Verilog file should be named
   `VexRiscv_SomethingCfu.v` for CPUs with a CFU interface,
   or `VexRiscv_Something.v` for CPUs without a CFU interface.
 
