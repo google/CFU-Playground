@@ -13,6 +13,6 @@ jobs:
       - run: bash scripts/setup -ci
       - run: which pip3 && which python3 && which pip
       - run: riscv64-unknown-elf-gcc --version
-      - run: bash scripts/install_oxide 
-      - run: pwd && source environment && cd proj/proj_template_v && pip3 list && make PLATFORM=hps bitstream
-      - run: pwd && source environment && ulimit -S -t 900 && ulimit -H -t 900 &&  cd proj/hps_accel && pip3 list && make PLATFORM=hps bitstream || true
+      - run: make env
+      - run: pwd && source env/conda/bin/activate cfu-common && source environment && cd proj/proj_template_v && pip3 list && make PLATFORM=hps bitstream
+      - run: pwd && source env/conda/bin/activate cfu-common && source environment && ulimit -S -t 900 && ulimit -H -t 900 &&  cd proj/hps_accel && pip3 list && make PLATFORM=hps bitstream || true
