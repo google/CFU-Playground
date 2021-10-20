@@ -1,19 +1,17 @@
 
 ## Custom VexRiscv
 
-The VexRiscv Verilog files in this directory augment the one provided in 
+The VexRiscv Verilog files in this directory augment the ones provided in 
 `pythondata_cpu_vexriscv`.   This directory is a place to experiment
 with new variants of VexRiscv.
 
-PREREQUISITE 1: You must have the Scala build tool, `sbt`, installed and in your path.
-
-* One option is to follow the instructions under [Requirements](https://github.com/litex-hub/pythondata-cpu-vexriscv/blob/master/pythondata_cpu_vexriscv/verilog/README.md#requirements).
-  Ignore the material under 'Usages'; we will rebuild VexRiscv differently.
+PREREQUISITE 1: You must have the Scala build tool, `sbt`, installed and in your path.  One option is to follow the instructions under [Requirements](https://github.com/litex-hub/pythondata-cpu-vexriscv/blob/master/pythondata_cpu_vexriscv/verilog/README.md#requirements).  Ignore the material under 'Usages'; we will rebuild VexRiscv differently.
 
 
-PREREQUISITE 2: Ensure that you have the VexRiscv source module loaded.   From the root of this repository, run `./scripts/setup`.
+PREREQUISITE 2: Ensure that you have the VexRiscv source submodule loaded.   From the root of this repository, run `./scripts/setup`.
 
 
+### Instructions
 
 * To build a custom CPU, add a recipe to the Makefile in this directory (`soc/vexriscv/`).  
   The target VexRiscv Verilog file should be named
@@ -56,6 +54,7 @@ PREREQUISITE 2: Ensure that you have the VexRiscv source module loaded.   From t
   The new custom CPU can then be used by others, without the need for others to 
   rerun the `sbt` build.
 
+### Example
 
 * See this [commit](https://github.com/google/CFU-Playground/pull/325/commits/e40b24f7499c9485dfe17d4bad1d2f9d1fd9713a)
   for a full example, including adding a new option to the Scala script.
