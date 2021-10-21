@@ -35,7 +35,7 @@ XXD            := $(PYRUN) $(CFU_ROOT)/scripts/xxd.py
 
 LD_DIR     := $(BUILD_DIR)/ld
 GEN_LD_DIR := $(SOC_SOFTWARE_DIR)/include/generated
-LDSCRIPT   := $(LD_DIR)/linker.ld
+LDSCRIPT   ?= $(LD_DIR)/linker.ld
 LDSCRIPTS  := $(LDSCRIPT) $(GEN_LD_DIR)/output_format.ld $(GEN_LD_DIR)/regions.ld
 
 SRC_DIR    := $(BUILD_DIR)/src
