@@ -12,7 +12,7 @@ $(error SOC_SOFTWARE_DIR not set)
 endif
 
 # These are found in the PATH
-RV64       := riscv64-unknown-elf-
+RV64       := riscv32-elf-newlib-
 CC         := $(RV64)gcc
 CXX        := $(RV64)g++
 OBJDUMP    := $(RV64)objdump
