@@ -16,11 +16,11 @@
 from nmigen_cfu import SimpleElaboratable, InstructionBase
 from nmigen import signed, unsigned, Memory, Module, Mux, Record, Signal
 
-from .stream import BinaryPipelineActor
-from .stream.gearbox import ByteToWord
-from .stream.fifo import StreamFifo
+from ..stream import BinaryPipelineActor
+from ..stream.gearbox import ByteToWord
+from ..stream.fifo import StreamFifo
 from .constants import Constants
-from .stream import connect, Endpoint, BinaryPipelineActor
+from ..stream import connect, Endpoint, BinaryPipelineActor
 
 
 SRDHM_INPUT_LAYOUT = [

@@ -18,7 +18,7 @@ from nmigen import Array, Shape, Signal, signed
 from nmigen.hdl.rec import Layout
 from nmigen_cfu.util import all_words, tree_sum, SimpleElaboratable
 
-from .stream import Endpoint
+from ..stream import Endpoint
 
 
 class MultiplyAccumulate(SimpleElaboratable):

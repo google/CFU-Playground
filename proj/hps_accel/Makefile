@@ -71,5 +71,5 @@ endif
 BUILD_DIR_EXTRA_DEP = $(BUILD_DIR)/src/gateware_constants.h
 include ../proj.mk
 
-$(BUILD_DIR)/src/gateware_constants.h: $(BUILD_DIR)/src $(PROJ_DIR)/gateware/constants.py
-	$(PYRUN) -m gateware.constants $@
+$(BUILD_DIR)/src/gateware_constants.h: $(BUILD_DIR)/src $(PROJ_DIR)/gateware/gen1/constants.py
+	$(PYRUN) -m gateware.gen1.constants $@

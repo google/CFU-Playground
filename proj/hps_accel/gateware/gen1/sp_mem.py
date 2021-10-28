@@ -20,7 +20,7 @@ from nmigen.hdl.mem import Memory
 from nmigen.hdl.rec import DIR_FANOUT, Layout
 from nmigen_cfu.util import SimpleElaboratable, ValueBuffer
 
-from .stream import Endpoint, Buffer, connect
+from ..stream import Endpoint, Buffer, connect
 
 
 class MemoryParameters:

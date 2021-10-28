@@ -17,7 +17,7 @@ from nmigen.hdl.ast import Mux
 from nmigen.hdl.dsl import Module
 from nmigen_cfu import InstructionBase, SimpleElaboratable, ValueBuffer
 from .constants import Constants
-from .stream import Endpoint, connect
+from ..stream import Endpoint, connect
 
 
 class StatusRegister(SimpleElaboratable):
