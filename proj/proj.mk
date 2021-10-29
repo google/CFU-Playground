@@ -100,6 +100,9 @@ CFU_VERILOG     := $(if $(wildcard $(PROJ_DIR)/cfu.sv),$(PROJ_DIR)/cfu.sv,$(PROJ
 BUILD_DIR       := $(PROJ_DIR)/build
 PYRUN           := $(CFU_ROOT)/scripts/pyrun
 
+# Optional additional arguments for cfu_gen
+CFU_GEN_EXTRA_ARGS ?=
+
 # Additional dependencies for assembling the build directory
 BUILD_DIR_EXTRA_DEP ?=
 
@@ -212,7 +215,7 @@ $(CFU_VERILOG): generate_cfu
 
 .PHONY: generate_cfu
 generate_cfu:
-	$(PYRUN) $(CFU_GEN)
+	$(PYRUN) $(CFU_GEN) $(CFU_GEN_EXTRA_ARGS)
 
 endif
 
