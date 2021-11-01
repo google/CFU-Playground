@@ -15,10 +15,12 @@
 
 """Tests for mem.py"""
 
+import random
+
 from nmigen.sim import Delay
 from nmigen_cfu import TestBase
 
-from .mem import SinglePortMemory
+from .mem import LoopingAddressGenerator, LoopingCounter, SinglePortMemory
 
 
 class SinglePortMemoryTest(TestBase):
@@ -57,4 +59,87 @@ class SinglePortMemoryTest(TestBase):
                 if rdata is not None:
                     self.assertEqual((yield dut.read_data), rdata)
                 yield
+        self.run_sim(process, False)
+
+
+class LoopingCounterTest(TestBase):
+    """Tests LoopingCounter."""
+
+    def create_dut(self):
+        return LoopingCounter(4)
+
+    def test_it(self):
+        X = None
+        DATA = [
+            # (count, reset, next), (value, last)
+            # Begin with count 4
+            ((4, 1, 0), (X, X)),
+            ((4, 0, 0), (0, 0)),
+            ((4, 0, 0), (0, 0)),
+            ((4, 0, 1), (0, 0)),
+            ((4, 0, 0), (1, 0)),
+            ((4, 0, 0), (1, 0)),
+            ((4, 0, 1), (1, 0)),
+            ((4, 0, 1), (2, 0)),
+            ((4, 0, 1), (3, 1)),
+            ((4, 0, 1), (0, 0)),
+            ((4, 0, 0), (1, 0)),
+            # Now with count 3
+            ((3, 1, 0), (X, X)),
+            ((3, 0, 1), (0, 0)),
+            ((3, 0, 1), (1, 0)),
+            ((3, 0, 1), (2, 1)),
+            ((3, 0, 1), (0, 0)),
+            ((3, 0, 1), (1, 0)),
+            ((3, 0, 0), (2, 1)),
+            ((3, 0, 0), (2, 1)),
+        ]
+
+        def process():
+            dut = self.dut
+            for (count, reset, next_), (value, last) in DATA:
+                yield dut.count.eq(count)
+                yield dut.reset.eq(reset)
+                yield dut.next.eq(next_)
+                yield Delay(0.1)
+                if value is not None:
+                    self.assertEqual((yield dut.value), value)
+                if last is not None:
+                    self.assertEqual((yield dut.last), last)
+                yield
+        self.run_sim(process, False)
+
+
+class LoopingAddressGeneratorTest(TestBase):
+    """Tests Looping Address Generator."""
+
+    def create_dut(self):
+        return LoopingAddressGenerator(depth=16, max_repeats=8)
+
+    def test_addresses(self):
+        def check_addresses(count, repeats):
+            dut = self.dut
+            # Set parameters
+            yield dut.next.eq(0)
+            yield dut.params_input.payload.count.eq(count)
+            yield dut.params_input.payload.repeats.eq(repeats)
+            yield dut.params_input.valid.eq(1)
+            yield
+            yield dut.params_input.valid.eq(0)
+            yield
+            # Check generated addresses
+            yield self.dut.next.eq(1)
+            expected = [n for n in range(count) for _ in range(repeats)]
+            for value in expected:
+                for _ in range(random.randrange(0, 2)):
+                    yield dut.next.eq(0)
+                    yield
+                yield dut.next.eq(1)
+                yield
+                self.assertEqual((yield dut.addr), value)
+
+        def process():
+            yield from check_addresses(16, 8)
+            yield from check_addresses(15, 7)
+            yield from check_addresses(12, 1)
         self.run_sim(process, False)

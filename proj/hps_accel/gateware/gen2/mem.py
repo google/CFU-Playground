@@ -15,8 +15,10 @@
 
 """Simple memory wrapper"""
 
-from nmigen import Memory, Signal
+from nmigen import Memory, Mux, Signal, unsigned
 from nmigen_cfu.util import SimpleElaboratable
+
+from ..stream import Endpoint
 
 
 class SinglePortMemory(SimpleElaboratable):
@@ -85,4 +87,137 @@ class SinglePortMemory(SimpleElaboratable):
             wp.data.eq(self.write_data),
             rp.addr.eq(self.read_addr),
             self.read_data.eq(rp.data)
+        ]
+
+
+class LoopingCounter(SimpleElaboratable):
+    """Loops over values from 0 to (count-1).
+
+    Parameters
+    ----------
+
+    max_count: int
+        Maximum value of the count attribute.
+
+
+    Attributes
+    ----------
+
+    count: Signal(max=max_count), in
+        Number of items to count.
+
+    reset: Signal(), in
+        Pulse to cause value to go back to zero on next cycle.
+
+    value: Signal(max=max_count-1), out
+        Current value of count.
+
+    next: Signal(), in
+        Causes count to increment on next cycle
+
+    last: Signal(), out
+        High when counter is about to loop
+    """
+
+    def __init__(self, max_count):
+        self._max_count = max_count
+
+        self.count = Signal(max_count.bit_length())
+        self.reset = Signal()
+        self.value = Signal((max_count - 1).bit_length())
+        self.next = Signal()
+        self.last = Signal()
+
+    def elab(self, m):
+
+        with m.If(self.reset):
+            m.d.sync += self.value.eq(0)
+
+        with m.Else():
+            value_p1 = Signal.like(self.count)
+            next_value = Signal.like(self.value)
+            m.d.comb += [
+                value_p1.eq(self.value + 1),
+                self.last.eq(value_p1 == self.count),
+                next_value.eq(Mux(self.last, 0, value_p1)),
+            ]
+            with m.If(self.next):
+                m.d.sync += self.value.eq(next_value)
+
+
+LDR_PARAMS_LAYOUT = [
+    ('count', unsigned(16)),
+    ('repeats', unsigned(4)),
+]
+
+
+class LoopingAddressGenerator(SimpleElaboratable):
+    """Generates addresses from a memory.
+
+    Loops from address zero for a given count, with configurable
+    number of repeats.
+
+    Parameters
+    ----------
+
+    depth: int
+        Number of words in the memory being addressed. Maximum
+        value for count attribute also determines addr_width.
+
+    max_repeats: int
+        Maximum value for repeats.
+
+    Attributes
+    ----------
+
+    params: Endpoint(LDR_PARAMS_LAYOUT)), in
+        Sets the maximum count of addresses and number of repeats
+        required. Always ready to receive a value. When new parameters
+        are set, the output reset to first value in memory.
+
+    next: Signal(), in
+        Indicates next value should be presented on next cycle.
+
+    addr: Signal(addr_width), out
+        Output read address.
+    """
+
+    def __init__(self, *, depth, max_repeats):
+        self._depth = depth
+        self._max_repeats = max_repeats
+
+        self.params_input = Endpoint(LDR_PARAMS_LAYOUT)
+        self.next = Signal()
+
+        addr_width = (depth - 1).bit_length()
+        self.addr = Signal(addr_width)
+
+    def elab(self, m):
+        # Define parameters
+        repeats = Signal(self._max_repeats.bit_length())
+        count = Signal(self._depth.bit_length())
+
+        # Accept new parameters
+        m.d.comb += self.params_input.ready.eq(1)
+        with m.If(self.params_input.valid):
+            m.d.sync += [
+                repeats.eq(self.params_input.payload.repeats),
+                count.eq(self.params_input.payload.count),
+            ]
+
+        # Count repeats
+        m.submodules.rc = repeat_counter = LoopingCounter(self._max_repeats)
+        m.d.comb += [
+            repeat_counter.count.eq(repeats),
+            repeat_counter.reset.eq(self.params_input.valid),
+            repeat_counter.next.eq(self.next),
+        ]
+
+        # Count addresses
+        m.submodules.ac = addr_counter = LoopingCounter(self._depth)
+        m.d.comb += [
+            addr_counter.count.eq(count),
+            addr_counter.reset.eq(self.params_input.valid),
+            addr_counter.next.eq(self.next & repeat_counter.last),
+            self.addr.eq(addr_counter.value),
         ]
