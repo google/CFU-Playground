@@ -17,7 +17,7 @@ from nmigen.hdl.dsl import Module
 from nmigen_cfu import InstructionBase, SimpleElaboratable
 
 from .constants import Constants
-from .stream import Endpoint, connect
+from ..stream import Endpoint, connect
 
 
 class ConfigurationRegister(SimpleElaboratable):

@@ -18,7 +18,7 @@ from nmigen import unsigned, Signal, Module, Mux
 
 from .constants import Constants
 from .mem import WideReadMemory
-from .stream import Endpoint, connect
+from ..stream import Endpoint, connect
 
 
 class InputStore(SimpleElaboratable):

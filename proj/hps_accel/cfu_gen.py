@@ -12,13 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+import argparse
 import os.path
+import sys
+
 from nmigen import *
 from nmigen.back import verilog
 
-from gateware.hps_cfu import make_cfu
+from gateware.gen1.hps_cfu import make_cfu as gen1_make_cfu
 
 VERILOG_FILENAME = "cfu.v"
+
 
 def read_file():
     if os.path.exists(VERILOG_FILENAME):
@@ -26,13 +31,26 @@ def read_file():
             return f.read()
     return None
 
+
 def main():
-    cfu = make_cfu()
+    gen_list = ['gen1']
+    parser = argparse.ArgumentParser(description='Generate cfu.v')
+    parser.add_argument('gen', metavar='GEN', type=str,
+                        choices=gen_list, help=f'Which kind of CFU to generate - one of {gen_list}')
+    args = parser.parse_args()
+    if args.gen == 'gen1':
+        cfu = gen1_make_cfu()
+    else:
+        # This should not happen if all cases from gen_list are covered
+        print(f'Unexpected GEN {args.gen}')
+        sys.exit(5)
+
     new_verilog = verilog.convert(cfu, name='Cfu', ports=cfu.ports)
     old_verilog = read_file()
     if new_verilog != old_verilog:
         with open(VERILOG_FILENAME, "w") as f:
             f.write(new_verilog)
+
 
 if __name__ == '__main__':
     main()

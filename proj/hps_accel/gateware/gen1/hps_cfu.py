@@ -23,7 +23,7 @@ from .input_store import InputStore
 from .macc import MultiplyAccumulate
 from .post_process import OutputParamsStorage, PostProcessInstruction
 from .set import SetInstruction
-from .stream import BinaryCombinatorialActor, ConcatenatingBuffer, \
+from ..stream import BinaryCombinatorialActor, ConcatenatingBuffer, \
     Endpoint, FlowRestrictor, connect
 
 

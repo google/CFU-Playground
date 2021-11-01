@@ -16,6 +16,11 @@
 # This variable lists symbols to define to the C preprocessor
 export DEFINES :=
 
+# Define which generation gateware to use
+GATEWARE_GEN ?= gen1
+#GATEWARE_GEN = gen2
+DEFINES += GATEWARE_GEN=$(GATEWARE_GEN)
+
 # Uncomment this line to use the custom accelerated convolution operation
 DEFINES += ACCEL_CONV
 
@@ -55,6 +60,10 @@ DEFINES += INCLUDE_MODEL_HPS
 # Uncomment to include all TFLM examples (pdti8, micro_speech, magic_wand)
 #DEFINES += INCLUDE_ALL_TFLM_EXAMPLES
 
+# Default is now hps proto2
+# Use PLATFORM=common_soc TARGET=digilent_arty to select Arty instead of hps
+PLATFORM=hps
+
 # How to respond to run and test
 RUN_MENU_ITEMS=1 1 c
 TEST_MENU_ITEMS=3 q
@@ -69,7 +78,15 @@ endif
 
 # Add constants defined in gateware/constants.py to C++ build
 BUILD_DIR_EXTRA_DEP = $(BUILD_DIR)/src/gateware_constants.h
+
+# Pass gen argument to cfu_gen
+CFU_GEN_EXTRA_ARGS = $(GATEWARE_GEN)
+
+#### Base rules ####
 include ../proj.mk
 
-$(BUILD_DIR)/src/gateware_constants.h: $(BUILD_DIR)/src $(PROJ_DIR)/gateware/constants.py
-	$(PYRUN) -m gateware.constants $@
+#### Additional rules ####
+
+# Rule to build gateware_constants.h
+$(BUILD_DIR)/src/gateware_constants.h: $(BUILD_DIR)/src $(PROJ_DIR)/gateware/$(GATEWARE_GEN)/constants.py
+	$(PYRUN) -m gateware.$(GATEWARE_GEN).constants $@
