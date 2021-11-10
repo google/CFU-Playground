@@ -282,7 +282,7 @@ class PostProcessPipeline(SimpleElaboratable):
 # Parameters for the ReadngProducer
 READING_PRODUCER_PARAMS = [
     ('depth', unsigned_upto(Constants.MAX_CHANNEL_DEPTH)),
-    ('repeats', unsigned(Constants.SYS_ARRAY_MAX_INPUTS)),
+    ('repeats', unsigned_upto(Constants.SYS_ARRAY_MAX_INPUTS)),
 ]
 
 
