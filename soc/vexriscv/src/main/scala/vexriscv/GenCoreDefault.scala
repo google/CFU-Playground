@@ -32,6 +32,7 @@ case class ArgConfig(
   pmpGranularity : Int = 256,
   mulDiv : Boolean = true,
   cfu : Boolean = false,
+  cfuRespReadyAlways : Boolean = false,
   perfCSRs : Int = 0,
   atomics: Boolean = false,
   compressedGen: Boolean = false,
@@ -83,6 +84,7 @@ object GenCoreDefault{
       opt[Boolean]("singleCycleMulDiv")    action { (v, c) => c.copy(singleCycleMulDiv = v)   } text("If true, MUL/DIV are single-cycle")
       opt[Boolean]("hardwareDiv") action { (v, c) => c.copy(hardwareDiv = v) } text ("Default true; if false, turns off any _iterative_ hardware division.")
       opt[Boolean]("singleCycleShift")    action { (v, c) => c.copy(singleCycleShift = v)   } text("If true, SHIFTS are single-cycle")
+      opt[Boolean]("cfuRespReadyAlways")  action { (v, c) => c.copy(cfuRespReadyAlways = v) } text("If true, no backpressure is allowed on the CFU result.")
       opt[Boolean]("relaxedPcCalculation")    action { (v, c) => c.copy(relaxedPcCalculation = v)   } text("If true, one extra stage will be added to the fetch to improve timings")
       opt[Boolean]("bypass")    action { (v, c) => c.copy(bypass = v)   } text("set pipeline interlock/bypass")
       opt[Boolean]("externalInterruptArray")    action { (v, c) => c.copy(externalInterruptArray = v)   } text("switch between regular CSR and array like one")
@@ -287,7 +289,7 @@ object GenCoreDefault{
               CFU_OUTPUTS = 1,
               CFU_OUTPUT_DATA_W = 32,
               CFU_FLOW_REQ_READY_ALWAYS = false,
-              CFU_FLOW_RESP_READY_ALWAYS = false
+              CFU_FLOW_RESP_READY_ALWAYS = argConfig.cfuRespReadyAlways
             )
           )
         )
