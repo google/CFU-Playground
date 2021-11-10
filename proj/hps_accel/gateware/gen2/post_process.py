@@ -279,8 +279,8 @@ class PostProcessPipeline(SimpleElaboratable):
         m.d.comb += connect(sap.output, self.output)
 
 
-# Parameters for the ReadngProducer
-READING_PRODUCER_PARAMS = [
+# Post Process size parameters
+POST_PROCESS_SIZES = [
     ('depth', unsigned_upto(Constants.MAX_CHANNEL_DEPTH)),
     ('repeats', unsigned_upto(Constants.SYS_ARRAY_MAX_INPUTS)),
 ]
@@ -291,9 +291,8 @@ class ReadingProducer(SimpleElaboratable):
 
     Each value read is repeated a given number of times.
 
-    Respects back pressure. This is probably not as efficient as
-    a component that produces on each cycle, but is conceptually
-    simpler.
+    Respects back pressure. This is not as efficient as a component
+    that produces on each cycle, but is conceptually simpler.
 
     Parameters
     ----------
@@ -307,9 +306,12 @@ class ReadingProducer(SimpleElaboratable):
     Attributes
     ----------
 
-    input_params: Endpoint(READING_PRODUCER_PARAMS), in
-        Parameters for this producer. Receiving new parameters
-        initiates a reset.
+    size_params: Record(POST_PROCESS_SIZES), in
+        Depth and repeat count for producing values.
+
+    reset: Signal(1), in
+        Initiates a reset, beginning reads from memory
+        with new repeat and depth count.
 
     output_data: Endpoint(POST_PROCESS_PARAMS), out
         Stream of data read from memory
@@ -326,7 +328,8 @@ class ReadingProducer(SimpleElaboratable):
                  max_repeats=Constants.SYS_ARRAY_MAX_INPUTS):
         self._max_depth = max_depth
         self._max_repeats = max_repeats
-        self.input_params = Endpoint(READING_PRODUCER_PARAMS)
+        self.sizes = Record(POST_PROCESS_SIZES)
+        self.reset = Signal()
         self.output_data = Endpoint(POST_PROCESS_PARAMS)
         self.mem_addr = Signal(range(max_depth))
         self.mem_data = Signal(POST_PROCESS_PARAMS_WIDTH)
@@ -336,25 +339,19 @@ class ReadingProducer(SimpleElaboratable):
         m.submodules.addr_gen = addr_gen = LoopingAddressGenerator(
             depth=self._max_depth, max_repeats=self._max_repeats)
         m.d.comb += [
-            addr_gen.params_input.payload.count.eq(
-                self.input_params.payload.depth),
-            addr_gen.params_input.payload.repeats.eq(
-                self.input_params.payload.repeats),
-            addr_gen.params_input.valid.eq(self.input_params.valid),
-            self.input_params.ready.eq(addr_gen.params_input.ready),
+            addr_gen.params_input.payload.count.eq(self.sizes.depth),
+            addr_gen.params_input.payload.repeats.eq(self.sizes.repeats),
+            addr_gen.params_input.valid.eq(self.reset),
             self.mem_addr.eq(addr_gen.addr),
         ]
 
-        fifo_reset = Signal()
-        m.submodules.fifo = fifo = ResetInserter(fifo_reset)(
+        # Reset FIFO when addr generator gets new sizes
+        m.submodules.fifo = fifo = ResetInserter(self.reset)(
             StreamFifo(type=POST_PROCESS_PARAMS, depth=3))
-
-        # Reset FIFO when addr generator gets new values
-        m.d.comb += fifo_reset.eq(self.input_params.is_transferring())
 
         # Generate new addresses while FIFO does not have data (i.e FIFO needs
         # to be primed) or FIFO is outputting data
-        with m.If(~fifo_reset):
+        with m.If(~self.reset):
             with m.If(~fifo.output.valid):
                 m.d.comb += addr_gen.next.eq(1)
             with m.If(fifo.output.is_transferring()):

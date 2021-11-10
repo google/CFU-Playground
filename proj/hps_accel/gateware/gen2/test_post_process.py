@@ -376,18 +376,18 @@ class ReadingProducerTest(TestBase):
         self.m.d.sync += rp.mem_data.eq(rp.mem_addr + 100)
         return rp
 
-    def set_input_params(self, depth, repeats):
+    def set_size_params(self, depth, repeats):
         dut = self.dut
-        yield dut.input_params.payload.depth.eq(depth)
-        yield dut.input_params.payload.repeats.eq(repeats)
-        yield dut.input_params.valid.eq(1)
+        yield dut.sizes.depth.eq(depth)
+        yield dut.sizes.repeats.eq(repeats)
+        yield dut.reset.eq(1)
         yield
-        yield dut.input_params.valid.eq(0)
+        yield dut.reset.eq(0)
 
     def check(self, depth, repeats):
         dut = self.dut
         # Set input parameters
-        yield from self.set_input_params(depth, repeats)
+        yield from self.set_size_params(depth, repeats)
         # Wait a little for buffer to fill
         for _ in range(10):
             yield
@@ -415,4 +415,3 @@ class ReadingProducerTest(TestBase):
             yield from self.check(27, 4)
             yield from self.check(3, 3)
         self.run_sim(process, False)
-    
