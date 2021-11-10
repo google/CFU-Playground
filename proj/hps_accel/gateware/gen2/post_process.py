@@ -12,18 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Post processing of saccumulated values into 8 bit outputs."""
+"""Post processing of accumulated values into 8 bit outputs."""
 
 from nmigen_cfu import SimpleElaboratable
-from nmigen import signed, unsigned, Module, Mux, Record, Signal
+from nmigen import signed, unsigned, Module, Mux, Record, Signal, ResetInserter
 
+from .constants import Constants
+from .mem import LoopingAddressGenerator
+from .utils import unsigned_upto
 from ..stream import connect, Endpoint, BinaryPipelineActor
+from ..stream.fifo import StreamFifo
 
-OUTPUT_PARAMS = [
+POST_PROCESS_PARAMS = [
     ('bias', signed(16)),
     ('multiplier', signed(32)),
     ('shift', unsigned(4)),
 ]
+
+POST_PROCESS_PARAMS_WIDTH = len(Record(POST_PROCESS_PARAMS))
 
 
 SRDHM_INPUT_LAYOUT = [
@@ -213,7 +219,7 @@ class PostProcessPipeline(SimpleElaboratable):
     activation_max: signed(8), out
         The maximum output value
 
-    read_data: Record(OUTPUT_PARAMS), in
+    read_data: Record(POST_PROCESS_PARAMS), in
       Data read from OutputStorageParams
     read_enable: Signal(), out
       Tells OutputStorageParams to read next
@@ -231,7 +237,7 @@ class PostProcessPipeline(SimpleElaboratable):
         self.offset = Signal(signed(9))
         self.activation_min = Signal(signed(8))
         self.activation_max = Signal(signed(8))
-        self.read_data = Record(OUTPUT_PARAMS)
+        self.read_data = Record(POST_PROCESS_PARAMS)
         self.read_enable = Signal()
 
     def elab(self, m: Module):
@@ -244,7 +250,7 @@ class PostProcessPipeline(SimpleElaboratable):
         m.submodules.sap = sap = SaturateActivationPipeline()
 
         # On incoming valid, put data into pipeline and get next set of
-        # OUTPUT_PARAMS
+        # POST_PROCESS_PARAMS
         m.d.comb += [
             srdhm.input.valid.eq(self.input.valid),
             srdhm.input.payload.a.eq(self.input.payload + self.read_data.bias),
@@ -271,3 +277,100 @@ class PostProcessPipeline(SimpleElaboratable):
         ]
         # Connect final state to output
         m.d.comb += connect(sap.output, self.output)
+
+
+# Parameters for the ReadngProducer
+READING_PRODUCER_PARAMS = [
+    ('depth', unsigned_upto(Constants.MAX_CHANNEL_DEPTH)),
+    ('repeats', unsigned(Constants.SYS_ARRAY_MAX_INPUTS)),
+]
+
+
+class ReadingProducer(SimpleElaboratable):
+    """Reads post-process parameters from memory to a stream.
+
+    Each value read is repeated a given number of times.
+
+    Respects back pressure. This is probably not as efficient as
+    a component that produces on each cycle, but is conceptually
+    simpler.
+
+    Parameters
+    ----------
+
+    max_depth: int
+        The maximum depth required for reads. Determines addr_width.
+
+    max_repeats: int
+        Maximum number of repeats
+
+    Attributes
+    ----------
+
+    input_params: Endpoint(READING_PRODUCER_PARAMS), in
+        Parameters for this producer. Receiving new parameters
+        initiates a reset.
+
+    output_data: Endpoint(POST_PROCESS_PARAMS), out
+        Stream of data read from memory
+
+    mem_addr: Signal(addr_width), out
+        Address sent to memory.
+
+    mem_data: Signal(POST_PROCESS_PARAMS_WIDTH)), in
+        Data received from memory
+    """
+
+    def __init__(self,
+                 max_depth=Constants.MAX_CHANNEL_DEPTH,
+                 max_repeats=Constants.SYS_ARRAY_MAX_INPUTS):
+        self._max_depth = max_depth
+        self._max_repeats = max_repeats
+        self.input_params = Endpoint(READING_PRODUCER_PARAMS)
+        self.output_data = Endpoint(POST_PROCESS_PARAMS)
+        self.mem_addr = Signal(range(max_depth))
+        self.mem_data = Signal(POST_PROCESS_PARAMS_WIDTH)
+
+    def elab(self, m):
+        # Address generator
+        m.submodules.addr_gen = addr_gen = LoopingAddressGenerator(
+            depth=self._max_depth, max_repeats=self._max_repeats)
+        m.d.comb += [
+            addr_gen.params_input.payload.count.eq(
+                self.input_params.payload.depth),
+            addr_gen.params_input.payload.repeats.eq(
+                self.input_params.payload.repeats),
+            addr_gen.params_input.valid.eq(self.input_params.valid),
+            self.input_params.ready.eq(addr_gen.params_input.ready),
+            self.mem_addr.eq(addr_gen.addr),
+        ]
+
+        fifo_reset = Signal()
+        m.submodules.fifo = fifo = ResetInserter(fifo_reset)(
+            StreamFifo(type=POST_PROCESS_PARAMS, depth=3))
+
+        # Reset FIFO when addr generator gets new values
+        m.d.comb += fifo_reset.eq(self.input_params.is_transferring())
+
+        # Generate new addresses while FIFO does not have data (i.e FIFO needs
+        # to be primed) or FIFO is outputting data
+        with m.If(~fifo_reset):
+            with m.If(~fifo.output.valid):
+                m.d.comb += addr_gen.next.eq(1)
+            with m.If(fifo.output.is_transferring()):
+                m.d.comb += addr_gen.next.eq(1)
+
+        # A cycle after address is generated take data from memory and
+        # put in FIFO
+        m.d.comb += fifo.input.payload.eq(self.mem_data)
+        with m.If(fifo.input.is_transferring()):
+            m.d.sync += fifo.input.valid.eq(0)
+        with m.If(addr_gen.next):
+            m.d.sync += fifo.input.valid.eq(1)
+
+        # Output data is from Fifo
+        m.d.comb += [
+            self.output_data.payload.eq(fifo.output.payload),
+            self.output_data.valid.eq(fifo.output.valid),
+            fifo.output.ready.eq(self.output_data.ready),
+        ]

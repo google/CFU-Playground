@@ -15,10 +15,12 @@
 
 """Tests for post_process.py"""
 
+from nmigen import Module
+
 from nmigen_cfu import TestBase
 
 from .post_process import (SaturatingRoundingDoubleHighMul, RoundingDivideByPowerOfTwo,
-                           SaturateActivationPipeline, PostProcessPipeline)
+                           SaturateActivationPipeline, PostProcessPipeline, ReadingProducer)
 
 
 # Test cases generated from original C implementation
@@ -364,3 +366,53 @@ class PostProcessPipelineTest(TestBase):
                     yield
                 self.assertEqual((yield self.dut.output.payload), expected)
         self.run_sim(process, False)
+
+
+class ReadingProducerTest(TestBase):
+    """Tests the ReadingProducer class."""
+
+    def create_dut(self):
+        rp = ReadingProducer()
+        self.m.d.sync += rp.mem_data.eq(rp.mem_addr + 100)
+        return rp
+
+    def set_input_params(self, depth, repeats):
+        dut = self.dut
+        yield dut.input_params.payload.depth.eq(depth)
+        yield dut.input_params.payload.repeats.eq(repeats)
+        yield dut.input_params.valid.eq(1)
+        yield
+        yield dut.input_params.valid.eq(0)
+
+    def check(self, depth, repeats):
+        dut = self.dut
+        # Set input parameters
+        yield from self.set_input_params(depth, repeats)
+        # Wait a little for buffer to fill
+        for _ in range(10):
+            yield
+        # Read on every cycle, three times through
+        for _ in range(3):
+            for addr in range(depth):
+                for _ in range(repeats):
+                    yield dut.output_data.ready.eq(1)
+                    yield
+                    self.assertTrue((yield dut.output_data.valid))
+                    self.assertEqual(
+                        (yield dut.output_data.payload.as_unsigned()),
+                        addr + 100)
+                    yield dut.output_data.ready.eq(0)
+
+    def test_it_reads(self):
+        def process():
+            yield from self.check(5, 1)
+        self.run_sim(process, False)
+
+    def test_it_resets(self):
+        def process():
+            yield from self.check(1, 1)
+            yield from self.check(12, 8)
+            yield from self.check(27, 4)
+            yield from self.check(3, 3)
+        self.run_sim(process, False)
+    
