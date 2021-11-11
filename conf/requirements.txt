@@ -3,3 +3,5 @@ termcolor
 tqdm
 yapf
 requests
+meson
+Pillow

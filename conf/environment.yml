@@ -3,23 +3,16 @@ channels:
   - defaults
   - litex-hub
 dependencies:
-#  - litex-hub::gcc-riscv64-elf-newlib
-#  - litex-hub::toolchain-riscv64-linux-musl
-#  - litex-hub::nextpnr-ecp5
-#  - litex-hub::nextpnr-ice40
+  - litex-hub::gcc-riscv32-elf-newlib
   - litex-hub::dfu-util
   - litex-hub::flterm
   - litex-hub::openocd
   - litex-hub::verilator
   - litex-hub::nextpnr-nexus
+  - litex-hub::nextpnr-ecp5
+  - litex-hub::nextpnr-ice40
   - litex-hub::yosys
   - python=3.7
   - pip
   - pip:
     - -r ./requirements.txt
-#
-# Union of packages needed to build for:
-#  lattice ice40
-#  lattice ecp5
-#  lattice nexus
-#
