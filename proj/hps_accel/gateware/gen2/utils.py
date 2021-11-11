@@ -14,10 +14,19 @@
 
 """Utility functions."""
 
-from nmigen import unsigned, Mux
+from nmigen import Signal, unsigned
 
 
 def unsigned_upto(maximum_value):
     """Creates a shape of a size to hold maximum_value"""
     return unsigned(maximum_value.bit_length())
 
+
+def delay(m, input_, cycles):
+    """Delays the given input signal by the number of cycles"""
+    delayed = input_
+    for i in range(cycles):
+        tmp = delayed
+        delayed = Signal.like(input_, name=f"{input_.name}_d{i+1}")
+        m.d.sync += delayed.eq(tmp)
+    return delayed
