@@ -19,6 +19,8 @@
 from nmigen import Mux, Signal, unsigned
 from nmigen_cfu.util import tree_sum, SimpleElaboratable
 
+from .utils import delay
+
 
 class MaccBlock(SimpleElaboratable):
     """An N-wide multiply and accumulate block.
@@ -120,16 +122,6 @@ class MaccBlock(SimpleElaboratable):
             self.output_last.eq(self.input_last),
         ]
 
-    @staticmethod
-    def _delay(m, sig, cycles):
-        """Creates simple shift register that delays a bit signal."""
-        shift_register = Signal(cycles)
-        m.d.sync += [
-            shift_register[1:].eq(shift_register[0:]),
-            shift_register[0].eq(sig)
-        ]
-        return shift_register
-
     def elab(self, m):
         self._connect_passthrough(m)
 
@@ -151,12 +143,12 @@ class MaccBlock(SimpleElaboratable):
         # Pipeline cycle 1: accumulate
         product_sum = Signal.like(tree_sum(products))
         m.d.comb += product_sum.eq(tree_sum(products))
-        first_delayed = self._delay(m, self.input_first, 1)
+        first_delayed = delay(m, self.input_first, 1)
         accumulator = Signal(self._accumulator_shape)
-        base = Mux(first_delayed[0], 0, accumulator)
+        base = Mux(first_delayed, 0, accumulator)
         m.d.sync += accumulator.eq(base + product_sum)
 
         # Pipeline cycle 2: optional accumulator output
-        last_delayed = self._delay(m, self.input_last, 2)
-        with m.If(last_delayed[1]):
+        last_delayed = delay(m, self.input_last, 2)
+        with m.If(last_delayed):
             m.d.sync += self.output_accumulator.eq(accumulator)

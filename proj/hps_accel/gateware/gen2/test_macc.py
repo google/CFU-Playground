@@ -75,7 +75,6 @@ class MaccBlockTest(TestBase):
                     self.assertEqual((yield self.dut.output_accumulator), expected_accumulator)
                 yield
                 prev_a, prev_b, prev_first, prev_last = a, b, first, last
-
         self.run_sim(process, False)
 
     def check_random_calculation(self, size, seed):
