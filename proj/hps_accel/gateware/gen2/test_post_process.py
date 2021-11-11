@@ -14,13 +14,16 @@
 # limitations under the License.
 
 """Tests for post_process.py"""
+import itertools
 
 from nmigen import Module
+from nmigen.sim import Passive, Delay
 
 from nmigen_cfu import TestBase
 
-from .post_process import (SaturatingRoundingDoubleHighMul, RoundingDivideByPowerOfTwo,
-                           SaturateActivationPipeline, PostProcessPipeline, ReadingProducer)
+from .post_process import (
+    SaturatingRoundingDoubleHighMul, RoundingDivideByPowerOfTwo,
+    SaturateActivationPipeline, PostProcessPipeline, ParamWriter, ReadingProducer)
 
 
 # Test cases generated from original C implementation
@@ -365,6 +368,51 @@ class PostProcessPipelineTest(TestBase):
                 while not (yield self.dut.output.valid):
                     yield
                 self.assertEqual((yield self.dut.output.payload), expected)
+        self.run_sim(process, False)
+
+
+class ParamWriterTest(TestBase):
+    """Tests the ReadingProducer class."""
+
+    def create_dut(self):
+        return ParamWriter()
+
+    def reset(self):
+        yield self.dut.reset.eq(1)
+        yield
+        yield self.dut.reset.eq(0)
+
+    def send_data(self, data):
+        dut = self.dut
+        yield dut.input_data.payload.eq(data)
+        yield dut.input_data.valid.eq(1)
+        yield Delay(0.1)  # Allow simulation to proceed
+        while not (yield dut.input_data.ready):
+            yield
+        yield
+        yield dut.input_data.valid.eq(0)
+
+    def check_writes(self, num):
+        for addr in range(num):
+            while not (yield self.dut.mem_we):
+                yield
+            self.assertEqual(addr, (yield self.dut.mem_addr))
+            self.assertEqual(10 + addr, (yield self.dut.mem_data))
+            yield
+
+    def test_it(self):
+        dut = self.dut
+        depth = 10
+
+        def check_expected():
+            yield from self.check_writes(10)
+
+        def process():
+            yield from self.reset()
+            for i in range(10, 10 + depth):
+                yield from self.send_data(i)
+
+        self.add_process(check_expected)
         self.run_sim(process, False)
 
 

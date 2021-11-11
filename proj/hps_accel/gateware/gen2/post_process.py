@@ -286,6 +286,56 @@ POST_PROCESS_SIZES = [
 ]
 
 
+class ParamWriter(SimpleElaboratable):
+    """Writes post processing parameters to a memory.
+
+    To write a new set of parameters, first reset the writer.
+
+    Parameters
+    ----------
+
+    max_depth: int
+        The maximum depth required for writes. Determines addr_width.
+
+    Attributes
+    ----------
+
+    reset: Signal(), in
+        Initiates a reset, beginning reads from memory
+
+    input_data: Endpoint(POST_PROCESS_PARAMS), out
+        Stream of data to write to memory.
+
+    mem_we: Signal(), out
+        Memory write enable
+
+    mem_addr: Signal(addr_width), out
+        Address sent to memory.
+
+    mem_data: Signal(POST_PROCESS_PARAMS_WIDTH)), out
+        Data sent to memory
+    """
+
+    def __init__(self, max_depth=Constants.MAX_CHANNEL_DEPTH):
+        self.reset = Signal()
+        self.input_data = Endpoint(POST_PROCESS_PARAMS)
+        self.mem_we = Signal()
+        self.mem_addr = Signal(range(max_depth))
+        self.mem_data = Signal(POST_PROCESS_PARAMS_WIDTH)
+
+    def elab(self, m):
+        with m.If(self.reset):
+            m.d.sync += self.mem_addr.eq(0)
+
+        m.d.comb += self.input_data.ready.eq(~self.reset)
+        m.d.comb += self.mem_data.eq(self.input_data.payload)
+        m.d.comb += self.mem_we.eq(self.input_data.is_transferring())
+
+        # Increment memory address on incoming data
+        with m.If(self.input_data.is_transferring()):
+            m.d.sync += self.mem_addr.eq(self.mem_addr + 1)
+
+
 class ReadingProducer(SimpleElaboratable):
     """Reads post-process parameters from memory to a stream.
 
