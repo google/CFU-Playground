@@ -136,7 +136,7 @@ fi
     cat > "${CFU_ROOT}/.env" << EOF
 # Generated file
 # Used by vscode Python plugins to find library code
-# Regenerate with scripts/update_env
+# Regenerate with scripts/setup
 PYTHONPATH=${PYTHONPATH//${CFU_ROOT}\//}
 EOF
 )
