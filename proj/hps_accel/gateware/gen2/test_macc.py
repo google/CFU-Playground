@@ -15,6 +15,7 @@
 
 """Tests for macc.py"""
 
+from collections import namedtuple
 import random
 
 from nmigen import unsigned, signed
@@ -32,49 +33,55 @@ class MaccBlockTest(TestBase):
         return MaccBlock(4, unsigned(8), signed(8), signed(24))
 
     def test_basic_functions(self):
+        D = namedtuple('D', ['a', 'b', 'first', 'last', 'expected'])
         DATA = [
-            # inputs: a, b, first, last
-            # expected: accumulator output
-            ((0, 0, 0, 0), None),
-            ((0, 0, 0, 0), 0),
+            # Filler - before sim start
+            D(0, 0, 0, 0, 0),
+            D(0, 0, 0, 0, 0),
+            D(0, 0, 0, 0, 0),
+
+            # Data starts here
+            D(0, 0, 0, 0, 0),
 
             # Multiply two sets of numbers (1 byte only)
-            ((1, -2, 1, 0), 0),  # -2
-            ((5, 3, 0, 1), 0),  # +15
-            ((6, 26, 0, 0), 0),  # parameters should not affect output
-            ((2, 17, 0, 0), 0),
-            ((4, 21, 0, 0), 13),
+            D(1, -2, 1, 0, 0),  # -2
+            D(5, 3, 0, 1, 13),  # +15
+            D(6, 26, 0, 0, 13),  # parameters should not affect output
+            D(2, 17, 0, 0, 13),
+            D(4, 21, 0, 0, 13),
 
             # Four sets of four numbers - result calculated by hand
-            ((0x01020304, 0x05060708, 1, 0), 13),
-            ((0x0a0b0c0d, 0xfffefdfc, 0, 0), 13),  # filter values negative
-            ((0x18191a1b, 0x1113171d, 0, 0), 13),
-            ((0x22232425, 0x1b1d2127, 0, 1), 13),
-            ((6, 26, 0, 0), 13),  # parameters should not affect output
-            ((2, 17, 0, 0), 13),
-            ((4, 21, 0, 0), 6778),
+            D(0x01020304, 0x05060708, 1, 0, 13),
+            D(0x0a0b0c0d, 0xfffefdfc, 0, 0, 13),  # filter values negative
+            D(0x18191a1b, 0x1113171d, 0, 0, 13),
+            D(0x22232425, 0x1b1d2127, 0, 1, 6778),
+            # ((6, 26, 0, 0), 13),  # parameters should not affect output
+            # ((2, 17, 0, 0), 13),
+            # ((4, 21, 0, 0), 6778),
+
+            # Filler - wait for results to percolate through system
+            D(0, 0, 0, 0, 0),
+            D(0, 0, 0, 0, 0),
+            D(0, 0, 0, 0, 0),
         ]
 
         def process():
-            prev_a, prev_b, prev_first, prev_last = None, None, None, None
-            for (a, b, first, last), expected_accumulator in DATA:
-                yield self.dut.input_a.eq(a)
-                yield self.dut.input_b.eq(b)
-                yield self.dut.input_first.eq(first)
-                yield self.dut.input_last.eq(last)
+            for (data, data_prev, data_prev3) in zip(DATA[3:], DATA[2:], DATA):
+                # Set inputs
+                yield self.dut.input_a.eq(data.a)
+                yield self.dut.input_b.eq(data.b)
+                yield self.dut.input_first.eq(data.first)
+                yield self.dut.input_last.eq(data.last)
                 yield Delay(0.1)
-                if prev_a is not None:
-                    self.assertEqual((yield self.dut.output_a), prev_a & 0xffff_ffff)
-                if prev_b is not None:
-                    self.assertEqual((yield self.dut.output_b), prev_b & 0xffff_ffff)
-                if prev_first is not None:
-                    self.assertEqual((yield self.dut.output_first), prev_first)
-                if prev_last is not None:
-                    self.assertEqual((yield self.dut.output_last), prev_last)
-                if expected_accumulator is not None:
-                    self.assertEqual((yield self.dut.output_accumulator), expected_accumulator)
+                # check inputs correctly passed onward
+                self.assertEqual((yield self.dut.output_a), data_prev.a & 0xffff_ffff)
+                self.assertEqual((yield self.dut.output_b), data_prev.b & 0xffff_ffff)
+                self.assertEqual((yield self.dut.output_first), data_prev.first)
+                self.assertEqual((yield self.dut.output_last), data_prev.last)
+                # Check output is as expected
+                self.assertEqual((yield self.dut.output_accumulator), data_prev3.expected)
+                self.assertEqual((yield self.dut.output_accumulator_new), data_prev3.last)
                 yield
-                prev_a, prev_b, prev_first, prev_last = a, b, first, last
         self.run_sim(process, False)
 
     def check_random_calculation(self, size, seed):

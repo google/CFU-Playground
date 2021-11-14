@@ -88,6 +88,9 @@ class MaccBlock(SimpleElaboratable):
     output_accumulator: accumulator_shape, out
         Holds the output value. Since there is no flow control, this
         value must be read before it is updated again.
+    output_accumulator_new: Signal(1), out
+        Pulsed to indicate that a new value has been placed in
+        output_accumulator.
     """
 
     # The latency from input_received to accumulator being updated
@@ -112,6 +115,7 @@ class MaccBlock(SimpleElaboratable):
         self.output_last = Signal()
 
         self.output_accumulator = Signal(accumulator_shape)
+        self.output_accumulator_new = Signal()
 
     def _connect_passthrough(self, m):
         """Connects the block pass through signals."""
@@ -152,3 +156,6 @@ class MaccBlock(SimpleElaboratable):
         last_delayed = delay(m, self.input_last, 2)
         with m.If(last_delayed):
             m.d.sync += self.output_accumulator.eq(accumulator)
+            m.d.sync += self.output_accumulator_new.eq(1)
+        with m.Else():
+            m.d.sync += self.output_accumulator_new.eq(0)
