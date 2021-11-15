@@ -39,8 +39,8 @@ LITEX_ARGS= --output-dir $(OUT_DIR) \
         --csr-json $(OUT_DIR)/csr.json $(CFU_ARGS) $(EXTRA_LITEX_ARGS)
 
 # Open source toolchain (Yosys + Nextpnr) is used by default
-# Avoid abc9 temporarily to work around https://github.com/google/CFU-Playground/issues/306
-#LITEX_ARGS += --yosys-abc9
+# abc9 bug (https://github.com/google/CFU-Playground/issues/306) has been fixed
+LITEX_ARGS += --yosys-abc9
 ifndef IGNORE_TIMING
 LITEX_ARGS += --nextpnr-timingstrict
 endif
