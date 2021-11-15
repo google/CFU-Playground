@@ -48,7 +48,7 @@ class MaccBlock(SimpleElaboratable):
     ----------
 
     n: int
-        The number of multipliers. Four is the usual vavlue.
+        The number of multipliers. Four is the usual value.
 
     a_shape: Shape
         The shape of each the value packed into the A input. If the A
