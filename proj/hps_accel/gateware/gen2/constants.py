@@ -14,7 +14,13 @@
 
 """Constants shared between gateware and C++"""
 
+
 class Constants:
+    # Maximum number of 8-bit channels per pixel
     MAX_CHANNEL_DEPTH = 512
-    SYS_ARRAY_MAX_FILTERS = 8
-    SYS_ARRAY_MAX_INPUTS = 8
+
+    # Height (A dimension, aka activation values, aka inputs)
+    SYS_ARRAY_HEIGHT = 4
+
+    # Width (B dimension, aka filter values) of the Systolic array
+    SYS_ARRAY_WIDTH = 2

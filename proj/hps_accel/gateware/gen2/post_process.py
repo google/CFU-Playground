@@ -282,7 +282,7 @@ class PostProcessPipeline(SimpleElaboratable):
 # Post Process size parameters
 POST_PROCESS_SIZES = [
     ('depth', unsigned_upto(Constants.MAX_CHANNEL_DEPTH)),
-    ('repeats', unsigned_upto(Constants.SYS_ARRAY_MAX_INPUTS)),
+    ('repeats', unsigned_upto(Constants.SYS_ARRAY_HEIGHT)),
 ]
 
 
@@ -344,14 +344,6 @@ class ReadingProducer(SimpleElaboratable):
     Respects back pressure. This is not as efficient as a component
     that produces on each cycle, but is conceptually simpler.
 
-    Parameters
-    ----------
-
-    max_depth: int
-        The maximum depth required for reads. Determines addr_width.
-
-    max_repeats: int
-        Maximum number of repeats
 
     Attributes
     ----------
@@ -373,21 +365,18 @@ class ReadingProducer(SimpleElaboratable):
         Data received from memory
     """
 
-    def __init__(self,
-                 max_depth=Constants.MAX_CHANNEL_DEPTH,
-                 max_repeats=Constants.SYS_ARRAY_MAX_INPUTS):
-        self._max_depth = max_depth
-        self._max_repeats = max_repeats
+    def __init__(self):
         self.sizes = Record(POST_PROCESS_SIZES)
         self.reset = Signal()
         self.output_data = Endpoint(POST_PROCESS_PARAMS)
-        self.mem_addr = Signal(range(max_depth))
+        self.mem_addr = Signal(range(Constants.MAX_CHANNEL_DEPTH))
         self.mem_data = Signal(POST_PROCESS_PARAMS_WIDTH)
 
     def elab(self, m):
         # Address generator
         m.submodules.addr_gen = addr_gen = LoopingAddressGenerator(
-            depth=self._max_depth, max_repeats=self._max_repeats)
+            depth=Constants.MAX_CHANNEL_DEPTH,
+            max_repeats=Constants.SYS_ARRAY_HEIGHT)
         m.d.comb += [
             addr_gen.params_input.payload.count.eq(self.sizes.depth),
             addr_gen.params_input.payload.repeats.eq(self.sizes.repeats),

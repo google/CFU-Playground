@@ -459,7 +459,7 @@ class ReadingProducerTest(TestBase):
     def test_it_resets(self):
         def process():
             yield from self.check(1, 1)
-            yield from self.check(12, 8)
-            yield from self.check(27, 4)
+            yield from self.check(12, 4)
+            yield from self.check(27, 2)
             yield from self.check(3, 3)
         self.run_sim(process, False)
