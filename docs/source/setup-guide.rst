@@ -35,19 +35,19 @@ Step 2: Install Vivado and Renode
 Step 3: Install RISCV toolchain
 -------------------------------
 
-1. Download the `April 2020`_ toolchain from freedom-tools and unpack the binaries to your home directory:
+1. Download the `August 2020`_ toolchain from freedom-tools and unpack the binaries to your home directory:
 
-.. _`April 2020`: https://github.com/sifive/freedom-tools/releases/tag/v2020.04.0-Toolchain.Only
+.. _`August 2020`: https://github.com/sifive/freedom-tools/releases/tag/v2020.08.0
 
 .. code-block:: bash
 
-   $ tar xvfz ~/Downloads/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14.tar.gz
+   $ tar xvfz ~/Downloads/riscv64-unknown-elf-gcc-10.1.0-2020.08.2-x86_64-linux-ubuntu14.tar.gz
 
 2. Add the toolchain to your `PATH` in your ``.bashrc`` script:
 
 .. code-block:: bash
 
-   export PATH=$PATH:$HOME/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14/bin
+   export PATH=$PATH:$HOME/riscv64-unknown-elf-gcc-10.1.0-2020.08.2-x86_64-linux-ubuntu14/bin
 
 
 Step 4: Clone the CFU-Playground Repository
