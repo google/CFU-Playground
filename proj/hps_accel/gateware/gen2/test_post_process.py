@@ -15,6 +15,7 @@
 
 """Tests for post_process.py"""
 import itertools
+import random
 
 from nmigen import Module
 from nmigen.sim import Passive, Delay
@@ -23,7 +24,8 @@ from nmigen_cfu import TestBase
 
 from .post_process import (
     SaturatingRoundingDoubleHighMul, RoundingDivideByPowerOfTwo,
-    SaturateActivationPipeline, PostProcessPipeline, ParamWriter, ReadingProducer)
+    SaturateActivationPipeline, PostProcessPipeline, ParamWriter, ReadingProducer,
+    AccumulatorReader)
 
 
 # Test cases generated from original C implementation
@@ -462,4 +464,69 @@ class ReadingProducerTest(TestBase):
             yield from self.check(12, 4)
             yield from self.check(27, 2)
             yield from self.check(3, 3)
+        self.run_sim(process, False)
+
+
+class AccumulatorReaderTest(TestBase):
+    """Tests the AccumulatorReader class."""
+
+    def create_dut(self):
+        return AccumulatorReader()
+
+    def set_accumulators(self, values, half, cycles):
+        """Set inputs in a manner approximating systolic array output."""
+        # Order is cycle number when accumulator value will be produced
+        order = [0, 1, 1, 2] if half else [0, 1, 2, 3, 1, 2, 3, 4]
+        size = 4 if half else 8
+        groups = [values[i:i + size] for i in range(0, len(values), size)]
+
+        yield self.dut.half.eq(half)
+
+        # Send each group over a number of cycles
+        for group in groups:
+            for cycle in range(cycles):
+                for i in range(size):
+                    producing = order[i] == cycle
+                    if producing:
+                        yield self.dut.accumulator_new[i].eq(True)
+                        yield self.dut.accumulator[i].eq(group[i])
+                    else:
+                        yield self.dut.accumulator_new[i].eq(False)
+                yield
+
+    def check_outputs(self, expected):
+        """Checks output stream has correct values."""
+        yield self.dut.output.ready.eq(1)
+        for expected_value in expected:
+            while not (yield self.dut.output.valid):
+                yield
+            actual = (yield self.dut.output.payload)
+            self.assertEqual(expected_value, actual)
+            yield
+        # check no additional values
+        for _ in range(50):
+            self.assertFalse((yield self.dut.output.valid))
+            yield
+
+    def test_it_reads_full(self):
+        data = list(range(100, 100 + 10 * 8))
+
+        def set_values():
+            yield from self.set_accumulators(data, False, 24)
+        self.add_process(set_values)
+
+        def process():
+            yield from self.check_outputs(data)
+        self.run_sim(process, False)
+
+    def test_it_reads_half(self):
+        data = list(range(100, 100 + 10 * 8))
+
+        def set_values():
+            yield from self.set_accumulators(data, True, 4)
+        self.add_process(set_values)
+
+        def process():
+            yield Passive()
+            yield from self.check_outputs(data)
         self.run_sim(process, False)

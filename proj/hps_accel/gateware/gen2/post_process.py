@@ -15,7 +15,9 @@
 """Post processing of accumulated values into 8 bit outputs."""
 
 from nmigen_cfu import SimpleElaboratable
-from nmigen import signed, unsigned, Module, Mux, Record, Signal, ResetInserter
+from nmigen import (
+    signed, unsigned, Array, Module, Mux, Record, Signal, ResetInserter
+)
 
 from .constants import Constants
 from .mem import LoopingAddressGenerator
@@ -342,8 +344,8 @@ class ReadingProducer(SimpleElaboratable):
     Each value read is repeated a given number of times.
 
     Respects back pressure. This is not as efficient as a component
-    that produces on each cycle, but is conceptually simpler.
-
+    that produces on each cycle without back pressure, but is
+    conceptually simpler.
 
     Attributes
     ----------
@@ -410,3 +412,66 @@ class ReadingProducer(SimpleElaboratable):
             self.output_data.valid.eq(fifo.output.valid),
             fifo.output.ready.eq(self.output_data.ready),
         ]
+
+
+class AccumulatorReader(SimpleElaboratable):
+    """Reads accumulators, in turn as values become available.
+
+    Hard-wired for 8 accumulators.
+
+    Can be set at run time to process only four accumulators.
+
+    Parameters
+    ----------
+
+    accumulator_shape: Shape
+        Defaults to signed(32)
+
+    Attributes
+    ----------
+
+    accumulator: [Signal(accumulator_shape)] * 8, in
+        The value to select.
+
+    accumulator_new: [Signal()] * 8, in
+        Strobes when new value available in accumulator.
+
+    half: Signal(), in
+        When held high, only the first four accumulators are considered.
+
+    output: Endpoint(accumulator_shape), in
+      The accumulated values to convert. Values not read before new values
+      are available are lsot.
+    """
+
+    def __init__(self, accumulator_shape=signed(32)):
+        self.accumulator = [Signal(accumulator_shape,
+                                   name=f"acc_{i}") for i in range(8)]
+        self.accumulator_new = [Signal(name=f"acc_new_{i}") for i in range(8)]
+        self.half = Signal()
+        self.reset = Signal()
+        self.output = Endpoint(accumulator_shape)
+
+    def elab(self, m):
+        # Unset valid on transfer (may be overrridden below)
+        with m.If(self.output.ready):
+            m.d.sync += self.output.valid.eq(0)
+
+        # Set flag to remember that value is available
+        flags = Array(Signal(name=f"flag_{i}") for i in range(8))
+        for i in range(8):
+            with m.If(self.accumulator_new[i]):
+                m.d.sync += flags[i].eq(1)
+
+        # If value available this cycle, or previously
+        # - output new value
+        # - unset flag
+        # - increment index
+        index = Signal(range(8))
+        with m.If(Array(self.accumulator_new)[index] | flags[index]):
+            m.d.sync += [
+                self.output.payload.eq(Array(self.accumulator)[index]),
+                self.output.valid.eq(1),
+                flags[index].eq(0),
+                index.eq(Mux(self.half & (index == 3), 0, index + 1)),
+            ]
