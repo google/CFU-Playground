@@ -158,7 +158,7 @@ void tflite_load_model(const unsigned char* model_data,
       buf[sizeof(tflite::INTERPRETER_TYPE)];
   interpreter = new (buf)
       tflite::INTERPRETER_TYPE(model, *op_resolver, tensor_arena,
-                               kTensorArenaSize, error_reporter, profiler);
+                               kTensorArenaSize, error_reporter, nullptr, profiler);
 
   // Allocate memory from the tensor_arena for the model's tensors.
   TfLiteStatus allocate_status = interpreter->AllocateTensors();
