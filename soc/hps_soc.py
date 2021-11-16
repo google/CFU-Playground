@@ -61,10 +61,12 @@ class HpsSoC(LiteXSoC):
     # that.
     rom_offset = 2*MB
     sram_origin = 0x40000000
+    arena_origin = 0x60000000
     vexriscv_region = SoCRegion(origin=0xf00f0000, size=0x100)
 
     mem_map = {
         "sram": sram_origin,
+        "arena": arena_origin,
         "csr":  csr_origin,
     }
 
@@ -72,6 +74,7 @@ class HpsSoC(LiteXSoC):
 
     def __init__(self, platform, debug, litespi_flash=True, variant=None,
                  cpu_cfu=None, execute_from_lram=False,
+                 separate_arena=False,
                  integrated_rom_init=[]):
         LiteXSoC.__init__(self,
                           platform=platform,
@@ -93,12 +96,19 @@ class HpsSoC(LiteXSoC):
                      cfu=cpu_cfu)
 
         # RAM
-        if execute_from_lram:
+        if separate_arena:
+            ram_size = 64*KB
+            arena_size = RAM_SIZE - ram_size
+        elif execute_from_lram:
             # Leave one LRAM free for ROM
             ram_size = RAM_SIZE - 64*KB
+            arena_size = 0
         else:
             ram_size = RAM_SIZE
+            arena_size = 0
         self.setup_ram(size=ram_size)
+        if arena_size > 0:
+            self.setup_arena(size=arena_size)
 
         # SPI Flash
         if litespi_flash:
@@ -141,6 +151,12 @@ class HpsSoC(LiteXSoC):
         self.submodules.lram = self.platform.create_ram(32, size)
         self.bus.add_slave("sram_lram", self.lram.bus, region)
         self.bus.add_region("sram", region)
+
+    def setup_arena(self, size):
+        region = SoCRegion(self.arena_origin, size, cached=True, linker=True)
+        self.submodules.arena = self.platform.create_ram(32, size)
+        self.bus.add_slave("arena_lram", self.arena.bus, region)
+        self.bus.add_region("arena", region)
 
     def setup_rom_in_lram(self):
         region = SoCRegion(self.cpu.reset_address, 64 * KB, mode='r',
@@ -241,6 +257,7 @@ def main():
                         help="Use Litex minimal SPI flash instead of Litespi")
     parser.add_argument("--cpu-cfu", default=None, help="Specify file containing CFU Verilog module")
     parser.add_argument("--cpu-variant", default=None, help="Which CPU variant to use")
+    parser.add_argument("--separate-arena", action="store_true", help="Create separate RAM for tensor arena")
     parser.add_argument("--execute-from-lram", action="store_true",
                         help="Make the CPU execute from integrated ROM stored in LRAM instead of flash")
     parser.add_argument("--integrated-rom-init", metavar="FILE",
@@ -267,6 +284,7 @@ def main():
                      variant=variant,
                      cpu_cfu=args.cpu_cfu,
                      execute_from_lram=args.execute_from_lram,
+                     separate_arena=args.separate_arena,
                      integrated_rom_init=integrated_rom_init)
     else:
         if args.cpu_variant:
