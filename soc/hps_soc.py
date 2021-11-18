@@ -107,8 +107,7 @@ class HpsSoC(LiteXSoC):
             ram_size = RAM_SIZE
             arena_size = 0
         self.setup_ram(size=ram_size)
-        if arena_size > 0:
-            self.setup_arena(size=arena_size)
+        self.setup_arena(size=arena_size)
 
         # SPI Flash
         if litespi_flash:
@@ -152,11 +151,14 @@ class HpsSoC(LiteXSoC):
         self.bus.add_slave("sram_lram", self.lram.bus, region)
         self.bus.add_region("sram", region)
 
+    # define the "arena" region even if it's length-zero
     def setup_arena(self, size):
         region = SoCRegion(self.arena_origin, size, cached=True, linker=True)
-        self.submodules.arena = self.platform.create_ram(32, size)
-        self.bus.add_slave("arena_lram", self.arena.bus, region)
         self.bus.add_region("arena", region)
+        if size > 0:
+            self.submodules.arena = self.platform.create_ram(32, size)
+            self.bus.add_slave("arena_lram", self.arena.bus, region)
+            self.add_config('SOC_SEPARATE_ARENA')
 
     def setup_rom_in_lram(self):
         region = SoCRegion(self.cpu.reset_address, 64 * KB, mode='r',

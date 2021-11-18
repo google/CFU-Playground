@@ -106,7 +106,11 @@ constexpr int kTensorArenaSize = const_max<int>(
     0 /* When no models defined, we don't need a tensor arena. */
 );
 
+#ifdef CONFIG_SOC_SEPARATE_ARENA
+static uint8_t tensor_arena[kTensorArenaSize] __attribute__((section(".arena")));
+#else
 static uint8_t tensor_arena[kTensorArenaSize];
+#endif
 }  // anonymous namespace
 
 static void tflite_init() {

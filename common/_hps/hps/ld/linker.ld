@@ -53,6 +53,13 @@ SECTIONS
 		_ebss = .;
 		_end = .;
 	} > sram
+
+        .arena (NOLOAD) :
+        {
+                _farena = .;
+                *(.arena)
+                _earena = .;
+        } > arena
 }
 
 PROVIDE(_fstack = ORIGIN(sram) + LENGTH(sram) - 4);
