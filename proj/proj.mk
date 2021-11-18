@@ -121,6 +121,7 @@ SRC_DIR            := $(abspath $(PROJ_DIR)/src)
 
 TFLM_SRC_DIR       := $(CFU_ROOT)/third_party/tflite-micro
 TFLM_MAKE_DIR      := $(TFLM_SRC_DIR)/tensorflow/lite/micro/tools/make
+TFLM_TP_DIR        := $(TFLM_SRC_DIR)/third_party
 
 # Copy every file found in these directories, except those excluded
 TFLM_COPY_SRC_DIRS := \
@@ -144,10 +145,11 @@ TFLM_FIND_PARAMS := \
 
 # Just copy data files from these dirs
 TFLM_COPY_DATA_DIRS := \
-	tensorflow/lite/micro/benchmarks \
 	tensorflow/lite/micro/examples/magic_wand \
 	tensorflow/lite/micro/examples/micro_speech/micro_features \
 	tensorflow/lite/micro/examples/person_detection \
+	tensorflow/lite/micro/models \
+	tensorflow/lite/micro/kernels/testdata \
 
 SOFTWARE_BIN     := $(BUILD_DIR)/software.bin
 SOFTWARE_ELF     := $(BUILD_DIR)/software.elf
@@ -244,20 +246,17 @@ tflite-micro-src: $(BUILD_DIR)/src
 		mkdir -p $(BUILD_DIR)/src/$$d; \
 		$(COPY) `find $(TFLM_SRC_DIR)/$$d -maxdepth 1 -type f -regex '.*_data\.\(h\|cc\)'` $(BUILD_DIR)/src/$$d; \
 	done
+	mkdir -p $(BUILD_DIR)/src/tensorflow/lite/micro/examples/person_detection
 	$(COPY) $(TFLM_SRC_DIR)/tensorflow/lite/micro/examples/person_detection/model_settings* $(BUILD_DIR)/src/tensorflow/lite/micro/examples/person_detection
 
-	@echo "TfLM: downloading third_party files"
-	# ensure TARGET is not passed to the TFLM make, where it means something different
-	( unset TARGET; unset MAKEFLAGS; cd $(TFLM_SRC_DIR); $(MAKE) -f $(TFLM_MAKE_DIR)/Makefile third_party_downloads )
 	@echo "TfLM: copying selected third_party files"
 	mkdir -p $(BUILD_DIR)/src/third_party/gemmlowp
-	$(COPY) $(TFLM_MAKE_DIR)/downloads/gemmlowp/fixedpoint $(BUILD_DIR)/src/third_party/gemmlowp
-	$(COPY) $(TFLM_MAKE_DIR)/downloads/gemmlowp/internal $(BUILD_DIR)/src/third_party/internal
+	$(COPY) $(TFLM_TP_DIR)/gemmlowp/fixedpoint $(BUILD_DIR)/src/third_party/gemmlowp
+	$(COPY) $(TFLM_TP_DIR)/gemmlowp/internal $(BUILD_DIR)/src/third_party/internal
 	mkdir -p $(BUILD_DIR)/src/third_party/flatbuffers/include
-	$(COPY) $(TFLM_MAKE_DIR)/downloads/flatbuffers/include/* $(BUILD_DIR)/src/third_party/flatbuffers/include
+	$(COPY) $(TFLM_TP_DIR)/flatbuffers/include/* $(BUILD_DIR)/src/third_party/flatbuffers/include
 	mkdir -p $(BUILD_DIR)/src/third_party/ruy/ruy/profiler
-	$(COPY) $(TFLM_MAKE_DIR)/downloads/ruy/ruy/profiler/instrumentation.h $(BUILD_DIR)/src/third_party/ruy/ruy/profiler
-	$(COPY) $(TFLM_MAKE_DIR)/downloads/person_model_int8/* $(BUILD_DIR)/src/tensorflow/lite/micro/examples/person_detection
+	$(COPY) $(TFLM_TP_DIR)/ruy/ruy/profiler/instrumentation.h $(BUILD_DIR)/src/third_party/ruy/ruy/profiler
 
 .PHONY: build-dir
 build-dir: $(BUILD_DIR)/src tflite-micro-src $(BUILD_DIR_EXTRA_DEP) 
