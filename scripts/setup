@@ -113,6 +113,16 @@ if [ ! -e "${VIL_DIR}" ]; then
     patch -p1 ${VIL_DIR}/src/renode.h ${CFU_ROOT}/common/renode-verilator-integration/renode_h.patch
 fi
 
+# To update TFLite Micro, remove the ${TFLM_DIR} directory and run this script.
+TFLM_DIR=${CFU_ROOT}/third_party/tflite-micro
+if [ ! -e "${TFLM_DIR}" ]; then
+    ${CFU_ROOT}/scripts/sync_from_tflite_micro.sh
+else
+    echo ""
+    echo "${TFLM_DIR} found, not updating TensorFlow Lite micro"
+    echo ""
+fi
+
 # Check GCC
 if ! which riscv64-unknown-elf-gcc >/dev/null; then
     echo "Error: RISCV GCC toolchain not found. Please install one, following the instructions at"
