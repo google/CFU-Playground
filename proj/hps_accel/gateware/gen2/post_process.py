@@ -301,7 +301,7 @@ class ParamWriter(SimpleElaboratable):
     ----------
 
     reset: Signal(), in
-        Initiates a reset, beginning reads from memory
+        Initiates a reset, resets write position to start of memory
 
     input_data: Endpoint(POST_PROCESS_PARAMS), out
         Stream of data to write to memory.
