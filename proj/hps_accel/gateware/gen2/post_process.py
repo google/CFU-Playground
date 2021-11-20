@@ -94,8 +94,8 @@ class SaturatingRoundingDoubleHighMul(BinaryPipelineActor):
 
 
 RDBPOT_INPUT_LAYOUT = [
-    ('dividend', signed(32)),
-    ('shift', unsigned(4))
+    ('dividend', signed(32)),  # The value to be divided
+    ('shift', unsigned(4)),    # The power of two by which to divide by
 ]
 
 
@@ -210,20 +210,21 @@ class PostProcessPipeline(SimpleElaboratable):
 
     input: Endpoint(signed(32)), in
       The accumulated value to convert
+
+    params: Endpoint(POST_PROCESS_PARAMS), in
+      Parameters assumed always ready and then read on input
+
     output: Endpoint(signed(8)), out
       The 8-bit quantized version of the accumulator
 
     offset: signed(9), in
        The output offset
+
     activation_min: signed(8), out
         The minimum output value
+
     activation_max: signed(8), out
         The maximum output value
-
-    read_data: Record(POST_PROCESS_PARAMS), in
-      Data read from OutputStorageParams
-    read_enable: Signal(), out
-      Tells OutputStorageParams to read next
     """
 
     PIPELINE_CYCLES = (
@@ -234,12 +235,11 @@ class PostProcessPipeline(SimpleElaboratable):
 
     def __init__(self):
         self.input = Endpoint(signed(32))
+        self.params = Endpoint(POST_PROCESS_PARAMS)
         self.output = Endpoint(signed(8))
         self.offset = Signal(signed(9))
         self.activation_min = Signal(signed(8))
         self.activation_max = Signal(signed(8))
-        self.read_data = Record(POST_PROCESS_PARAMS)
-        self.read_enable = Signal()
 
     def elab(self, m: Module):
         # Input always ready
@@ -254,13 +254,15 @@ class PostProcessPipeline(SimpleElaboratable):
         # POST_PROCESS_PARAMS
         m.d.comb += [
             srdhm.input.valid.eq(self.input.valid),
-            srdhm.input.payload.a.eq(self.input.payload + self.read_data.bias),
-            srdhm.input.payload.b.eq(self.read_data.multiplier),
-            self.read_enable.eq(self.input.valid),
+            self.params.ready.eq(self.input.valid),
+            srdhm.input.payload.a.eq(
+                self.input.payload +
+                self.params.payload.bias),
+            srdhm.input.payload.b.eq(self.params.payload.multiplier),
         ]
 
         # Connect the output of srdhm to rdbpot, along with the shift parameter
-        delayed_shift = delay(m, self.read_data.shift,
+        delayed_shift = delay(m, self.params.payload.shift,
                               SaturatingRoundingDoubleHighMul.PIPELINE_CYCLES)
         m.d.comb += [
             srdhm.output.ready.eq(rdbpot.input.ready),
@@ -385,7 +387,7 @@ class ReadingProducer(SimpleElaboratable):
             self.mem_addr.eq(addr_gen.addr),
         ]
 
-        # Reset FIFO when addr generator gets new sizes
+        # FIFO with reset
         m.submodules.fifo = fifo = ResetInserter(self.reset)(
             StreamFifo(type=POST_PROCESS_PARAMS, depth=3))
 

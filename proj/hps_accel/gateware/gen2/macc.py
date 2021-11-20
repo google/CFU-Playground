@@ -134,8 +134,8 @@ class MaccBlock(SimpleElaboratable):
         for i in range(self._n):
             a_bits = self.input_a.word_select(i, self._a_shape.width)
             b_bits = self.input_b.word_select(i, self._b_shape.width)
-            a = Signal(self._a_shape)
-            b = Signal(self._b_shape)
+            a = Signal(self._a_shape, name=f"a_{i}")
+            b = Signal(self._b_shape, name=f"b_{i}")
             m.d.comb += [
                 a.eq(a_bits),
                 b.eq(b_bits),

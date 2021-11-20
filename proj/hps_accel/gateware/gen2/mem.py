@@ -19,6 +19,7 @@ from nmigen import Memory, Mux, Signal, unsigned
 from nmigen_cfu.util import SimpleElaboratable
 
 from ..stream import Endpoint
+from .utils import unsigned_upto
 
 
 class SinglePortMemory(SimpleElaboratable):
@@ -194,8 +195,8 @@ class LoopingAddressGenerator(SimpleElaboratable):
 
     def elab(self, m):
         # Define parameters
-        repeats = Signal(self._max_repeats.bit_length())
-        count = Signal(self._depth.bit_length())
+        repeats = Signal(unsigned_upto(self._max_repeats))
+        count = Signal(unsigned_upto(self._depth))
 
         # Accept new parameters
         m.d.comb += self.params_input.ready.eq(1)
