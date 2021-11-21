@@ -20,12 +20,12 @@ import random
 from nmigen import Module
 from nmigen.sim import Passive, Delay
 
-from nmigen_cfu import TestBase
+from nmigen_cfu import pack_vals, TestBase
 
 from .post_process import (
     SaturatingRoundingDoubleHighMul, RoundingDivideByPowerOfTwo,
     SaturateActivationPipeline, PostProcessPipeline, ParamWriter, ReadingProducer,
-    AccumulatorReader)
+    AccumulatorReader, OutputWordAssembler)
 
 
 # Test cases generated from original C implementation
@@ -530,3 +530,65 @@ class AccumulatorReaderTest(TestBase):
             yield Passive()
             yield from self.check_outputs(data)
         self.run_sim(process, False)
+
+
+class OutputWordAssemblerTest(TestBase):
+    """Tests the OutputWordAssembler class."""
+
+    def create_dut(self):
+        return OutputWordAssembler()
+
+    def send_inputs(self, inputs):
+        for value in inputs:
+            yield self.dut.input.valid.eq(1)
+            yield self.dut.input.payload.eq(value)
+            yield
+            yield self.dut.input.valid.eq(0)
+            for _ in range(random.randrange(3)):
+                yield
+
+    def check_expected(self, expected):
+        yield self.dut.output.ready.eq(1)
+        for value in expected:
+            while not (yield self.dut.output.valid):
+                yield
+            self.assertEqual(value, (yield self.dut.output.payload))
+            yield
+
+    def test_it_does_8_words(self):
+        inputs = [
+            0x11, 0x12, 0x13, 0x14,
+            0x21, 0x22, 0x23, 0x24,
+            0x31, 0x32, 0x33, 0x34,
+            0x41, 0x42, 0x43, 0x44,
+            0x11, 0x12, 0x13, 0x14,
+            0x21, 0x22, 0x23, 0x24,
+            0x31, 0x32, 0x33, 0x34,
+            0x41, 0x42, 0x43, 0x44,
+        ]
+        expected = [
+            0x41312111, 0x42322212, 0x43332313, 0x44342414,
+            0x41312111, 0x42322212, 0x43332313, 0x44342414,
+        ]
+        self.add_process(lambda: (yield from self.send_inputs(inputs)))
+        self.run_sim(lambda: (yield from self.check_expected(expected)), False)
+
+    def test_it_does_more(self):
+        dut = self.dut
+
+        # Make random inputs
+        inputs = [random.randrange(256) for _ in range(25 * 16)]
+
+        # Transform inputs to expected outputs
+        def group(lst, size):
+            return [lst[i:i + size] for i in range(0, len(lst), size)]
+        expected = []
+        for sixteen_bytes in group(inputs, 16):
+            expected_words_as_bytes = zip(*group(sixteen_bytes, 4))
+            expected_words = [pack_vals(*word)
+                              for word in expected_words_as_bytes]
+            expected += expected_words
+
+        # Run the test
+        self.add_process(lambda: (yield from self.send_inputs(inputs)))
+        self.run_sim(lambda: (yield from self.check_expected(expected)), False)

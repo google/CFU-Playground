@@ -16,7 +16,7 @@
 
 from nmigen_cfu import SimpleElaboratable
 from nmigen import (
-    signed, unsigned, Array, Module, Mux, Record, Signal, ResetInserter
+    signed, unsigned, Array, Cat, Module, Mux, Record, Signal, ResetInserter
 )
 
 from .constants import Constants
@@ -32,7 +32,6 @@ POST_PROCESS_PARAMS = [
 ]
 
 POST_PROCESS_PARAMS_WIDTH = len(Record(POST_PROCESS_PARAMS))
-
 
 SRDHM_INPUT_LAYOUT = [
     ('a', signed(32)),
@@ -475,3 +474,65 @@ class AccumulatorReader(SimpleElaboratable):
                 flags[index].eq(0),
                 index.eq(Mux(self.half & (index == 3), 0, index + 1)),
             ]
+
+
+class OutputWordAssembler(SimpleElaboratable):
+    """Assembles output values into words.
+
+    The output from the post process pipeline consists of interleaved values
+    from four separate output pixels. This component reassembles the values
+    into words, one per output channel.
+
+    Output words are interleaved in the same order as the bytes were.
+
+    TODO: add a reset signal to ensure output always synchronized
+    TODO: add an error signal to catch output buffer overflow
+
+    Parameters
+    ----------
+
+    num_pixels: int
+        The maximum depth required for writes. Determines addr_width.
+
+    Attributes
+    ----------
+
+    input: Endpoint(signed(8)), in
+      The 8-bit quantized versions of the accumulator. Always ready.
+
+    output: Endpoint(unsigned(32)), out
+      The assembled 32 bit words. Assumes always ready.
+    """
+
+    def __init__(self, num_pixels=Constants.SYS_ARRAY_HEIGHT):
+        self._num_pixels = num_pixels
+        self.input = Endpoint(signed(8))
+        self.output = Endpoint(unsigned(32))
+
+    def elab(self, m):
+        # number of bytes received already
+        byte_count = Signal(range(4))
+        # output channel for next byte received
+        pixel_index = Signal(range(self._num_pixels))
+        # shift registers to buffer 3 incoming values
+        shift_registers = Array(
+            [Signal(24, name=f"sr_{i}") for i in range(self._num_pixels)])
+
+        m.d.sync += self.input.ready.eq(1)
+        with m.If(self.input.is_transferring()):
+            sr = shift_registers[pixel_index]
+            with m.If(byte_count == 3):
+                # Output current value and shift register
+                m.d.comb += self.output.valid.eq(1)
+                payload = Cat(sr, self.input.payload)
+                m.d.comb += self.output.payload.eq(payload)
+            with m.Else():
+                # Save input to shift register
+                m.d.sync += sr[-8:].eq(self.input.payload)
+                m.d.sync += sr[:-8].eq(sr[8:])
+
+            # Increment pixel index
+            m.d.sync += pixel_index.eq(pixel_index + 1)
+            with m.If(pixel_index == (self._num_pixels - 1)):
+                m.d.sync += pixel_index.eq(0)
+                m.d.sync += byte_count.eq(byte_count + 1)  # allow rollover
