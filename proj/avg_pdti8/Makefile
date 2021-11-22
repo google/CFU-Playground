@@ -34,4 +34,7 @@ DEFINES += INCLUDE_MODEL_PDTI8
 
 export UART_SPEED := 3686400
 
+# Tests are in implementation files in this project
+PYTEST_PATTERN := '*.py'
+
 include ../proj.mk
