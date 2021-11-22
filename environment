@@ -36,3 +36,4 @@ pathadd() {
 }
 pathadd "${CFU_ROOT}/third_party/usr/local/bin"
 pathadd "${CFU_ROOT}/scripts"
+pathadd "${CFU_ROOT}/third_party/symbiflow/xc7/install/bin"
