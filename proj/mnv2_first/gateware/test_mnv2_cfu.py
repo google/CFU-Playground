@@ -161,4 +161,4 @@ class CfuTest(CfuTestBase):
             yield get_output(pack_vals(122, -67, 127, 42))
             yield get_output(pack_vals(127, -55, 127, 67))
 
-        return self.run_ops(make_op_stream(), True)
+        return self.run_ops(make_op_stream(), False)

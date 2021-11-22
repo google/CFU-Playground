@@ -96,7 +96,7 @@ class InstructionTestBase(TestBase):
                 yield
         self.run_sim(process, trace)
 
-    def verify_against_reference(self, inputs, reference_fn):
+    def verify_against_reference(self, inputs, reference_fn, trace=False):
         """Verifies that our instruction behaves the same as a reference
         implementation.
 
@@ -129,7 +129,7 @@ class InstructionTestBase(TestBase):
                     f"\n  HEX: instruction({input_hex}) expected: 0x{expected:08X} actual: 0x{actual:08X}" +
                     f"\n  DEC: instruction({input}) expected: {expected} actual: {actual}")
                 yield
-        self.run_sim(process, True)
+        self.run_sim(process, trace)
 
 
 class _FallbackInstruction(InstructionBase):

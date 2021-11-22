@@ -116,7 +116,7 @@ class WriteInstructionTest(TestBase):
                 self.assertEqual((yield self.dut.input_offset), input_offset)
                 self.assertEqual((yield self.dut.reset_acc), reset_acc)
                 yield
-        self.run_sim(process, True)
+        self.run_sim(process, False)
 
 
 class ReadInstruction(InstructionBase):
@@ -167,7 +167,7 @@ class ReadInstructionTest(TestBase):
                     yield
                 self.assertEqual((yield self.dut.output), expected)
                 yield
-        self.run_sim(process, True)
+        self.run_sim(process, False)
 
 
 class MaccInstruction(InstructionBase):
@@ -253,7 +253,7 @@ class MaccInstructionTest(TestBase):
                     yield
                 self.assertEqual((yield self.dut.accumulator), acc)
                 yield
-        self.run_sim(process, True)
+        self.run_sim(process, False)
 
 
 INT32_MIN = 0x8000_0000

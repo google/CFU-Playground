@@ -70,7 +70,7 @@ class ValueBufferTest(TestBase):
                 yield Settle()
                 self.assertEqual((yield self.dut.output), expected_output, f"cycle={n}")
                 yield
-        self.run_sim(process, True)
+        self.run_sim(process, False)
 
 if __name__ == '__main__':
     unittest.main()
