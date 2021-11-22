@@ -72,10 +72,10 @@ class CfuTest(CfuTestBase):
 
             # Store 4 input value words
             ((0, 10, 4, 0), 0),
-            ((0, 25, pack_vals(2, 3, 4, 5, offset=128), 0), 0),
-            ((0, 25, pack_vals(2, 12, 220, 51, offset=128), 0), 0),
-            ((0, 25, pack_vals(255, 255, 255, 255, offset=128), 0), 0),
-            ((0, 25, pack_vals(19, 17, 103, 11, offset=128), 0), 0),
+            ((0, 25, pack_vals(2, 3, 4, 5, offset=-128), 0), 0),
+            ((0, 25, pack_vals(2, 12, 220, 51, offset=-128), 0), 0),
+            ((0, 25, pack_vals(255, 255, 255, 255, offset=-128), 0), 0),
+            ((0, 25, pack_vals(19, 17, 103, 11, offset=-128), 0), 0),
         ]
         return self.run_ops(DATA, False)
 
