@@ -448,7 +448,6 @@ class AccumulatorReader(SimpleElaboratable):
                                    name=f"acc_{i}") for i in range(8)]
         self.accumulator_new = [Signal(name=f"acc_new_{i}") for i in range(8)]
         self.half = Signal()
-        self.reset = Signal()
         self.output = Endpoint(accumulator_shape)
 
     def elab(self, m):
