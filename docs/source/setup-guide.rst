@@ -33,31 +33,42 @@ Clone the repository from the github:
 .. code-block:: bash
 
    git clone https://github.com/google/CFU-Playground.git
+
+
+Step 3: Run the setup script
+-------------------------------------------
+
+This updates submodules, builds some local executables, and installs missing Linux packages.
+
+.. code-block:: bash
+
    cd CFU-Playground
+   ./scripts/setup
 
 
-
-Step 3: Install Toolchain
+Step 4: Install Toolchain
 --------------------------------------------
 
 There are a few options depending on whether your board has a Xilinx FPGA 
-or not, and whether you want to use Conda or not.  If you have alredy installed
+or not, and whether you want to use Conda or not.  If you have already installed
 a toolchain and can build bitstreams for your board, you probably 
 don't need to do anything.   
 
 
-Option 3a: Install Conda package for SymbiFlow (Xilinx)
-----------------------------------------------------------
+Option 4a: Install Conda package for SymbiFlow (for Xilinx)
+--------------------------------------------------------------
 
-To download and install the open source SymbiFlow tools and databases, run the following from the top directory of the CFU Playground.
-It will take about six minutes in the best case, and use approximately 25GB of disk space.
+To download and install the open source SymbiFlow tools and databases, 
+run the following from the top directory of the CFU Playground.
+It will take about six minutes in the best case, 
+and use approximately 25GB of disk space.
 You normally only need to do this once.
 
 .. code-block:: bash
 
    make install-sf
 
-Then, to enter the environment, type:
+Then, each time to enter the environment, type:
 
 .. code-block:: bash
 
@@ -65,11 +76,12 @@ Then, to enter the environment, type:
 
 This starts a subshell; you can leave the environment by typing ``exit``.
 
-Later when you're building a project bitstream, you need to add USE\_SYMBIFLOW=1 to your make command line.
+Later when you're building a project bitstream, 
+you need to add USE\_SYMBIFLOW=1 to your make command line.
 
 
 
-Option 3b: Install Conda packages for Lattice FPGAs
+Option 4b: Install Conda packages for Lattice FPGAs
 -----------------------------------------------------
 
 This installs yosys and nextpnr versions and all other support tools
@@ -80,7 +92,7 @@ You normally only need to do this once.
 
    make env
 
-Then, to enter the environment, type:
+Then, each time to enter the environment, type:
 
 .. code-block:: bash
 
@@ -90,16 +102,16 @@ This starts a subshell; you can leave the environment by typing ``exit``.
 
 
 
-Option 3c: Use already-installed Yosys, Nextpnr, and other required tools 
+Option 4c: Use already-installed Yosys, Nextpnr, and other required tools 
 --------------------------------------------------------------------------
 
-This option makes sense if you have already installed the necessary open-source tools
-for your board.   In that case you don't need to do anything other than
+This option makes sense if you have already installed the necessary open-source 
+tools for your board.   In that case you don't need to do anything other than
 make sure that they're in your PATH.
 
 
 
-Option 3d: Install/Use Vivado 
+Option 4d: Install/Use Vivado 
 ----------------------------------
 
 If you are using a board with a Xilinx part, such as Arty A7 or Nexys Video, and you **don't** want to use
@@ -113,12 +125,13 @@ or do it in your .bashrc.
 
 
 
-Step 4: Install RISC-V toolchain 
+Step 5: Install RISC-V toolchain 
 ---------------------------------
 
 .. note::
 
-   This is only required if you don't use one of the Conda options above.  All of the Conda packages include the RISC-V toolchain.
+   This is only required if you don't use one of the Conda options above.  
+   All of the Conda packages include the RISC-V toolchain.
 
 1. Download the `August 2020`_ toolchain from freedom-tools and unpack the binaries to your home directory:
 
@@ -135,7 +148,7 @@ Step 4: Install RISC-V toolchain
    export PATH=$PATH:$HOME/riscv64-unknown-elf-gcc-10.1.0-2020.08.2-x86_64-linux-ubuntu14/bin
 
 
-Step 5: Test Run
+Step 6: Test Run
 ----------------
 
 Test that everything is working by building the template project. The template
