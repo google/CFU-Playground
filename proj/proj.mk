@@ -106,6 +106,9 @@ CFU_GEN_EXTRA_ARGS ?=
 # Additional dependencies for assembling the build directory
 BUILD_DIR_EXTRA_DEP ?=
 
+# Matching pattern used by pytest to find unit tests
+PYTEST_PATTERN ?= 'test_*.py'
+
 COMMON_DIR         := $(CFU_ROOT)/common
 RVI_DIR            := $(COMMON_DIR)/renode-verilator-integration
 COMMON_FILES       := $(shell find $(COMMON_DIR) -type f)
@@ -341,4 +344,4 @@ endif
 
 .PHONY: pytest
 pytest:
-	$(PYRUN) -m unittest discover -p '*.py'
+	$(PYRUN) -m unittest discover -p ${PYTEST_PATTERN}

@@ -81,7 +81,7 @@ class StoreInstructionTest(TestBase):
                 self.assertEqual((yield self.dut.output), output)
                 self.assertEqual((yield self.dut.max_width), width)
                 self.assertEqual((yield self.dut.max_height), height)
-        self.run_sim(process, True)
+        self.run_sim(process, False)
 
 
 class ReadInstruction(InstructionBase):
@@ -131,7 +131,7 @@ class ReadInstructionTest(TestBase):
             yield
             self.assertEqual((yield self.dut.done), 1)
             self.assertEqual((yield self.dut.output), height)
-        self.run_sim(process, True)
+        self.run_sim(process, False)
 
 
 class DoubleCompareInstruction(InstructionBase):
@@ -175,7 +175,7 @@ class DoubleCompareInstructionTest(TestBase):
                 yield self.dut.max_height.eq(height)
                 yield
                 self.assertEqual((yield self.dut.output), expected_output)
-        self.run_sim(process, True)
+        self.run_sim(process, False)
 
 
 class MultiplyAccumulateInstruction(InstructionBase):
@@ -239,7 +239,7 @@ class MultiplyAccumulateInstructionTest(TestBase):
                 yield self.dut.input_offset.eq(input_offset)
                 yield
                 self.assertEqual((yield self.dut.acc), expected_output)
-        self.run_sim(process, True)
+        self.run_sim(process, False)
 
 
 class MultiplyAccumulateFourInstruction(InstructionBase):
@@ -330,7 +330,7 @@ class MultiplyAccumulateFourInstructionTest(TestBase):
                 yield self.dut.input_offset.eq(input_offset)
                 yield
                 self.assertEqual((yield self.dut.acc), expected_output)
-        self.run_sim(process, True)
+        self.run_sim(process, False)
 
 
 class ProjAccel1Cfu(Cfu):

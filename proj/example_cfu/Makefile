@@ -22,4 +22,7 @@ export DEFINES := PLACEHOLDER
 # Uncomment to include pdti8 in built binary
 DEFINES += INCLUDE_MODEL_PDTI8
 
+# Tests are in implementation files in this project
+PYTEST_PATTERN := '*.py'
+
 include ../proj.mk
