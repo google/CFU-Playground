@@ -111,14 +111,14 @@ class AcceleratorCoreTest(TestBase):
         yield dut.post_process_sizes.depth.eq(depth)
         yield dut.post_process_sizes.repeats.eq(Constants.SYS_ARRAY_HEIGHT)
         for i in range(depth):
-            payload = dut.filter_params.payload
+            payload = dut.post_process_params.payload
             yield payload.bias.eq(data.output_biases[i])
             yield payload.multiplier.eq(data.output_multipliers[i])
             # Note: shift is stored as a negative number in tflite model
             yield payload.shift.eq(-data.output_shifts[i])
-            yield dut.filter_params.valid.eq(1)
+            yield dut.post_process_params.valid.eq(1)
             yield
-        yield dut.filter_params.valid.eq(0)
+        yield dut.post_process_params.valid.eq(0)
         yield
 
     def test_convolution(self):

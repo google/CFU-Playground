@@ -92,11 +92,11 @@ class AcceleratorCore(SimpleElaboratable):
     reset: Signal(), in
         Resets logic to starting state
 
-    filter_sizes: Record(POST_PROCESS_SIZES)
+    post_process_sizes: Record(POST_PROCESS_SIZES)
         Depth and repeat count for producing values.
 
-    filter_params: Endpoint(POST_PROCESS_PARAMS), out
-        Stream of data to write to filter parameter memory.
+    post_process_params: Endpoint(POST_PROCESS_PARAMS), out
+        Stream of data to write to post_process memory.
     """
 
     def __init__(self):
@@ -112,7 +112,7 @@ class AcceleratorCore(SimpleElaboratable):
         self.output_activation_max = Signal(signed(8))
         self.reset = Signal()
         self.post_process_sizes = Record(POST_PROCESS_SIZES)
-        self.filter_params = Endpoint(POST_PROCESS_PARAMS)
+        self.post_process_params = Endpoint(POST_PROCESS_PARAMS)
 
     def build_param_store(self, m):
         # Create memory for post process params
@@ -124,11 +124,11 @@ class AcceleratorCore(SimpleElaboratable):
 
         # Configure param writer
         m.submodules['param_writer'] = pw = ParamWriter()
-        m.d.comb += connect(self.filter_params, pw.input_data)
+        m.d.comb += connect(self.post_process_params, pw.input_data)
         m.d.comb += [
             pw.reset.eq(self.reset),
             wp.en.eq(pw.mem_we),
-            wp.addr.eq(pw.mem_addr), 
+            wp.addr.eq(pw.mem_addr),
             wp.data.eq(pw.mem_data),
         ]
 
