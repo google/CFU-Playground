@@ -1,5 +1,5 @@
-Vivado HL WebPack Installation
-==============================
+Vivado HLS WebPack Installation
+================================
 
 This page is a guide ton installing `Vivado HL WebPack`_ on Linux.
 

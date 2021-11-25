@@ -27,19 +27,27 @@ _This is an early prototype of a ML exploration framework; expect a lack of docu
 ### Required hardware/OS
 
 * One of the boards supported by [LiteX Boards](https://github.com/litex-hub/litex-boards/tree/master/litex_boards/targets). Most of LiteX Boards targets should work.\
-It has been tested on **Arty A7-35T** and **Nexys Video Board**.
+It has been tested on the **Arty A7-35T/100T**, **iCEBreaker**, **Fomu**, **OrangeCrab**, **ULX3S**, and **Nexys Video** boards.
 * The only supported host OS is Linux (Debian / Ubuntu).
 
 You don't need any board if you want to run [Renode](https://renode.io) or Verilator simulation.
 
 ### Assumed software
 
-* Toolchain that depends on a chosen board.\
-For Arty A7-35T it would be [Vivado](https://www.xilinx.com/support/download.html) which must be manually installed.
-You always need a toolchain for a target that you choose.
+* FPGA Toolchain: that depends on a chosen board.  If you already have a toolchain installed for your board, you can use that.
+
+For a board with a Xilinx XC7 part, you can use either [Vivado](https://www.xilinx.com/support/download.html),
+which must be manually installed (here's our [guide](https://cfu-playground.readthedocs.io/en/latest/vivado-install.html)),
+or the open-source SymbiFlow tool chain, which can be easily installed using Conda
+(see the [Setup Guide](https://cfu-playground.readthedocs.io/en/latest/setup-guide.html)).
+
+For boards with Lattice iCE40, ECP5, or Nexus FPGAs, you can install the appropriate set of open source tools
+either via Conda (see the [Setup Guide](https://cfu-playground.readthedocs.io/en/latest/setup-guide.html))
+or on your own by building from source.   Or, you can use the Lattice toolchain (Radiant/Diamond).
 
 If you want to try things out using [Renode](https://renode.io) simulation, then you don't need either the board or toolchain.
 You can also perform Verilog-level cycle-accurate simulation with Verilator, but this is much slower.
+Renode is installed by the setup script.
 
 Other required packages will be checked for and, if on a Debian-based system, automatically installed by the setup script below.
 
@@ -50,6 +58,7 @@ Clone this repo, `cd` into it, then get run:
 ```sh
 scripts/setup
 ```
+
 ### Use with board
 
 The default board is Arty. If you want to use different board you must specify target, e.g. `TARGET=digilent_nexys_video`.

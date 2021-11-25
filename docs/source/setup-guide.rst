@@ -1,13 +1,11 @@
 Setup Guide
-===========
+============
 
 This is a guide to setting up to use the CFU-Playground.
 
 
-Step 1: Order an Arty A7-35T
-----------------------------
-
-(allow 1-2 week delivery time)
+Step 1: Acquire an Arty A7-35T or other supported board
+---------------------------------------------------------
 
 The Arty A7-35T is available from several distributors, including direct from
 the `Digilent Store`_, `Element 14`_ or `Mouser`_. The A7-100T will also work,
@@ -18,22 +16,122 @@ but is significantly more expensive.
 .. _`Mouser`: https://au.mouser.com/ProductDetail/Digilent/410-319?qs=%2Fha2pyFaduiP6GD6DfdhNp6rR4rT1KTVOohSnRQ%252BMgra5hr4M7aEiQ%3D%3D 
 
 
-Step 2: Install Vivado and Renode
+Other options that have been tested: 
+
+* iCEBreaker by 1BitSquared
+* OrangeCrab by GSD 
+* ULX3S by Radiona
+* FOMU by Kosagi
+* Nexys Video by Digilent
+
+
+Step 2: Clone the CFU-Playground Repository
+-------------------------------------------
+
+Clone the repository from the github:
+
+.. code-block:: bash
+
+   git clone https://github.com/google/CFU-Playground.git
+
+
+Step 3: Run the setup script
+-------------------------------------------
+
+This updates submodules, builds some local executables, and installs missing Linux packages.
+
+.. code-block:: bash
+
+   cd CFU-Playground
+   ./scripts/setup
+
+
+Step 4: Install Toolchain
+--------------------------------------------
+
+There are a few options depending on whether your board has a Xilinx FPGA 
+or not, and whether you want to use Conda or not.  If you have already installed
+a toolchain and can build bitstreams for your board, you probably 
+don't need to do anything.   
+
+
+Option 4a: Install Conda package for SymbiFlow (for Xilinx)
+--------------------------------------------------------------
+
+To download and install the open source SymbiFlow tools and databases, 
+run the following from the top directory of the CFU Playground.
+It will take about six minutes in the best case, 
+and use approximately 25GB of disk space.
+You normally only need to do this once.
+
+.. code-block:: bash
+
+   make install-sf
+
+Then, each time to enter the environment, type:
+
+.. code-block:: bash
+
+   make enter-sf
+
+This starts a subshell; you can leave the environment by typing ``exit``.
+
+Later when you're building a project bitstream, 
+you need to add USE\_SYMBIFLOW=1 to your make command line.
+
+
+
+Option 4b: Install Conda packages for Lattice FPGAs
+-----------------------------------------------------
+
+This installs yosys and nextpnr versions and all other support tools
+for building bitstreams for Lattice iCE40, ECP5, and CrossLink/Nexus FPGAs.
+You normally only need to do this once.
+
+.. code-block:: bash
+
+   make env
+
+Then, each time to enter the environment, type:
+
+.. code-block:: bash
+
+   make enter
+
+This starts a subshell; you can leave the environment by typing ``exit``.
+
+
+
+Option 4c: Use already-installed Yosys, Nextpnr, and other required tools 
+--------------------------------------------------------------------------
+
+This option makes sense if you have already installed the necessary open-source 
+tools for your board.   In that case you don't need to do anything other than
+make sure that they're in your PATH.
+
+
+
+Option 4d: Install/Use Vivado 
+----------------------------------
+
+If you are using a board with a Xilinx part, such as Arty A7 or Nexys Video, and you **don't** want to use
+open source SymbiFlow tools, then install Vivado if it is not already installed on your system.
+
+See https://cfu-playground.readthedocs.io/en/latest/vivado-install.html for a comprehensive guide. 
+Note that the software can take up to 8 hours to download
+
+You will need to source the settings64.sh script each time you start a shell,
+or do it in your .bashrc.
+
+
+
+Step 5: Install RISC-V toolchain 
 ---------------------------------
 
-1. Vivado
-  
-  See https://cfu-playground.readthedocs.io/en/latest/vivado-install.html for a comprehensive guide. 
-  Note that the software can take up to 8H to download
+.. note::
 
-2. Renode
-
-   Either "apt-get install renode" or get renode-xxx-linux.portable.tar.gz from
-   https://dl.antmicro.com/projects/renode/builds/ (and make sure ``renode`` is in your PATH)
-
-
-Step 3: Install RISCV toolchain
--------------------------------
+   This is only required if you don't use one of the Conda options above.  
+   All of the Conda packages include the RISC-V toolchain.
 
 1. Download the `August 2020`_ toolchain from freedom-tools and unpack the binaries to your home directory:
 
@@ -50,49 +148,15 @@ Step 3: Install RISCV toolchain
    export PATH=$PATH:$HOME/riscv64-unknown-elf-gcc-10.1.0-2020.08.2-x86_64-linux-ubuntu14/bin
 
 
-Step 4: Clone the CFU-Playground Repository
--------------------------------------------
-
-Clone the repository from the github:
-
-.. code-block:: bash
-
-   git clone https://github.com/google/CFU-Playground.git
-
-
-Step 5: Setup python virtual environment + setup
-------------------------------------------------
-
-Python virtualenv ensures that you have the correct python and modules needed by this code.
-
-If you don't have the python ``venv`` module, install it; for example, on a Debian-based Linux such as Ubuntu, use:
-
-.. code-block:: bash
-
-   $ apt install python3-venv
-
-
-Once you have virtualenv, do the following:
-
-.. code-block:: bash
-
-  
-   $ cd CFU-Playground
-   $ python3 -m venv env
-   $ source env/bin/activate  # activate the python virtualenv
-   $ # Check that you have the correct gcc in path
-   $ (env) CFU-Playground $ type riscv64-unknown-elf-gcc
-   riscv64-unknown-elf-gcc is hashed (/home/merlin/fpga/riscv64-unknown-elf-gcc/bin/riscv64-unknown-elf-gcc)
-   $ (env) CFU-Playground $ riscv64-unknown-elf-gcc --version
-   riscv64-unknown-elf-gcc (SiFive GCC 8.3.0-2020.04.1) 8.3.0
-   $ (env) CFU-Playground $ scripts/setup  # install prerequisites
-   
 Step 6: Test Run
 ----------------
 
 Test that everything is working by building the template project. The template
 project is designed to be used a base for your own projects, and it also serves
 as a useful "minimal" system.
+
+The following assumes the default Arty A7-35T.   If you use a different board, add ``TARGET=board``
+to each of the ``make`` commands.   For example, to target iCEBreaker, add ``TARGET=1bitsquared_icebreaker``.
 
 .. code-block:: bash
 
