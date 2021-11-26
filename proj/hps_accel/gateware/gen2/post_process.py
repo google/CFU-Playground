@@ -15,7 +15,9 @@
 """Post processing of accumulated values into 8 bit outputs."""
 
 from nmigen_cfu import SimpleElaboratable
-from nmigen import signed, unsigned, Module, Mux, Record, Signal, ResetInserter
+from nmigen import (
+    signed, unsigned, Array, Cat, Module, Mux, Record, Signal, ResetInserter
+)
 
 from .constants import Constants
 from .mem import LoopingAddressGenerator
@@ -30,7 +32,6 @@ POST_PROCESS_PARAMS = [
 ]
 
 POST_PROCESS_PARAMS_WIDTH = len(Record(POST_PROCESS_PARAMS))
-
 
 SRDHM_INPUT_LAYOUT = [
     ('a', signed(32)),
@@ -93,8 +94,8 @@ class SaturatingRoundingDoubleHighMul(BinaryPipelineActor):
 
 
 RDBPOT_INPUT_LAYOUT = [
-    ('dividend', signed(32)),
-    ('shift', unsigned(4))
+    ('dividend', signed(32)),  # The value to be divided
+    ('shift', unsigned(4)),    # The power of two by which to divide by
 ]
 
 
@@ -209,20 +210,21 @@ class PostProcessPipeline(SimpleElaboratable):
 
     input: Endpoint(signed(32)), in
       The accumulated value to convert
+
+    params: Endpoint(POST_PROCESS_PARAMS), in
+      Parameters assumed always ready and then read on input
+
     output: Endpoint(signed(8)), out
       The 8-bit quantized version of the accumulator
 
     offset: signed(9), in
        The output offset
+
     activation_min: signed(8), out
         The minimum output value
+
     activation_max: signed(8), out
         The maximum output value
-
-    read_data: Record(POST_PROCESS_PARAMS), in
-      Data read from OutputStorageParams
-    read_enable: Signal(), out
-      Tells OutputStorageParams to read next
     """
 
     PIPELINE_CYCLES = (
@@ -233,12 +235,11 @@ class PostProcessPipeline(SimpleElaboratable):
 
     def __init__(self):
         self.input = Endpoint(signed(32))
+        self.params = Endpoint(POST_PROCESS_PARAMS)
         self.output = Endpoint(signed(8))
         self.offset = Signal(signed(9))
         self.activation_min = Signal(signed(8))
         self.activation_max = Signal(signed(8))
-        self.read_data = Record(POST_PROCESS_PARAMS)
-        self.read_enable = Signal()
 
     def elab(self, m: Module):
         # Input always ready
@@ -253,13 +254,15 @@ class PostProcessPipeline(SimpleElaboratable):
         # POST_PROCESS_PARAMS
         m.d.comb += [
             srdhm.input.valid.eq(self.input.valid),
-            srdhm.input.payload.a.eq(self.input.payload + self.read_data.bias),
-            srdhm.input.payload.b.eq(self.read_data.multiplier),
-            self.read_enable.eq(self.input.valid),
+            self.params.ready.eq(self.input.valid),
+            srdhm.input.payload.a.eq(
+                self.input.payload +
+                self.params.payload.bias),
+            srdhm.input.payload.b.eq(self.params.payload.multiplier),
         ]
 
         # Connect the output of srdhm to rdbpot, along with the shift parameter
-        delayed_shift = delay(m, self.read_data.shift,
+        delayed_shift = delay(m, self.params.payload.shift,
                               SaturatingRoundingDoubleHighMul.PIPELINE_CYCLES)
         m.d.comb += [
             srdhm.output.ready.eq(rdbpot.input.ready),
@@ -301,7 +304,7 @@ class ParamWriter(SimpleElaboratable):
     ----------
 
     reset: Signal(), in
-        Initiates a reset, beginning reads from memory
+        Initiates a reset, resets write position to start of memory
 
     input_data: Endpoint(POST_PROCESS_PARAMS), out
         Stream of data to write to memory.
@@ -342,8 +345,8 @@ class ReadingProducer(SimpleElaboratable):
     Each value read is repeated a given number of times.
 
     Respects back pressure. This is not as efficient as a component
-    that produces on each cycle, but is conceptually simpler.
-
+    that produces on each cycle without back pressure, but is
+    conceptually simpler.
 
     Attributes
     ----------
@@ -384,7 +387,7 @@ class ReadingProducer(SimpleElaboratable):
             self.mem_addr.eq(addr_gen.addr),
         ]
 
-        # Reset FIFO when addr generator gets new sizes
+        # FIFO with reset
         m.submodules.fifo = fifo = ResetInserter(self.reset)(
             StreamFifo(type=POST_PROCESS_PARAMS, depth=3))
 
@@ -410,3 +413,127 @@ class ReadingProducer(SimpleElaboratable):
             self.output_data.valid.eq(fifo.output.valid),
             fifo.output.ready.eq(self.output_data.ready),
         ]
+
+
+class AccumulatorReader(SimpleElaboratable):
+    """Reads accumulators, in turn as values become available.
+
+    Hard-wired for 8 accumulators.
+
+    Can be set at run time to process only four accumulators.
+
+    Parameters
+    ----------
+
+    accumulator_shape: Shape
+        Defaults to signed(32)
+
+    Attributes
+    ----------
+
+    accumulator: [Signal(accumulator_shape)] * 8, in
+        The value to select.
+
+    accumulator_new: [Signal()] * 8, in
+        Strobes when new value available in accumulator.
+
+    half: Signal(), in
+        When held high, only the first four accumulators are considered.
+
+    output: Endpoint(accumulator_shape), in
+      The accumulated values to convert. Values not read before new values
+      are available are lsot.
+    """
+
+    def __init__(self, accumulator_shape=signed(32)):
+        self.accumulator = [Signal(accumulator_shape,
+                                   name=f"acc_{i}") for i in range(8)]
+        self.accumulator_new = [Signal(name=f"acc_new_{i}") for i in range(8)]
+        self.half = Signal()
+        self.output = Endpoint(accumulator_shape)
+
+    def elab(self, m):
+        # Unset valid on transfer (may be overrridden below)
+        with m.If(self.output.ready):
+            m.d.sync += self.output.valid.eq(0)
+
+        # Set flag to remember that value is available
+        flags = Array(Signal(name=f"flag_{i}") for i in range(8))
+        for i in range(8):
+            with m.If(self.accumulator_new[i]):
+                m.d.sync += flags[i].eq(1)
+
+        # If value available this cycle, or previously
+        # - output new value
+        # - unset flag
+        # - increment index
+        index = Signal(range(8))
+        with m.If(Array(self.accumulator_new)[index] | flags[index]):
+            m.d.sync += [
+                self.output.payload.eq(Array(self.accumulator)[index]),
+                self.output.valid.eq(1),
+                flags[index].eq(0),
+                index.eq(Mux(self.half & (index == 3), 0, index + 1)),
+            ]
+
+
+class OutputWordAssembler(SimpleElaboratable):
+    """Assembles output values into words.
+
+    The output from the post process pipeline consists of interleaved values
+    from four separate output pixels. This component reassembles the values
+    into words, one per output channel.
+
+    Output words are interleaved in the same order as the bytes were.
+
+    TODO: add a reset signal to ensure output always synchronized
+    TODO: add an error signal to catch output buffer overflow
+
+    Parameters
+    ----------
+
+    num_pixels: int
+        The maximum depth required for writes. Determines addr_width.
+
+    Attributes
+    ----------
+
+    input: Endpoint(signed(8)), in
+      The 8-bit quantized versions of the accumulator. Always ready.
+
+    output: Endpoint(unsigned(32)), out
+      The assembled 32 bit words. Assumes always ready.
+    """
+
+    def __init__(self, num_pixels=Constants.SYS_ARRAY_HEIGHT):
+        self._num_pixels = num_pixels
+        self.input = Endpoint(signed(8))
+        self.output = Endpoint(unsigned(32))
+
+    def elab(self, m):
+        # number of bytes received already
+        byte_count = Signal(range(4))
+        # output channel for next byte received
+        pixel_index = Signal(range(self._num_pixels))
+        # shift registers to buffer 3 incoming values
+        shift_registers = Array(
+            [Signal(24, name=f"sr_{i}") for i in range(self._num_pixels)])
+
+        m.d.sync += self.input.ready.eq(1)
+        with m.If(self.input.is_transferring()):
+            sr = shift_registers[pixel_index]
+            with m.If(byte_count == 3):
+                # Output current value and shift register
+                m.d.comb += self.output.valid.eq(1)
+                payload = Cat(sr, self.input.payload)
+                m.d.comb += self.output.payload.eq(payload)
+            with m.Else():
+                # Save input to shift register
+                m.d.sync += sr[-8:].eq(self.input.payload)
+                m.d.sync += sr[:-8].eq(sr[8:])
+
+            # Increment pixel index
+            m.d.sync += pixel_index.eq(pixel_index + 1)
+            with m.If(pixel_index == (self._num_pixels - 1)):
+                m.d.sync += pixel_index.eq(0)
+                m.d.sync += byte_count.eq(byte_count + 1)  # allow rollover

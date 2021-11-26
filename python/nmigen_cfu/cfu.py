@@ -143,12 +143,14 @@ class _FallbackInstruction(InstructionBase):
         m.d.comb += self.done.eq(1)
 
 
-class Cfu(SimpleElaboratable):
+class CfuBase(SimpleElaboratable):
     """Custom function unit interface.
 
     Implements RR instruction format instrunctions
     We use funct3 bits of function ID to distinguish 8 separate "instructions".
     funct7 is passed to the instruction.
+
+    This class contains interface only, without any implementation.
 
     Attributes
     ----------
@@ -188,6 +190,13 @@ class Cfu(SimpleElaboratable):
             self.rsp_out,
             self.reset
         ]
+
+
+class Cfu(CfuBase):
+    """Standard Custom function unit implementation.
+
+    See CfuBase for attributes.
+    """
 
     def elab_instructions(self, m):
         """Make instructions this CFU will execute.

@@ -50,22 +50,21 @@ def all_words(signal, word_length):
             for i in range(0, len(signal), word_length))
 
 
-def pack_vals(a, b, c, d, *, offset=0):
-    """Packs 4 byte values into a 32-bit word
-    offset is added from the values before packing
+def pack_vals(*values, offset=0, bits=8):
+    """Packs single values into a word in little endian order.
+    offset is added to the values before packing
+    bits is the number of bits in each value
     """
-    return (((a + offset) & 0xff)
-            + (((b + offset) & 0xff) << 8)
-            + (((c + offset) & 0xff) << 16)
-            + (((d + offset) & 0xff) << 24))
+    mask = (1 << bits) - 1
+    result = 0
+    for i, v in enumerate(values):
+        result += ((v + offset) & mask) << (i * bits)
+    return result
 
 
 def pack128(a, b, c, d):
     """Packs 4 32-bit values into a 128-bit value."""
-    return ((a & 0xffffff)
-            + ((b & 0xffffffff) << 32)
-            + ((c & 0xffffffff) << 64)
-            + ((d & 0xffffffff) << 96))
+    return pack_vals(a, b, c, d, bits=32)
 
 
 class SimpleElaboratable(Elaboratable):

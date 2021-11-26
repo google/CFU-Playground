@@ -24,3 +24,6 @@ class Constants:
 
     # Width (B dimension, aka filter values) of the Systolic array
     SYS_ARRAY_WIDTH = 2
+
+    # Total Number of MACC blocks in Systolic array
+    SYS_ARRAY_MACC_BLOCKS = SYS_ARRAY_HEIGHT * SYS_ARRAY_WIDTH

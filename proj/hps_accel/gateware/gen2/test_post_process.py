@@ -15,15 +15,17 @@
 
 """Tests for post_process.py"""
 import itertools
+import random
 
 from nmigen import Module
 from nmigen.sim import Passive, Delay
 
-from nmigen_cfu import TestBase
+from nmigen_cfu import pack_vals, TestBase
 
 from .post_process import (
     SaturatingRoundingDoubleHighMul, RoundingDivideByPowerOfTwo,
-    SaturateActivationPipeline, PostProcessPipeline, ParamWriter, ReadingProducer)
+    SaturateActivationPipeline, PostProcessPipeline, ParamWriter, ReadingProducer,
+    AccumulatorReader, OutputWordAssembler)
 
 
 # Test cases generated from original C implementation
@@ -356,14 +358,14 @@ class PostProcessPipelineTest(TestBase):
             yield self.dut.activation_max.eq(127)
             yield
             for (acc_in, bias, multiplier, shift), expected in TEST_CASES:
-                self.assertEqual((yield self.dut.read_enable), 0)
-                yield self.dut.read_data.bias.eq(bias)
-                yield self.dut.read_data.multiplier.eq(multiplier)
-                yield self.dut.read_data.shift.eq(shift)
+                self.assertEqual((yield self.dut.params.ready), 0)
+                yield self.dut.params.payload.bias.eq(bias)
+                yield self.dut.params.payload.multiplier.eq(multiplier)
+                yield self.dut.params.payload.shift.eq(shift)
                 yield self.dut.input.payload.eq(acc_in)
                 yield self.dut.input.valid.eq(1)
                 yield
-                self.assertEqual((yield self.dut.read_enable), 1)
+                self.assertEqual((yield self.dut.params.ready), 1)
                 yield self.dut.input.valid.eq(0)
                 while not (yield self.dut.output.valid):
                     yield
@@ -463,3 +465,130 @@ class ReadingProducerTest(TestBase):
             yield from self.check(27, 2)
             yield from self.check(3, 3)
         self.run_sim(process, False)
+
+
+class AccumulatorReaderTest(TestBase):
+    """Tests the AccumulatorReader class."""
+
+    def create_dut(self):
+        return AccumulatorReader()
+
+    def set_accumulators(self, values, half, cycles):
+        """Set inputs in a manner approximating systolic array output."""
+        # Order is cycle number when accumulator value will be produced
+        order = [0, 1, 1, 2] if half else [0, 1, 2, 3, 1, 2, 3, 4]
+        size = 4 if half else 8
+        groups = [values[i:i + size] for i in range(0, len(values), size)]
+
+        yield self.dut.half.eq(half)
+
+        # Send each group over a number of cycles
+        for group in groups:
+            for cycle in range(cycles):
+                for i in range(size):
+                    producing = order[i] == cycle
+                    if producing:
+                        yield self.dut.accumulator_new[i].eq(True)
+                        yield self.dut.accumulator[i].eq(group[i])
+                    else:
+                        yield self.dut.accumulator_new[i].eq(False)
+                yield
+
+    def check_outputs(self, expected):
+        """Checks output stream has correct values."""
+        yield self.dut.output.ready.eq(1)
+        for expected_value in expected:
+            while not (yield self.dut.output.valid):
+                yield
+            actual = (yield self.dut.output.payload)
+            self.assertEqual(expected_value, actual)
+            yield
+        # check no additional values
+        for _ in range(50):
+            self.assertFalse((yield self.dut.output.valid))
+            yield
+
+    def test_it_reads_full(self):
+        data = list(range(100, 100 + 10 * 8))
+
+        def set_values():
+            yield from self.set_accumulators(data, False, 24)
+        self.add_process(set_values)
+
+        def process():
+            yield from self.check_outputs(data)
+        self.run_sim(process, False)
+
+    def test_it_reads_half(self):
+        data = list(range(100, 100 + 10 * 8))
+
+        def set_values():
+            yield from self.set_accumulators(data, True, 4)
+        self.add_process(set_values)
+
+        def process():
+            yield Passive()
+            yield from self.check_outputs(data)
+        self.run_sim(process, False)
+
+
+class OutputWordAssemblerTest(TestBase):
+    """Tests the OutputWordAssembler class."""
+
+    def create_dut(self):
+        return OutputWordAssembler()
+
+    def send_inputs(self, inputs):
+        for value in inputs:
+            yield self.dut.input.valid.eq(1)
+            yield self.dut.input.payload.eq(value)
+            yield
+            yield self.dut.input.valid.eq(0)
+            for _ in range(random.randrange(3)):
+                yield
+
+    def check_expected(self, expected):
+        yield self.dut.output.ready.eq(1)
+        for value in expected:
+            while not (yield self.dut.output.valid):
+                yield
+            self.assertEqual(value, (yield self.dut.output.payload))
+            yield
+
+    def test_it_does_8_words(self):
+        inputs = [
+            0x11, 0x12, 0x13, 0x14,
+            0x21, 0x22, 0x23, 0x24,
+            0x31, 0x32, 0x33, 0x34,
+            0x41, 0x42, 0x43, 0x44,
+            0x11, 0x12, 0x13, 0x14,
+            0x21, 0x22, 0x23, 0x24,
+            0x31, 0x32, 0x33, 0x34,
+            0x41, 0x42, 0x43, 0x44,
+        ]
+        expected = [
+            0x41312111, 0x42322212, 0x43332313, 0x44342414,
+            0x41312111, 0x42322212, 0x43332313, 0x44342414,
+        ]
+        self.add_process(lambda: (yield from self.send_inputs(inputs)))
+        self.run_sim(lambda: (yield from self.check_expected(expected)), False)
+
+    def test_it_does_more(self):
+        dut = self.dut
+
+        # Make random inputs
+        inputs = [random.randrange(256) for _ in range(25 * 16)]
+
+        # Transform inputs to expected outputs
+        def group(lst, size):
+            return [lst[i:i + size] for i in range(0, len(lst), size)]
+        expected = []
+        for sixteen_bytes in group(inputs, 16):
+            expected_words_as_bytes = zip(*group(sixteen_bytes, 4))
+            expected_words = [pack_vals(*word)
+                              for word in expected_words_as_bytes]
+            expected += expected_words
+
+        # Run the test
+        self.add_process(lambda: (yield from self.send_inputs(inputs)))
+        self.run_sim(lambda: (yield from self.check_expected(expected)), False)
