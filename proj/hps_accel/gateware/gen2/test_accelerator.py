@@ -15,6 +15,7 @@
 
 """Tests for accelerator.py"""
 
+from functools import reduce
 import random
 
 from nmigen import unsigned, signed
@@ -102,14 +103,22 @@ class AcceleratorCoreTest(TestBase):
         dut = self.dut
         data = self.data
         depth = data.output_dims[3]
+        num_filter_values = reduce(lambda a, b: a * b, data.filter_dims, 1)
+        filter_words_per_store = num_filter_values // 4 // 2
         yield dut.half.eq(0)
         yield dut.input_offset.eq(data.input_offset)
         yield dut.output_offset.eq(data.output_offset)
         yield dut.output_activation_min.eq(data.output_min)
         yield dut.output_activation_max.eq(data.output_max)
+        yield dut.num_filter_words.eq(filter_words_per_store)
+        yield dut.output_channel_depth.eq(depth)
 
-        yield dut.post_process_sizes.depth.eq(depth)
-        yield dut.post_process_sizes.repeats.eq(Constants.SYS_ARRAY_HEIGHT)
+        # Toggle reset
+        yield dut.reset.eq(1)
+        yield
+        yield dut.reset.eq(0)
+
+        # load post process parameters
         for i in range(depth):
             payload = dut.post_process_params.payload
             yield payload.bias.eq(data.output_biases[i])
@@ -121,20 +130,25 @@ class AcceleratorCoreTest(TestBase):
         yield dut.post_process_params.valid.eq(0)
         yield
 
+        # Load filters
+        filter_data = self.extract_filter_data()
+        for addr in range(filter_words_per_store):
+            for store in range(2):
+                inp = dut.write_filter_input
+                yield inp.payload.store.eq(store)
+                yield inp.payload.addr.eq(addr)
+                yield inp.payload.data.eq(filter_data[store][addr])
+                yield inp.valid.eq(True)
+                yield
+                yield inp.valid.eq(False)
+
     def test_convolution(self):
         # tests part of a convolution, producing results for 16 output pixels
         # uses data dumped from a real convolution
         dut = self.dut
         data = self.data
-        filter_even, filter_odd = self.extract_filter_data()
 
         def feed_dut():
-            # Toggle reset
-            yield dut.reset.eq(1)
-            yield
-            yield dut.reset.eq(0)
-
-            # Configure
             yield from self.configure()
             input_depth = data.filter_dims[3]
             input_depth_words = input_depth // 4
@@ -152,6 +166,11 @@ class AcceleratorCoreTest(TestBase):
                     data.input_dims[3] // 4,
                     fetch_words_per_row=16)
                 for i in range(4)]
+
+            # Start generating filter values
+            yield self.dut.filter_start.eq(1)
+            yield
+            yield self.dut.filter_start.eq(0)
 
             # Pump through data
             # We want to produce 16 pixels of output data
@@ -180,10 +199,6 @@ class AcceleratorCoreTest(TestBase):
                         bits=9,
                         offset=data.input_offset)
                     yield dut.activations[a].eq(with_offset)
-
-                # set filters
-                yield dut.filters[0].eq(filter_even[clock % len(filter_even)])
-                yield dut.filters[1].eq(filter_odd[(clock - 1) % len(filter_odd)])
                 yield
         self.add_process(feed_dut)
 
