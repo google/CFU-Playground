@@ -14,10 +14,10 @@
 
 """Tests for ram_input.py"""
 
-
+from nmigen import unsigned
 from nmigen_cfu import TestBase
 
-from .ram_input import PixelAddressGenerator
+from .ram_input import PixelAddressGenerator, RoundRobin4
 
 
 class PixelAddressGeneratorTest(TestBase):
@@ -81,4 +81,43 @@ class PixelAddressGeneratorTest(TestBase):
                 for _ in range(12):
                     yield
 
+        self.run_sim(process, False)
+
+
+class RoundRobin4Test(TestBase):
+    """Tests RoundRobin4 class."""
+
+    def create_dut(self):
+        return RoundRobin4(shape=unsigned(8))
+
+    def test_it(self):
+        dut = self.dut
+        X = None
+        DATA = [
+            # start, mux_in, phase, mux_out
+            (1, [0, 0, 0, 0], X, [X, X, X, X]),
+            (0, [0, 1, 2, 3], 0, [0, 3, 2, 1]),
+            (0, [10, 11, 12, 13], 1, [11, 10, 13, 12]),
+            (0, [20, 21, 22, 23], 2, [22, 21, 20, 23]),
+            (0, [30, 31, 32, 33], 3, [33, 32, 31, 30]),
+            (0, [40, 41, 42, 43], 0, [40, 43, 42, 41]),
+            (0, [50, 51, 52, 53], 1, [51, 50, 53, 52]),
+            (1, [60, 62, 62, 63], X, [X, X, X, X]),
+            (0, [70, 71, 72, 73], 0, [70, 73, 72, 71]),
+            (0, [80, 81, 82, 83], 1, [81, 80, 83, 82]),
+        ]
+
+        def process():
+            for start, mux_in, phase, expected_mux_out in DATA:
+                yield dut.start.eq(start)
+                for sig, data in zip(dut.mux_in, mux_in):
+                    yield sig.eq(data)
+                yield
+                if phase is not None:
+                    self.assertEqual((yield dut.phase), phase)
+                for sig, expected in zip(dut.mux_out, expected_mux_out):
+                    if expected is not None:
+                        actual = (yield sig)
+                        expected = (expected)
+                        self.assertEqual((yield sig), expected)
         self.run_sim(process, False)

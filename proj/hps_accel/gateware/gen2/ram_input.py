@@ -135,3 +135,64 @@ class PixelAddressGenerator(SimpleElaboratable):
                 pixel_row_begin_addr.eq(self.base_addr + self.num_blocks_y),
                 pixel_x.eq(0)
             ]
+
+
+class RoundRobin4(SimpleElaboratable):
+    """Connects four sets of input and output signals to each other in turn.
+
+    Each input is connected to an output, but that output rotates on
+    each cycle. There are four ways in which connections are made,
+    indicated by the 'phase' signal.
+
+    +-------+-------+-------+-------+-------+
+    | Phase | out 0 | out 1 | out 2 | out 3 |
+    +-------+-------+-------+-------+-------+
+    |    0  |   0   |   3   |   2   |   1   |
+    |    1  |   1   |   0   |   3   |   2   |
+    |    2  |   2   |   1   |   0   |   3   |
+    |    3  |   3   |   2   |   1   |   0   |
+    +-------+-------+-------+-------+-------+
+
+    Parameters
+    ----------
+
+    shape: Shape
+        The shape of the four signals to be connected
+
+    Attributes
+    ----------
+
+    mux_in: [Signal(shape) * 4], in
+        The incoming signals.
+
+    mux_out: [Signal(shape) * 4], out
+        The incoming signals connected as per the current phase.
+
+    phase: Signal(range(4)), out
+        The current phase, indicating which signal is connected to
+        which output.
+
+    start: Signal(), in
+        Resets phase to 0 on next cycle.
+    """
+
+    def __init__(self, *, shape):
+        self.mux_in = [Signal(shape, name=f"in_{i}") for i in range(4)]
+        self.mux_out = [Signal(shape, name=f"out_{i}") for i in range(4)]
+        self.phase = Signal(range(4))
+        self.start = Signal()
+
+    def elab(self, m):
+        # phase is a free running counter with reset
+        m.d.sync += self.phase.eq(self.phase + 1)
+        with m.If(self.start):
+            m.d.sync += self.phase.eq(0)
+
+        # Connect outputs to inputs depending on phase
+        def connect_for_phase(p):
+            for i in range(4):
+                m.d.comb += self.mux_out[i].eq(self.mux_in[(p - i) % 4])
+        with m.Switch(self.phase):
+            for p in range(4):
+                with m.Case(p):
+                    connect_for_phase(p)
