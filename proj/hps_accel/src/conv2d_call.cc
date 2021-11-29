@@ -28,7 +28,7 @@ void test_conv2d(const Conv2DData* data) {
 
   const tflite::RuntimeShape& output_shape =
       *(reinterpret_cast<const tflite::RuntimeShape*>(data->output_shape));
-  TF_LITE_ASSERT(output_shape.FlatSize() <= buf_size);
+  assert((output_shape.FlatSize() <= buf_size, ""));
   tflite::reference_integer_ops::ConvPerChannel4x4(
       *(reinterpret_cast<const tflite::ConvParams*>(data->params)),
       reinterpret_cast<const int32_t*>(data->output_multiplier),

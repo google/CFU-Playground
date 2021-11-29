@@ -77,6 +77,7 @@ SHARED_FLAGS := \
 	-Wunused-variable\
 	-Wmissing-field-initializers\
 	-Wunused-function\
+	-Wno-maybe-uninitialized\
 	-Wswitch\
 	-Wvla\
 	-DTF_LITE_STATIC_MEMORY\
