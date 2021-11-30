@@ -196,3 +196,68 @@ class RoundRobin4(SimpleElaboratable):
             for p in range(4):
                 with m.Case(p):
                     connect_for_phase(p)
+
+
+class ValueAddressGenerator(SimpleElaboratable):
+    """Generates addresses within a single pixel.
+
+    Specifically for a 4x4 2DConv, works with a PixelAddressGenerator to find
+    addresses of individual values. It reads `columns` * 4 * 32bit words,
+    then moves down and repeats this three times.
+
+    Attributes
+    ----------
+
+    start: Signal, in
+        Begin generating addresses from the start_addr.
+
+    start_addr: Signal(14), in
+        Address of start of first pixel, from a PixelAddressGenerator.
+
+    depth: Signal(3), in
+        Number of 16-byte blocks to read per pixel. Max depth is 7 which is 112
+        values/pixel).
+
+    num_blocks_y: Signal(10), in
+        Number of blocks per row.
+
+    addr_out: Signal(14), out
+        Current output address
+    """
+
+    def __init__(self):
+        self.start = Signal()
+        self.start_addr = Signal(14)
+        self.depth = Signal(3)
+        self.num_blocks_y = Signal(10)
+        self.addr_out = Signal(14)
+
+    def elab(self, m):
+        x_count = Signal(7)
+        next_row_addr = Signal(14)
+        addr = Signal(14)
+
+        with m.If(self.start):
+            # Start overrides other behaviors
+            m.d.comb += self.addr_out.eq(self.start_addr)
+            m.d.sync += [
+                addr.eq(self.start_addr),
+                x_count.eq(1),
+                next_row_addr.eq(self.start_addr + self.num_blocks_y),
+            ]
+        with m.Else():
+            m.d.comb += self.addr_out.eq(addr)
+            # x_size is the number of cycles to read 4 consecutive pixels
+            x_size = Signal(7)
+            m.d.comb += x_size.eq(self.depth << 4)
+            with m.If(x_count != (x_size - 1)):
+                m.d.sync += x_count.eq(x_count + 1)
+                with m.If(x_count[:2] == 3):
+                    m.d.sync += addr.eq(addr + 1)
+            with m.Else():
+                # x_count == x_size - 1 ==> End of row
+                m.d.sync += [
+                    addr.eq(next_row_addr),
+                    next_row_addr.eq(next_row_addr + self.num_blocks_y),
+                    x_count.eq(0),
+                ]

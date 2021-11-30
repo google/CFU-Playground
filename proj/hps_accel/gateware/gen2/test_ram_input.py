@@ -17,7 +17,7 @@
 from nmigen import unsigned
 from nmigen_cfu import TestBase
 
-from .ram_input import PixelAddressGenerator, RoundRobin4
+from .ram_input import PixelAddressGenerator, RoundRobin4, ValueAddressGenerator
 
 
 class PixelAddressGeneratorTest(TestBase):
@@ -120,4 +120,58 @@ class RoundRobin4Test(TestBase):
                         actual = (yield sig)
                         expected = (expected)
                         self.assertEqual((yield sig), expected)
+        self.run_sim(process, False)
+
+
+class ValueAddressGeneratorTest(TestBase):
+    """Tests ValueAddressGenerator class."""
+
+    def create_dut(self):
+        return ValueAddressGenerator()
+
+    def config(self, start_addr, depth, num_blocks_y):
+        yield self.dut.start_addr.eq(start_addr)
+        yield self.dut.depth.eq(depth)
+        yield self.dut.num_blocks_y.eq(num_blocks_y)
+
+    def check(self, start_addr, depth, num_blocks_y):
+        # generate expected addresses
+        expected = []
+        for row in range(4):
+            for col in range(4):
+                for i in range(depth):
+                    expected += [start_addr +
+                                 row * num_blocks_y +
+                                 col * depth +
+                                 i] * 4
+        # start generator and check output
+        yield self.dut.start.eq(1)
+        yield
+        yield self.dut.start.eq(0)
+        for e in expected:
+            self.assertEqual((yield self.dut.addr_out), e)
+            yield
+
+    def test_it_does_depth_16(self):
+        dut = self.dut
+
+        def process():
+            yield from self.config(200, 1, 100)
+            yield from self.check(200, 1, 100)
+        self.run_sim(process, False)
+
+    def test_it_does_depth_64(self):
+        dut = self.dut
+
+        def process():
+            yield from self.config(2000, 4, 1000)
+            yield from self.check(2000, 4, 1000)
+        self.run_sim(process, False)
+
+    def test_it_does_depth_48(self):
+        dut = self.dut
+
+        def process():
+            yield from self.config(2000, 3, 1000)
+            yield from self.check(2000, 3, 1000)
         self.run_sim(process, False)
