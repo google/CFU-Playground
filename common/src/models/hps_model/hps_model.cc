@@ -19,25 +19,25 @@
 #include "menu.h"
 #include "models/hps_model/cat_picture.h"
 #include "models/hps_model/diagram.h"
-#include "models/hps_model/hps_model_2021_07_05_tiled.h"
 #include "models/hps_model/hps_model_2021_09_20_tiled.h"
+#include "models/hps_model/hps_second_2021_11_18_tiled.h"
 #include "tflite.h"
 
 namespace {
 
 bool uses_09_20_model;
 
-// Initialize model
-void do_init_07_05(void) {
-  puts("Loading HPS 07_05 model");
-  tflite_load_model(hps_model_2021_07_05_tiled, hps_model_2021_07_05_tiled_len);
-  uses_09_20_model = false;
-}
-
+// Initialize models
 void do_init_09_20(void) {
   puts("Loading HPS 09_20 model");
   tflite_load_model(hps_model_2021_09_20_tiled, hps_model_2021_09_20_tiled_len);
   uses_09_20_model = true;
+}
+
+void do_init_11_18(void) {
+  puts("Loading HPS second 11_18 model");
+  tflite_load_model(hps_second_2021_11_18_tiled, hps_second_2021_11_18_tiled_len);
+  uses_09_20_model = false;
 }
 
 // Run classification and interpret results
@@ -75,14 +75,14 @@ void do_classify_zeros() { printf("Result is %ld\n", classify_zeros()); }
 struct GoldenTest {
   int32_t (*fn)();
   const char* name;
-  int32_t expected_07_05;
   int32_t expected_09_20;
+  int32_t expected_11_18;
 };
 
 GoldenTest golden_tests[4] = {
-    {classify_cat, "cat", -116, -77},
-    {classify_diagram, "diagram", -124, -124},
-    {classify_zeros, "zeroes", -123, -126},
+    {classify_cat, "cat", -77, -126},
+    {classify_diagram, "diagram", -124, -125},
+    {classify_zeros, "zeroes", -126, -128},
     {nullptr, "", 0, 0},
 };
 
@@ -93,7 +93,7 @@ static void do_golden_tests() {
     printf("Testing input %s: ", test.name);
     int32_t actual = test.fn();
     int32_t expected =
-        uses_09_20_model ? test.expected_09_20 : test.expected_07_05;
+        uses_09_20_model ? test.expected_09_20 : test.expected_11_18;
     if (actual != expected) {
       failed = true;
       printf("FAIL %ld (actual) != %ld (expected) ***\n", actual, expected);
@@ -118,8 +118,8 @@ struct Menu MENU = {
         MENU_ITEM('z', "Zeros input", do_classify_zeros),
         MENU_ITEM('g', "Golden tests (check for expected outputs)",
                   do_golden_tests),
-        MENU_ITEM('1', "Reinitialize with 07_05 model", do_init_07_05),
-        MENU_ITEM('2', "Reinitialize with 09_20 model", do_init_09_20),
+        MENU_ITEM('1', "Reinitialize with 09_20 model", do_init_09_20),
+        MENU_ITEM('2', "Reinitialize with 11_18 model", do_init_11_18),
         MENU_END,
     },
 };
