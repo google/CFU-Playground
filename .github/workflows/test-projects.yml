@@ -79,7 +79,7 @@ jobs:
       timeout-minutes: 15
       uses: antmicro/renode-test-action@v1.0.0
       with:
-        renode-version: '1.12.0+20211006gite082694a'
+        renode-version: '1.12.0+20211130gitfabd4209'
         tests-to-run: proj/${{ matrix.proj_name }}/build/renode/${{ matrix.target }}.robot
 
     - name: Archive results
