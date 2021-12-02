@@ -5,3 +5,5 @@ yapf
 requests
 meson
 Pillow
+six
+Wave

@@ -1,0 +1,62 @@
+name: Sync from tflite-micro
+
+on:
+  schedule:
+    - cron: 0 0 * * *
+
+  # Allow manually triggering of the workflow.
+  workflow_dispatch: {}
+
+jobs:
+  sync-tflite-micro:
+    runs-on: ubuntu-latest
+
+    if: |
+      github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+
+    env:
+      GH_SERVICE_ACCOUNT_NAME: "tflite-bot"
+      GH_SERVICE_ACCOUNT_EMAIL: "tflite-bot@antmicro.com"
+
+    steps:
+      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GH_SERVICE_ACCOUNT_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config --global user.name $GH_SERVICE_ACCOUNT_NAME
+          git config --global user.email $GH_SERVICE_ACCOUNT_EMAIL
+
+      - name: Sync the code, commit and push
+        run: |
+          export TFLM_SHA=$(git ls-remote https://github.com/tensorflow/tflite-micro.git main | cut -c1-7)
+          ./scripts/sync_from_tflite_micro.sh
+          git add *
+
+          if [ -n "$(git status --porcelain)" ]; then
+            git commit -m "Sync from tflite-micro at $TFLM_SHA."
+          else
+            echo "no changes"
+          fi
+
+      - name: Create Pull Request
+        id: create-pr
+        uses: peter-evans/create-pull-request@v3
+        with:
+          branch: sync-from-tflite-micro
+          delete-branch: true
+          token: ${{ secrets.GH_SERVICE_ACCOUNT_TOKEN }}
+          title: (CFU Playground) Automated sync from github.com/tensorflow/tflite-micro
+          commit-message: Automated sync from github.com/tensorflow/tflite-micro
+          committer: $GH_SERVICE_ACCOUNT_NAME <$GH_SERVICE_ACCOUNT_EMAIL>
+          author: $GH_SERVICE_ACCOUNT_NAME <$GH_SERVICE_ACCOUNT_EMAIL>
+          body: "(CFU Playground) Automated sync from github.com/tensorflow/tflite-micro"
+
+      - name: Enable Pull Request Automerge
+        if: steps.create-pr.outputs.pull-request-operation == 'created'
+        uses: peter-evans/enable-pull-request-automerge@v1
+        with:
+          token: ${{ secrets.GH_SERVICE_ACCOUNT_TOKEN }}
+          pull-request-number: ${{ steps.create-pr.outputs.pull-request-number }}
