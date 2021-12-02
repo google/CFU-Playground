@@ -20,6 +20,8 @@ from nmigen_cfu.util import SimpleElaboratable
 
 from ..stream import connect, Endpoint
 from .constants import Constants
+from .filter import FilterStore, FILTER_WRITE_COMMAND
+from .mem import SinglePortMemory
 from .post_process import (
     AccumulatorReader,
     OutputWordAssembler,
@@ -30,10 +32,16 @@ from .post_process import (
     PostProcessPipeline,
     ReadingProducer)
 from .sysarray import SystolicArray
+from .utils import unsigned_upto
 
 
 class AcceleratorCore(SimpleElaboratable):
     """Core of the accelerator.
+
+    Sequence of use:
+    1. Set filter and post process param sizes
+    2. reset
+    3. Add filter an post process param data
 
     This is a work in progress.
 
@@ -56,9 +64,11 @@ class AcceleratorCore(SimpleElaboratable):
         Activation values as read from memory. Four 8 bit values are
         packed into each 32 bit word.
 
-    filters: [Signal(32) * 2], in
-        Filter values as read from a filter store. Four 8 bit values are
-        packed into each 32 bit word.
+    write_filter_input: Endpoint(FILTER_WRITE_COMMAND), in
+        Commands to write to the filter store.
+
+    filter_start: Signal(), in
+        Causes filter output to begin with addr(0), on cycle after next.
 
     first: Signal(), in
         Beginning of value computation signal for systolic array.
@@ -89,19 +99,24 @@ class AcceleratorCore(SimpleElaboratable):
     output_activation_max: Signal(signed(8)), out
         The maximum output value
 
+    num_filter_words: Signal(unsigned_upto(FILTER_WORDS_PER_STORE)), in
+        Number of words of filter data, per filter store
+
+    output_channel_depth: Signal(Constants.MAX_CHANNEL_DEPTH), in
+        Number of output channels to cycle through
+
+    post_process_params: Endpoint(POST_PROCESS_PARAMS), out
+        Stream of data to write to post_process memory.
+
     reset: Signal(), in
-        Resets logic to starting state
-
-    filter_sizes: Record(POST_PROCESS_SIZES)
-        Depth and repeat count for producing values.
-
-    filter_params: Endpoint(POST_PROCESS_PARAMS), out
-        Stream of data to write to filter parameter memory.
+        Resets internal logic to starting state. Input values are not
+        affected.
     """
 
     def __init__(self):
         self.activations = [Signal(32, name=f"act_{i}") for i in range(4)]
-        self.filters = [Signal(32, name=f"filters_{i}") for i in range(2)]
+        self.write_filter_input = Endpoint(FILTER_WRITE_COMMAND)
+        self.filter_start = Signal()
         self.first = Signal()
         self.last = Signal()
         self.half = Signal()
@@ -110,12 +125,26 @@ class AcceleratorCore(SimpleElaboratable):
         self.output_offset = Signal(signed(9))
         self.output_activation_min = Signal(signed(8))
         self.output_activation_max = Signal(signed(8))
+        self.num_filter_words = Signal(
+            unsigned_upto(Constants.FILTER_WORDS_PER_STORE))
+        self.output_channel_depth = Signal(
+            unsigned_upto(Constants.MAX_CHANNEL_DEPTH))
+        self.post_process_params = Endpoint(POST_PROCESS_PARAMS)
         self.reset = Signal()
-        self.post_process_sizes = Record(POST_PROCESS_SIZES)
-        self.filter_params = Endpoint(POST_PROCESS_PARAMS)
+
+    def build_filter_store(self, m):
+        m.submodules['filter_store'] = store = FilterStore()
+        m.d.comb += [
+            *connect(self.write_filter_input, store.write_input),
+            store.reset.eq(self.reset),
+            store.size.eq(self.num_filter_words),
+            store.start.eq(self.filter_start),
+        ]
+        return store.values_out
 
     def build_param_store(self, m):
         # Create memory for post process params
+        # Use SinglePortMemory here?
         param_mem = Memory(
             width=POST_PROCESS_PARAMS_WIDTH,
             depth=Constants.MAX_CHANNEL_DEPTH)
@@ -124,11 +153,11 @@ class AcceleratorCore(SimpleElaboratable):
 
         # Configure param writer
         m.submodules['param_writer'] = pw = ParamWriter()
-        m.d.comb += connect(self.filter_params, pw.input_data)
+        m.d.comb += connect(self.post_process_params, pw.input_data)
         m.d.comb += [
             pw.reset.eq(self.reset),
             wp.en.eq(pw.mem_we),
-            wp.addr.eq(pw.mem_addr), 
+            wp.addr.eq(pw.mem_addr),
             wp.data.eq(pw.mem_data),
         ]
 
@@ -137,7 +166,8 @@ class AcceleratorCore(SimpleElaboratable):
         m.d.comb += [
             # Reset reader whenever new parameters are written
             reader.reset.eq(pw.input_data.is_transferring()),
-            reader.sizes.eq(self.post_process_sizes),
+            reader.sizes.depth.eq(self.output_channel_depth),
+            reader.sizes.repeats.eq(Constants.SYS_ARRAY_HEIGHT),
             rp.addr.eq(reader.mem_addr),
             reader.mem_data.eq(rp.data),
         ]
@@ -156,12 +186,15 @@ class AcceleratorCore(SimpleElaboratable):
         return ar.output
 
     def elab(self, m):
+        # Create filter store
+        filter_values = self.build_filter_store(m)
+
         # Plumb in sysarray and its inputs
         m.submodules['sysarray'] = sa = SystolicArray()
         for in_a, activation in zip(sa.input_a, self.activations):
             m.d.comb += in_a.eq(activation)
-        for in_b, filter_ in zip(sa.input_b, self.filters):
-            m.d.comb += in_b.eq(filter_)
+        for in_b, value in zip(sa.input_b, filter_values):
+            m.d.comb += in_b.eq(value)
         m.d.comb += sa.first.eq(self.first)
         m.d.comb += sa.last.eq(self.last)
 

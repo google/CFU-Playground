@@ -25,14 +25,6 @@ from .utils import unsigned_upto
 from ..stream import connect, Endpoint, BinaryPipelineActor
 from ..stream.fifo import StreamFifo
 
-POST_PROCESS_PARAMS = [
-    ('bias', signed(16)),
-    ('multiplier', signed(32)),
-    ('shift', unsigned(4)),
-]
-
-POST_PROCESS_PARAMS_WIDTH = len(Record(POST_PROCESS_PARAMS))
-
 SRDHM_INPUT_LAYOUT = [
     ('a', signed(32)),
     ('b', signed(32)),
@@ -200,6 +192,15 @@ def delay(m, signal, cycles):
         m.d.sync += delayed.eq(signal)
         signal = delayed
     return signal
+
+
+POST_PROCESS_PARAMS = [
+    ('bias', signed(16)),
+    ('multiplier', signed(32)),
+    ('shift', unsigned(4)),
+]
+
+POST_PROCESS_PARAMS_WIDTH = len(Record(POST_PROCESS_PARAMS))
 
 
 class PostProcessPipeline(SimpleElaboratable):

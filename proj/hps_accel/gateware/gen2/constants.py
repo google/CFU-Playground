@@ -27,3 +27,10 @@ class Constants:
 
     # Total Number of MACC blocks in Systolic array
     SYS_ARRAY_MACC_BLOCKS = SYS_ARRAY_HEIGHT * SYS_ARRAY_WIDTH
+
+    # Total number of separate store
+    NUM_FILTER_STORES = SYS_ARRAY_WIDTH
+
+    # Depth of filter storage, per store 
+    FILTER_WORDS_PER_STORE = 512
+
