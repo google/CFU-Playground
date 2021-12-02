@@ -84,8 +84,14 @@ class Ice40UP5KWorkflow(general.GeneralSoCWorkflow):
 
     def make_soc(self, **kwargs) -> litex_soc.LiteXSoC:
         """Runs the general make_soc with a bios_flash_offset."""
-        return super().make_soc(bios_flash_offset=self.bios_flash_offset,
+        soc = super().make_soc(bios_flash_offset=self.bios_flash_offset,
                                 **kwargs)
+
+        # restore full 128kB to "sram" region (steal back from "main_ram")
+        soc.bus.regions["sram"].size = 128 * 1024;
+        soc.bus.regions["main_ram"].origin = 128 * 1024;
+        soc.bus.regions["main_ram"].size = 0;
+        return soc
 
     def software_load(
             self,
