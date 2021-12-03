@@ -14,10 +14,18 @@
 
 """Tests for ram_input.py"""
 
+import itertools
+
 from nmigen import unsigned
+from nmigen.sim import Passive
 from nmigen_cfu import TestBase
 
-from .ram_input import PixelAddressGenerator, RoundRobin4, ValueAddressGenerator
+from .conv2d_data import fetch_data
+from .ram_input import (
+    InputFetcher,
+    PixelAddressGenerator,
+    RoundRobin4,
+    ValueAddressGenerator)
 
 
 class PixelAddressGeneratorTest(TestBase):
@@ -175,3 +183,113 @@ class ValueAddressGeneratorTest(TestBase):
             yield from self.config(2000, 3, 1000)
             yield from self.check(2000, 3, 1000)
         self.run_sim(process, False)
+
+
+class InputFetcherTest(TestBase):
+    """Tests InputFetcher class."""
+
+    def create_dut(self):
+        return InputFetcher()
+
+    def setUp(self):
+        super().setUp()
+        self.data = fetch_data('sample_conv_1')
+
+    def pixel_input_values(self, pixel):
+        # Get values for a given pixel number
+        # TODO: allow for stride != 1
+        data = self.data
+        in_x_dim = data.input_dims[2]
+        out_x_dim = data.output_dims[2]
+        word_depth = data.input_dims[3] // 4
+        pixel_y, pixel_x = pixel // out_x_dim, pixel % out_x_dim
+        result = []
+        for row in range(4):
+            row_start_addr = (
+                (pixel_y + row) * in_x_dim + pixel_x) * word_depth
+            result += data.input_data[row_start_addr:
+                                      row_start_addr + word_depth * 4]
+        return result
+
+    def test_it(self):
+        dut = self.dut
+        data = self.data
+
+        def ram():
+            yield Passive()
+            while True:
+                for i in range(4):
+                    block = (yield dut.lram_addr[i]) - 0x123
+                    data_addr = block * 4 + i
+                    yield dut.lram_data[i].eq(data.input_data[data_addr])
+                yield
+        self.add_process(ram)
+
+        captured_outputs = [[] for _ in range(4)]
+
+        def capture_output(n):
+            # Captures one output as a list of lists into captured_outputs
+            data_out = dut.data_out[n]
+
+            def fn():
+                yield Passive()
+                # Wait for initilalisation
+                yield
+                yield
+                yield
+                yield
+                first_seen, last_seen, capture = None, None, []
+                for cycle in itertools.count():
+                    if (yield dut.first):
+                        first_seen = cycle
+                    if (yield dut.last):
+                        last_seen = cycle
+                    if cycle - n == first_seen:
+                        capture = []
+                    capture.append((yield data_out))
+                    if cycle - n == last_seen:
+                        captured_outputs[n].append(capture)
+                    yield
+            return fn
+        for n in range(4):
+            self.add_process(capture_output(n))
+
+        def process():
+            # Configure the dut to match the input
+            depth = data.input_dims[3]
+            in_x_dim = data.input_dims[2]
+            out_x_dim = data.output_dims[2]
+
+            yield dut.base_addr.eq(0x123)
+            yield dut.num_pixels_x.eq(out_x_dim)
+            yield dut.num_blocks_x.eq(depth // 16)
+            yield dut.num_blocks_y.eq((depth // 16) * in_x_dim)
+            yield dut.depth.eq(depth // 16)
+            yield
+            # Toggle start high to begin output
+            yield dut.start.eq(1)
+            yield
+            yield dut.start.eq(0)
+
+            # Number of pixels of output we want to capture 
+            # Use "data.output_dims[1] * data.output_dims[2]" to test all rows
+            # (takes about 30 seconds)
+            # Test with 3 rows
+            capture_pixels = 3 * data.output_dims[2]
+            input_words_per_output_pixel = depth // 4 * 16
+            num_cycles = (
+                capture_pixels * input_words_per_output_pixel // 4) + 5
+            for cycle in range(num_cycles):
+                yield
+
+        self.run_sim(process, False)
+
+        # Reorder data
+        ordered_outputs = []
+        for group in zip(*captured_outputs):
+            for i in range(4):
+                ordered_outputs.append(group[i])
+
+        for i, actual in enumerate(ordered_outputs):
+            expected = self.pixel_input_values(i)
+            self.assertEqual(actual, expected, msg=f"differ at pixel {i}")

@@ -63,8 +63,10 @@ TODO: An alternate mode to deal with input layers
 - no need to cross row boundaries
 """
 
-from nmigen import Signal
+from nmigen import Mux, Signal, unsigned
 from nmigen_cfu.util import SimpleElaboratable
+
+from .utils import delay
 
 
 class PixelAddressGenerator(SimpleElaboratable):
@@ -261,3 +263,136 @@ class ValueAddressGenerator(SimpleElaboratable):
                     next_row_addr.eq(next_row_addr + self.num_blocks_y),
                     x_count.eq(0),
                 ]
+
+
+class InputFetcher(SimpleElaboratable):
+    """Fetches input vectors for Conv2D.
+
+    Coordinates a "normal mode" input fetch, where input data depth is a
+    multiple of 16.
+
+    This is a free-running component which synchronizes its start when
+    "start" is pulsed high.
+
+
+    Attributes
+    ----------
+
+    start: Signal, in
+        Pulsed to reset and restart logic with the given numbers. There is
+        a delay of __ cycles between start and the first valid data produced.
+
+    base_addr: Signal(14), in
+        A base number, added to all results
+
+    num_pixels_x: Signal(9), in
+        How many pixels in a row
+
+    num_blocks_x: Signal(4), in
+        Number of RAM blocks to advance to move to new pixel in X direction
+
+    num_blocks_y: Signal(8), in
+        Number of RAM blocks  to advance between pixels in Y direction
+
+    depth: Signal(3), in
+        Number of 16-byte blocks to read per pixel. Max depth is 7 which is 112
+        values/pixel). Total number of cycles per output pixel is
+        depth * (4 cycles/block) * 4 (x dim) * 4 (y dim) = 64 * depth.
+
+    lram_addr: [Signal(14)] * 4, out
+        Address for each LRAM bank
+
+    lram_data: [Signal(32)] * 4, in
+        Data as read from addresses provided at previous cycle.
+
+    data_out: [Signal(32)] * 4, out
+        Data for each of four pixels.
+
+    first: Signal(), out
+        Indicates first data for a pixel available at data_out[0]. First data
+        will arrive at data_out[1] a cycle later and so on. This signal is not
+        valid until 2 cycles after start.
+
+    last: Signal(), out
+        Indicates last data for a pixel available at data_out[0]. Last data
+        will arrive at data_out[1] a cycle later and so on.
+    """
+
+    def __init__(self):
+        self.start = Signal()
+        self.base_addr = Signal(14)
+        self.num_pixels_x = Signal(9)
+        self.num_blocks_x = Signal(4)
+        self.num_blocks_y = Signal(8)
+        self.depth = Signal(3)
+        self.lram_addr = [Signal(14, name=f"lram_addr{i}") for i in range(4)]
+        self.lram_data = [Signal(32, name=f"lram_data{i}") for i in range(4)]
+        self.data_out = [Signal(32, name=f"data_out{i}") for i in range(4)]
+        self.first = Signal()
+        self.last = Signal()
+
+    def elab(self, m):
+        m.submodules["pixel_ag"] = pixel_ag = PixelAddressGenerator()
+        m.submodules["rraddr"] = rr_addr = RoundRobin4(shape=unsigned(14))
+        m.submodules["rrdata"] = rr_data = RoundRobin4(shape=unsigned(32))
+        value_ags = [ValueAddressGenerator() for _ in range(4)]
+        for i, v in enumerate(value_ags):
+            m.submodules[f"value_ag{i}"] = v
+
+        # Connect pixel address generator inputs
+        m.d.comb += [
+            pixel_ag.base_addr.eq(self.base_addr),
+            pixel_ag.num_pixels_x.eq(self.num_pixels_x),
+            pixel_ag.num_blocks_x.eq(self.num_blocks_x),
+            pixel_ag.num_blocks_y.eq(self.num_blocks_y),
+        ]
+
+        # Connect value address generators
+        for i, v in enumerate(value_ags):
+            m.d.comb += [
+                v.start_addr.eq(pixel_ag.addr),
+                v.depth.eq(self.depth),
+                v.num_blocks_y.eq(self.num_blocks_y),
+                rr_addr.mux_in[i].eq(v.addr_out),
+            ]
+
+        # Connect round robins to LRAM and data output
+        for i in range(4):
+            m.d.comb += [
+                self.lram_addr[i].eq(rr_addr.mux_out[i]),
+                rr_data.mux_in[i].eq(self.lram_data[i]),
+                self.data_out[i].eq(rr_data.mux_out[i]),
+            ]
+
+        # Sequence start signals to PixelAddressGenerator and round robins
+        starts = delay(m, self.start, 1)
+        m.d.comb += [
+            pixel_ag.start.eq(starts[0]),
+            rr_addr.start.eq(starts[0]),
+            rr_data.start.eq(starts[1]),
+        ]
+
+        # cycle_counter counts cycles through reading input data
+        max_cycle_counter = Signal(9)
+        m.d.comb += max_cycle_counter.eq((self.depth << 6) - 1)
+        cycle_counter = Signal(9)
+
+        # Restart counter on start
+        with m.If(self.start):
+            m.d.sync += cycle_counter.eq(0)
+        with m.Else():
+            rollover = cycle_counter == max_cycle_counter
+            m.d.sync += cycle_counter.eq(Mux(rollover, 0, cycle_counter + 1))
+        next_pixel = 0
+        for i in range(4):
+            start_gen = Signal()
+            m.d.comb += start_gen.eq(cycle_counter == i)
+            m.d.comb += value_ags[i].start.eq(start_gen)
+            next_pixel |= start_gen
+        m.d.comb += pixel_ag.next.eq(next_pixel)
+
+        # Generate first and last signals
+        m.d.sync += [
+            self.first.eq(cycle_counter == 0),
+            self.last.eq(cycle_counter == max_cycle_counter),
+        ]
