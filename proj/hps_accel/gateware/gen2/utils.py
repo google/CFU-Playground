@@ -23,10 +23,9 @@ def unsigned_upto(maximum_value):
 
 
 def delay(m, input_, cycles):
-    """Delays the given input signal by the number of cycles"""
-    delayed = input_
+    result = [input_]
     for i in range(cycles):
-        tmp = delayed
         delayed = Signal.like(input_, name=f"{input_.name}_d{i+1}")
-        m.d.sync += delayed.eq(tmp)
-    return delayed
+        m.d.sync += delayed.eq(result[-1])
+        result.append(delayed)
+    return result
