@@ -473,14 +473,12 @@ class AccumulatorReaderTest(TestBase):
     def create_dut(self):
         return AccumulatorReader()
 
-    def set_accumulators(self, values, half, cycles):
+    def set_accumulators(self, values, cycles):
         """Set inputs in a manner approximating systolic array output."""
         # Order is cycle number when accumulator value will be produced
-        order = [0, 1, 1, 2] if half else [0, 1, 2, 3, 1, 2, 3, 4]
-        size = 4 if half else 8
+        order = [0, 1, 2, 3, 1, 2, 3, 4]
+        size = 8
         groups = [values[i:i + size] for i in range(0, len(values), size)]
-
-        yield self.dut.half.eq(half)
 
         # Send each group over a number of cycles
         for group in groups:
@@ -508,26 +506,14 @@ class AccumulatorReaderTest(TestBase):
             self.assertFalse((yield self.dut.output.valid))
             yield
 
-    def test_it_reads_full(self):
+    def test_it_reads_accumulators(self):
         data = list(range(100, 100 + 10 * 8))
 
         def set_values():
-            yield from self.set_accumulators(data, False, 24)
+            yield from self.set_accumulators(data, 24)
         self.add_process(set_values)
 
         def process():
-            yield from self.check_outputs(data)
-        self.run_sim(process, False)
-
-    def test_it_reads_half(self):
-        data = list(range(100, 100 + 10 * 8))
-
-        def set_values():
-            yield from self.set_accumulators(data, True, 4)
-        self.add_process(set_values)
-
-        def process():
-            yield Passive()
             yield from self.check_outputs(data)
         self.run_sim(process, False)
 

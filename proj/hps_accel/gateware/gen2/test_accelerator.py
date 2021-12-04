@@ -105,7 +105,6 @@ class AcceleratorCoreTest(TestBase):
         depth = data.output_dims[3]
         num_filter_values = reduce(lambda a, b: a * b, data.filter_dims, 1)
         filter_words_per_store = num_filter_values // 4 // 2
-        yield dut.half.eq(0)
         yield dut.input_offset.eq(data.input_offset)
         yield dut.output_offset.eq(data.output_offset)
         yield dut.output_activation_min.eq(data.output_min)

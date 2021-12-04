@@ -76,13 +76,6 @@ class AcceleratorCore(SimpleElaboratable):
     last: Signal(), in
         End of value computation signal for systolic array.
 
-    half: Signal(), in
-        Indicates only half of the systolic array (i.e 16 of 32
-        multipliers) are to be used. This is set when each output value
-        requires only 16 multiplication operations and so using 32
-        multipliers would overwhelm the post processing pipeline, which
-        can only process one output per cycle.
-
     output: Endpoint(unsigned(32)), out
       The 8 bit output values as 4 byte words. Values are produced in an
       algorithm dependent order.
@@ -119,7 +112,6 @@ class AcceleratorCore(SimpleElaboratable):
         self.filter_start = Signal()
         self.first = Signal()
         self.last = Signal()
-        self.half = Signal()
         self.output = Endpoint(unsigned(32))
         self.input_offset = Signal(signed(9))
         self.output_offset = Signal(signed(9))
@@ -182,7 +174,6 @@ class AcceleratorCore(SimpleElaboratable):
                 ar.accumulator[i].eq(accumulators[i]),
                 ar.accumulator_new[i].eq(accumulator_news[i]),
             ]
-        m.d.comb += ar.half.eq(self.half)
         return ar.output
 
     def elab(self, m):

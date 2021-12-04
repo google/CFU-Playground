@@ -438,9 +438,6 @@ class AccumulatorReader(SimpleElaboratable):
     accumulator_new: [Signal()] * 8, in
         Strobes when new value available in accumulator.
 
-    half: Signal(), in
-        When held high, only the first four accumulators are considered.
-
     output: Endpoint(accumulator_shape), in
       The accumulated values to convert. Values not read before new values
       are available are lsot.
@@ -450,7 +447,6 @@ class AccumulatorReader(SimpleElaboratable):
         self.accumulator = [Signal(accumulator_shape,
                                    name=f"acc_{i}") for i in range(8)]
         self.accumulator_new = [Signal(name=f"acc_new_{i}") for i in range(8)]
-        self.half = Signal()
         self.output = Endpoint(accumulator_shape)
 
     def elab(self, m):
@@ -474,7 +470,7 @@ class AccumulatorReader(SimpleElaboratable):
                 self.output.payload.eq(Array(self.accumulator)[index]),
                 self.output.valid.eq(1),
                 flags[index].eq(0),
-                index.eq(Mux(self.half & (index == 3), 0, index + 1)),
+                index.eq(index + 1),
             ]
 
 
