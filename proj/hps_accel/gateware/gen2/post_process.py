@@ -421,8 +421,6 @@ class AccumulatorReader(SimpleElaboratable):
 
     Hard-wired for 8 accumulators.
 
-    Can be set at run time to process only four accumulators.
-
     Parameters
     ----------
 
@@ -440,7 +438,7 @@ class AccumulatorReader(SimpleElaboratable):
 
     output: Endpoint(accumulator_shape), in
       The accumulated values to convert. Values not read before new values
-      are available are lsot.
+      are available are lost.
     """
 
     def __init__(self, accumulator_shape=signed(32)):
@@ -472,6 +470,57 @@ class AccumulatorReader(SimpleElaboratable):
                 flags[index].eq(0),
                 index.eq(index + 1),
             ]
+
+
+class StreamLimiter(SimpleElaboratable):
+    """Allows only a certain number of elements to apss through stream.
+
+    Counts a given number of items, then signals that it is done.
+
+    Parameters
+    ----------
+
+    payload_type:
+        The type carried by the stream
+
+    Attributes
+    ----------
+
+    stream_in: Endpoint(payload_type), in
+        The incoming stream. Will always be ready after start and
+        until done.
+    stream_out: Endpoint(payload_type), out
+        The outgoing stream. Does not respect back pressure.
+
+    num_allowed: Signal(18), in
+        The number of items allowed to pass.
+
+    start: Signal(), in
+        Pulse high to allow items beginning next cycle.
+
+    running: Signal(), out
+        Indicates that items are being allowed to pass
+    """
+
+    def __init__(self, payload_type):
+        self.stream_in = Endpoint(payload_type)
+        self.stream_out = Endpoint(payload_type)
+        self.num_allowed = Signal(18)
+        self.start = Signal()
+        self.running = Signal()
+
+    def elab(self, m):
+        m.d.comb += [
+            self.stream_in.ready.eq(self.running),
+            self.stream_out.valid.eq(self.stream_in.is_transferring()),
+            self.stream_out.payload.eq(self.stream_in.payload),
+        ]
+        counter = Signal.like(self.num_allowed)
+        with m.If(self.start):
+            m.d.sync += counter.eq(self.num_allowed)
+        with m.If(self.stream_in.is_transferring()):
+            m.d.sync += counter.eq(counter - 1)
+        m.d.comb += self.running.eq(counter != 0)
 
 
 class OutputWordAssembler(SimpleElaboratable):
