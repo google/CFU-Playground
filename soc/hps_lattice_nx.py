@@ -6,53 +6,48 @@
 # Copyright (c) 2019 Florent Kermarrec <florent@enjoy-digital.fr>
 # SPDX-License-Identifier: BSD-2-Clause
 #
-#
-##################################################################
-# This is a modified version of litex/soc/cores/ram/lattice_nx.py
-# Modified by CFU Playground Authors to:
-#  * optionally use the dual port LRAM primitive
-#  * optionally stripe consecutive addresses across the banks
-##################################################################
-#
-# When the striping option is used:
-#
-# The RAM from which data is fetched consists of 4 32 bit wide, 16K words deep
-# LRAMs, with word addresses in rows across the LRAMs:
-# (this is how the "arena" address space looks from the Wishbone bus)
-#
-# +--------+--------+--------+--------+
-# | LRAM 0 | LRAM 1 | LRAM 2 | LRAM 3 |
-# +--------+--------+--------+--------+
-# |    0   |    1   |    2   |    3   |
-# +--------+--------+--------+--------+
-# |    4   |    5   |    6   |    7   |
-# +--------+--------+--------+--------+
-# |    8   |    9   |   10   |   11   |
-# +--------+--------+--------+--------+
-# |  ...   |  ...   |  ...   |  ...   |
-# +--------+--------+--------+--------+
-#
-#  In addition, each LRAM has a second port that gets connected directly to the CFU.
-#  From each of these ports, the connected LRAM is word addressed consecutively.
-#
-#  Thus, "arena" offset 4 from the Wishbone bus can also be accessed at
-#  address 0x1 from the LRAM-0 port of the CFU.
-#
+"""NX family-specific Wishbone interface to the LRAM primitive.
 
+Each LRAM is 64kBytes arranged in 32 bit wide words.
+
+##################################################################
+ This is a modified version of litex/soc/cores/ram/lattice_nx.py
+ Modified by CFU Playground Authors to:
+  * optionally use the dual port LRAM primitive
+  * optionally stripe consecutive addresses across the banks
+##################################################################
+
+ When the striping option is used:
+
+ The RAM from which data is fetched consists of 4 32 bit wide, 16K words deep
+ LRAMs, with word addresses in rows across the LRAMs:
+ (this is how the "arena" address space looks from the Wishbone bus)
+
+ +--------+--------+--------+--------+
+ | LRAM 0 | LRAM 1 | LRAM 2 | LRAM 3 |
+ +--------+--------+--------+--------+
+ |    0   |    1   |    2   |    3   |
+ +--------+--------+--------+--------+
+ |    4   |    5   |    6   |    7   |
+ +--------+--------+--------+--------+
+ |    8   |    9   |   10   |   11   |
+ +--------+--------+--------+--------+
+ |  ...   |  ...   |  ...   |  ...   |
+ +--------+--------+--------+--------+
+
+  In addition, each LRAM has a second port that gets connected directly to the CFU.
+  From each of these ports, the connected LRAM is word addressed consecutively.
+
+  Thus, "arena" offset 4 from the Wishbone bus can also be accessed at
+  address 0x1 from the LRAM-0 port connected to the CFU.
+
+"""
 
 from migen import *
 from litex.soc.interconnect import wishbone
 
 kB = 1024
 
-"""
-NX family-specific Wishbone interface to the LRAM primitive.
-
-Each LRAM is 64kBytes arranged in 32 bit wide words.
-
-Note that this memory is dual port, but we only use a single port in this
-instantiation.
-"""
 
 
 def initval_parameters(contents, width):
