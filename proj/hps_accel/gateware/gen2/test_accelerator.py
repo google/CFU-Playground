@@ -170,6 +170,7 @@ class AcceleratorCoreTest(TestBase):
             yield self.dut.filter_start.eq(1)
             yield
             yield self.dut.filter_start.eq(0)
+            yield
 
             # Pump through data
             # We want to produce 16 pixels of output data
