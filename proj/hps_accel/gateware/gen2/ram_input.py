@@ -291,9 +291,13 @@ class InputFetcher(SimpleElaboratable):
     Attributes
     ----------
 
+    reset: Signal, in
+        Pulsed to stop producing values. This ensures that invalid first
+        and last signals are not produced.
+
     start: Signal, in
-        Pulsed to reset and restart logic with the given numbers. There is
-        a delay of __ cycles between start and the first valid data produced.
+        Pulsed to begin producing data. There is a delay of 2 cycles between
+        the start signal and the first valid data being produced.
 
     base_addr: Signal(14), in
         A base number, added to all results
@@ -332,6 +336,7 @@ class InputFetcher(SimpleElaboratable):
     """
 
     def __init__(self):
+        self.reset = Signal()
         self.start = Signal()
         self.base_addr = Signal(14)
         self.num_pixels_x = Signal(9)
@@ -390,22 +395,29 @@ class InputFetcher(SimpleElaboratable):
         m.d.comb += max_cycle_counter.eq((self.depth << 6) - 1)
         cycle_counter = Signal(9)
 
-        # Restart counter on start
-        with m.If(self.start):
+        # Stop running on reset. Start running on start
+        running = Signal()
+        with m.If(self.reset):
+            m.d.sync += running.eq(0)
+        with m.Elif(self.start):
+            m.d.sync += running.eq(1)
             m.d.sync += cycle_counter.eq(0)
-        with m.Else():
+        with m.Elif(running):
             rollover = cycle_counter == max_cycle_counter
             m.d.sync += cycle_counter.eq(Mux(rollover, 0, cycle_counter + 1))
+
+        # Calculate when to value address generators and when to get
+        # next pixel address
         next_pixel = 0
         for i in range(4):
             start_gen = Signal()
-            m.d.comb += start_gen.eq(cycle_counter == i)
+            m.d.comb += start_gen.eq(running & (cycle_counter == i))
             m.d.comb += value_ags[i].start.eq(start_gen)
             next_pixel |= start_gen
         m.d.comb += pixel_ag.next.eq(next_pixel)
 
         # Generate first and last signals
         m.d.sync += [
-            self.first.eq(cycle_counter == 0),
-            self.last.eq(cycle_counter == max_cycle_counter),
+            self.first.eq(running & (cycle_counter == 0)),
+            self.last.eq(running & (cycle_counter == max_cycle_counter)),
         ]

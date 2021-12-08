@@ -233,11 +233,9 @@ class InputFetcherTest(TestBase):
 
             def fn():
                 yield Passive()
-                # Wait for initilalisation
-                yield
-                yield
-                yield
-                yield
+                # Wait for first "first" signal, then begin capturing
+                while not (yield dut.first):
+                    yield
                 first_seen, last_seen, capture = None, None, []
                 for cycle in itertools.count():
                     if (yield dut.first):
@@ -266,7 +264,12 @@ class InputFetcherTest(TestBase):
             yield dut.num_blocks_y.eq((depth // 16) * in_x_dim)
             yield dut.depth.eq(depth // 16)
             yield
-            # Toggle start high to begin output
+            # Reset, let it run for a bit, then toggle start high to begin
+            yield dut.reset.eq(1)
+            yield
+            yield dut.reset.eq(0)
+            for _ in range(10):
+                yield
             yield dut.start.eq(1)
             yield
             yield dut.start.eq(0)
@@ -277,6 +280,8 @@ class InputFetcherTest(TestBase):
             # Test with 3 rows
             capture_pixels = 3 * data.output_dims[2]
             input_words_per_output_pixel = depth // 4 * 16
+            # num_cycles is 2 cycle startup + time to output first stream + 3 cycles 
+            # for other streams to finish 
             num_cycles = (
                 capture_pixels * input_words_per_output_pixel // 4) + 5
             for cycle in range(num_cycles):
