@@ -30,7 +30,8 @@ from .post_process import (
     POST_PROCESS_SIZES,
     POST_PROCESS_PARAMS_WIDTH,
     PostProcessPipeline,
-    ReadingProducer)
+    ReadingProducer,
+    StreamLimiter)
 from .sysarray import SystolicArray
 from .utils import unsigned_upto
 
@@ -85,6 +86,9 @@ class AcceleratorCore(SimpleElaboratable):
     post_process_params: Endpoint(POST_PROCESS_PARAMS), out
         Stream of data to write to post_process memory.
 
+    num_output_values: Signal(18), in
+        Number of 8bit output values produced. Expected to be a multiple of 16.
+
     start: Signal(), in
         Starts accelerator working.
 
@@ -119,14 +123,13 @@ class AcceleratorCore(SimpleElaboratable):
         self.output_channel_depth = Signal(
             unsigned_upto(Constants.MAX_CHANNEL_DEPTH))
         self.post_process_params = Endpoint(POST_PROCESS_PARAMS)
+        self.num_output_values = Signal(unsigned(18))
 
         self.start = Signal()
         self.activations = [Signal(32, name=f"act_{i}") for i in range(4)]
         self.first = Signal()
         self.last = Signal()
         self.output = Endpoint(unsigned(32))
-
-
 
     def build_filter_store(self, m):
         m.submodules['filter_store'] = store = FilterStore()
@@ -177,7 +180,11 @@ class AcceleratorCore(SimpleElaboratable):
                 ar.accumulator[i].eq(accumulators[i]),
                 ar.accumulator_new[i].eq(accumulator_news[i]),
             ]
-        return ar.output
+        m.submodules['acc_limiter'] = al = StreamLimiter()
+        m.d.comb += connect(ar.output, al.stream_in)
+        m.d.comb += al.num_allowed.eq(self.num_output_values)
+        m.d.comb += al.start.eq(self.start)
+        return al.stream_out
 
     def elab(self, m):
         # Create filter store

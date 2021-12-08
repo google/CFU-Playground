@@ -111,6 +111,7 @@ class AcceleratorCoreTest(TestBase):
         yield dut.output_activation_max.eq(data.output_max)
         yield dut.num_filter_words.eq(filter_words_per_store)
         yield dut.output_channel_depth.eq(depth)
+        yield dut.num_output_values.eq(256)
 
         # Toggle reset
         yield dut.reset.eq(1)
@@ -183,7 +184,9 @@ class AcceleratorCoreTest(TestBase):
             # Input pass = 16 pixels * 16 depth = 256 values = 64 words
             # 32 passes * 64 words/pass * 1 cycle/word = 2048 cycles
             # Add 3 cycles to allow other input streams to complete
-            for clock in range(2048 + 3):
+            # Then add some more cycles which should make no difference since
+            # output is limited to the configured num_output_values
+            for clock in range(2048 + 3 + 100):
                 first = (clock < 2048) and (clock % 64) == 0
                 last = (clock < 2048) and (clock % 64) == 63
                 yield dut.first.eq(first)
@@ -213,6 +216,11 @@ class AcceleratorCoreTest(TestBase):
                     yield
                 actual_outputs.append((yield dut.output.payload) & 0xffff_ffff)
                 yield
+            # Check for a bit longer to ensure no more data than expected
+            for _ in range(100):
+                self.assertFalse((yield dut.output.valid))
+                yield
+
             # Reorder output words to match tflite expected order
             reordered_actual = []
             for four_pixels in group(actual_outputs, 16):

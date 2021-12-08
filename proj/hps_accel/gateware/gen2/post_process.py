@@ -502,7 +502,7 @@ class StreamLimiter(SimpleElaboratable):
         Indicates that items are being allowed to pass
     """
 
-    def __init__(self, payload_type):
+    def __init__(self, payload_type=signed(32)):
         self.stream_in = Endpoint(payload_type)
         self.stream_out = Endpoint(payload_type)
         self.num_allowed = Signal(18)
