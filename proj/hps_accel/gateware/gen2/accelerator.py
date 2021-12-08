@@ -85,8 +85,8 @@ class AcceleratorCore(SimpleElaboratable):
     post_process_params: Endpoint(POST_PROCESS_PARAMS), out
         Stream of data to write to post_process memory.
 
-    filter_start: Signal(), in
-        Causes filter output to begin with addr(0), on cycle after next.
+    start: Signal(), in
+        Starts accelerator working.
 
     activations: [Signal(32) * 4], in
         Activation values as read from memory. Four 8 bit values are
@@ -120,7 +120,7 @@ class AcceleratorCore(SimpleElaboratable):
             unsigned_upto(Constants.MAX_CHANNEL_DEPTH))
         self.post_process_params = Endpoint(POST_PROCESS_PARAMS)
 
-        self.filter_start = Signal()
+        self.start = Signal()
         self.activations = [Signal(32, name=f"act_{i}") for i in range(4)]
         self.first = Signal()
         self.last = Signal()
@@ -133,7 +133,7 @@ class AcceleratorCore(SimpleElaboratable):
         m.d.comb += [
             *connect(self.write_filter_input, store.write_input),
             store.size.eq(self.num_filter_words),
-            store.start.eq(self.filter_start),
+            store.start.eq(self.start),
         ]
         return store.values_out
 

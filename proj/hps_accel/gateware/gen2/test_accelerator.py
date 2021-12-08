@@ -167,9 +167,9 @@ class AcceleratorCoreTest(TestBase):
                 for i in range(4)]
 
             # Start generating filter values
-            yield self.dut.filter_start.eq(1)
+            yield self.dut.start.eq(1)
             yield
-            yield self.dut.filter_start.eq(0)
+            yield self.dut.start.eq(0)
             yield
 
             # Pump through data
