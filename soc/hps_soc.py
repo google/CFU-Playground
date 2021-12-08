@@ -156,7 +156,7 @@ class HpsSoC(LiteXSoC):
         region = SoCRegion(self.arena_origin, size, cached=True, linker=True)
         self.bus.add_region("arena", region)
         if size > 0:
-            self.submodules.arena = self.platform.create_ram(32, size)
+            self.submodules.arena = self.platform.create_ram(32, size, dual_port=True)
             self.bus.add_slave("arena_lram", self.arena.bus, region)
             self.add_config('SOC_SEPARATE_ARENA')
 

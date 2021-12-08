@@ -7,8 +7,9 @@ from migen.genlib.resetsync import AsyncResetSynchronizer
 from litex.build.generic_platform import Pins, Subsignal, IOStandard
 from litex.build.lattice import LatticePlatform, oxide
 from litex.build.lattice.programmer import LatticeProgrammer
-from litex.soc.cores.ram import NXLRAM
 from litex.soc.cores.clock import NXOSCA
+# from litex.soc.cores.ram import NXLRAM
+from hps_lattice_nx import NXLRAM
 
 hps_io = [
     ("done", 0, Pins("A5"), IOStandard("LVCMOS18H")),
@@ -133,7 +134,7 @@ class Platform(LatticePlatform):
     def create_crg(self):
         return _CRG(self, self.sys_clk_freq)
 
-    def create_ram(self, width, size):
-        return NXLRAM(width, size)
+    def create_ram(self, width, size, dual_port=False):
+        return NXLRAM(width, size, dual_port=dual_port)
 
     # TODO: add create_programmer function
