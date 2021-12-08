@@ -93,11 +93,6 @@ class AcceleratorCoreTest(TestBase):
                 debug = False
             base_addr += inter_pixel_stride
 
-    @staticmethod
-    def apply_input_offset(word):
-        with_offset = [byte + data.input_offset for byte in unpack_bytes(word)]
-        return pack_vals(*unpack_bytes(word), offset=input_offset)
-
     def configure(self):
         # Configure the accelerator
         dut = self.dut
@@ -197,11 +192,7 @@ class AcceleratorCoreTest(TestBase):
                 for a in range(min(clock + 1, 4)):
                     addr = next(activation_addr[a])
                     activation = data.input_data[addr]
-                    with_offset = pack_vals(
-                        *unpack_bytes(activation),
-                        bits=9,
-                        offset=data.input_offset)
-                    yield dut.activations[a].eq(with_offset)
+                    yield dut.activations[a].eq(activation)
                 yield
         self.add_process(feed_dut)
 
