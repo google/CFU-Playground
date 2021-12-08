@@ -305,10 +305,10 @@ class InputFetcher(SimpleElaboratable):
     num_pixels_x: Signal(9), in
         How many pixels in a row
 
-    num_blocks_x: Signal(4), in
+    pixel_advance_x: Signal(4), in
         Number of RAM blocks to advance to move to new pixel in X direction
 
-    num_blocks_y: Signal(8), in
+    pixel_advance_y: Signal(8), in
         Number of RAM blocks  to advance between pixels in Y direction
 
     depth: Signal(3), in
@@ -340,8 +340,8 @@ class InputFetcher(SimpleElaboratable):
         self.start = Signal()
         self.base_addr = Signal(14)
         self.num_pixels_x = Signal(9)
-        self.num_blocks_x = Signal(4)
-        self.num_blocks_y = Signal(8)
+        self.pixel_advance_x = Signal(4)
+        self.pixel_advance_y = Signal(8)
         self.depth = Signal(3)
         self.lram_addr = [Signal(14, name=f"lram_addr{i}") for i in range(4)]
         self.lram_data = [Signal(32, name=f"lram_data{i}") for i in range(4)]
@@ -361,8 +361,8 @@ class InputFetcher(SimpleElaboratable):
         m.d.comb += [
             pixel_ag.base_addr.eq(self.base_addr),
             pixel_ag.num_pixels_x.eq(self.num_pixels_x),
-            pixel_ag.num_blocks_x.eq(self.num_blocks_x),
-            pixel_ag.num_blocks_y.eq(self.num_blocks_y),
+            pixel_ag.num_blocks_x.eq(self.pixel_advance_x),
+            pixel_ag.num_blocks_y.eq(self.pixel_advance_y),
         ]
 
         # Connect value address generators
@@ -370,7 +370,7 @@ class InputFetcher(SimpleElaboratable):
             m.d.comb += [
                 v.start_addr.eq(pixel_ag.addr),
                 v.depth.eq(self.depth),
-                v.num_blocks_y.eq(self.num_blocks_y),
+                v.num_blocks_y.eq(self.pixel_advance_y),
                 rr_addr.mux_in[i].eq(v.addr_out),
             ]
 

@@ -260,8 +260,8 @@ class InputFetcherTest(TestBase):
 
             yield dut.base_addr.eq(0x123)
             yield dut.num_pixels_x.eq(out_x_dim)
-            yield dut.num_blocks_x.eq(depth // 16)
-            yield dut.num_blocks_y.eq((depth // 16) * in_x_dim)
+            yield dut.pixel_advance_x.eq(depth // 16)
+            yield dut.pixel_advance_y.eq((depth // 16) * in_x_dim)
             yield dut.depth.eq(depth // 16)
             yield
             # Reset, let it run for a bit, then toggle start high to begin
