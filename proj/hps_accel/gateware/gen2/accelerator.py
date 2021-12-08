@@ -53,22 +53,44 @@ class AcceleratorCore(SimpleElaboratable):
     -   FIFO for output values
 
     Still TODO:
-    -   Write Filter values
-    -   Read Filter values to logic array
     -   Read Input activation values from memory
 
     Attributes
     ----------
 
-    activations: [Signal(32) * 4], in
-        Activation values as read from memory. Four 8 bit values are
-        packed into each 32 bit word.
+    reset: Signal(), in
+        Resets internal logic ready for configuration.
+
+    input_offset: Signal(signed(9)), in
+        Offset applied to each input activation value.
+
+    num_filter_words: Signal(unsigned_upto(FILTER_WORDS_PER_STORE)), in
+        Number of words of filter data, per filter store
+
+    output_offset: Signal(signed(9)), in
+        Offset applied to each output value.
+
+    output_activation_min: Signal(signed(8)), out
+        The minimum output value
+
+    output_activation_max: Signal(signed(8)), out
+        The maximum output value
 
     write_filter_input: Endpoint(FILTER_WRITE_COMMAND), in
         Commands to write to the filter store.
 
+    output_channel_depth: Signal(unsigned_upto(MAX_CHANNEL_DEPTH)), in
+        Number of output channels - must be divisible by 16
+
+    post_process_params: Endpoint(POST_PROCESS_PARAMS), out
+        Stream of data to write to post_process memory.
+
     filter_start: Signal(), in
         Causes filter output to begin with addr(0), on cycle after next.
+
+    activations: [Signal(32) * 4], in
+        Activation values as read from memory. Four 8 bit values are
+        packed into each 32 bit word.
 
     first: Signal(), in
         Beginning of value computation signal for systolic array.
@@ -80,55 +102,36 @@ class AcceleratorCore(SimpleElaboratable):
       The 8 bit output values as 4 byte words. Values are produced in an
       algorithm dependent order.
 
-    input_offset: Signal(signed(9)), in
-        Offset applied to each input activation value.
-
-    output_offset: Signal(signed(9)), in
-        Offset applied to each output value.
-
-    output_activation_min: Signal(signed(8)), out
-        The minimum output value
-
-    output_activation_max: Signal(signed(8)), out
-        The maximum output value
-
-    num_filter_words: Signal(unsigned_upto(FILTER_WORDS_PER_STORE)), in
-        Number of words of filter data, per filter store
-
-    output_channel_depth: Signal(Constants.MAX_CHANNEL_DEPTH), in
-        Number of output channels to cycle through
-
-    post_process_params: Endpoint(POST_PROCESS_PARAMS), out
-        Stream of data to write to post_process memory.
-
-    reset: Signal(), in
-        Resets internal logic to starting state. Input values are not
-        affected.
     """
 
     def __init__(self):
-        self.activations = [Signal(32, name=f"act_{i}") for i in range(4)]
-        self.write_filter_input = Endpoint(FILTER_WRITE_COMMAND)
-        self.filter_start = Signal()
-        self.first = Signal()
-        self.last = Signal()
-        self.output = Endpoint(unsigned(32))
+        self.reset = Signal()
+
         self.input_offset = Signal(signed(9))
+        self.num_filter_words = Signal(
+            unsigned_upto(Constants.FILTER_WORDS_PER_STORE))
+
         self.output_offset = Signal(signed(9))
         self.output_activation_min = Signal(signed(8))
         self.output_activation_max = Signal(signed(8))
-        self.num_filter_words = Signal(
-            unsigned_upto(Constants.FILTER_WORDS_PER_STORE))
+        self.write_filter_input = Endpoint(FILTER_WRITE_COMMAND)
+
         self.output_channel_depth = Signal(
             unsigned_upto(Constants.MAX_CHANNEL_DEPTH))
         self.post_process_params = Endpoint(POST_PROCESS_PARAMS)
-        self.reset = Signal()
+
+        self.filter_start = Signal()
+        self.activations = [Signal(32, name=f"act_{i}") for i in range(4)]
+        self.first = Signal()
+        self.last = Signal()
+        self.output = Endpoint(unsigned(32))
+
+
 
     def build_filter_store(self, m):
         m.submodules['filter_store'] = store = FilterStore()
         m.d.comb += [
             *connect(self.write_filter_input, store.write_input),
-            store.reset.eq(self.reset),
             store.size.eq(self.num_filter_words),
             store.start.eq(self.filter_start),
         ]
