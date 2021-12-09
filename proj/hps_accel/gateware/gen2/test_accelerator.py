@@ -18,13 +18,15 @@
 from functools import reduce
 import random
 
-from nmigen import unsigned, signed
+from nmigen import Module, signed, unsigned
+from nmigen.sim import Passive
 
 from nmigen_cfu import pack_vals, TestBase
 
 from .accelerator import AcceleratorCore
 from .constants import Constants
 from .conv2d_data import fetch_data
+from .ram_input import InputFetcher
 
 
 def unpack_bytes(word):
@@ -51,12 +53,22 @@ def flatten(list_of_lists):
 class AcceleratorCoreTest(TestBase):
     """Tests AcceleratorCore"""
 
+    NUM_OUTPUT_PIXELS = 16
+
     def create_dut(self):
-        return AcceleratorCore()
+        m = self.m
+        dut = AcceleratorCore()
+        self.fetcher = InputFetcher()
+        m.submodules['input_fetcher'] = self.fetcher
+        m.d.comb += dut.first.eq(self.fetcher.first)
+        m.d.comb += dut.last.eq(self.fetcher.last)
+        for d, f in zip(dut.activations, self.fetcher.data_out):
+            m.d.comb += d.eq(f)
+        return dut
 
     def setUp(self):
-        super().setUp()
         self.data = fetch_data('sample_conv_1')
+        super().setUp()
 
     def extract_filter_data(self):
         # Splits filter data into "evens" and "odds" for the two columns of the
@@ -70,34 +82,12 @@ class AcceleratorCoreTest(TestBase):
         evens, odds = filters_by_output[::2], filters_by_output[1::2]
         return flatten(evens), flatten(odds)
 
-    @staticmethod
-    def activation_address_generator(*,
-                                     base_addr, repeats, inter_pixel_stride,
-                                     fetch_num_rows, inter_row_stride,
-                                     fetch_words_per_row, debug=0):
-        # Specifies addresses of data to be streamed into the accelerator
-        # via the "activations" attribute. Designed to allow all values
-        # from a 4x4 region of input pixels to be fetched in the correct
-        # order.
-        while True:
-            for _ in range(repeats):
-                row_start = base_addr
-                for _ in range(fetch_num_rows):
-                    addr = row_start
-                    for _ in range(fetch_words_per_row):
-                        if debug:
-                            print(f"Channel 1 yield {addr}")
-                        yield addr
-                        addr += 1
-                    row_start += inter_row_stride
-                debug = False
-            base_addr += inter_pixel_stride
-
     def configure(self):
         # Configure the accelerator
         dut = self.dut
+        fetcher = self.fetcher
         data = self.data
-        depth = data.output_dims[3]
+        output_depth = data.output_dims[3]
         num_filter_values = reduce(lambda a, b: a * b, data.filter_dims, 1)
         filter_words_per_store = num_filter_values // 4 // 2
         yield dut.input_offset.eq(data.input_offset)
@@ -105,16 +95,29 @@ class AcceleratorCoreTest(TestBase):
         yield dut.output_activation_min.eq(data.output_min)
         yield dut.output_activation_max.eq(data.output_max)
         yield dut.num_filter_words.eq(filter_words_per_store)
-        yield dut.output_channel_depth.eq(depth)
-        yield dut.num_output_values.eq(256)
+        yield dut.output_channel_depth.eq(output_depth)
+        yield dut.num_output_values.eq(self.NUM_OUTPUT_PIXELS * output_depth)
 
-        # Toggle reset
+        # Configure fetcher
+        input_depth = data.input_dims[3]
+        in_x_dim = data.input_dims[2]
+        out_x_dim = data.output_dims[2]
+        yield fetcher.base_addr.eq(0x123)
+        yield fetcher.num_pixels_x.eq(out_x_dim)
+        yield fetcher.pixel_advance_x.eq(input_depth // 16)
+        yield fetcher.pixel_advance_y.eq((input_depth // 16) * in_x_dim)
+        yield fetcher.depth.eq(input_depth // 16)
+        yield fetcher.num_repeats.eq(8)
+
+        # Toggle resets
         yield dut.reset.eq(1)
+        yield fetcher.reset.eq(1)
         yield
         yield dut.reset.eq(0)
+        yield fetcher.reset.eq(0)
 
         # load post process parameters
-        for i in range(depth):
+        for i in range(output_depth):
             payload = dut.post_process_params.payload
             yield payload.bias.eq(data.output_biases[i])
             yield payload.multiplier.eq(data.output_multipliers[i])
@@ -141,68 +144,44 @@ class AcceleratorCoreTest(TestBase):
         # tests part of a convolution, producing results for 16 output pixels
         # uses data dumped from a real convolution
         dut = self.dut
+        fetcher = self.fetcher
         data = self.data
 
-        def feed_dut():
+        def ram():
+            yield Passive()
+            while True:
+                for i in range(4):
+                    block = (yield fetcher.lram_addr[i]) - 0x123
+                    data_addr = block * 4 + i
+                    data_value = data.input_data[data_addr % len(data.input_data)]
+                    yield fetcher.lram_data[i].eq(data_value)
+                yield
+        self.add_process(ram)
+
+        def start_dut():
+            yield Passive()
             yield from self.configure()
             input_depth = data.filter_dims[3]
             input_depth_words = input_depth // 4
             filter_size = data.filter_dims[1] * data.filter_dims[2]
             output_depth = data.filter_dims[0]
 
-            # Addresses of inputs within input activation buffer
-            activation_addr = [
-                self.activation_address_generator(
-                    base_addr=i * input_depth_words,
-                    repeats=output_depth // 2,
-                    inter_pixel_stride=input_depth_words * 4,  # Stride 4 pixels along
-                    fetch_num_rows=4,
-                    inter_row_stride=data.input_dims[2] *
-                    data.input_dims[3] // 4,
-                    fetch_words_per_row=16)
-                for i in range(4)]
-
-            # Start generating filter values
-            yield self.dut.start.eq(1)
+            # Start values from filter and input fetcher
+            yield dut.start.eq(1)
+            yield fetcher.start.eq(1)
             yield
-            yield self.dut.start.eq(0)
+            yield dut.start.eq(0)
+            yield fetcher.start.eq(0)
             yield
 
-            # Pump through data
-            # We want to produce 16 pixels of output data
-            # Total of 16 pixels * 16 depth= 256 values
-            # The first activation stream produces (1/4 * 16 =) 4 pixels
-            # 4 pixels * output_depth = 64 values.
-            # Each pass of of input data produces 2 values7.
-            # Therefore 32 passes are required
-            # Each pass increments over 16 pixels of data.
-            # Input pass = 16 pixels * 16 depth = 256 values = 64 words
-            # 32 passes * 64 words/pass * 1 cycle/word = 2048 cycles
-            # Add 3 cycles to allow other input streams to complete
-            # Then add some more cycles which should make no difference since
-            # output is limited to the configured num_output_values
-            for clock in range(2048 + 3 + 100):
-                first = (clock < 2048) and (clock % 64) == 0
-                last = (clock < 2048) and (clock % 64) == 63
-                yield dut.first.eq(first)
-                yield dut.last.eq(last)
-
-                # set activations
-                # act[0] starts on clock 0, act[1] starts on clock 1 etc.
-                for a in range(min(clock + 1, 4)):
-                    addr = next(activation_addr[a])
-                    activation = data.input_data[addr]
-                    yield dut.activations[a].eq(activation)
-                yield
-        self.add_process(feed_dut)
+        self.add_process(start_dut)
 
         def check_output():
             yield dut.output.ready.eq(1)
 
-            # Collect all of the output data for 16 pixels
-            # 16 pixels * 16 depth = 256 values = 64 words
+            # Collect all of the output data for all pixels
             actual_outputs = []
-            for i in range(64):
+            for i in range(self.NUM_OUTPUT_PIXELS * data.output_dims[3] // 4):
                 while not (yield dut.output.valid):
                     yield
                 actual_outputs.append((yield dut.output.payload) & 0xffff_ffff)
