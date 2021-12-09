@@ -30,28 +30,41 @@ LRAMs, with word addresses in rows across the LRAMs:
 +--------+--------+--------+--------+
 
 The main mode is used when Conv2D input data has a depth that is a multiple of
-16 values per pixel. We call these groups of 16 pixels a "block". Each block
-begins in LRAM 0.
+16 values per pixel. We call these groups of 16 bytes a "block". Each block
+fits exactly in 4 words (4 bytes * 4 bytes/word = 16 bytes). Blocks are each
+spread across the four LRAMs, beginning in LRAM 0.
 
-In this main mode, four words are fetched concurrently, one each for four
-separate pixels, with one word being fetched from each LRAM. This produces four
-separate streams of pixel data. Assuming pixels are 16 bytes deep and thus
-consist of 1 block of data, the fetch order would be:
+In this main mode, four words are fetched concurrently, one word for each of
+four separate pixels. This produces four separate streams of pixel data.
+
+Each stream of pixel data corresponds to the input data for the calculation of
+a channel of an output pixel in a Conv2D operation. It therefore requires
+fetching data for a 4x4 group of pixels.In the X direction, the blocks of
+pixel data are sequential - data for pixels (1, 0) is directly after pixel
+(0,0). The following table shows the memory access pattern at the beginning
+of a fetch of four pixels.
 
 +------+---------+---------+---------+---------+
 | time | fetch 0 | fetch 1 | fetch 2 | fetch 3 |
 +------+---------+---------+---------+---------+
-|    0 |     0*  |     -   |     -   |     -   |
-|    1 |     1   |     4*  |     -   |     -   |
-|    2 |     2   |     5   |     8*  |     -   |
-|    3 |     3   |     6   |     9   |    12*  |
-|    4 |    16*  |     7   |    10   |    13   |
-|    5 |    17   |    20*  |    11   |    14   |
-|    6 |    18   |    21   |    24*  |    15   |
-|    7 |    19   |    22   |    25   |    28*  |
+|    0 |     0   |     -   |     -   |     -   |
+|    1 |     1   |     4   |     -   |     -   |
+|    2 |     2   |     5   |     8   |     -   |
+|    3 |     3   |     6   |     9   |    12   |
+|    4 |     4   |     7   |    10   |    13   |
+|    5 |     5   |     8   |    11   |    14   |
+|    6 |     6   |     9   |    12   |    15   |
+|    7 |     7   |    10   |    13   |    26   |
 +------+---------+---------+---------+---------+
 
-(*) denotes the start of a new pixel.
+Note that, because the starts of fetches for each stream of data are delayed by
+a cycle, each is working from a different LRAM bank on each cycle.
+
+In the Y direction, some number of blocks must be skipped so address generation
+is a little more complicated. There are two classes involved in address
+generation: the `PixelAddressGenerator` generates the start addresses from
+which data is to be read, and the `ValueAddressGenerator` generates the
+addresses for all the data for a given output pixel from that start address.
 
 TODO:
 - handle padding in y or x directions
