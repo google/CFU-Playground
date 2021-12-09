@@ -92,6 +92,11 @@ class GeneralSoCWorkflow():
         Returns:
             The LiteX Builder for the SoC.
         """
+        #for sp in soc.cpu.specials:
+        #    print("CPU special:", sp)
+        print("\n\nTJC\n\n")
+        print("cpu_params", soc.cpu.cpu_params)
+        print("cfu_params", soc.cpu.cfu_params)
         copy_cpu_variant_if_needed(self.args.cpu_variant)
         soc_builder = self.builder_constructor(
             soc, **builder.builder_argdict(self.args))
@@ -118,6 +123,7 @@ class GeneralSoCWorkflow():
     def run(self) -> None:
         """Runs the workflow in order (make_soc -> build_soc -> load)."""
         soc = self.make_soc()
+        print("\n AFTER make_soc(), BEFORE build_soc()\n\n")
         soc_builder = self.build_soc(soc)
         if self.args.load:
             self.load(soc, soc_builder)
