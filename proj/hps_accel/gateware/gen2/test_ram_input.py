@@ -24,6 +24,7 @@ from .conv2d_data import fetch_data
 from .ram_input import (
     InputFetcher,
     PixelAddressGenerator,
+    PixelAddressRepeater,
     RoundRobin4,
     ValueAddressGenerator)
 
@@ -88,6 +89,45 @@ class PixelAddressGeneratorTest(TestBase):
                     yield from check(i + j)
                 for _ in range(12):
                     yield
+
+        self.run_sim(process, False)
+
+
+class PixelAddressRepeaterTest(TestBase):
+    """Tests PixelAddressRepeater class."""
+
+    def create_dut(self):
+        return PixelAddressRepeater()
+
+    def test_it(self):
+        dut = self.dut
+
+        def addr_generator():
+            yield Passive()
+            n = 0
+            dut.gen_addr.eq(n)
+            while True:
+                if (yield dut.gen_next):
+                    n += 1
+                    yield dut.gen_addr.eq(n)
+                yield
+        self.add_process(addr_generator)
+
+        def process():
+            yield dut.repeats.eq(8)
+            yield dut.start.eq(1)
+            yield
+            yield dut.start.eq(0)
+            yield
+            for i in (range(0, 256, 4)):
+                for _ in range(8):
+                    for j in range(4):
+                        yield dut.next.eq(1)
+                        yield
+                        yield dut.next.eq(0)
+                        self.assertEqual((yield dut.addr), i + j)
+                    for _ in range(12):
+                        yield
 
         self.run_sim(process, False)
 
@@ -195,9 +235,12 @@ class InputFetcherTest(TestBase):
         super().setUp()
         self.data = fetch_data('sample_conv_1')
 
-    def pixel_input_values(self, pixel):
+    def pixel_input_values(self, index):
         # Get values for a given pixel number
-        # TODO: allow for stride != 1
+        # TODO: allow for stride != 1, num_repeats != 8
+
+        # We repeat each pixel 8 times, in groups of 4
+        pixel = (index // (8 * 4)) * 4 + index % 4
         data = self.data
         in_x_dim = data.input_dims[2]
         out_x_dim = data.output_dims[2]
@@ -263,6 +306,7 @@ class InputFetcherTest(TestBase):
             yield dut.pixel_advance_x.eq(depth // 16)
             yield dut.pixel_advance_y.eq((depth // 16) * in_x_dim)
             yield dut.depth.eq(depth // 16)
+            yield dut.num_repeats.eq(8)
             yield
             # Reset, let it run for a bit, then toggle start high to begin
             yield dut.reset.eq(1)
@@ -274,14 +318,14 @@ class InputFetcherTest(TestBase):
             yield
             yield dut.start.eq(0)
 
-            # Number of pixels of output we want to capture 
+            # Number of pixels of output we want to capture
             # Use "data.output_dims[1] * data.output_dims[2]" to test all rows
             # (takes about 30 seconds)
             # Test with 3 rows
             capture_pixels = 3 * data.output_dims[2]
             input_words_per_output_pixel = depth // 4 * 16
-            # num_cycles is 2 cycle startup + time to output first stream + 3 cycles 
-            # for other streams to finish 
+            # num_cycles is 2 cycle startup + time to output first stream + 3 cycles
+            # for other streams to finish
             num_cycles = (
                 capture_pixels * input_words_per_output_pixel // 4) + 5
             for cycle in range(num_cycles):
@@ -297,4 +341,4 @@ class InputFetcherTest(TestBase):
 
         for i, actual in enumerate(ordered_outputs):
             expected = self.pixel_input_values(i)
-            self.assertEqual(actual, expected, msg=f"differ at pixel {i}")
+            self.assertEqual(actual, expected, msg=f"differ at index {i}")

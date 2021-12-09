@@ -76,10 +76,10 @@ TODO: An alternate mode to deal with input layers
 - no need to cross row boundaries
 """
 
-from nmigen import Mux, Signal, unsigned
+from nmigen import Array, Mux, Signal, unsigned
 from nmigen_cfu.util import SimpleElaboratable
 
-from .utils import delay
+from .utils import delay, unsigned_upto
 
 
 class PixelAddressGenerator(SimpleElaboratable):
@@ -109,10 +109,10 @@ class PixelAddressGenerator(SimpleElaboratable):
     addr: Signal(14), out
         The output row address for the current pixel.
 
-    start:
+    start: Signal(), in
         Starts address generation. Addr will be updated on next cycle.
 
-    next:
+    next: Signal(), in
         Indicates current address has been used. Address will be updated on next
         cycle with next row address.
     """
@@ -150,6 +150,73 @@ class PixelAddressGenerator(SimpleElaboratable):
                 pixel_row_begin_addr.eq(self.base_addr + self.num_blocks_y),
                 pixel_x.eq(0)
             ]
+
+
+class PixelAddressRepeater(SimpleElaboratable):
+    """Repeats addresses from PixelAddressGenerator.
+
+    The systolic array requires multiple passes over input data. This class
+    provides that functionatlity by repeating the pixel start addresses
+    generated from PixelAddress Generator.
+
+    Pixel addresses are repeated in groups of four, which matches the
+    number of outputs of the InputFetcher and inputs to the systolic array.
+
+    Attributes
+    ----------
+
+    next: Signal(), in
+        Indicates current address has been used. Address will be updated on next
+        cycle with next row address.
+
+    addr: Signal(14), out
+        Output address
+
+    start: Signal(), in
+        Starts address generation. Addr will be updated on next cycle.
+
+    gen_next: Signal(), out
+        Indicates that a new pixel address is required.
+
+    gen_addr: Signal(14), in
+        Input from the PixelAddressGenerator
+
+    """
+
+    def __init__(self):
+        self.repeats = Signal(unsigned_upto(64))
+        self.next = Signal()
+        self.addr = Signal(14)
+        self.start = Signal()
+        self.gen_next = Signal()
+        self.gen_addr = Signal(14)
+
+    def elab(self, m):
+        group = Signal(range(4))
+        repeat_count = Signal.like(self.repeats)
+        mem = Array([Signal(14, name=f"mem{i}") for i in range(4)])
+
+        with m.If(repeat_count == 0):
+            # On first repeat - pass through next and addr and record addresses
+            m.d.comb += self.gen_next.eq(self.next)
+            m.d.comb += self.addr.eq(self.gen_addr)
+            with m.If(self.next):
+                m.d.sync += mem[group].eq(self.gen_addr)
+        with m.Else():
+            # Subsequently use recorded data
+            m.d.comb += self.addr.eq(mem[group])
+
+        # Update group and repeat_count on next
+        with m.If(self.next):
+            m.d.sync += group.eq(group + 1)
+            with m.If(group == 3):
+                m.d.sync += repeat_count.eq(repeat_count + 1)
+                with m.If(repeat_count + 1 == self.repeats):
+                    m.d.sync += repeat_count.eq(0)
+
+        with m.If(self.start):
+            m.d.sync += repeat_count.eq(0)
+            m.d.sync += group.eq(0)
 
 
 class RoundRobin4(SimpleElaboratable):
@@ -316,6 +383,9 @@ class InputFetcher(SimpleElaboratable):
         values/pixel). Total number of cycles per output pixel is
         depth * (4 cycles/block) * 4 (x dim) * 4 (y dim) = 64 * depth.
 
+    repeats: Signal(unsigned_upto(64)), in
+        The number of times each stream of input pixel data is to be repeated.
+
     lram_addr: [Signal(14)] * 4, out
         Address for each LRAM bank
 
@@ -343,6 +413,7 @@ class InputFetcher(SimpleElaboratable):
         self.pixel_advance_x = Signal(4)
         self.pixel_advance_y = Signal(8)
         self.depth = Signal(3)
+        self.num_repeats = Signal(unsigned_upto(64))
         self.lram_addr = [Signal(14, name=f"lram_addr{i}") for i in range(4)]
         self.lram_data = [Signal(32, name=f"lram_data{i}") for i in range(4)]
         self.data_out = [Signal(32, name=f"data_out{i}") for i in range(4)]
@@ -351,24 +422,28 @@ class InputFetcher(SimpleElaboratable):
 
     def elab(self, m):
         m.submodules["pixel_ag"] = pixel_ag = PixelAddressGenerator()
+        m.submodules["repeater"] = repeater = PixelAddressRepeater()
         m.submodules["rraddr"] = rr_addr = RoundRobin4(shape=unsigned(14))
         m.submodules["rrdata"] = rr_data = RoundRobin4(shape=unsigned(32))
         value_ags = [ValueAddressGenerator() for _ in range(4)]
         for i, v in enumerate(value_ags):
             m.submodules[f"value_ag{i}"] = v
 
-        # Connect pixel address generator inputs
+        # Connect pixel address generator and repeater
         m.d.comb += [
             pixel_ag.base_addr.eq(self.base_addr),
             pixel_ag.num_pixels_x.eq(self.num_pixels_x),
             pixel_ag.num_blocks_x.eq(self.pixel_advance_x),
             pixel_ag.num_blocks_y.eq(self.pixel_advance_y),
+            repeater.repeats.eq(self.num_repeats),
+            pixel_ag.next.eq(repeater.gen_next),
+            repeater.gen_addr.eq(pixel_ag.addr),
         ]
 
         # Connect value address generators
         for i, v in enumerate(value_ags):
             m.d.comb += [
-                v.start_addr.eq(pixel_ag.addr),
+                v.start_addr.eq(repeater.addr),
                 v.depth.eq(self.depth),
                 v.num_blocks_y.eq(self.pixel_advance_y),
                 rr_addr.mux_in[i].eq(v.addr_out),
@@ -386,6 +461,7 @@ class InputFetcher(SimpleElaboratable):
         starts = delay(m, self.start, 1)
         m.d.comb += [
             pixel_ag.start.eq(starts[0]),
+            repeater.start.eq(starts[0]),
             rr_addr.start.eq(starts[0]),
             rr_data.start.eq(starts[1]),
         ]
@@ -406,7 +482,7 @@ class InputFetcher(SimpleElaboratable):
             rollover = cycle_counter == max_cycle_counter
             m.d.sync += cycle_counter.eq(Mux(rollover, 0, cycle_counter + 1))
 
-        # Calculate when to value address generators and when to get
+        # Calculate when to start value address generators and when to get
         # next pixel address
         next_pixel = 0
         for i in range(4):
@@ -414,7 +490,7 @@ class InputFetcher(SimpleElaboratable):
             m.d.comb += start_gen.eq(running & (cycle_counter == i))
             m.d.comb += value_ags[i].start.eq(start_gen)
             next_pixel |= start_gen
-        m.d.comb += pixel_ag.next.eq(next_pixel)
+        m.d.comb += repeater.next.eq(next_pixel)
 
         # Generate first and last signals
         m.d.sync += [
