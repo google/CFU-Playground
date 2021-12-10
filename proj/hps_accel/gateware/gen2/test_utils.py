@@ -27,18 +27,17 @@ class DelayTest(TestBase):
     def create_dut(self):
         module = Module()
         self.in_ = Signal(8)
-        self.out_ = delay(module, self.in_, 3)
+        self.outs_ = delay(module, self.in_, 3)
         return module
 
     def test_it(self):
-        expected = [random.randrange(256) for _ in range(20)]
-        
+        # data with 3 zeros at end, since we are delaying by 3
+        data = [random.randrange(256) for _ in range(20)] + [0] * 3
+
         def process():
-            for data_in in expected[:3]:
-                yield self.in_.eq(data_in)
+            for i in range(len(data)):
+                yield self.in_.eq(data[i])
                 yield
-            for data_in, data_out in zip(expected[3:], expected):
-                yield self.in_.eq(data_in)
-                yield
-                self.assertEqual((yield self.out_), data_out)
+                for j in range(3):
+                    self.assertEqual((yield self.outs_[j]), data[i - j])
         self.run_sim(process, False)

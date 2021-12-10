@@ -7931,8 +7931,8 @@ def as_unsigned_int32_array(byte_array):
 
 
 data = Conv2DData(
-    input_dims = [1, 28, 163, 16],
-    output_dims = [1, 25, 160, 16],
+    input_dims = [1, 25, 163, 16],
+    output_dims = [1, 22, 160, 16],
     filter_dims = [16, 4, 4, 16],
     input_offset = 128,
     output_offset = -128,

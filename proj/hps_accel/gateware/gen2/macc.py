@@ -147,13 +147,13 @@ class MaccBlock(SimpleElaboratable):
         # Pipeline cycle 1: accumulate
         product_sum = Signal.like(tree_sum(products))
         m.d.comb += product_sum.eq(tree_sum(products))
-        first_delayed = delay(m, self.input_first, 1)
+        first_delayed = delay(m, self.input_first, 1)[-1]
         accumulator = Signal(self._accumulator_shape)
         base = Mux(first_delayed, 0, accumulator)
         m.d.sync += accumulator.eq(base + product_sum)
 
         # Pipeline cycle 2: optional accumulator output
-        last_delayed = delay(m, self.input_last, 2)
+        last_delayed = delay(m, self.input_last, 2)[-1]
         with m.If(last_delayed):
             m.d.sync += self.output_accumulator.eq(accumulator)
             m.d.sync += self.output_accumulator_new.eq(1)
