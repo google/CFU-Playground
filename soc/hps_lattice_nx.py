@@ -115,6 +115,10 @@ class NXLRAM(Module):
         print("sel_bits_start ", sel_bits_start)
         print("adr_bits_start ", adr_bits_start)
 
+        if dual_port:
+            self.b_addrs = []
+            self.b_douts = []
+
         # Combine RAMs to increase Depth.
         for d in range(self.depth_cascading):
             self.lram_blocks.append([])
@@ -143,6 +147,8 @@ class NXLRAM(Module):
                     ]
 
                 if dual_port:
+                    b_addr = Signal(14)
+                    b_dout = Signal(32)
                     lram_block = Instance("DPSC512K",
                         p_ECC_BYTE_SEL = "BYTE_EN",
                         i_DIA       = datain,
@@ -155,13 +161,17 @@ class NXLRAM(Module):
                         i_CEOUTA    = 0b0,
                         i_BENA_N    = ~self.bus.sel[4*w:4*(w+1)],
                         o_DOA       = dataout,
-                        # tie off port B for now
-                        i_CEB       = 0b0,
+                        # port B read only
+                        i_ADB       = b_addr,
+                        o_DOB       = b_dout,
+                        i_CEB       = 0b1,
                         i_WEB       = 0b0,
-                        i_CSB       = 0b0,
+                        i_CSB       = 0b1,
                         i_RSTB      = 0b0,
                         i_CEOUTB    = 0b0
                     )
+                    self.b_addrs.append(b_addr)
+                    self.b_douts.append(b_dout)
 
                 else:
                     lram_block = Instance("SP512K",
