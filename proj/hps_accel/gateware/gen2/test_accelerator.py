@@ -56,15 +56,7 @@ class AcceleratorCoreTest(TestBase):
     NUM_OUTPUT_PIXELS = 16
 
     def create_dut(self):
-        m = self.m
-        dut = AcceleratorCore()
-        self.fetcher = InputFetcher()
-        m.submodules['input_fetcher'] = self.fetcher
-        m.d.comb += dut.first.eq(self.fetcher.first)
-        m.d.comb += dut.last.eq(self.fetcher.last)
-        for d, f in zip(dut.activations, self.fetcher.data_out):
-            m.d.comb += d.eq(f)
-        return dut
+        return AcceleratorCore()
 
     def setUp(self):
         self.data = fetch_data('sample_conv_1')
@@ -85,36 +77,30 @@ class AcceleratorCoreTest(TestBase):
     def configure(self):
         # Configure the accelerator
         dut = self.dut
-        fetcher = self.fetcher
         data = self.data
-        output_depth = data.output_dims[3]
         num_filter_values = reduce(lambda a, b: a * b, data.filter_dims, 1)
-        filter_words_per_store = num_filter_values // 4 // 2
-        yield dut.input_offset.eq(data.input_offset)
-        yield dut.output_offset.eq(data.output_offset)
-        yield dut.output_activation_min.eq(data.output_min)
-        yield dut.output_activation_max.eq(data.output_max)
-        yield dut.num_filter_words.eq(filter_words_per_store)
-        yield dut.output_channel_depth.eq(output_depth)
-        yield dut.num_output_values.eq(self.NUM_OUTPUT_PIXELS * output_depth)
-
-        # Configure fetcher
         input_depth = data.input_dims[3]
         in_x_dim = data.input_dims[2]
         out_x_dim = data.output_dims[2]
-        yield fetcher.base_addr.eq(0x123)
-        yield fetcher.num_pixels_x.eq(out_x_dim)
-        yield fetcher.pixel_advance_x.eq(input_depth // 16)
-        yield fetcher.pixel_advance_y.eq((input_depth // 16) * in_x_dim)
-        yield fetcher.depth.eq(input_depth // 16)
-        yield fetcher.num_repeats.eq(8)
+        output_depth = data.output_dims[3]
+        filter_words_per_store = num_filter_values // 4 // 2
+        yield dut.input_offset.eq(data.input_offset)
+        yield dut.num_filter_words.eq(filter_words_per_store)
+        yield dut.output_offset.eq(data.output_offset)
+        yield dut.output_activation_min.eq(data.output_min)
+        yield dut.output_activation_max.eq(data.output_max)
+        yield dut.input_base_addr.eq(0x123)
+        yield dut.num_pixels_x.eq(out_x_dim)
+        yield dut.pixel_advance_x.eq(input_depth // 16)
+        yield dut.pixel_advance_y.eq((input_depth // 16) * in_x_dim)
+        yield dut.num_repeats.eq(output_depth // Constants.SYS_ARRAY_WIDTH)
+        yield dut.output_channel_depth.eq(output_depth)
+        yield dut.num_output_values.eq(self.NUM_OUTPUT_PIXELS * output_depth)
 
         # Toggle resets
         yield dut.reset.eq(1)
-        yield fetcher.reset.eq(1)
         yield
         yield dut.reset.eq(0)
-        yield fetcher.reset.eq(0)
 
         # load post process parameters
         for i in range(output_depth):
@@ -144,34 +130,27 @@ class AcceleratorCoreTest(TestBase):
         # tests part of a convolution, producing results for 16 output pixels
         # uses data dumped from a real convolution
         dut = self.dut
-        fetcher = self.fetcher
         data = self.data
 
         def ram():
             yield Passive()
             while True:
                 for i in range(4):
-                    block = (yield fetcher.lram_addr[i]) - 0x123
+                    block = (yield dut.lram_addr[i]) - 0x123
                     data_addr = block * 4 + i
                     data_value = data.input_data[data_addr % len(data.input_data)]
-                    yield fetcher.lram_data[i].eq(data_value)
+                    yield dut.lram_data[i].eq(data_value)
                 yield
         self.add_process(ram)
 
         def start_dut():
             yield Passive()
             yield from self.configure()
-            input_depth = data.filter_dims[3]
-            input_depth_words = input_depth // 4
-            filter_size = data.filter_dims[1] * data.filter_dims[2]
-            output_depth = data.filter_dims[0]
 
-            # Start values from filter and input fetcher
+            # Start the dut
             yield dut.start.eq(1)
-            yield fetcher.start.eq(1)
             yield
             yield dut.start.eq(0)
-            yield fetcher.start.eq(0)
             yield
 
         self.add_process(start_dut)

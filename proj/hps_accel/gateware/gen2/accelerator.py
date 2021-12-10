@@ -32,6 +32,7 @@ from .post_process import (
     PostProcessPipeline,
     ReadingProducer,
     StreamLimiter)
+from .ram_input import InputFetcher
 from .sysarray import SystolicArray
 from .utils import unsigned_upto
 
@@ -62,6 +63,9 @@ class AcceleratorCore(SimpleElaboratable):
     reset: Signal(), in
         Resets internal logic ready for configuration.
 
+    start: Signal(), in
+        Starts accelerator working.
+
     input_offset: Signal(signed(9)), in
         Offset applied to each input activation value.
 
@@ -80,6 +84,27 @@ class AcceleratorCore(SimpleElaboratable):
     write_filter_input: Endpoint(FILTER_WRITE_COMMAND), in
         Commands to write to the filter store.
 
+    input_base_addr: Signal(14), in
+        Address of start of input data, in 16 byte blocks (i.e addr 1 = byte 16)
+
+    num_pixels_x: Signal(9), in
+        How many pixels in output row
+
+    pixel_advance_x: Signal(4), in
+        Number of RAM blocks to advance to move to new pixel in X direction
+
+    pixel_advance_y: Signal(8), in
+        Number of RAM blocks  to advance between pixels in Y direction
+
+    num_repeats: Signal(unsigned_upto(64)), in
+        The number of times each stream of input pixel data is to be repeated.
+
+    lram_addr: [Signal(14)] * 4, out
+        Address for each LRAM bank
+
+    lram_data: [Signal(32)] * 4, in
+        Data as read from addresses provided at previous cycle.
+
     output_channel_depth: Signal(unsigned_upto(MAX_CHANNEL_DEPTH)), in
         Number of output channels - must be divisible by 16
 
@@ -88,9 +113,6 @@ class AcceleratorCore(SimpleElaboratable):
 
     num_output_values: Signal(18), in
         Number of 8bit output values produced. Expected to be a multiple of 16.
-
-    start: Signal(), in
-        Starts accelerator working.
 
     activations: [Signal(32) * 4], in
         Activation values as read from memory. Four 8 bit values are
@@ -110,6 +132,7 @@ class AcceleratorCore(SimpleElaboratable):
 
     def __init__(self):
         self.reset = Signal()
+        self.start = Signal()
 
         self.input_offset = Signal(signed(9))
         self.num_filter_words = Signal(
@@ -120,15 +143,20 @@ class AcceleratorCore(SimpleElaboratable):
         self.output_activation_max = Signal(signed(8))
         self.write_filter_input = Endpoint(FILTER_WRITE_COMMAND)
 
+        self.input_base_addr = Signal(14)
+        self.num_pixels_x = Signal(9)
+        self.pixel_advance_x = Signal(4)
+        self.pixel_advance_y = Signal(8)
+        self.num_repeats = Signal(unsigned_upto(64))
+
+        self.lram_addr = [Signal(14, name=f"lram_addr{i}") for i in range(4)]
+        self.lram_data = [Signal(32, name=f"lram_data{i}") for i in range(4)]
+
         self.output_channel_depth = Signal(
             unsigned_upto(Constants.MAX_CHANNEL_DEPTH))
         self.post_process_params = Endpoint(POST_PROCESS_PARAMS)
         self.num_output_values = Signal(unsigned(18))
 
-        self.start = Signal()
-        self.activations = [Signal(32, name=f"act_{i}") for i in range(4)]
-        self.first = Signal()
-        self.last = Signal()
         self.output = Endpoint(unsigned(32))
 
     def build_filter_store(self, m):
@@ -139,6 +167,26 @@ class AcceleratorCore(SimpleElaboratable):
             store.start.eq(self.start),
         ]
         return store.values_out
+
+    def build_input_fetcher(self, m):
+        m.submodules['fetcher'] = fetcher = InputFetcher()
+        m.d.comb += [
+            fetcher.reset.eq(self.reset),
+            fetcher.start.eq(self.start),
+            fetcher.base_addr.eq(self.input_base_addr),
+            fetcher.num_pixels_x.eq(self.num_pixels_x),
+            fetcher.pixel_advance_x.eq(self.pixel_advance_x),
+            fetcher.pixel_advance_y.eq(self.pixel_advance_y),
+            fetcher.depth.eq(self.output_channel_depth >> 4),  # divide by 16
+            fetcher.num_repeats.eq(self.num_repeats),
+        ]
+        for i in range(4):
+            m.d.comb += [
+                self.lram_addr[i].eq(fetcher.lram_addr[i]),
+                fetcher.lram_data[i].eq(self.lram_data[i]),
+            ]
+
+        return fetcher.first, fetcher.last, fetcher.data_out
 
     def build_param_store(self, m):
         # Create memory for post process params
@@ -187,12 +235,13 @@ class AcceleratorCore(SimpleElaboratable):
         return al.stream_out
 
     def elab(self, m):
-        # Create filter store
+        # Create filter store and input fetcher
         filter_values = self.build_filter_store(m)
+        first, last, activations = self.build_input_fetcher(m)
 
         # Plumb in sysarray and its inputs
         m.submodules['sysarray'] = sa = SystolicArray()
-        for in_a, activation in zip(sa.input_a, self.activations):
+        for in_a, activation in zip(sa.input_a, activations):
             # Assign activation values with input offset
             for i in range(4):
                 with_offset = Signal(signed(8), name=f"val_{i}")
@@ -201,8 +250,8 @@ class AcceleratorCore(SimpleElaboratable):
                 m.d.comb += in_a[i * 9:i * 9 + 9].eq(with_offset)
         for in_b, value in zip(sa.input_b, filter_values):
             m.d.comb += in_b.eq(value)
-        m.d.comb += sa.first.eq(self.first)
-        m.d.comb += sa.last.eq(self.last)
+        m.d.comb += sa.first.eq(first)
+        m.d.comb += sa.last.eq(last)
 
         # Get pipeline inputs from systolic array and parameters
         accumulator_stream = self.build_accumulator_reader(
