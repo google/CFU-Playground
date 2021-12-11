@@ -14,6 +14,8 @@
 
 """Constants shared between gateware and C++"""
 
+import argparse
+import sys
 
 class Constants:
     # Maximum number of 8-bit channels per pixel
@@ -34,3 +36,32 @@ class Constants:
     # Depth of filter storage, per store 
     FILTER_WORDS_PER_STORE = 512
 
+
+CC_FILE_HEADER = """// Generated file
+// Shared constants generated from gen2/gateware/constants.py
+#ifndef _GATEWARE_CONSTANTS_H
+#define _GATEWARE_CONSTANTS_H
+"""
+
+CC_FILE_TAIL = """#endif"""
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Write C header file with constants')
+    'outfile',
+    parser.add_argument('output', metavar='FILE', nargs='?',
+                        type=argparse.FileType('w'), default=sys.stdout,
+                        help='Where to send output')
+    args = parser.parse_args()
+
+    with args.output as f:
+        print(CC_FILE_HEADER, file=f)
+        for name, value in vars(Constants).items():
+            if not name.startswith('_'):
+                print(f"#define {name} {value}", file=f)
+        print(CC_FILE_TAIL, file=f)
+
+
+if __name__ == "__main__":
+    main()
