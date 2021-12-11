@@ -114,20 +114,9 @@ class AcceleratorCore(SimpleElaboratable):
     num_output_values: Signal(18), in
         Number of 8bit output values produced. Expected to be a multiple of 16.
 
-    activations: [Signal(32) * 4], in
-        Activation values as read from memory. Four 8 bit values are
-        packed into each 32 bit word.
-
-    first: Signal(), in
-        Beginning of value computation signal for systolic array.
-
-    last: Signal(), in
-        End of value computation signal for systolic array.
-
     output: Endpoint(unsigned(32)), out
       The 8 bit output values as 4 byte words. Values are produced in an
       algorithm dependent order.
-
     """
 
     def __init__(self):
