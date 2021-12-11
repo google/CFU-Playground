@@ -17,7 +17,17 @@
 import argparse
 import sys
 
+
 class Constants:
+    ###########################################################################
+    # Funct3 codes - used to route CFU to instructions
+    INS_SET = 0
+    INS_GET = 1
+    INS_PING = 7
+
+    # Registers
+    REG_VERIFY = 0
+
     # Maximum number of 8-bit channels per pixel
     MAX_CHANNEL_DEPTH = 512
 
@@ -33,7 +43,7 @@ class Constants:
     # Total number of separate store
     NUM_FILTER_STORES = SYS_ARRAY_WIDTH
 
-    # Depth of filter storage, per store 
+    # Depth of filter storage, per store
     FILTER_WORDS_PER_STORE = 512
 
 

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#if GATEWARE_GEN == 1
+
 #include "blocks.h"
 
 #include <cstdio>
@@ -120,3 +122,5 @@ void LoadOutputParams(size_t offset, size_t count, const int32_t* bias_data,
 }
 
 };  // namespace hps_accel
+
+#endif  // GATEWARE_GEN

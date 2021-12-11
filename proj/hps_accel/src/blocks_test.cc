@@ -15,6 +15,7 @@
  */
 
 #include "blocks_test.h"
+#if GATEWARE_GEN == 1
 
 #include <cstdio>
 
@@ -152,3 +153,5 @@ extern "C" void do_test_blocks_all(void) {
   printf("multiply_accumulate\n");
   do_test_blocks_multiply_accumulate();
 }
+
+#endif  // GATEWARE_GEN

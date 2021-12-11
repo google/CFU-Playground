@@ -157,7 +157,7 @@ inline void ConvPerChannel(
   const int output_width = output_shape.Dims(2);
 
 #ifdef ACCEL_CONV
-#if GATEWARE_GEN == "gen1"
+#if GATEWARE_GEN == 1
   // Use specialised implementation if possible.
   if (params.padding_type == PaddingType::kValid &&
       (input_depth == 1 || input_depth % 4 == 0) && filter_width == 4 &&

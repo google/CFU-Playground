@@ -18,7 +18,7 @@
 
 #include <cstdio>
 
-#include "tensorflow/lite/kernels/internal/reference/integer_ops/conv_accel.h"
+#include "tensorflow/lite/kernels/internal/reference/integer_ops/conv.h"
 
 void test_conv2d(const Conv2DData* data) {
   printf("Testing Conv2D %s\n", data->name);
@@ -29,7 +29,7 @@ void test_conv2d(const Conv2DData* data) {
   const tflite::RuntimeShape& output_shape =
       *(reinterpret_cast<const tflite::RuntimeShape*>(data->output_shape));
   assert((output_shape.FlatSize() <= buf_size, ""));
-  tflite::reference_integer_ops::ConvPerChannel4x4(
+  tflite::reference_integer_ops::ConvPerChannel(
       *(reinterpret_cast<const tflite::ConvParams*>(data->params)),
       reinterpret_cast<const int32_t*>(data->output_multiplier),
       reinterpret_cast<const int32_t*>(data->output_shift),
