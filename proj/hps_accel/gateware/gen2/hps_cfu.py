@@ -12,23 +12,99 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen_cfu import CfuBase
+from nmigen import Signal
+from nmigen_cfu import Cfu, InstructionBase
 
-class Cfu(CfuBase):
-    """Gen2 accelerator CFU.
-    
-    Assumes working with a slimopt+cfu VexRiscV, which rsp_ready is always true.
+from .constants import Constants
+
+
+class PingInstruction(InstructionBase):
+    """An instruction used to verify simple CFU functionality.
+
+    Adds the two arguments and stores the result. The previously stored value
+    is returned.
     """
-    def elab(self, m):
-        m.d.comb += [
-            self.cmd_ready.eq(1),
-        ]
 
-        # Assumes response always ready
-        # Assumes extra delay in pipeline to allow for this
-        m.d.sync += [
-            self.rsp_out.eq(self.cmd_in0 + 1),
-        ]
+    def elab(self, m):
+        stored_value = Signal(32)
+        with m.If(self.start):
+            m.d.sync += [
+                stored_value.eq(self.in0 + self.in1),
+                self.output.eq(stored_value),
+                self.done.eq(1),
+            ]
+        with m.Else():
+            m.d.sync += self.done.eq(0)
+
+
+class GetInstruction(InstructionBase):
+    """Handles sending values from CFU to CPU.
+
+    Attributes
+    ----------
+
+    reg_verify_value: Signal(32), in
+       The value to return for the verify register.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.reg_verify_value = Signal(32)
+
+    def elab(self, m):
+        # Currently only implements REG_VERIFY
+        m.d.sync += self.done.eq(0)
+        with m.If(self.start):
+            m.d.sync += self.output.eq(self.reg_verify_value)
+            m.d.sync += self.done.eq(1)
+
+
+class SetInstruction(InstructionBase):
+    """Handles sending values from CPU to CFU
+
+    Attributes
+    ----------
+
+    reg_verify_value: Signal(32), out
+       The value last set into the verify register
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.reg_verify_value = Signal(32)
+
+    def elab(self, m):
+        # Currently only implements REG_VERIFY
+        m.d.sync += self.done.eq(0)
+        with m.If(self.start):
+            m.d.sync += self.reg_verify_value.eq(self.in0)
+            m.d.sync += self.done.eq(1)
+
+
+class HpsCfu(Cfu):
+    """Gen2 accelerator CFU.
+
+    Assumes working with a slimopt+cfu VexRiscV, which rsp_ready is
+    always true.
+    """
+
+    def connect_verify(self, m, set_, get):
+        """Connects the verify register get and set halves"""
+        m.d.comb += get.reg_verify_value.eq(set_.reg_verify_value + 1)
+
+    def elab_instructions(self, m):
+        m.submodules['ping'] = ping = PingInstruction()
+        m.submodules['set'] = set_ = SetInstruction()
+        m.submodules['get'] = get = GetInstruction()
+
+        self.connect_verify(m, set_, get)
+
+        return {
+            Constants.INS_GET: get,
+            Constants.INS_SET: set_,
+            Constants.INS_PING: ping,
+        }
+
 
 def make_cfu():
-    return Cfu()
+    return HpsCfu()
