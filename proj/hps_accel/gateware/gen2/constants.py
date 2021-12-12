@@ -28,6 +28,36 @@ class Constants:
     # Registers
     REG_VERIFY = 0
 
+    # Write any value to start or reset to trigger accelerator start or reset
+    REG_ACCELERATOR_START = 1
+    REG_ACCELERATOR_RESET = 2
+
+    # Write data to filter store at address
+    # in0 = (store << 16 | addr), in1  = data
+    REG_FILTER_WRITE = 3
+
+    # Configuration values
+    REG_INPUT_OFFSET = 4
+    REG_NUM_FILTER_WORDS = 5
+    REG_OUTPUT_OFFSET = 6
+    REG_OUTPUT_ACTIVATION_MIN = 7
+    REG_OUTPUT_ACTIVATION_MAX = 8
+    REG_INPUT_BASE_ADDR = 9
+    REG_NUM_PIXELS_X = 10
+    REG_PIXEL_ADVANCE_X = 11
+    REG_PIXEL_ADVANCE_Y = 12
+    REG_NUM_REPEATS = 13
+    REG_OUTPUT_CHANNEL_DEPTH = 14
+    REG_NUM_OUTPUT_VALUES = 15
+
+    # For post process parameters. Writing multiplier sends all values
+    REG_POST_PROCESS_BIAS = 16
+    REG_POST_PROCESS_SHIFT = 17
+    REG_POST_PROCESS_MULTIPLIER = 18
+
+    # Gets the output value
+    REG_OUTPUT_WORD = 19
+
     # Maximum number of 8-bit channels per pixel
     MAX_CHANNEL_DEPTH = 512
 
