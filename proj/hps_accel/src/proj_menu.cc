@@ -64,34 +64,6 @@ void do_verify_register(void) {
 }
 void do_test_layer_20(void) { test_conv2d(&conv2d_layer_20_data); }
 
-#if GATEWARE_GEN == 2
-// to get ARENA_LRAM_BASE
-#include "generated/mem.h"
-
-void do_test_mport(void) {
-  const int64_t kSeed = 12345;
-  int64_t r = kSeed;
-  uint32_t* arena = (uint32_t*)(ARENA_LRAM_BASE);
-  // Fill arena with PSEUDO random numers
-  for (int i = 0; i < 65536; i++) {
-    arena[i] = next_pseudo_random(&r);
-  }
-
-  // Retrieve each value via mport and check is correct
-  r = kSeed;
-  for (int i = 0; i < 65536; i++) {
-    uint32_t expected = next_pseudo_random(&r);
-    uint32_t actual = cfu_mem(i);
-    if (actual != expected) {
-      printf("FAIL at index %04x: Actual %08lx != Expected %08lx\n", i, actual,
-             expected);
-    }
-  }
-  printf("OK: Checked whole arena. No mismatches\n");
-}
-
-#endif
-
 struct Menu MENU = {
     "Project Menu",
     "project",
@@ -102,9 +74,6 @@ struct Menu MENU = {
         MENU_ITEM('m', "test blocks Multiply",
                   do_test_blocks_multiply_accumulate),
         MENU_ITEM('a', "test blocks All", do_test_blocks_all),
-#endif
-#if GATEWARE_GEN == 2
-        MENU_ITEM('m', "test mport access", do_test_mport),
 #endif
         MENU_ITEM('L', "test layer 20", do_test_layer_20),
         MENU_END,

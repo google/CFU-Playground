@@ -81,35 +81,6 @@ class SetInstruction(InstructionBase):
             m.d.sync += self.done.eq(1)
 
 
-class MemoryReadInstruction(InstructionBase):
-    """Reads arena memory via 2nd LRAM port.
-
-    Validates that memory ports are correctly passed through.
-
-    Attributes
-    ----------
-
-    lram_addr: [Signal(14)] * 4, out
-        Address for each LRAM bank
-
-    lram_data: [Signal(32)] * 4, in
-        Data as read from addresses provided at previous cycle.
-    """
-
-    def __init__(self):
-        super().__init__()
-        self.lram_addr = [Signal(32, name=f'addr{i}') for i in range(4)]
-        self.lram_data = [Signal(32, name=f'data{i}') for i in range(4)]
-
-    def elab(self, m):
-        # assumes in0 holds state while CFU executing
-        m.d.sync += self.done.eq(self.start)
-        for i in range(4):
-            m.d.comb += self.lram_addr[i].eq(self.in0[2:])
-            with m.If(self.in0[:2] == i):
-                m.d.comb += self.output.eq(self.lram_data[i])
-
-
 class HpsCfu(Cfu):
     """Gen2 accelerator CFU.
 
@@ -121,28 +92,13 @@ class HpsCfu(Cfu):
         """Connects the verify register get and set halves"""
         m.d.comb += get.reg_verify_value.eq(set_.reg_verify_value + 1)
 
-    def connect_mem(self, m, mem):
-        """Connects memory ports to the mem instruction"""
-
-        for i in range(4):
-            m.d.comb += [
-                self.lram_addr[i].eq(mem.lram_addr[i]),
-                mem.lram_data[i].eq(self.lram_data[i])
-            ]
-
     def elab_instructions(self, m):
         m.submodules['ping'] = ping = PingInstruction()
         m.submodules['set'] = set_ = SetInstruction()
         m.submodules['get'] = get = GetInstruction()
-        m.submodules['mem'] = mem = MemoryReadInstruction()
-
-        self.connect_verify(m, set_, get)
-        self.connect_mem(m, mem)
-
         return {
             Constants.INS_GET: get,
             Constants.INS_SET: set_,
-            Constants.INS_MEM: mem,
             Constants.INS_PING: ping,
         }
 

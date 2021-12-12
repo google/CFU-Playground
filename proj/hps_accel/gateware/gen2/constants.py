@@ -23,7 +23,6 @@ class Constants:
     # Funct3 codes - used to route CFU to instructions
     INS_SET = 0
     INS_GET = 1
-    INS_MEM = 2
     INS_PING = 7
 
     # Registers
