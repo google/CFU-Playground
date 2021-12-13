@@ -318,6 +318,11 @@ load: $(SOFTWARE_BIN)
 # Load hook allows common_soc.py to provide board-specific changes to load.
 # This isn't ideal, the logic is starting to get too voluminous for a Makefile.
 	$(SOC_MK) load_hook
+	@while [ ! -e $(TTY) ]; do echo "Waiting for UART"; sleep 1; done
+	$(LXTERM) --speed $(UART_SPEED) $(CRC) --kernel $(SOFTWARE_BIN) $(TTY)
+
+connect:
+	@echo Connecting to board
 	$(LXTERM) --speed $(UART_SPEED) $(CRC) --kernel $(SOFTWARE_BIN) $(TTY)
 endif
 
