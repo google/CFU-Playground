@@ -51,9 +51,6 @@ class FilterStore(SimpleElaboratable):
 
     start: Signal(), in
         Causes filter output to begin with addr(0), on cycle after next.
-
-    reset: Signal(), in
-        Stops the filter and resets read index to zero. Does not clear memories.
     """
 
     def __init__(self):
@@ -62,21 +59,18 @@ class FilterStore(SimpleElaboratable):
         self.values_out = [Signal(32, name=f"out_{i}")
                            for i in range(Constants.NUM_FILTER_STORES)]
         self.start = Signal()
-        self.reset = Signal()
 
     def elab(self, m):
         # Read_index tracks the address for memory 0
         # self.start starts the address incrementing and reset stops it.
         read_index = Signal(range(Constants.FILTER_WORDS_PER_STORE))
         running = Signal()
-        with m.If(self.start | running):
+        with m.If(running):
             m.d.sync += read_index.eq(Mux(read_index == self.size - 1,
                                           0, read_index + 1))
         with m.If(self.start):
             m.d.sync += running.eq(True)
-        with m.If(self.reset):
             m.d.sync += read_index.eq(0)
-            m.d.sync += running.eq(False)
 
         # set up each memory
         for i in range(Constants.NUM_FILTER_STORES):

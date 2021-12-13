@@ -32,6 +32,7 @@ class FilterStoreTest(TestBase):
         yield
         yield dut.start.eq(0)
         yield
+        yield
         for _ in range(3):
             for addr in range(512):
                 for store in range(2):
@@ -64,10 +65,7 @@ class FilterStoreTest(TestBase):
             for _ in range(123):
                 yield
 
-            # Reset then fetch values three more times
-            yield dut.reset.eq(1)
-            yield
-            yield dut.reset.eq(0)
+            # Fetch values three more times
             yield from self.read_three_times()
             
 

@@ -30,7 +30,9 @@ from .post_process import (
     POST_PROCESS_SIZES,
     POST_PROCESS_PARAMS_WIDTH,
     PostProcessPipeline,
-    ReadingProducer)
+    ReadingProducer,
+    StreamLimiter)
+from .ram_input import InputFetcher
 from .sysarray import SystolicArray
 from .utils import unsigned_upto
 
@@ -53,42 +55,22 @@ class AcceleratorCore(SimpleElaboratable):
     -   FIFO for output values
 
     Still TODO:
-    -   Write Filter values
-    -   Read Filter values to logic array
     -   Read Input activation values from memory
 
     Attributes
     ----------
 
-    activations: [Signal(32) * 4], in
-        Activation values as read from memory. Four 8 bit values are
-        packed into each 32 bit word.
+    reset: Signal(), in
+        Resets internal logic ready for configuration.
 
-    write_filter_input: Endpoint(FILTER_WRITE_COMMAND), in
-        Commands to write to the filter store.
-
-    filter_start: Signal(), in
-        Causes filter output to begin with addr(0), on cycle after next.
-
-    first: Signal(), in
-        Beginning of value computation signal for systolic array.
-
-    last: Signal(), in
-        End of value computation signal for systolic array.
-
-    half: Signal(), in
-        Indicates only half of the systolic array (i.e 16 of 32
-        multipliers) are to be used. This is set when each output value
-        requires only 16 multiplication operations and so using 32
-        multipliers would overwhelm the post processing pipeline, which
-        can only process one output per cycle.
-
-    output: Endpoint(unsigned(32)), out
-      The 8 bit output values as 4 byte words. Values are produced in an
-      algorithm dependent order.
+    start: Signal(), in
+        Starts accelerator working.
 
     input_offset: Signal(signed(9)), in
         Offset applied to each input activation value.
+
+    num_filter_words: Signal(unsigned_upto(FILTER_WORDS_PER_STORE)), in
+        Number of words of filter data, per filter store
 
     output_offset: Signal(signed(9)), in
         Offset applied to each output value.
@@ -99,48 +81,112 @@ class AcceleratorCore(SimpleElaboratable):
     output_activation_max: Signal(signed(8)), out
         The maximum output value
 
-    num_filter_words: Signal(unsigned_upto(FILTER_WORDS_PER_STORE)), in
-        Number of words of filter data, per filter store
+    write_filter_input: Endpoint(FILTER_WRITE_COMMAND), in
+        Commands to write to the filter store.
 
-    output_channel_depth: Signal(Constants.MAX_CHANNEL_DEPTH), in
-        Number of output channels to cycle through
+    input_base_addr: Signal(14), in
+        Address of start of input data, in 16 byte blocks (i.e addr 1 = byte 16)
+
+    num_pixels_x: Signal(9), in
+        How many pixels in output row
+
+    pixel_advance_x: Signal(4), in
+        Number of RAM blocks to advance to move to new pixel in X direction
+
+    pixel_advance_y: Signal(8), in
+        Number of RAM blocks  to advance between pixels in Y direction
+
+    num_repeats: Signal(unsigned_upto(64)), in
+        The number of times each stream of input pixel data is to be repeated.
+
+    lram_addr: [Signal(14)] * 4, out
+        Address for each LRAM bank
+
+    lram_data: [Signal(32)] * 4, in
+        Data as read from addresses provided at previous cycle.
+
+    output_channel_depth: Signal(unsigned_upto(MAX_CHANNEL_DEPTH)), in
+        Number of output channels - must be divisible by 16
 
     post_process_params: Endpoint(POST_PROCESS_PARAMS), out
         Stream of data to write to post_process memory.
 
-    reset: Signal(), in
-        Resets internal logic to starting state. Input values are not
-        affected.
+    num_output_values: Signal(18), in
+        Number of 8bit output values produced. Expected to be a multiple of 16.
+
+    activations: [Signal(32) * 4], in
+        Activation values as read from memory. Four 8 bit values are
+        packed into each 32 bit word.
+
+    first: Signal(), in
+        Beginning of value computation signal for systolic array.
+
+    last: Signal(), in
+        End of value computation signal for systolic array.
+
+    output: Endpoint(unsigned(32)), out
+      The 8 bit output values as 4 byte words. Values are produced in an
+      algorithm dependent order.
+
     """
 
     def __init__(self):
-        self.activations = [Signal(32, name=f"act_{i}") for i in range(4)]
-        self.write_filter_input = Endpoint(FILTER_WRITE_COMMAND)
-        self.filter_start = Signal()
-        self.first = Signal()
-        self.last = Signal()
-        self.half = Signal()
-        self.output = Endpoint(unsigned(32))
+        self.reset = Signal()
+        self.start = Signal()
+
         self.input_offset = Signal(signed(9))
+        self.num_filter_words = Signal(
+            unsigned_upto(Constants.FILTER_WORDS_PER_STORE))
+
         self.output_offset = Signal(signed(9))
         self.output_activation_min = Signal(signed(8))
         self.output_activation_max = Signal(signed(8))
-        self.num_filter_words = Signal(
-            unsigned_upto(Constants.FILTER_WORDS_PER_STORE))
+        self.write_filter_input = Endpoint(FILTER_WRITE_COMMAND)
+
+        self.input_base_addr = Signal(14)
+        self.num_pixels_x = Signal(9)
+        self.pixel_advance_x = Signal(4)
+        self.pixel_advance_y = Signal(8)
+        self.num_repeats = Signal(unsigned_upto(64))
+
+        self.lram_addr = [Signal(14, name=f"lram_addr{i}") for i in range(4)]
+        self.lram_data = [Signal(32, name=f"lram_data{i}") for i in range(4)]
+
         self.output_channel_depth = Signal(
             unsigned_upto(Constants.MAX_CHANNEL_DEPTH))
         self.post_process_params = Endpoint(POST_PROCESS_PARAMS)
-        self.reset = Signal()
+        self.num_output_values = Signal(unsigned(18))
+
+        self.output = Endpoint(unsigned(32))
 
     def build_filter_store(self, m):
         m.submodules['filter_store'] = store = FilterStore()
         m.d.comb += [
             *connect(self.write_filter_input, store.write_input),
-            store.reset.eq(self.reset),
             store.size.eq(self.num_filter_words),
-            store.start.eq(self.filter_start),
+            store.start.eq(self.start),
         ]
         return store.values_out
+
+    def build_input_fetcher(self, m):
+        m.submodules['fetcher'] = fetcher = InputFetcher()
+        m.d.comb += [
+            fetcher.reset.eq(self.reset),
+            fetcher.start.eq(self.start),
+            fetcher.base_addr.eq(self.input_base_addr),
+            fetcher.num_pixels_x.eq(self.num_pixels_x),
+            fetcher.pixel_advance_x.eq(self.pixel_advance_x),
+            fetcher.pixel_advance_y.eq(self.pixel_advance_y),
+            fetcher.depth.eq(self.output_channel_depth >> 4),  # divide by 16
+            fetcher.num_repeats.eq(self.num_repeats),
+        ]
+        for i in range(4):
+            m.d.comb += [
+                self.lram_addr[i].eq(fetcher.lram_addr[i]),
+                fetcher.lram_data[i].eq(self.lram_data[i]),
+            ]
+
+        return fetcher.first, fetcher.last, fetcher.data_out
 
     def build_param_store(self, m):
         # Create memory for post process params
@@ -182,21 +228,30 @@ class AcceleratorCore(SimpleElaboratable):
                 ar.accumulator[i].eq(accumulators[i]),
                 ar.accumulator_new[i].eq(accumulator_news[i]),
             ]
-        m.d.comb += ar.half.eq(self.half)
-        return ar.output
+        m.submodules['acc_limiter'] = al = StreamLimiter()
+        m.d.comb += connect(ar.output, al.stream_in)
+        m.d.comb += al.num_allowed.eq(self.num_output_values)
+        m.d.comb += al.start.eq(self.start)
+        return al.stream_out
 
     def elab(self, m):
-        # Create filter store
+        # Create filter store and input fetcher
         filter_values = self.build_filter_store(m)
+        first, last, activations = self.build_input_fetcher(m)
 
         # Plumb in sysarray and its inputs
         m.submodules['sysarray'] = sa = SystolicArray()
-        for in_a, activation in zip(sa.input_a, self.activations):
-            m.d.comb += in_a.eq(activation)
+        for in_a, activation in zip(sa.input_a, activations):
+            # Assign activation values with input offset
+            for i in range(4):
+                with_offset = Signal(signed(8), name=f"val_{i}")
+                raw_val = activation[i * 8:i * 8 + 8]
+                m.d.comb += with_offset.eq(raw_val + self.input_offset)
+                m.d.comb += in_a[i * 9:i * 9 + 9].eq(with_offset)
         for in_b, value in zip(sa.input_b, filter_values):
             m.d.comb += in_b.eq(value)
-        m.d.comb += sa.first.eq(self.first)
-        m.d.comb += sa.last.eq(self.last)
+        m.d.comb += sa.first.eq(first)
+        m.d.comb += sa.last.eq(last)
 
         # Get pipeline inputs from systolic array and parameters
         accumulator_stream = self.build_accumulator_reader(

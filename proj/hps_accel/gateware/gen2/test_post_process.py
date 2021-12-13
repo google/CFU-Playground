@@ -17,7 +17,7 @@
 import itertools
 import random
 
-from nmigen import Module
+from nmigen import Module, unsigned
 from nmigen.sim import Passive, Delay
 
 from nmigen_cfu import pack_vals, TestBase
@@ -25,7 +25,7 @@ from nmigen_cfu import pack_vals, TestBase
 from .post_process import (
     SaturatingRoundingDoubleHighMul, RoundingDivideByPowerOfTwo,
     SaturateActivationPipeline, PostProcessPipeline, ParamWriter, ReadingProducer,
-    AccumulatorReader, OutputWordAssembler)
+    AccumulatorReader, StreamLimiter, OutputWordAssembler)
 
 
 # Test cases generated from original C implementation
@@ -473,14 +473,12 @@ class AccumulatorReaderTest(TestBase):
     def create_dut(self):
         return AccumulatorReader()
 
-    def set_accumulators(self, values, half, cycles):
+    def set_accumulators(self, values, cycles):
         """Set inputs in a manner approximating systolic array output."""
         # Order is cycle number when accumulator value will be produced
-        order = [0, 1, 1, 2] if half else [0, 1, 2, 3, 1, 2, 3, 4]
-        size = 4 if half else 8
+        order = [0, 1, 2, 3, 1, 2, 3, 4]
+        size = 8
         groups = [values[i:i + size] for i in range(0, len(values), size)]
-
-        yield self.dut.half.eq(half)
 
         # Send each group over a number of cycles
         for group in groups:
@@ -508,28 +506,76 @@ class AccumulatorReaderTest(TestBase):
             self.assertFalse((yield self.dut.output.valid))
             yield
 
-    def test_it_reads_full(self):
+    def test_it_reads_accumulators(self):
         data = list(range(100, 100 + 10 * 8))
 
         def set_values():
-            yield from self.set_accumulators(data, False, 24)
+            yield from self.set_accumulators(data, 24)
         self.add_process(set_values)
 
         def process():
             yield from self.check_outputs(data)
         self.run_sim(process, False)
 
-    def test_it_reads_half(self):
-        data = list(range(100, 100 + 10 * 8))
 
-        def set_values():
-            yield from self.set_accumulators(data, True, 4)
-        self.add_process(set_values)
+class StreamLimiterTest(TestBase):
+    """Tests StreamLimiter class."""
+
+    def create_dut(self):
+        return StreamLimiter(unsigned(8))
+
+    def test_simple_case(self):
+        dut = self.dut
+
+        # send 15, check it limits to 10
+        data = [
+            # (num_allowed, start, valid, running)
+            (3, 0, 1, 0),
+            (3, 0, 1, 0),
+            # Pass 3 items
+            (3, 1, 1, 0),
+            (2, 0, 1, 1),
+            (2, 0, 1, 1),
+            (2, 0, 1, 1),
+
+            # Do not allow next few
+            (2, 0, 1, 0),
+            (2, 0, 0, 0),
+            (2, 0, 0, 0),
+
+            # Start running again, but do not pass on every cycle
+            (2, 1, 0, 0),
+            (2, 0, 0, 1),
+            (2, 0, 1, 1),
+            (2, 0, 0, 1),
+            (2, 0, 0, 1),
+            (2, 0, 1, 1),
+            (2, 0, 0, 0),
+        ]
 
         def process():
-            yield Passive()
-            yield from self.check_outputs(data)
+            for num_allowed, start, input_valid, running in data:
+                # Set inputs
+                payload = random.randrange(256)
+                yield dut.num_allowed.eq(num_allowed)
+                yield dut.start.eq(start)
+                yield dut.stream_in.valid.eq(input_valid)
+                yield dut.stream_in.payload.eq(payload)
+
+                # Allow time for inputs to apply and then check outputs
+                yield Delay(0.1)
+                self.assertEqual(running, (yield dut.running))
+                self.assertEqual(running, (yield dut.stream_in.ready))
+
+                if running:
+                    self.assertEqual(payload, (yield dut.stream_out.payload))
+                self.assertEqual(running and input_valid,
+                                 (yield dut.stream_out.valid))
+                yield
+
         self.run_sim(process, False)
+
+    # Send continuously
 
 
 class OutputWordAssemblerTest(TestBase):
