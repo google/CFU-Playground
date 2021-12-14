@@ -19,6 +19,7 @@
 #include <stdio.h>
 
 #include "blocks_test.h"
+#include "conv2d_05.h"
 #include "conv2d_20.h"
 #include "conv2d_call.h"
 #include "fixedpoint/fixedpoint.h"
@@ -62,7 +63,9 @@ void do_verify_register(void) {
   printf("%4s: %d failures out of %d tests\n", failures ? "FAIL" : "OK",
          failures, tests);
 }
+
 void do_test_layer_20(void) { test_conv2d(&conv2d_layer_20_data); }
+void do_test_layer_05(void) { test_conv2d(&conv2d_layer_05_data); }
 
 struct Menu MENU = {
     "Project Menu",
@@ -75,7 +78,8 @@ struct Menu MENU = {
                   do_test_blocks_multiply_accumulate),
         MENU_ITEM('a', "test blocks All", do_test_blocks_all),
 #endif
-        MENU_ITEM('L', "test layer 20", do_test_layer_20),
+        MENU_ITEM('2', "test layer 20", do_test_layer_20),
+        MENU_ITEM('5', "test layer 05", do_test_layer_05),
         MENU_END,
     },
 };
