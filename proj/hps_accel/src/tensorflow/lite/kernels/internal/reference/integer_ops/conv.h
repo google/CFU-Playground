@@ -21,7 +21,7 @@ limitations under the License.
 #include "playground_util/dump.h"
 #include "playground_util/print_params.h"
 #include "tensorflow/lite/kernels/internal/common.h"
-#include "tensorflow/lite/kernels/internal/reference/integer_ops/conv_accel.h"
+#include "tensorflow/lite/kernels/internal/reference/integer_ops/conv_accel_gen_1.h"
 
 namespace tflite {
 namespace reference_integer_ops {
@@ -233,7 +233,6 @@ inline void ConvPerChannel(
   }
   invocation_count++;
 #endif
-
 }
 
 // Fixed-point per-channel-quantization convolution reference kernel.
