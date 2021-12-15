@@ -46,6 +46,7 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           branch: sync-from-tflite-micro
+          base: main
           delete-branch: true
           token: ${{ secrets.GH_SERVICE_ACCOUNT_TOKEN }}
           title: (CFU Playground) Automated sync from github.com/tensorflow/tflite-micro
