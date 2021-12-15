@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: "23 12 * * *"
 jobs:
-  oxide-build-and-runs:
+  oxide-build-and-runs-conda:
     runs-on: ubuntu-latest
     steps:
       - run: wget --progress=dot:giga -O- https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14.tar.gz | tar -xzC /opt
