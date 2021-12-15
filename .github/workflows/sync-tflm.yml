@@ -15,14 +15,14 @@ jobs:
       github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
 
     env:
-      GH_SERVICE_ACCOUNT_NAME: "tflite-bot"
-      GH_SERVICE_ACCOUNT_EMAIL: "tflite-bot@antmicro.com"
+      GH_SERVICE_ACCOUNT_NAME: "GitHub"
+      GH_SERVICE_ACCOUNT_EMAIL: "noreply@github.com"
 
     steps:
       - uses: actions/setup-python@v2
       - uses: actions/checkout@v2
         with:
-          token: ${{ secrets.GH_SERVICE_ACCOUNT_TOKEN }}
+          ssh-key: ${{ secrets.SSH_DEPLOY_KEY }}
 
       - name: Configure git
         run: |
@@ -48,9 +48,7 @@ jobs:
           branch: sync-from-tflite-micro
           base: main
           delete-branch: true
-          token: ${{ secrets.GH_SERVICE_ACCOUNT_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           title: (CFU Playground) Automated sync from github.com/tensorflow/tflite-micro
           commit-message: Automated sync from github.com/tensorflow/tflite-micro
-          committer: $GH_SERVICE_ACCOUNT_NAME <$GH_SERVICE_ACCOUNT_EMAIL>
-          author: $GH_SERVICE_ACCOUNT_NAME <$GH_SERVICE_ACCOUNT_EMAIL>
           body: "(CFU Playground) Automated sync from github.com/tensorflow/tflite-micro"
