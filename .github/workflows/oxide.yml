@@ -1,7 +1,7 @@
 name: oxide_ci
 on: [push, pull_request]
 jobs:
-  check-multi-proj:
+  install-use-oxide-conda:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

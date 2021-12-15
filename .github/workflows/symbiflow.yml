@@ -1,7 +1,7 @@
 name: symbiflow
 on: [push, pull_request]
 jobs:
-  check-multi-proj:
+  install-use-symbiflow:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
