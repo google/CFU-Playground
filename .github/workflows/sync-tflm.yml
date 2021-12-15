@@ -41,7 +41,7 @@ jobs:
           git add *
 
           if [ -n "$(git status --porcelain)" ]; then
-            git commit -m "Sync from tflite-micro at $TFLM_SHA."
+            git commit -sm "Sync from tflite-micro at $TFLM_SHA."
           else
             echo "no changes"
           fi
@@ -53,6 +53,7 @@ jobs:
           branch: sync-from-tflite-micro
           base: main
           delete-branch: true
+          signoff: true
           token: ${{ secrets.GITHUB_TOKEN }}
           title: (CFU Playground) Automated sync from github.com/tensorflow/tflite-micro
           commit-message: Automated sync from github.com/tensorflow/tflite-micro
