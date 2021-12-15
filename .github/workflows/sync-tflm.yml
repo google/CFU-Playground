@@ -19,10 +19,15 @@ jobs:
       GH_SERVICE_ACCOUNT_EMAIL: "noreply@github.com"
 
     steps:
-      - uses: actions/setup-python@v2
-      - uses: actions/checkout@v2
+      - name: Clone repository
+        uses: actions/checkout@v2
         with:
           ssh-key: ${{ secrets.SSH_DEPLOY_KEY }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
 
       - name: Configure git
         run: |
