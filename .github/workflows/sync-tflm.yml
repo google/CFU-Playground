@@ -29,6 +29,9 @@ jobs:
         with:
           python-version: '3.7'
 
+      - name: Setup environment
+        run: bash scripts/setup -ci
+
       - name: Configure git
         run: |
           git config --global user.name $GH_SERVICE_ACCOUNT_NAME
@@ -36,6 +39,8 @@ jobs:
 
       - name: Sync the code, commit and push
         run: |
+          source environment
+          python3 -m pip install -r conf/requirements.txt
           export TFLM_SHA=$(git ls-remote https://github.com/tensorflow/tflite-micro.git main | cut -c1-7)
           ./scripts/sync_from_tflite_micro.sh
           git add *
