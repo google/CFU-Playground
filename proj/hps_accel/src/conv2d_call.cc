@@ -18,33 +18,40 @@
 
 #include <cstdio>
 
+#include "playground_util/dump.h"
 #include "tensorflow/lite/kernels/internal/reference/integer_ops/conv.h"
 #include "tflite.h"
 
 void test_conv2d(const Conv2DData* data) {
   printf("Testing Conv2D %s\n", data->name);
-  // Use TFLite arena to hold output
-  int8_t* actual_output = reinterpret_cast<int8_t*>(tflite_tensor_arena);
+  // Copy input arena
+  int8_t* arena_input = reinterpret_cast<int8_t*>(tflite_tensor_arena);
+  auto input_shape =
+      *(reinterpret_cast<const tflite::RuntimeShape*>(data->input_shape));
+  for (int i = 0; i < input_shape.FlatSize(); i++) {
+    arena_input[i] = data->input_data[i];
+  }
+  int8_t* arena_output =
+      reinterpret_cast<int8_t*>(tflite_tensor_arena) + 128 * 1024;
 
   const tflite::RuntimeShape& output_shape =
       *(reinterpret_cast<const tflite::RuntimeShape*>(data->output_shape));
   tflite::reference_integer_ops::ConvPerChannel(
       *(reinterpret_cast<const tflite::ConvParams*>(data->params)),
       reinterpret_cast<const int32_t*>(data->output_multiplier),
-      reinterpret_cast<const int32_t*>(data->output_shift),
-      *(reinterpret_cast<const tflite::RuntimeShape*>(data->input_shape)),
-      reinterpret_cast<const int8_t*>(data->input_data),
+      reinterpret_cast<const int32_t*>(data->output_shift), input_shape,
+      reinterpret_cast<const int8_t*>(arena_input),
       *(reinterpret_cast<const tflite::RuntimeShape*>(data->filter_shape)),
       reinterpret_cast<const int8_t*>(data->filter_data),
       *(reinterpret_cast<const tflite::RuntimeShape*>(data->bias_shape)),
       reinterpret_cast<const int32_t*>(data->bias_data), output_shape,
-      actual_output);
+      arena_output);
 
   // Check for differences with output
   int diff_count = 0;
   int first_diff = 0;
   for (int i = 0; i < output_shape.FlatSize(); i++) {
-    if (actual_output[i] != static_cast<int8_t>(data->output_data[i])) {
+    if (arena_output[i] != static_cast<int8_t>(data->output_data[i])) {
       diff_count++;
       if (diff_count == 1) {
         first_diff = i;
@@ -57,5 +64,9 @@ void test_conv2d(const Conv2DData* data) {
   } else {
     printf("FAIL - %d differences, first at index %d\n", diff_count,
            first_diff);
+    printf("actual:\n");
+    dump_hex(reinterpret_cast<const int32_t*>(arena_output), 16);
+    printf("expected:\n");
+    dump_hex(reinterpret_cast<const int32_t*>(data->output_data), 16);
   }
 }
