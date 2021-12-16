@@ -45,4 +45,6 @@ void tflite_classify();
 int8_t* tflite_get_output();
 float* tflite_get_output_float();
 
+// The arena
+extern uint8_t *tflite_tensor_arena;
 #endif  // _TFLITE_H
