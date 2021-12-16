@@ -22,6 +22,7 @@ limitations under the License.
 #include "playground_util/print_params.h"
 #include "tensorflow/lite/kernels/internal/common.h"
 #include "tensorflow/lite/kernels/internal/reference/integer_ops/conv_accel_gen_1.h"
+#include "tensorflow/lite/kernels/internal/reference/integer_ops/conv_accel_gen_2.h"
 
 namespace tflite {
 namespace reference_integer_ops {
@@ -138,6 +139,15 @@ inline void ConvPerChannel(
                       bias_data, output_shape, output_data);
     return;
   }
+#elif GATEWARE_GEN == 2
+  if (CanAccelerateConv4x4(params, input_shape, filter_shape, output_shape,
+                           bias_data)) {
+    ConvPerChannel4x4(params, output_multiplier, output_shift, input_shape,
+                      input_data, filter_shape, filter_data, bias_shape,
+                      bias_data, output_shape, output_data);
+    return;
+  }
+
 #endif
   printf("ConvPerChannel() not accelerated!\n");
 #endif
