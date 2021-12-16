@@ -21,6 +21,7 @@
 
 // Convenience macros for get/set
 #define cfu_set(reg, val) cfu_op(INS_SET, reg, val, 0)
+#define cfu_setx(reg, val1, val2) cfu_op(INS_SET, reg, val1, val2)
 #define cfu_get(reg) cfu_op(INS_GET, reg, 0, 0)
 
 // Ping instructions for checking CFU is available
