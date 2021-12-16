@@ -17,6 +17,8 @@
 
 #include "tensorflow/lite/kernels/internal/reference/integer_ops/conv_accel.h"
 
+#if GATEWARE_GEN == 1
+
 #include "blocks.h"
 #include "cfu.h"
 #include "gateware_constants.h"
@@ -141,3 +143,4 @@ void ConvPerChannel4x4(const ConvParams& params,
 
 }  // namespace reference_integer_ops
 }  // namespace tflite
+#endif  // GATEWARE_GEN

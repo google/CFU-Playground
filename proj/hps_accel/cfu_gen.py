@@ -21,9 +21,14 @@ from nmigen import *
 from nmigen.back import verilog
 
 from gateware.gen1.hps_cfu import make_cfu as gen1_make_cfu
+from gateware.gen2.hps_cfu import make_cfu as gen2_make_cfu
 
 VERILOG_FILENAME = "cfu.v"
 
+make_cfu_fns = {
+    'gen1': gen1_make_cfu,
+    'gen2': gen2_make_cfu,
+}
 
 def read_file():
     if os.path.exists(VERILOG_FILENAME):
@@ -33,17 +38,15 @@ def read_file():
 
 
 def main():
-    gen_list = ['gen1']
+    gen_list = list(make_cfu_fns.keys()).sort()
     parser = argparse.ArgumentParser(description='Generate cfu.v')
     parser.add_argument('gen', metavar='GEN', type=str,
                         choices=gen_list, help=f'Which kind of CFU to generate - one of {gen_list}')
     args = parser.parse_args()
-    if args.gen == 'gen1':
-        cfu = gen1_make_cfu()
-    else:
-        # This should not happen if all cases from gen_list are covered
+    if args.gen not in make_cfu_fns.keys():
         print(f'Unexpected GEN {args.gen}')
         sys.exit(5)
+    cfu = make_cfu_fns[args.gen]()
 
     new_verilog = verilog.convert(cfu, name='Cfu', ports=cfu.ports)
     old_verilog = read_file()

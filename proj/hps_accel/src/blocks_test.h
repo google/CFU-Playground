@@ -16,6 +16,7 @@
 
 #ifndef _BLOCKS_TEST_H
 #define _BLOCKS_TEST_H
+#if GATEWARE_GEN == 1
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,4 +31,5 @@ void do_test_blocks_all(void);
 #ifdef __cplusplus
 }
 #endif
+#endif  // GATEWARE_GEN
 #endif  // _BLOCKS_TEST_H

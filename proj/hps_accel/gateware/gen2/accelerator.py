@@ -37,6 +37,34 @@ from .sysarray import SystolicArray
 from .utils import unsigned_upto
 
 
+ACCELERATOR_CONFIGURATION_LAYOUT = [
+    # Offset applied to each input activation value.
+    ('input_offset', signed(9)),
+    # Number of words of filter data, per filter store
+    ('num_filter_words', unsigned_upto(Constants.FILTER_WORDS_PER_STORE)),
+    # Offset applied to each output value.
+    ('output_offset', signed(9)),
+    #  The minimum output value
+    ('output_activation_min', signed(8)),
+    #  The maximum output value
+    ('output_activation_max', signed(8)),
+    # Address of start of input data, in 16 byte blocks (i.e addr 1 = byte 16)
+    ('input_base_addr', 14),
+    # How many pixels in output row
+    ('num_pixels_x', 9),
+    # Number of RAM blocks to advance to move to new pixel in X direction
+    ('pixel_advance_x', 4),
+    # Number of RAM blocks  to advance between pixels in Y direction
+    ('pixel_advance_y', 8),
+    # The number of times each stream of input pixel data is to be repeated.
+    ('num_repeats', unsigned_upto(64)),
+    # Number of output channels - must be divisible by 16
+    ('output_channel_depth', unsigned_upto(Constants.MAX_CHANNEL_DEPTH)),
+    # Number of 8bit output values produced. Expected to be a multiple of 16.
+    ('num_output_values', 18),
+]
+
+
 class AcceleratorCore(SimpleElaboratable):
     """Core of the accelerator.
 
@@ -54,9 +82,6 @@ class AcceleratorCore(SimpleElaboratable):
     -   Post Process Parameter Write
     -   FIFO for output values
 
-    Still TODO:
-    -   Read Input activation values from memory
-
     Attributes
     ----------
 
@@ -66,38 +91,11 @@ class AcceleratorCore(SimpleElaboratable):
     start: Signal(), in
         Starts accelerator working.
 
-    input_offset: Signal(signed(9)), in
-        Offset applied to each input activation value.
-
-    num_filter_words: Signal(unsigned_upto(FILTER_WORDS_PER_STORE)), in
-        Number of words of filter data, per filter store
-
-    output_offset: Signal(signed(9)), in
-        Offset applied to each output value.
-
-    output_activation_min: Signal(signed(8)), out
-        The minimum output value
-
-    output_activation_max: Signal(signed(8)), out
-        The maximum output value
+    config: Record(ACCELERATOR_CONFIGURATION_LAYOUT), in
+        Configuration values for this component.
 
     write_filter_input: Endpoint(FILTER_WRITE_COMMAND), in
         Commands to write to the filter store.
-
-    input_base_addr: Signal(14), in
-        Address of start of input data, in 16 byte blocks (i.e addr 1 = byte 16)
-
-    num_pixels_x: Signal(9), in
-        How many pixels in output row
-
-    pixel_advance_x: Signal(4), in
-        Number of RAM blocks to advance to move to new pixel in X direction
-
-    pixel_advance_y: Signal(8), in
-        Number of RAM blocks  to advance between pixels in Y direction
-
-    num_repeats: Signal(unsigned_upto(64)), in
-        The number of times each stream of input pixel data is to be repeated.
 
     lram_addr: [Signal(14)] * 4, out
         Address for each LRAM bank
@@ -105,65 +103,30 @@ class AcceleratorCore(SimpleElaboratable):
     lram_data: [Signal(32)] * 4, in
         Data as read from addresses provided at previous cycle.
 
-    output_channel_depth: Signal(unsigned_upto(MAX_CHANNEL_DEPTH)), in
-        Number of output channels - must be divisible by 16
-
     post_process_params: Endpoint(POST_PROCESS_PARAMS), out
         Stream of data to write to post_process memory.
-
-    num_output_values: Signal(18), in
-        Number of 8bit output values produced. Expected to be a multiple of 16.
-
-    activations: [Signal(32) * 4], in
-        Activation values as read from memory. Four 8 bit values are
-        packed into each 32 bit word.
-
-    first: Signal(), in
-        Beginning of value computation signal for systolic array.
-
-    last: Signal(), in
-        End of value computation signal for systolic array.
 
     output: Endpoint(unsigned(32)), out
       The 8 bit output values as 4 byte words. Values are produced in an
       algorithm dependent order.
-
     """
 
     def __init__(self):
         self.reset = Signal()
         self.start = Signal()
+        self.config = Record(ACCELERATOR_CONFIGURATION_LAYOUT)
 
-        self.input_offset = Signal(signed(9))
-        self.num_filter_words = Signal(
-            unsigned_upto(Constants.FILTER_WORDS_PER_STORE))
-
-        self.output_offset = Signal(signed(9))
-        self.output_activation_min = Signal(signed(8))
-        self.output_activation_max = Signal(signed(8))
         self.write_filter_input = Endpoint(FILTER_WRITE_COMMAND)
-
-        self.input_base_addr = Signal(14)
-        self.num_pixels_x = Signal(9)
-        self.pixel_advance_x = Signal(4)
-        self.pixel_advance_y = Signal(8)
-        self.num_repeats = Signal(unsigned_upto(64))
-
         self.lram_addr = [Signal(14, name=f"lram_addr{i}") for i in range(4)]
         self.lram_data = [Signal(32, name=f"lram_data{i}") for i in range(4)]
-
-        self.output_channel_depth = Signal(
-            unsigned_upto(Constants.MAX_CHANNEL_DEPTH))
         self.post_process_params = Endpoint(POST_PROCESS_PARAMS)
-        self.num_output_values = Signal(unsigned(18))
-
         self.output = Endpoint(unsigned(32))
 
     def build_filter_store(self, m):
         m.submodules['filter_store'] = store = FilterStore()
         m.d.comb += [
             *connect(self.write_filter_input, store.write_input),
-            store.size.eq(self.num_filter_words),
+            store.size.eq(self.config.num_filter_words),
             store.start.eq(self.start),
         ]
         return store.values_out
@@ -173,12 +136,12 @@ class AcceleratorCore(SimpleElaboratable):
         m.d.comb += [
             fetcher.reset.eq(self.reset),
             fetcher.start.eq(self.start),
-            fetcher.base_addr.eq(self.input_base_addr),
-            fetcher.num_pixels_x.eq(self.num_pixels_x),
-            fetcher.pixel_advance_x.eq(self.pixel_advance_x),
-            fetcher.pixel_advance_y.eq(self.pixel_advance_y),
-            fetcher.depth.eq(self.output_channel_depth >> 4),  # divide by 16
-            fetcher.num_repeats.eq(self.num_repeats),
+            fetcher.base_addr.eq(self.config.input_base_addr),
+            fetcher.num_pixels_x.eq(self.config.num_pixels_x),
+            fetcher.pixel_advance_x.eq(self.config.pixel_advance_x),
+            fetcher.pixel_advance_y.eq(self.config.pixel_advance_y),
+            fetcher.depth.eq(self.config.output_channel_depth >> 4),  # divide by 16
+            fetcher.num_repeats.eq(self.config.num_repeats),
         ]
         for i in range(4):
             m.d.comb += [
@@ -212,7 +175,7 @@ class AcceleratorCore(SimpleElaboratable):
         m.d.comb += [
             # Reset reader whenever new parameters are written
             reader.reset.eq(pw.input_data.is_transferring()),
-            reader.sizes.depth.eq(self.output_channel_depth),
+            reader.sizes.depth.eq(self.config.output_channel_depth),
             reader.sizes.repeats.eq(Constants.SYS_ARRAY_HEIGHT),
             rp.addr.eq(reader.mem_addr),
             reader.mem_data.eq(rp.data),
@@ -230,7 +193,7 @@ class AcceleratorCore(SimpleElaboratable):
             ]
         m.submodules['acc_limiter'] = al = StreamLimiter()
         m.d.comb += connect(ar.output, al.stream_in)
-        m.d.comb += al.num_allowed.eq(self.num_output_values)
+        m.d.comb += al.num_allowed.eq(self.config.num_output_values)
         m.d.comb += al.start.eq(self.start)
         return al.stream_out
 
@@ -246,7 +209,7 @@ class AcceleratorCore(SimpleElaboratable):
             for i in range(4):
                 with_offset = Signal(signed(8), name=f"val_{i}")
                 raw_val = activation[i * 8:i * 8 + 8]
-                m.d.comb += with_offset.eq(raw_val + self.input_offset)
+                m.d.comb += with_offset.eq(raw_val + self.config.input_offset)
                 m.d.comb += in_a[i * 9:i * 9 + 9].eq(with_offset)
         for in_b, value in zip(sa.input_b, filter_values):
             m.d.comb += in_b.eq(value)
@@ -264,9 +227,9 @@ class AcceleratorCore(SimpleElaboratable):
         m.d.comb += connect(accumulator_stream, ppp.input)
         m.d.comb += connect(param_stream, ppp.params)
         m.d.comb += [
-            ppp.offset.eq(self.output_offset),
-            ppp.activation_min.eq(self.output_activation_min),
-            ppp.activation_max.eq(self.output_activation_max),
+            ppp.offset.eq(self.config.output_offset),
+            ppp.activation_min.eq(self.config.output_activation_min),
+            ppp.activation_max.eq(self.config.output_activation_max),
         ]
 
         # Handle output

@@ -16,9 +16,9 @@
 # This variable lists symbols to define to the C preprocessor
 export DEFINES :=
 
-# Define which generation gateware to use
-GATEWARE_GEN ?= gen1
-#GATEWARE_GEN = gen2
+# Define which generation gateware to use = gen1 or gen2
+#GATEWARE_GEN ?= 1
+GATEWARE_GEN = 2
 DEFINES += GATEWARE_GEN=$(GATEWARE_GEN)
 
 # Uncomment this line to use the custom accelerated convolution operation
@@ -26,7 +26,7 @@ DEFINES += ACCEL_CONV
 
 # For development purposes, dump a layer in accelerated code
 # (Large effect on performance, much output)
-DEFINES += DUMP_LAYER=5
+#DEFINES += DUMP_LAYER=0
 
 # Uncomment this line to use software defined CFU functions in software_cfu.cc
 #DEFINES += CFU_SOFTWARE_DEFINED
@@ -71,6 +71,13 @@ TEST_MENU_ITEMS=3 q
 # Customise arguments to Litex:
 export EXTRA_LITEX_ARGS
 EXTRA_LITEX_ARGS += --cpu-variant slim+cfu
+
+# gen2 needs special build args and only works on hps
+ifeq '$(GATEWARE_GEN)' '2'
+EXTRA_LITEX_ARGS += --separate-arena --cfu-mport --cpu-variant=slimopt+cfu
+export PLATFORM=hps
+endif
+
 ifeq '$(TARGET)' 'digilent_arty'
 # Cannot meet timing at 100MHz, reduce to 75MHz
 EXTRA_LITEX_ARGS += --sys-clk-freq 75000000
@@ -80,7 +87,7 @@ endif
 BUILD_DIR_EXTRA_DEP = $(BUILD_DIR)/src/gateware_constants.h
 
 # Pass gen argument to cfu_gen
-CFU_GEN_EXTRA_ARGS = $(GATEWARE_GEN)
+CFU_GEN_EXTRA_ARGS = gen$(GATEWARE_GEN)
 
 #### Base rules ####
 include ../proj.mk
@@ -88,5 +95,5 @@ include ../proj.mk
 #### Additional rules ####
 
 # Rule to build gateware_constants.h
-$(BUILD_DIR)/src/gateware_constants.h: $(BUILD_DIR)/src $(PROJ_DIR)/gateware/$(GATEWARE_GEN)/constants.py
-	$(PYRUN) -m gateware.$(GATEWARE_GEN).constants $@
+$(BUILD_DIR)/src/gateware_constants.h: $(BUILD_DIR)/src $(PROJ_DIR)/gateware/gen$(GATEWARE_GEN)/constants.py
+	$(PYRUN) -m gateware.gen$(GATEWARE_GEN).constants $@

@@ -84,18 +84,18 @@ class AcceleratorCoreTest(TestBase):
         out_x_dim = data.output_dims[2]
         output_depth = data.output_dims[3]
         filter_words_per_store = num_filter_values // 4 // 2
-        yield dut.input_offset.eq(data.input_offset)
-        yield dut.num_filter_words.eq(filter_words_per_store)
-        yield dut.output_offset.eq(data.output_offset)
-        yield dut.output_activation_min.eq(data.output_min)
-        yield dut.output_activation_max.eq(data.output_max)
-        yield dut.input_base_addr.eq(0x123)
-        yield dut.num_pixels_x.eq(out_x_dim)
-        yield dut.pixel_advance_x.eq(input_depth // 16)
-        yield dut.pixel_advance_y.eq((input_depth // 16) * in_x_dim)
-        yield dut.num_repeats.eq(output_depth // Constants.SYS_ARRAY_WIDTH)
-        yield dut.output_channel_depth.eq(output_depth)
-        yield dut.num_output_values.eq(self.NUM_OUTPUT_PIXELS * output_depth)
+        yield dut.config.input_offset.eq(data.input_offset)
+        yield dut.config.num_filter_words.eq(filter_words_per_store)
+        yield dut.config.output_offset.eq(data.output_offset)
+        yield dut.config.output_activation_min.eq(data.output_min)
+        yield dut.config.output_activation_max.eq(data.output_max)
+        yield dut.config.input_base_addr.eq(0x123)
+        yield dut.config.num_pixels_x.eq(out_x_dim)
+        yield dut.config.pixel_advance_x.eq(input_depth // 16)
+        yield dut.config.pixel_advance_y.eq((input_depth // 16) * in_x_dim)
+        yield dut.config.num_repeats.eq(output_depth // Constants.SYS_ARRAY_WIDTH)
+        yield dut.config.output_channel_depth.eq(output_depth)
+        yield dut.config.num_output_values.eq(self.NUM_OUTPUT_PIXELS * output_depth)
 
         # Toggle resets
         yield dut.reset.eq(1)
@@ -138,7 +138,8 @@ class AcceleratorCoreTest(TestBase):
                 for i in range(4):
                     block = (yield dut.lram_addr[i]) - 0x123
                     data_addr = block * 4 + i
-                    data_value = data.input_data[data_addr % len(data.input_data)]
+                    data_value = data.input_data[data_addr % len(
+                        data.input_data)]
                     yield dut.lram_data[i].eq(data_value)
                 yield
         self.add_process(ram)

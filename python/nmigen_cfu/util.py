@@ -250,7 +250,7 @@ class SequentialMemoryReader(SimpleElaboratable):
 
     Public Interface
     ----------------
-    limit: Signal(range(max_depth)) input
+    limit: Signal(range(max_depth+1)) input
         The number of items to read
     mem_addr: Signal(range(max_depth)) output
         The address to send to the memory read port
@@ -269,7 +269,7 @@ class SequentialMemoryReader(SimpleElaboratable):
     def __init__(self, *, width, max_depth):
         self.width = width
         self.max_depth = max_depth
-        self.limit = Signal(range(max_depth))
+        self.limit = Signal(range(max_depth+1))
         self.mem_addr = Signal(range(max_depth))
         self.mem_data = Signal(32)
         self.data = Signal(32)
@@ -284,7 +284,7 @@ class SequentialMemoryReader(SimpleElaboratable):
         m.d.sync += was_next.eq(self.next)
 
         # Decide address to be output (determines data available next cycle)
-        last_mem_addr = Signal.like(self.limit)
+        last_mem_addr = Signal.like(self.mem_addr)
         m.d.sync += last_mem_addr.eq(self.mem_addr)
         incremented_addr = Signal.like(self.limit)
         m.d.comb += incremented_addr.eq(Mux(last_mem_addr ==

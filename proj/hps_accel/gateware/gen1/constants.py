@@ -111,7 +111,7 @@ class Constants:
 
 
 CC_FILE_HEADER = """// Generated file
-// Shared constants generated from gateware/constants.py
+// Shared constants generated from gen1/gateware/constants.py
 #ifndef _GATEWARE_CONSTANTS_H
 #define _GATEWARE_CONSTANTS_H
 """

@@ -41,7 +41,7 @@ class FilterStore(SimpleElaboratable):
     ----------
 
     write_input: Endpoint(FILTER_WRITE_COMMAND), in
-        Commands to write to the filter store
+        Commands to write to the filter store. Always ready.
 
     size: Signal(unsigned_upto(depth)), in
         Number of words held in each filter store

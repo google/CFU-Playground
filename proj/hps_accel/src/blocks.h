@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-// Some useful building blocks for an initial accelerator architecture
+// Some useful building blocks for building the gen1 accelerator
 #ifndef _BLOCKS_H
 #define _BLOCKS_H
+#if GATEWARE_GEN == 1
 
 #include <cstddef>
 #include <cstdint>
@@ -99,17 +100,14 @@ void LoadOutputParams(size_t offset, size_t count, const int32_t* bias_data,
                       const int32_t* output_shift);
 
 // Kicks off the actual post-processing
-inline void PostProcess(int32_t acc) {
-  cfu_op2(PP_POST_PROCESS, acc, 0);
-}
+inline void PostProcess(int32_t acc) { cfu_op2(PP_POST_PROCESS, acc, 0); }
 
-inline uint32_t GetOutputWord() {
-  return cfu_get(REG_OUTPUT_WORD);
-}
+inline uint32_t GetOutputWord() { return cfu_get(REG_OUTPUT_WORD); }
 
 // Reset all
 inline void Reset() { cfu_set(REG_RESET, 0); }
 
 };  // namespace hps_accel
 
+#endif  // GATEWARE_GEN
 #endif  // _BLOCKS_H

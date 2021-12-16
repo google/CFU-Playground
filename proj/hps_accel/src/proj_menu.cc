@@ -70,9 +70,11 @@ struct Menu MENU = {
     {
         MENU_ITEM('p', "Ping CFU", do_test_ping),
         MENU_ITEM('v', "Verify register tests", do_verify_register),
+#if GATEWARE_GEN == 1
         MENU_ITEM('m', "test blocks Multiply",
                   do_test_blocks_multiply_accumulate),
         MENU_ITEM('a', "test blocks All", do_test_blocks_all),
+#endif
         MENU_ITEM('L', "test layer 20", do_test_layer_20),
         MENU_END,
     },
