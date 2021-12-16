@@ -19,16 +19,15 @@
 #include <cstdio>
 
 #include "tensorflow/lite/kernels/internal/reference/integer_ops/conv.h"
+#include "tflite.h"
 
 void test_conv2d(const Conv2DData* data) {
   printf("Testing Conv2D %s\n", data->name);
-  // Allocate buffer on stack large enough for largest output in HPS model
-  constexpr int buf_size = 128 * 1024;
-  int8_t actual_output[buf_size];
+  // Use TFLite arena to hold output
+  int8_t* actual_output = reinterpret_cast<int8_t*>(tflite_tensor_arena);
 
   const tflite::RuntimeShape& output_shape =
       *(reinterpret_cast<const tflite::RuntimeShape*>(data->output_shape));
-  assert((output_shape.FlatSize() <= buf_size, ""));
   tflite::reference_integer_ops::ConvPerChannel(
       *(reinterpret_cast<const tflite::ConvParams*>(data->params)),
       reinterpret_cast<const int32_t*>(data->output_multiplier),
