@@ -64,6 +64,7 @@ for s in $(seq ${SEED_COUNT}); do
         --device LIFCL-17-8UWG72C \
         --report="${DIR}/report.json" \
         --detailed-timing-report \
+        --router router2 \
         --seed "${seed}" 2>&1 | \
       (while read line; do 
         echo "$(date +%H:%M:%S) ${line}"; done
@@ -91,9 +92,16 @@ while [[ ${#CHILD_PIDS} -gt 1 ]]; do
   wait -n -p TERMINATED "${CHILD_PIDS[@]}"
   result=$?
   update_pids
-  if [[ "${result}" -eq "0" ]]; then
+  seed="${PID_TO_SEED[${TERMINATED}]}"
+  echo ${seed} terminated with result ${result}
+  if [[ "${result}" -ne "0" ]]; then
+    # Child failed - remove TERMINATED from list of PIDS
+    echo "FAIL: nextpnr with seed=${seed}"
+  elif grep "ERROR:" runs/seed-${seed}/nextpnr-nexus.log; then
+    # Child failed - remove TERMINATED from list of PIDS
+    echo "ERROR: nextpnr with seed=${seed}"
+  else
     # Child succeeded - copy result and finish
-    seed="${PID_TO_SEED[${TERMINATED}]}"
     echo "SUCCESS: nextpnr with seed=${seed}"
     cp "runs/seed-${seed}/output.fasm" $RESULT_FASM
     cp "runs/seed-${seed}/nextpnr-nexus.log" nextpnr-nexus.log
@@ -101,10 +109,6 @@ while [[ ${#CHILD_PIDS} -gt 1 ]]; do
     # TODO: find a more elegant solution for halting all children
     for p in "${CHILD_PIDS[@]}"; do pkill -P $p; done
     exit 0
-  else
-    # Child failed - remove TERMINATED from list of PIDS
-    seed="${PID_TO_SEED[${TERMINATED}]}"
-    echo "FAIL: nextpnr with seed=${seed}"
   fi
 done
 
