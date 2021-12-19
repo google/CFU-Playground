@@ -27,8 +27,11 @@ from litex.build.sim.config import SimConfig
 from litex.soc.integration.common import get_mem_data
 from litex.soc.integration.builder import *
 from litex.soc.integration.soc_core import soc_core_args, soc_core_argdict
+from litex.soc.integration.soc import SoCRegion
 
 from litex.tools.litex_sim import SimSoC
+
+from patch_cpu_variant import patch_cpu_variant, copy_cpu_variant_if_needed
 
 import argparse
 import os
@@ -49,6 +52,7 @@ def configure_sim_builder(builder: Builder, sim_rom_bin):
 
 
 def main():
+    patch_cpu_variant()
     parser = argparse.ArgumentParser(description="LiteX SoC on Arty A7")
     builder_args(parser)
     soc_core_args(parser)
@@ -56,6 +60,9 @@ def main():
     parser.add_argument("--sim-trace-start", default=0, help="Start tracing at this time in picoseconds")
     parser.add_argument("--sim-trace-end", default=-1, help="Stop tracing at this time in picoseconds")
     parser.add_argument("--run", action="store_true", help="Whether to run the simulation")
+    parser.add_argument("--separate-arena", action="store_true", help="Add arena mem region at 0x60000000")
+    parser.add_argument("--cfu-mport", action="store_true", help="Add ports between arena and CFU " \
+                        "(implies --separate-arena)")
     parser.add_argument("--bin", help="RISCV binary to run. Required if --run is set.")
     parser.set_defaults(
             csr_csv='csr.csv',
@@ -71,6 +78,10 @@ def main():
         else:
             print("must provide --bin if using --run")
     
+    # cfu_mport implies separate_arena
+    if args.cfu_mport:
+        args.separate_arena = True
+
     soc_kwargs = soc_core_argdict(args)
     soc_kwargs["l2_size"] = 8 * 1024
     soc_kwargs["uart_name"] = "sim"
@@ -79,6 +90,41 @@ def main():
         integrated_main_ram_init=bin, 
         sim_debug = True,
         **soc_kwargs)
+
+    if args.separate_arena:
+        soc.add_config('SOC_SEPARATE_ARENA')
+        soc.add_ram("arena",
+            origin = 0x60000000,
+            size   = 256 * 1024,
+        )
+    else:
+        # size-zero .arena region (linker script needs it)
+        region = SoCRegion(0x60000000, 0, cached=True, linker=True)
+        soc.bus.add_region("arena", region)
+
+
+    if args.cfu_mport:
+        print("soc.arena.mem: ", soc.arena.mem)
+        newport = []
+        for i in range(4):
+            newport.append(soc.arena.mem.get_port())
+            soc.specials += newport[i]
+            print(f"newport[{i}]: ", newport[i])
+            print(f"newport[{i}].adr: ", newport[i].adr, " len:", len(newport[i].adr))
+            soc.comb += newport[i].adr.eq(0)
+
+            p_adr_from_cfu = Signal(14)
+            p_adr = Cat(Constant(i,2), p_adr_from_cfu)
+            p_dat_r = Signal(32)
+            soc.comb += [
+                p_dat_r.eq(newport[i].dat_r),
+                newport[i].adr.eq(p_adr),
+            ]
+
+            soc.cpu.cfu_params.update(**{ f"o_port{i}_addr" : p_adr_from_cfu})
+            soc.cpu.cfu_params.update(**{ f"i_port{i}_din"  : p_dat_r})
+        print("Final soc.cpu.cfu_params: ", soc.cpu.cfu_params)
+
     sim_config = SimConfig()
     sim_config.add_clocker("sys_clk", freq_hz=soc.clk_freq)
     sim_config.add_module("serial2console", "serial")
