@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#include "tensorflow/lite/kernels/internal/reference/integer_ops/conv_accel.h"
+#include "tensorflow/lite/kernels/internal/reference/integer_ops/conv_accel_gen_1.h"
 
 #if GATEWARE_GEN == 1
 
