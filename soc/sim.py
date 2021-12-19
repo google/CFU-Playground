@@ -104,13 +104,14 @@ def main():
 
 
     if args.cfu_mport:
-        print("soc.arena.mem: ", soc.arena.mem)
+        #
+        # add 4 read-only ports with LSBs fixed to 00, 01, 10, and 11.
+        #   and connect them to the CFU
+        #
         newport = []
         for i in range(4):
             newport.append(soc.arena.mem.get_port())
             soc.specials += newport[i]
-            print(f"newport[{i}]: ", newport[i])
-            print(f"newport[{i}].adr: ", newport[i].adr, " len:", len(newport[i].adr))
             soc.comb += newport[i].adr.eq(0)
 
             p_adr_from_cfu = Signal(14)
@@ -123,7 +124,6 @@ def main():
 
             soc.cpu.cfu_params.update(**{ f"o_port{i}_addr" : p_adr_from_cfu})
             soc.cpu.cfu_params.update(**{ f"i_port{i}_din"  : p_dat_r})
-        print("Final soc.cpu.cfu_params: ", soc.cpu.cfu_params)
 
     sim_config = SimConfig()
     sim_config.add_clocker("sys_clk", freq_hz=soc.clk_freq)
