@@ -82,6 +82,7 @@ def main():
     if args.cfu_mport:
         args.separate_arena = True
 
+    copy_cpu_variant_if_needed(args.cpu_variant)
     soc_kwargs = soc_core_argdict(args)
     soc_kwargs["l2_size"] = 8 * 1024
     soc_kwargs["uart_name"] = "sim"
