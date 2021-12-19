@@ -48,6 +48,8 @@ class GetInstruction(InstructionBase):
     Attributes
     ----------
 
+    reg_fifo_items_value: Signal(32), in
+        The value to return for the fifo item count register.
     reg_verify_value: Signal(32), in
         The value to return for the verify register.
 
@@ -57,30 +59,35 @@ class GetInstruction(InstructionBase):
 
     def __init__(self):
         super().__init__()
+        self.reg_fifo_items_value = Signal(32)
         self.reg_verify_value = Signal(32)
         self.output_words = Endpoint(unsigned(32))
 
     def elab(self, m):
         m.d.sync += self.done.eq(0)
+
+        def get_output():
+            m.d.comb += self.output_words.ready.eq(1)
+            with m.If(self.output_words.is_transferring()):
+                m.d.sync += self.output.eq(self.output_words.payload)
+                m.d.sync += self.done.eq(1)
+                m.next = "WAIT_START"
+            with m.Else():
+                m.next = "WAIT_OUTPUT"
+
         with m.FSM():
             with m.State("WAIT_START"):
                 with m.If(self.start):
                     with m.If(self.funct7 == Constants.REG_VERIFY):
                         m.d.sync += self.output.eq(self.reg_verify_value)
                         m.d.sync += self.done.eq(1)
+                    with m.Elif(self.funct7 == Constants.REG_FIFO_ITEMS):
+                        m.d.sync += self.output.eq(self.reg_fifo_items_value)
+                        m.d.sync += self.done.eq(1)
                     with m.Elif(self.funct7 == Constants.REG_OUTPUT_WORD):
-                        m.d.comb += self.output_words.ready.eq(1)
-                        with m.If(self.output_words.is_transferring()):
-                            m.d.sync += self.output.eq(self.output_words.payload)
-                            m.d.sync += self.done.eq(1)
-                        with m.Else():
-                            m.next = "WAIT_OUTPUT"
+                        get_output()
             with m.State("WAIT_OUTPUT"):
-                m.d.comb += self.output_words.ready.eq(1)
-                with m.If(self.output_words.is_transferring()):
-                    m.d.sync += self.output.eq(self.output_words.payload)
-                    m.d.sync += self.done.eq(1)
-                    m.next = "WAIT_START"
+                get_output()
 
 
 class SetInstruction(InstructionBase):
@@ -208,6 +215,7 @@ class HpsCfu(Cfu):
             core.start.eq(set_.accelerator_start),
             core.reset.eq(set_.accelerator_reset),
             core.config.eq(set_.config),
+            get.reg_fifo_items_value.eq(fifo.r_level),
         ]
         m.d.comb += connect(set_.filter_output, core.write_filter_input)
         m.d.comb += connect(set_.post_process_params, core.post_process_params)
