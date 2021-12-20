@@ -500,6 +500,9 @@ class StreamLimiter(SimpleElaboratable):
 
     running: Signal(), out
         Indicates that items are being allowed to pass
+
+    finished: Signal(), out
+        Indicates that last item has been handled.
     """
 
     def __init__(self, payload_type=signed(32)):
@@ -508,8 +511,10 @@ class StreamLimiter(SimpleElaboratable):
         self.num_allowed = Signal(18)
         self.start = Signal()
         self.running = Signal()
+        self.finished = Signal()
 
     def elab(self, m):
+        m.d.sync += self.finished.eq(0)
         m.d.comb += [
             self.stream_in.ready.eq(self.running),
             self.stream_out.valid.eq(self.stream_in.is_transferring()),
@@ -520,6 +525,8 @@ class StreamLimiter(SimpleElaboratable):
             m.d.sync += counter.eq(self.num_allowed)
         with m.If(self.stream_in.is_transferring()):
             m.d.sync += counter.eq(counter - 1)
+            with m.If(counter == 1):
+                m.d.sync += self.finished.eq(1)
         m.d.comb += self.running.eq(counter != 0)
 
 
