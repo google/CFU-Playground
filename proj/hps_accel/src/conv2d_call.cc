@@ -50,8 +50,12 @@ void test_conv2d(const Conv2DData* data) {
   // Check for differences with output
   int diff_count = 0;
   int first_diff = 0;
-  for (int i = 0; i < output_shape.FlatSize(); i++) {
-    if (arena_output[i] != static_cast<int8_t>(data->output_data[i])) {
+  int num_words = output_shape.FlatSize() / 4;
+  const int32_t* arena_words = reinterpret_cast<const int32_t*>(arena_output);
+  const int32_t* expected_words =
+      reinterpret_cast<const int32_t*>(data->output_data);
+  for (int i = 0; i < num_words; i++) {
+    if (arena_words[i] != expected_words[i]) {
       diff_count++;
       if (diff_count == 1) {
         first_diff = i;
@@ -62,11 +66,10 @@ void test_conv2d(const Conv2DData* data) {
   if (diff_count == 0) {
     printf("OK - output identical to golden ouput\n");
   } else {
-    printf("FAIL - %d differences, first at index %d\n", diff_count,
-           first_diff);
+    printf("FAIL - %d differences, first at word %d\n", diff_count, first_diff);
     printf("actual:\n");
-    dump_hex(reinterpret_cast<const int32_t*>(arena_output), 16);
+    dump_hex(arena_words, 16);
     printf("expected:\n");
-    dump_hex(reinterpret_cast<const int32_t*>(data->output_data), 16);
+    dump_hex(expected_words, 16);
   }
 }

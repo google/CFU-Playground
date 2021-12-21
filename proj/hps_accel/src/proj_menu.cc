@@ -19,6 +19,7 @@
 #include <stdio.h>
 
 #include "blocks_test.h"
+#include "conv2d_04.h"
 #include "conv2d_05.h"
 #include "conv2d_20.h"
 #include "conv2d_call.h"
@@ -65,6 +66,7 @@ void do_verify_register(void) {
 }
 
 void do_test_layer_20(void) { test_conv2d(&conv2d_layer_20_data); }
+void do_test_layer_04(void) { test_conv2d(&conv2d_layer_04_data); }
 void do_test_layer_05(void) { test_conv2d(&conv2d_layer_05_data); }
 
 struct Menu MENU = {
@@ -79,6 +81,7 @@ struct Menu MENU = {
         MENU_ITEM('a', "test blocks All", do_test_blocks_all),
 #endif
         MENU_ITEM('2', "test layer 20", do_test_layer_20),
+        MENU_ITEM('4', "test layer 04", do_test_layer_04),
         MENU_ITEM('5', "test layer 05", do_test_layer_05),
         MENU_END,
     },
