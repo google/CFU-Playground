@@ -113,7 +113,6 @@ def main():
         for i in range(4):
             newport.append(soc.arena.mem.get_port())
             soc.specials += newport[i]
-            soc.comb += newport[i].adr.eq(0)
 
             p_adr_from_cfu = Signal(14)
             p_adr = Cat(Constant(i,2), p_adr_from_cfu)
