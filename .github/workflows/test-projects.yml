@@ -33,15 +33,35 @@ jobs:
     steps:
     - name: Clone repository
       uses: actions/checkout@v2
+
     - name: Setup Python
       uses: actions/setup-python@v2
       with:
         python-version: '3.7'
+
     - name: Setup matrix combinations
       id: setup-matrix-combinations
       run: |
         export MATRIX_PARAMS=$(./.github/scripts/generate_ci_matrix.py)
         echo "::set-output name=matrix-combinations::{\"include\":$MATRIX_PARAMS}"
+
+    - name: Setup environment
+      run: |
+        echo "RENODE_VERSION=$(cat conf/renode.version)" >> $GITHUB_ENV
+        echo "RENODE_DIR=third_party/renode" >> $GITHUB_ENV
+
+    - name: Download Renode
+      uses: antmicro/renode-test-action@v2.0.0
+      with:
+        renode-version: '${{ env.RENODE_VERSION }}'
+        renode-path: '${{ env.RENODE_DIR }}'
+
+    - name: Cache Renode installation
+      uses: actions/cache@v2
+      id: cache-renode
+      with:
+        path: '${{ env.RENODE_DIR }}'
+        key: cfu-cache-renode-${{ env.RENODE_VERSION }}
 
   test-projects:
     runs-on: ubuntu-20.04
@@ -66,10 +86,21 @@ jobs:
       with:
         python-version: '3.7'
 
+    - name: Prepare Renode version
+      run: |
+        echo "RENODE_VERSION=$(cat conf/renode.version)" >> $GITHUB_ENV
+        echo "RENODE_DIR=third_party/renode" >> $GITHUB_ENV
+
+    - name: Restore Renode
+      uses: actions/cache@v2
+      id: cache-renode
+      with:
+        path: '${{ env.RENODE_DIR }}'
+        key: cfu-cache-renode-${{ env.RENODE_VERSION }}
+
     - name: Setup environment
       run: |
         bash scripts/setup -ci
-        echo "RENODE_VERSION=$(cat conf/renode.version)" >> $GITHUB_ENV
 
     - name: Build sample & generate Renode scripts
       run:
@@ -79,10 +110,11 @@ jobs:
 
     - name: Run tests
       timeout-minutes: 15
-      uses: antmicro/renode-test-action@v1.0.0
+      uses: antmicro/renode-test-action@v2.0.0
       with:
         renode-version: '${{ env.RENODE_VERSION }}'
         tests-to-run: proj/${{ matrix.proj_name }}/build/renode/${{ matrix.target }}.robot
+        renode-path: '${{ env.RENODE_DIR }}'
 
     - name: Archive results
       if: ${{ success() || failure() }}
