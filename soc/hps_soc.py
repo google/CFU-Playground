@@ -286,6 +286,8 @@ def main():
                         help="Whether to do a full build, including the bitstream")
     parser.add_argument("--toolchain", default="oxide",
                         help="Which toolchain to use: oxide (default) or radiant")
+    parser.add_argument("--parallel-nextpnr", action="store_true",
+                        help="Whether to use the parallel nextpnr script with the oxide toolchain")
     parser.add_argument("--synth_mode", default="radiant",
                         help="Which synthesis mode to use with Radiant toolchain: "
                         "radiant/synplify (default), lse, or yosys")
@@ -318,7 +320,7 @@ def main():
     else:
         variant = "full+debug" if args.debug else "full"
     copy_cpu_variant_if_needed(variant)
-    soc = HpsSoC(Platform(args.toolchain),
+    soc = HpsSoC(Platform(args.toolchain, args.parallel_nextpnr),
                     debug=args.debug,
                     litespi_flash=args.litespi_flash,
                     variant=variant,
