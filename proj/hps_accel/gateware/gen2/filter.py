@@ -84,11 +84,16 @@ class FilterStore(SimpleElaboratable):
                 mem.write_data.eq(inp.payload.data),
             ]
             # Do reads continuously
-            addr = Signal(range(-i, Constants.FILTER_WORDS_PER_STORE),
-                          name=f"addr_{i}")
-            m.d.comb += addr.eq(read_index - i)
-            m.d.comb += mem.read_addr.eq(Mux(addr >= 0,
-                                             addr, addr + self.size))
+            if i == 0:
+                # i == 0 treated separately to avoid verilator warnings
+                # (and save a few LUTs and FFs)
+                m.d.comb += mem.read_addr.eq(read_index)
+            else:
+                addr = Signal(range(-i, Constants.FILTER_WORDS_PER_STORE),
+                              name=f"addr_{i}")
+                m.d.comb += addr.eq(read_index - i)
+                m.d.comb += mem.read_addr.eq(Mux(addr >= 0,
+                                                 addr, addr + self.size))
             m.d.comb += self.values_out[i].eq(mem.read_data)
 
         # Always ready to receive more data
