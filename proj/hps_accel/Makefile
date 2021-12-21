@@ -18,7 +18,7 @@ export DEFINES :=
 
 # Define which generation gateware to use = gen1 or gen2
 #GATEWARE_GEN ?= 1
-GATEWARE_GEN := 1
+GATEWARE_GEN := 2
 DEFINES += GATEWARE_GEN=$(GATEWARE_GEN)
 
 # Uncomment this line to use the custom accelerated convolution operation
