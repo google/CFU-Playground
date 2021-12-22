@@ -84,16 +84,13 @@ class MaccBlockTest(TestBase):
                 yield
         self.run_sim(process, False)
 
-    def check_random_calculation(self, size, seed):
-        """Checks a randomly generated calculation.
+    def check_calculation(self, a_list, b_list):
+        """Checks a given calculation:
 
         Args:
-          size - number of arguments must be divisble by 4
-          seed - used to seed the generator.
+          a_list: first operands. Size is a multiple of 4.
+          b_list: second operands. List of integers the same size as a_list.
         """
-        random.seed(seed)
-        a_list = [random.randrange(0, 256) for _ in range(size)]
-        b_list = [random.randrange(-128, 128) for _ in range(size)]
         expected_result = sum(a * b for a, b in zip(a_list, b_list))
 
         def to_word(x, y, z, t):
@@ -104,7 +101,7 @@ class MaccBlockTest(TestBase):
 
         def process():
             # Send in all inputs
-            num_inputs = size // 4
+            num_inputs = len(a_list) // 4
             for i in range(num_inputs):
                 a = to_word(*a_list[i * 4: (i + 1) * 4])
                 b = to_word(*b_list[i * 4: (i + 1) * 4])
@@ -114,12 +111,29 @@ class MaccBlockTest(TestBase):
                 yield self.dut.input_last.eq(i == (num_inputs - 1))
                 yield
             # wait for output to be available
+            yield self.dut.input_last.eq(0)
             yield
             yield
+            self.assertFalse((yield self.dut.output_accumulator_new))
             yield
+            self.assertTrue((yield self.dut.output_accumulator_new))
             self.assertEqual((yield self.dut.output_accumulator), expected_result)
+            yield
+            self.assertFalse((yield self.dut.output_accumulator_new))
 
         return process()
+
+    def check_random_calculation(self, size, seed):
+        """Checks a randomly generated calculation.
+
+        Args:
+          size - number of arguments must be divisble by 4
+          seed - used to seed the generator.
+        """
+        random.seed(seed)
+        a_list = [random.randrange(0, 256) for _ in range(size)]
+        b_list = [random.randrange(-128, 128) for _ in range(size)]
+        return self.check_calculation(a_list, b_list)
 
     def test_larger_calculations(self):
         def process():
@@ -128,4 +142,45 @@ class MaccBlockTest(TestBase):
             yield from self.check_random_calculation(64, 3)
             yield from self.check_random_calculation(48, 3)
 
+        self.run_sim(process, False)
+
+    def test_layer_04_index_15200(self):
+        # Real values from a problematic calculation in gen2.
+        a_list = [
+            0, 0, 0, 21, 0, 0, 61, 0, 0, 0, 2, 0, 0, 0, 0, 17, 0, 0, 0, 44, 0,
+            0, 81, 0, 0, 0, 49, 0, 81, 0, 0, 39, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0,
+            9, 0, 6, 10, 0, 29, 0, 0, 0, 25, 0, 0, 7, 0, 0, 0, 0, 0, 0, 3, 0, 9,
+            0, 0, 0, 16, 0, 0, 56, 0, 0, 0, 0, 0, 0, 0, 0, 17, 0, 14, 0, 38, 0,
+            0, 77, 0, 0, 0, 32, 0, 3, 0, 0, 21, 0, 0, 0, 22, 0, 9, 42, 0, 0, 0,
+            31, 0, 83, 0, 0, 48, 0, 0, 0, 16, 0, 0, 2, 0, 0, 0, 14, 0, 0, 0, 0,
+            17, 0, 0, 0, 17, 0, 0, 54, 0, 0, 0, 0, 0, 0, 0, 0, 17, 0, 0, 0, 20,
+            0, 0, 58, 0, 0, 0, 0, 0, 0, 0, 0, 17, 0, 0, 0, 42, 0, 0, 84, 0, 0,
+            0, 59, 0, 69, 0, 0, 35, 0, 0, 0, 3, 0, 15, 13, 0, 0, 12, 3, 0, 35,
+            33, 0, 30, 0, 0, 0, 17, 0, 0, 51, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0,
+            0, 17, 0, 0, 53, 0, 0, 0, 0, 0, 0, 0, 0, 17, 0, 14, 0, 32, 0, 0, 66,
+            0, 0, 0, 19, 0, 0, 0, 0, 18, 0, 0, 0, 46, 0, 37, 56, 0, 0, 0, 49, 0,
+            135, 0, 0, 59
+        ]
+        b_list = [
+            -16, 3, 2, -23, -4, 11, 31, 5, 15, 11, 36, 27, 10, 22, 30, 28, -37,
+            3, 6, -22, 18, -2, 25, 9, 7, 47, 17, 10, 54, 0, 70, 28, -12, -13, 6,
+            -9, -8, -7, 42, 5, -19, 13, 4, -27, -4, -12, 41, 49, -15, -13, 2, 2,
+            -7, 8, 24, 39, -13, -41, 8, 16, -28, -39, -16, 28, 55, 39, 3, -4,
+            -52, -60, 41, -115, -27, 125, 3, 1, 6, 43, -20, 1, 49, 33, -3, 10,
+            -27, -16, -1, -71, -18, -16, 0, 16, 0, 20, -17, -12, 1, 12, 7, 27,
+            -22, 15, 29, -27, -5, 33, -1, 17, 50, 6, 5, 20, -29, -24, -26, 14,
+            -52, 23, 13, 3, -38, -43, 13, -6, -1, 11, -53, 13, -42, -87, -2, 12,
+            17, -17, -22, -71, -7, 30, -18, -20, -117, 3, -59, 2, -31, -22, -1,
+            -10, -20, -45, -13, -93, -49, -65, -21, -52, -78, -48, -10, -19, 18,
+            -9, 4, 11, 4, 45, -31, -72, -27, -127, -21, -32, -12, -45, 19, -10,
+            -7, -39, -18, 17, 14, 25, -28, 7, -31, -47, 10, 3, -36, -9, -46, -6,
+            25, -89, 20, -11, 25, -15, -39, 4, -17, 23, -37, -59, -18, -3, -60,
+            -30, -21, -49, 10, -7, 33, -20, -29, -33, 11, -2, -14, -27, -74,
+            -10, -14, -40, 70, -9, -6, 14, 10, 1, -18, -84, 4, 33, -26, -31, -20,
+            -49, -7, -17, -6, 14, -11, -17, 31, 1, -25, -22, 5, 3, 26, -1, -3,
+            -27, 3, -24
+        ]
+
+        def process():
+            yield from self.check_calculation(a_list, b_list)
         self.run_sim(process, False)
