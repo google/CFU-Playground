@@ -131,16 +131,19 @@ class AcceleratorCore(SimpleElaboratable):
         ]
         return store.values_out
 
-    def build_input_fetcher(self, m):
+    def build_input_fetcher(self, m, stop):
         m.submodules['fetcher'] = fetcher = InputFetcher()
+        # We reset the fetcher when finished calculating to avoid
+        # spurious first and last signals that might corrupt the next
+        # accelerator reset.
         m.d.comb += [
-            fetcher.reset.eq(self.reset),
+            fetcher.reset.eq(self.reset | stop),
             fetcher.start.eq(self.start),
             fetcher.base_addr.eq(self.config.input_base_addr),
             fetcher.num_pixels_x.eq(self.config.num_pixels_x),
             fetcher.pixel_advance_x.eq(self.config.pixel_advance_x),
             fetcher.pixel_advance_y.eq(self.config.pixel_advance_y),
-            fetcher.depth.eq(self.config.output_channel_depth >> 4),  # divide by 16
+            fetcher.depth.eq(self.config.output_channel_depth >> 4),
             fetcher.num_repeats.eq(self.config.num_repeats),
         ]
         for i in range(4):
@@ -195,12 +198,13 @@ class AcceleratorCore(SimpleElaboratable):
         m.d.comb += connect(ar.output, al.stream_in)
         m.d.comb += al.num_allowed.eq(self.config.num_output_values)
         m.d.comb += al.start.eq(self.start)
-        return al.stream_out
+        return al.stream_out, al.finished
 
     def elab(self, m):
         # Create filter store and input fetcher
         filter_values = self.build_filter_store(m)
-        first, last, activations = self.build_input_fetcher(m)
+        stop_input = Signal()
+        first, last, activations = self.build_input_fetcher(m, stop_input)
 
         # Plumb in sysarray and its inputs
         m.submodules['sysarray'] = sa = SystolicArray()
@@ -217,9 +221,12 @@ class AcceleratorCore(SimpleElaboratable):
         m.d.comb += sa.last.eq(last)
 
         # Get pipeline inputs from systolic array and parameters
-        accumulator_stream = self.build_accumulator_reader(
+        accumulator_stream, finished = self.build_accumulator_reader(
             m, sa.accumulator, sa.accumulator_new)
         param_stream = self.build_param_store(m)
+
+        # When last accumulator read, stop input
+        m.d.comb += stop_input.eq(finished)
 
         # Plumb in pipeline
         m.submodules['ppp'] = ppp = PostProcessPipeline()

@@ -58,6 +58,9 @@ class Constants:
     # Gets the output value
     REG_OUTPUT_WORD = 19
 
+    # Number of items in FIFO
+    REG_FIFO_ITEMS = 20
+
     # Maximum number of 8-bit channels per pixel
     MAX_CHANNEL_DEPTH = 512
 

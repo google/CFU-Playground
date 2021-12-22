@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-#ifndef TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_CONV_ACCEL_H_
-#define TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_CONV_ACCEL_H_
+#ifndef TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_CONV_ACCEL_GEN_1_H_
+#define TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_CONV_ACCEL_GEN_1_H_
 
 #include "tensorflow/lite/kernels/internal/common.h"
 
+#if GATEWARE_GEN == 1
 namespace tflite {
 namespace reference_integer_ops {
 
@@ -38,4 +39,6 @@ void ConvPerChannel4x4(const ConvParams& params,
 }  // namespace reference_integer_ops
 }  // namespace tflite
 
-#endif  // TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_CONV_ACCEL_H_
+#endif // GATEWARE_GEN
+
+#endif  // TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_CONV_ACCEL_GEN_1_H_

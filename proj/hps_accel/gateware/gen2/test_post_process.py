@@ -527,34 +527,33 @@ class StreamLimiterTest(TestBase):
     def test_simple_case(self):
         dut = self.dut
 
-        # send 15, check it limits to 10
         data = [
-            # (num_allowed, start, valid, running)
-            (3, 0, 1, 0),
-            (3, 0, 1, 0),
+            # (num_allowed, start, valid, running, finished)
+            (3, 0, 1, 0, 0),
+            (3, 0, 1, 0, 0),
             # Pass 3 items
-            (3, 1, 1, 0),
-            (2, 0, 1, 1),
-            (2, 0, 1, 1),
-            (2, 0, 1, 1),
+            (3, 1, 1, 0, 0),
+            (2, 0, 1, 1, 0),
+            (2, 0, 1, 1, 0),
+            (2, 0, 1, 1, 0),
 
             # Do not allow next few
-            (2, 0, 1, 0),
-            (2, 0, 0, 0),
-            (2, 0, 0, 0),
+            (2, 0, 1, 0, 1),
+            (2, 0, 0, 0, 0),
+            (2, 0, 0, 0, 0),
 
             # Start running again, but do not pass on every cycle
-            (2, 1, 0, 0),
-            (2, 0, 0, 1),
-            (2, 0, 1, 1),
-            (2, 0, 0, 1),
-            (2, 0, 0, 1),
-            (2, 0, 1, 1),
-            (2, 0, 0, 0),
+            (2, 1, 0, 0, 0),
+            (2, 0, 0, 1, 0),
+            (2, 0, 1, 1, 0),
+            (2, 0, 0, 1, 0),
+            (2, 0, 0, 1, 0),
+            (2, 0, 1, 1, 0),
+            (2, 0, 0, 0, 1),
         ]
 
         def process():
-            for num_allowed, start, input_valid, running in data:
+            for num_allowed, start, input_valid, running, finished in data:
                 # Set inputs
                 payload = random.randrange(256)
                 yield dut.num_allowed.eq(num_allowed)
@@ -571,6 +570,8 @@ class StreamLimiterTest(TestBase):
                     self.assertEqual(payload, (yield dut.stream_out.payload))
                 self.assertEqual(running and input_valid,
                                  (yield dut.stream_out.valid))
+
+                self.assertEqual(finished, (yield dut.finished))
                 yield
 
         self.run_sim(process, False)

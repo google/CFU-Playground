@@ -113,6 +113,8 @@ static uint8_t tensor_arena[kTensorArenaSize];
 #endif
 }  // anonymous namespace
 
+uint8_t *tflite_tensor_arena = tensor_arena;
+
 static void tflite_init() {
   static bool initialized = false;
   if (initialized) {

@@ -43,7 +43,6 @@ class HpsCfuTest(CfuTestBase):
         filter_data = self.data.filter_data
         num_filter_words_per_output = dims[1] * dims[2] * dims[3] // 4
         num_output_channels = dims[0]
-        store = 0
         for chan in range(num_output_channels):
             store = chan & 1
             chan_start = chan * num_filter_words_per_output
@@ -72,6 +71,11 @@ class HpsCfuTest(CfuTestBase):
         output_depth = data.output_dims[3]
         num_filter_values = reduce(lambda a, b: a * b, data.filter_dims, 1)
         filter_words_per_store = num_filter_values // 4 // 2
+
+        # Toggle reset
+        yield do_set(C.REG_ACCELERATOR_RESET, 0)
+
+        # Set simple values
         yield do_set(C.REG_INPUT_OFFSET, data.input_offset)
         yield do_set(C.REG_NUM_FILTER_WORDS, filter_words_per_store)
         yield do_set(C.REG_OUTPUT_OFFSET, data.output_offset)
@@ -86,9 +90,6 @@ class HpsCfuTest(CfuTestBase):
         yield do_set(C.REG_OUTPUT_CHANNEL_DEPTH, output_depth)
         yield do_set(C.REG_NUM_OUTPUT_VALUES,
                      self.NUM_OUTPUT_PIXELS * output_depth)
-
-        # Toggle reset
-        yield do_set(Constants.REG_ACCELERATOR_RESET, 0)
 
         # load post process parameters
         for i in range(output_depth):

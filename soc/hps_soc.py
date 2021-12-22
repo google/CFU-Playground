@@ -180,7 +180,7 @@ class HpsSoC(LiteXSoC):
             self.platform.request("spiflash4x"),
             GD25LQ128D(Codes.READ_1_1_4),
             default_divisor=0,
-            rate='1:2',
+            rate='1:1',
             extra_latency=1)
         self.submodules.spiflash_mmap  = LiteSPI(phy=self.spiflash_phy,
             mmap_endianness = self.cpu.endianness)
@@ -308,34 +308,24 @@ def main():
     else:
         integrated_rom_init = []
 
-    if args.cpu_cfu:
-        if args.cpu_variant:
-            variant = args.cpu_variant
-        elif args.slim_cpu:
+    if args.cpu_variant:
+        variant = args.cpu_variant
+    elif args.cpu_cfu:
+        if  args.slim_cpu:
             variant = "slim+cfu+debug" if args.debug else "slim+cfu"
         else:
             variant = "full+cfu+debug" if args.debug else "full+cfu"
-        copy_cpu_variant_if_needed(variant)
-        soc = HpsSoC(Platform(args.toolchain),
-                     debug=args.debug,
-                     litespi_flash=args.litespi_flash,
-                     variant=variant,
-                     cpu_cfu=args.cpu_cfu,
-                     execute_from_lram=args.execute_from_lram,
-                     separate_arena=args.separate_arena,
-                     integrated_rom_init=integrated_rom_init)
     else:
-        if args.cpu_variant:
-            variant = args.cpu_variant
-        else:
-            variant = "full+debug" if args.debug else "full"
-        copy_cpu_variant_if_needed(variant)
-        soc = HpsSoC(Platform(args.toolchain),
-                     debug=args.debug,
-                     litespi_flash=args.litespi_flash,
-                     variant=variant,
-                     execute_from_lram=args.execute_from_lram,
-                     integrated_rom_init=integrated_rom_init)
+        variant = "full+debug" if args.debug else "full"
+    copy_cpu_variant_if_needed(variant)
+    soc = HpsSoC(Platform(args.toolchain),
+                    debug=args.debug,
+                    litespi_flash=args.litespi_flash,
+                    variant=variant,
+                    cpu_cfu=args.cpu_cfu,
+                    execute_from_lram=args.execute_from_lram,
+                    separate_arena=args.separate_arena,
+                    integrated_rom_init=integrated_rom_init)
 
     if args.cfu_mport:
         soc.connect_cfu_to_lram()

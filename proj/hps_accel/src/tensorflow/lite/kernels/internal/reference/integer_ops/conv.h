@@ -21,7 +21,8 @@ limitations under the License.
 #include "playground_util/dump.h"
 #include "playground_util/print_params.h"
 #include "tensorflow/lite/kernels/internal/common.h"
-#include "tensorflow/lite/kernels/internal/reference/integer_ops/conv_accel.h"
+#include "tensorflow/lite/kernels/internal/reference/integer_ops/conv_accel_gen_1.h"
+#include "tensorflow/lite/kernels/internal/reference/integer_ops/conv_accel_gen_2.h"
 
 namespace tflite {
 namespace reference_integer_ops {
@@ -76,36 +77,6 @@ inline void ConvPerChannel(
   print_int32_array(output_shift, output_shape.Dims(3));
   printf("bias\n");
   print_int32_array(bias_data, output_shape.Dims(3));
-#endif
-#ifdef DUMP_LAYER
-  static int invocation_count = 0;
-  if (invocation_count == DUMP_LAYER) {
-    printf("\n\n");
-    // const ConvParams& params,
-    dump_c_array("params", &params, sizeof(ConvParams));
-
-    // const int32_t* output_multiplier, const int32_t* output_shift,
-    dump_c_array("output_multiplier", output_multiplier, 4 * output_depth);
-    dump_c_array("output_shift", output_shift, 4 * output_depth);
-
-    // const RuntimeShape& input_shape, const int8_t* input_data,
-    dump_c_array("input_shape", &input_shape, sizeof(RuntimeShape));
-    dump_c_array("input_data", input_data, input_shape.FlatSize());
-
-    // const RuntimeShape& filter_shape, const int8_t* filter_data,
-    dump_c_array("filter_shape", &filter_shape, sizeof(RuntimeShape));
-    dump_c_array("filter_data", filter_data, filter_shape.FlatSize());
-
-    // const RuntimeShape& bias_shape, const int32_t* bias_data,
-    dump_c_array("bias_shape", &bias_shape, sizeof(RuntimeShape));
-    dump_c_array("bias_data", bias_data, 4 * bias_shape.FlatSize());
-
-    // const RuntimeShape& output_shape, int8_t* output_data
-    dump_c_array("output_shape", &output_shape, sizeof(RuntimeShape));
-    dump_c_array("output_data", output_data, output_shape.FlatSize());
-    printf("\n\n");
-  }
-  invocation_count++;
 #endif
 
 // Uncomment to show min/max values for each
@@ -168,6 +139,15 @@ inline void ConvPerChannel(
                       bias_data, output_shape, output_data);
     return;
   }
+#elif GATEWARE_GEN == 2
+  if (CanAccelerateConv4x4(params, input_shape, filter_shape, output_shape,
+                           bias_data)) {
+    ConvPerChannel4x4(params, output_multiplier, output_shift, input_shape,
+                      input_data, filter_shape, filter_data, bias_shape,
+                      bias_data, output_shape, output_data);
+    return;
+  }
+
 #endif
   printf("ConvPerChannel() not accelerated!\n");
 #endif
@@ -233,6 +213,36 @@ inline void ConvPerChannel(
       }
     }
   }
+#ifdef DUMP_LAYER
+  static int invocation_count = 0;
+  if (invocation_count == DUMP_LAYER) {
+    printf("\n\n");
+    // const ConvParams& params,
+    dump_c_array("params", &params, sizeof(ConvParams));
+
+    // const int32_t* output_multiplier, const int32_t* output_shift,
+    dump_c_array("output_multiplier", output_multiplier, 4 * output_depth);
+    dump_c_array("output_shift", output_shift, 4 * output_depth);
+
+    // const RuntimeShape& input_shape, const int8_t* input_data,
+    dump_c_array("input_shape", &input_shape, sizeof(RuntimeShape));
+    dump_c_array("input_data", input_data, input_shape.FlatSize());
+
+    // const RuntimeShape& filter_shape, const int8_t* filter_data,
+    dump_c_array("filter_shape", &filter_shape, sizeof(RuntimeShape));
+    dump_c_array("filter_data", filter_data, filter_shape.FlatSize());
+
+    // const RuntimeShape& bias_shape, const int32_t* bias_data,
+    dump_c_array("bias_shape", &bias_shape, sizeof(RuntimeShape));
+    dump_c_array("bias_data", bias_data, 4 * bias_shape.FlatSize());
+
+    // const RuntimeShape& output_shape, int8_t* output_data
+    dump_c_array("output_shape", &output_shape, sizeof(RuntimeShape));
+    dump_c_array("output_data", output_data, output_shape.FlatSize());
+    printf("\n\n");
+  }
+  invocation_count++;
+#endif
 }
 
 // Fixed-point per-channel-quantization convolution reference kernel.

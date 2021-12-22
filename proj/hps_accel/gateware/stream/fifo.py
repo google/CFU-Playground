@@ -41,6 +41,8 @@ class StreamFifo(SimpleElaboratable):
       Incoming stream of items
     output: Endpoint(type), out
       Outgoing stream of items
+    r_level: Signal(depth.bit_length())
+      Number of items available for reading
 
     """
 
@@ -48,6 +50,7 @@ class StreamFifo(SimpleElaboratable):
         self.depth = depth
         self.input = Endpoint(type)
         self.output = Endpoint(type)
+        self.r_level = Signal(depth.bit_length())
 
     def elab(self, m: Module):
         m.submodules.wrapped = fifo = SyncFIFOBuffered(
@@ -60,4 +63,5 @@ class StreamFifo(SimpleElaboratable):
             self.output.valid.eq(fifo.r_rdy),
             self.output.payload.eq(fifo.r_data),
             fifo.r_en.eq(self.output.ready),
+            self.r_level.eq(fifo.r_level),
         ]
