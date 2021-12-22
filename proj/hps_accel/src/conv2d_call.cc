@@ -64,12 +64,12 @@ void test_conv2d(const Conv2DData* data) {
   }
 
   if (diff_count == 0) {
-    printf("OK - output identical to golden ouput\n");
+    printf("OK - output identical to golden output\n");
   } else {
     printf("FAIL - %d differences, first at word %d\n", diff_count, first_diff);
     printf("actual:\n");
-    dump_hex(arena_words, 16);
+    dump_hex(arena_words + first_diff, 16);
     printf("expected:\n");
-    dump_hex(expected_words, 16);
+    dump_hex(expected_words + first_diff, 16);
   }
 }
