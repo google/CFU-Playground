@@ -80,10 +80,14 @@ bool CanAccelerateConv4x4(const ConvParams& params,
   if (batches != 1) return false;
 
   // Input and output depths must be a multiple of 16
+  // NB: We could probably relax output depth to be a multiple of 4
   const int input_depth = input_shape.Dims(3);
   const int output_depth = output_shape.Dims(3);
-  if (input_depth % 16 != 0) return false;
-  if (output_depth % 16 != 0) return false;
+  // if (input_depth % 16 != 0) return false;
+  // if (output_depth % 16 != 0) return false;
+  // Currently, only works where input and output depths are exactly 16
+  if (input_depth != 16) return false;
+  if (output_depth != 16) return false;
 
   // Must be 4x4
   const int filter_height = filter_shape.Dims(1);
