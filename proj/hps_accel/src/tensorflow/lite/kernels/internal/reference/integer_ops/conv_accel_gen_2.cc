@@ -170,7 +170,7 @@ void ConvPerChannel4x4(const ConvParams& params,
   cfu_set(REG_NUM_PIXELS_X, output_width);
   cfu_set(REG_PIXEL_ADVANCE_X, input_depth / 16);
   cfu_set(REG_PIXEL_ADVANCE_Y, (input_depth / 16) * input_width);
-  cfu_set(REG_NUM_REPEATS, output_depth / SYS_ARRAY_WIDTH);
+  cfu_set(REG_INPUT_CHANNEL_DEPTH, input_depth);
   cfu_set(REG_OUTPUT_CHANNEL_DEPTH, output_depth);
   cfu_set(REG_NUM_OUTPUT_VALUES, num_output_values);
 

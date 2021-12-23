@@ -173,8 +173,8 @@ class SetInstruction(InstructionBase):
                     m.d.sync += self.config.pixel_advance_x.eq(self.in0)
                 with m.Case(Constants.REG_PIXEL_ADVANCE_Y):
                     m.d.sync += self.config.pixel_advance_y.eq(self.in0)
-                with m.Case(Constants.REG_NUM_REPEATS):
-                    m.d.sync += self.config.num_repeats.eq(self.in0)
+                with m.Case(Constants.REG_INPUT_CHANNEL_DEPTH):
+                    m.d.sync += self.config.input_channel_depth.eq(self.in0)
                 with m.Case(Constants.REG_OUTPUT_CHANNEL_DEPTH):
                     m.d.sync += self.config.output_channel_depth.eq(self.in0)
                 with m.Case(Constants.REG_NUM_OUTPUT_VALUES):

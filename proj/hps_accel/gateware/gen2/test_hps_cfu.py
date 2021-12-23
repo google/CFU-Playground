@@ -85,8 +85,7 @@ class HpsCfuTest(CfuTestBase):
         yield do_set(C.REG_NUM_PIXELS_X, out_x_dim)
         yield do_set(C.REG_PIXEL_ADVANCE_X, input_depth // 16)
         yield do_set(C.REG_PIXEL_ADVANCE_Y, (input_depth // 16) * in_x_dim)
-        yield do_set(C.REG_NUM_REPEATS,
-                     output_depth // Constants.SYS_ARRAY_WIDTH)
+        yield do_set(C.REG_INPUT_CHANNEL_DEPTH, input_depth)
         yield do_set(C.REG_OUTPUT_CHANNEL_DEPTH, output_depth)
         yield do_set(C.REG_NUM_OUTPUT_VALUES,
                      self.NUM_OUTPUT_PIXELS * output_depth)

@@ -93,7 +93,7 @@ class AcceleratorCoreTest(TestBase):
         yield dut.config.num_pixels_x.eq(out_x_dim)
         yield dut.config.pixel_advance_x.eq(input_depth // 16)
         yield dut.config.pixel_advance_y.eq((input_depth // 16) * in_x_dim)
-        yield dut.config.num_repeats.eq(output_depth // Constants.SYS_ARRAY_WIDTH)
+        yield dut.config.input_channel_depth.eq(input_depth)
         yield dut.config.output_channel_depth.eq(output_depth)
         yield dut.config.num_output_values.eq(self.NUM_OUTPUT_PIXELS * output_depth)
 
