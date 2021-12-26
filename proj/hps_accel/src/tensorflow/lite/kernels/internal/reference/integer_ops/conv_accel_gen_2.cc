@@ -45,17 +45,16 @@ void LoadPostProcessParameters(int output_depth, const int32_t* bias_data,
 // Loads filter parameters, correctly split between the two
 // stores
 void LoadFilterData(const RuntimeShape& filter_shape,
-                    const int8_t* filter_data) {
+                    const uint32_t* filter_data) {
   const int num_filter_words_per_output =
       filter_shape.Dims(1) * filter_shape.Dims(2) * filter_shape.Dims(3) / 4;
   const int num_output_channels = filter_shape.Dims(0);
-  const uint32_t* filter_words = reinterpret_cast<const uint32_t*>(filter_data);
 
   size_t addr_base = 0;
   for (int chan = 0; chan < num_output_channels; chan += 2) {
     for (int store = 0; store < 2; store++) {
       for (int i = 0; i < num_filter_words_per_output; i++) {
-        uint32_t data = *filter_words++;
+        uint32_t data = *filter_data++;
         uint32_t addr = addr_base + i;
         cfu_setx(REG_FILTER_WRITE, (store << 16 | addr), data);
       }
@@ -64,6 +63,40 @@ void LoadFilterData(const RuntimeShape& filter_shape,
   }
 }
 
+// Collects a single ouput value and optionally places it into memory
+inline void CollectValue(uint32_t*& p, bool collect) {
+  uint32_t val = cfu_get(REG_OUTPUT_WORD);
+  if (collect) {
+    *p++ = val;
+  }
+}
+
+// Collects output from the accelerator into the output area
+void CollectOutput(uint32_t* output, const int height, const int width,
+                   const int depth) {
+  const int num_pixels = height * width;
+  const int num_words_per_pixel = depth / 4;
+  uint32_t* group_base = output;
+
+  for (int pixel = 0; pixel < num_pixels; pixel += 4) {
+    uint32_t* g0 = group_base;
+    uint32_t* g1 = g0 + num_words_per_pixel;
+    uint32_t* g2 = g1 + num_words_per_pixel;
+    uint32_t* g3 = g2 + num_words_per_pixel;
+
+    bool collect1 = pixel + 1 < num_pixels;
+    bool collect2 = pixel + 2 < num_pixels;
+    bool collect3 = pixel + 3 < num_pixels;
+
+    for (int word = 0; word < num_words_per_pixel; word++) {
+      CollectValue(g0, true);
+      CollectValue(g1, collect1);
+      CollectValue(g2, collect2);
+      CollectValue(g3, collect3);
+    }
+    group_base += num_words_per_pixel * 4;
+  }
+}
 };  // namespace
 
 bool CanAccelerateConv4x4(const ConvParams& params,
@@ -176,31 +209,14 @@ void ConvPerChannel4x4(const ConvParams& params,
 
   LoadPostProcessParameters(output_depth, bias_data, output_shift,
                             output_multiplier);
-  LoadFilterData(filter_shape, filter_data);
+  LoadFilterData(filter_shape, reinterpret_cast<const uint32_t*>(filter_data));
 
   // Start Accelerator
   cfu_set(REG_ACCELERATOR_START, 0);
 
-  // Collect data for groups of four pixels
-  // TODO: handle number of pixels not being a multiple of 4
-  const int num_output_pixels = output_height * output_width;
-  const int num_groups = num_output_pixels / 4;
-  const int num_words_per_output_pixel = output_depth / 4;
-  uint32_t* output_words = reinterpret_cast<uint32_t*>(output_data);
-  uint32_t* group_base = output_words;
-  for (int group = 0; group < num_groups; group++) {
-    uint32_t* g0 = group_base;
-    uint32_t* g1 = g0 + num_words_per_output_pixel;
-    uint32_t* g2 = g1 + num_words_per_output_pixel;
-    uint32_t* g3 = g2 + num_words_per_output_pixel;
-    for (int word = 0; word < num_words_per_output_pixel; word++) {
-      *g0++ = cfu_get(REG_OUTPUT_WORD);
-      *g1++ = cfu_get(REG_OUTPUT_WORD);
-      *g2++ = cfu_get(REG_OUTPUT_WORD);
-      *g3++ = cfu_get(REG_OUTPUT_WORD);
-    }
-    group_base += num_words_per_output_pixel * 4;
-  }
+  // Collect data
+  CollectOutput(reinterpret_cast<uint32_t*>(output_data), output_height,
+                output_width, output_depth);
 }
 
 }  // namespace reference_integer_ops
