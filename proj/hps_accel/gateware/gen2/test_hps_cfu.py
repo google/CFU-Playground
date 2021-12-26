@@ -152,3 +152,28 @@ class HpsCfuTest(CfuTestBase):
                 yield self.do_get(expected)
 
         self.run_ops(process(), False)
+
+    def test_groups_of_four(self):
+        """Tests a 4x4 convolution producing 4 channels per start."""
+        dut = self.dut
+        data = fetch_data('sample_conv_1')
+
+        self.add_ram_process(data)
+
+        def process():
+            # Configure, start accelerator
+            output_depth = data.output_dims[3]
+            for channel in range(0, output_depth, 4):
+                yield from self.configure(data, channel, 4)
+                yield self.do_set(Constants.REG_ACCELERATOR_START, 0)
+
+                # Collect all of the output data for the pixels in this group
+                words_per_pixel = output_depth // 4
+                num_output_words = self.NUM_OUTPUT_PIXELS
+                addr = channel // 4
+                for word in range(num_output_words):
+                    expected = data.expected_output_data[addr]
+                    addr += words_per_pixel
+                    yield self.do_get(expected)
+
+        self.run_ops(process(), False)
