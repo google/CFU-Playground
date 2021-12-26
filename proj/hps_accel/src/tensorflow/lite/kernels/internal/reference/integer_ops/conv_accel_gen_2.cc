@@ -105,25 +105,25 @@ bool CanAccelerateConv4x4(const ConvParams& params,
   const int batches = MatchingDim(input_shape, 0, output_shape, 0);
   if (batches != 1) return false;
 
-  // Input and output depths must be a multiple of 16
-  // NB: We could probably relax output depth to be a multiple of 4
+  // Input and output depths must be a multiples of 16 and 4
   const int input_depth = input_shape.Dims(3);
   const int output_depth = output_shape.Dims(3);
-  // if (input_depth % 16 != 0) return false;
-  // if (output_depth % 16 != 0) return false;
-  // Currently, only works where input and output depths are exactly 16
-  if (input_depth != 16) return false;
-  if (output_depth != 16) return false;
+  if (input_depth % 16 != 0) return false;
+  if (output_depth % 4 != 0) return false;
 
   // Must be 4x4
   const int filter_height = filter_shape.Dims(1);
   const int filter_width = filter_shape.Dims(2);
   if (filter_height != 4 || filter_width != 4) return false;
 
-  // Must fit in filter word storag   e
-  const int num_filter_words = input_depth * output_depth * 4 * 4 / 4;
-  if (num_filter_words > NUM_FILTER_STORES * FILTER_WORDS_PER_STORE)
-    return false;
+  // Must fit in filter word storage
+  const int filter_values_per_output =
+      input_depth * filter_height * filter_width;
+  // Calculate 4 output values per tranche
+  const int filter_values = 4 * filter_values_per_output;
+  // 4 values per word
+  const int filter_words = filter_values / 4;
+  if (filter_words > NUM_FILTER_STORES * FILTER_WORDS_PER_STORE) return false;
 
   // Dilation must be 1
   if (params.dilation_height_factor != 1 || params.dilation_width_factor != 1)
@@ -147,7 +147,7 @@ void ConvPerChannel4x4(const ConvParams& params,
                        const int8_t* filter_data,
                        const RuntimeShape& bias_shape, const int32_t* bias_data,
                        const RuntimeShape& output_shape, int8_t* output_data) {
-  // Calculates in trances of four channels (one output word)
+  // Calculates in tranches of four channels (one output word)
   const int channels_per_tranche = 4;
 
   // Get parameters.
@@ -178,8 +178,9 @@ void ConvPerChannel4x4(const ConvParams& params,
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
 
+  // Round up output values to next multiple of 16
   const int num_output_values_per_tranche =
-      output_width * output_height * channels_per_tranche;
+      (output_width * output_height * channels_per_tranche + 15) / 16 * 16;
 
   // Filter words required to calculate each tranche
   const int filter_words_per_channel =
