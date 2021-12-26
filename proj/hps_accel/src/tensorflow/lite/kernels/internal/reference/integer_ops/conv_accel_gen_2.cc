@@ -30,11 +30,11 @@ namespace reference_integer_ops {
 
 namespace {
 
-// Loads Post process parameters into the CFU
-void LoadPostProcessParameters(int output_depth, const int32_t* bias_data,
-                               const int32_t* output_shift,
-                               const int32_t* output_multiplier) {
-  for (int i = 0; i < output_depth; i++) {
+// Loads four post process parameters into the CFU
+void LoadFourPostProcessParameters(int channel_start, const int32_t* bias_data,
+                                   const int32_t* output_shift,
+                                   const int32_t* output_multiplier) {
+  for (int i = channel_start; i < channel_start + 4; i++) {
     cfu_set(REG_POST_PROCESS_BIAS, bias_data[i]);
     // Note : shift is stored as a negative number in tflite model
     cfu_set(REG_POST_PROCESS_SHIFT, -output_shift[i]);
@@ -44,19 +44,21 @@ void LoadPostProcessParameters(int output_depth, const int32_t* bias_data,
 
 // Loads filter parameters, correctly split between the two
 // stores
-void LoadFilterData(const RuntimeShape& filter_shape,
-                    const uint32_t* filter_data) {
+void LoadFourFilterData(int channel_start, const RuntimeShape& filter_shape,
+                        const uint32_t* data_base) {
   const int num_filter_words_per_output =
       filter_shape.Dims(1) * filter_shape.Dims(2) * filter_shape.Dims(3) / 4;
-  const int num_output_channels = filter_shape.Dims(0);
+  const uint32_t* filter_data =
+      data_base + channel_start * num_filter_words_per_output;
 
   size_t addr_base = 0;
-  for (int chan = 0; chan < num_output_channels; chan += 2) {
+  for (int i = channel_start; i < channel_start + 4; i += 2) {
     for (int store = 0; store < 2; store++) {
-      for (int i = 0; i < num_filter_words_per_output; i++) {
+      uint32_t addr = addr_base;
+      for (int j = 0; j < num_filter_words_per_output; j++) {
         uint32_t data = *filter_data++;
-        uint32_t addr = addr_base + i;
         cfu_setx(REG_FILTER_WRITE, (store << 16 | addr), data);
+        addr++;
       }
     }
     addr_base += num_filter_words_per_output;
@@ -64,37 +66,28 @@ void LoadFilterData(const RuntimeShape& filter_shape,
 }
 
 // Collects a single ouput value and optionally places it into memory
-inline void CollectValue(uint32_t*& p, bool collect) {
+inline void CollectValue(uint32_t*& p, int advance, bool write) {
   uint32_t val = cfu_get(REG_OUTPUT_WORD);
-  if (collect) {
-    *p++ = val;
+  if (write) {
+    *p = val;
+    p += advance;
   }
 }
 
 // Collects output from the accelerator into the output area
-void CollectOutput(uint32_t* output, const int height, const int width,
-                   const int depth) {
+// Collects one word per output pixel
+void CollectOutput(int channel, uint32_t* output, const int height,
+                   const int width, const int depth) {
   const int num_pixels = height * width;
   const int num_words_per_pixel = depth / 4;
-  uint32_t* group_base = output;
+
+  uint32_t* p = output + channel / 4;
 
   for (int pixel = 0; pixel < num_pixels; pixel += 4) {
-    uint32_t* g0 = group_base;
-    uint32_t* g1 = g0 + num_words_per_pixel;
-    uint32_t* g2 = g1 + num_words_per_pixel;
-    uint32_t* g3 = g2 + num_words_per_pixel;
-
-    bool collect1 = pixel + 1 < num_pixels;
-    bool collect2 = pixel + 2 < num_pixels;
-    bool collect3 = pixel + 3 < num_pixels;
-
-    for (int word = 0; word < num_words_per_pixel; word++) {
-      CollectValue(g0, true);
-      CollectValue(g1, collect1);
-      CollectValue(g2, collect2);
-      CollectValue(g3, collect3);
-    }
-    group_base += num_words_per_pixel * 4;
+    CollectValue(p, num_words_per_pixel, true);
+    CollectValue(p, num_words_per_pixel, pixel + 1 < num_pixels);
+    CollectValue(p, num_words_per_pixel, pixel + 2 < num_pixels);
+    CollectValue(p, num_words_per_pixel, pixel + 3 < num_pixels);
   }
 }
 };  // namespace
@@ -144,7 +137,7 @@ bool CanAccelerateConv4x4(const ConvParams& params,
   return true;
 }
 
-// Fixed-point per-channel-quantization convolution reference kernel.
+// Accelerated Conv2D
 void ConvPerChannel4x4(const ConvParams& params,
                        const int32_t* output_multiplier,
                        const int32_t* output_shift,
@@ -154,6 +147,9 @@ void ConvPerChannel4x4(const ConvParams& params,
                        const int8_t* filter_data,
                        const RuntimeShape& bias_shape, const int32_t* bias_data,
                        const RuntimeShape& output_shape, int8_t* output_data) {
+  // Calculates in trances of four channels (one output word)
+  const int channels_per_tranche = 4;
+
   // Get parameters.
   const int32_t input_offset = params.input_offset;  // r = s(q - Z)
   // TODO: handle stride
@@ -181,42 +177,51 @@ void ConvPerChannel4x4(const ConvParams& params,
   const int input_width = input_shape.Dims(2);
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
-  const int filter_size_words = filter_shape.FlatSize() / 4;
-  const int num_output_values = output_shape.FlatSize();
 
-  // TODO: Calculate in tranches limited by filter memory size
+  const int num_output_values_per_tranche =
+      output_width * output_height * channels_per_tranche;
+
+  // Filter words required to calculate each tranche
+  const int filter_words_per_channel =
+      filter_shape.Dims(1) * filter_shape.Dims(2) * filter_shape.Dims(3) / 4;
+  const int filter_words_per_tranche =
+      filter_words_per_channel * channels_per_tranche;
 
   // Base address is bank address (4 words per bank) within 256K arena
   uint32_t input_base_addr =
       (reinterpret_cast<uint32_t>(input_data) & 0x3ffff) / 16;
 
-  // Reset to ensure important state is initialized
-  cfu_set(REG_ACCELERATOR_RESET, 0);
+  for (int channel = 0; channel < output_depth;
+       channel += channels_per_tranche) {
+    // Reset to ensure important state is initialized
+    cfu_set(REG_ACCELERATOR_RESET, 0);
 
-  // Configure simple values
-  cfu_set(REG_INPUT_OFFSET, input_offset);
-  cfu_set(REG_NUM_FILTER_WORDS, filter_size_words / 2);
-  cfu_set(REG_OUTPUT_OFFSET, output_offset);
-  cfu_set(REG_OUTPUT_ACTIVATION_MIN, output_activation_min);
-  cfu_set(REG_OUTPUT_ACTIVATION_MAX, output_activation_max);
-  cfu_set(REG_INPUT_BASE_ADDR, input_base_addr);
-  cfu_set(REG_NUM_PIXELS_X, output_width);
-  cfu_set(REG_PIXEL_ADVANCE_X, input_depth / 16);
-  cfu_set(REG_PIXEL_ADVANCE_Y, (input_depth / 16) * input_width);
-  cfu_set(REG_INPUT_CHANNEL_DEPTH, input_depth);
-  cfu_set(REG_OUTPUT_CHANNEL_DEPTH, output_depth);
-  cfu_set(REG_NUM_OUTPUT_VALUES, num_output_values);
+    // Configure simple values
+    cfu_set(REG_INPUT_OFFSET, input_offset);
+    cfu_set(REG_NUM_FILTER_WORDS, filter_words_per_tranche / 2);
+    cfu_set(REG_OUTPUT_OFFSET, output_offset);
+    cfu_set(REG_OUTPUT_ACTIVATION_MIN, output_activation_min);
+    cfu_set(REG_OUTPUT_ACTIVATION_MAX, output_activation_max);
+    cfu_set(REG_INPUT_BASE_ADDR, input_base_addr);
+    cfu_set(REG_NUM_PIXELS_X, output_width);
+    cfu_set(REG_PIXEL_ADVANCE_X, input_depth / 16);
+    cfu_set(REG_PIXEL_ADVANCE_Y, (input_depth / 16) * input_width);
+    cfu_set(REG_INPUT_CHANNEL_DEPTH, input_depth);
+    cfu_set(REG_OUTPUT_CHANNEL_DEPTH, channels_per_tranche);
+    cfu_set(REG_NUM_OUTPUT_VALUES, num_output_values_per_tranche);
 
-  LoadPostProcessParameters(output_depth, bias_data, output_shift,
-                            output_multiplier);
-  LoadFilterData(filter_shape, reinterpret_cast<const uint32_t*>(filter_data));
+    LoadFourPostProcessParameters(channel, bias_data, output_shift,
+                                  output_multiplier);
+    LoadFourFilterData(channel, filter_shape,
+                       reinterpret_cast<const uint32_t*>(filter_data));
 
-  // Start Accelerator
-  cfu_set(REG_ACCELERATOR_START, 0);
+    // Start Accelerator
+    cfu_set(REG_ACCELERATOR_START, 0);
 
-  // Collect data
-  CollectOutput(reinterpret_cast<uint32_t*>(output_data), output_height,
-                output_width, output_depth);
+    // Collect data
+    CollectOutput(channel, reinterpret_cast<uint32_t*>(output_data),
+                  output_height, output_width, output_depth);
+  }
 }
 
 }  // namespace reference_integer_ops
