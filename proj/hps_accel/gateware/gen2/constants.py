@@ -37,6 +37,7 @@ class Constants:
     REG_FILTER_WRITE = 3
 
     # Configuration values
+    # See ACCELERATOR_CONFIGURATION_LAYOUT in accelerator.py
     REG_INPUT_OFFSET = 4
     REG_NUM_FILTER_WORDS = 5
     REG_OUTPUT_OFFSET = 6

@@ -141,9 +141,8 @@ class AcceleratorCore(SimpleElaboratable):
 
     def build_input_fetcher(self, m, stop):
         m.submodules['fetcher'] = fetcher = InputFetcher()
-        # We reset the fetcher when finished calculating to avoid
-        # spurious first and last signals that might corrupt the next
-        # accelerator reset.
+        # We reset the fetcher on stop to avoid spurious first and last
+        # signals that might corrupt the next accelerator reset.
         repeats = (self.config.output_channel_depth //
                    Const(Constants.SYS_ARRAY_WIDTH))
         m.d.comb += [
