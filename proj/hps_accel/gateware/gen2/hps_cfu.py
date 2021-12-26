@@ -179,8 +179,6 @@ class SetInstruction(InstructionBase):
                     m.d.sync += self.config.output_channel_depth.eq(self.in0)
                 with m.Case(Constants.REG_NUM_OUTPUT_VALUES):
                     m.d.sync += self.config.num_output_values.eq(self.in0)
-                with m.Case(Constants.REG_NUM_OUTPUT_VALUES):
-                    m.d.sync += self.config.num_output_values.eq(self.in0)
                 with m.Case(Constants.REG_POST_PROCESS_BIAS):
                     m.d.sync += pp_bias.eq(self.in0s)
                 with m.Case(Constants.REG_POST_PROCESS_SHIFT):
