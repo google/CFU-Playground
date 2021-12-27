@@ -28,6 +28,7 @@ import pickle
 import sys
 
 from .conv2d_data import Conv2DData, save_data
+from .utils import as_signed_int32_array, as_unsigned_int32_array
 
 if __name__ != '__main__':
   print('Run as script to produce a data file. Do not import')
@@ -7914,21 +7915,6 @@ output_data_raw = [
   0x80,0x80,0x8f,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,
   0x80,0x80,0x80,0x80,0x80,0xb0,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,
 ]
-
-def as_signed_int32_array(byte_array):
-  """Interprets array of byte values as signed 32 bit ints."""
-  def int32(a, b, c, d):
-    unsigned = a + (b << 8) + (c << 16) + (d << 24)
-    return unsigned if unsigned < (2**31) else (unsigned - 2**32)
-
-  return [int32(*byte_array[i:i+4]) for i in range(0, len(byte_array), 4)]
-
-def as_unsigned_int32_array(byte_array):
-  """Interprets array of byte values as unsigned 32 bit ints."""
-  def uint32(a, b, c, d):
-    return a + (b << 8) + (c << 16) + (d << 24)
-
-  return [uint32(*byte_array[i:i+4]) for i in range(0, len(byte_array), 4)]
 
 
 data = Conv2DData(

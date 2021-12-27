@@ -29,3 +29,20 @@ def delay(m, input_, cycles):
         m.d.sync += delayed.eq(result[-1])
         result.append(delayed)
     return result
+
+
+def as_signed_int32_array(byte_array):
+    """Interprets array of byte values as signed 32 bit ints."""
+    def int32(a, b, c, d):
+        unsigned = a + (b << 8) + (c << 16) + (d << 24)
+        return unsigned if unsigned < (2**31) else (unsigned - 2**32)
+
+    return [int32(*byte_array[i:i + 4]) for i in range(0, len(byte_array), 4)]
+
+
+def as_unsigned_int32_array(byte_array):
+    """Interprets array of byte values as unsigned 32 bit ints."""
+    def uint32(a, b, c, d):
+        return a + (b << 8) + (c << 16) + (d << 24)
+
+    return [uint32(*byte_array[i:i + 4]) for i in range(0, len(byte_array), 4)]
