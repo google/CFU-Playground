@@ -59,7 +59,7 @@ class AcceleratorCoreTest(TestBase):
         return AcceleratorCore()
 
     def setUp(self):
-        self.data = fetch_data('sample_conv_1')
+        self.data = fetch_data('sample_conv_05')
         super().setUp()
 
     def extract_filter_data(self):

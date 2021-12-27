@@ -233,7 +233,7 @@ class InputFetcherTest(TestBase):
 
     def setUp(self):
         super().setUp()
-        self.data = fetch_data('sample_conv_1')
+        self.data = fetch_data('sample_conv_05')
 
     def pixel_input_values(self, index):
         # Get values for a given pixel number

@@ -34,7 +34,7 @@ class HpsCfuTest(CfuTestBase):
         return HpsCfu()
 
     def setUp(self):
-        self.data = fetch_data('sample_conv_1')
+        self.data = fetch_data('sample_conv_05')
         super().setUp()
 
     @staticmethod
@@ -128,7 +128,7 @@ class HpsCfuTest(CfuTestBase):
     def test_simple(self):
         """Tests a 4x4 convolution producing 16 channels per start."""
         dut = self.dut
-        data = fetch_data('sample_conv_1')
+        data = fetch_data('sample_conv_05')
 
         self.add_ram_process(data)
 
@@ -156,7 +156,7 @@ class HpsCfuTest(CfuTestBase):
     def test_groups_of_four(self):
         """Tests a 4x4 convolution producing 4 channels per start."""
         dut = self.dut
-        data = fetch_data('sample_conv_1')
+        data = fetch_data('sample_conv_05')
 
         self.add_ram_process(data)
 

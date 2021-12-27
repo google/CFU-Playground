@@ -12,14 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Data from 6th Conv2D op in 09_20 model with cat picture input.
+"""Data from Conv2D op 05 in 09_20 model with cat picture input.
 
-This op is a 4x4 conv with 16 deep inputs and 16 deep outputs outputs.
+This op is a 4x4 conv with 16 deep inputs and 16 deep outputs outputs. It
+is the same op as contained in the conv2d_05.cc test data file.
 
 Run with
 ```
 cd proj/hps_accel
-../../scripts/pyrun -m gateware.gen2.build_sample_conv_1_pickle
+../../scripts/pyrun -m gateware.gen2.build_sample_conv_05_pickle
 ```
 """
 from pathlib import Path
@@ -7947,4 +7948,4 @@ data = Conv2DData(
     expected_output_data = as_unsigned_int32_array(output_data_raw))
 
 
-save_data('sample_conv_1', data)
+save_data('sample_conv_05', data)
