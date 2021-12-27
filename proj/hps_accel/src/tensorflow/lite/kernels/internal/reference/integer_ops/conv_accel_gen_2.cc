@@ -192,24 +192,23 @@ void ConvPerChannel4x4(const ConvParams& params,
   uint32_t input_base_addr =
       (reinterpret_cast<uint32_t>(input_data) & 0x3ffff) / 16;
 
+  // Configure simple values
+  cfu_set(REG_INPUT_OFFSET, input_offset);
+  cfu_set(REG_NUM_FILTER_WORDS, filter_words_per_tranche / 2);
+  cfu_set(REG_OUTPUT_OFFSET, output_offset);
+  cfu_set(REG_OUTPUT_ACTIVATION_MIN, output_activation_min);
+  cfu_set(REG_OUTPUT_ACTIVATION_MAX, output_activation_max);
+  cfu_set(REG_INPUT_BASE_ADDR, input_base_addr);
+  cfu_set(REG_NUM_PIXELS_X, output_width);
+  cfu_set(REG_PIXEL_ADVANCE_X, input_depth / 16);
+  cfu_set(REG_PIXEL_ADVANCE_Y, (input_depth / 16) * input_width);
+  cfu_set(REG_INPUT_CHANNEL_DEPTH, input_depth);
+  cfu_set(REG_OUTPUT_CHANNEL_DEPTH, channels_per_tranche);
+  cfu_set(REG_NUM_OUTPUT_VALUES, num_output_values_per_tranche);
   for (int channel = 0; channel < output_depth;
        channel += channels_per_tranche) {
     // Reset to ensure important state is initialized
     cfu_set(REG_ACCELERATOR_RESET, 0);
-
-    // Configure simple values
-    cfu_set(REG_INPUT_OFFSET, input_offset);
-    cfu_set(REG_NUM_FILTER_WORDS, filter_words_per_tranche / 2);
-    cfu_set(REG_OUTPUT_OFFSET, output_offset);
-    cfu_set(REG_OUTPUT_ACTIVATION_MIN, output_activation_min);
-    cfu_set(REG_OUTPUT_ACTIVATION_MAX, output_activation_max);
-    cfu_set(REG_INPUT_BASE_ADDR, input_base_addr);
-    cfu_set(REG_NUM_PIXELS_X, output_width);
-    cfu_set(REG_PIXEL_ADVANCE_X, input_depth / 16);
-    cfu_set(REG_PIXEL_ADVANCE_Y, (input_depth / 16) * input_width);
-    cfu_set(REG_INPUT_CHANNEL_DEPTH, input_depth);
-    cfu_set(REG_OUTPUT_CHANNEL_DEPTH, channels_per_tranche);
-    cfu_set(REG_NUM_OUTPUT_VALUES, num_output_values_per_tranche);
 
     LoadFourPostProcessParameters(channel, bias_data, output_shift,
                                   output_multiplier);
