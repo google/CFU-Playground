@@ -66,20 +66,20 @@ generation: the `PixelAddressGenerator` generates the start addresses from
 which data is to be read, and the `ValueAddressGenerator` generates the
 addresses for all the data for a given output pixel from that start address.
 
+There is also an input mode which handles the input layers. The input for these
+layers has depth 1, width 322 and stride 2. A key difference between the input
+mode and the main mode is that in input mode, the individual input pixels do not
+fit neatly into RAM blocks.
+
 TODO:
 - handle padding in y or x directions
-
-TODO: An alternate mode to deal with input layers
-- one channel per input
-- probably padding to include
-- stride 2 in both directions
-- no need to cross row boundaries
 """
 
 from nmigen import Array, Mux, Signal, unsigned
 from nmigen_cfu.util import SimpleElaboratable
 
-from .utils import delay, unsigned_upto
+from .ram_mux import RamMux
+from .utils import unsigned_upto
 
 
 class PixelAddressGenerator(SimpleElaboratable):
@@ -219,73 +219,13 @@ class PixelAddressRepeater(SimpleElaboratable):
             m.d.sync += group.eq(0)
 
 
-class RoundRobin4(SimpleElaboratable):
-    """Connects four sets of input and output signals to each other in turn.
-
-    Each input is connected to an output, but that output rotates on
-    each cycle. There are four ways in which connections are made,
-    indicated by the 'phase' signal.
-
-    +-------+-------+-------+-------+-------+
-    | Phase | out 0 | out 1 | out 2 | out 3 |
-    +-------+-------+-------+-------+-------+
-    |    0  |   0   |   3   |   2   |   1   |
-    |    1  |   1   |   0   |   3   |   2   |
-    |    2  |   2   |   1   |   0   |   3   |
-    |    3  |   3   |   2   |   1   |   0   |
-    +-------+-------+-------+-------+-------+
-
-    Parameters
-    ----------
-
-    shape: Shape
-        The shape of the four signals to be connected
-
-    Attributes
-    ----------
-
-    mux_in: [Signal(shape) * 4], in
-        The incoming signals.
-
-    mux_out: [Signal(shape) * 4], out
-        The incoming signals connected as per the current phase.
-
-    phase: Signal(range(4)), out
-        The current phase, indicating which signal is connected to
-        which output.
-
-    start: Signal(), in
-        Resets phase to 0 on next cycle.
-    """
-
-    def __init__(self, *, shape):
-        self.mux_in = [Signal(shape, name=f"in_{i}") for i in range(4)]
-        self.mux_out = [Signal(shape, name=f"out_{i}") for i in range(4)]
-        self.phase = Signal(range(4))
-        self.start = Signal()
-
-    def elab(self, m):
-        # phase is a free running counter with reset
-        m.d.sync += self.phase.eq(self.phase + 1)
-        with m.If(self.start):
-            m.d.sync += self.phase.eq(0)
-
-        # Connect outputs to inputs depending on phase
-        def connect_for_phase(p):
-            for i in range(4):
-                m.d.comb += self.mux_out[i].eq(self.mux_in[(p - i) % 4])
-        with m.Switch(self.phase):
-            for p in range(4):
-                with m.Case(p):
-                    connect_for_phase(p)
-
-
 class ValueAddressGenerator(SimpleElaboratable):
     """Generates addresses within a single pixel.
 
     Specifically for a 4x4 2DConv, works with a PixelAddressGenerator to find
-    addresses of individual values. It reads `columns` * 4 * 32bit words,
-    then moves down and repeats this three times.
+    addresses of individual values. It reads `depth` * 4 * 32bit words,
+    then moves down and repeats this. An external counter re-starts the
+    generator once it has read 4 complete rows of input.
 
     Attributes
     ----------
@@ -423,8 +363,7 @@ class InputFetcher(SimpleElaboratable):
     def elab(self, m):
         m.submodules["pixel_ag"] = pixel_ag = PixelAddressGenerator()
         m.submodules["repeater"] = repeater = PixelAddressRepeater()
-        m.submodules["rraddr"] = rr_addr = RoundRobin4(shape=unsigned(14))
-        m.submodules["rrdata"] = rr_data = RoundRobin4(shape=unsigned(32))
+        m.submodules["ram_mux"] = ram_mux = RamMux()
         value_ags = [ValueAddressGenerator() for _ in range(4)]
         for i, v in enumerate(value_ags):
             m.submodules[f"value_ag{i}"] = v
@@ -438,33 +377,17 @@ class InputFetcher(SimpleElaboratable):
             repeater.repeats.eq(self.num_repeats),
             pixel_ag.next.eq(repeater.gen_next),
             repeater.gen_addr.eq(pixel_ag.addr),
+            pixel_ag.start.eq(self.start),
+            repeater.start.eq(self.start),
         ]
 
         # Connect value address generators
-        for i, v in enumerate(value_ags):
+        for v in value_ags:
             m.d.comb += [
                 v.start_addr.eq(repeater.addr),
                 v.depth.eq(self.depth),
                 v.num_blocks_y.eq(self.pixel_advance_y),
-                rr_addr.mux_in[i].eq(v.addr_out),
             ]
-
-        # Connect round robins to LRAM and data output
-        for i in range(4):
-            m.d.comb += [
-                self.lram_addr[i].eq(rr_addr.mux_out[i]),
-                rr_data.mux_in[i].eq(self.lram_data[i]),
-                self.data_out[i].eq(rr_data.mux_out[i]),
-            ]
-
-        # Sequence start signals to PixelAddressGenerator and round robins
-        starts = delay(m, self.start, 1)
-        m.d.comb += [
-            pixel_ag.start.eq(starts[0]),
-            repeater.start.eq(starts[0]),
-            rr_addr.start.eq(starts[0]),
-            rr_data.start.eq(starts[1]),
-        ]
 
         # cycle_counter counts cycles through reading input data
         max_cycle_counter = Signal(9)
@@ -497,3 +420,13 @@ class InputFetcher(SimpleElaboratable):
             self.first.eq(running & (cycle_counter == 0)),
             self.last.eq(running & (cycle_counter == max_cycle_counter)),
         ]
+
+        # Connect RamMux to LRAM, phase, data_out
+        m.d.comb += ram_mux.phase.eq(cycle_counter[:2])
+        for i in range(4):
+            m.d.comb += [
+                ram_mux.addr_in[i].eq(value_ags[i].addr_out),
+                self.data_out[i].eq(ram_mux.data_out[i]),
+                self.lram_addr[i].eq(ram_mux.lram_addr[i]),
+                ram_mux.lram_data[i].eq(self.lram_data[i]),
+            ]
