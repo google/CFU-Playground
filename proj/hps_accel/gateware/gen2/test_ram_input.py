@@ -26,6 +26,7 @@ from .ram_input import (
     PixelAddressGenerator,
     PixelAddressRepeater,
     ValueAddressGenerator)
+from .ram_mux import RamMux
 
 
 class PixelAddressGeneratorTest(TestBase):
@@ -190,15 +191,19 @@ class InputFetcherTest(TestBase):
 
     def create_dut(self):
         fetcher = InputFetcher()
-        # Simulate LRAMs
+        # Connect RAM Mux with simulated LRAMs
+        self.m.submodules["ram_mux"] = ram_mux = RamMux()
+        self.m.d.comb += ram_mux.phase.eq(fetcher.ram_mux_phase)
         for i in range(4):
             init = ([0] * 0x12 + self.data.input_data[i::4])[:1024]
             mem = Memory(width=32, depth=1024, init=init)
             rp = mem.read_port(transparent=False)
             self.m.d.comb += [
-                fetcher.lram_data[i].eq(rp.data),
-                rp.addr.eq(fetcher.lram_addr[i]),
-                rp.en.eq(1)
+                ram_mux.lram_data[i].eq(rp.data),
+                rp.addr.eq(ram_mux.lram_addr[i]),
+                rp.en.eq(1),
+                ram_mux.addr_in[i].eq(fetcher.ram_mux_addr[i]),
+                fetcher.ram_mux_data[i].eq(ram_mux.data_out[i]),
             ]
             self.m.submodules[f"rp{i}"] = rp
         return fetcher

@@ -78,7 +78,6 @@ TODO:
 from nmigen import Array, Mux, Signal, unsigned
 from nmigen_cfu.util import SimpleElaboratable
 
-from .ram_mux import RamMux
 from .utils import unsigned_upto
 
 
@@ -326,10 +325,13 @@ class InputFetcher(SimpleElaboratable):
     repeats: Signal(unsigned_upto(64)), in
         The number of times each stream of input pixel data is to be repeated.
 
-    lram_addr: [Signal(14)] * 4, out
-        Address for each LRAM bank
+    ram_mux_phase: Signal(range(4)), out
+        The phase provided to the RamMux
 
-    lram_data: [Signal(32)] * 4, in
+    ram_mux_addr: [Signal(14)] * 4, out
+        Addresses to send to the RAM Mux
+
+    ram_mux_data: [Signal(32)] * 4, in
         Data as read from addresses provided at previous cycle.
 
     data_out: [Signal(32)] * 4, out
@@ -354,8 +356,9 @@ class InputFetcher(SimpleElaboratable):
         self.pixel_advance_y = Signal(8)
         self.depth = Signal(3)
         self.num_repeats = Signal(unsigned_upto(64))
-        self.lram_addr = [Signal(14, name=f"lram_addr{i}") for i in range(4)]
-        self.lram_data = [Signal(32, name=f"lram_data{i}") for i in range(4)]
+        self.ram_mux_phase = Signal(range(4))
+        self.ram_mux_addr = [Signal(14, name=f"rm_addr{i}") for i in range(4)]
+        self.ram_mux_data = [Signal(32, name=f"rm_data{i}") for i in range(4)]
         self.data_out = [Signal(32, name=f"data_out{i}") for i in range(4)]
         self.first = Signal()
         self.last = Signal()
@@ -363,7 +366,6 @@ class InputFetcher(SimpleElaboratable):
     def elab(self, m):
         m.submodules["pixel_ag"] = pixel_ag = PixelAddressGenerator()
         m.submodules["repeater"] = repeater = PixelAddressRepeater()
-        m.submodules["ram_mux"] = ram_mux = RamMux()
         value_ags = [ValueAddressGenerator() for _ in range(4)]
         for i, v in enumerate(value_ags):
             m.submodules[f"value_ag{i}"] = v
@@ -421,12 +423,10 @@ class InputFetcher(SimpleElaboratable):
             self.last.eq(running & (cycle_counter == max_cycle_counter)),
         ]
 
-        # Connect RamMux to LRAM, phase, data_out
-        m.d.comb += ram_mux.phase.eq(cycle_counter[:2])
+        # Connect to RamMux
+        m.d.comb += self.ram_mux_phase.eq(cycle_counter[:2])
         for i in range(4):
             m.d.comb += [
-                ram_mux.addr_in[i].eq(value_ags[i].addr_out),
-                self.data_out[i].eq(ram_mux.data_out[i]),
-                self.lram_addr[i].eq(ram_mux.lram_addr[i]),
-                ram_mux.lram_data[i].eq(self.lram_data[i]),
+                self.ram_mux_addr[i].eq(value_ags[i].addr_out),
+                self.data_out[i].eq(self.ram_mux_data[i]),
             ]
