@@ -16,8 +16,8 @@
 
 import itertools
 
-from nmigen import unsigned
-from nmigen.sim import Passive
+from nmigen import Memory, unsigned
+from nmigen.sim import Passive, Delay, Settle
 from nmigen_cfu import TestBase
 
 from .conv2d_data import fetch_data
@@ -229,11 +229,23 @@ class InputFetcherTest(TestBase):
     """Tests InputFetcher class."""
 
     def create_dut(self):
-        return InputFetcher()
+        fetcher = InputFetcher()
+        # Simulate LRAMs
+        for i in range(4):
+            init = ([0] * 0x12 + self.data.input_data[i::4])[:1024]
+            mem = Memory(width=32, depth=1024, init=init)
+            rp = mem.read_port(transparent=False)
+            self.m.d.comb += [
+                fetcher.lram_data[i].eq(rp.data),
+                rp.addr.eq(fetcher.lram_addr[i]),
+                rp.en.eq(1)
+            ]
+            self.m.submodules[f"rp{i}"] = rp
+        return fetcher
 
     def setUp(self):
-        super().setUp()
         self.data = fetch_data('sample_conv_05')
+        super().setUp()
 
     def pixel_input_values(self, index):
         # Get values for a given pixel number
@@ -258,42 +270,7 @@ class InputFetcherTest(TestBase):
         dut = self.dut
         data = self.data
 
-        def ram():
-            yield Passive()
-            while True:
-                for i in range(4):
-                    block = (yield dut.lram_addr[i]) - 0x123
-                    data_addr = block * 4 + i
-                    yield dut.lram_data[i].eq(data.input_data[data_addr])
-                yield
-        self.add_process(ram)
-
         captured_outputs = [[] for _ in range(4)]
-
-        def capture_output(n):
-            # Captures one output as a list of lists into captured_outputs
-            data_out = dut.data_out[n]
-
-            def fn():
-                yield Passive()
-                # Wait for first "first" signal, then begin capturing
-                while not (yield dut.first):
-                    yield
-                first_seen, last_seen, capture = None, None, []
-                for cycle in itertools.count():
-                    if (yield dut.first):
-                        first_seen = cycle
-                    if (yield dut.last):
-                        last_seen = cycle
-                    if cycle - n == first_seen:
-                        capture = []
-                    capture.append((yield data_out))
-                    if cycle - n == last_seen:
-                        captured_outputs[n].append(capture)
-                    yield
-            return fn
-        for n in range(4):
-            self.add_process(capture_output(n))
 
         def process():
             # Configure the dut to match the input
@@ -301,7 +278,7 @@ class InputFetcherTest(TestBase):
             in_x_dim = data.input_dims[2]
             out_x_dim = data.output_dims[2]
 
-            yield dut.base_addr.eq(0x123)
+            yield dut.base_addr.eq(0x12)
             yield dut.num_pixels_x.eq(out_x_dim)
             yield dut.pixel_advance_x.eq(depth // 16)
             yield dut.pixel_advance_y.eq((depth // 16) * in_x_dim)
@@ -317,28 +294,32 @@ class InputFetcherTest(TestBase):
             yield dut.start.eq(1)
             yield
             yield dut.start.eq(0)
+            yield
 
+            # For each of the four outputs, capture values between first and last
             # Number of pixels of output we want to capture
-            # Use "data.output_dims[1] * data.output_dims[2]" to test all rows
-            # (takes about 30 seconds)
             # Test with 3 rows
-            capture_pixels = 3 * data.output_dims[2]
-            input_words_per_output_pixel = depth // 4 * 16
-            # num_cycles is 2 cycle startup + time to output first stream + 3 cycles
-            # for other streams to finish
-            num_cycles = (
-                capture_pixels * input_words_per_output_pixel // 4) + 5
-            for cycle in range(num_cycles):
+            num_pixels = 3 * data.output_dims[2]
+            actual = [[], [], [], []]
+            pixel = 0
+            cycle = 0
+            first_seen = last_seen = -10
+            while pixel < num_pixels:
+                if (yield dut.first):
+                    first_seen = cycle
+                if (yield dut.last):
+                    last_seen = cycle
+
+                for i in range(4):
+                    if cycle == first_seen + i:
+                        actual[i] = []
+                    actual[i].append((yield dut.data_out[i]))
+                    if cycle == last_seen + i:
+                        expected = self.pixel_input_values(pixel)
+                        self.assertEqual(
+                            actual[i], expected, msg=f"differ at pixel {pixel}")
+                        pixel += 1
+                cycle += 1
                 yield
 
         self.run_sim(process, False)
-
-        # Reorder data
-        ordered_outputs = []
-        for group in zip(*captured_outputs):
-            for i in range(4):
-                ordered_outputs.append(group[i])
-
-        for i, actual in enumerate(ordered_outputs):
-            expected = self.pixel_input_values(i)
-            self.assertEqual(actual, expected, msg=f"differ at index {i}")
