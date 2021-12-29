@@ -36,6 +36,7 @@ Conv2DData = namedtuple('Conv2DData', [
     'output_multipliers',
     'output_shifts',
     'output_biases',
+    'raw_input_data',        # as bytes
     'input_data',            # as words
     'filter_data',           # as words
     'expected_output_data',  # as words

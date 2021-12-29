@@ -7929,6 +7929,7 @@ data = Conv2DData(
     output_multipliers = as_signed_int32_array(output_multipliers_raw),
     output_shifts = as_signed_int32_array(output_shift_raw),
     output_biases = as_signed_int32_array(output_bias_raw),
+    raw_input_data = input_data_raw,
     input_data = as_unsigned_int32_array(input_data_raw),
     filter_data = as_unsigned_int32_array(filter_data_raw),
     expected_output_data = as_unsigned_int32_array(output_data_raw))
