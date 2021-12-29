@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for ram_input.py"""
+"""Tests for mode1_input.py"""
 
 import itertools
 
@@ -21,8 +21,8 @@ from nmigen.sim import Passive, Delay, Settle
 from nmigen_cfu import TestBase
 
 from .conv2d_data import fetch_data
-from .ram_input import (
-    InputFetcher,
+from .mode1_input import (
+    Mode1InputFetcher,
     PixelAddressGenerator,
     PixelAddressRepeater,
     ValueAddressGenerator)
@@ -186,11 +186,11 @@ class ValueAddressGeneratorTest(TestBase):
         self.run_sim(process, False)
 
 
-class InputFetcherTest(TestBase):
-    """Tests InputFetcher class."""
+class Mode1InputFetcherTest(TestBase):
+    """Tests Mode1InputFetcher class."""
 
     def create_dut(self):
-        fetcher = InputFetcher()
+        fetcher = Mode1InputFetcher()
         # Connect RAM Mux with simulated LRAMs
         self.m.submodules["ram_mux"] = ram_mux = RamMux()
         self.m.d.comb += ram_mux.phase.eq(fetcher.ram_mux_phase)

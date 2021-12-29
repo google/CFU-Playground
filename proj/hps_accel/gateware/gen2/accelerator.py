@@ -30,6 +30,7 @@ from ..stream import connect, Endpoint
 from .constants import Constants
 from .filter import FilterStore, FILTER_WRITE_COMMAND
 from .mem import SinglePortMemory
+from .mode1_input import Mode1InputFetcher
 from .post_process import (
     AccumulatorReader,
     OutputWordAssembler,
@@ -40,7 +41,6 @@ from .post_process import (
     PostProcessPipeline,
     ReadingProducer,
     StreamLimiter)
-from .ram_input import InputFetcher
 from .ram_mux import RamMux
 from .sysarray import SystolicArray
 from .utils import unsigned_upto
@@ -141,7 +141,7 @@ class AcceleratorCore(SimpleElaboratable):
         return store.values_out
 
     def build_input_fetcher(self, m, stop):
-        m.submodules['fetcher'] = fetcher = InputFetcher()
+        m.submodules['fetcher'] = fetcher = Mode1InputFetcher()
         m.submodules['ram_mux'] = ram_mux = RamMux()
         # We reset the fetcher on stop to avoid spurious first and last
         # signals that might corrupt the next accelerator reset.

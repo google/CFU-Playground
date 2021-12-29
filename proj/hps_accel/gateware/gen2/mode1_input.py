@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Fetches data from RAM for input to Conv2D ops.
+"""Fetches data from RAM for input to Conv2D ops (Mode1).
+
+This Mode1 fetcher is used when the Conv2D input data has a depth that is
+a multiple of 16. Each pixel's data is aligned on 16 byte boundaries.
 
 The RAM from which data is fetched consists of 4 32 bit wide, 16K words deep
 LRAMs, with word addresses in rows across the LRAMs:
@@ -29,20 +32,18 @@ LRAMs, with word addresses in rows across the LRAMs:
 |  ...   |  ...   |  ...   |  ...   |
 +--------+--------+--------+--------+
 
-The main mode is used when Conv2D input data has a depth that is a multiple of
-16 values per pixel. We call these groups of 16 bytes a "block". Each block
-fits exactly in 4 words (4 bytes * 4 bytes/word = 16 bytes). Blocks are each
-spread across the four LRAMs, beginning in LRAM 0.
+We call each group of 4 words (16 bytes) a "block". Each input pixels data
+begins on a block boundary and is an exact multiple of a number of blocks long.
+The first word for each pixel is in LRAM0, the second in LRAM1 and so on.
 
-In this main mode, four words are fetched concurrently, one word for each of
-four separate pixels. This produces four separate streams of pixel data.
+The input fetcher produces four streams of pixel data suitable for input to the
+systolic array. Each stream consists of a 4x4 square of pixels extracted from
+the larger input buffer.
 
-Each stream of pixel data corresponds to the input data for the calculation of
-a channel of an output pixel in a Conv2D operation. It therefore requires
-fetching data for a 4x4 group of pixels.In the X direction, the blocks of
-pixel data are sequential - data for pixels (1, 0) is directly after pixel
-(0,0). The following table shows the memory access pattern at the beginning
-of a fetch of four pixels.
+In the X direction, the blocks of pixel data are sequential - data for pixels
+(1, 0) is directly after pixel (0,0). The following table shows the memory
+access pattern at the beginning of a fetch of four pixels where input
+depth = 16.
 
 +------+---------+---------+---------+---------+
 | time | fetch 0 | fetch 1 | fetch 2 | fetch 3 |
@@ -65,14 +66,6 @@ is a little more complicated. There are two classes involved in address
 generation: the `PixelAddressGenerator` generates the start addresses from
 which data is to be read, and the `ValueAddressGenerator` generates the
 addresses for all the data for a given output pixel from that start address.
-
-There is also an input mode which handles the input layers. The input for these
-layers has depth 1, width 322 and stride 2. A key difference between the input
-mode and the main mode is that in input mode, the individual input pixels do not
-fit neatly into RAM blocks.
-
-TODO:
-- handle padding in y or x directions
 """
 
 from nmigen import Array, Mux, Signal, unsigned
@@ -284,7 +277,7 @@ class ValueAddressGenerator(SimpleElaboratable):
                 ]
 
 
-class InputFetcher(SimpleElaboratable):
+class Mode1InputFetcher(SimpleElaboratable):
     """Fetches input vectors for Conv2D.
 
     Coordinates a "normal mode" input fetch, where input data depth is a
@@ -292,7 +285,6 @@ class InputFetcher(SimpleElaboratable):
 
     This is a free-running component which synchronizes its start when
     "start" is pulsed high.
-
 
     Attributes
     ----------

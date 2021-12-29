@@ -26,7 +26,6 @@ from nmigen_cfu import pack_vals, TestBase
 from .accelerator import AcceleratorCore
 from .constants import Constants
 from .conv2d_data import fetch_data
-from .ram_input import InputFetcher
 
 
 def unpack_bytes(word):
