@@ -26,7 +26,7 @@ model. These Conv 2D ops have:
 Data is read through the RamMux, allowing two words to be read on every cycle.
 """
 
-from nmigen import Signal
+from nmigen import Cat, Mux, Signal
 from nmigen_cfu.util import SimpleElaboratable
 
 from .ram_mux import RamMux
@@ -99,3 +99,74 @@ class EvenPixelAddressGenerator(SimpleElaboratable):
                 pixel_x.eq(0),
                 next_count.eq(0)
             ]
+
+
+class ValueReader(SimpleElaboratable):
+    """Given an address, reads values from a RamMux.
+
+    Reads six bytes, returning the values as two, 32 bit words.
+
+    Attributes
+    ----------
+
+    addr: Signal(18), in
+        Address from which to read two values. Expected to be an even number
+
+    ram_mux_phase: Signal(range(4)), out
+        The phase provided to the RamMux
+
+    ram_mux_addr: [Signal(14)] * 4, out
+        Addresses to send to the RAM Mux
+
+    ram_mux_data: [Signal(32)] * 4, in
+        Data as read from addresses provided at previous cycle.
+
+    data_out: [Signal(32)] * 2, out
+        Data for each of four pixels.
+    """
+
+    def __init__(self):
+        self.addr = Signal(18)
+        self.ram_mux_phase = Signal(range(4))
+        self.ram_mux_addr = [Signal(14, name=f"rm_addr{i}") for i in range(4)]
+        self.ram_mux_data = [Signal(32, name=f"rm_data{i}") for i in range(4)]
+        self.data_out = [Signal(32, name=f"data_out{i}") for i in range(2)]
+
+    def elab(self, m):
+        # This code covers 8 cases, determined by bits 1, 2 and 3 of self.addr.
+        # First, bit 2 and 3 are used to select the appropriate ram_mux phase
+        # and addresses in order to read the two words containing the required
+        # data via channels 0 and 3 of the RAM Mux. Once the two words have been
+        # retrieved, six bytes are selected from those two words based on the
+        # value of bit 1 of self.addr.
+
+        # Uses just two of the mux channels - 0 and 3
+        # For convenience, tie the unused addresses to zero
+        m.d.comb += self.ram_mux_addr[1].eq(0)
+        m.d.comb += self.ram_mux_addr[2].eq(0)
+
+        # Calculate block addresses of the two words - second word may cross 16
+        # byte block boundary
+        block = Signal(14)
+        m.d.comb += block.eq(self.addr[4:])
+        m.d.comb += self.ram_mux_addr[0].eq(block)
+        m.d.comb += self.ram_mux_addr[3].eq(
+            Mux(self.ram_mux_phase == 3, block + 1, block))
+
+        # Use phase to select the two required words to channels 0 & 3
+        m.d.comb += self.ram_mux_phase.eq(self.addr[2:4])
+
+        # Select correct three half words when data is available, on cycle after
+        # address received
+        byte_sel = Signal(1)
+        m.d.sync += byte_sel.eq(self.addr[1])
+        d0 = self.ram_mux_data[0]
+        d3 = self.ram_mux_data[3]
+        dmix = Signal(32)
+        m.d.comb += dmix.eq(Cat(d0[16:], d3[:16]))
+        with m.If(byte_sel == 0):
+            m.d.comb += self.data_out[0].eq(d0)
+            m.d.comb += self.data_out[1].eq(dmix)
+        with m.Else():
+            m.d.comb += self.data_out[0].eq(dmix)
+            m.d.comb += self.data_out[1].eq(d3)
