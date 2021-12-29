@@ -208,11 +208,12 @@ class AcceleratorCore(SimpleElaboratable):
 
         # Plumb in sysarray and its inputs
         m.submodules['sysarray'] = sa = SystolicArray()
-        for in_a, activation in zip(sa.input_a, activations):
+        for j, (in_a, activation) in enumerate(zip(sa.input_a, activations)):
             # Assign activation values with input offset
             for i in range(4):
-                with_offset = Signal(signed(8), name=f"val_{i}")
-                raw_val = activation[i * 8:i * 8 + 8]
+                raw_val = Signal(signed(8), name=f"raw_{j}_{i}")
+                m.d.comb += raw_val.eq(activation[i * 8:i * 8 + 8])
+                with_offset = Signal(signed(9), name=f"val_{j}_{i}")
                 m.d.comb += with_offset.eq(raw_val + self.config.input_offset)
                 m.d.comb += in_a[i * 9:i * 9 + 9].eq(with_offset)
         for in_b, value in zip(sa.input_b, filter_values):

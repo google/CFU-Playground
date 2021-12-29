@@ -85,10 +85,10 @@ class SystolicArray(SimpleElaboratable):
         self._b_shape = b_shape
         self._accumulator_shape = accumulator_shape
 
-        self.input_a = [Signal(unsigned(n * a_shape.width))
-                        for _ in range(a_size)]
-        self.input_b = [Signal(unsigned(n * b_shape.width))
-                        for _ in range(b_size)]
+        self.input_a = [Signal(unsigned(n * a_shape.width), name=f"input_a{i}")
+                        for i in range(a_size)]
+        self.input_b = [Signal(unsigned(n * b_shape.width), name=f"input_b{i}")
+                        for i in range(b_size)]
 
         self.first = Signal()
         self.last = Signal()

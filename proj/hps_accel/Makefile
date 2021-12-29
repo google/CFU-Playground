@@ -18,7 +18,7 @@ export DEFINES :=
 
 # Define which generation gateware to use = gen1 or gen2
 #GATEWARE_GEN ?= 1
-GATEWARE_GEN := 1
+GATEWARE_GEN := 2
 DEFINES += GATEWARE_GEN=$(GATEWARE_GEN)
 
 # Uncomment this line to use the custom accelerated convolution operation
@@ -74,7 +74,7 @@ EXTRA_LITEX_ARGS += --cpu-variant slim+cfu
 
 # gen2 needs special build args and only works on hps
 ifeq '$(GATEWARE_GEN)' '2'
-EXTRA_LITEX_ARGS += --separate-arena --cfu-mport --cpu-variant=slimopt+cfu
+EXTRA_LITEX_ARGS += --separate-arena --cfu-mport
 export PLATFORM=hps
 endif
 
