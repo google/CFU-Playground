@@ -101,6 +101,70 @@ class EvenPixelAddressGenerator(SimpleElaboratable):
             ]
 
 
+class ValueAddressGenerator(SimpleElaboratable):
+    """Generates addresses of values of even pixels.
+
+    Produces first the start address of a pixel, then addresses on the next
+    three rows, thus identifying the 4 words that form the 16 values of the
+    pixel.
+
+    The values of odd pixels are at the same address but offset by two bytes.
+
+    Attributes
+    ----------
+
+    reset: Signal, in
+        Stops the address generator.
+
+    start: Signal, in
+        Begin generating addresses from the start_addr.
+
+    start_addr: Signal(18), in
+        Address of start of first pixel, from an EvenPixelAddressGenerator.
+
+    first: Signal, out
+        Indicates that first address in cycle is being produced.
+
+    last: Signal, out
+        Indicates that the last address is being produced and a new start
+        address is required on the following cycle.
+
+    addr_out: Signal(14), out
+        Current output address
+    """
+
+    # Bytes per row
+    INCREMENT_Y = 322
+
+    def __init__(self):
+        self.reset = Signal()
+        self.start = Signal()
+        self.start_addr = Signal(18)
+        self.first = Signal()
+        self.last = Signal()
+        self.addr_out = Signal(18)
+
+    def elab(self, m):
+        running = Signal()
+        count = Signal(2)
+        with m.If(running):
+            m.d.sync += count.eq(count + 1)  # Allow rollover
+
+        next_row = Signal(18)
+        m.d.comb += self.addr_out.eq(Mux(count == 0,
+                                         self.start_addr, next_row))
+        m.d.sync += next_row.eq(self.addr_out + self.INCREMENT_Y)
+        m.d.comb += self.first.eq(running & (count == 0))
+        m.d.comb += self.last.eq(running & (count == 3))
+
+        with m.If(self.start):
+            m.d.sync += running.eq(True)
+            m.d.sync += count.eq(0)
+        with m.If(self.reset):
+            m.d.sync += running.eq(False)
+            m.d.sync += count.eq(0)
+
+
 class ValueReader(SimpleElaboratable):
     """Given an address, reads values from a RamMux.
 
@@ -122,7 +186,8 @@ class ValueReader(SimpleElaboratable):
         Data as read from addresses provided at previous cycle.
 
     data_out: [Signal(32)] * 2, out
-        Data for each of four pixels.
+        Data for each of two output pixels. The second word is delayed by one
+        cycle to match expected timing of the SystolicArray.
     """
 
     def __init__(self):
@@ -157,7 +222,7 @@ class ValueReader(SimpleElaboratable):
         m.d.comb += self.ram_mux_phase.eq(self.addr[2:4])
 
         # Select correct three half words when data is available, on cycle after
-        # address received
+        # address received.
         byte_sel = Signal(1)
         m.d.sync += byte_sel.eq(self.addr[1])
         d0 = self.ram_mux_data[0]
@@ -166,7 +231,7 @@ class ValueReader(SimpleElaboratable):
         m.d.comb += dmix.eq(Cat(d0[16:], d3[:16]))
         with m.If(byte_sel == 0):
             m.d.comb += self.data_out[0].eq(d0)
-            m.d.comb += self.data_out[1].eq(dmix)
+            m.d.sync += self.data_out[1].eq(dmix)
         with m.Else():
             m.d.comb += self.data_out[0].eq(dmix)
-            m.d.comb += self.data_out[1].eq(d3)
+            m.d.sync += self.data_out[1].eq(d3)

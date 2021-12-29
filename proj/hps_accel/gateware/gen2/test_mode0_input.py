@@ -16,7 +16,10 @@
 
 from nmigen import Memory
 from nmigen_cfu import TestBase
-from .mode0_input import EvenPixelAddressGenerator, ValueReader
+from .mode0_input import (
+    EvenPixelAddressGenerator,
+    ValueAddressGenerator,
+    ValueReader)
 from .ram_mux import RamMux
 
 
@@ -54,6 +57,50 @@ class EvenPixelAddressGeneratorTest(TestBase):
                 self.assertEqual((yield dut.addr), expected_addr(i + 1))
                 yield
                 yield
+
+        self.run_sim(process, False)
+
+
+class ValueAddressGeneratorTest(TestBase):
+    """Tests ValueAddressGenerator class."""
+
+    def create_dut(self):
+        return ValueAddressGenerator()
+
+    def test_it(self):
+        dut = self.dut
+        DATA = [
+            # (reset, start, start_addr), (first, last, addr_out)
+            ((1, 0, 1000), (0, 0, None)),
+            # Check not running after reset
+            ((0, 0, 1000), (0, 0, 1000)),
+            ((0, 0, 1000), (0, 0, 1000)),
+            # Start and let cycle a few times
+            ((0, 1, 1000), (0, 0, 1000)),
+            ((0, 0, 1000), (1, 0, 1000)),
+            ((0, 0, 1000), (0, 0, 1322)),
+            ((0, 0, 1000), (0, 0, 1644)),
+            ((0, 0, 1000), (0, 1, 1966)),  # end cycle
+            ((0, 0, 1004), (1, 0, 1004)),
+            ((0, 0, 1004), (0, 0, 1326)),
+            ((0, 0, 1004), (0, 0, 1648)),
+            ((0, 0, 1004), (0, 1, 1970)),  # end cycle
+            # Reset and check not running after reset
+            ((1, 0, 1000), (1, 0, None)),
+            ((0, 0, 1000), (0, 0, 1000)),
+            ((0, 0, 1000), (0, 0, 1000)),
+        ]
+
+        def process():
+            for (reset, start, start_addr), (first, last, addr_out) in DATA:
+                yield dut.reset.eq(reset)
+                yield dut.start.eq(start)
+                yield dut.start_addr.eq(start_addr)
+                yield
+                self.assertEqual((yield dut.first), first)
+                self.assertEqual((yield dut.last), last)
+                if addr_out is not None:
+                    self.assertEqual((yield dut.addr_out), addr_out)
 
         self.run_sim(process, False)
 
@@ -107,14 +154,17 @@ class ValueReaderTest(TestBase):
         ]
 
         def process():
+            val1_delayed = 0
             for i in range(len(DATA) + 1):
                 if i < len(DATA):
                     addr, _, _ = DATA[i]
                 yield dut.addr.eq(addr)
                 yield
+                if i > 1:
+                    self.assertEqual((yield dut.data_out[1]), val1_delayed)
                 if i > 0:
                     _, val0, val1 = DATA[i - 1]
                     self.assertEqual((yield dut.data_out[0]), val0)
-                    self.assertEqual((yield dut.data_out[1]), val1)
+                    val1_delayed = val1
 
         self.run_sim(process, False)
