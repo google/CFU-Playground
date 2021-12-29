@@ -99,10 +99,11 @@ class PixelAddressGenerator(SimpleElaboratable):
         Number of RAM blocks to advance between pixels in Y direction
 
     addr: Signal(14), out
-        The output row address for the current pixel.
+        The output block address for the current pixel.
 
     start: Signal(), in
-        Starts address generation. Addr will be updated on next cycle.
+        Starts address generation. Addr will be updated to base_addr on next
+        cycle.
 
     next: Signal(), in
         Indicates current address has been used. Address will be updated on next
@@ -156,6 +157,9 @@ class PixelAddressRepeater(SimpleElaboratable):
 
     Attributes
     ----------
+
+    repeats: Signal(unsigned_upto(64)), in
+        The number of times each stream of input pixel data is to be repeated.
 
     next: Signal(), in
         Indicates current address has been used. Address will be updated on next
@@ -282,9 +286,6 @@ class Mode1InputFetcher(SimpleElaboratable):
 
     Coordinates a "normal mode" input fetch, where input data depth is a
     multiple of 16.
-
-    This is a free-running component which synchronizes its start when
-    "start" is pulsed high.
 
     Attributes
     ----------
