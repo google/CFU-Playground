@@ -150,29 +150,10 @@ void ConvPerChannel4x4(const ConvParams& params,
   // Calculates in tranches of four channels (one output word)
   const int channels_per_tranche = 4;
 
-  // Get parameters.
-  const int32_t input_offset = params.input_offset;  // r = s(q - Z)
-  // TODO: handle stride
-  // const int stride_width = params.stride_width;
-  // const int stride_height = params.stride_height;
-  // TODO: handle padding
-  // const int pad_width = params.padding_values.width;
-  // const int pad_height = params.padding_values.height;
-  const int32_t output_offset = params.output_offset;
 
-  // Set min and max value of the output.
-  const int32_t output_activation_min = params.quantized_activation_min;
-  const int32_t output_activation_max = params.quantized_activation_max;
-
-  // Consistency checks
-  TFLITE_DCHECK_LE(output_activation_min, output_activation_max);
-  TFLITE_DCHECK_EQ(input_shape.DimensionsCount(), 4);
-  TFLITE_DCHECK_EQ(filter_shape.DimensionsCount(), 4);
-  TFLITE_DCHECK_EQ(output_shape.DimensionsCount(), 4);
-  const int input_depth = MatchingDim(input_shape, 3, filter_shape, 3);
-  const int output_depth = MatchingDim(filter_shape, 0, output_shape, 3);
-  TFLITE_DCHECK_EQ(bias_shape.FlatSize(), output_depth);
-
+  const int input_depth = input_shape.Dims(3);
+  const int output_depth = output_shape.Dims(3);
+  
   // Get dimensions of the tensors.
   const int input_width = input_shape.Dims(2);
   const int output_height = output_shape.Dims(1);
@@ -193,11 +174,11 @@ void ConvPerChannel4x4(const ConvParams& params,
 
   // Configure simple values
   cfu_set(REG_MODE, MODE_1);
-  cfu_set(REG_INPUT_OFFSET, input_offset);
+  cfu_set(REG_INPUT_OFFSET, params.input_offset);
   cfu_set(REG_NUM_FILTER_WORDS, filter_words_per_tranche / 2);
-  cfu_set(REG_OUTPUT_OFFSET, output_offset);
-  cfu_set(REG_OUTPUT_ACTIVATION_MIN, output_activation_min);
-  cfu_set(REG_OUTPUT_ACTIVATION_MAX, output_activation_max);
+  cfu_set(REG_OUTPUT_OFFSET, params.output_offset);
+  cfu_set(REG_OUTPUT_ACTIVATION_MIN, params.quantized_activation_min);
+  cfu_set(REG_OUTPUT_ACTIVATION_MAX, params.quantized_activation_max);
   cfu_set(REG_INPUT_BASE_ADDR, input_base_addr);
   cfu_set(REG_NUM_PIXELS_X, output_width);
   cfu_set(REG_PIXEL_ADVANCE_X, input_depth / 16);
