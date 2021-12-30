@@ -37,6 +37,7 @@ class Constants:
     REG_FILTER_WRITE = 3
 
     # Configuration values
+    # See ACCELERATOR_CONFIGURATION_LAYOUT in accelerator.py
     REG_INPUT_OFFSET = 4
     REG_NUM_FILTER_WORDS = 5
     REG_OUTPUT_OFFSET = 6
@@ -46,7 +47,7 @@ class Constants:
     REG_NUM_PIXELS_X = 10
     REG_PIXEL_ADVANCE_X = 11
     REG_PIXEL_ADVANCE_Y = 12
-    REG_NUM_REPEATS = 13
+    REG_INPUT_CHANNEL_DEPTH = 13
     REG_OUTPUT_CHANNEL_DEPTH = 14
     REG_NUM_OUTPUT_VALUES = 15
 
@@ -65,9 +66,11 @@ class Constants:
     MAX_CHANNEL_DEPTH = 512
 
     # Height (A dimension, aka activation values, aka inputs)
+    # Must be a power of 2. Only tested with value 4
     SYS_ARRAY_HEIGHT = 4
 
     # Width (B dimension, aka filter values) of the Systolic array
+    # Must be a power of 2. Only tested with value 2
     SYS_ARRAY_WIDTH = 2
 
     # Total Number of MACC blocks in Systolic array

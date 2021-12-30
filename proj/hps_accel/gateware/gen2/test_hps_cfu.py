@@ -37,21 +37,6 @@ class HpsCfuTest(CfuTestBase):
         self.data = fetch_data('sample_conv_1')
         super().setUp()
 
-    def load_filter_data(self):
-        # Loads filter data into filter store
-        dims = self.data.filter_dims
-        filter_data = self.data.filter_data
-        num_filter_words_per_output = dims[1] * dims[2] * dims[3] // 4
-        num_output_channels = dims[0]
-        for chan in range(num_output_channels):
-            store = chan & 1
-            chan_start = chan * num_filter_words_per_output
-            for index in range(num_filter_words_per_output):
-                data = filter_data[chan_start + index]
-                addr = chan // 2 * num_filter_words_per_output + index
-                yield self.do_set(Constants.REG_FILTER_WRITE,
-                                  (store << 16 | addr), data)
-
     @staticmethod
     def do_set(reg, val0, val1=0):
         return ((Constants.INS_SET, reg, val0, val1), None)
@@ -60,16 +45,39 @@ class HpsCfuTest(CfuTestBase):
     def do_get(expected):
         return ((Constants.INS_GET, Constants.REG_OUTPUT_WORD, 0, 0), expected)
 
-    def configure(self):
+    def load_filter_data(self, data, chan_start, chan_count):
+        """ Loads filter data for a range of output channels."""
+        dims = self.data.filter_dims
+        filter_data = data.filter_data
+        num_filter_words_per_output = dims[1] * dims[2] * dims[3] // 4
+        chan_data_index = chan_start * num_filter_words_per_output
+        addr_base = 0
+
+        for _ in range(0, chan_count, 2):
+            for store in range(2):
+                addr = addr_base
+                for index in range(num_filter_words_per_output):
+                    value = filter_data[chan_data_index]
+                    chan_data_index += 1
+                    yield self.do_set(Constants.REG_FILTER_WRITE,
+                                      (store << 16 | addr), value)
+                    addr += 1
+            addr_base += num_filter_words_per_output
+
+    def configure(self, data, output_chan_start, output_chan_count):
         # Configure the accelerator
-        data = self.data
         do_set = self.do_set
         C = Constants
         input_depth = data.input_dims[3]
         in_x_dim = data.input_dims[2]
         out_x_dim = data.output_dims[2]
         output_depth = data.output_dims[3]
-        num_filter_values = reduce(lambda a, b: a * b, data.filter_dims, 1)
+        num_filter_values = (
+            output_chan_count *
+            data.filter_dims[1] *
+            data.filter_dims[2] *
+            data.filter_dims[3])
+        # values / 4 = bytes then /2 to get per store
         filter_words_per_store = num_filter_values // 4 // 2
 
         # Toggle reset
@@ -85,43 +93,48 @@ class HpsCfuTest(CfuTestBase):
         yield do_set(C.REG_NUM_PIXELS_X, out_x_dim)
         yield do_set(C.REG_PIXEL_ADVANCE_X, input_depth // 16)
         yield do_set(C.REG_PIXEL_ADVANCE_Y, (input_depth // 16) * in_x_dim)
-        yield do_set(C.REG_NUM_REPEATS,
-                     output_depth // Constants.SYS_ARRAY_WIDTH)
-        yield do_set(C.REG_OUTPUT_CHANNEL_DEPTH, output_depth)
+        yield do_set(C.REG_INPUT_CHANNEL_DEPTH, input_depth)
+        yield do_set(C.REG_OUTPUT_CHANNEL_DEPTH, output_chan_count)
         yield do_set(C.REG_NUM_OUTPUT_VALUES,
-                     self.NUM_OUTPUT_PIXELS * output_depth)
+                     self.NUM_OUTPUT_PIXELS * output_chan_count)
 
         # load post process parameters
-        for i in range(output_depth):
-            yield do_set(C.REG_POST_PROCESS_BIAS, data.output_biases[i])
+        for i in range(output_chan_count):
+            index = i + output_chan_start
+            yield do_set(C.REG_POST_PROCESS_BIAS, data.output_biases[index])
             # Note: shift is stored as a negative number in tflite model
-            yield do_set(C.REG_POST_PROCESS_SHIFT, -data.output_shifts[i])
+            yield do_set(C.REG_POST_PROCESS_SHIFT, -data.output_shifts[index])
             yield do_set(C.REG_POST_PROCESS_MULTIPLIER,
-                         data.output_multipliers[i])
+                         data.output_multipliers[index])
 
         # Load filters
-        yield from self.load_filter_data()
+        yield from self.load_filter_data(data, output_chan_start,
+                                         output_chan_count)
 
-    def test_it(self):
-        """Tests a 4x4 convolution."""
-        dut = self.dut
-        data = self.data
-
+    def add_ram_process(self, data):
+        """Adds logic for a RAM connected to the DUT."""
         def ram():
             yield Passive()
             while True:
                 for i in range(4):
-                    block = (yield dut.lram_addr[i]) - self.RAM_BASE_ADDR
+                    block = (yield self.dut.lram_addr[i]) - self.RAM_BASE_ADDR
                     data_addr = block * 4 + i
                     data_value = data.input_data[data_addr % len(
                         data.input_data)]
-                    yield dut.lram_data[i].eq(data_value)
+                    yield self.dut.lram_data[i].eq(data_value)
                 yield
         self.add_process(ram)
 
+    def test_simple(self):
+        """Tests a 4x4 convolution producing 16 channels per start."""
+        dut = self.dut
+        data = fetch_data('sample_conv_1')
+
+        self.add_ram_process(data)
+
         def process():
             # Configure, start accelerator
-            yield from self.configure()
+            yield from self.configure(data, 0, 16)
             yield self.do_set(Constants.REG_ACCELERATOR_START, 0)
 
             # Collect all of the output data for all pixels
@@ -137,5 +150,30 @@ class HpsCfuTest(CfuTestBase):
                         index_in_pixel)
                 expected = data.expected_output_data[addr]
                 yield self.do_get(expected)
+
+        self.run_ops(process(), False)
+
+    def test_groups_of_four(self):
+        """Tests a 4x4 convolution producing 4 channels per start."""
+        dut = self.dut
+        data = fetch_data('sample_conv_1')
+
+        self.add_ram_process(data)
+
+        def process():
+            # Configure, start accelerator
+            output_depth = data.output_dims[3]
+            for channel in range(0, output_depth, 4):
+                yield from self.configure(data, channel, 4)
+                yield self.do_set(Constants.REG_ACCELERATOR_START, 0)
+
+                # Collect all of the output data for the pixels in this group
+                words_per_pixel = output_depth // 4
+                num_output_words = self.NUM_OUTPUT_PIXELS
+                addr = channel // 4
+                for word in range(num_output_words):
+                    expected = data.expected_output_data[addr]
+                    addr += words_per_pixel
+                    yield self.do_get(expected)
 
         self.run_ops(process(), False)

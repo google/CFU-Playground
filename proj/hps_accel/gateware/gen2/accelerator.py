@@ -15,7 +15,15 @@
 
 """Accelerator Gateware"""
 
-from nmigen import Memory, Mux, Record, ResetInserter, Signal, signed, unsigned
+from nmigen import (
+    Const,
+    Memory,
+    Mux,
+    Record,
+    ResetInserter,
+    Signal,
+    signed,
+    unsigned)
 from nmigen_cfu.util import SimpleElaboratable
 
 from ..stream import connect, Endpoint
@@ -56,9 +64,9 @@ ACCELERATOR_CONFIGURATION_LAYOUT = [
     ('pixel_advance_x', 4),
     # Number of RAM blocks  to advance between pixels in Y direction
     ('pixel_advance_y', 8),
-    # The number of times each stream of input pixel data is to be repeated.
-    ('num_repeats', unsigned_upto(64)),
-    # Number of output channels - must be divisible by 16
+    # The number of 8bit values in the input channel - divisible by 16
+    ('input_channel_depth', unsigned_upto(Constants.MAX_CHANNEL_DEPTH)),
+    # Number of output channels - divisible by 4
     ('output_channel_depth', unsigned_upto(Constants.MAX_CHANNEL_DEPTH)),
     # Number of 8bit output values produced. Expected to be a multiple of 16.
     ('num_output_values', 18),
@@ -133,9 +141,10 @@ class AcceleratorCore(SimpleElaboratable):
 
     def build_input_fetcher(self, m, stop):
         m.submodules['fetcher'] = fetcher = InputFetcher()
-        # We reset the fetcher when finished calculating to avoid
-        # spurious first and last signals that might corrupt the next
-        # accelerator reset.
+        # We reset the fetcher on stop to avoid spurious first and last
+        # signals that might corrupt the next accelerator reset.
+        repeats = (self.config.output_channel_depth //
+                   Const(Constants.SYS_ARRAY_WIDTH))
         m.d.comb += [
             fetcher.reset.eq(self.reset | stop),
             fetcher.start.eq(self.start),
@@ -143,8 +152,8 @@ class AcceleratorCore(SimpleElaboratable):
             fetcher.num_pixels_x.eq(self.config.num_pixels_x),
             fetcher.pixel_advance_x.eq(self.config.pixel_advance_x),
             fetcher.pixel_advance_y.eq(self.config.pixel_advance_y),
-            fetcher.depth.eq(self.config.output_channel_depth >> 4),
-            fetcher.num_repeats.eq(self.config.num_repeats),
+            fetcher.depth.eq(self.config.input_channel_depth >> 4),
+            fetcher.num_repeats.eq(repeats),
         ]
         for i in range(4):
             m.d.comb += [

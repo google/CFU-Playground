@@ -216,7 +216,9 @@ inline void ConvPerChannel(
 #ifdef DUMP_LAYER
   static int invocation_count = 0;
   if (invocation_count == DUMP_LAYER) {
-    printf("\n\n");
+    printf("Dumping layer %d\n\n", DUMP_LAYER);
+    print_conv_params(params, input_shape, filter_shape, output_shape);
+
     // const ConvParams& params,
     dump_c_array("params", &params, sizeof(ConvParams));
 
