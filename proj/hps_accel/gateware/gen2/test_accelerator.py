@@ -80,6 +80,7 @@ class AcceleratorCoreTest(TestBase):
         out_x_dim = data.output_dims[2]
         output_depth = data.output_dims[3]
         filter_words_per_store = num_filter_values // 4 // 2
+        yield dut.config.mode.eq(input_depth > 1)
         yield dut.config.input_offset.eq(data.input_offset)
         yield dut.config.num_filter_words.eq(filter_words_per_store)
         yield dut.config.output_offset.eq(data.output_offset)
@@ -125,7 +126,7 @@ class AcceleratorCoreTest(TestBase):
             yield Passive()
             while True:
                 for i in range(4):
-                    block = (yield self.dut.lram_addr[i]) - self.BASE_ADDR
+                    block = (yield self.dut.lram_addr[i]) - self.BASE_ADDR // 16
                     data_addr = block * 4 + i
                     data_value = data.input_data[data_addr % len(
                         data.input_data)]
@@ -154,13 +155,11 @@ class AcceleratorCoreTest(TestBase):
                 zip(collected_data, data.expected_output_data)):
             self.assertEqual(
                 actual, expected, f" word {i}: " +
-                f"actual {actual:08x} != expected {expected:08x} "
-                f"(pos {i*4}, output {i // 4}, row {i % 4}, col {i %2})")
+                f"actual {actual:08x} != expected {expected:08x} ")
 
 
     def test_convolution_05(self):
         # tests a conv2D with input and output depths of 16
-        dut = self.dut
         data = fetch_data('sample_conv_05')
         self.simulate_lram(data)
 
@@ -178,4 +177,23 @@ class AcceleratorCoreTest(TestBase):
                 reordered_actual += four_pixels[3::4]
             self.check_output(data, reordered_actual)
 
+        self.run_sim(run, False)
+
+
+    def test_convolution_06(self):
+        # tests a conv2D for an input layer (i.e. Mode 0)
+        data = fetch_data('sample_conv_06')
+        self.simulate_lram(data)
+
+        def run():
+            yield from self.configure(data)
+            yield from self.start_dut()
+            actual_outputs = (yield from self.collect_output(data))
+
+            # Reorder output words to match tflite expected order
+            reordered_actual = []
+            for two_pixels in group(actual_outputs, 8):
+                reordered_actual += two_pixels [::2]
+                reordered_actual += two_pixels [1::2]
+            self.check_output(data, reordered_actual)
         self.run_sim(run, False)

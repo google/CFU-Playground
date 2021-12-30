@@ -132,6 +132,9 @@ class SetInstruction(InstructionBase):
         m.d.sync += self.filter_output.valid.eq(0)
         m.d.sync += self.post_process_params.valid.eq(0)
 
+        # Set Mode 1 to ensure continued compatibility
+        m.d.comb += self.config.mode.eq(1)
+
         # post process parameters
         pp_bias = Signal(signed(16))
         pp_shift = Signal(unsigned(4))

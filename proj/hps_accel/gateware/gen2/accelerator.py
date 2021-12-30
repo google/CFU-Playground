@@ -30,6 +30,7 @@ from ..stream import connect, Endpoint
 from .constants import Constants
 from .filter import FilterStore, FILTER_WRITE_COMMAND
 from .mem import SinglePortMemory
+from .mode0_input import Mode0InputFetcher
 from .mode1_input import Mode1InputFetcher
 from .post_process import (
     AccumulatorReader,
@@ -46,6 +47,8 @@ from .utils import unsigned_upto
 
 
 ACCELERATOR_CONFIGURATION_LAYOUT = [
+    # The mode of the accelerator - mode 0 for input, mode 1 for full speed
+    ('mode', unsigned(1)),
     # Offset applied to each input activation value.
     ('input_offset', signed(9)),
     # Number of words of filter data, per filter store
@@ -139,33 +142,57 @@ class AcceleratorCore(SimpleElaboratable):
         ]
         return store.values_out
 
-    def build_input_fetcher(self, m, stop):
-        m.submodules['fetcher'] = fetcher = Mode1InputFetcher()
-        m.submodules['ram_mux'] = ram_mux = RamMux()
-        # We reset the fetcher on stop to avoid spurious first and last
-        # signals that might corrupt the next accelerator reset.
-        repeats = (self.config.output_channel_depth //
-                   Const(Constants.SYS_ARRAY_WIDTH))
+    def create_fetcher(self, m, stop, name, klass):
+        # Create a fetcher submodule and connect common interface
+        m.submodules[name] = fetcher = klass()
         m.d.comb += [
+            # We reset the fetcher on stop to avoid spurious first and last
+            # signals that might corrupt the next accelerator reset.
             fetcher.reset.eq(self.reset | stop),
             fetcher.start.eq(self.start),
             fetcher.base_addr.eq(self.config.input_base_addr),
-            fetcher.num_pixels_x.eq(self.config.num_pixels_x),
-            fetcher.pixel_advance_x.eq(self.config.pixel_advance_x),
-            fetcher.pixel_advance_y.eq(self.config.pixel_advance_y),
-            fetcher.depth.eq(self.config.input_channel_depth >> 4),
-            fetcher.num_repeats.eq(repeats),
-            ram_mux.phase.eq(fetcher.ram_mux_phase)
         ]
-        for i in range(4):
-            m.d.comb += [
-                self.lram_addr[i].eq(ram_mux.lram_addr[i]),
-                ram_mux.lram_data[i].eq(self.lram_data[i]),
-                ram_mux.addr_in[i].eq(fetcher.ram_mux_addr[i]),
-                fetcher.ram_mux_data[i].eq(ram_mux.data_out[i]),
-            ]
+        return fetcher
 
-        return fetcher.first, fetcher.last, fetcher.data_out
+    def build_input_fetcher(self, m, stop):
+        # Create fetchers
+        f0 = self.create_fetcher(m, stop, 'f0', Mode0InputFetcher)
+        f1 = self.create_fetcher(m, stop, 'f1', Mode1InputFetcher)
+
+        # Additional config for fetcher1
+        repeats = (self.config.output_channel_depth //
+                   Const(Constants.SYS_ARRAY_WIDTH))
+        m.d.comb += [
+            f1.num_pixels_x.eq(self.config.num_pixels_x),
+            f1.pixel_advance_x.eq(self.config.pixel_advance_x),
+            f1.pixel_advance_y.eq(self.config.pixel_advance_y),
+            f1.depth.eq(self.config.input_channel_depth >> 4),
+            f1.num_repeats.eq(repeats),
+        ]
+
+        # Create RamMux and connect to LRAMs
+        m.submodules['ram_mux'] = ram_mux = RamMux()
+        mode = self.config.mode
+        for i in range(4):
+            # Connect to ram mux addr and data ports
+            m.d.comb += self.lram_addr[i].eq(ram_mux.lram_addr[i])
+            m.d.comb += ram_mux.lram_data[i].eq(self.lram_data[i])
+            m.d.comb += f0.ram_mux_data[i].eq(ram_mux.data_out[i])
+            m.d.comb += f1.ram_mux_data[i].eq(ram_mux.data_out[i])
+            m.d.comb += ram_mux.addr_in[i].eq(
+                Mux(mode, f1.ram_mux_addr[i], f0.ram_mux_addr[i]))
+
+        # phase input depends on mode
+        m.d.comb += ram_mux.phase.eq(
+            Mux(mode, f1.ram_mux_phase, f0.ram_mux_phase))
+
+        # Router fetcher outputs depending on mode
+        mode_first = Mux(mode, f1.first, f0.first)
+        mode_last = Mux(mode, f1.last, f0.last)
+        mode_data = [Mux(mode, f1.data_out[i], f0.data_out[i])
+                     for i in range(4)]
+
+        return (mode_first, mode_last, mode_data)
 
     def build_param_store(self, m):
         # Create memory for post process params
@@ -188,11 +215,14 @@ class AcceleratorCore(SimpleElaboratable):
 
         # Configure param reader
         m.submodules['param_reader'] = reader = ReadingProducer()
+        repeats = Mux(self.config.mode,
+                      Constants.SYS_ARRAY_HEIGHT,
+                      Constants.SYS_ARRAY_HEIGHT // 2)
         m.d.comb += [
             # Reset reader whenever new parameters are written
             reader.reset.eq(pw.input_data.is_transferring()),
             reader.sizes.depth.eq(self.config.output_channel_depth),
-            reader.sizes.repeats.eq(Constants.SYS_ARRAY_HEIGHT),
+            reader.sizes.repeats.eq(repeats),
             rp.addr.eq(reader.mem_addr),
             reader.mem_data.eq(rp.data),
         ]
@@ -202,6 +232,7 @@ class AcceleratorCore(SimpleElaboratable):
         """Builds and connects the accumulator reader part."""
         ar = ResetInserter(self.reset)(AccumulatorReader())
         m.submodules['acc_reader'] = ar
+        m.d.comb += ar.half_mode.eq(~self.config.mode)
         for i in range(8):
             m.d.comb += [
                 ar.accumulator[i].eq(accumulators[i]),
@@ -256,5 +287,6 @@ class AcceleratorCore(SimpleElaboratable):
         # Handle output
         m.submodules['owa'] = owa = ResetInserter(
             self.reset)(OutputWordAssembler())
+        m.d.comb += owa.half_mode.eq(~self.config.mode)
         m.d.comb += connect(ppp.output, owa.input)
         m.d.comb += connect(owa.output, self.output)
