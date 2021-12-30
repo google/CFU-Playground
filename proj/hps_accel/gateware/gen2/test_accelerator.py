@@ -42,7 +42,7 @@ class AcceleratorCoreTest(TestBase):
     """Tests AcceleratorCore"""
 
     NUM_OUTPUT_PIXELS = 16
-    BASE_ADDR = 0x123
+    BASE_ADDR = 0x1230
 
     def create_dut(self):
         return AcceleratorCore()

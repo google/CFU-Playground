@@ -28,7 +28,7 @@ class HpsCfuTest(CfuTestBase):
     """Tests HpsCfu class."""
 
     NUM_OUTPUT_PIXELS = 16
-    RAM_BASE_ADDR = 0x123
+    RAM_BASE_ADDR = 0x1230
 
     def create_dut(self):
         return HpsCfu()
@@ -117,8 +117,8 @@ class HpsCfuTest(CfuTestBase):
             yield Passive()
             while True:
                 for i in range(4):
-                    block = (yield self.dut.lram_addr[i]) - self.RAM_BASE_ADDR
-                    data_addr = block * 4 + i
+                    block = (yield self.dut.lram_addr[i])
+                    data_addr = (block - self.RAM_BASE_ADDR // 16) * 4 + i
                     data_value = data.input_data[data_addr % len(
                         data.input_data)]
                     yield self.dut.lram_data[i].eq(data_value)

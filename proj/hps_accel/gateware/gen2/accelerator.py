@@ -56,8 +56,8 @@ ACCELERATOR_CONFIGURATION_LAYOUT = [
     ('output_activation_min', signed(8)),
     #  The maximum output value
     ('output_activation_max', signed(8)),
-    # Address of start of input data, in 16 byte blocks (i.e addr 1 = byte 16)
-    ('input_base_addr', 14),
+    # Address of start of input data, in bytes
+    ('input_base_addr', 18),
     # How many pixels in output row
     ('num_pixels_x', 9),
     # Number of RAM blocks to advance to move to new pixel in X direction

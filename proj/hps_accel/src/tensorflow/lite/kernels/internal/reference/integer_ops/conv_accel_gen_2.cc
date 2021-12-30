@@ -188,9 +188,8 @@ void ConvPerChannel4x4(const ConvParams& params,
   const int filter_words_per_tranche =
       filter_words_per_channel * channels_per_tranche;
 
-  // Base address is bank address (4 words per bank) within 256K arena
-  uint32_t input_base_addr =
-      (reinterpret_cast<uint32_t>(input_data) & 0x3ffff) / 16;
+  // Base address is byte address within 256K arena
+  uint32_t input_base_addr = reinterpret_cast<uint32_t>(input_data) & 0x3ffff;
 
   // Configure simple values
   cfu_set(REG_INPUT_OFFSET, input_offset);

@@ -298,8 +298,8 @@ class Mode1InputFetcher(SimpleElaboratable):
         Pulsed to begin producing data. There is a delay of 2 cycles between
         the start signal and the first valid data being produced.
 
-    base_addr: Signal(14), in
-        A base number, added to all results
+    base_addr: Signal(18), in
+        A base address, in bytes. Assumed to be a multiple of 16
 
     num_pixels_x: Signal(9), in
         How many pixels in a row
@@ -343,7 +343,7 @@ class Mode1InputFetcher(SimpleElaboratable):
     def __init__(self):
         self.reset = Signal()
         self.start = Signal()
-        self.base_addr = Signal(14)
+        self.base_addr = Signal(18)
         self.num_pixels_x = Signal(9)
         self.pixel_advance_x = Signal(4)
         self.pixel_advance_y = Signal(8)
@@ -365,7 +365,7 @@ class Mode1InputFetcher(SimpleElaboratable):
 
         # Connect pixel address generator and repeater
         m.d.comb += [
-            pixel_ag.base_addr.eq(self.base_addr),
+            pixel_ag.base_addr.eq(self.base_addr >> 4),
             pixel_ag.num_pixels_x.eq(self.num_pixels_x),
             pixel_ag.num_blocks_x.eq(self.pixel_advance_x),
             pixel_ag.num_blocks_y.eq(self.pixel_advance_y),
