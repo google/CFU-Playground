@@ -352,7 +352,7 @@ class ReadingProducer(SimpleElaboratable):
     Attributes
     ----------
 
-    size_params: Record(POST_PROCESS_SIZES), in
+    sizes: Record(POST_PROCESS_SIZES), in
         Depth and repeat count for producing values.
 
     reset: Signal(1), in

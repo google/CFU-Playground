@@ -36,7 +36,6 @@ from .post_process import (
     OutputWordAssembler,
     ParamWriter,
     POST_PROCESS_PARAMS,
-    POST_PROCESS_SIZES,
     POST_PROCESS_PARAMS_WIDTH,
     PostProcessPipeline,
     ReadingProducer,
