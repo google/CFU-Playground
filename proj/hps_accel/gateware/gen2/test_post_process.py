@@ -484,7 +484,7 @@ class AccumulatorReaderTest(TestBase):
         for group in groups:
             for cycle in range(cycles):
                 for i in range(size):
-                    producing = order[i] == cycle
+                    producing = (order[i] % cycles) == cycle
                     if producing:
                         yield self.dut.accumulator_new[i].eq(True)
                         yield self.dut.accumulator[i].eq(group[i])
@@ -506,7 +506,7 @@ class AccumulatorReaderTest(TestBase):
             self.assertFalse((yield self.dut.output.valid))
             yield
 
-    def test_it_reads_accumulators(self):
+    def test_full_read(self):
         data = list(range(100, 100 + 10 * 8))
 
         def set_values():
@@ -515,6 +515,20 @@ class AccumulatorReaderTest(TestBase):
 
         def process():
             yield from self.check_outputs(data)
+        self.run_sim(process, False)
+
+    def test_half_read(self):
+        all_data = list(range(100, 100 + 10 * 8))
+        half_data = [d for i, d in enumerate(all_data) if i % 4 in [0, 1]]
+
+        def set_values():
+            # In half mode, set all values over just 4 cycles
+            yield self.dut.half_mode.eq(True)
+            yield from self.set_accumulators(all_data, 4)
+        self.add_process(set_values)
+
+        def process():
+            yield from self.check_outputs(half_data)
         self.run_sim(process, False)
 
 
