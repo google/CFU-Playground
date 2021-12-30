@@ -28,17 +28,6 @@ from .constants import Constants
 from .conv2d_data import fetch_data
 
 
-def unpack_bytes(word):
-    """Unpacks a 32 bit word into 4 signed byte length values."""
-    def as_8bit_signed(val):
-        val = val & 0xff
-        return val if val < 128 else val - 256
-    return (as_8bit_signed(word),
-            as_8bit_signed(word >> 8),
-            as_8bit_signed(word >> 16),
-            as_8bit_signed(word >> 24))
-
-
 def group(list_, size):
     """Separate list into sublists of size size"""
     return [list_[i:i + size] for i in range(0, len(list_), size)]
@@ -53,19 +42,16 @@ class AcceleratorCoreTest(TestBase):
     """Tests AcceleratorCore"""
 
     NUM_OUTPUT_PIXELS = 16
+    BASE_ADDR = 0x123
 
     def create_dut(self):
         return AcceleratorCore()
 
-    def setUp(self):
-        self.data = fetch_data('sample_conv_05')
-        super().setUp()
-
-    def extract_filter_data(self):
+    def extract_filter_data(self, data):
         # Splits filter data into "evens" and "odds" for the two columns of the
         # systolic array.
-        dims = self.data.filter_dims
-        filter_data = self.data.filter_data
+        dims = data.filter_dims
+        filter_data = data.filter_data
         # Group by words that are used to calculate a single output value
         num_filters_per_output = dims[1] * dims[2] * dims[3]
         filters_by_output = group(filter_data, num_filters_per_output // 4)
@@ -73,10 +59,21 @@ class AcceleratorCoreTest(TestBase):
         evens, odds = filters_by_output[::2], filters_by_output[1::2]
         return flatten(evens), flatten(odds)
 
-    def configure(self):
+    def reset_dut(self):
+        yield self.dut.reset.eq(1)
+        yield
+        yield self.dut.reset.eq(0)
+        yield
+
+    def start_dut(self):
+        yield self.dut.start.eq(1)
+        yield
+        yield self.dut.start.eq(0)
+        yield
+
+    def configure(self, data):
         # Configure the accelerator
         dut = self.dut
-        data = self.data
         num_filter_values = reduce(lambda a, b: a * b, data.filter_dims, 1)
         input_depth = data.input_dims[3]
         in_x_dim = data.input_dims[2]
@@ -88,7 +85,7 @@ class AcceleratorCoreTest(TestBase):
         yield dut.config.output_offset.eq(data.output_offset)
         yield dut.config.output_activation_min.eq(data.output_min)
         yield dut.config.output_activation_max.eq(data.output_max)
-        yield dut.config.input_base_addr.eq(0x123)
+        yield dut.config.input_base_addr.eq(self.BASE_ADDR)
         yield dut.config.num_pixels_x.eq(out_x_dim)
         yield dut.config.pixel_advance_x.eq(input_depth // 16)
         yield dut.config.pixel_advance_y.eq((input_depth // 16) * in_x_dim)
@@ -96,10 +93,7 @@ class AcceleratorCoreTest(TestBase):
         yield dut.config.output_channel_depth.eq(output_depth)
         yield dut.config.num_output_values.eq(self.NUM_OUTPUT_PIXELS * output_depth)
 
-        # Toggle resets
-        yield dut.reset.eq(1)
-        yield
-        yield dut.reset.eq(0)
+        yield from self.reset_dut()
 
         # load post process parameters
         for i in range(output_depth):
@@ -114,7 +108,7 @@ class AcceleratorCoreTest(TestBase):
         yield
 
         # Load filters
-        filter_data = self.extract_filter_data()
+        filter_data = self.extract_filter_data(data)
         for addr in range(filter_words_per_store):
             for store in range(2):
                 inp = dut.write_filter_input
@@ -125,50 +119,55 @@ class AcceleratorCoreTest(TestBase):
                 yield
                 yield inp.valid.eq(False)
 
-    def test_convolution(self):
-        # tests part of a convolution, producing results for 16 output pixels
-        # uses data dumped from a real convolution
-        dut = self.dut
-        data = self.data
-
+    def simulate_lram(self, data):
+        # Simulates LRAM holding input data
         def ram():
             yield Passive()
             while True:
                 for i in range(4):
-                    block = (yield dut.lram_addr[i]) - 0x123
+                    block = (yield self.dut.lram_addr[i]) - self.BASE_ADDR
                     data_addr = block * 4 + i
                     data_value = data.input_data[data_addr % len(
                         data.input_data)]
-                    yield dut.lram_data[i].eq(data_value)
+                    yield self.dut.lram_data[i].eq(data_value)
                 yield
         self.add_process(ram)
 
-        def start_dut():
-            yield Passive()
-            yield from self.configure()
-
-            # Start the dut
-            yield dut.start.eq(1)
-            yield
-            yield dut.start.eq(0)
-            yield
-
-        self.add_process(start_dut)
-
-        def check_output():
-            yield dut.output.ready.eq(1)
-
-            # Collect all of the output data for all pixels
-            actual_outputs = []
-            for i in range(self.NUM_OUTPUT_PIXELS * data.output_dims[3] // 4):
-                while not (yield dut.output.valid):
-                    yield
-                actual_outputs.append((yield dut.output.payload) & 0xffff_ffff)
+    def collect_output(self, data):
+        # Collects output from dut
+        yield self.dut.output.ready.eq(1)
+        collected = []
+        for i in range(self.NUM_OUTPUT_PIXELS * data.output_dims[3] // 4):
+            while not (yield self.dut.output.valid):
                 yield
-            # Check for a bit longer to ensure no more data than expected
-            for _ in range(100):
-                self.assertFalse((yield dut.output.valid))
-                yield
+            collected.append((yield self.dut.output.payload) & 0xffff_ffff)
+            yield
+        # Check for a bit longer to ensure no more data than expected
+        for _ in range(100):
+            self.assertFalse((yield self.dut.output.valid))
+            yield
+        return collected
+
+    def check_output(self, data, collected_data):
+        # Check reordered output against expected
+        for i, (actual, expected) in enumerate(
+                zip(collected_data, data.expected_output_data)):
+            self.assertEqual(
+                actual, expected, f" word {i}: " +
+                f"actual {actual:08x} != expected {expected:08x} "
+                f"(pos {i*4}, output {i // 4}, row {i % 4}, col {i %2})")
+
+
+    def test_convolution_05(self):
+        # tests a conv2D with input and output depths of 16
+        dut = self.dut
+        data = fetch_data('sample_conv_05')
+        self.simulate_lram(data)
+
+        def run():
+            yield from self.configure(data)
+            yield from self.start_dut()
+            actual_outputs = (yield from self.collect_output(data))
 
             # Reorder output words to match tflite expected order
             reordered_actual = []
@@ -177,13 +176,6 @@ class AcceleratorCoreTest(TestBase):
                 reordered_actual += four_pixels[1::4]
                 reordered_actual += four_pixels[2::4]
                 reordered_actual += four_pixels[3::4]
+            self.check_output(data, reordered_actual)
 
-            # Check reordered output against expected
-            for i, (actual, expected) in enumerate(
-                    zip(reordered_actual, self.data.expected_output_data)):
-                self.assertEqual(
-                    actual, expected, f" word {i}: " +
-                    f"actual {actual:08x} != expected {expected:08x} "
-                    f"(pos {i*4}, output {i // 4}, row {i % 4}, col {i %2})")
-
-        self.run_sim(check_output, False)
+        self.run_sim(run, False)
