@@ -192,6 +192,7 @@ void ConvPerChannel4x4(const ConvParams& params,
   uint32_t input_base_addr = reinterpret_cast<uint32_t>(input_data) & 0x3ffff;
 
   // Configure simple values
+  cfu_set(REG_MODE, MODE_1);
   cfu_set(REG_INPUT_OFFSET, input_offset);
   cfu_set(REG_NUM_FILTER_WORDS, filter_words_per_tranche / 2);
   cfu_set(REG_OUTPUT_OFFSET, output_offset);

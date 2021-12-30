@@ -132,9 +132,6 @@ class SetInstruction(InstructionBase):
         m.d.sync += self.filter_output.valid.eq(0)
         m.d.sync += self.post_process_params.valid.eq(0)
 
-        # Set Mode 1 to ensure continued compatibility
-        m.d.comb += self.config.mode.eq(1)
-
         # post process parameters
         pp_bias = Signal(signed(16))
         pp_shift = Signal(unsigned(4))
@@ -158,6 +155,8 @@ class SetInstruction(InstructionBase):
                         self.filter_output.payload.data.eq(self.in1),
                         self.filter_output.valid.eq(1),
                     ]
+                with m.Case(Constants.REG_MODE):
+                    m.d.sync += self.config.mode.eq(self.in0)
                 with m.Case(Constants.REG_INPUT_OFFSET):
                     m.d.sync += self.config.input_offset.eq(self.in0s)
                 with m.Case(Constants.REG_NUM_FILTER_WORDS):
