@@ -19,6 +19,7 @@ limitations under the License.
 #include <limits>
 
 #include "playground_util/dump.h"
+#include "playground_util/murmurhash.h"
 #include "playground_util/print_params.h"
 #include "tensorflow/lite/kernels/internal/common.h"
 #include "tensorflow/lite/kernels/internal/reference/integer_ops/conv_accel_gen_1.h"
@@ -218,12 +219,20 @@ inline void ConvPerChannel(
 #endif
 
   if (!accelerated) {
-    printf("ConvPerChannel() not accelerated!\n");
+    printf("X");
     UnacceleratedConvPerChannel(params, output_multiplier, output_shift,
                                 input_shape, input_data, filter_shape,
                                 filter_data, bias_shape, bias_data,
                                 output_shape, output_data);
   }
+
+#ifdef SHOW_OUTPUT_HASHES
+  static int hash_layer = 0;
+  int32_t hash = murmurhash3_32(reinterpret_cast<uint8_t*>(output_data),
+                                output_shape.FlatSize());
+  printf("%3d: %08lx\n", hash_layer, hash);
+  hash_layer++;
+#endif
 }
 
 // Fixed-point per-channel-quantization convolution reference kernel.
