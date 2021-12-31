@@ -26,7 +26,6 @@ from nmigen_cfu import pack_vals, TestBase
 from .accelerator import AcceleratorCore
 from .constants import Constants
 from .conv2d_data import fetch_data
-from .ram_input import InputFetcher
 
 
 def unpack_bytes(word):
@@ -59,7 +58,7 @@ class AcceleratorCoreTest(TestBase):
         return AcceleratorCore()
 
     def setUp(self):
-        self.data = fetch_data('sample_conv_1')
+        self.data = fetch_data('sample_conv_05')
         super().setUp()
 
     def extract_filter_data(self):

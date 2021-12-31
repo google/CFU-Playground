@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Fetches data from RAM for input to Conv2D ops.
+"""Fetches data from RAM for input to Conv2D ops (Mode1).
+
+This Mode1 fetcher is used when the Conv2D input data has a depth that is
+a multiple of 16. Each pixel's data is aligned on 16 byte boundaries.
 
 The RAM from which data is fetched consists of 4 32 bit wide, 16K words deep
 LRAMs, with word addresses in rows across the LRAMs:
@@ -29,20 +32,18 @@ LRAMs, with word addresses in rows across the LRAMs:
 |  ...   |  ...   |  ...   |  ...   |
 +--------+--------+--------+--------+
 
-The main mode is used when Conv2D input data has a depth that is a multiple of
-16 values per pixel. We call these groups of 16 bytes a "block". Each block
-fits exactly in 4 words (4 bytes * 4 bytes/word = 16 bytes). Blocks are each
-spread across the four LRAMs, beginning in LRAM 0.
+We call each group of 4 words (16 bytes) a "block". Each input pixels data
+begins on a block boundary and is an exact multiple of a number of blocks long.
+The first word for each pixel is in LRAM0, the second in LRAM1 and so on.
 
-In this main mode, four words are fetched concurrently, one word for each of
-four separate pixels. This produces four separate streams of pixel data.
+The input fetcher produces four streams of pixel data suitable for input to the
+systolic array. Each stream consists of a 4x4 square of pixels extracted from
+the larger input buffer.
 
-Each stream of pixel data corresponds to the input data for the calculation of
-a channel of an output pixel in a Conv2D operation. It therefore requires
-fetching data for a 4x4 group of pixels.In the X direction, the blocks of
-pixel data are sequential - data for pixels (1, 0) is directly after pixel
-(0,0). The following table shows the memory access pattern at the beginning
-of a fetch of four pixels.
+In the X direction, the blocks of pixel data are sequential - data for pixels
+(1, 0) is directly after pixel (0,0). The following table shows the memory
+access pattern at the beginning of a fetch of four pixels where input
+depth = 16.
 
 +------+---------+---------+---------+---------+
 | time | fetch 0 | fetch 1 | fetch 2 | fetch 3 |
@@ -65,21 +66,12 @@ is a little more complicated. There are two classes involved in address
 generation: the `PixelAddressGenerator` generates the start addresses from
 which data is to be read, and the `ValueAddressGenerator` generates the
 addresses for all the data for a given output pixel from that start address.
-
-TODO:
-- handle padding in y or x directions
-
-TODO: An alternate mode to deal with input layers
-- one channel per input
-- probably padding to include
-- stride 2 in both directions
-- no need to cross row boundaries
 """
 
 from nmigen import Array, Mux, Signal, unsigned
 from nmigen_cfu.util import SimpleElaboratable
 
-from .utils import delay, unsigned_upto
+from .utils import unsigned_upto
 
 
 class PixelAddressGenerator(SimpleElaboratable):
@@ -107,10 +99,11 @@ class PixelAddressGenerator(SimpleElaboratable):
         Number of RAM blocks to advance between pixels in Y direction
 
     addr: Signal(14), out
-        The output row address for the current pixel.
+        The output block address for the current pixel.
 
     start: Signal(), in
-        Starts address generation. Addr will be updated on next cycle.
+        Starts address generation. Addr will be updated to base_addr on next
+        cycle.
 
     next: Signal(), in
         Indicates current address has been used. Address will be updated on next
@@ -164,6 +157,9 @@ class PixelAddressRepeater(SimpleElaboratable):
 
     Attributes
     ----------
+
+    repeats: Signal(unsigned_upto(64)), in
+        The number of times each stream of input pixel data is to be repeated.
 
     next: Signal(), in
         Indicates current address has been used. Address will be updated on next
@@ -219,73 +215,13 @@ class PixelAddressRepeater(SimpleElaboratable):
             m.d.sync += group.eq(0)
 
 
-class RoundRobin4(SimpleElaboratable):
-    """Connects four sets of input and output signals to each other in turn.
-
-    Each input is connected to an output, but that output rotates on
-    each cycle. There are four ways in which connections are made,
-    indicated by the 'phase' signal.
-
-    +-------+-------+-------+-------+-------+
-    | Phase | out 0 | out 1 | out 2 | out 3 |
-    +-------+-------+-------+-------+-------+
-    |    0  |   0   |   3   |   2   |   1   |
-    |    1  |   1   |   0   |   3   |   2   |
-    |    2  |   2   |   1   |   0   |   3   |
-    |    3  |   3   |   2   |   1   |   0   |
-    +-------+-------+-------+-------+-------+
-
-    Parameters
-    ----------
-
-    shape: Shape
-        The shape of the four signals to be connected
-
-    Attributes
-    ----------
-
-    mux_in: [Signal(shape) * 4], in
-        The incoming signals.
-
-    mux_out: [Signal(shape) * 4], out
-        The incoming signals connected as per the current phase.
-
-    phase: Signal(range(4)), out
-        The current phase, indicating which signal is connected to
-        which output.
-
-    start: Signal(), in
-        Resets phase to 0 on next cycle.
-    """
-
-    def __init__(self, *, shape):
-        self.mux_in = [Signal(shape, name=f"in_{i}") for i in range(4)]
-        self.mux_out = [Signal(shape, name=f"out_{i}") for i in range(4)]
-        self.phase = Signal(range(4))
-        self.start = Signal()
-
-    def elab(self, m):
-        # phase is a free running counter with reset
-        m.d.sync += self.phase.eq(self.phase + 1)
-        with m.If(self.start):
-            m.d.sync += self.phase.eq(0)
-
-        # Connect outputs to inputs depending on phase
-        def connect_for_phase(p):
-            for i in range(4):
-                m.d.comb += self.mux_out[i].eq(self.mux_in[(p - i) % 4])
-        with m.Switch(self.phase):
-            for p in range(4):
-                with m.Case(p):
-                    connect_for_phase(p)
-
-
 class ValueAddressGenerator(SimpleElaboratable):
     """Generates addresses within a single pixel.
 
     Specifically for a 4x4 2DConv, works with a PixelAddressGenerator to find
-    addresses of individual values. It reads `columns` * 4 * 32bit words,
-    then moves down and repeats this three times.
+    addresses of individual values. It reads `depth` * 4 * 32bit words,
+    then moves down and repeats this. An external counter re-starts the
+    generator once it has read 4 complete rows of input.
 
     Attributes
     ----------
@@ -345,15 +281,11 @@ class ValueAddressGenerator(SimpleElaboratable):
                 ]
 
 
-class InputFetcher(SimpleElaboratable):
+class Mode1InputFetcher(SimpleElaboratable):
     """Fetches input vectors for Conv2D.
 
     Coordinates a "normal mode" input fetch, where input data depth is a
     multiple of 16.
-
-    This is a free-running component which synchronizes its start when
-    "start" is pulsed high.
-
 
     Attributes
     ----------
@@ -386,10 +318,13 @@ class InputFetcher(SimpleElaboratable):
     repeats: Signal(unsigned_upto(64)), in
         The number of times each stream of input pixel data is to be repeated.
 
-    lram_addr: [Signal(14)] * 4, out
-        Address for each LRAM bank
+    ram_mux_phase: Signal(range(4)), out
+        The phase provided to the RamMux
 
-    lram_data: [Signal(32)] * 4, in
+    ram_mux_addr: [Signal(14)] * 4, out
+        Addresses to send to the RAM Mux
+
+    ram_mux_data: [Signal(32)] * 4, in
         Data as read from addresses provided at previous cycle.
 
     data_out: [Signal(32)] * 4, out
@@ -414,8 +349,9 @@ class InputFetcher(SimpleElaboratable):
         self.pixel_advance_y = Signal(8)
         self.depth = Signal(3)
         self.num_repeats = Signal(unsigned_upto(64))
-        self.lram_addr = [Signal(14, name=f"lram_addr{i}") for i in range(4)]
-        self.lram_data = [Signal(32, name=f"lram_data{i}") for i in range(4)]
+        self.ram_mux_phase = Signal(range(4))
+        self.ram_mux_addr = [Signal(14, name=f"rm_addr{i}") for i in range(4)]
+        self.ram_mux_data = [Signal(32, name=f"rm_data{i}") for i in range(4)]
         self.data_out = [Signal(32, name=f"data_out{i}") for i in range(4)]
         self.first = Signal()
         self.last = Signal()
@@ -423,8 +359,6 @@ class InputFetcher(SimpleElaboratable):
     def elab(self, m):
         m.submodules["pixel_ag"] = pixel_ag = PixelAddressGenerator()
         m.submodules["repeater"] = repeater = PixelAddressRepeater()
-        m.submodules["rraddr"] = rr_addr = RoundRobin4(shape=unsigned(14))
-        m.submodules["rrdata"] = rr_data = RoundRobin4(shape=unsigned(32))
         value_ags = [ValueAddressGenerator() for _ in range(4)]
         for i, v in enumerate(value_ags):
             m.submodules[f"value_ag{i}"] = v
@@ -438,33 +372,17 @@ class InputFetcher(SimpleElaboratable):
             repeater.repeats.eq(self.num_repeats),
             pixel_ag.next.eq(repeater.gen_next),
             repeater.gen_addr.eq(pixel_ag.addr),
+            pixel_ag.start.eq(self.start),
+            repeater.start.eq(self.start),
         ]
 
         # Connect value address generators
-        for i, v in enumerate(value_ags):
+        for v in value_ags:
             m.d.comb += [
                 v.start_addr.eq(repeater.addr),
                 v.depth.eq(self.depth),
                 v.num_blocks_y.eq(self.pixel_advance_y),
-                rr_addr.mux_in[i].eq(v.addr_out),
             ]
-
-        # Connect round robins to LRAM and data output
-        for i in range(4):
-            m.d.comb += [
-                self.lram_addr[i].eq(rr_addr.mux_out[i]),
-                rr_data.mux_in[i].eq(self.lram_data[i]),
-                self.data_out[i].eq(rr_data.mux_out[i]),
-            ]
-
-        # Sequence start signals to PixelAddressGenerator and round robins
-        starts = delay(m, self.start, 1)
-        m.d.comb += [
-            pixel_ag.start.eq(starts[0]),
-            repeater.start.eq(starts[0]),
-            rr_addr.start.eq(starts[0]),
-            rr_data.start.eq(starts[1]),
-        ]
 
         # cycle_counter counts cycles through reading input data
         max_cycle_counter = Signal(9)
@@ -497,3 +415,11 @@ class InputFetcher(SimpleElaboratable):
             self.first.eq(running & (cycle_counter == 0)),
             self.last.eq(running & (cycle_counter == max_cycle_counter)),
         ]
+
+        # Connect to RamMux
+        m.d.comb += self.ram_mux_phase.eq(cycle_counter[:2])
+        for i in range(4):
+            m.d.comb += [
+                self.ram_mux_addr[i].eq(value_ags[i].addr_out),
+                self.data_out[i].eq(self.ram_mux_data[i]),
+            ]

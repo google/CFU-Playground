@@ -419,7 +419,8 @@ class ReadingProducer(SimpleElaboratable):
 class AccumulatorReader(SimpleElaboratable):
     """Reads accumulators, in turn as values become available.
 
-    Hard-wired for 8 accumulators.
+    In normal mode, reads all 8 accumulators. In half_mode, reads
+    just accumulators 0, 1, 4 and 5.
 
     Parameters
     ----------
@@ -431,10 +432,13 @@ class AccumulatorReader(SimpleElaboratable):
     ----------
 
     accumulator: [Signal(accumulator_shape)] * 8, in
-        The value to select.
+      The value to select.
 
     accumulator_new: [Signal()] * 8, in
-        Strobes when new value available in accumulator.
+      Strobes when new value available in accumulator.
+
+    half_mode: Signal(), in
+      When True, reads only half of the accumulators
 
     output: Endpoint(accumulator_shape), in
       The accumulated values to convert. Values not read before new values
@@ -445,6 +449,7 @@ class AccumulatorReader(SimpleElaboratable):
         self.accumulator = [Signal(accumulator_shape,
                                    name=f"acc_{i}") for i in range(8)]
         self.accumulator_new = [Signal(name=f"acc_new_{i}") for i in range(8)]
+        self.half_mode = Signal()
         self.output = Endpoint(accumulator_shape)
 
     def elab(self, m):
@@ -458,17 +463,27 @@ class AccumulatorReader(SimpleElaboratable):
             with m.If(self.accumulator_new[i]):
                 m.d.sync += flags[i].eq(1)
 
+        # Calculate index of value to output
+        index = Signal(range(8))
+        next_index = Signal(range(8))
+        with m.If(self.half_mode):
+            # counts: 0, 1, 4, 5, 0 ... 
+            m.d.comb += next_index[1].eq(0)
+            m.d.comb += Cat(next_index[0], next_index[2]
+                            ).eq(Cat(index[0], index[2]) + 1)
+        with m.Else():
+            m.d.comb += next_index.eq(index + 1)
+
         # If value available this cycle, or previously
         # - output new value
         # - unset flag
         # - increment index
-        index = Signal(range(8))
         with m.If(Array(self.accumulator_new)[index] | flags[index]):
             m.d.sync += [
                 self.output.payload.eq(Array(self.accumulator)[index]),
                 self.output.valid.eq(1),
                 flags[index].eq(0),
-                index.eq(index + 1),
+                index.eq(next_index),
             ]
 
 

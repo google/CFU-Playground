@@ -12,21 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for ram_input.py"""
+"""Tests for mode1_input.py"""
 
 import itertools
 
-from nmigen import unsigned
-from nmigen.sim import Passive
+from nmigen import Memory, unsigned
+from nmigen.sim import Passive, Delay, Settle
 from nmigen_cfu import TestBase
 
 from .conv2d_data import fetch_data
-from .ram_input import (
-    InputFetcher,
+from .mode1_input import (
+    Mode1InputFetcher,
     PixelAddressGenerator,
     PixelAddressRepeater,
-    RoundRobin4,
     ValueAddressGenerator)
+from .ram_mux import RamMux
 
 
 class PixelAddressGeneratorTest(TestBase):
@@ -132,45 +132,6 @@ class PixelAddressRepeaterTest(TestBase):
         self.run_sim(process, False)
 
 
-class RoundRobin4Test(TestBase):
-    """Tests RoundRobin4 class."""
-
-    def create_dut(self):
-        return RoundRobin4(shape=unsigned(8))
-
-    def test_it(self):
-        dut = self.dut
-        X = None
-        DATA = [
-            # start, mux_in, phase, mux_out
-            (1, [0, 0, 0, 0], X, [X, X, X, X]),
-            (0, [0, 1, 2, 3], 0, [0, 3, 2, 1]),
-            (0, [10, 11, 12, 13], 1, [11, 10, 13, 12]),
-            (0, [20, 21, 22, 23], 2, [22, 21, 20, 23]),
-            (0, [30, 31, 32, 33], 3, [33, 32, 31, 30]),
-            (0, [40, 41, 42, 43], 0, [40, 43, 42, 41]),
-            (0, [50, 51, 52, 53], 1, [51, 50, 53, 52]),
-            (1, [60, 62, 62, 63], X, [X, X, X, X]),
-            (0, [70, 71, 72, 73], 0, [70, 73, 72, 71]),
-            (0, [80, 81, 82, 83], 1, [81, 80, 83, 82]),
-        ]
-
-        def process():
-            for start, mux_in, phase, expected_mux_out in DATA:
-                yield dut.start.eq(start)
-                for sig, data in zip(dut.mux_in, mux_in):
-                    yield sig.eq(data)
-                yield
-                if phase is not None:
-                    self.assertEqual((yield dut.phase), phase)
-                for sig, expected in zip(dut.mux_out, expected_mux_out):
-                    if expected is not None:
-                        actual = (yield sig)
-                        expected = (expected)
-                        self.assertEqual((yield sig), expected)
-        self.run_sim(process, False)
-
-
 class ValueAddressGeneratorTest(TestBase):
     """Tests ValueAddressGenerator class."""
 
@@ -225,15 +186,31 @@ class ValueAddressGeneratorTest(TestBase):
         self.run_sim(process, False)
 
 
-class InputFetcherTest(TestBase):
-    """Tests InputFetcher class."""
+class Mode1InputFetcherTest(TestBase):
+    """Tests Mode1InputFetcher class."""
 
     def create_dut(self):
-        return InputFetcher()
+        fetcher = Mode1InputFetcher()
+        # Connect RAM Mux with simulated LRAMs
+        self.m.submodules["ram_mux"] = ram_mux = RamMux()
+        self.m.d.comb += ram_mux.phase.eq(fetcher.ram_mux_phase)
+        for i in range(4):
+            init = ([0] * 0x12 + self.data.input_data[i::4])[:1024]
+            mem = Memory(width=32, depth=1024, init=init)
+            rp = mem.read_port(transparent=False)
+            self.m.d.comb += [
+                ram_mux.lram_data[i].eq(rp.data),
+                rp.addr.eq(ram_mux.lram_addr[i]),
+                rp.en.eq(1),
+                ram_mux.addr_in[i].eq(fetcher.ram_mux_addr[i]),
+                fetcher.ram_mux_data[i].eq(ram_mux.data_out[i]),
+            ]
+            self.m.submodules[f"rp{i}"] = rp
+        return fetcher
 
     def setUp(self):
+        self.data = fetch_data('sample_conv_05')
         super().setUp()
-        self.data = fetch_data('sample_conv_1')
 
     def pixel_input_values(self, index):
         # Get values for a given pixel number
@@ -258,42 +235,7 @@ class InputFetcherTest(TestBase):
         dut = self.dut
         data = self.data
 
-        def ram():
-            yield Passive()
-            while True:
-                for i in range(4):
-                    block = (yield dut.lram_addr[i]) - 0x123
-                    data_addr = block * 4 + i
-                    yield dut.lram_data[i].eq(data.input_data[data_addr])
-                yield
-        self.add_process(ram)
-
         captured_outputs = [[] for _ in range(4)]
-
-        def capture_output(n):
-            # Captures one output as a list of lists into captured_outputs
-            data_out = dut.data_out[n]
-
-            def fn():
-                yield Passive()
-                # Wait for first "first" signal, then begin capturing
-                while not (yield dut.first):
-                    yield
-                first_seen, last_seen, capture = None, None, []
-                for cycle in itertools.count():
-                    if (yield dut.first):
-                        first_seen = cycle
-                    if (yield dut.last):
-                        last_seen = cycle
-                    if cycle - n == first_seen:
-                        capture = []
-                    capture.append((yield data_out))
-                    if cycle - n == last_seen:
-                        captured_outputs[n].append(capture)
-                    yield
-            return fn
-        for n in range(4):
-            self.add_process(capture_output(n))
 
         def process():
             # Configure the dut to match the input
@@ -301,7 +243,7 @@ class InputFetcherTest(TestBase):
             in_x_dim = data.input_dims[2]
             out_x_dim = data.output_dims[2]
 
-            yield dut.base_addr.eq(0x123)
+            yield dut.base_addr.eq(0x12)
             yield dut.num_pixels_x.eq(out_x_dim)
             yield dut.pixel_advance_x.eq(depth // 16)
             yield dut.pixel_advance_y.eq((depth // 16) * in_x_dim)
@@ -317,28 +259,32 @@ class InputFetcherTest(TestBase):
             yield dut.start.eq(1)
             yield
             yield dut.start.eq(0)
+            yield
 
+            # For each of the four outputs, capture values between first and last
             # Number of pixels of output we want to capture
-            # Use "data.output_dims[1] * data.output_dims[2]" to test all rows
-            # (takes about 30 seconds)
             # Test with 3 rows
-            capture_pixels = 3 * data.output_dims[2]
-            input_words_per_output_pixel = depth // 4 * 16
-            # num_cycles is 2 cycle startup + time to output first stream + 3 cycles
-            # for other streams to finish
-            num_cycles = (
-                capture_pixels * input_words_per_output_pixel // 4) + 5
-            for cycle in range(num_cycles):
+            num_pixels = 3 * data.output_dims[2]
+            actual = [[], [], [], []]
+            pixel = 0
+            cycle = 0
+            first_seen = last_seen = -10
+            while pixel < num_pixels:
+                if (yield dut.first):
+                    first_seen = cycle
+                if (yield dut.last):
+                    last_seen = cycle
+
+                for i in range(4):
+                    if cycle == first_seen + i:
+                        actual[i] = []
+                    actual[i].append((yield dut.data_out[i]))
+                    if cycle == last_seen + i:
+                        expected = self.pixel_input_values(pixel)
+                        self.assertEqual(
+                            actual[i], expected, msg=f"differ at pixel {pixel}")
+                        pixel += 1
+                cycle += 1
                 yield
 
         self.run_sim(process, False)
-
-        # Reorder data
-        ordered_outputs = []
-        for group in zip(*captured_outputs):
-            for i in range(4):
-                ordered_outputs.append(group[i])
-
-        for i, actual in enumerate(ordered_outputs):
-            expected = self.pixel_input_values(i)
-            self.assertEqual(actual, expected, msg=f"differ at index {i}")

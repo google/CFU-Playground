@@ -30,6 +30,7 @@ from ..stream import connect, Endpoint
 from .constants import Constants
 from .filter import FilterStore, FILTER_WRITE_COMMAND
 from .mem import SinglePortMemory
+from .mode1_input import Mode1InputFetcher
 from .post_process import (
     AccumulatorReader,
     OutputWordAssembler,
@@ -40,7 +41,7 @@ from .post_process import (
     PostProcessPipeline,
     ReadingProducer,
     StreamLimiter)
-from .ram_input import InputFetcher
+from .ram_mux import RamMux
 from .sysarray import SystolicArray
 from .utils import unsigned_upto
 
@@ -140,7 +141,8 @@ class AcceleratorCore(SimpleElaboratable):
         return store.values_out
 
     def build_input_fetcher(self, m, stop):
-        m.submodules['fetcher'] = fetcher = InputFetcher()
+        m.submodules['fetcher'] = fetcher = Mode1InputFetcher()
+        m.submodules['ram_mux'] = ram_mux = RamMux()
         # We reset the fetcher on stop to avoid spurious first and last
         # signals that might corrupt the next accelerator reset.
         repeats = (self.config.output_channel_depth //
@@ -154,11 +156,14 @@ class AcceleratorCore(SimpleElaboratable):
             fetcher.pixel_advance_y.eq(self.config.pixel_advance_y),
             fetcher.depth.eq(self.config.input_channel_depth >> 4),
             fetcher.num_repeats.eq(repeats),
+            ram_mux.phase.eq(fetcher.ram_mux_phase)
         ]
         for i in range(4):
             m.d.comb += [
-                self.lram_addr[i].eq(fetcher.lram_addr[i]),
-                fetcher.lram_data[i].eq(self.lram_data[i]),
+                self.lram_addr[i].eq(ram_mux.lram_addr[i]),
+                ram_mux.lram_data[i].eq(self.lram_data[i]),
+                ram_mux.addr_in[i].eq(fetcher.ram_mux_addr[i]),
+                fetcher.ram_mux_data[i].eq(ram_mux.data_out[i]),
             ]
 
         return fetcher.first, fetcher.last, fetcher.data_out

@@ -17,7 +17,7 @@
 #include "conv2d_04.h"
 
 namespace {
-
+// This data obtained by dumping layer 4 of the 09_20 model
 // kValid, 0, 0, 0, -24080, 1, 1, 1, 1, 128, 0, -128, 0, 0, -128, 127, 1, 28,
 // 163, 16, 16, 4, 4, 16, 1, 25, 160, 16,
 

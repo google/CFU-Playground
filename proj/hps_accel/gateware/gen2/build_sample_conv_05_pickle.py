@@ -12,14 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Data from 6th Conv2D op in 09_20 model with cat picture input.
+"""Data from Conv2D op 05 in 09_20 model with cat picture input.
 
-This op is a 4x4 conv with 16 deep inputs and 16 deep outputs outputs.
+This op is a 4x4 conv with 16 deep inputs and 16 deep outputs outputs. It
+is the same op as contained in the conv2d_05.cc test data file.
 
 Run with
 ```
 cd proj/hps_accel
-../../scripts/pyrun -m gateware.gen2.build_sample_conv_1_pickle
+../../scripts/pyrun -m gateware.gen2.build_sample_conv_05_pickle
 ```
 """
 from pathlib import Path
@@ -27,6 +28,7 @@ import pickle
 import sys
 
 from .conv2d_data import Conv2DData, save_data
+from .utils import as_signed_int32_array, as_unsigned_int32_array
 
 if __name__ != '__main__':
   print('Run as script to produce a data file. Do not import')
@@ -7914,21 +7916,6 @@ output_data_raw = [
   0x80,0x80,0x80,0x80,0x80,0xb0,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,
 ]
 
-def as_signed_int32_array(byte_array):
-  """Interprets array of byte values as signed 32 bit ints."""
-  def int32(a, b, c, d):
-    unsigned = a + (b << 8) + (c << 16) + (d << 24)
-    return unsigned if unsigned < (2**31) else (unsigned - 2**32)
-
-  return [int32(*byte_array[i:i+4]) for i in range(0, len(byte_array), 4)]
-
-def as_unsigned_int32_array(byte_array):
-  """Interprets array of byte values as unsigned 32 bit ints."""
-  def uint32(a, b, c, d):
-    return a + (b << 8) + (c << 16) + (d << 24)
-
-  return [uint32(*byte_array[i:i+4]) for i in range(0, len(byte_array), 4)]
-
 
 data = Conv2DData(
     input_dims = [1, 25, 163, 16],
@@ -7942,9 +7929,10 @@ data = Conv2DData(
     output_multipliers = as_signed_int32_array(output_multipliers_raw),
     output_shifts = as_signed_int32_array(output_shift_raw),
     output_biases = as_signed_int32_array(output_bias_raw),
+    raw_input_data = input_data_raw,
     input_data = as_unsigned_int32_array(input_data_raw),
     filter_data = as_unsigned_int32_array(filter_data_raw),
     expected_output_data = as_unsigned_int32_array(output_data_raw))
 
 
-save_data('sample_conv_1', data)
+save_data('sample_conv_05', data)
