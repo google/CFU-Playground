@@ -56,43 +56,15 @@ class CumulativeMinMax {
   int32_t min_;
   int32_t max_;
 };
-}  // namespace
 
-// Fixed-point per-channel-quantization convolution reference kernel.
-inline void ConvPerChannel(
+// The unmodified 8bit ConvPerChannel function
+inline void UnacceleratedConvPerChannel(
     const ConvParams& params, const int32_t* output_multiplier,
     const int32_t* output_shift, const RuntimeShape& input_shape,
     const int8_t* input_data, const RuntimeShape& filter_shape,
     const int8_t* filter_data, const RuntimeShape& bias_shape,
     const int32_t* bias_data, const RuntimeShape& output_shape,
     int8_t* output_data) {
-#ifdef SHOW_CONV_PARAMS
-  print_conv_params(params, input_shape, filter_shape, output_shape);
-
-// Uncomment to print values
-#if 0
-  printf("output_multiplier\n");
-  print_int32_array(output_multiplier, output_shape.Dims(3));
-  printf("output_shift\n");
-  print_int32_array(output_shift, output_shape.Dims(3));
-  printf("bias\n");
-  print_int32_array(bias_data, output_shape.Dims(3));
-#endif
-
-// Uncomment to show min/max values for each
-#if 0
-  static CumulativeMinMax multiplier_minmax("multiplier");
-  multiplier_minmax.update(output_multiplier, output_shape.Dims(3));
-  multiplier_minmax.print();
-  static CumulativeMinMax shift_minmax("shift");
-  shift_minmax.update(output_shift, output_shape.Dims(3));
-  shift_minmax.print();
-  static CumulativeMinMax bias_minmax("bias");
-  bias_minmax.update(bias_data, output_shape.Dims(3));
-  bias_minmax.print();
-#endif
-
-#endif
   // Get parameters.
   const int32_t input_offset = params.input_offset;  // r = s(q - Z)
   const int stride_width = params.stride_width;
@@ -126,32 +98,6 @@ inline void ConvPerChannel(
   const int filter_width = filter_shape.Dims(2);
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
-
-#ifdef ACCEL_CONV
-#if GATEWARE_GEN == 1
-  // Use specialised implementation if possible.
-  if (params.padding_type == PaddingType::kValid &&
-      (input_depth == 1 || input_depth % 4 == 0) && filter_width == 4 &&
-      filter_height == 4 && dilation_width_factor == 1 &&
-      dilation_height_factor == 1 && batches == 1 && bias_data != NULL) {
-    ConvPerChannel4x4(params, output_multiplier, output_shift, input_shape,
-                      input_data, filter_shape, filter_data, bias_shape,
-                      bias_data, output_shape, output_data);
-    return;
-  }
-#elif GATEWARE_GEN == 2
-  if (CanAccelerateConv4x4(params, input_shape, filter_shape, output_shape,
-                           bias_data)) {
-    ConvPerChannel4x4(params, output_multiplier, output_shift, input_shape,
-                      input_data, filter_shape, filter_data, bias_shape,
-                      bias_data, output_shape, output_data);
-    return;
-  }
-
-#endif
-  printf("ConvPerChannel() not accelerated!\n");
-#endif
-
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
       const int in_y_origin = (out_y * stride_height) - pad_height;
@@ -213,38 +159,71 @@ inline void ConvPerChannel(
       }
     }
   }
-#ifdef DUMP_LAYER
-  static int invocation_count = 0;
-  if (invocation_count == DUMP_LAYER) {
-    printf("Dumping layer %d\n\n", DUMP_LAYER);
-    print_conv_params(params, input_shape, filter_shape, output_shape);
+}
 
-    // const ConvParams& params,
-    dump_c_array("params", &params, sizeof(ConvParams));
+}  // namespace
 
-    // const int32_t* output_multiplier, const int32_t* output_shift,
-    dump_c_array("output_multiplier", output_multiplier, 4 * output_depth);
-    dump_c_array("output_shift", output_shift, 4 * output_depth);
-
-    // const RuntimeShape& input_shape, const int8_t* input_data,
-    dump_c_array("input_shape", &input_shape, sizeof(RuntimeShape));
-    dump_c_array("input_data", input_data, input_shape.FlatSize());
-
-    // const RuntimeShape& filter_shape, const int8_t* filter_data,
-    dump_c_array("filter_shape", &filter_shape, sizeof(RuntimeShape));
-    dump_c_array("filter_data", filter_data, filter_shape.FlatSize());
-
-    // const RuntimeShape& bias_shape, const int32_t* bias_data,
-    dump_c_array("bias_shape", &bias_shape, sizeof(RuntimeShape));
-    dump_c_array("bias_data", bias_data, 4 * bias_shape.FlatSize());
-
-    // const RuntimeShape& output_shape, int8_t* output_data
-    dump_c_array("output_shape", &output_shape, sizeof(RuntimeShape));
-    dump_c_array("output_data", output_data, output_shape.FlatSize());
-    printf("\n\n");
-  }
-  invocation_count++;
+// Fixed-point per-channel-quantization convolution reference kernel.
+inline void ConvPerChannel(
+    const ConvParams& params, const int32_t* output_multiplier,
+    const int32_t* output_shift, const RuntimeShape& input_shape,
+    const int8_t* input_data, const RuntimeShape& filter_shape,
+    const int8_t* filter_data, const RuntimeShape& bias_shape,
+    const int32_t* bias_data, const RuntimeShape& output_shape,
+    int8_t* output_data) {
+#ifdef SHOW_CONV_PARAMS
+  print_conv_params(params, input_shape, filter_shape, output_shape);
 #endif
+
+#if SHOW_POST_PROCESS_PARAMS
+  printf("output_multiplier\n");
+  print_int32_array(output_multiplier, output_shape.Dims(3));
+  printf("output_shift\n");
+  print_int32_array(output_shift, output_shape.Dims(3));
+  printf("bias\n");
+  print_int32_array(bias_data, output_shape.Dims(3));
+  static CumulativeMinMax multiplier_minmax("multiplier");
+  multiplier_minmax.update(output_multiplier, output_shape.Dims(3));
+  multiplier_minmax.print();
+  static CumulativeMinMax shift_minmax("shift");
+  shift_minmax.update(output_shift, output_shape.Dims(3));
+  shift_minmax.print();
+  static CumulativeMinMax bias_minmax("bias");
+  bias_minmax.update(bias_data, output_shape.Dims(3));
+  bias_minmax.print();
+#endif
+
+  // Consistency check.
+  TFLITE_DCHECK_LE(params.quantized_activation_min,
+                   params.quantized_activation_max);
+  TFLITE_DCHECK_EQ(input_shape.DimensionsCount(), 4);
+  TFLITE_DCHECK_EQ(filter_shape.DimensionsCount(), 4);
+  TFLITE_DCHECK_EQ(output_shape.DimensionsCount(), 4);
+  MatchingDim(input_shape, 0, output_shape, 0);
+  MatchingDim(input_shape, 3, filter_shape, 3);
+  MatchingDim(filter_shape, 0, output_shape, 3);
+  if (bias_data) {
+    TFLITE_DCHECK_EQ(bias_shape.FlatSize(), output_shape.Dims(3));
+  }
+
+  bool accelerated = false;
+#ifdef ACCEL_CONV
+  if (CanAccelerateConv4x4(params, input_shape, filter_shape, output_shape,
+                           bias_data)) {
+    ConvPerChannel4x4(params, output_multiplier, output_shift, input_shape,
+                      input_data, filter_shape, filter_data, bias_shape,
+                      bias_data, output_shape, output_data);
+    accelerated = true;
+  }
+#endif
+
+  if (!accelerated) {
+    printf("ConvPerChannel() not accelerated!\n");
+    UnacceleratedConvPerChannel(params, output_multiplier, output_shift,
+                                input_shape, input_data, filter_shape,
+                                filter_data, bias_shape, bias_data,
+                                output_shape, output_data);
+  }
 }
 
 // Fixed-point per-channel-quantization convolution reference kernel.
