@@ -94,6 +94,73 @@ void CollectOutput(const int start_channel, const int num_channels,
   }
 }
 
+// Accelerate Mode1
+void ConvPerChannel4x4Mode1(
+    const ConvParams& params, const int32_t* output_multiplier,
+    const int32_t* output_shift, const RuntimeShape& input_shape,
+    const int8_t* input_data, const RuntimeShape& filter_shape,
+    const int8_t* filter_data, const RuntimeShape& bias_shape,
+    const int32_t* bias_data, const RuntimeShape& output_shape,
+    int8_t* output_data) {
+  const int input_depth = input_shape.Dims(3);
+  const int output_depth = output_shape.Dims(3);
+
+  // Get dimensions of the tensors.
+  const int input_width = input_shape.Dims(2);
+  const int output_height = output_shape.Dims(1);
+  const int output_width = output_shape.Dims(2);
+  const int num_output_pixels = output_height * output_width;
+
+  // Filter words required to calculate each tranche
+  const int filter_words_per_channel =
+      filter_shape.Dims(1) * filter_shape.Dims(2) * filter_shape.Dims(3) / 4;
+  const int filter_words_per_four_channels = filter_words_per_channel * 4;
+
+  const int max_channels_per_tranche = FILTER_WORDS_PER_STORE *
+                                       NUM_FILTER_STORES /
+                                       filter_words_per_four_channels * 4;
+
+  // Configure static values
+  cfu_set(REG_MODE, MODE_1);
+  cfu_set(REG_NUM_PIXELS_X, output_width);
+  cfu_set(REG_PIXEL_ADVANCE_X, input_depth / 16);
+  cfu_set(REG_PIXEL_ADVANCE_Y, (input_depth / 16) * input_width);
+  cfu_set(REG_INPUT_CHANNEL_DEPTH, input_depth);
+
+  for (int channel = 0; channel < output_depth;
+       channel += max_channels_per_tranche) {
+    const int tranche_channels =
+        std::min(max_channels_per_tranche, output_depth - channel);
+    const int tranche_filter_words =
+        filter_words_per_channel * tranche_channels;
+
+    // Round up number of output values to multiple of 4 pixels
+    const int tranche_output_values =
+        (num_output_pixels + 3) / 4 * 4 * tranche_channels;
+
+    // Configure
+    cfu_set(REG_NUM_FILTER_WORDS, tranche_filter_words / 2);
+    cfu_set(REG_NUM_OUTPUT_VALUES, tranche_output_values);
+    cfu_set(REG_OUTPUT_CHANNEL_DEPTH, tranche_channels);
+
+    // Reset to ensure important state is initialized
+    cfu_set(REG_ACCELERATOR_RESET, 0);
+
+    LoadPostProcessParameters(channel, tranche_channels, bias_data,
+                              output_shift, output_multiplier);
+    LoadFilterData(channel, tranche_channels, filter_shape,
+                   reinterpret_cast<const uint32_t*>(filter_data));
+
+    // Start Accelerator
+    cfu_set(REG_ACCELERATOR_START, 0);
+
+    // Collect data
+    CollectOutput(channel, tranche_channels,
+                  reinterpret_cast<uint32_t*>(output_data), num_output_pixels,
+                  output_depth);
+  }
+}
+
 };  // namespace
 
 bool CanAccelerateConv4x4(const ConvParams& params,
@@ -159,71 +226,18 @@ void ConvPerChannel4x4(const ConvParams& params,
                        const int8_t* filter_data,
                        const RuntimeShape& bias_shape, const int32_t* bias_data,
                        const RuntimeShape& output_shape, int8_t* output_data) {
-  const int input_depth = input_shape.Dims(3);
-  const int output_depth = output_shape.Dims(3);
-
-  // Get dimensions of the tensors.
-  const int input_width = input_shape.Dims(2);
-  const int output_height = output_shape.Dims(1);
-  const int output_width = output_shape.Dims(2);
-  const int num_output_pixels = output_height * output_width;
-
-  // Filter words required to calculate each tranche
-  const int filter_words_per_channel =
-      filter_shape.Dims(1) * filter_shape.Dims(2) * filter_shape.Dims(3) / 4;
-  const int filter_words_per_four_channels = filter_words_per_channel * 4;
-
-  const int max_channels_per_tranche = FILTER_WORDS_PER_STORE *
-                                       NUM_FILTER_STORES /
-                                       filter_words_per_four_channels * 4;
-
-  // Base address is byte address within 256K arena
+  // Configure parameters common to Mode 0 and 1
   uint32_t input_base_addr = reinterpret_cast<uint32_t>(input_data) & 0x3ffff;
-
-  // Configure static values
-  cfu_set(REG_MODE, MODE_1);
   cfu_set(REG_INPUT_OFFSET, params.input_offset);
   cfu_set(REG_OUTPUT_OFFSET, params.output_offset);
   cfu_set(REG_OUTPUT_ACTIVATION_MIN, params.quantized_activation_min);
   cfu_set(REG_OUTPUT_ACTIVATION_MAX, params.quantized_activation_max);
   cfu_set(REG_INPUT_BASE_ADDR, input_base_addr);
-  cfu_set(REG_NUM_PIXELS_X, output_width);
-  cfu_set(REG_PIXEL_ADVANCE_X, input_depth / 16);
-  cfu_set(REG_PIXEL_ADVANCE_Y, (input_depth / 16) * input_width);
-  cfu_set(REG_INPUT_CHANNEL_DEPTH, input_depth);
 
-  for (int channel = 0; channel < output_depth;
-       channel += max_channels_per_tranche) {
-    const int tranche_channels =
-        std::min(max_channels_per_tranche, output_depth - channel);
-    const int tranche_filter_words =
-        filter_words_per_channel * tranche_channels;
-
-    // Round up number of output values to multiple of 4 pixels
-    const int tranche_output_values =
-        (num_output_pixels + 3) / 4 * 4 * tranche_channels;
-
-    // Configure
-    cfu_set(REG_NUM_FILTER_WORDS, tranche_filter_words / 2);
-    cfu_set(REG_NUM_OUTPUT_VALUES, tranche_output_values);
-    cfu_set(REG_OUTPUT_CHANNEL_DEPTH, tranche_channels);
-
-    // Reset to ensure important state is initialized
-    cfu_set(REG_ACCELERATOR_RESET, 0);
-
-    LoadPostProcessParameters(channel, tranche_channels, bias_data,
-                              output_shift, output_multiplier);
-    LoadFilterData(channel, tranche_channels, filter_shape,
-                   reinterpret_cast<const uint32_t*>(filter_data));
-
-    // Start Accelerator
-    cfu_set(REG_ACCELERATOR_START, 0);
-
-    // Collect data
-    CollectOutput(channel, tranche_channels,
-                  reinterpret_cast<uint32_t*>(output_data), num_output_pixels,
-                  output_depth);
-  }
+  // Do Mode1 acceleration
+  ConvPerChannel4x4Mode1(params, output_multiplier, output_shift, input_shape,
+                      input_data, filter_shape, filter_data, bias_shape,
+                      bias_data, output_shape, output_data);
 }
 
 }  // namespace reference_integer_ops
