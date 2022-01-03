@@ -4,7 +4,7 @@
 
 from migen import Module, ClockDomain, Signal, If, log2_int
 from migen.genlib.resetsync import AsyncResetSynchronizer
-from litex.build.generic_platform import Pins, Subsignal, IOStandard
+from litex.build.generic_platform import Pins, Subsignal, IOStandard, Misc
 from litex.build.lattice import LatticePlatform, oxide
 from litex.build.lattice.programmer import LatticeProgrammer
 from litex.soc.cores.clock import NXOSCA
@@ -21,7 +21,8 @@ hps_io = [
         Subsignal("tdi", Pins("C3")),
         Subsignal("tdo", Pins("D3")),
         Subsignal("tms", Pins("B1")),
-        IOStandard("LVCMOS18H")
+        IOStandard("LVCMOS18H"),
+        Misc("SLEWRATE=FAST"),
      ),
     # SPI flash, defined two ways
     ("spiflash", 0,
@@ -31,13 +32,15 @@ hps_io = [
         Subsignal("miso", Pins("C4")),
         Subsignal("wp", Pins("B3")),
         Subsignal("hold", Pins("B2")),
-        IOStandard("LVCMOS18")
+        IOStandard("LVCMOS18"),
+        Misc("SLEWRATE=FAST"),
      ),
     ("spiflash4x", 0,
         Subsignal("cs_n", Pins("A3")),
         Subsignal("clk", Pins("B4")),
         Subsignal("dq", Pins("B5 C4 B3 B2")),
-        IOStandard("LVCMOS18")
+        IOStandard("LVCMOS18"),
+        Misc("SLEWRATE=FAST"),
      ),
 ]
 
