@@ -16,6 +16,7 @@ limitations under the License.
 #ifndef TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_PAD_H_
 #define TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_PAD_H_
 
+#include <cstdio>
 #include <vector>
 
 #include "tensorflow/lite/kernels/internal/types.h"
@@ -39,6 +40,32 @@ inline void PadImpl(const tflite::PadParams& op_params,
                     const RuntimeShape& input_shape, const T* input_data,
                     const P* pad_value_ptr, const RuntimeShape& output_shape,
                     T* output_data) {
+#ifdef SHOW_PAD_PARAMS
+  // left_padding_count, left_padding[0], left_padding[1], left_padding[2],
+  // left_padding[3], left_padding[4] right_padding_count, right_padding[0],
+  // right_padding[1], right_padding[2], right_padding[3], right_padding[4]
+  // resizing_category
+  // input_shape[0], input_shape[1], input_shape[2], input_shape[3]
+  // output_shape[0], output_shape[1], output_shape[2], output_shape[3]
+  printf("\n");
+  printf("%d, ", op_params.left_padding_count);
+  for (int i = 0; i < 5; i++) {
+    printf("%ld, ", op_params.left_padding[i]);
+  }
+  printf("%d, ", op_params.right_padding_count);
+  for (int i = 0; i < 5; i++) {
+    printf("%ld, ", op_params.right_padding[i]);
+  }
+  printf("%d, ", static_cast<int>(op_params.resizing_category));
+
+  printf("%ld, %ld, %ld, %ld, ", input_shape.Dims(0), input_shape.Dims(1),
+         input_shape.Dims(2), input_shape.Dims(3));
+  printf("%ld, %ld, %ld, %ld, ", output_shape.Dims(0), output_shape.Dims(1),
+         output_shape.Dims(2), output_shape.Dims(3));
+
+  printf("\n");
+
+#endif
   const RuntimeShape ext_input_shape =
       RuntimeShape::ExtendedShape(PadKernelMaxDimensionCount(), input_shape);
   const RuntimeShape ext_output_shape =

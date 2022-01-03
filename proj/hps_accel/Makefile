@@ -31,6 +31,9 @@ DEFINES += ACCEL_CONV
 # Uncomment this line to use software defined CFU functions in software_cfu.cc
 #DEFINES += CFU_SOFTWARE_DEFINED
 
+# Uncomment to dump hashes of the output layer
+#DEFINES += SHOW_OUTPUT_HASHES
+
 # Uncomment this line to skip debug code (large effect on performance)
 DEFINES += NDEBUG
 
@@ -40,8 +43,9 @@ DEFINES += TF_LITE_MCU_DEBUG_LOG
 # Uncomment this line to skip individual profiling output (has minor effect on performance).
 #DEFINES += NPROFILE
 
-# Uncomment to show the parameters used for each convolution step when evaluating a model
+# Uncomment to show the parameters used when evaluating a model
 #DEFINES += SHOW_CONV_PARAMS
+#DEFINES += SHOW_PAD_PARAMS
 
 # Hide progress dots (they mess up the formatting of CONV_PARAMS)
 #DEFINES += HIDE_PROGRESS_DOTS
@@ -76,6 +80,10 @@ EXTRA_LITEX_ARGS += --cpu-variant slim+cfu
 ifeq '$(GATEWARE_GEN)' '2'
 EXTRA_LITEX_ARGS += --separate-arena --cfu-mport
 export PLATFORM=hps
+endif
+
+ifeq '$(PLATFORM)' 'hps'
+EXTRA_LITEX_ARGS += --parallel
 endif
 
 ifeq '$(TARGET)' 'digilent_arty'
