@@ -83,6 +83,9 @@ class Constants:
     # Depth of filter storage, per store
     FILTER_WORDS_PER_STORE = 512
 
+    # Number of words in the output queue
+    OUTPUT_FIFO_DEPTH = 1024
+
     # Accelerator Mode
     MODE_0 = 0  # For input layers
     MODE_1 = 1  # For other layers

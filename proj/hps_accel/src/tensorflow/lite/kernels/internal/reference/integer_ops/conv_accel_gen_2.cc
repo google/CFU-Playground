@@ -67,6 +67,70 @@ void LoadFilterData(int channel_start, int num_channels,
   }
 }
 
+// Accelerate Mode0
+void ConvPerChannel4x4Mode0(
+    const ConvParams& params, const int32_t* output_multiplier,
+    const int32_t* output_shift, const RuntimeShape& input_shape,
+    const int8_t* input_data, const RuntimeShape& filter_shape,
+    const int8_t* filter_data, const RuntimeShape& bias_shape,
+    const int32_t* bias_data, const RuntimeShape& output_shape,
+    int8_t* output_data) {
+  // Get dimensions of the tensors.
+  const int input_width = input_shape.Dims(2);
+  const int output_height = output_shape.Dims(1);
+  const int output_width = output_shape.Dims(2);
+  const int output_depth = output_shape.Dims(3);
+  const int words_per_pixel = output_depth / 4;
+
+  // Filter words required to calculate each tranche
+  const int num_filter_words = filter_shape.FlatSize() / 4;  // 64
+  const int filter_words_per_channel = num_filter_words / 2;
+
+  // Configure
+  cfu_set(REG_MODE, MODE_0);
+  cfu_set(REG_NUM_FILTER_WORDS, filter_words_per_channel);
+  cfu_set(REG_OUTPUT_CHANNEL_DEPTH, output_depth);
+
+  // Reset to ensure important state is initialized
+  cfu_set(REG_ACCELERATOR_RESET, 0);
+  LoadPostProcessParameters(0, output_depth, bias_data, output_shift,
+                            output_multiplier);
+  LoadFilterData(0, output_depth, filter_shape,
+                 reinterpret_cast<const uint32_t*>(filter_data));
+
+  uint32_t input_base_addr = reinterpret_cast<uint32_t>(input_data) & 0x3ffff;
+  uint32_t* output_words = reinterpret_cast<uint32_t*>(output_data);
+
+  // Process small number of rowsat a time so as not to overflow input buffer
+  const int max_rows = 2;
+  for (int row = 0; row < output_height; row += max_rows) {
+    int num_rows = std::min(max_rows, output_height - row);
+    cfu_set(REG_INPUT_BASE_ADDR, input_base_addr);
+    cfu_set(REG_NUM_OUTPUT_VALUES, num_rows * output_width * output_depth);
+
+    // Start Accelerator
+    cfu_set(REG_ACCELERATOR_START, 0);
+
+    // Collect data, two pixels at a time
+    const int num_pixels = 160 * num_rows;
+    for (int pixel = 0; pixel < num_pixels; pixel += 2) {
+      uint32_t* p = output_words;
+      for (int c = 0; c < output_depth; c += 4) {
+        *p = cfu_get(REG_OUTPUT_WORD);
+        *(p + words_per_pixel) = cfu_get(REG_OUTPUT_WORD);
+        p++;
+      }
+      output_words += 2 * words_per_pixel;
+    }
+
+    // advance num_row * 2 (because input is stride 2)
+    input_base_addr += input_width * num_rows * 2;
+
+    // Reset accelerator state
+    cfu_set(REG_ACCELERATOR_RESET, 0);
+  };
+}
+
 // Collects a single ouput value and optionally places it into memory
 inline void CollectValue(uint32_t*& p, int advance, bool write) {
   uint32_t val = cfu_get(REG_OUTPUT_WORD);
@@ -119,13 +183,13 @@ void ConvPerChannel4x4Mode1(
   const int max_channels_per_tranche = FILTER_WORDS_PER_STORE *
                                        NUM_FILTER_STORES /
                                        filter_words_per_four_channels * 4;
-
   // Configure static values
   cfu_set(REG_MODE, MODE_1);
   cfu_set(REG_NUM_PIXELS_X, output_width);
   cfu_set(REG_PIXEL_ADVANCE_X, input_depth / 16);
   cfu_set(REG_PIXEL_ADVANCE_Y, (input_depth / 16) * input_width);
-  cfu_set(REG_INPUT_CHANNEL_DEPTH, input_depth);
+  cfu_set(REG_INPUT_BASE_ADDR,
+          reinterpret_cast<uint32_t>(input_data) & 0x3ffff);
 
   for (int channel = 0; channel < output_depth;
        channel += max_channels_per_tranche) {
@@ -176,11 +240,24 @@ bool CanAccelerateConv4x4(const ConvParams& params,
   const int batches = MatchingDim(input_shape, 0, output_shape, 0);
   if (batches != 1) return false;
 
-  // Input and output depths must be a multiples of 16 and 4
   const int input_depth = input_shape.Dims(3);
   const int output_depth = output_shape.Dims(3);
-  if (input_depth % 16 != 0) return false;
-  if (output_depth % 4 != 0) return false;
+  const int stride_width = params.stride_width;
+  const int stride_height = params.stride_height;
+  if (input_depth == 1) {
+    // For input layers, stride must be two
+    if (stride_height != 2 || stride_width != 2) return false;
+    // Input and output width are fixed
+    if (input_shape.Dims(2) != 322 || output_shape.Dims(2) != 160) return false;
+    // Output depth is fixed
+    if (output_depth != 16) return false;
+  } else {
+    // For all other layers, stride must be 1
+    if (stride_height != 1 || stride_width != 1) return false;
+    // Input depth must be multiple of 16, and output depth a multiple of 4
+    if (input_depth % 16 != 0) return false;
+    if (output_depth % 4 != 0) return false;
+  }
 
   // Must be 4x4
   const int filter_height = filter_shape.Dims(1);
@@ -200,18 +277,6 @@ bool CanAccelerateConv4x4(const ConvParams& params,
   if (params.dilation_height_factor != 1 || params.dilation_width_factor != 1)
     return false;
 
-  const int stride_width = params.stride_width;
-  const int stride_height = params.stride_height;
-  if (input_depth == 1) {
-    // For input layers, stride must be two
-    if (stride_height != 2 || stride_width != 2) return false;
-    // Input and output width are fixed
-    if (input_shape.Dims(2) != 322 || output_shape.Dims(2) != 160) return false;
-  } else {
-    // For all other layers, stride must be 1
-    if (stride_height != 1 || stride_width != 1) return false;
-  }
-
   return true;
 }
 
@@ -227,17 +292,24 @@ void ConvPerChannel4x4(const ConvParams& params,
                        const RuntimeShape& bias_shape, const int32_t* bias_data,
                        const RuntimeShape& output_shape, int8_t* output_data) {
   // Configure parameters common to Mode 0 and 1
-  uint32_t input_base_addr = reinterpret_cast<uint32_t>(input_data) & 0x3ffff;
+  const int input_depth = input_shape.Dims(3);
+
   cfu_set(REG_INPUT_OFFSET, params.input_offset);
   cfu_set(REG_OUTPUT_OFFSET, params.output_offset);
   cfu_set(REG_OUTPUT_ACTIVATION_MIN, params.quantized_activation_min);
   cfu_set(REG_OUTPUT_ACTIVATION_MAX, params.quantized_activation_max);
-  cfu_set(REG_INPUT_BASE_ADDR, input_base_addr);
+  cfu_set(REG_INPUT_CHANNEL_DEPTH, input_depth);
 
   // Do Mode1 acceleration
-  ConvPerChannel4x4Mode1(params, output_multiplier, output_shift, input_shape,
-                      input_data, filter_shape, filter_data, bias_shape,
-                      bias_data, output_shape, output_data);
+  if (input_depth == 1) {
+    ConvPerChannel4x4Mode0(params, output_multiplier, output_shift, input_shape,
+                           input_data, filter_shape, filter_data, bias_shape,
+                           bias_data, output_shape, output_data);
+  } else {
+    ConvPerChannel4x4Mode1(params, output_multiplier, output_shift, input_shape,
+                           input_data, filter_shape, filter_data, bias_shape,
+                           bias_data, output_shape, output_data);
+  }
 }
 
 }  // namespace reference_integer_ops

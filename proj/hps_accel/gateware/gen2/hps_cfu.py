@@ -208,7 +208,8 @@ class HpsCfu(Cfu):
         m.submodules['set'] = set_ = SetInstruction()
         m.submodules['get'] = get = GetInstruction()
         m.submodules['core'] = core = AcceleratorCore()
-        m.submodules['fifo'] = fifo = StreamFifo(depth=512, type=unsigned(32))
+        m.submodules['fifo'] = fifo = StreamFifo(
+            depth=Constants.OUTPUT_FIFO_DEPTH, type=unsigned(32))
 
         # Connect set_ and get instructions to accelerator core and FIFO
         m.d.comb += [
