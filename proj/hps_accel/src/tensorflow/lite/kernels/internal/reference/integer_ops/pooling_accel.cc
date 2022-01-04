@@ -72,7 +72,13 @@ void AccelerateMaxPool(const PoolParams& params,
       const uint32_t* in2 = pixel_base + input_row_words;
       const uint32_t* in3 = pixel_base + input_row_words + depth_words;
 
-      for (int channel = 0; channel < depth_words; ++channel) {
+      for (int channel = 0; channel < depth_words; channel += 4) {
+        cfu_pool(*in0++, *in1++);
+        *output_words++ = cfu_pool(*in2++, *in3++);
+        cfu_pool(*in0++, *in1++);
+        *output_words++ = cfu_pool(*in2++, *in3++);
+        cfu_pool(*in0++, *in1++);
+        *output_words++ = cfu_pool(*in2++, *in3++);
         cfu_pool(*in0++, *in1++);
         *output_words++ = cfu_pool(*in2++, *in3++);
       }
