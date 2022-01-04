@@ -47,6 +47,9 @@ fi
 declare -a CHILD_PIDS
 declare -A PID_TO_SEED
 
+# This lets us detect a nextpnr-nexus failure in the pipelines spawned below
+set -o pipefail
+
 # Launch a number of nextpnrs
 echo "$(basename $0): running ${SEED_COUNT} nextpnr-nexus instances."
 rm -rf runs 
