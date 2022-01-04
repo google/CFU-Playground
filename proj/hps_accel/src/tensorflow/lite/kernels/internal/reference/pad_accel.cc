@@ -17,7 +17,8 @@
 
 #include "tensorflow/lite/kernels/internal/reference/pad_accel.h"
 
-#include "pad.h"
+#include <cstdio>
+#include <cstring>
 
 namespace tflite {
 namespace reference_ops {
@@ -70,8 +71,23 @@ void AcceleratePad(const tflite::PadParams& op_params,
                    const RuntimeShape& input_shape, const int8_t* input_data,
                    const int8_t* pad_value_ptr,
                    const RuntimeShape& output_shape, int8_t* output_data) {
-  Pad(op_params, input_shape, input_data, pad_value_ptr, output_shape,
-      output_data);
+  int8_t pad_value = *pad_value_ptr;
+  int input_depth = input_shape.Dims(3);
+  if (input_depth == 1) {
+    // First, blank row
+    memset(output_data, pad_value, 322);
+    output_data += 322;
+    // 240 rows of data with padding on each side
+    for (int i = 0; i < 240; i++) {
+      *output_data++ = pad_value;
+      memcpy(output_data, input_data, 320);
+      output_data += 320;
+      input_data += 320;
+      *output_data++ = pad_value;
+    }
+    // Last, blank row
+    memset(output_data, pad_value, 322);
+  }
 }
 
 }  // namespace reference_ops
