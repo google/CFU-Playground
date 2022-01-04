@@ -58,22 +58,22 @@ void AccelerateMaxPool(const PoolParams& params,
   const int stride_height = 2;
   const int stride_width = 2;
   const int input_row_size = input_width * depth;
+  const int8_t* row_base = input_data;
   for (int out_y = 0; out_y < output_height; ++out_y) {
+    const int8_t* pixel_base = row_base;
     for (int out_x = 0; out_x < output_width; ++out_x) {
-      for (int channel = 0; channel < depth; ++channel) {
-        const int in_x_origin = out_x * stride_width;
-        const int in_y_origin = out_y * stride_height;
-        int input_offset =
-            Offset(input_shape, 0, in_y_origin, in_x_origin, channel);
-        int8_t max = input_data[input_offset];
-        max = std::max(max, input_data[input_offset + depth]);
-        input_offset += input_row_size;
-        max = std::max(max, input_data[input_offset]);
-        max = std::max(max, input_data[input_offset + depth]);
-        output_data[Offset(output_shape, 0, out_y, out_x, channel)] =
-            static_cast<int8_t>(max);
+      const int8_t* channel = pixel_base;
+      const int8_t* end_channel = pixel_base + depth;
+      for (; channel < end_channel; ++channel) {
+        int8_t max = channel[0];
+        max = std::max(max, channel[depth]);
+        max = std::max(max, channel[input_row_size]);
+        max = std::max(max, channel[input_row_size + depth]);
+        *output_data++ = max;
       }
+      pixel_base += stride_width * depth;
     }
+    row_base += stride_height * input_row_size;
   }
 }
 
