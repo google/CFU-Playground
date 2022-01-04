@@ -15,6 +15,8 @@ limitations under the License.
 #ifndef TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_FULLY_CONNECTED_H_
 #define TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_FULLY_CONNECTED_H_
 
+#include <cstdio>
+
 #include "tensorflow/lite/kernels/internal/common.h"
 
 namespace tflite {
@@ -26,6 +28,25 @@ inline void FullyConnected(
     const int8_t* filter_data, const RuntimeShape& bias_shape,
     const int32_t* bias_data, const RuntimeShape& output_shape,
     int8_t* output_data) {
+#ifdef SHOW_FULLY_CONNECTED_PARAMS
+  // input_offset, weights_offset, output_offset, output_multiplier,
+  // output_shift, quantized_activation_min, quantized_activation_max,
+  // bias_data_present,
+  // filter_shape[0], filter_shape[1],
+  // output_shape[0], output_shape[1],
+  printf("\n");
+  printf("%ld, %ld, %ld, %ld, %d, ", params.input_offset, params.weights_offset,
+         params.output_offset, params.output_multiplier, params.output_shift);
+  printf("%ld, %ld, ", params.quantized_activation_min,
+         params.quantized_activation_max);
+
+  printf("%s, ", bias_data == NULL ? "N" : "Y");
+  printf("%ld, %ld, ", filter_shape.Dims(0), filter_shape.Dims(1));
+  printf("%ld, %ld, ", output_shape.Dims(0), output_shape.Dims(1));
+
+  printf("\n");
+#endif
+
   const int32_t input_offset = params.input_offset;
   const int32_t filter_offset = params.weights_offset;
   const int32_t output_offset = params.output_offset;
