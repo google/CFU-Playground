@@ -109,6 +109,9 @@ inline void MaxPool(const PoolParams& params, const RuntimeShape& input_shape,
 #endif
 
 #ifdef ACCEL_MAX_POOL
+#if GATEWARE_GEN != 2
+#error MAX_POOL op requires gateware gen 2
+#endif
   if (CanAccelerateMaxPool(params, input_shape, output_shape)) {
     return AccelerateMaxPool(params, input_shape, input_data, output_shape,
                              output_data);

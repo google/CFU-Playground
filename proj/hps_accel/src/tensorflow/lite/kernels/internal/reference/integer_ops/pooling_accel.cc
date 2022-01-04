@@ -20,7 +20,10 @@
 #include <algorithm>
 #include <cstdio>
 
+#include "cfu.h"
 #include "tensorflow/lite/kernels/internal/common.h"
+
+#define cfu_pool(val0, val1) cfu_op2(0, val0, val1)
 
 namespace tflite {
 namespace reference_integer_ops {
@@ -51,29 +54,31 @@ void AccelerateMaxPool(const PoolParams& params,
                        const RuntimeShape& input_shape,
                        const int8_t* input_data,
                        const RuntimeShape& output_shape, int8_t* output_data) {
-  const int depth = MatchingDim(input_shape, 3, output_shape, 3);
+  const int depth_words = MatchingDim(input_shape, 3, output_shape, 3) / 4;
   const int input_width = input_shape.Dims(2);
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
   const int stride_height = 2;
   const int stride_width = 2;
-  const int input_row_size = input_width * depth;
-  const int8_t* row_base = input_data;
+  const int input_row_words = input_width * depth_words;
+  const uint32_t* row_base = reinterpret_cast<const uint32_t*>(input_data);
+  uint32_t* output_words = reinterpret_cast<uint32_t*>(output_data);
   for (int out_y = 0; out_y < output_height; ++out_y) {
-    const int8_t* pixel_base = row_base;
+    const uint32_t* pixel_base = row_base;
     for (int out_x = 0; out_x < output_width; ++out_x) {
-      const int8_t* channel = pixel_base;
-      const int8_t* end_channel = pixel_base + depth;
-      for (; channel < end_channel; ++channel) {
-        int8_t max = channel[0];
-        max = std::max(max, channel[depth]);
-        max = std::max(max, channel[input_row_size]);
-        max = std::max(max, channel[input_row_size + depth]);
-        *output_data++ = max;
+      // Point to the start of the four input pixels
+      const uint32_t* in0 = pixel_base;
+      const uint32_t* in1 = pixel_base + depth_words;
+      const uint32_t* in2 = pixel_base + input_row_words;
+      const uint32_t* in3 = pixel_base + input_row_words + depth_words;
+
+      for (int channel = 0; channel < depth_words; ++channel) {
+        cfu_pool(*in0++, *in1++);
+        *output_words++ = cfu_pool(*in2++, *in3++);
       }
-      pixel_base += stride_width * depth;
+      pixel_base += stride_width * depth_words;
     }
-    row_base += stride_height * input_row_size;
+    row_base += stride_height * input_row_words;
   }
 }
 
