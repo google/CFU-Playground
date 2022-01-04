@@ -15,7 +15,9 @@ limitations under the License.
 #ifndef TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_POOLING_H_
 #define TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_POOLING_H_
 
+#include <cstdio>
 #include <limits>
+
 #include "tensorflow/lite/kernels/internal/common.h"
 
 namespace tflite {
@@ -84,6 +86,27 @@ inline bool AveragePool(const PoolParams& params,
 inline void MaxPool(const PoolParams& params, const RuntimeShape& input_shape,
                     const int8_t* input_data, const RuntimeShape& output_shape,
                     int8_t* output_data) {
+#if SHOW_MAX_POOL_PARAMS
+  // padding_width, padding_height,
+  // stride_width, stride_height, filter_height, filter_width,
+  // quantized_activation_min, quantized_activation_max,
+  // input_shape[0], input_shape[1], input_shape[2], input_shape[3],
+  // output_shape[0], output_shape[1], output_shape[2], output_shape[3]
+  printf("\n");
+  const auto& padding = params.padding_values;
+  printf("%d, %d, ", padding.width, padding.height);
+  printf("%d, %d, %d, %d, ", params.stride_height, params.stride_width,
+         params.filter_height, params.filter_width);
+  printf("%ld, %ld, ", params.quantized_activation_min,
+         params.quantized_activation_max);
+  printf("%ld, %ld, %ld, %ld, ", input_shape.Dims(0), input_shape.Dims(1),
+         input_shape.Dims(2), input_shape.Dims(3));
+  printf("%ld, %ld, %ld, %ld, ", output_shape.Dims(0), output_shape.Dims(1),
+         output_shape.Dims(2), output_shape.Dims(3));
+
+  printf("\n");
+#endif
+
   TFLITE_DCHECK_LE(params.quantized_activation_min,
                    params.quantized_activation_max);
   TFLITE_DCHECK_GE(params.quantized_activation_min,
