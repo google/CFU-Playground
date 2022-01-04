@@ -21,11 +21,10 @@ export DEFINES :=
 GATEWARE_GEN := 2
 DEFINES += GATEWARE_GEN=$(GATEWARE_GEN)
 
-# Uncomment this line to use the custom accelerated convolution operation
+# Uncomment these line to use the custom accelerated operations
 DEFINES += ACCEL_CONV
-
-# Uncomment this line to use the model specific padding operation
 DEFINES += ACCEL_PAD
+DEFINES += ACCEL_MAX_POOL
 
 # For development purposes, dump a layer in accelerated code
 # (Large effect on performance, much output)
@@ -49,6 +48,7 @@ DEFINES += TF_LITE_MCU_DEBUG_LOG
 # Uncomment to show the parameters used when evaluating a model
 #DEFINES += SHOW_CONV_PARAMS
 #DEFINES += SHOW_PAD_PARAMS
+#DEFINES += SHOW_MAX_POOL_PARAMS
 
 # Hide progress dots (they mess up the formatting of CONV_PARAMS)
 #DEFINES += HIDE_PROGRESS_DOTS

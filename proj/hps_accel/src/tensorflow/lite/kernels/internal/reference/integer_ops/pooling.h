@@ -19,6 +19,7 @@ limitations under the License.
 #include <limits>
 
 #include "tensorflow/lite/kernels/internal/common.h"
+#include "tensorflow/lite/kernels/internal/reference/integer_ops/pooling_accel.h"
 
 namespace tflite {
 namespace reference_integer_ops {
@@ -105,6 +106,13 @@ inline void MaxPool(const PoolParams& params, const RuntimeShape& input_shape,
          output_shape.Dims(2), output_shape.Dims(3));
 
   printf("\n");
+#endif
+
+#ifdef ACCEL_MAX_POOL
+  if (CanAccelerateMaxPool(params, input_shape, output_shape)) {
+    return AccelerateMaxPool(params, input_shape, input_data, output_shape,
+                             output_data);
+  }
 #endif
 
   TFLITE_DCHECK_LE(params.quantized_activation_min,
