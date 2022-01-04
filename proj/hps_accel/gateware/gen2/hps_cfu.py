@@ -155,6 +155,8 @@ class SetInstruction(InstructionBase):
                         self.filter_output.payload.data.eq(self.in1),
                         self.filter_output.valid.eq(1),
                     ]
+                with m.Case(Constants.REG_MODE):
+                    m.d.sync += self.config.mode.eq(self.in0)
                 with m.Case(Constants.REG_INPUT_OFFSET):
                     m.d.sync += self.config.input_offset.eq(self.in0s)
                 with m.Case(Constants.REG_NUM_FILTER_WORDS):
@@ -206,7 +208,8 @@ class HpsCfu(Cfu):
         m.submodules['set'] = set_ = SetInstruction()
         m.submodules['get'] = get = GetInstruction()
         m.submodules['core'] = core = AcceleratorCore()
-        m.submodules['fifo'] = fifo = StreamFifo(depth=512, type=unsigned(32))
+        m.submodules['fifo'] = fifo = StreamFifo(
+            depth=Constants.OUTPUT_FIFO_DEPTH, type=unsigned(32))
 
         # Connect set_ and get instructions to accelerator core and FIFO
         m.d.comb += [

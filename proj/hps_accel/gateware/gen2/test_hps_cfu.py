@@ -28,14 +28,10 @@ class HpsCfuTest(CfuTestBase):
     """Tests HpsCfu class."""
 
     NUM_OUTPUT_PIXELS = 16
-    RAM_BASE_ADDR = 0x123
+    RAM_BASE_ADDR = 0x1230
 
     def create_dut(self):
         return HpsCfu()
-
-    def setUp(self):
-        self.data = fetch_data('sample_conv_05')
-        super().setUp()
 
     @staticmethod
     def do_set(reg, val0, val1=0):
@@ -47,7 +43,7 @@ class HpsCfuTest(CfuTestBase):
 
     def load_filter_data(self, data, chan_start, chan_count):
         """ Loads filter data for a range of output channels."""
-        dims = self.data.filter_dims
+        dims = data.filter_dims
         filter_data = data.filter_data
         num_filter_words_per_output = dims[1] * dims[2] * dims[3] // 4
         chan_data_index = chan_start * num_filter_words_per_output
@@ -80,10 +76,8 @@ class HpsCfuTest(CfuTestBase):
         # values / 4 = bytes then /2 to get per store
         filter_words_per_store = num_filter_values // 4 // 2
 
-        # Toggle reset
-        yield do_set(C.REG_ACCELERATOR_RESET, 0)
-
         # Set simple values
+        yield do_set(C.REG_MODE, C.MODE_0 if input_depth == 1 else C.MODE_1)
         yield do_set(C.REG_INPUT_OFFSET, data.input_offset)
         yield do_set(C.REG_NUM_FILTER_WORDS, filter_words_per_store)
         yield do_set(C.REG_OUTPUT_OFFSET, data.output_offset)
@@ -97,6 +91,9 @@ class HpsCfuTest(CfuTestBase):
         yield do_set(C.REG_OUTPUT_CHANNEL_DEPTH, output_chan_count)
         yield do_set(C.REG_NUM_OUTPUT_VALUES,
                      self.NUM_OUTPUT_PIXELS * output_chan_count)
+
+        # Toggle reset
+        yield do_set(C.REG_ACCELERATOR_RESET, 0)
 
         # load post process parameters
         for i in range(output_chan_count):
@@ -117,15 +114,15 @@ class HpsCfuTest(CfuTestBase):
             yield Passive()
             while True:
                 for i in range(4):
-                    block = (yield self.dut.lram_addr[i]) - self.RAM_BASE_ADDR
-                    data_addr = block * 4 + i
+                    block = (yield self.dut.lram_addr[i])
+                    data_addr = (block - self.RAM_BASE_ADDR // 16) * 4 + i
                     data_value = data.input_data[data_addr % len(
                         data.input_data)]
                     yield self.dut.lram_data[i].eq(data_value)
                 yield
         self.add_process(ram)
 
-    def test_simple(self):
+    def test_simple_05(self):
         """Tests a 4x4 convolution producing 16 channels per start."""
         dut = self.dut
         data = fetch_data('sample_conv_05')
@@ -145,6 +142,35 @@ class HpsCfuTest(CfuTestBase):
                 group = i // words_per_group
                 index_in_pixel = (i // 4) % words_per_pixel
                 pixel_in_group = i % 4
+                addr = (group * words_per_group +
+                        pixel_in_group * words_per_pixel +
+                        index_in_pixel)
+                expected = data.expected_output_data[addr]
+                yield self.do_get(expected)
+
+        self.run_ops(process(), False)
+
+    def test_simple_06(self):
+        """Tests a 4x4 convolution over an input layer."""
+        dut = self.dut
+        data = fetch_data('sample_conv_06')
+
+        self.add_ram_process(data)
+
+        def process():
+            # Configure, start accelerator
+            yield from self.configure(data, 0, 16)
+            yield self.do_set(Constants.REG_ACCELERATOR_START, 0)
+
+            # Collect all of the output data for all pixels - output is in
+            # groups of 2
+            words_per_pixel = data.output_dims[3] // 4
+            num_output_words = self.NUM_OUTPUT_PIXELS * words_per_pixel
+            words_per_group = words_per_pixel * 2
+            for i in range(num_output_words):
+                group = i // words_per_group
+                pixel_in_group = i % 2
+                index_in_pixel = (i // 2) % words_per_pixel
                 addr = (group * words_per_group +
                         pixel_in_group * words_per_pixel +
                         index_in_pixel)

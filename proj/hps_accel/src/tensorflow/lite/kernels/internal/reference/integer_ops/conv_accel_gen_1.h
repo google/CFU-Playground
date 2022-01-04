@@ -23,6 +23,12 @@
 namespace tflite {
 namespace reference_integer_ops {
 
+bool CanAccelerateConv4x4(const ConvParams& params,
+                          const RuntimeShape& input_shape,
+                          const RuntimeShape& filter_shape,
+                          const RuntimeShape& output_shape,
+                          const int32_t* bias_data);
+
 // Accelerated version of ConvPerChannel() specialised for:
 // * 4x4 filter size
 // * no dilation

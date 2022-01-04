@@ -29,6 +29,24 @@ using hps_accel::Vector16;
 namespace tflite {
 namespace reference_integer_ops {
 
+bool CanAccelerateConv4x4(const ConvParams& params,
+                          const RuntimeShape& input_shape,
+                          const RuntimeShape& filter_shape,
+                          const RuntimeShape& output_shape,
+                          const int32_t* bias_data) {
+  const int input_depth = MatchingDim(input_shape, 3, filter_shape, 3);
+  const int filter_height = filter_shape.Dims(1);
+  const int filter_width = filter_shape.Dims(2);
+  const int dilation_width_factor = params.dilation_width_factor;
+  const int dilation_height_factor = params.dilation_height_factor;
+  const int batches = MatchingDim(input_shape, 0, output_shape, 0);
+ 
+  return params.padding_type == PaddingType::kValid &&
+         (input_depth == 1 || input_depth % 4 == 0) && filter_width == 4 &&
+         filter_height == 4 && dilation_width_factor == 1 &&
+         dilation_height_factor == 1 && batches == 1 && bias_data != NULL;
+}
+
 void ConvPerChannel4x4(const ConvParams& params,
                        const int32_t* output_multiplier,
                        const int32_t* output_shift,

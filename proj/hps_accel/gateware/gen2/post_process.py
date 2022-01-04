@@ -352,7 +352,7 @@ class ReadingProducer(SimpleElaboratable):
     Attributes
     ----------
 
-    size_params: Record(POST_PROCESS_SIZES), in
+    sizes: Record(POST_PROCESS_SIZES), in
         Depth and repeat count for producing values.
 
     reset: Signal(1), in
@@ -467,7 +467,7 @@ class AccumulatorReader(SimpleElaboratable):
         index = Signal(range(8))
         next_index = Signal(range(8))
         with m.If(self.half_mode):
-            # counts: 0, 1, 4, 5, 0 ... 
+            # counts: 0, 1, 4, 5, 0 ...
             m.d.comb += next_index[1].eq(0)
             m.d.comb += Cat(next_index[0], next_index[2]
                             ).eq(Cat(index[0], index[2]) + 1)
@@ -566,6 +566,10 @@ class OutputWordAssembler(SimpleElaboratable):
     Attributes
     ----------
 
+    half_mode: Signal, in
+      In normal mode, buffers data over four pixels. In half mode only buffers
+      data over two pixels.
+
     input: Endpoint(signed(8)), in
       The 8-bit quantized versions of the accumulator. Always ready.
 
@@ -575,6 +579,7 @@ class OutputWordAssembler(SimpleElaboratable):
 
     def __init__(self, num_pixels=Constants.SYS_ARRAY_HEIGHT):
         self._num_pixels = num_pixels
+        self.half_mode = Signal()
         self.input = Endpoint(signed(8))
         self.output = Endpoint(unsigned(32))
 
@@ -587,7 +592,15 @@ class OutputWordAssembler(SimpleElaboratable):
         shift_registers = Array(
             [Signal(24, name=f"sr_{i}") for i in range(self._num_pixels)])
 
-        m.d.sync += self.input.ready.eq(1)
+        last_pixel_index = Signal.like(pixel_index)
+        m.d.sync += last_pixel_index.eq(Mux(self.half_mode,
+                                            self._num_pixels // 2 - 1,
+                                            self._num_pixels - 1))
+        next_pixel_index = Signal.like(pixel_index)
+        m.d.comb += next_pixel_index.eq(Mux(pixel_index == last_pixel_index,
+                                            0, pixel_index + 1))
+
+        m.d.comb += self.input.ready.eq(1)
         with m.If(self.input.is_transferring()):
             sr = shift_registers[pixel_index]
             with m.If(byte_count == 3):
@@ -601,7 +614,7 @@ class OutputWordAssembler(SimpleElaboratable):
                 m.d.sync += sr[:-8].eq(sr[8:])
 
             # Increment pixel index
-            m.d.sync += pixel_index.eq(pixel_index + 1)
-            with m.If(pixel_index == (self._num_pixels - 1)):
+            m.d.sync += pixel_index.eq(next_pixel_index)
+            with m.If(pixel_index == last_pixel_index):
                 m.d.sync += pixel_index.eq(0)
                 m.d.sync += byte_count.eq(byte_count + 1)  # allow rollover

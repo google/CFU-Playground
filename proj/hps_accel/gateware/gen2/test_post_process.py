@@ -613,7 +613,8 @@ class OutputWordAssemblerTest(TestBase):
         for value in expected:
             while not (yield self.dut.output.valid):
                 yield
-            self.assertEqual(value, (yield self.dut.output.payload))
+            actual = (yield self.dut.output.payload)
+            self.assertEqual(value, actual)
             yield
 
     def test_it_does_8_words(self):
@@ -622,14 +623,14 @@ class OutputWordAssemblerTest(TestBase):
             0x21, 0x22, 0x23, 0x24,
             0x31, 0x32, 0x33, 0x34,
             0x41, 0x42, 0x43, 0x44,
-            0x11, 0x12, 0x13, 0x14,
-            0x21, 0x22, 0x23, 0x24,
-            0x31, 0x32, 0x33, 0x34,
-            0x41, 0x42, 0x43, 0x44,
+            0x51, 0x52, 0x53, 0x54,
+            0x61, 0x62, 0x63, 0x64,
+            0x71, 0x72, 0x73, 0x74,
+            0x81, 0x82, 0x83, 0x84,
         ]
         expected = [
             0x41312111, 0x42322212, 0x43332313, 0x44342414,
-            0x41312111, 0x42322212, 0x43332313, 0x44342414,
+            0x81716151, 0x82726252, 0x83736353, 0x84746454,
         ]
         self.add_process(lambda: (yield from self.send_inputs(inputs)))
         self.run_sim(lambda: (yield from self.check_expected(expected)), False)
@@ -653,3 +654,24 @@ class OutputWordAssemblerTest(TestBase):
         # Run the test
         self.add_process(lambda: (yield from self.send_inputs(inputs)))
         self.run_sim(lambda: (yield from self.check_expected(expected)), False)
+
+    def test_it_handles_half_mode(self):
+        inputs = [
+            0x11, 0x12,
+            0x21, 0x22,
+            0x31, 0x32,
+            0x41, 0x42,
+            0x51, 0x52,
+            0x61, 0x62,
+            0x71, 0x72,
+            0x81, 0x82,
+        ]
+        expected = [
+            0x41312111, 0x42322212,
+            0x81716151, 0x82726252,
+        ]
+        self.add_process(lambda: (yield from self.send_inputs(inputs)))
+        def check():
+            yield self.dut.half_mode.eq(1)
+            yield from self.check_expected(expected)
+        self.run_sim(check, False)

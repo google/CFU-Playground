@@ -189,13 +189,16 @@ class ValueAddressGeneratorTest(TestBase):
 class Mode1InputFetcherTest(TestBase):
     """Tests Mode1InputFetcher class."""
 
+    BASE_ADDR = 0x120
+
     def create_dut(self):
         fetcher = Mode1InputFetcher()
         # Connect RAM Mux with simulated LRAMs
         self.m.submodules["ram_mux"] = ram_mux = RamMux()
         self.m.d.comb += ram_mux.phase.eq(fetcher.ram_mux_phase)
         for i in range(4):
-            init = ([0] * 0x12 + self.data.input_data[i::4])[:1024]
+            padding = [0] * (self.BASE_ADDR // 16)
+            init = (padding + self.data.input_data[i::4])[:1024]
             mem = Memory(width=32, depth=1024, init=init)
             rp = mem.read_port(transparent=False)
             self.m.d.comb += [
@@ -243,7 +246,7 @@ class Mode1InputFetcherTest(TestBase):
             in_x_dim = data.input_dims[2]
             out_x_dim = data.output_dims[2]
 
-            yield dut.base_addr.eq(0x12)
+            yield dut.base_addr.eq(self.BASE_ADDR)
             yield dut.num_pixels_x.eq(out_x_dim)
             yield dut.pixel_advance_x.eq(depth // 16)
             yield dut.pixel_advance_y.eq((depth // 16) * in_x_dim)

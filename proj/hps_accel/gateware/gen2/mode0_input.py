@@ -75,7 +75,7 @@ class EvenPixelAddressGenerator(SimpleElaboratable):
 
     def elab(self, m):
         pixel_x = Signal(8)
-        pixel_row_begin_addr = Signal(16)
+        pixel_row_begin_addr = Signal(18)
         next_count = Signal(3)
 
         with m.If(self.next):

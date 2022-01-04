@@ -38,29 +38,30 @@ class Constants:
 
     # Configuration values
     # See ACCELERATOR_CONFIGURATION_LAYOUT in accelerator.py
-    REG_INPUT_OFFSET = 4
-    REG_NUM_FILTER_WORDS = 5
-    REG_OUTPUT_OFFSET = 6
-    REG_OUTPUT_ACTIVATION_MIN = 7
-    REG_OUTPUT_ACTIVATION_MAX = 8
-    REG_INPUT_BASE_ADDR = 9
-    REG_NUM_PIXELS_X = 10
-    REG_PIXEL_ADVANCE_X = 11
-    REG_PIXEL_ADVANCE_Y = 12
-    REG_INPUT_CHANNEL_DEPTH = 13
-    REG_OUTPUT_CHANNEL_DEPTH = 14
-    REG_NUM_OUTPUT_VALUES = 15
+    REG_MODE = 4
+    REG_INPUT_OFFSET = 5
+    REG_NUM_FILTER_WORDS = 6
+    REG_OUTPUT_OFFSET = 7
+    REG_OUTPUT_ACTIVATION_MIN = 8
+    REG_OUTPUT_ACTIVATION_MAX = 9
+    REG_INPUT_BASE_ADDR = 10
+    REG_NUM_PIXELS_X = 11
+    REG_PIXEL_ADVANCE_X = 12
+    REG_PIXEL_ADVANCE_Y = 13
+    REG_INPUT_CHANNEL_DEPTH = 14
+    REG_OUTPUT_CHANNEL_DEPTH = 15
+    REG_NUM_OUTPUT_VALUES = 16
 
     # For post process parameters. Writing multiplier sends all values
-    REG_POST_PROCESS_BIAS = 16
-    REG_POST_PROCESS_SHIFT = 17
-    REG_POST_PROCESS_MULTIPLIER = 18
+    REG_POST_PROCESS_BIAS = 17
+    REG_POST_PROCESS_SHIFT = 18
+    REG_POST_PROCESS_MULTIPLIER = 19
 
     # Gets the output value
-    REG_OUTPUT_WORD = 19
+    REG_OUTPUT_WORD = 20
 
     # Number of items in FIFO
-    REG_FIFO_ITEMS = 20
+    REG_FIFO_ITEMS = 21
 
     # Maximum number of 8-bit channels per pixel
     MAX_CHANNEL_DEPTH = 512
@@ -81,6 +82,13 @@ class Constants:
 
     # Depth of filter storage, per store
     FILTER_WORDS_PER_STORE = 512
+
+    # Number of words in the output queue
+    OUTPUT_FIFO_DEPTH = 1024
+
+    # Accelerator Mode
+    MODE_0 = 0  # For input layers
+    MODE_1 = 1  # For other layers
 
 
 CC_FILE_HEADER = """// Generated file
