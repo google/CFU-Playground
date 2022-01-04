@@ -20,6 +20,7 @@ limitations under the License.
 #include <vector>
 
 #include "tensorflow/lite/kernels/internal/types.h"
+#include "tensorflow/lite/kernels/internal/reference/pad_accel.h"
 
 namespace tflite {
 
@@ -176,6 +177,14 @@ inline void PadImageStyle(const tflite::PadParams& op_params,
                           const RuntimeShape& input_shape, const T* input_data,
                           const P* pad_value_ptr,
                           const RuntimeShape& output_shape, T* output_data) {
+#ifdef ACCEL_PAD
+  if (CanAcceleratePad(op_params, input_shape, input_data, pad_value_ptr,
+                       output_shape)) {
+    AcceleratePad(op_params, input_shape, input_data, pad_value_ptr,
+                  output_shape, output_data);
+    return;
+  }
+#endif
   Pad(op_params, input_shape, input_data, pad_value_ptr, output_shape,
       output_data);
 }

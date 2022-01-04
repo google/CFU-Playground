@@ -24,6 +24,9 @@ DEFINES += GATEWARE_GEN=$(GATEWARE_GEN)
 # Uncomment this line to use the custom accelerated convolution operation
 DEFINES += ACCEL_CONV
 
+# Uncomment this line to use the model specific padding operation
+DEFINES += ACCEL_PAD
+
 # For development purposes, dump a layer in accelerated code
 # (Large effect on performance, much output)
 #DEFINES += DUMP_LAYER=0
