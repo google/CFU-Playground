@@ -15,13 +15,41 @@
 """Tests for hps_cfu.py"""
 
 
-from nmigen_cfu import CfuTestBase
+from nmigen_cfu import CfuTestBase, InstructionTestBase, pack_vals
 from nmigen.sim import Passive
 
 from .constants import Constants
 from .conv2d_data import fetch_data
-from .hps_cfu import HpsCfu
+from .hps_cfu import PoolInstruction, HpsCfu
 from functools import reduce
+
+
+class PoolInstructionTest(InstructionTestBase):
+    """Tests PoolInstruction class."""
+
+    def create_dut(self):
+        return PoolInstruction()
+
+    def test_it(self):
+        def p(a, b, c, d): return pack_vals(a, b, c, d, offset=-128)
+        DATA = [
+            (0, 0, 0),
+            # min case
+            (p(0, 0, 0, 0), p(0, 0, 0, 0), None),
+            (p(0, 0, 0, 0), p(0, 0, 0, 0), p(0, 0, 0, 0)),
+            # Max case
+            (p(255, 255, 255, 255), p(255, 255, 255, 255), None),
+            (p(255, 255, 255, 255), p(255, 255, 255, 255), p(255, 255, 255, 255)),
+            # Arbitrary values
+            (p(10, 20, 30, 40), p(50, 60, 70, 80), p(255, 255, 255, 255)),
+            (p(10, 20, 30, 40), p(50, 60, 70, 80), p(50, 60, 70, 80)),
+            (p(52, 37, 30, 40), p(12, 13, 34, 95), p(52, 60, 70, 95)),
+            (p(51, 33, 30, 98), p(12, 13, 26, 90), p(52, 37, 34, 98)),            
+            (p(251, 33, 30, 98), p(12, 13, 26, 90), p(251, 33, 30, 98)),            
+            (p(0, 200, 0, 0), p(0, 0, 200, 0), p(251, 200, 200, 98)),
+        ]
+
+        self.verify(DATA, False)
 
 
 class HpsCfuTest(CfuTestBase):
@@ -203,3 +231,13 @@ class HpsCfuTest(CfuTestBase):
                     yield self.do_get(expected)
 
         self.run_ops(process(), False)
+
+    def test_pool(self):
+        OPS = [
+            ((Constants.INS_POOL, 0x80808080, 0x80808080), None),
+            ((Constants.INS_POOL, 0x80808080, 0x80808080), 0x80808080),
+            ((Constants.INS_POOL, 0x08030601, 0x04070205), 0x08070605),
+            ((Constants.INS_POOL, 0x00660000, 0x00007700), 0x08667705),
+        ]
+
+        self.run_ops(OPS, False)

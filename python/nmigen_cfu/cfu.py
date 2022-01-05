@@ -89,10 +89,12 @@ class InstructionTestBase(TestBase):
                 while not (yield self.dut.done):
                     yield
                 actual = (yield self.dut.output)
-                self.assertEqual(
-                    actual, expected,
-                    f"\n  case {n}:  " +
-                    f" in0={in0:08x}, in1={in1:08x}, expected={expected:08x}, actual={actual:08x}")
+                if expected is not None:
+                    self.assertEqual(
+                        actual, expected,
+                        f"\n  case {n}:   " +
+                        f"in0={in0:08x}, in1={in1:08x}, " +
+                        f"expected={expected:08x}, actual={actual:08x}")
                 yield
         self.run_sim(process, trace)
 

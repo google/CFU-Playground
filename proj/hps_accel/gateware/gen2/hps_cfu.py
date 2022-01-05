@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Record, Signal, signed, unsigned
+from nmigen import Cat, Mux, Record, Signal, signed, unsigned
 from nmigen_cfu import Cfu, InstructionBase
 
 from .accelerator import AcceleratorCore, ACCELERATOR_CONFIGURATION_LAYOUT
@@ -196,17 +196,45 @@ class SetInstruction(InstructionBase):
             m.d.sync += self.done.eq(1)
 
 
+class PoolInstruction(InstructionBase):
+    """Handles 8-bit Max Pool operation.
+
+    Returns one word, where each byte is the maximum of the current two and
+    previous two inputs.
+    """
+
+    def elab(self, m):
+        def max_(word0, word1):
+            result = [Signal(8, name=f"result{i}") for i in range(4)]
+            bytes0 = [word0[i:i + 8] for i in range(0, 32, 8)]
+            bytes1 = [word1[i:i + 8] for i in range(0, 32, 8)]
+            for r, b0, b1 in zip(result, bytes0, bytes1):
+                sb0 = Signal(signed(8))
+                m.d.comb += sb0.eq(b0)
+                sb1 = Signal(signed(8))
+                m.d.comb += sb1.eq(b1)
+                m.d.comb += r.eq(Mux(sb1 > sb0, b1, b0))
+            return Cat(*result)
+
+        last2 = Signal(32)
+        m.d.sync += self.done.eq(0)
+        with m.If(self.start):
+            this2 = Signal(32)
+            m.d.comb += this2.eq(max_(self.in0,self.in1))
+            m.d.sync += self.output.eq(max_(this2, last2))
+            m.d.sync += last2.eq(this2)
+            m.d.sync += self.done.eq(1)
+
+
 class HpsCfu(Cfu):
     """Gen2 accelerator CFU.
-
-    Assumes working with a slimopt+cfu VexRiscV, which rsp_ready is
-    always true.
     """
 
     def elab_instructions(self, m):
         m.submodules['ping'] = ping = PingInstruction()
         m.submodules['set'] = set_ = SetInstruction()
         m.submodules['get'] = get = GetInstruction()
+        m.submodules['pool'] = pool = PoolInstruction()
         m.submodules['core'] = core = AcceleratorCore()
         m.submodules['fifo'] = fifo = StreamFifo(
             depth=Constants.OUTPUT_FIFO_DEPTH, type=unsigned(32))
@@ -236,6 +264,7 @@ class HpsCfu(Cfu):
         return {
             Constants.INS_GET: get,
             Constants.INS_SET: set_,
+            Constants.INS_POOL: pool,
             Constants.INS_PING: ping,
         }
 
