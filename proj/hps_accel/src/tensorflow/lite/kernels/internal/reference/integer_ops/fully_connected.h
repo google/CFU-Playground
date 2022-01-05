@@ -18,6 +18,7 @@ limitations under the License.
 #include <cstdio>
 
 #include "tensorflow/lite/kernels/internal/common.h"
+#include "tensorflow/lite/kernels/internal/reference/integer_ops/fully_connected_accel.h"
 
 namespace tflite {
 namespace reference_integer_ops {
@@ -47,6 +48,15 @@ inline void FullyConnected(
   printf("\n");
 #endif
 
+#ifdef ACCEL_FULLY_CONNECTED
+  if (CanAccelerateFullyConnected(params, filter_shape, bias_data,
+                                  output_shape)) {
+    AccelerateFullyConnected(params, input_shape, input_data, filter_shape,
+                             filter_data, bias_shape, bias_data, output_shape,
+                             output_data);
+    return;
+  }
+#endif
   const int32_t input_offset = params.input_offset;
   const int32_t filter_offset = params.weights_offset;
   const int32_t output_offset = params.output_offset;
