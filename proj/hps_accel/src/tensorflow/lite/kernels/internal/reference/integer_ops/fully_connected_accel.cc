@@ -59,11 +59,13 @@ void AccelerateFullyConnected(
   TFLITE_DCHECK_LE(output_depth, filter_shape.Dims(filter_dim_count - 2));
   const int accum_depth = filter_shape.Dims(filter_dim_count - 1);
   for (int out_c = 0; out_c < output_depth; ++out_c) {
+    const int8_t* ip = input_data;
     int32_t acc = 0;
-    for (int d = 0; d < accum_depth; ++d) {
-      int32_t input_val = input_data[d];
-      int32_t filter_val = filter_data[out_c * accum_depth + d];
-      acc += filter_val * (input_val + input_offset);
+    for (int d = 0; d < accum_depth; d += 4) {
+      acc += *filter_data++ * (input_offset + *ip++);
+      acc += *filter_data++ * (input_offset + *ip++);
+      acc += *filter_data++ * (input_offset + *ip++);
+      acc += *filter_data++ * (input_offset + *ip++);
     }
     acc += bias_data[out_c];
     acc = MultiplyByQuantizedMultiplier(acc, output_multiplier, output_shift);
