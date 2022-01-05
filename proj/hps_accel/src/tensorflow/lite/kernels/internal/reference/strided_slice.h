@@ -95,12 +95,11 @@ inline void StridedSlice(const tflite::StridedSliceParams& op_params,
   }
 }
 
-template <typename T>
 inline void StridedSlice(const tflite::StridedSliceParams& op_params,
                          const RuntimeShape& unextended_input_shape,
-                         const T* input_data,
+                         const int8_t* input_data,
                          const RuntimeShape& unextended_output_shape,
-                         T* output_data) {
+                         int8_t* output_data) {
   // start_indices_count,
   // start_indices[0], start_indices[1], start_indices[2], start_indices[3],
   // stop_indices_count,
@@ -128,6 +127,17 @@ inline void StridedSlice(const tflite::StridedSliceParams& op_params,
   printf("\n");
 #endif
 
+  SequentialTensorWriter<int8_t> writer(input_data, output_data);
+  StridedSlice<int8_t>(op_params, unextended_input_shape,
+                       unextended_output_shape, &writer);
+}
+
+template <typename T>
+inline void StridedSlice(const tflite::StridedSliceParams& op_params,
+                         const RuntimeShape& unextended_input_shape,
+                         const T* input_data,
+                         const RuntimeShape& unextended_output_shape,
+                         T* output_data) {
   SequentialTensorWriter<T> writer(input_data, output_data);
   StridedSlice<T>(op_params, unextended_input_shape, unextended_output_shape,
                   &writer);
