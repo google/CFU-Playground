@@ -104,6 +104,8 @@ inline void StridedSlice(const tflite::StridedSliceParams& op_params,
   // start_indices[0], start_indices[1], start_indices[2], start_indices[3],
   // stop_indices_count,
   // stop_indices[0], stop_indices[1], stop_indices[2], stop_indices[3],
+  // strides_count,
+  // strides[0], strides[1], strides[2], strides[3],
   // begin_mask, ellipsis_mask, end_mask, new_axis_mask, shrink_axis_mask,
   // input_shape[0], input_shape[1], input_shape[2], input_shape[3],
   // output_shape[0], output_shape[1], output_shape[2], output_shape[3],
@@ -115,6 +117,9 @@ inline void StridedSlice(const tflite::StridedSliceParams& op_params,
   printf("%d, %ld, %ld, %ld, %ld, ", op_params.stop_indices_count,
          op_params.stop_indices[0], op_params.stop_indices[1],
          op_params.stop_indices[2], op_params.stop_indices[3]);
+  printf("%d, %ld, %ld, %ld, %ld, ", op_params.strides_count,
+         op_params.strides[0], op_params.strides[1],
+         op_params.strides[2], op_params.strides[3]);
   printf("%d, %d, %d, %d, %d, ", op_params.begin_mask, op_params.ellipsis_mask,
          op_params.end_mask, op_params.new_axis_mask,
          op_params.shrink_axis_mask);
