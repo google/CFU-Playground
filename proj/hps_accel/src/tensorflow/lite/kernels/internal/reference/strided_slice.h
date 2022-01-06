@@ -118,8 +118,8 @@ inline void StridedSlice(const tflite::StridedSliceParams& op_params,
          op_params.stop_indices[0], op_params.stop_indices[1],
          op_params.stop_indices[2], op_params.stop_indices[3]);
   printf("%d, %ld, %ld, %ld, %ld, ", op_params.strides_count,
-         op_params.strides[0], op_params.strides[1],
-         op_params.strides[2], op_params.strides[3]);
+         op_params.strides[0], op_params.strides[1], op_params.strides[2],
+         op_params.strides[3]);
   printf("%d, %d, %d, %d, %d, ", op_params.begin_mask, op_params.ellipsis_mask,
          op_params.end_mask, op_params.new_axis_mask,
          op_params.shrink_axis_mask);
@@ -130,6 +130,45 @@ inline void StridedSlice(const tflite::StridedSliceParams& op_params,
          unextended_output_shape.Dims(1), unextended_output_shape.Dims(2),
          unextended_output_shape.Dims(3));
   printf("\n");
+#endif
+
+#ifdef ACCEL_STRIDED_SLICE
+  if (op_params.strides_count == 4 &&  //
+      op_params.strides[0] == 1 && op_params.strides[1] == 1 &&
+      op_params.strides[2] == 1 && op_params.strides[3] == 1 &&
+      op_params.start_indices_count == 4 &&  //
+      op_params.start_indices[0] == 0 && op_params.start_indices[2] == 0 &&
+      op_params.start_indices[3] == 0 && op_params.stop_indices_count == 4 &&
+      op_params.stop_indices[0] == 0 && op_params.stop_indices[2] == 0 &&
+      op_params.stop_indices[3] == 0 &&
+      unextended_input_shape.DimensionsCount() == 4 &&
+      unextended_input_shape.Dims(0) == 1) {
+    int width = unextended_input_shape.Dims(2);
+    int depth = unextended_input_shape.Dims(3);
+    int start_offset = op_params.start_indices[1] * depth * width;
+    int stop_offset = op_params.stop_indices[1] * depth * width;
+
+    if (start_offset % 4 == 0 && stop_offset % 4 == 0) {
+      const uint32_t* start_word =
+          reinterpret_cast<const uint32_t*>(input_data + start_offset);
+      const uint32_t* stop_word =
+          reinterpret_cast<const uint32_t*>(input_data + stop_offset);
+      uint32_t* output_words = reinterpret_cast<uint32_t*>(output_data);
+      // Copy 4 words at a time
+      const uint32_t* p = start_word;
+      while (p < stop_word - 3) {
+        *output_words++ = *p++;
+        *output_words++ = *p++;
+        *output_words++ = *p++;
+        *output_words++ = *p++;
+      }
+      // Residuals
+      while (p < stop_word) {
+        *output_words++ = *p++;
+      }
+      return;
+    }
+  }
 #endif
 
   SequentialTensorWriter<int8_t> writer(input_data, output_data);

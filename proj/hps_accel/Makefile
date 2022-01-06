@@ -26,6 +26,7 @@ DEFINES += ACCEL_CONV
 DEFINES += ACCEL_PAD
 DEFINES += ACCEL_MAX_POOL
 DEFINES += ACCEL_FULLY_CONNECTED
+DEFINES += ACCEL_STRIDED_SLICE
 
 # For development purposes, dump a layer in accelerated code
 # (Large effect on performance, much output)
