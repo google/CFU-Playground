@@ -44,7 +44,7 @@ GEN_LD_DIR := $(SOC_SOFTWARE_DIR)/include/generated
 LDSCRIPT   := $(LD_DIR)/linker.ld
 LDSCRIPTS  := $(LDSCRIPT) $(GEN_LD_DIR)/output_format.ld $(GEN_LD_DIR)/regions.ld
 
-SRC_DIR    := $(BUILD_DIR)/src
+SRC_DIR    := src
 
 PACKAGE    := software
 
@@ -120,7 +120,8 @@ LFLAGS     := \
 	-Wl,--fatal-warnings \
 	-Wl,--no-warn-mismatch \
 	-Wl,--script=$(LDSCRIPT) \
-	-Wl,--build-id=none 
+	-Wl,--build-id=none \
+	-Wl,-Map=$(PACKAGE).map
 	
 
 find_srcs = $(shell find $(SRC_DIR) -name \*.$(1) | LC_ALL=C sort)

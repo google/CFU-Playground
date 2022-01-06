@@ -11,18 +11,30 @@ SECTIONS
 	.text :
 	{
 		_ftext = .;
-		*(.text.start)
-		*(.text .stub .text.* .gnu.linkonce.t.*)
+		*(SORT(.text.start))
+		*(SORT(.text))
+		*(SORT(.stub))
+		*(SORT(.text.*))
+		*(SORT(.gnu.linkonce.t.*))
 		_etext = .;
 	} > rom
 
 	.rodata :
 	{
-		. = ALIGN(8);
+		/*
+		 * Align models and large chunks of data into a constant position
+		 */
+		. = _ftext + 0x80000;
 		_frodata = .;
-		*(.rodata .rodata.* .gnu.linkonce.r.*)
-		*(.rodata1)
-		*(.srodata .srodata.*)
+		src/models/*/*(SORT(.rodata.*))
+		src/conv2d_??.o(SORT(.rodata.*))  /* specific to hps_accel */
+		. = ALIGN(4096);
+		*(SORT(.rodata))
+		*(SORT(.rodata.*))
+		*(SORT(.gnu.linkonce.r.*))
+		*(SORT(.rodata1))
+		*(SORT(.srodata))
+		*(SORT(.srodata.*))
 		. = ALIGN(8);
 		_erodata = .;
 	} > rom
@@ -31,11 +43,18 @@ SECTIONS
 	{
 		. = ALIGN(8);
 		_fdata = .;
-		*(.data .data.* .gnu.linkonce.d.*)
-		*(.data1)
-		*(.ramtext .ramtext.*)
+		*(SORT(.data))
+		*(SORT(.data.*))
+		*(SORT(.gnu.linkonce.d.*))
+		*(SORT(.data1))
+		*(SORT(.ramtext))
+		*(SORT(.ramtext.*))
 		_gp = ALIGN(16);
-		*(.sdata .sdata.* .gnu.linkonce.s.* .sdata2 .sdata2.*)
+		*(SORT(.sdata))
+		*(SORT(.sdata.*))
+		*(SORT(.gnu.linkonce.s.*))
+		*(SORT(.sdata2))
+		*(SORT(.sdata2.*))
 		_edata = ALIGN(16); /* Make sure _edata is >= _gp. */
 	} > sram
 
@@ -43,12 +62,16 @@ SECTIONS
 	{
 		. = ALIGN(16);
 		_fbss = .;
-		*(.dynsbss)
-		*(.sbss .sbss.* .gnu.linkonce.sb.*)
-		*(.scommon)
-		*(.dynbss)
-		*(.bss .bss.* .gnu.linkonce.b.*)
-		*(COMMON)
+		*(SORT(.dynsbss))
+		*(SORT(.sbss))
+		*(SORT(.sbss.*))
+		*(SORT(.gnu.linkonce.sb.*))
+		*(SORT(.scommon))
+		*(SORT(.dynbss))
+		*(SORT(.bss))
+		*(SORT(.bss.*))
+		*(SORT(.gnu.linkonce.b.*))
+		*(SORT(COMMON))
 		. = ALIGN(8);
 		_ebss = .;
 		_end = .;
