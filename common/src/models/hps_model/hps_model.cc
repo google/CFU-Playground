@@ -20,14 +20,33 @@
 #include "models/hps_model/cat_picture.h"
 #include "models/hps_model/diagram.h"
 #include "models/hps_model/hps_model_2021_09_20_tiled.h"
+#include "models/hps_model/hps_model_2022_01_05_74ops.h"
+#include "models/hps_model/hps_model_2022_01_05_89ops.h"
 #include "tflite.h"
 
 namespace {
+
+int loaded_model = 0;
 
 // Initialize models
 void do_init_09_20(void) {
   puts("Loading HPS 09_20 model");
   tflite_load_model(hps_model_2021_09_20_tiled, hps_model_2021_09_20_tiled_len);
+  loaded_model = 0;
+}
+
+// Initialize models
+void do_init_01_05_74ops(void) {
+  puts("Loading HPS 01_05_74ops model");
+  tflite_load_model(hps_model_2022_01_05_74ops, hps_model_2022_01_05_74ops_len);
+  loaded_model = 1;
+}
+
+// Initialize models
+void do_init_01_05_89ops(void) {
+  puts("Loading HPS 01_05_89ops model");
+  tflite_load_model(hps_model_2022_01_05_89ops, hps_model_2022_01_05_89ops_len);
+  loaded_model = 2;
 }
 
 // Run classification and interpret results
@@ -65,13 +84,13 @@ void do_classify_zeros() { printf("Result is %ld\n", classify_zeros()); }
 struct GoldenTest {
   int32_t (*fn)();
   const char* name;
-  int32_t expected_09_20;
+  int32_t expected[3];
 };
 
 GoldenTest golden_tests[4] = {
-    {classify_cat, "cat", -77},
-    {classify_diagram, "diagram", -124},
-    {classify_zeros, "zeroes", -126},
+    {classify_cat, "cat", {-77, -47, -47}},
+    {classify_diagram, "diagram", {-124, -123, -123}},
+    {classify_zeros, "zeroes", {-126, -128, -128}},
     {nullptr, "", 0},
 };
 
@@ -81,7 +100,7 @@ static void do_golden_tests() {
     const GoldenTest& test = golden_tests[i];
     printf("Testing input %s: ", test.name);
     int32_t actual = test.fn();
-    int32_t expected =test.expected_09_20;
+    int32_t expected = test.expected[loaded_model];
     if (actual != expected) {
       failed = true;
       printf("FAIL %ld (actual) != %ld (expected) ***\n", actual, expected);
@@ -106,7 +125,11 @@ struct Menu MENU = {
         MENU_ITEM('z', "Zeros input", do_classify_zeros),
         MENU_ITEM('g', "Golden tests (check for expected outputs)",
                   do_golden_tests),
-        MENU_ITEM('1', "Reinitialize with 09_20 model", do_init_09_20),
+        MENU_ITEM('0', "Reinitialize with 09_20 model", do_init_09_20),
+        MENU_ITEM('1', "Reinitialize with 01_05_74ops model",
+                  do_init_01_05_74ops),
+        MENU_ITEM('2', "Reinitialize with 01_05_89ops model",
+                  do_init_01_05_89ops),
         MENU_END,
     },
 };
@@ -115,6 +138,6 @@ struct Menu MENU = {
 
 // For integration into menu system
 extern "C" void hps_model_menu() {
-  do_init_09_20();
+  do_init_01_05_74ops();
   menu_run(&MENU);
 }
