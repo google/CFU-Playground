@@ -25,6 +25,7 @@ DEFINES += GATEWARE_GEN=$(GATEWARE_GEN)
 DEFINES += ACCEL_CONV
 DEFINES += ACCEL_PAD
 DEFINES += ACCEL_MAX_POOL
+DEFINES += ACCEL_FULLY_CONNECTED
 
 # For development purposes, dump a layer in accelerated code
 # (Large effect on performance, much output)
@@ -49,6 +50,7 @@ DEFINES += TF_LITE_MCU_DEBUG_LOG
 #DEFINES += SHOW_CONV_PARAMS
 #DEFINES += SHOW_PAD_PARAMS
 #DEFINES += SHOW_MAX_POOL_PARAMS
+#DEFINES += SHOW_FULLY_CONNECTED_PARAMS
 
 # Hide progress dots (they mess up the formatting of CONV_PARAMS)
 #DEFINES += HIDE_PROGRESS_DOTS
