@@ -1,3 +1,20 @@
+#!/usr/bin/env python3
+# Copyright 2021 The CFU-Playground Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""This script is executed by nextpnr-nexus to generate a placement plot."""
+
+
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import random
@@ -5,10 +22,6 @@ import random
 fig, ax = plt.subplots(dpi=200)
 
 print("\nGenerating placement image...\n")
-
-for net, netinfo in ctx.nets:
-    print(net)
-    print(netinfo.users)
 
 for cell, cellinfo in ctx.cells:
     if cellinfo.bel:
@@ -73,5 +86,5 @@ ax.autoscale_view()
 plt.savefig("placement.png", format="png")
 print("Done\n")
 
-# Uncommenting this will cause nextpnr to stop without running routing (but still show the placement plot)
+# Uncommenting this will cause nextpnr to stop without running routing (but still produce the placement plot)
 # exit()
