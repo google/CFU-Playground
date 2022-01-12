@@ -174,7 +174,7 @@ class HpsSoC(LiteXSoC):
                                             endianness="little", div=4)
         self.bus.add_slave("spiflash", self.spiflash.bus, self.spiflash_region)
         self.csr.add("spiflash")
-        
+
     def setup_litespi_flash(self):
         self.submodules.spiflash_phy = LiteSPIPHY(
             self.platform.request("spiflash4x"),
@@ -288,6 +288,7 @@ def main():
                         help="Which toolchain to use: oxide (default) or radiant")
     parser.add_argument("--parallel-nextpnr", action="store_true",
                         help="Whether to use the parallel nextpnr script with the oxide toolchain")
+    parser.add_argument("--extra-nextpnr-params", action="store_true", help="Enable extra nextpnr parameters")
     parser.add_argument("--synth_mode", default="radiant",
                         help="Which synthesis mode to use with Radiant toolchain: "
                         "radiant/synplify (default), lse, or yosys")
@@ -320,7 +321,7 @@ def main():
     else:
         variant = "full+debug" if args.debug else "full"
     copy_cpu_variant_if_needed(variant)
-    soc = HpsSoC(Platform(args.toolchain, args.parallel_nextpnr),
+    soc = HpsSoC(Platform(args.toolchain, args.parallel_nextpnr, args.extra_nextpnr_params),
                     debug=args.debug,
                     litespi_flash=args.litespi_flash,
                     variant=variant,
