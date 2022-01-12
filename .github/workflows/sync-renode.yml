@@ -66,7 +66,7 @@ jobs:
           signoff: true
           committer: CFU Playground Bot <cfu-playground-bot@google.com>
           author: CFU Playground Bot <cfu-playground-bot@google.com>
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.CFU_BOT_TOKEN }}
           title: (CFU Playground) Automatic Renode update from builds.renode.io
           commit-message: Automatic Renode update from builds.renode.io
           body: "(CFU Playground) Automatic Renode update from builds.renode.io"

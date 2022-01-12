@@ -59,7 +59,7 @@ jobs:
           base: main
           delete-branch: true
           signoff: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.CFU_BOT_TOKEN }}
           committer: CFU Playground Bot <cfu-playground-bot@google.com>
           author: CFU Playground Bot <cfu-playground-bot@google.com>
           title: (CFU Playground) Automated sync from github.com/tensorflow/tflite-micro
