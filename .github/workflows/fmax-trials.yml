@@ -16,8 +16,8 @@ jobs:
       - run: bash scripts/setup -ci
       - run: which pip3 && which python3 && which pip
       - run: riscv64-unknown-elf-gcc --version
-      - run: make env 
-      - run: pwd && source env/conda/bin/activate cfu-common && which yosys && yosys --version && which nextpnr-nexus && nextpnr-nexus --version 
+      - run: make env
+      - run: pwd && source env/conda/bin/activate cfu-common && which yosys && yosys --version && which nextpnr-nexus && nextpnr-nexus --version
       - run: pwd && source env/conda/bin/activate cfu-common && source environment && cd proj/proj_template_v && ulimit -S -t 900  && ulimit -H -t 900  && make PLATFORM=hps EXTRA_LITEX_ARGS="--cpu-variant=full     --nextpnr-seed=1"   clean bitstream |& egrep '(Max frequency|Info:.*%)' || true
       - run: pwd && source env/conda/bin/activate cfu-common && source environment && cd proj/proj_template_v && ulimit -S -t 900  && ulimit -H -t 900  && make PLATFORM=hps EXTRA_LITEX_ARGS="--cpu-variant=full     --nextpnr-seed=22"  clean bitstream |& egrep '(Max frequency|Info:.*%)' || true
       - run: pwd && source env/conda/bin/activate cfu-common && source environment && cd proj/proj_template_v && ulimit -S -t 900  && ulimit -H -t 900  && make PLATFORM=hps EXTRA_LITEX_ARGS="--cpu-variant=full     --nextpnr-seed=333" clean bitstream |& egrep '(Max frequency|Info:.*%)' || true
@@ -33,3 +33,5 @@ jobs:
       - run: pwd && source env/conda/bin/activate cfu-common && source environment && cd proj/hps_accel       && ulimit -S -t 1200  && ulimit -H -t 1200  && make PLATFORM=hps EXTRA_LITEX_ARGS="--separate-arena --cpu-variant=slimopt+cfu --nextpnr-seed=1"   clean bitstream |& egrep '(Max frequency|Info:.*%)' || true
       - run: pwd && source env/conda/bin/activate cfu-common && source environment && cd proj/hps_accel       && ulimit -S -t 1200  && ulimit -H -t 1200  && make PLATFORM=hps EXTRA_LITEX_ARGS="--separate-arena --cpu-variant=slimopt+cfu --nextpnr-seed=22"  clean bitstream |& egrep '(Max frequency|Info:.*%)' || true
       - run: pwd && source env/conda/bin/activate cfu-common && source environment && cd proj/hps_accel       && ulimit -S -t 1200  && ulimit -H -t 1200  && make PLATFORM=hps EXTRA_LITEX_ARGS="--separate-arena --cpu-variant=slimopt+cfu --nextpnr-seed=333" clean bitstream |& egrep '(Max frequency|Info:.*%)' || true
+      - run: pwd && source env/conda/bin/activate cfu-common && source environment && cd proj/hps_accel       && ulimit -S -t 240  && ulimit -H -t 240  && make PLATFORM=hps EXTRA_NEXTPNR_ARGS="--placer-heap-timingweight 52" EXTRA_LITEX_ARGS="--separate-arena --cpu-variant=slimopt+cfu --extra-nextpnr-params"   clean bitstream |& egrep '(Max frequency|Info:.*%)' || true
+      - run: pwd && source env/conda/bin/activate cfu-common && source environment && cd proj/hps_accel       && ulimit -S -t 240  && ulimit -H -t 240  && make PLATFORM=hps EXTRA_NEXTPNR_ARGS="--placer-heap-timingweight 52" EXTRA_LITEX_ARGS="--separate-arena --cpu-variant=slimopt+cfu --extra-nextpnr-params --no-compile-software"   clean bitstream |& egrep '(Max frequency|Info:.*%)' || true
