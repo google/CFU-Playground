@@ -12,6 +12,7 @@ dependencies:
   - litex-hub::nextpnr-ecp5
   - litex-hub::nextpnr-ice40
   - litex-hub::yosys
+  - litex-hub::iceprog
   - litex-hub::prjxray-tools
   - litex-hub::prjxray-db
   - litex-hub::vtr-optimized
