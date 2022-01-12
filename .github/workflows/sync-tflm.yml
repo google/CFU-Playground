@@ -59,9 +59,17 @@ jobs:
           base: main
           delete-branch: true
           signoff: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.CFU_BOT_TOKEN }}
           committer: CFU Playground Bot <cfu-playground-bot@google.com>
           author: CFU Playground Bot <cfu-playground-bot@google.com>
           title: (CFU Playground) Automated sync from github.com/tensorflow/tflite-micro
           commit-message: Automated sync from github.com/tensorflow/tflite-micro
           body: "(CFU Playground) Automated sync from github.com/tensorflow/tflite-micro"
+
+      - name: Enable automerge
+        if: steps.create-pr.outputs.pull-request-operation == 'created'
+        uses: peter-evans/enable-pull-request-automerge@v1
+        with:
+          token: ${{ secrets.CFU_BOT_TOKEN }}
+          merge-method: rebase
+          pull-request-number: ${{ steps.create-pr.outputs.pull-request-number }}
