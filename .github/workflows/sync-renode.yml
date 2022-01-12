@@ -70,3 +70,11 @@ jobs:
           title: (CFU Playground) Automatic Renode update from builds.renode.io
           commit-message: Automatic Renode update from builds.renode.io
           body: "(CFU Playground) Automatic Renode update from builds.renode.io"
+
+      - name: Enable automerge
+        if: steps.create-pr.outputs.pull-request-operation == 'created'
+        uses: peter-evans/enable-pull-request-automerge@v1
+        with:
+          token: ${{ secrets.CFU_BOT_TOKEN }}
+          merge-method: rebase
+          pull-request-number: ${{ steps.create-pr.outputs.pull-request-number }}
