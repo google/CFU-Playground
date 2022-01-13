@@ -94,6 +94,13 @@ _oxide_parallel_build_template = [
     "prjoxide pack {build_name}.fasm {build_name}.bit"
 ]
 
+# Template for build script that adds custom nextpnr parameters
+_oxide_custom_build_template = [
+    "yosys -l {build_name}.rpt {build_name}.ys",
+    "custom-nextpnr-nexus {build_name}.json {build_name}.pdc {build_name}.fasm",
+    "prjoxide pack {build_name}.fasm {build_name}.bit"
+]
+
 # Template for build script that passes --router router1
 _oxide_router1_build_template = [
     'yosys -l {build_name}.rpt {build_name}.ys',
@@ -119,7 +126,7 @@ class Platform(LatticePlatform):
     clk_divisor = 9
     sys_clk_freq = int(450e6 / clk_divisor)
 
-    def __init__(self, toolchain="radiant", parallel_pnr=False):
+    def __init__(self, toolchain="radiant", parallel_pnr=False, custom_params=False):
         LatticePlatform.__init__(self,
                                  # The HPS actually has the LIFCL-17-7UWG72C, but that doesn't
                                  # seem to be available in Radiant 2.2, at
@@ -129,7 +136,9 @@ class Platform(LatticePlatform):
                                  connectors=[],
                                  toolchain=toolchain)
         if toolchain == "oxide":
-            if parallel_pnr:
+            if custom_params:
+                self.toolchain.build_template = _oxide_custom_build_template
+            elif parallel_pnr:
                 self.toolchain.build_template = _oxide_parallel_build_template
             else:
                 self.toolchain.build_template = _oxide_router1_build_template
