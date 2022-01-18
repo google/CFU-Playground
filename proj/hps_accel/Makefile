@@ -81,7 +81,10 @@ TEST_MENU_ITEMS=3 q
 
 # Customise arguments to Litex:
 export EXTRA_LITEX_ARGS
-EXTRA_LITEX_ARGS += --cpu-variant slim+cfu
+export EXTRA_NEXTPNR_ARGS
+
+# Use slim optimized core + CFU
+EXTRA_LITEX_ARGS += --cpu-variant slimopt+cfu
 
 # Pass gen argument to cfu_gen
 CFU_GEN_EXTRA_ARGS := gen$(GATEWARE_GEN)
@@ -106,6 +109,8 @@ endif
 BUILD_DIR_EXTRA_DEP = $(BUILD_DIR)/src/gateware_constants.h
 
 
+BUILD_FLAGS="-j$(shell nproc)"
+
 #### Base rules ####
 include ../proj.mk
 
@@ -114,3 +119,5 @@ include ../proj.mk
 # Rule to build gateware_constants.h
 $(BUILD_DIR)/src/gateware_constants.h: $(BUILD_DIR)/src $(PROJ_DIR)/gateware/gen$(GATEWARE_GEN)/constants.py
 	$(PYRUN) -m gateware.gen$(GATEWARE_GEN).constants $@
+
+all: bitstream software
