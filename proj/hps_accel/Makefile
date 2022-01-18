@@ -75,13 +75,19 @@ DEFINES += INCLUDE_MODEL_HPS
 # Use PLATFORM=common_soc TARGET=digilent_arty to select Arty instead of hps
 PLATFORM=hps
 
+# Parallel software and bitstream build
+PARALLEL ?= no
+
 # How to respond to run and test
 RUN_MENU_ITEMS=1 1 c
 TEST_MENU_ITEMS=3 q
 
 # Customise arguments to Litex:
 export EXTRA_LITEX_ARGS
-EXTRA_LITEX_ARGS += --cpu-variant slim+cfu
+export EXTRA_NEXTPNR_ARGS
+
+# Use slim optimized core + CFU
+EXTRA_LITEX_ARGS += --cpu-variant slimopt+cfu
 
 # gen2 needs special build args and only works on hps
 ifeq '$(GATEWARE_GEN)' '2'
@@ -98,11 +104,18 @@ ifeq '$(TARGET)' 'digilent_arty'
 EXTRA_LITEX_ARGS += --sys-clk-freq 75000000
 endif
 
+ifneq '$(PARALLEL)' 'no'
+EXTRA_LITEX_ARGS += --extra-nextpnr-params
+EXTRA_NEXTPNR_ARGS += --placer-heap-timingweight 79
+endif
+
 # Add constants defined in gateware/constants.py to C++ build
 BUILD_DIR_EXTRA_DEP = $(BUILD_DIR)/src/gateware_constants.h
 
 # Pass gen argument to cfu_gen
 CFU_GEN_EXTRA_ARGS = gen$(GATEWARE_GEN)
+
+BUILD_FLAGS="-j$(shell nproc)"
 
 #### Base rules ####
 include ../proj.mk
@@ -112,3 +125,5 @@ include ../proj.mk
 # Rule to build gateware_constants.h
 $(BUILD_DIR)/src/gateware_constants.h: $(BUILD_DIR)/src $(PROJ_DIR)/gateware/gen$(GATEWARE_GEN)/constants.py
 	$(PYRUN) -m gateware.gen$(GATEWARE_GEN).constants $@
+
+all: bitstream software

@@ -87,4 +87,5 @@ $(BIOS_BIN): $(CFU_V)
 
 $(BITSTREAM): $(CFU_V)
 	@echo Building bitstream for Arty. CFU option: $(CFU_ARGS)
-	$(HPS_RUN) --build
+	# Do not run software compilation if building bitstream
+	$(HPS_RUN) --build --no-compile-software
