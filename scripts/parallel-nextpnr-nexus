@@ -34,6 +34,7 @@ SEED="$5"
 if ! [[ ${BASH_VERSION} =~ "5.1" ]]; then
     echo Not doing parallel nextpnr run.
     nextpnr-nexus \
+        --placer-heap-timingweight 52 \
         --json "${JSON}" \
         --pdc "${PDC}" \
         --fasm "${RESULT_FASM}" \
@@ -54,13 +55,14 @@ set -o pipefail
 echo "$(basename $0): running ${SEED_COUNT} nextpnr-nexus instances."
 rm -rf runs 
 mkdir runs
-seed_base=$((RANDOM % 100 * 100))
+seed_base=1000
 for s in $(seq ${SEED_COUNT}); do
   seed=$((seed_base + s))
   DIR="runs/seed-${seed}"
   mkdir "${DIR}"
   ( 
     nextpnr-nexus \
+        --placer-heap-timingweight 52 \
         --json "${JSON}" \
         --pdc "${PDC}" \
         --fasm "${DIR}/output.fasm" \
