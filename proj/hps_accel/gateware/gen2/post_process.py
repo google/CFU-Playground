@@ -195,7 +195,7 @@ def delay(m, signal, cycles):
 
 
 POST_PROCESS_PARAMS = [
-    ('bias', signed(16)),
+    ('bias', signed(18)),
     ('multiplier', signed(32)),
     ('shift', unsigned(4)),
 ]
