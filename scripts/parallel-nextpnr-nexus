@@ -28,6 +28,7 @@ PDC="$2"
 RESULT_FASM="$3"
 SEED_COUNT="$4"
 SEED="$5"
+PREROUTE_SCRIPT=""
 
 
 ### check if bash 5.1 for "wait -p"; if not, do plain run
@@ -51,6 +52,9 @@ declare -A PID_TO_SEED
 set -o pipefail
 
 # Launch a number of nextpnrs
+if [[ -e "../../../pre-route.py" ]]; then
+    PREROUTE_SCRIPT=" --pre-route ../../../../../pre-route.py"
+fi
 echo "$(basename $0): running ${SEED_COUNT} nextpnr-nexus instances."
 rm -rf runs 
 mkdir runs
@@ -60,17 +64,19 @@ for s in $(seq ${SEED_COUNT}); do
   DIR="runs/seed-${seed}"
   mkdir "${DIR}"
   ( 
+    cd ${DIR} &&
     nextpnr-nexus \
-        --json "${JSON}" \
-        --pdc "${PDC}" \
-        --fasm "${DIR}/output.fasm" \
+        --json "../../${JSON}" \
+        --pdc "../../${PDC}" \
+        --fasm "./output.fasm" \
         --device LIFCL-17-8UWG72C \
-        --report="${DIR}/report.json" \
+        --report="./report.json" \
         --detailed-timing-report \
+        ${PREROUTE_SCRIPT} \
         --seed "${seed}" 2>&1 | \
       (while read line; do 
         echo "$(date +%H:%M:%S) ${line}"; done
-      ) > "${DIR}/nextpnr-nexus.log"
+      ) > "./nextpnr-nexus.log"
   ) &
   PID=$!
   CHILD_PIDS+=(${PID})
