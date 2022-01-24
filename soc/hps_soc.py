@@ -23,7 +23,6 @@ from litex.soc.integration.common import get_mem_data
 from litex.soc.integration.soc import SoCRegion
 from litex.soc.integration.builder import Builder, builder_args, builder_argdict
 from litex.soc.integration.soc import LiteXSoC, SoCRegion
-from litex.soc.cores.led import LedChaser
 from litex.soc.cores.spi_flash import SpiFlash
 
 from litex.build.lattice.radiant import radiant_build_args, radiant_build_argdict
@@ -124,13 +123,6 @@ class HpsSoC(LiteXSoC):
                 self.rom.add_init(integrated_rom_init)
         else:
             self.setup_rom_in_flash()
-
-        # "LEDS" - Just one LED on JTAG port
-        self.submodules.leds = LedChaser(
-            pads=platform.request_all("user_led"),
-            sys_clk_freq=platform.sys_clk_freq)
-        self.csr.add("leds")
-
 
         # UART
         self.add_serial()
