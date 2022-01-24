@@ -24,7 +24,6 @@ from litex.soc.integration.soc import SoCRegion
 from litex.soc.integration.builder import Builder, builder_args, builder_argdict
 from litex.soc.integration.soc import LiteXSoC, SoCRegion
 from litex.soc.cores.led import LedChaser
-from litex.soc.cores.spi_flash import SpiFlash
 
 from litex.build.lattice.radiant import radiant_build_args, radiant_build_argdict
 from litex.build.lattice.oxide import oxide_args, oxide_argdict
@@ -72,14 +71,14 @@ class HpsSoC(LiteXSoC):
 
     cpu_type = "vexriscv"
 
-    def __init__(self, platform, debug, litespi_flash=True, variant=None,
+    def __init__(self, platform, debug, variant=None,
                  cpu_cfu=None, execute_from_lram=False,
                  separate_arena=False,
                  integrated_rom_init=[]):
         LiteXSoC.__init__(self,
                           platform=platform,
                           sys_clk_freq=platform.sys_clk_freq,
-                          csr_data_width=(32 if litespi_flash else 8))
+                          csr_data_width=32)
         if variant == None:
             variant = "full+debug" if debug else "full"
 
@@ -110,10 +109,7 @@ class HpsSoC(LiteXSoC):
         self.setup_arena(size=arena_size)
 
         # SPI Flash
-        if litespi_flash:
-            self.setup_litespi_flash()
-        else:
-            self.setup_flash()
+        self.setup_litespi_flash()
 
         # ROM (either part of SPI Flash, or embedded)
         if execute_from_lram:
@@ -168,12 +164,6 @@ class HpsSoC(LiteXSoC):
         self.bus.add_region("rom", region)
         self.integrated_rom_initialized = False
         self.integrated_rom_size = region.size
-
-    def setup_flash(self):
-        self.submodules.spiflash = SpiFlash(self.platform.request("spiflash"), dummy=8,
-                                            endianness="little", div=4)
-        self.bus.add_slave("spiflash", self.spiflash.bus, self.spiflash_region)
-        self.csr.add("spiflash")
 
     def setup_litespi_flash(self):
         self.submodules.spiflash_phy = LiteSPIPHY(
@@ -292,9 +282,6 @@ def main():
     parser.add_argument("--synth_mode", default="radiant",
                         help="Which synthesis mode to use with Radiant toolchain: "
                         "radiant/synplify (default), lse, or yosys")
-    parser.add_argument("--no-litespi-flash", dest="litespi_flash",
-                        action="store_false", default=True,
-                        help="Use Litex minimal SPI flash instead of Litespi")
     parser.add_argument("--cpu-cfu", default=None, help="Specify file containing CFU Verilog module")
     parser.add_argument("--cpu-variant", default=None, help="Which CPU variant to use")
     parser.add_argument("--separate-arena", action="store_true", help="Create separate RAM for tensor arena")
@@ -323,7 +310,6 @@ def main():
     copy_cpu_variant_if_needed(variant)
     soc = HpsSoC(Platform(args.toolchain, args.parallel_nextpnr, args.extra_nextpnr_params),
                     debug=args.debug,
-                    litespi_flash=args.litespi_flash,
                     variant=variant,
                     cpu_cfu=args.cpu_cfu,
                     execute_from_lram=args.execute_from_lram,
