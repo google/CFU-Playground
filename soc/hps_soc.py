@@ -187,7 +187,7 @@ class HpsSoC(LiteXSoC):
         self.integrated_rom_size = region.size
 
     def add_serial(self):
-        self.add_uart("serial", baudrate=UART_SPEED)
+        self.add_uart("uart", baudrate=UART_SPEED)
 
     def connect_cfu_to_lram(self):
         # create cfu <-> lram bus
