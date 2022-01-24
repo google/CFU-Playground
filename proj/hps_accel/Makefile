@@ -106,7 +106,7 @@ endif
 
 ifneq '$(PARALLEL)' 'no'
 EXTRA_LITEX_ARGS += --extra-nextpnr-params
-EXTRA_NEXTPNR_ARGS += --placer-heap-timingweight 79
+EXTRA_NEXTPNR_ARGS += --placer-heap-timingweight 52
 endif
 
 # Add constants defined in gateware/constants.py to C++ build
