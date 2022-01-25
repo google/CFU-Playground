@@ -55,8 +55,8 @@ set -o pipefail
 echo "$(basename $0): running ${SEED_COUNT} nextpnr-nexus instances."
 rm -rf runs 
 mkdir runs
-seed_base=1000
-for s in $(seq ${SEED_COUNT}); do
+seed_base=${SEED}
+for s in $(seq 0 $(("${SEED_COUNT}"-1))); do
   seed=$((seed_base + s))
   DIR="runs/seed-${seed}"
   mkdir "${DIR}"
