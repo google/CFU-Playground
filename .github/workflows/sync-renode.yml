@@ -35,6 +35,7 @@ jobs:
           git config --global user.email $GH_SERVICE_ACCOUNT_EMAIL
 
       - name: Sync the code and commit
+        id: sync-and-commit
         run: |
           rm -rf ./third_party/renode/*
           wget --progress=dot:giga "https://dl.antmicro.com/projects/renode/builds/renode-latest.linux-portable.tar.gz"
@@ -43,14 +44,17 @@ jobs:
           RENODE_DIRNAME=$(basename renode_*_portable)
           RENODE_VERSION=${RENODE_DIRNAME#*_}
           RENODE_VERSION=${RENODE_VERSION%_*}
-          echo $RENODE_VERSION > conf/renode.version
-          git add conf/renode.version
 
-          if [ -n "$(git status --porcelain)" ]; then
+          if [ "$RENODE_VERSION" != "$(cat conf/renode.version)" ]; then
+            echo $RENODE_VERSION > conf/renode.version
+            git add conf/renode.version
+
             RENODE_SHA=${RENODE_VERSION#*git}
             git commit -sm "Update Renode to $RENODE_SHA."
+            echo "::set-output name=committed::true"
           else
-            echo "no changes"
+            echo "::notice title=Early exit::Renode is up to date."
+            echo "::set-output name=committed::false"
           fi
 
           rm renode-latest.linux-portable.tar.gz
@@ -58,6 +62,7 @@ jobs:
 
       - name: Create Pull Request
         id: create-pr
+        if: steps.sync-and-commit.outputs.committed == 'true'
         uses: peter-evans/create-pull-request@v3
         with:
           branch: update-renode
