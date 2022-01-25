@@ -16,7 +16,7 @@
 """Multiply Accumulate Blocks for a systolic array"""
 
 
-from nmigen import Mux, Signal, unsigned
+from nmigen import Mux, Signal, unsigned, Const, Instance, ClockSignal, ResetSignal, Cat
 from nmigen_cfu.util import tree_sum, SimpleElaboratable
 
 from .utils import delay
@@ -129,28 +129,70 @@ class MaccBlock(SimpleElaboratable):
     def elab(self, m):
         self._connect_passthrough(m)
 
-        # Pipeline cycle 0: calculate products
-        products = []
-        for i in range(self._n):
-            a_bits = self.input_a.word_select(i, self._a_shape.width)
-            b_bits = self.input_b.word_select(i, self._b_shape.width)
-            a = Signal(self._a_shape, name=f"a_{i}")
-            b = Signal(self._b_shape, name=f"b_{i}")
-            m.d.comb += [
-                a.eq(a_bits),
-                b.eq(b_bits),
-            ]
-            ab = Signal.like(a * b)
-            m.d.sync += ab.eq(a * b)
-            products.append(ab)
-
-        # Pipeline cycle 1: accumulate
-        product_sum = Signal.like(tree_sum(products))
-        m.d.comb += product_sum.eq(tree_sum(products))
-        first_delayed = delay(m, self.input_first, 1)[-1]
         accumulator = Signal(self._accumulator_shape)
-        base = Mux(first_delayed, 0, accumulator)
-        m.d.sync += accumulator.eq(base + product_sum)
+
+        a0 = self.input_a.word_select(0, self._a_shape.width)
+        b0 = self.input_b.word_select(0, self._b_shape.width)
+        a1 = self.input_a.word_select(1, self._a_shape.width)
+        b1 = self.input_b.word_select(1, self._b_shape.width)
+        a2 = self.input_a.word_select(2, self._a_shape.width)
+        b2 = self.input_b.word_select(2, self._b_shape.width)
+        a3 = self.input_a.word_select(3, self._a_shape.width)
+        b3 = self.input_b.word_select(3, self._b_shape.width)
+
+        # Explicitly instantiate the DSP macro
+        m.submodules.dsp = Instance(
+            "MULTADDSUB9X9WIDE",
+
+            i_CLK=ClockSignal(),
+            i_CEA0A1=Const(1),
+            i_CEA2A3=Const(1),
+            i_CEB0B1=Const(1),
+            i_CEB2B3=Const(1),
+            i_CEC=Const(1),
+            i_CEPIPE=Const(1),
+            i_CEOUT=Const(1),
+            i_CECTRL=Const(1),
+
+            i_RSTA0A1=ResetSignal(),
+            i_RSTA2A3=ResetSignal(),
+            i_RSTB0B1=ResetSignal(),
+            i_RSTB2B3=ResetSignal(),
+            i_RSTC=ResetSignal(),
+            i_RSTCTRL=ResetSignal(),
+            i_RSTPIPE=ResetSignal(),
+            i_RSTOUT=ResetSignal(),
+
+            i_SIGNED=Const(1),
+            i_ADDSUB=Const(0, unsigned(4)),
+
+            i_A0=a0,
+            i_B0=Cat(b0, b0[7]),
+            i_A1=a1,
+            i_B1=Cat(b1, b1[7]),
+            i_A2=a2,
+            i_B2=Cat(b2, b2[7]),
+            i_A3=a3,
+            i_B3=Cat(b3, b3[7]),
+
+            i_C=Const(0, unsigned(54)),
+            i_LOADC=self.input_first,
+
+            o_Z=accumulator,
+
+            p_REGINPUTAB0="BYPASS",
+            p_REGINPUTAB1="BYPASS",
+            p_REGINPUTAB2="BYPASS",
+            p_REGINPUTAB3="BYPASS",
+            p_REGINPUTC="BYPASS",
+            p_REGADDSUB="BYPASS",
+            p_REGLOADC="BYPASS",
+            p_REGLOADC2="REGISTER",
+            p_REGPIPELINE="REGISTER",
+            p_REGOUTPUT="REGISTER",
+            p_RESETMODE="SYNC",
+            p_GSR="ENABLED",
+        )
 
         # Pipeline cycle 2: optional accumulator output
         last_delayed = delay(m, self.input_last, 2)[-1]
@@ -159,3 +201,36 @@ class MaccBlock(SimpleElaboratable):
             m.d.sync += self.output_accumulator_new.eq(1)
         with m.Else():
             m.d.sync += self.output_accumulator_new.eq(0)
+
+        # The original RTL code below:
+
+#        # Pipeline cycle 0: calculate products
+#        products = []
+#        for i in range(self._n):
+#            a_bits = self.input_a.word_select(i, self._a_shape.width)
+#            b_bits = self.input_b.word_select(i, self._b_shape.width)
+#            a = Signal(self._a_shape, name=f"a_{i}")
+#            b = Signal(self._b_shape, name=f"b_{i}")
+#            m.d.comb += [
+#                a.eq(a_bits),
+#                b.eq(b_bits),
+#            ]
+#            ab = Signal.like(a * b)
+#            m.d.sync += ab.eq(a * b)
+#            products.append(ab)
+#
+#        # Pipeline cycle 1: accumulate
+#        product_sum = Signal.like(tree_sum(products))
+#        m.d.comb += product_sum.eq(tree_sum(products))
+#        first_delayed = delay(m, self.input_first, 1)[-1]
+#        accumulator = Signal(self._accumulator_shape)
+#        base = Mux(first_delayed, 0, accumulator)
+#        m.d.sync += accumulator.eq(base + product_sum)
+#
+#        # Pipeline cycle 2: optional accumulator output
+#        last_delayed = delay(m, self.input_last, 2)[-1]
+#        with m.If(last_delayed):
+#            m.d.sync += self.output_accumulator.eq(accumulator)
+#            m.d.sync += self.output_accumulator_new.eq(1)
+#        with m.Else():
+#            m.d.sync += self.output_accumulator_new.eq(0)
