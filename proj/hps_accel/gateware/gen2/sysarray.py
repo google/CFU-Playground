@@ -26,6 +26,10 @@ class SystolicArray(SimpleElaboratable):
     Parameters
     ----------
 
+    specialize_nx: bool
+      True to explicitly use Crosslink/NX DSP blocks, otherwise use regular
+      verilog multiply operation.
+
     a_size: int
       The number of A words processed concurrently
 
@@ -74,7 +78,7 @@ class SystolicArray(SimpleElaboratable):
       The accumulator update strobe from each macc unit
     """
 
-    def __init__(self, a_size=Constants.SYS_ARRAY_HEIGHT,
+    def __init__(self, specialize_nx=False, a_size=Constants.SYS_ARRAY_HEIGHT,
                  b_size=Constants.SYS_ARRAY_WIDTH, n=4,
                  a_shape=signed(9), b_shape=signed(8),
                  accumulator_shape=signed(32)):

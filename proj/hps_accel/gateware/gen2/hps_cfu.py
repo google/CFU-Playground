@@ -225,13 +225,21 @@ class PoolInstruction(InstructionBase):
 class HpsCfu(Cfu):
     """Gen2 accelerator CFU.
     """
+    def __init__(self, specialize_nx=False):
+        """Constructor
+
+        Args:
+           specialize_nx: generate code for the Crosslink/NX-17.
+        """
+        super().__init__()
+        self._specialize_nx = specialize_nx
 
     def elab_instructions(self, m):
         m.submodules['ping'] = ping = PingInstruction()
         m.submodules['set'] = set_ = SetInstruction()
         m.submodules['get'] = get = GetInstruction()
         m.submodules['pool'] = pool = PoolInstruction()
-        m.submodules['core'] = core = AcceleratorCore()
+        m.submodules['core'] = core = AcceleratorCore(self._specialize_nx)
         m.submodules['fifo'] = fifo = StreamFifo(
             depth=Constants.OUTPUT_FIFO_DEPTH, type=unsigned(32))
 
@@ -265,5 +273,10 @@ class HpsCfu(Cfu):
         }
 
 
-def make_cfu():
-    return HpsCfu()
+def make_cfu(specialize_nx):
+    """Returns the gen2 CFU design.
+
+    Args:
+        specialize_nx: generate code for the Crosslink/NX-17.
+    """
+    return HpsCfu(specialize_nx)
