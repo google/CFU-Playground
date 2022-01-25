@@ -117,8 +117,8 @@ class MaccBlock(SimpleElaboratable):
         self.output_accumulator = Signal(accumulator_shape)
         self.output_accumulator_new = Signal()
 
-    def _connect_passthrough(self, m):
-        """Connects the block pass through signals."""
+    def elab(self, m):
+        # Pass inputs to outputs for next MaccBlock in array
         m.d.sync += [
             self.output_a.eq(self.input_a),
             self.output_b.eq(self.input_b),
@@ -126,11 +126,60 @@ class MaccBlock(SimpleElaboratable):
             self.output_last.eq(self.input_last),
         ]
 
-    def elab(self, m):
-        self._connect_passthrough(m)
-
+        # On cycle 1: multiply and add
         accumulator = Signal(self._accumulator_shape)
+        self.build_multipliers(m, accumulator)
 
+        # On cycle 2: present accumulated values
+        last_delayed = delay(m, self.input_last, 2)[-1]
+        with m.If(last_delayed):
+            m.d.sync += self.output_accumulator.eq(accumulator)
+            m.d.sync += self.output_accumulator_new.eq(1)
+        with m.Else():
+            m.d.sync += self.output_accumulator_new.eq(0)
+
+    def build_multipliers(self, m, accumulator):
+        """Builds the multiply and add block.
+
+        m: current module being built
+        accumulator: register holding current accumulated value.
+        """
+        raise NotImplementedError()
+
+
+class StandardMaccBlock(MaccBlock):
+    """A Macc block contructed from standard Amaranth.
+    """
+
+    def build_multipliers(self, m, accumulator):
+        # Pipeline cycle 0: calculate products
+        products = []
+        for i in range(self._n):
+            a_bits = self.input_a.word_select(i, self._a_shape.width)
+            b_bits = self.input_b.word_select(i, self._b_shape.width)
+            a = Signal(self._a_shape, name=f"a_{i}")
+            b = Signal(self._b_shape, name=f"b_{i}")
+            m.d.comb += [
+                a.eq(a_bits),
+                b.eq(b_bits),
+            ]
+            ab = Signal.like(a * b)
+            m.d.sync += ab.eq(a * b)
+            products.append(ab)
+
+        # Pipeline cycle 1: accumulate
+        product_sum = Signal.like(tree_sum(products))
+        m.d.comb += product_sum.eq(tree_sum(products))
+        first_delayed = delay(m, self.input_first, 1)[-1]
+        base = Mux(first_delayed, 0, accumulator)
+        m.d.sync += accumulator.eq(base + product_sum)
+
+
+class NXMaccBlock(MaccBlock):
+    """A Macc block specialized for the CrossLink/NX-17.
+    """
+
+    def build_multipliers(self, m, accumulator):
         a0 = self.input_a.word_select(0, self._a_shape.width)
         b0 = self.input_b.word_select(0, self._b_shape.width)
         a1 = self.input_a.word_select(1, self._a_shape.width)
@@ -194,43 +243,5 @@ class MaccBlock(SimpleElaboratable):
             p_GSR="ENABLED",
         )
 
-        # Pipeline cycle 2: optional accumulator output
-        last_delayed = delay(m, self.input_last, 2)[-1]
-        with m.If(last_delayed):
-            m.d.sync += self.output_accumulator.eq(accumulator)
-            m.d.sync += self.output_accumulator_new.eq(1)
-        with m.Else():
-            m.d.sync += self.output_accumulator_new.eq(0)
-
-        # The original RTL code below:
-
-#        # Pipeline cycle 0: calculate products
-#        products = []
-#        for i in range(self._n):
-#            a_bits = self.input_a.word_select(i, self._a_shape.width)
-#            b_bits = self.input_b.word_select(i, self._b_shape.width)
-#            a = Signal(self._a_shape, name=f"a_{i}")
-#            b = Signal(self._b_shape, name=f"b_{i}")
-#            m.d.comb += [
-#                a.eq(a_bits),
-#                b.eq(b_bits),
-#            ]
-#            ab = Signal.like(a * b)
-#            m.d.sync += ab.eq(a * b)
-#            products.append(ab)
-#
-#        # Pipeline cycle 1: accumulate
-#        product_sum = Signal.like(tree_sum(products))
-#        m.d.comb += product_sum.eq(tree_sum(products))
-#        first_delayed = delay(m, self.input_first, 1)[-1]
-#        accumulator = Signal(self._accumulator_shape)
-#        base = Mux(first_delayed, 0, accumulator)
-#        m.d.sync += accumulator.eq(base + product_sum)
-#
-#        # Pipeline cycle 2: optional accumulator output
-#        last_delayed = delay(m, self.input_last, 2)[-1]
-#        with m.If(last_delayed):
-#            m.d.sync += self.output_accumulator.eq(accumulator)
-#            m.d.sync += self.output_accumulator_new.eq(1)
-#        with m.Else():
-#            m.d.sync += self.output_accumulator_new.eq(0)
+def get_macc_block_class(specialize_nx):
+    return NXMaccBlock if specialize_nx else StandardMaccBlock

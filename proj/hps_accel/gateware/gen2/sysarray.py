@@ -17,7 +17,7 @@
 from nmigen import Signal, signed, unsigned
 from nmigen_cfu import SimpleElaboratable
 from .constants import Constants
-from .macc import MaccBlock
+from .macc import get_macc_block_class
 
 
 class SystolicArray(SimpleElaboratable):
@@ -82,6 +82,7 @@ class SystolicArray(SimpleElaboratable):
                  b_size=Constants.SYS_ARRAY_WIDTH, n=4,
                  a_shape=signed(9), b_shape=signed(8),
                  accumulator_shape=signed(32)):
+        self._specialize_nx = specialize_nx
         self._a_size = a_size
         self._b_size = b_size
         self._n = n
@@ -106,7 +107,8 @@ class SystolicArray(SimpleElaboratable):
                  for _ in range(self._a_size)]
         for i in range(self._a_size):
             for j in range(self._b_size):
-                macc = MaccBlock(self._n, self._a_shape, self._b_shape,
+                klass = get_macc_block_class(self._specialize_nx)
+                macc = klass(self._n, self._a_shape, self._b_shape,
                                  self._accumulator_shape)
                 maccs[i][j] = macc
 
