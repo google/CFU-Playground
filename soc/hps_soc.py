@@ -74,6 +74,7 @@ class HpsSoC(LiteXSoC):
     def __init__(self, platform, debug, variant=None,
                  cpu_cfu=None, execute_from_lram=False,
                  separate_arena=False,
+                 with_led_chaser=False,
                  integrated_rom_init=[]):
         LiteXSoC.__init__(self,
                           platform=platform,
@@ -122,10 +123,11 @@ class HpsSoC(LiteXSoC):
             self.setup_rom_in_flash()
 
         # "LEDS" - Just one LED on JTAG port
-        self.submodules.leds = LedChaser(
-            pads=platform.request_all("user_led"),
-            sys_clk_freq=platform.sys_clk_freq)
-        self.csr.add("leds")
+        if with_led_chaser:
+            self.submodules.leds = LedChaser(
+                pads=platform.request_all("user_led"),
+                sys_clk_freq=platform.sys_clk_freq)
+            self.csr.add("leds")
 
 
         # UART
