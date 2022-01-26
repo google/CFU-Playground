@@ -104,7 +104,7 @@ class SystolicArray(SimpleElaboratable):
 
     def elab(self, m):
         maccs = [[None for _ in range(self._b_size)]
-                 for _ in range(self._a_size)]
+                  for _ in range(self._a_size)]
         for i in range(self._a_size):
             for j in range(self._b_size):
                 klass = get_macc_block_class(self._specialize_nx)
