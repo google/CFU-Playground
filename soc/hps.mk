@@ -64,16 +64,11 @@ HPS_RUN:=   MAKEFLAGS=-j8 $(PYRUN) ./hps_soc.py $(LITEX_ARGS)
 BIOS_BIN := $(OUT_DIR)/software/bios/bios.bin
 BITSTREAM:= $(OUT_DIR)/gateware/hps_proto2_platform.bit
 
-.PHONY: bitstream litex-software prog clean
+.PHONY: bitstream litex-software clean
 
 bitstream: $(BITSTREAM)
 
 litex-software: $(BIOS_BIN)
-
-prog: $(BITSTREAM)
-	@echo Loading bitstream and bios onto HPS
-	$(CFU_ROOT)/scripts/hps_prog $(BITSTREAM) bitstream
-	$(CFU_ROOT)/scripts/hps_prog $(BIOS_BIN) program
 
 clean:
 	@echo Removing $(OUT_DIR)
