@@ -24,16 +24,16 @@
 # Arty builds require 3 parts:
 # - SoC Gateware
 # - SoC Software - BIOS, libraries and #includes
-# - The main C program 
+# - The main C program
 #
 # Renode builds are quite similar to Arty, and use the same Soc Software
 # and C program builds.
 #
 # Simulator builds are a little different:
 # - Verilator C++ instead of Gateware
-# - Soc Software is different due to the simulator having a different 
+# - Soc Software is different due to the simulator having a different
 #   set of peripherals
-# - The main C program requires rebuilding since it uses different Soc 
+# - The main C program requires rebuilding since it uses different Soc
 #   Software.
 #
 # To run on Arty (from within proj/xxx subdirectory):
@@ -77,7 +77,7 @@ export DEFINES    += PLATFORM_$(PLATFORM)
 export DEFINES    += PLATFORM=$(PLATFORM)
 
 SHELL           := /bin/bash
-CRC             := 
+CRC             :=
 #CRC             := --no-crc
 
 #
@@ -151,6 +151,8 @@ TFLM_COPY_DATA_DIRS := \
 	tensorflow/lite/micro/models \
 	tensorflow/lite/micro/kernels/testdata \
 
+BUILD_FLAGS ?=
+
 SOFTWARE_BIN     := $(BUILD_DIR)/software.bin
 SOFTWARE_ELF     := $(BUILD_DIR)/software.elf
 SOFTWARE_LOG     := $(BUILD_DIR)/software.log
@@ -211,7 +213,7 @@ clean:
 software: $(SOFTWARE_BIN)
 
 $(SOFTWARE_BIN) $(SOFTWARE_ELF): litex-software build-dir
-	$(MAKE) -C $(BUILD_DIR) all
+	$(MAKE) -C $(BUILD_DIR) all $(BUILD_FLAGS)
 
 # Always run cfu_gen when it exists
 # cfu_gen should not update cfu.v unless it has changed
@@ -259,7 +261,7 @@ tflite-micro-src: $(BUILD_DIR)/src
 	$(COPY) $(TFLM_TP_DIR)/ruy/ruy/profiler/instrumentation.h $(BUILD_DIR)/src/third_party/ruy/ruy/profiler
 
 .PHONY: build-dir
-build-dir: $(BUILD_DIR)/src tflite-micro-src $(BUILD_DIR_EXTRA_DEP) 
+build-dir: $(BUILD_DIR)/src tflite-micro-src $(BUILD_DIR_EXTRA_DEP)
 	@echo "build-dir: copying source to build dir"
 	$(COPY) $(COMMON_DIR)/*              $(BUILD_DIR)
 	$(COPY) $(MLCOMMONS_SRC_DIR)/*       $(BUILD_DIR)/src
@@ -270,7 +272,7 @@ build-dir: $(BUILD_DIR)/src tflite-micro-src $(BUILD_DIR_EXTRA_DEP)
 ifneq ($(wildcard $(COMMON_DIR)/_$(PLATFORM)/$(TARGET)/*),)
 	$(COPY) $(COMMON_DIR)/_$(PLATFORM)/$(TARGET)/* $(BUILD_DIR)
 endif
-	
+
 .PHONY: litex-software
 litex-software: $(CFU_VERILOG)
 	$(SOC_MK) litex-software
