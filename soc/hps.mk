@@ -38,6 +38,9 @@ OUT_DIR:=   build/$(SOC_NAME)
 LITEX_ARGS= --output-dir $(OUT_DIR) \
         --csr-json $(OUT_DIR)/csr.json $(CFU_ARGS) $(EXTRA_LITEX_ARGS)
 
+# Litex BIOS is not necessary (nor usable) with HPS
+LITEX_ARGS += --no-compile-software
+
 # Open source toolchain (Yosys + Nextpnr) is used by default
 # abc9 bug (https://github.com/google/CFU-Playground/issues/306) has been fixed
 LITEX_ARGS += --yosys-abc9
@@ -61,14 +64,13 @@ endif
 PYRUN:=     $(CFU_ROOT)/scripts/pyrun
 HPS_RUN:=   MAKEFLAGS=-j8 $(PYRUN) ./hps_soc.py $(LITEX_ARGS)
 
-BIOS_BIN := $(OUT_DIR)/software/bios/bios.bin
 BITSTREAM:= $(OUT_DIR)/gateware/hps_proto2_platform.bit
 
 .PHONY: bitstream litex-software clean
 
-bitstream: $(BITSTREAM)
+litex-software:
 
-litex-software: $(BIOS_BIN)
+bitstream: $(BITSTREAM)
 
 clean:
 	@echo Removing $(OUT_DIR)
@@ -76,9 +78,6 @@ clean:
 
 $(CFU_V):
 	$(error $(CFU_V) not found. $(HELP_MESSAGE))
-
-$(BIOS_BIN): $(CFU_V)
-	$(HPS_RUN)
 
 $(BITSTREAM): $(CFU_V)
 	@echo Building bitstream for Arty. CFU option: $(CFU_ARGS)
