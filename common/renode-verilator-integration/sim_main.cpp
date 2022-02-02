@@ -73,7 +73,11 @@ RenodeAgent *Init() {
     Verilated::traceEverOn(true);
     tfp = new VERILATED_DUMP;
     top->trace(tfp, 99);
+  #ifndef TRACE_FILEPATH
     tfp->open(DEF_TRACE_FILEPATH);
+  #else
+    tfp->open(TRACE_FILEPATH);
+  #endif
 #endif
 
     return cfu;

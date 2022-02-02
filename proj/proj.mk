@@ -178,6 +178,12 @@ ifneq '$(VERILATOR_TRACE_DEPTH)' ''
 	ENABLE_TRACE_ARG := --trace
 endif
 
+ifeq '$(ENABLE_TRACE_ARG)' '--trace'
+	VERILATOR_TRACE_PATH := $(BUILD_DIR)/simx.vcd
+else ifeq '$(ENABLE_TRACE_ARG)' '--trace-fst'
+	VERILATOR_TRACE_PATH := $(BUILD_DIR)/simx.fst
+endif
+
 BUILD_JOBS ?= 1
 
 .PHONY:	renode
@@ -199,7 +205,7 @@ renode-scripts: $(SOFTWARE_ELF)
 ifneq '$(SW_ONLY)' '1'
 	pushd $(BUILD_DIR)/renode && cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_TRACE=$(ENABLE_TRACE_ARG) -DTRACE_DEPTH_VAL=$(VERILATOR_TRACE_DEPTH) \
 		-DINCLUDE_DIR="$(PROJ_DIR)" -DVTOP="$(CFU_VERILOG)" -DVIL_DIR="$(VIL_DIR)" $${VERILATOR_PATH:+"-DUSER_VERILATOR_DIR=$$VERILATOR_PATH"} \
-		"$(RVI_DIR)" && make libVtop && popd
+		-DTRACE_FILEPATH="$(VERILATOR_TRACE_PATH)" "$(RVI_DIR)" && make libVtop && popd
 	$(CFU_ROOT)/scripts/generate_renode_scripts.py $(SOC_BUILD_DIR)/csr.json $(TARGET) $(BUILD_DIR)/renode/ --repl $(TARGET_REPL)
 else
 	$(CFU_ROOT)/scripts/generate_renode_scripts.py $(SOC_BUILD_DIR)/csr.json $(TARGET) $(BUILD_DIR)/renode/ --repl $(TARGET_REPL) --sw-only
