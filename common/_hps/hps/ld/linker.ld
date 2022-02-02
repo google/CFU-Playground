@@ -19,6 +19,7 @@ SECTIONS
 		_etext = .;
 	} > rom
 
+
 	.rodata :
 	{
 		/*
@@ -35,7 +36,7 @@ SECTIONS
 		*(SORT(.rodata1))
 		*(SORT(.srodata))
 		*(SORT(.srodata.*))
-		. = ALIGN(8);
+		. = ALIGN(4096);
 		_erodata = .;
 	} > rom
 
@@ -77,12 +78,13 @@ SECTIONS
 		_end = .;
 	} > sram
 
-        .arena (NOLOAD) :
-        {
-                _farena = .;
-                *(.arena)
-                _earena = .;
-        } > arena
+
+    .arena (NOLOAD) :   /* For separate arena */
+    {
+		_farena = .;
+		*(.arena)
+		_earena = .;
+   } > arena
 }
 
 PROVIDE(_fstack = ORIGIN(sram) + LENGTH(sram) - 4);
