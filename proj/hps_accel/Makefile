@@ -102,9 +102,16 @@ ifeq '$(TARGET)' 'digilent_arty'
 EXTRA_LITEX_ARGS += --sys-clk-freq 75000000
 endif
 
+ifeq '$(BUILD_BIOS)' 'yes'
+# By default the BIOS is not built as not required by the HPS app
+EXTRA_LITEX_ARGS += --build-bios
+endif
+
 # Add constants defined in gateware/constants.py to C++ build
 BUILD_DIR_EXTRA_DEP = $(BUILD_DIR)/src/gateware_constants.h
 
+# Number of parllel jobs
+BUILD_JOBS := 1
 
 #### Base rules ####
 include ../proj.mk

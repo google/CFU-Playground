@@ -25,6 +25,8 @@ from litex.soc.integration.builder import Builder, builder_args, builder_argdict
 from litex.soc.integration.soc import LiteXSoC, SoCRegion
 from litex.soc.cores.led import LedChaser
 
+from litex import get_data_mod
+
 from litex.build.lattice.radiant import radiant_build_args, radiant_build_argdict
 from litex.build.lattice.oxide import oxide_args, oxide_argdict
 
@@ -75,7 +77,8 @@ class HpsSoC(LiteXSoC):
                  cpu_cfu=None, execute_from_lram=False,
                  separate_arena=False,
                  with_led_chaser=False,
-                 integrated_rom_init=[]):
+                 integrated_rom_init=[],
+                 build_bios=False):
         LiteXSoC.__init__(self,
                           platform=platform,
                           sys_clk_freq=platform.sys_clk_freq,
@@ -129,7 +132,6 @@ class HpsSoC(LiteXSoC):
                 sys_clk_freq=platform.sys_clk_freq)
             self.csr.add("leds")
 
-
         # UART
         self.add_serial()
 
@@ -139,9 +141,11 @@ class HpsSoC(LiteXSoC):
             self.bus.add_slave(
                 "vexriscv_debug", self.cpu.debug_bus, self.vexriscv_region)
 
-        # Timer
-        self.add_timer(name="timer0")
-        self.timer0.add_uptime()
+        if build_bios:
+            # Timer (required for the BIOS build only)
+            self.add_timer(name="timer0")
+            self.timer0.add_uptime()
+
 
     def setup_ram(self, size):
         region = SoCRegion(self.sram_origin, size, cached=True, linker=True)
@@ -292,6 +296,8 @@ def main():
                         help="Make the CPU execute from integrated ROM stored in LRAM instead of flash")
     parser.add_argument("--integrated-rom-init", metavar="FILE",
                         help="Use FILE as integrated ROM data instead of default BIOS")
+    parser.add_argument("--build-bios", action="store_true",
+                        help="Flag to specify that the BIOS is built as well")
 
     args = parser.parse_args()
 
@@ -316,10 +322,18 @@ def main():
                     cpu_cfu=args.cpu_cfu,
                     execute_from_lram=args.execute_from_lram,
                     separate_arena=args.separate_arena,
-                    integrated_rom_init=integrated_rom_init)
+                    integrated_rom_init=integrated_rom_init,
+                    build_bios=args.build_bios)
 
     if args.cfu_mport:
         soc.connect_cfu_to_lram()
+
+    if not args.build_bios:
+        # To still allow building libraries needed
+        # by the HPS software, without the necessity of
+        # having the BIOS (and its gatware requirements such as the Timer)
+        # this flag needs to be set to True
+        soc.integrated_rom_initialized = True
 
     builder = create_builder(soc, args)
     builder_kwargs = {}
