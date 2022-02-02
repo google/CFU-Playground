@@ -277,8 +277,8 @@ endif
 litex-software: $(CFU_VERILOG)
 	$(SOC_MK) litex-software
 
-RUN_TARGETS := load unit run unit-renode run-renode
-.PHONY: $(RUN_TARGETS) prog bitstream
+RUN_TARGETS := load unit run
+.PHONY: $(RUN_TARGETS) prog bitstream run-renode unit-renode
 
 ifneq 'sim' '$(PLATFORM)'
 # $(PLATFORM) == 'arty'
@@ -288,6 +288,14 @@ prog: $(CFU_VERILOG)
 bitstream: $(CFU_VERILOG)
 	$(SOC_MK) bitstream
 
+run-renode: $(SOFTWARE_ELF) renode-scripts
+	@echo Running automated test in Renode
+	$(BUILD_DIR)/interact.expect r $(RUN_MENU_ITEMS) |& tee $(SOFTWARE_LOG)
+
+unit-renode: $(SOFTWARE_ELF) renode-scripts
+	@echo Running unit test in Renode simulation
+	$(BUILD_DIR)/interact.expect r $(TEST_MENU_ITEMS) |& tee $(UNITTEST_LOG)
+
 ifeq '1' '$(words $(TTY))'
 run: $(SOFTWARE_BIN)
 	@echo Running automated pdti8 test on board
@@ -296,14 +304,6 @@ run: $(SOFTWARE_BIN)
 unit: $(SOFTWARE_BIN)
 	@echo Running unit test on board
 	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) $(UART_SPEED) $(TEST_MENU_ITEMS) |& tee $(UNITTEST_LOG)
-
-run-renode: $(SOFTWARE_ELF) renode-scripts
-	@echo Running automated test in Renode
-	$(BUILD_DIR)/interact.expect r $(RUN_MENU_ITEMS) |& tee $(SOFTWARE_LOG)
-
-unit-renode: $(SOFTWARE_ELF) renode-scripts
-	@echo Running unit test in Renode simulation
-	$(BUILD_DIR)/interact.expect r $(TEST_MENU_ITEMS) |& tee $(UNITTEST_LOG)
 
 ifeq 'hps' '$(PLATFORM)'
 load: $(SOFTWARE_BIN)
