@@ -1,6 +1,7 @@
 #!/usr/bin/expect -f
 #
-# Choose simulation mode by making the first arg "s" (no dash).   
+# Choose Verilator simulation mode by making the first arg "s" (no dash)
+#  or Renode simulation mode by making the first arg "r" (no dash).
 #  Then no other options, just the menu choices.
 #
 # For non-simulation (Arty) mode:
