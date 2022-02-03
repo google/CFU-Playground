@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 The CFU-Playground Authors
+ * Copyright 2022 The CFU-Playground Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-#include "conv2d_call.h"
+#include "pool_call.h"
 
 #include <cstdio>
 
 #include "playground_util/dump.h"
-#include "tensorflow/lite/kernels/internal/reference/integer_ops/conv.h"
+#include "tensorflow/lite/kernels/internal/reference/integer_ops/pooling.h"
 #include "tflite.h"
 
-void test_conv2d(const Conv2DData* data) {
-  printf("Testing Conv2D %s\n", data->name);
+void test_pool(const PoolData* data) {
+  printf("Testing Pool %s\n", data->name);
   // Copy input arena
   int8_t* arena_input = reinterpret_cast<int8_t*>(tflite_tensor_arena);
   auto input_shape =
@@ -31,22 +31,15 @@ void test_conv2d(const Conv2DData* data) {
   for (int i = 0; i < input_shape.FlatSize(); i++) {
     arena_input[i] = data->input_data[i];
   }
+  // Set up output arena
   int8_t* arena_output =
       reinterpret_cast<int8_t*>(tflite_tensor_arena) + 128 * 1024;
-
   const tflite::RuntimeShape& output_shape =
       *(reinterpret_cast<const tflite::RuntimeShape*>(data->output_shape));
 
-  tflite::reference_integer_ops::ConvPerChannel(
-      *(reinterpret_cast<const tflite::ConvParams*>(data->params)),
-      reinterpret_cast<const int32_t*>(data->output_multiplier),
-      reinterpret_cast<const int32_t*>(data->output_shift), input_shape,
-      arena_input,
-      *(reinterpret_cast<const tflite::RuntimeShape*>(data->filter_shape)),
-      reinterpret_cast<const int8_t*>(data->filter_data),
-      *(reinterpret_cast<const tflite::RuntimeShape*>(data->bias_shape)),
-      reinterpret_cast<const int32_t*>(data->bias_data), output_shape,
-      arena_output);
+  tflite::reference_integer_ops::MaxPool(
+      *(reinterpret_cast<const tflite::PoolParams*>(data->params)), input_shape,
+      arena_input, output_shape, arena_output);
 
   // Check for differences with output
   int diff_count = 0;

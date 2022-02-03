@@ -18,6 +18,7 @@ limitations under the License.
 #include <cstdio>
 #include <limits>
 
+#include "playground_util/murmurhash.h"
 #include "tensorflow/lite/kernels/internal/common.h"
 #include "tensorflow/lite/kernels/internal/reference/integer_ops/pooling_accel.h"
 
@@ -84,40 +85,11 @@ inline bool AveragePool(const PoolParams& params,
   return true;
 }
 
-inline void MaxPool(const PoolParams& params, const RuntimeShape& input_shape,
-                    const int8_t* input_data, const RuntimeShape& output_shape,
-                    int8_t* output_data) {
-#if SHOW_MAX_POOL_PARAMS
-  // padding_width, padding_height,
-  // stride_width, stride_height, filter_height, filter_width,
-  // quantized_activation_min, quantized_activation_max,
-  // input_shape[0], input_shape[1], input_shape[2], input_shape[3],
-  // output_shape[0], output_shape[1], output_shape[2], output_shape[3]
-  printf("\n");
-  const auto& padding = params.padding_values;
-  printf("%d, %d, ", padding.width, padding.height);
-  printf("%d, %d, %d, %d, ", params.stride_height, params.stride_width,
-         params.filter_height, params.filter_width);
-  printf("%ld, %ld, ", params.quantized_activation_min,
-         params.quantized_activation_max);
-  printf("%ld, %ld, %ld, %ld, ", input_shape.Dims(0), input_shape.Dims(1),
-         input_shape.Dims(2), input_shape.Dims(3));
-  printf("%ld, %ld, %ld, %ld, ", output_shape.Dims(0), output_shape.Dims(1),
-         output_shape.Dims(2), output_shape.Dims(3));
-
-  printf("\n");
-#endif
-
-#ifdef ACCEL_MAX_POOL
-#if GATEWARE_GEN != 2
-#error MAX_POOL op requires gateware gen 2
-#endif
-  if (CanAccelerateMaxPool(params, input_shape, output_shape)) {
-    return AccelerateMaxPool(params, input_shape, input_data, output_shape,
-                             output_data);
-  }
-#endif
-
+inline void UnacceleratedMaxPool(const PoolParams& params,
+                                 const RuntimeShape& input_shape,
+                                 const int8_t* input_data,
+                                 const RuntimeShape& output_shape,
+                                 int8_t* output_data) {
   TFLITE_DCHECK_LE(params.quantized_activation_min,
                    params.quantized_activation_max);
   TFLITE_DCHECK_GE(params.quantized_activation_min,
@@ -170,6 +142,58 @@ inline void MaxPool(const PoolParams& params, const RuntimeShape& input_shape,
       }
     }
   }
+}
+
+inline void MaxPool(const PoolParams& params, const RuntimeShape& input_shape,
+                    const int8_t* input_data, const RuntimeShape& output_shape,
+                    int8_t* output_data) {
+#if SHOW_MAX_POOL_PARAMS
+  // padding_width, padding_height,
+  // stride_width, stride_height, filter_height, filter_width,
+  // quantized_activation_min, quantized_activation_max,
+  // input_shape[0], input_shape[1], input_shape[2], input_shape[3],
+  // output_shape[0], output_shape[1], output_shape[2], output_shape[3]
+  printf("\n");
+  const auto& padding = params.padding_values;
+  printf("%d, %d, ", padding.width, padding.height);
+  printf("%d, %d, %d, %d, ", params.stride_height, params.stride_width,
+         params.filter_height, params.filter_width);
+  printf("%ld, %ld, ", params.quantized_activation_min,
+         params.quantized_activation_max);
+  printf("%ld, %ld, %ld, %ld, ", input_shape.Dims(0), input_shape.Dims(1),
+         input_shape.Dims(2), input_shape.Dims(3));
+  printf("%ld, %ld, %ld, %ld, ", output_shape.Dims(0), output_shape.Dims(1),
+         output_shape.Dims(2), output_shape.Dims(3));
+
+  printf("\n");
+#endif
+
+  bool accelerated = false;
+
+#ifdef ACCEL_MAX_POOL
+#if GATEWARE_GEN != 2
+#error MAX_POOL op requires gateware gen 2
+#endif
+  accelerated = CanAccelerateMaxPool(params, input_shape, output_shape);
+  if (accelerated) {
+    AccelerateMaxPool(params, input_shape, input_data, output_shape,
+                      output_data);
+  }
+#endif
+  if (!accelerated) {
+    UnacceleratedMaxPool(params, input_shape, input_data, output_shape,
+                         output_data);
+  }
+
+#ifdef SHOW_POOL_HASHES
+  static int hash_layer = 0;
+  int32_t input_hash = murmurhash3_32(reinterpret_cast<const uint8_t*>(input_data),
+                                      input_shape.FlatSize());
+  int32_t output_hash = murmurhash3_32(reinterpret_cast<const uint8_t*>(output_data),
+                                       output_shape.FlatSize());
+  printf("%3d, %08lx, %08lx\n", hash_layer, input_hash, output_hash);
+  hash_layer++;
+#endif
 }
 
 inline bool AveragePool(const PoolParams& params,

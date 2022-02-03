@@ -29,6 +29,9 @@ SECTIONS
 		_frodata = .;
 		src/models/*/*(SORT(.rodata.*))
 		src/conv2d_??.o(SORT(.rodata.*))  /* specific to hps_accel */
+		src/conv2d_???.o(SORT(.rodata.*))  /* specific to hps_accel */
+		src/pool_??.o(SORT(.rodata.*))  /* specific to hps_accel */
+
 		. = ALIGN(4096);
 		*(SORT(.rodata))
 		*(SORT(.rodata.*))
