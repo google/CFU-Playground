@@ -35,8 +35,9 @@ DEFINES += ACCEL_STRIDED_SLICE
 # Uncomment this line to use software defined CFU functions in software_cfu.cc
 #DEFINES += CFU_SOFTWARE_DEFINED
 
-# Uncomment to dump hashes of the output layer
-#DEFINES += SHOW_OUTPUT_HASHES
+# Uncomment to dump hashes of the outputs of each layer
+#DEFINES += SHOW_CONV_HASHES
+#DEFINES += SHOW_POOL_HASHES
 
 # Uncomment this line to skip debug code (large effect on performance)
 DEFINES += NDEBUG
@@ -45,7 +46,7 @@ DEFINES += NDEBUG
 DEFINES += TF_LITE_MCU_DEBUG_LOG
 
 # Uncomment this line to skip individual profiling output (has minor effect on performance).
-#DEFINES += NPROFILE
+DEFINES += NPROFILE
 
 # Uncomment to show the parameters used when evaluating a model
 #DEFINES += SHOW_CONV_PARAMS
@@ -55,7 +56,7 @@ DEFINES += TF_LITE_MCU_DEBUG_LOG
 #DEFINES += SHOW_STRIDED_SLICE_PARAMS
 
 # Hide progress dots (they mess up the formatting of CONV_PARAMS)
-#DEFINES += HIDE_PROGRESS_DOTS
+DEFINES += HIDE_PROGRESS_DOTS
 
 # Uncomment to include specified model in built binary
 #DEFINES += INCLUDE_MODEL_PDTI8
