@@ -178,6 +178,8 @@ ifneq '$(VERILATOR_TRACE_DEPTH)' ''
 	ENABLE_TRACE_ARG := --trace
 endif
 
+BUILD_JOBS ?= 1
+
 .PHONY:	renode
 renode: renode-scripts
 	@echo Running interactively under renode
@@ -211,7 +213,7 @@ clean:
 software: $(SOFTWARE_BIN)
 
 $(SOFTWARE_BIN) $(SOFTWARE_ELF): litex-software build-dir
-	$(MAKE) -C $(BUILD_DIR) all
+	$(MAKE) -C $(BUILD_DIR) all -j $(BUILD_JOBS)
 
 # Always run cfu_gen when it exists
 # cfu_gen should not update cfu.v unless it has changed
