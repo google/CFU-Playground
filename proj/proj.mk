@@ -277,8 +277,8 @@ endif
 litex-software: $(CFU_VERILOG)
 	$(SOC_MK) litex-software
 
-RUN_TARGETS := load unit run
-.PHONY: $(RUN_TARGETS) prog bitstream run-renode unit-renode
+TTY_TARGETS := load unit run
+.PHONY: $(TTY_TARGETS) prog bitstream run-renode unit-renode
 
 ifneq 'sim' '$(PLATFORM)'
 # $(PLATFORM) == 'arty'
@@ -329,7 +329,7 @@ connect:
 endif
 
 else
-$(RUN_TARGETS):
+$(TTY_TARGETS):
 	@echo Error: could not determine unique TTY
 	@echo TTY possibilities: $(TTY)
 	@echo Optionally, manually specify TTY= on the command line
