@@ -169,7 +169,7 @@ else ifeq '$(PLATFORM)' 'common_soc'
 else ifeq '$(PLATFORM)' 'sim'
 	SOC_MK   := $(SIM_MK)
 else
-	$(error PLATFORM must be 'arty' or 'nexys_video' or 'qmtech_wukong' or 'sim')
+	$(error PLATFORM must be 'common_soc' or 'hps' or 'sim')
 endif
 
 TARGET_REPL := $(BUILD_DIR)/renode/$(TARGET)_generated.repl
@@ -281,7 +281,7 @@ TTY_TARGETS := load unit run
 .PHONY: $(TTY_TARGETS) prog bitstream run-renode unit-renode
 
 ifneq 'sim' '$(PLATFORM)'
-# $(PLATFORM) == 'arty'
+# $(PLATFORM) == 'common_soc' or 'hps'
 prog: $(CFU_VERILOG)
 	$(SOC_MK) prog
 
