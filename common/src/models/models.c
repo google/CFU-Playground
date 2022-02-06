@@ -41,6 +41,10 @@ static struct Menu MENU = {
     "TfLM Models",
     "models",
     {
+#if defined(INCLUDE_MODEL_NEURAL_NET1) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "Neural_net1 model", neural_net1_menu),
+#endif
+    
 #if defined(INCLUDE_MODEL_PDTI8) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
         MENU_ITEM(AUTO_INC_CHAR, "Person Detection int8 model", pdti8_menu),
 #endif
