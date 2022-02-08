@@ -183,11 +183,15 @@ BUILD_JOBS ?= 1
 .PHONY:	renode
 renode: renode-scripts
 	@echo Running interactively under renode
-	pushd $(PROJ_DIR)/build/renode/ && $(RENODE_DIR)/renode -e "s @$(TARGET).resc" && popd
+	pushd $(BUILD_DIR)/renode/ && $(RENODE_DIR)/renode -e "s @$(TARGET).resc" && popd
 
 .PHONY:	renode-headless
 renode-headless: renode-scripts
-	pushd $(PROJ_DIR)/build/renode/ && $(RENODE_DIR)/renode --console --disable-xwt --hide-log -e "s @$(TARGET).resc ; uart_connect sysbus.uart" && popd
+	pushd $(BUILD_DIR)/renode/ && $(RENODE_DIR)/renode --console --disable-xwt --hide-log -e "s @$(TARGET).resc ; uart_connect sysbus.uart" && popd
+
+.PHONY:	renode-test
+renode-test: renode-scripts
+	$(RENODE_DIR)/renode-test $(BUILD_DIR)/renode/$(TARGET).robot
 
 .PHONY: renode-scripts
 renode-scripts: $(SOFTWARE_ELF)
