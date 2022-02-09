@@ -64,3 +64,6 @@
 [submodule "third_party/python/meson"]
 	path = third_party/python/meson
 	url = https://github.com/mesonbuild/meson
+[submodule "third_party/python/amaranth"]
+	path = third_party/python/amaranth
+	url = https://github.com/amaranth-lang/amaranth
