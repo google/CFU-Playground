@@ -1,5 +1,12 @@
 #!/bin/bash
 set -e
+
+# Clean up obsolete nmigen directory, if present
+if [ -d third_party/python/nmigen ] ; then
+    rm -rf third_party/python/nmigen
+fi
+
+# Bring in submodules
 git submodule update --init
 
 # only these submodules need a recursive update
