@@ -16,11 +16,11 @@
 #
 # This file contains tests and examples
 #
-__package__ = 'nmigen_cfu'
+__package__ = 'amaranth_cfu'
 
 import math
-from nmigen import Signal
-from nmigen.sim import Delay
+from amaranth import Signal
+from amaranth.sim import Delay
 
 from .cfu import simple_cfu, InstructionBase, InstructionTestBase
 from .util import TestBase

@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Signal, Mux
+from amaranth import Signal, Mux
 
-from nmigen_cfu import SimpleElaboratable
+from amaranth_cfu import SimpleElaboratable
 
 from . import config
 from .delay import Delayer

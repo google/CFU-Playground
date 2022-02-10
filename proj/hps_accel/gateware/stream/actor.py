@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Cat, Signal, Module
-from nmigen_cfu import SimpleElaboratable
+from amaranth import Cat, Signal, Module
+from amaranth_cfu import SimpleElaboratable
 
 from .stream import PayloadDefinition, Endpoint
 

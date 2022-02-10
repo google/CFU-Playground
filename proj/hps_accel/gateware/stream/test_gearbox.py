@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import unsigned
-from nmigen.sim.core import Delay
+from amaranth import unsigned
+from amaranth.sim.core import Delay
 
 
-from nmigen_cfu.util import TestBase
+from amaranth_cfu.util import TestBase
 
 from .gearbox import ByteToWord
 

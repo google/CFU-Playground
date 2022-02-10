@@ -13,9 +13,9 @@
 # limitations under the License.
 
 
-from nmigen.sim.core import Settle
-from nmigen_cfu import TestBase
-from nmigen_cfu.util import pack128
+from amaranth.sim.core import Settle
+from amaranth_cfu import TestBase
+from amaranth_cfu.util import pack128
 
 from .filter_store import FilterStore
 

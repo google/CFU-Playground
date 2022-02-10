@@ -13,8 +13,8 @@
 # limitations under the License.
 
 
-from nmigen_cfu import SimpleElaboratable, InstructionBase
-from nmigen import signed, unsigned, Memory, Module, Mux, Record, Signal
+from amaranth_cfu import SimpleElaboratable, InstructionBase
+from amaranth import signed, unsigned, Memory, Module, Mux, Record, Signal
 
 from ..stream import BinaryPipelineActor
 from ..stream.gearbox import ByteToWord

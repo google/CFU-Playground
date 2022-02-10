@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__package__ = 'nmigen_cfu'
+__package__ = 'amaranth_cfu'
 
-from nmigen import Signal
-from nmigen.sim import Settle, Delay
+from amaranth import Signal
+from amaranth.sim import Settle, Delay
 
 from .util import SequentialMemoryReader, TestBase, ValueBuffer, SequentialMemoryReader
 

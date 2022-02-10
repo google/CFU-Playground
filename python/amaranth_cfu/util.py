@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__package__ = 'nmigen_cfu'
+__package__ = 'amaranth_cfu'
 
-from nmigen import Elaboratable, Module, Mux, Signal, Memory
-from nmigen.build import Platform
-from nmigen.hdl.ast import Cat
-from nmigen.sim import Simulator
+from amaranth import Elaboratable, Module, Mux, Signal, Memory
+from amaranth.build import Platform
+from amaranth.hdl.ast import Cat
+from amaranth.sim import Simulator
 
 import unittest
 
@@ -96,7 +96,7 @@ class SimpleElaboratable(Elaboratable):
 class _DummySyncModule(SimpleElaboratable):
     """A module that does something arbirarty with synchronous logic
 
-    This is used by TestBase to stop nMigen from complaining if our DUT doesn't
+    This is used by TestBase to stop Amaranth from complaining if our DUT doesn't
     contain any synchronous logic."""
 
     def elab(self, m):
@@ -105,7 +105,7 @@ class _DummySyncModule(SimpleElaboratable):
 
 
 class TestBase(unittest.TestCase):
-    """Base class for testing an nMigen module.
+    """Base class for testing an Amaranth module.
 
     The module can use sync, comb or both.
     """

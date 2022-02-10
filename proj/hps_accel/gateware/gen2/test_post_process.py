@@ -17,10 +17,10 @@
 import itertools
 import random
 
-from nmigen import Module, unsigned
-from nmigen.sim import Passive, Delay
+from amaranth import Module, unsigned
+from amaranth.sim import Passive, Delay
 
-from nmigen_cfu import pack_vals, TestBase
+from amaranth_cfu import pack_vals, TestBase
 
 from .post_process import (
     SaturatingRoundingDoubleHighMul, RoundingDivideByPowerOfTwo,

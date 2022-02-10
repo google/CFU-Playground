@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import *
-from nmigen_cfu import InstructionBase, TestBase, Cfu, CfuTestBase
+from amaranth import *
+from amaranth_cfu import InstructionBase, TestBase, Cfu, CfuTestBase
 
 import unittest
 

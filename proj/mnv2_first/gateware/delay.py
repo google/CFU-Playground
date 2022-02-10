@@ -15,9 +15,9 @@
 
 # Delayer temporarily moved out of the sequencing module to break a circular dependency
 
-from nmigen import Signal
+from amaranth import Signal
 
-from nmigen_cfu import SimpleElaboratable
+from amaranth_cfu import SimpleElaboratable
 
 
 class Delayer(SimpleElaboratable):

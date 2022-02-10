@@ -18,10 +18,10 @@
 from collections import namedtuple
 import random
 
-from nmigen import unsigned, signed
-from nmigen.sim import Delay
+from amaranth import unsigned, signed
+from amaranth.sim import Delay
 
-from nmigen_cfu import TestBase
+from amaranth_cfu import TestBase
 
 from .macc import StandardMaccBlock
 

@@ -14,9 +14,9 @@
 
 from random import seed, randint
 
-from nmigen.sim import Settle
-from nmigen_cfu import CfuTestBase, InstructionTestBase, pack_vals
-from nmigen_cfu.util import TestBase
+from amaranth.sim import Settle
+from amaranth_cfu import CfuTestBase, InstructionTestBase, pack_vals
+from amaranth_cfu.util import TestBase
 
 from .constants import Constants
 from .hps_cfu import PingInstruction, ResultAccumulator, make_cfu

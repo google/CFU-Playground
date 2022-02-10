@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Signal, signed, unsigned
-from nmigen.hdl.rec import Layout
-from nmigen_cfu import Cfu, InstructionBase, SimpleElaboratable, all_words
+from amaranth import Signal, signed, unsigned
+from amaranth.hdl.rec import Layout
+from amaranth_cfu import Cfu, InstructionBase, SimpleElaboratable, all_words
 
 from .constants import Constants
 from .filter_store import FilterStore

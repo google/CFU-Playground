@@ -17,10 +17,10 @@
 
 import random
 
-from nmigen import Cat, Const, Module, signed
-from nmigen.sim import Passive, Delay
+from amaranth import Cat, Const, Module, signed
+from amaranth.sim import Passive, Delay
 
-from nmigen_cfu import TestBase
+from amaranth_cfu import TestBase
 
 from .sysarray import SystolicArray
 

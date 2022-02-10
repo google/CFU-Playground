@@ -18,10 +18,10 @@
 from functools import reduce
 import random
 
-from nmigen import Module, signed, unsigned
-from nmigen.sim import Passive
+from amaranth import Module, signed, unsigned
+from amaranth.sim import Passive
 
-from nmigen_cfu import pack_vals, TestBase
+from amaranth_cfu import pack_vals, TestBase
 
 from .accelerator import AcceleratorCore
 from .constants import Constants

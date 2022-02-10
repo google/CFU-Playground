@@ -13,8 +13,8 @@
 # limitations under the License.
 
 
-from nmigen_cfu.util import SimpleElaboratable
-from nmigen import unsigned, Signal, Module, Mux
+from amaranth_cfu.util import SimpleElaboratable
+from amaranth import unsigned, Signal, Module, Mux
 
 from .constants import Constants
 from .mem import WideReadMemory

@@ -16,4 +16,4 @@ jobs:
       - run: cd proj/mnv2_first && pwd && make pytest
       - run: cd proj/proj_accel_1 && pwd && make pytest
       - run: cd proj/proj_template && pwd && make pytest
-      - run: echo "nmigen_cfu tests"; python/nmigen_cfu/run_unit_tests.sh
+      - run: echo "amaranth_cfu tests"; python/amaranth_cfu/run_unit_tests.sh

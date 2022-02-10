@@ -15,8 +15,8 @@
 
 """Tests for uitls.py"""
 
-from nmigen import Signal, Module
-from nmigen_cfu import TestBase
+from amaranth import Signal, Module
+from amaranth_cfu import TestBase
 from .utils import delay
 import random
 

@@ -15,8 +15,8 @@
 
 """Simple memory wrapper"""
 
-from nmigen import Memory, Mux, Signal, unsigned
-from nmigen_cfu.util import SimpleElaboratable
+from amaranth import Memory, Mux, Signal, unsigned
+from amaranth_cfu.util import SimpleElaboratable
 
 from ..stream import Endpoint
 from .utils import unsigned_upto
@@ -29,7 +29,7 @@ class SinglePortMemory(SimpleElaboratable):
     write occurs at the same time as a read, the write takes precedence,
     and the output data is invalid.
 
-    This is a simple wrapper for the nmigen library Memory, and in future
+    This is a simple wrapper for the amaranth library Memory, and in future
     may be replaced with an implementation based on FPGA-specific
     primitives.
 

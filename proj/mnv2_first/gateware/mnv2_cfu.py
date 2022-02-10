@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Signal
-from nmigen.lib.fifo import SyncFIFOBuffered
-from nmigen_cfu import simple_cfu, DualPortMemory, is_pysim_run
+from amaranth import Signal
+from amaranth.lib.fifo import SyncFIFOBuffered
+from amaranth_cfu import simple_cfu, DualPortMemory, is_pysim_run
 
 from . import config
 from .macc import Accumulator, ByteToWordShifter, Madd4Pipeline

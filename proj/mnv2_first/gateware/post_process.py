@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Mux, Signal, signed
+from amaranth import Mux, Signal, signed
 
-from nmigen_cfu import SimpleElaboratable
+from amaranth_cfu import SimpleElaboratable
 
 from .delay import Delayer
 from .registerfile import Xetter

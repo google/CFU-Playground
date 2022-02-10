@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Cat, Mux, Record, Signal, signed, unsigned
-from nmigen_cfu import Cfu, InstructionBase
+from amaranth import Cat, Mux, Record, Signal, signed, unsigned
+from amaranth_cfu import Cfu, InstructionBase
 
 from .accelerator import AcceleratorCore, ACCELERATOR_CONFIGURATION_LAYOUT
 from .constants import Constants

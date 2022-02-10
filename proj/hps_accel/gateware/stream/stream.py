@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Shape
-from nmigen.hdl.rec import Layout, Record
+from amaranth import Shape
+from amaranth.hdl.rec import Layout, Record
 
 __all__ = ['PayloadDefinition', 'Endpoint', 'connect']
 

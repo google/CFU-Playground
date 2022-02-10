@@ -14,8 +14,8 @@
 
 """Post processing of accumulated values into 8 bit outputs."""
 
-from nmigen_cfu import SimpleElaboratable
-from nmigen import (
+from amaranth_cfu import SimpleElaboratable
+from amaranth import (
     signed, unsigned, Array, Cat, Module, Mux, Record, Signal, ResetInserter
 )
 

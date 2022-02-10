@@ -50,9 +50,9 @@ generate a signal for a monitor. If an upstream or downstream cannot
 wait for a handshake, it declares this in its Definition.
 
 This implementation was heavily influenced by the discussion at
-https://github.com/nmigen/nmigen/issues/317, and especially the existing design
-of LiteX streams. It relies heavily on the nmigen Record class for payload
-manipulation.
+https://github.com/amaranth-lang/amaranth/issues/317, and especially the
+existing design of LiteX streams. It relies heavily on the amaranth Record class
+for payload manipulation.
 
 Major differences from LiteX Streams:
 

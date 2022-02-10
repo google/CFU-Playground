@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Signal, unsigned
-from nmigen.hdl.dsl import Module
-from nmigen_cfu import InstructionBase, SimpleElaboratable
+from amaranth import Signal, unsigned
+from amaranth.hdl.dsl import Module
+from amaranth_cfu import InstructionBase, SimpleElaboratable
 
 from .constants import Constants
 from ..stream import Endpoint, connect

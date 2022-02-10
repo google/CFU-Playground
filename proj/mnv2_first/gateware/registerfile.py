@@ -14,9 +14,9 @@
 # limitations under the License.
 
 
-from nmigen import Signal
+from amaranth import Signal
 
-from nmigen_cfu import InstructionBase, SimpleElaboratable, ValueBuffer
+from amaranth_cfu import InstructionBase, SimpleElaboratable, ValueBuffer
 
 
 class Xetter(SimpleElaboratable):

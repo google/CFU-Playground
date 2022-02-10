@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Cat, Signal, signed
+from amaranth import Cat, Signal, signed
 
-from nmigen_cfu import all_words, SimpleElaboratable, tree_sum
+from amaranth_cfu import all_words, SimpleElaboratable, tree_sum
 
 from .delay import Delayer
 from .post_process import PostProcessor

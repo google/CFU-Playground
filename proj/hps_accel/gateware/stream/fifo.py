@@ -14,10 +14,10 @@
 # limitations under the License.
 
 
-from nmigen import signed, unsigned, Cat, Signal, Module
-from nmigen.lib.fifo import SyncFIFOBuffered
-from nmigen.hdl.dsl import FSM
-from nmigen_cfu import SimpleElaboratable
+from amaranth import signed, unsigned, Cat, Signal, Module
+from amaranth.lib.fifo import SyncFIFOBuffered
+from amaranth.hdl.dsl import FSM
+from amaranth_cfu import SimpleElaboratable
 
 from .stream import PayloadDefinition, Endpoint
 

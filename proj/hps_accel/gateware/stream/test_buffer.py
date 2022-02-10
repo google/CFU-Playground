@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import unsigned
-from nmigen.hdl.rec import Layout
-from nmigen.sim.core import Delay, Settle
+from amaranth import unsigned
+from amaranth.hdl.rec import Layout
+from amaranth.sim.core import Delay, Settle
 
 
-from nmigen_cfu.util import TestBase
+from amaranth_cfu.util import TestBase
 
 from .buffer import Buffer, ConcatenatingBuffer
 

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Signal, unsigned
+from amaranth import Signal, unsigned
 
 from .actor import BinaryActor
 from .stream import Endpoint

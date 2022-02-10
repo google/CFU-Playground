@@ -15,7 +15,7 @@
 """Tests for filter.py"""
 
 
-from nmigen_cfu import TestBase
+from amaranth_cfu import TestBase
 
 from .filter import FilterStore
 
