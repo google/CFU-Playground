@@ -107,7 +107,7 @@ make PLATFORM=sim load
 
 * [LiteX](https://github.com/enjoy-digital/litex): Open-source framework for assembling the SoC (CPU + peripherals)
 * [VexRiscv](https://github.com/SpinalHDL/VexRiscv): Open-source RISC-V soft CPU optimized for FPGAs
-* [nMigen](https://github.com/nmigen/nmigen): Python toolbox for building digital hardware
+* [Amaranth](https://github.com/amaranth-lang/amaranth): Python toolbox for building digital hardware
 
 
 ### Licensed under Apache-2.0 license
