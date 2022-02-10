@@ -30,7 +30,7 @@
 #include "models/pdti8/pdti8.h"
 #include "models/neural_net1/neural_net1.h"
 
-inline void no_menu() {}
+//inline void no_menu() {}
 
 // Automatically incrementing compile time constant character.
 // Used for avoiding selection character collisions in the menu.

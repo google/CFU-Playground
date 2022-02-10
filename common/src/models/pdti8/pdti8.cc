@@ -41,7 +41,9 @@ static int32_t pdti8_classify() {
 
   // Process the inference results.
   int8_t* output = tflite_get_output();
+  printf("OUT: %d\n",output[0]);
   return output[1] - output[0];
+  
 }
 
 static void do_classify_zeros() {
