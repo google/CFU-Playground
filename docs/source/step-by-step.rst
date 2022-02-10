@@ -4,7 +4,7 @@ The Step-by-Step Guide to Building an ML Accelerator
 After you have read the :doc:`overview <overview>` of the CFU Playground
 components and :doc:`set up <setup-guide>` your CFU-Playground, it's time
 to accelerate a model. This tutorial will walk through the steps for building
-a basic CFU in your choice of nMigen or Verilog.
+a basic CFU in your choice of Amaranth or Verilog.
 
 -------------------------
 Step 1: Make Your Project
@@ -413,25 +413,25 @@ representation of the inputs and output of the instruction are shown below:
 
 Now that we've described our CFU it's time to actually write the gateware. If
 you'd like to implement your CFU directly in Verilog you can skip the upcoming
-section about nMigen CFUs (and likewise if you're going to be using nMigen you
+section about Amaranth CFUs (and likewise if you're going to be using Amaranth you
 can skip the Verilog section).
 
 ^^^^^^^^^^^^^^^^^^^^^^
-nMigen CFU Development
+Amaranth CFU Development
 ^^^^^^^^^^^^^^^^^^^^^^
 
-There is a fairly robust framework for building a CFU in nMigen. Inside of
-``<CFU-Playground root>/python/nmigen_cfu`` there are a set of helper files
+There is a fairly robust framework for building a CFU in Amaranth. Inside of
+``<CFU-Playground root>/python/amaranth_cfu`` there are a set of helper files
 that you can ``import`` in your code. It's best to read through the doc
-comments in ``<CFU-Playground root>/python/nmigen_cfu/cfu.py`` and
-``<CFU-Playground root>/python/nmigen_cfu/util.py`` before starting
+comments in ``<CFU-Playground root>/python/amaranth_cfu/cfu.py`` and
+``<CFU-Playground root>/python/amaranth_cfu/util.py`` before starting
 development, but you should be able to get a reasonable understanding of the
 framework through this example.
 
 .. code-block:: python
 
-    from nmigen import C, Module, Signal, signed
-    from nmigen_cfu import all_words, InstructionBase, InstructionTestBase, pack_vals, simple_cfu
+    from amaranth import C, Module, Signal, signed
+    from amaranth_cfu import all_words, InstructionBase, InstructionTestBase, pack_vals, simple_cfu
     import unittest
 
 
@@ -513,7 +513,7 @@ more control over the CFU. Firstly, delete the ``cfu.py`` and ``cfu_gen.py``
 files from your project folder, we'll directly be creating and editing a file
 named ``cfu.v``.
 
-When doing CFU development with nMigen, the CFU-CPU handshaking is implemented
+When doing CFU development with Amaranth, the CFU-CPU handshaking is implemented
 for you in the ``Cfu`` base class. In Verilog you will need to implement your
 own handshaking and for that it's important to know the CFU module
 specification.

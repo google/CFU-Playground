@@ -1,11 +1,11 @@
 ==========================================================
-Building FPGA Gateware with Verilog and nMigen: A Tutorial
+Building FPGA Gateware with Verilog and Amaranth: A Tutorial
 ==========================================================
 
 This page takes the reader through a hands-on tutorial on FPGA, Verilog and
-nMigen_.
+Amaranth_.
 
-.. _nMigen: https://github.com/nmigen/nmigen
+.. _Amaranth: https://github.com/amaranth-lang/amaranth
 
 Field Programmable Gate Arrays are fascinating devices that can efficiently
 perform all kinds of computing tasks. A configuration for and FPGA is known as
@@ -16,7 +16,7 @@ well known and best supported. Learning Verilog is good way to begin to
 understand how FPGAs work.
 
 It is possible to write CFUs in Verilog, but for more sophisticated CFUs we use
-nMigen to generate Verilog.
+Amaranth to generate Verilog.
 
 ------------
 Getting Help
@@ -46,7 +46,7 @@ Obtain the following:
 
 3. Speaker with 3.5mm plug. Obtain this from eBay or any electronics store.
 
-4. Optional: UPduino. A small FGPA dev board which will make the nMigen
+4. Optional: UPduino. A small FGPA dev board which will make the Amaranth
    tutorial a little easier and faster. (Order from tindie.)
    * The UPduino often goes out of stock and sometimes delivery times are long.
    * It's more than possible to run the tutorial from an Arty A7.
@@ -357,10 +357,10 @@ Counters are an important building block.
    end
 
 ---------------------
-Part 2: nMigen Basics
+Part 2: Amaranth Basics
 ---------------------
 
-We're now going to dive into nMigen_, a Python based domain-specific language
+We're now going to dive into Amaranth_, a Python based domain-specific language
 for writing gateware. At the lowest levels, it works much the same as
 Verilog. At the higher levels, it allows all the power of Python to be applied
 to generalizing, reusing and testing components.
@@ -388,7 +388,7 @@ Preparation
 .. code-block:: bash
 
    $ cd $HOME
-   $ virtualenv -p python3 nmigen-tutorial
+   $ virtualenv -p python3 amaranth-tutorial
 
 4. Add an alias to your ``.bashrc`` or ``.bash_aliases`` file:
 
@@ -401,19 +401,19 @@ Preparation
    }
    VIVADO_BIN_DIR=/home/$USER/tools/Xilinx/Vivado/2020.1/bin
    FOMU_DIR=/home/$USER/fomu-toolchain-linux_x86_64-v1.5.6/bin
-   alias startp='pathadd $FOMU_DIR;pathadd $VIVADO_BIN_DIR;source ~/nmigen-tutorial/bin/activate'
+   alias startp='pathadd $FOMU_DIR;pathadd $VIVADO_BIN_DIR;source ~/amaranth-tutorial/bin/activate'
 
 5. Execute the ``startp`` alias to enter the virtual environment.
 
-6. Install nMigen and gtkwave used for the tutorial
+6. Install Amaranth and gtkwave used for the tutorial
 
 .. code-block:: bash
 
    $ sudo apt install gtkwave   
    $ pip install --upgrade \
-     'git+https://github.com/nmigen/nmigen.git#egg=nmigen[builtin-yosys]'
-   $ pip install --upgrade 'git+https://github.com/nmigen/nmigen-boards.git'
-   $ pip install --upgrade 'git+https://github.com/nmigen/nmigen-soc.git'
+     'git+https://github.com/amaranth-lang/amaranth.git#egg=amaranth[builtin-yosys]'
+   $ pip install --upgrade 'git+https://github.com/amaranth-lang/amaranth-boards.git'
+   $ pip install --upgrade 'git+https://github.com/amaranth-lang/amaranth-soc.git'
 
 .. hint:: You may need to install udev rules
 
@@ -421,9 +421,9 @@ Preparation
 Vivonomicon Tutorial
 ====================
 
-Work through the `Learning FPGA Design with nMigen`_ from vivonomicon
+Work through the `Learning FPGA Design with Amaranth`_ from vivonomicon
 
-.. _`Learning FPGA Design with nMigen`: https://vivonomicon.com/2020/04/14/learning-fpga-design-with-nmigen/
+.. _`Learning FPGA Design with Amaranth`: https://vivonomicon.com/2020/04/14/learning-fpga-design-with-amaranth/
 
 This is a big tutorial. Expect to spend at least half a day understanding what
 is going on.  This tutorial was written with the UPduino as a target, but you
@@ -432,15 +432,15 @@ code:
 
 .. code-block:: bash
 
-   $ cd ~/nmigen-tutorial
-   $ git clone --branch updated_api https://github.com/alanvgreen/nmigen_getting_started.git
+   $ cd ~/amaranth-tutorial
+   $ git clone --branch updated_api https://github.com/alanvgreen/amaranth_getting_started.git
    $ # make sure the virtualenv is activated with startp as explained above
      
 This is a summary of the first commands in the tutorial to make sure everything is working:
 
 .. code-block:: bash
 
-   $ cd nmigen_getting_started/hello_nmigen
+   $ cd amaranth_getting_started/hello_amaranth
    $ python3 test.py 
    $ gtkwave test.vcd 
    $ # make sure you click the zoom out icon in gtkwave after enabling the signals to view
@@ -451,14 +451,14 @@ This is a summary of the first commands in the tutorial to make sure everything 
 
 Some notes:
 
-* the nMigen API has changed slightly since this tutorial was written. See
+* the Amaranth API has changed slightly since this tutorial was written. See
   `this PR`__ for the required updates. Because the PR has not been merged
   the git clone command above will get you correct tree 
 
-.. __: https://github.com/WRansohoff/nmigen_getting_started/pull/1
+.. __: https://github.com/WRansohoff/amaranth_getting_started/pull/1
 
 * Do not try to cut and paste the code bits in the tutorial, they contain the outdated non
-  working code. Instead use hello_nmigen/test.py from the patched tree you just cloned.
+  working code. Instead use hello_amaranth/test.py from the patched tree you just cloned.
 
 * You may notice that the different tutorials run so quickly that it's hard to
   follow the sequence of lights.  can't see the sequences. Try to fix this by
@@ -466,7 +466,7 @@ Some notes:
   tutorials you might want to try slowing down the main clock / oscillator like
   this:
 
-.. _hello_led: https://github.com/WRansohoff/nmigen_getting_started/blob/master/hello_led/led.py
+.. _hello_led: https://github.com/WRansohoff/amaranth_getting_started/blob/master/hello_led/led.py
 
 .. code:: python
 
@@ -533,7 +533,7 @@ If Using The Arty A7
 +----------------------------------------------+------------------------------------------+
 | From                                         |  To                                      |
 +==============================================+==========================================+
-| ``from nmigen_boards.upduino_v2 import *``   | ``from nmigen_boards.arty_a7 import *``  |
+| ``from amaranth_boards.upduino_v2 import *``   | ``from amaranth_boards.arty_a7 import *``  |
 +----------------------------------------------+------------------------------------------+
 | ``grn_led = platform.request( 'led_g', 0 )`` | ``rgb = platform.request('rgb_led', 0)`` |
 | ``blu_led = platform.request( 'led_b', 0 )`` |                                          |
@@ -549,7 +549,7 @@ If Using The Arty A7
 
    $ xc3sprog -c nexys4 build/top.bit
 
-* alternatively get nmigen to call xc3sprog for you by adding do_program=True to the build() call:
+* alternatively get amaranth to call xc3sprog for you by adding do_program=True to the build() call:
 
 .. code:: bash
 
@@ -566,14 +566,14 @@ Recap
 
 You now know how to:
 
-* Write basic nMigen code
+* Write basic Amaranth code
 * Simulate a design
 * Synthesize a design
 * Program a real device
 
 
 -------------------------------------------
-Part 3: Test Driven Development with nMigen
+Part 3: Test Driven Development with Amaranth
 -------------------------------------------
 
 That tutorial was fun, but it was missing a vital piece: unit tests. Coupled
@@ -594,8 +594,8 @@ whenever the input transitions from low to high.
 
 .. code:: python
 
-   from nmigen import *
-   from nmigen.sim import Simulator
+   from amaranth import *
+   from amaranth.sim import Simulator
 
    import unittest
 
@@ -654,7 +654,7 @@ whenever the input transitions from low to high.
       EdgeDetector and assign to a variable named "self.dut". Because it is a
       submodule, we add it to our list of submodules. "DUT" means "device under
       test".
-   E. as we saw in the previous tutorial, nMigen uses generator functions to
+   E. as we saw in the previous tutorial, Amaranth uses generator functions to
       drive the simulation. ``process()`` is a simple generator function.
    F. ``run_sim()`` can optionally write a trace file. When debugging, it can
       be helpful to write a tracefile.
@@ -777,8 +777,8 @@ let's create a Top() and deploy it to a real Arty board.
 
 .. code:: python
 
-   from nmigen import *
-   from nmigen_boards.arty_a7 import *
+   from amaranth import *
+   from amaranth_boards.arty_a7 import *
 
    from edge_detect import EdgeDetector
 
@@ -818,7 +818,7 @@ let's create a Top() and deploy it to a real Arty board.
        that the detector only outputs '1' for a single cycle when an edge is
        detected.
 
-.. _arty_a7.py: https://github.com/nmigen/nmigen-boards/blob/8be37da521e8789726a53bd4e0c261c12e2ab22b/nmigen_boards/arty_a7.py
+.. _arty_a7.py: https://github.com/amaranth-lang/amaranth-boards/blob/8be37da521e8789726a53bd4e0c261c12e2ab22b/amaranth_boards/arty_a7.py
 
 3. Run it to synthesize the design and program the Arty.
 4. Wait around for this to finish. Notice how long it takes and remember how
@@ -830,7 +830,7 @@ let's create a Top() and deploy it to a real Arty board.
    the switch causes the LED to change.
 
 
-nMigen: Finite State Machines
+Amaranth: Finite State Machines
 =============================
 
 We're going to make a small example design that outputs colors in response to
@@ -1005,8 +1005,8 @@ For reference, this code worked for us:
 
 .. code:: python
 
-   from nmigen import *
-   from nmigen_boards.arty_a7 import *
+   from amaranth import *
+   from amaranth_boards.arty_a7 import *
 
    from edge_detect import EdgeDetector
    from color_stepper import ColorStepper
@@ -1045,10 +1045,10 @@ For reference, this code worked for us:
    skip.
 
 
-nMigen: Memory
+Amaranth: Memory
 ==============
 
-nMigen provides an abstraction called Memory which is useful for building
+Amaranth provides an abstraction called Memory which is useful for building
 small, fast memories. The toolchain will choose exactly how it is implemented:
 usually with bare flip flops if there's only a few bits or with block ram
 (BRAMs) for larger memories.
@@ -1057,7 +1057,7 @@ These small, local memories are important for evaluating ML operations. Many of
 them can be used in parallel, caching input data and intermediate values and so
 greatly reducing the bandwidth load on main memory.
 
-As shown in the following diagram a typical nMigen memory has:
+As shown in the following diagram a typical Amaranth memory has:
 
 a read port.
     Every cycle, the given address lines are read and the next cycle, the data
@@ -1073,7 +1073,7 @@ even on separate clocks.
 .. raw:: html
 
    <img class="std"
-        alt="Abstract nMigen memory with read and write ports"
+        alt="Abstract Amaranth memory with read and write ports"
         src="https://docs.google.com/drawings/d/e/2PACX-1vRJX5EPgeux49kEx7ZDnq0uNVbvM8wKuI0lrI5TcEmAw_PhSQo1CZw8XWDjVqqPKKLLmiXJ_aT05_GN/pub?w=1676&amp;h=711">
 
 
@@ -1161,7 +1161,7 @@ Further hints:
   ``read_addr`` signal which holds the read address - which also happens to be
   the next value for addr when it is incremented.
 
-.. _mem.py: https://github.com/nmigen/nmigen/blob/master/nmigen/hdl/mem.py
+.. _mem.py: https://github.com/amaranth-lang/amaranth/blob/master/amaranth/hdl/mem.py
 .. _`bit_length()`: https://docs.python.org/3/library/stdtypes.html#int.bit_length
 
 And spoilers (don't read unless you're stuck):
@@ -1200,8 +1200,8 @@ lower.
 Things To Do Now
 ----------------
 
-You now know enough nMigen to do quite a bit. If you'd like to experiment further, you could:
+You now know enough Amaranth to do quite a bit. If you'd like to experiment further, you could:
 
-* reimplement the FPGA4Fun beep tutorials in nMigen. 
+* reimplement the FPGA4Fun beep tutorials in Amaranth. 
 * Pick up other examples from FPGA4Fun
 * Move on with CFUs!
