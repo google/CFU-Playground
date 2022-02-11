@@ -1,5 +1,12 @@
 #!/bin/bash
 set -e
+
+# Clean up obsolete nmigen directory, if present
+if [ -d third_party/python/nmigen ] ; then
+    rm -rf third_party/python/nmigen
+fi
+
+# Bring in submodules
 git submodule update --init
 
 # only these submodules need a recursive update
@@ -22,9 +29,6 @@ if ! which cmake >/dev/null; then
 fi
 if ! which openocd >/dev/null; then
     missing+=(openocd)
-fi
-if ! which yosys >/dev/null; then
-    missing+=(yosys)
 fi
 if ! which expect >/dev/null; then
     missing+=(expect)
@@ -116,9 +120,26 @@ else
     echo ""
 fi
 
+
+# Yosys -- get local copy if there isn't a sufficiently recent system verion 
+if ! which yosys >/dev/null || ! yosys -V | grep "Yosys 0.1" >/dev/null; then
+    if [ ! -e "${CFU_ROOT}/third_party/usr/local/bin/yosys" ]; then
+        echo "Getting Yosys."
+        mkdir -p "${CFU_ROOT}/third_party/usr/local"
+        wget -qO- "https://anaconda.org/LiteX-Hub/yosys/0.13_39_g958c3a46a/download/linux-64/yosys-0.13_39_g958c3a46a-20220202_022309_py37.tar.bz2" | tar -xjC "${CFU_ROOT}/third_party/usr/local"
+        wget -qO- "https://anaconda.org/LiteX-Hub/yosys-symbiflow-plugins/1.0.0_7_640_gf184835/download/linux-64/yosys-symbiflow-plugins-1.0.0_7_640_gf184835-20220202_022309.tar.bz2" | tar -xjC "${CFU_ROOT}/third_party/usr/local"
+    else
+        echo "Yosys already installed locally."
+    fi
+else
+    echo -n "Found satisfactory system Yosys: "
+    yosys -V
+fi
+
+
 # Check GCC
 if ! which riscv64-unknown-elf-gcc >/dev/null; then
-    echo "Error: RISCV GCC toolchain not found. Please install one, following the instructions at"
+    echo "Warning: RISCV GCC toolchain not found. Please install one, following the instructions at"
     echo "https://cfu-playground.readthedocs.io/en/latest/setup-guide.html#step-3-install-riscv-toolchain"
 
 elif ! riscv64-unknown-elf-gcc --version | grep 'SiFive GCC 10.1.' >/dev/null; then

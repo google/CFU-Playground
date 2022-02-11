@@ -15,7 +15,7 @@
 
 """Accelerator Gateware"""
 
-from nmigen import (
+from amaranth import (
     Const,
     Memory,
     Mux,
@@ -24,7 +24,7 @@ from nmigen import (
     Signal,
     signed,
     unsigned)
-from nmigen_cfu.util import SimpleElaboratable
+from amaranth_cfu.util import SimpleElaboratable
 
 from ..stream import connect, Endpoint
 from .constants import Constants

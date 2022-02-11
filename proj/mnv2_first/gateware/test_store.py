@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Signal
-from nmigen.sim import Settle, Delay
+from amaranth import Signal
+from amaranth.sim import Settle, Delay
 
-from nmigen_cfu import InstructionTestBase, DualPortMemory, TestBase
+from amaranth_cfu import InstructionTestBase, DualPortMemory, TestBase
 
 from .store import CircularIncrementer, InputStore, StoreSetter
 from .registerfile import RegisterSetter, Xetter, RegisterFileInstruction

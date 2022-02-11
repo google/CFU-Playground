@@ -14,8 +14,8 @@
 # limitations under the License.
 
 
-from nmigen.sim import Settle
-from nmigen_cfu import TestBase
+from amaranth.sim import Settle
+from amaranth_cfu import TestBase
 
 from .sp_mem import MemoryParameters, SinglePortMemory
 

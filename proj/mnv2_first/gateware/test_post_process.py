@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen.sim import Settle
+from amaranth.sim import Settle
 
-from nmigen_cfu import TestBase
+from amaranth_cfu import TestBase
 
 from.post_process import PostProcessXetter, PostProcessor
 

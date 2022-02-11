@@ -15,8 +15,8 @@
 """Tests for hps_cfu.py"""
 
 
-from nmigen_cfu import CfuTestBase, InstructionTestBase, pack_vals
-from nmigen.sim import Passive
+from amaranth_cfu import CfuTestBase, InstructionTestBase, pack_vals
+from amaranth.sim import Passive
 
 from .constants import Constants
 from .conv2d_data import fetch_data

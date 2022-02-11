@@ -16,8 +16,8 @@
 """Multiply Accumulate Blocks for a systolic array"""
 
 
-from nmigen import Mux, Signal, unsigned, Const, Instance, ClockSignal, ResetSignal, Cat
-from nmigen_cfu.util import tree_sum, SimpleElaboratable
+from amaranth import Mux, Signal, unsigned, Const, Instance, ClockSignal, ResetSignal, Cat
+from amaranth_cfu.util import tree_sum, SimpleElaboratable
 
 from .utils import delay
 

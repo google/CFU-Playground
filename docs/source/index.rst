@@ -52,7 +52,7 @@ gateware components that make up the CFU Playground.
 
 :doc:`setup-guide` gives detailed instructions for setting up an environment.
 
-:doc:`crash-course/index` explains the basics of FPGAs, Verilog, `nMigen`_,
+:doc:`crash-course/index` explains the basics of FPGAs, Verilog, `Amaranth`_,
 RISCV, Custom Function Units and `Tensorflow Lite for Microcontrollers`_.
 
 :doc:`step-by-step` will guide you through creating your first accelerator.
@@ -60,7 +60,7 @@ RISCV, Custom Function Units and `Tensorflow Lite for Microcontrollers`_.
 :doc:`renode` can tell you more about simulating your project in `Renode`_.
 
 .. _`Tensorflow Lite for Microcontrollers`: https://www.tensorflow.org/lite/microcontrollers
-.. _nMigen: https://github.com/nmigen/nmigen
+.. _Amaranth: https://github.com/amaranth-lang/amaranth
 .. _Renode: https://renode.io
 
 .. raw:: html

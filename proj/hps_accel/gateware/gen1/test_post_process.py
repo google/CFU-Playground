@@ -15,8 +15,8 @@
 
 import random
 
-from nmigen.sim import Delay
-from nmigen_cfu import TestBase
+from amaranth.sim import Delay
+from amaranth_cfu import TestBase
 
 from .post_process import (SaturatingRoundingDoubleHighMul, RoundingDivideByPowerOfTwo,
                            OutputParamsStorage, SaturateActivationPipeline,

@@ -15,8 +15,8 @@
 
 """Gateware for filter storage."""
 
-from nmigen import Mux, Signal, unsigned
-from nmigen_cfu import SequentialMemoryReader, SimpleElaboratable
+from amaranth import Mux, Signal, unsigned
+from amaranth_cfu import SequentialMemoryReader, SimpleElaboratable
 
 from ..stream import Endpoint
 from .constants import Constants

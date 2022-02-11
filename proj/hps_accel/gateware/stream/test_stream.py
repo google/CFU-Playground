@@ -13,14 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Signal, Shape
-from nmigen.hdl.dsl import Module
-from nmigen.hdl.rec import Layout, Record
-from nmigen.sim.core import Delay
+from amaranth import Signal, Shape
+from amaranth.hdl.dsl import Module
+from amaranth.hdl.rec import Layout, Record
+from amaranth.sim.core import Delay
 
 from .stream import Endpoint, connect
 
-from nmigen_cfu.util import SimpleElaboratable, TestBase
+from amaranth_cfu.util import SimpleElaboratable, TestBase
 
 
 TEST_PAYLOAD_LAYOUT = Layout([

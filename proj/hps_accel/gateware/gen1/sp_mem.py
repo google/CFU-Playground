@@ -13,12 +13,12 @@
 # limitations under the License.
 
 from migen.fhdl.structure import Mux
-from nmigen import unsigned
-from nmigen.hdl.ast import Shape, Signal
-from nmigen.hdl.dsl import Module
-from nmigen.hdl.mem import Memory
-from nmigen.hdl.rec import DIR_FANOUT, Layout
-from nmigen_cfu.util import SimpleElaboratable, ValueBuffer
+from amaranth import unsigned
+from amaranth.hdl.ast import Shape, Signal
+from amaranth.hdl.dsl import Module
+from amaranth.hdl.mem import Memory
+from amaranth.hdl.rec import DIR_FANOUT, Layout
+from amaranth_cfu.util import SimpleElaboratable, ValueBuffer
 
 from ..stream import Endpoint, Buffer, connect
 
@@ -42,11 +42,11 @@ class MemoryParameters:
         self.depth = depth
 
     def addr_shape(self) -> Shape:
-        """nMigen shape describing the address."""
+        """Amaranth shape describing the address."""
         return unsigned((self.depth - 1).bit_length())
 
     def data_shape(self) -> Shape:
-        """nMigen shape describing a data word."""
+        """Amaranth shape describing a data word."""
         return unsigned(self.width)
 
     def write_stream_payload_type(self) -> Layout:

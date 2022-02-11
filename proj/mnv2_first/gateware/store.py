@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Array, Signal, Mux, Cat
+from amaranth import Array, Signal, Mux, Cat
 
-from nmigen_cfu import SimpleElaboratable, is_pysim_run, DualPortMemory, SequentialMemoryReader
+from amaranth_cfu import SimpleElaboratable, is_pysim_run, DualPortMemory, SequentialMemoryReader
 
 from .registerfile import Xetter
 

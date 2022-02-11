@@ -13,8 +13,8 @@
 # limitations under the License.
 
 import os.path
-from nmigen import *
-from nmigen.back import rtlil, verilog
+from amaranth import *
+from amaranth.back import rtlil, verilog
 
 from cfu import make_cfu
 

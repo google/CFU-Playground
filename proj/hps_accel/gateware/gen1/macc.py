@@ -14,9 +14,9 @@
 # limitations under the License.
 
 
-from nmigen import Array, Shape, Signal, signed
-from nmigen.hdl.rec import Layout
-from nmigen_cfu.util import all_words, tree_sum, SimpleElaboratable
+from amaranth import Array, Shape, Signal, signed
+from amaranth.hdl.rec import Layout
+from amaranth_cfu.util import all_words, tree_sum, SimpleElaboratable
 
 from ..stream import Endpoint
 

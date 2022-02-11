@@ -14,8 +14,8 @@
 
 """Gateware for the accelerator."""
 
-from nmigen import Signal, signed, unsigned
-from nmigen_cfu import SimpleElaboratable
+from amaranth import Signal, signed, unsigned
+from amaranth_cfu import SimpleElaboratable
 from .constants import Constants
 from .macc import get_macc_block_class
 

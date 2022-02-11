@@ -68,8 +68,8 @@ which data is to be read, and the `ValueAddressGenerator` generates the
 addresses for all the data for a given output pixel from that start address.
 """
 
-from nmigen import Array, Mux, Signal, unsigned
-from nmigen_cfu.util import SimpleElaboratable
+from amaranth import Array, Mux, Signal, unsigned
+from amaranth_cfu.util import SimpleElaboratable
 
 from .utils import unsigned_upto
 

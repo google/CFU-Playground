@@ -62,14 +62,14 @@ architecture is that the CFU does not have direct access to memory. It relies
 on the CPU to move data back and forth.
 
 CFUs may be written in Verilog or with any tool that outputs Verilog. We prefer
-using nMigen_, because it has good support for composition, reuse and unit
-testing. The CFU Playground includes nMigen library components to support
+using Amaranth_, because it has good support for composition, reuse and unit
+testing. The CFU Playground includes Amaranth library components to support
 CFU development.
 
 We are currently using Vivado_ to synthesize the FPGA bitstream, and intend to move 
 to Symbiflow_ in the near future.
 
-.. _nMigen: https://github.com/nmigen/nmigen
+.. _Amaranth: https://github.com/amaranth-lang/amaranth
 .. _Vivado: https://www.xilinx.com/products/design-tools/vivado.html
 .. _Symbiflow: https://symbiflow.readthedocs.io/
 

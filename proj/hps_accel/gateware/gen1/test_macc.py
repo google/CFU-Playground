@@ -14,10 +14,10 @@
 # limitations under the License.
 
 
-from nmigen.hdl.ast import Cat, Const, signed
-from nmigen.sim import Settle, Tick
+from amaranth.hdl.ast import Cat, Const, signed
+from amaranth.sim import Settle, Tick
 
-from nmigen_cfu import TestBase
+from amaranth_cfu import TestBase
 
 from .macc import MultiplyAccumulate
 
