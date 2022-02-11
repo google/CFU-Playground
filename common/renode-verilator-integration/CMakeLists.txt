@@ -12,6 +12,11 @@ if(TRACE_DEPTH_VAL)
 endif()
 set(VERI_LIB_ARGS ${ENABLE_TRACE} ${TRACE_DEPTH} -Wno-WIDTH -Wno-CASEINCOMPLETE -Wno-CASEOVERLAP)
 
+# Used by 'sim_main.cpp'.
+if(ENABLE_TRACE AND TRACE_FILEPATH)
+  add_definitions(-DTRACE_FILEPATH="${TRACE_FILEPATH}")
+endif()
+
 find_package(verilator)
 
 file(GLOB_RECURSE RENODE_SOURCES ${VIL_DIR}/cfu.cpp ${VIL_DIR}/renode_cfu.cpp)

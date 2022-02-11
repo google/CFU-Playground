@@ -88,3 +88,15 @@ software includes:
 
 .. _`Tensorflow Lite for Microcontrollers`: https://www.tensorflow.org/lite/microcontrollers
 
+
+Testing and simulation
+----------------------
+
+We use Renode_, an open source simulation framework by Antmicro_, enabling you to run the software without having the hardware available.
+
+Renode simulates the whole SoC and is able to use co-simulation with verilated CFU models to test the end-to-end flow of your application.
+
+Consult the :doc:`renode` documentation for additional details.
+
+.. _Renode: https://renode.io
+.. _Antmicro: https://antmicro.com
