@@ -30,9 +30,6 @@ fi
 if ! which openocd >/dev/null; then
     missing+=(openocd)
 fi
-if ! which yosys >/dev/null; then
-    missing+=(yosys)
-fi
 if ! which expect >/dev/null; then
     missing+=(expect)
 fi
@@ -123,9 +120,20 @@ else
     echo ""
 fi
 
+
+# Yosys
+if [ ! -e "${CFU_ROOT}/third_party/usr/local/bin/yosys" ]; then
+    echo "Getting Yosys"
+    mkdir -p "${CFU_ROOT}/third_party/usr/local"
+    wget -qO- "https://anaconda.org/LiteX-Hub/yosys/0.13_39_g958c3a46a/download/linux-64/yosys-0.13_39_g958c3a46a-20220202_022309_py37.tar.bz2" | tar -xjC "${CFU_ROOT}/third_party/usr/local"
+else
+    echo "Yosys already installed"
+fi
+
+
 # Check GCC
 if ! which riscv64-unknown-elf-gcc >/dev/null; then
-    echo "Error: RISCV GCC toolchain not found. Please install one, following the instructions at"
+    echo "Warning: RISCV GCC toolchain not found. Please install one, following the instructions at"
     echo "https://cfu-playground.readthedocs.io/en/latest/setup-guide.html#step-3-install-riscv-toolchain"
 
 elif ! riscv64-unknown-elf-gcc --version | grep 'SiFive GCC 10.1.' >/dev/null; then
