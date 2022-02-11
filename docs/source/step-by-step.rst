@@ -416,9 +416,9 @@ you'd like to implement your CFU directly in Verilog you can skip the upcoming
 section about Amaranth CFUs (and likewise if you're going to be using Amaranth you
 can skip the Verilog section).
 
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^
 Amaranth CFU Development
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 There is a fairly robust framework for building a CFU in Amaranth. Inside of
 ``<CFU-Playground root>/python/amaranth_cfu`` there are a set of helper files

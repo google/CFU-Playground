@@ -1,6 +1,6 @@
-==========================================================
+============================================================
 Building FPGA Gateware with Verilog and Amaranth: A Tutorial
-==========================================================
+============================================================
 
 This page takes the reader through a hands-on tutorial on FPGA, Verilog and
 Amaranth_.
@@ -356,9 +356,9 @@ Counters are an important building block.
        counter <= counter-1;
    end
 
----------------------
+-----------------------
 Part 2: Amaranth Basics
----------------------
+-----------------------
 
 We're now going to dive into Amaranth_, a Python based domain-specific language
 for writing gateware. At the lowest levels, it works much the same as
@@ -533,7 +533,7 @@ If Using The Arty A7
 +----------------------------------------------+------------------------------------------+
 | From                                         |  To                                      |
 +==============================================+==========================================+
-| ``from amaranth_boards.upduino_v2 import *``   | ``from amaranth_boards.arty_a7 import *``  |
+| ``from amaranth_boards.upduino_v2 import *`` | ``from amaranth_boards.arty_a7 import *``|
 +----------------------------------------------+------------------------------------------+
 | ``grn_led = platform.request( 'led_g', 0 )`` | ``rgb = platform.request('rgb_led', 0)`` |
 | ``blu_led = platform.request( 'led_b', 0 )`` |                                          |
@@ -572,9 +572,9 @@ You now know how to:
 * Program a real device
 
 
--------------------------------------------
+---------------------------------------------
 Part 3: Test Driven Development with Amaranth
--------------------------------------------
+---------------------------------------------
 
 That tutorial was fun, but it was missing a vital piece: unit tests. Coupled
 with simulation, unit tests allow fast iteration without needing to deploy to
@@ -831,7 +831,7 @@ let's create a Top() and deploy it to a real Arty board.
 
 
 Amaranth: Finite State Machines
-=============================
+===============================
 
 We're going to make a small example design that outputs colors in response to
 button presses. In order to avoid long waits for the FPGA toolchain, we'll
@@ -1046,7 +1046,7 @@ For reference, this code worked for us:
 
 
 Amaranth: Memory
-==============
+================
 
 Amaranth provides an abstraction called Memory which is useful for building
 small, fast memories. The toolchain will choose exactly how it is implemented:
