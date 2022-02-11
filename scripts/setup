@@ -126,6 +126,7 @@ if [ ! -e "${CFU_ROOT}/third_party/usr/local/bin/yosys" ]; then
     echo "Getting Yosys"
     mkdir -p "${CFU_ROOT}/third_party/usr/local"
     wget -qO- "https://anaconda.org/LiteX-Hub/yosys/0.13_39_g958c3a46a/download/linux-64/yosys-0.13_39_g958c3a46a-20220202_022309_py37.tar.bz2" | tar -xjC "${CFU_ROOT}/third_party/usr/local"
+    wget -qO- "https://anaconda.org/LiteX-Hub/yosys-symbiflow-plugins/1.0.0_7_640_gf184835/download/linux-64/yosys-symbiflow-plugins-1.0.0_7_640_gf184835-20220202_022309.tar.bz2" | tar -xjC "${CFU_ROOT}/third_party/usr/local"
 else
     echo "Yosys already installed"
 fi
