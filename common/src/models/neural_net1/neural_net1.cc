@@ -20,7 +20,7 @@
 
 #include "menu.h"
 #include "models/neural_net1/model_neural_net1.h"
-#include "/home/shivaubuntu/CFU-Playground/CFU-Playground/Custom_Tensorflow/mnist_test_data/mnist_img_data.cc"
+#include "/home/shivaubuntu/Tensorflow/mnist_test_data/mnist_img_data.cc"
 #include "tflite.h"
 
 
