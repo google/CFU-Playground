@@ -1,0 +1,11 @@
+# DESCRIPTION: Verilator output: Timestamp data for --skip-identical.  Delete at will.
+C "--compiler gcc --prefix Vcfu --Mdir /home/shivaubuntu/CFU-playground/CFU-Playground/proj/my_first_cfu/build/renode/CMakeFiles/libVtop.dir/Vcfu.dir --make cmake --cc -y /home/shivaubuntu/CFU-playground/CFU-Playground/proj/my_first_cfu -Wno-WIDTH -Wno-CASEINCOMPLETE -Wno-CASEOVERLAP /home/shivaubuntu/CFU-playground/CFU-Playground/proj/my_first_cfu/cfu.v"
+T      2040 14418585  1644488951   978814129  1644488951   978814129 "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/my_first_cfu/build/renode/CMakeFiles/libVtop.dir/Vcfu.dir/Vcfu.cmake"
+T     12798 14418570  1644488951   978814129  1644488951   978814129 "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/my_first_cfu/build/renode/CMakeFiles/libVtop.dir/Vcfu.dir/Vcfu.cpp"
+T      2565 14418567  1644488951   978814129  1644488951   978814129 "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/my_first_cfu/build/renode/CMakeFiles/libVtop.dir/Vcfu.dir/Vcfu.h"
+T       529 14418565  1644488951   978814129  1644488951   978814129 "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/my_first_cfu/build/renode/CMakeFiles/libVtop.dir/Vcfu.dir/Vcfu__Syms.cpp"
+T       767 14418566  1644488951   978814129  1644488951   978814129 "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/my_first_cfu/build/renode/CMakeFiles/libVtop.dir/Vcfu.dir/Vcfu__Syms.h"
+T       855 14418590  1644488951   978814129  1644488951   978814129 "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/my_first_cfu/build/renode/CMakeFiles/libVtop.dir/Vcfu.dir/Vcfu__ver.d"
+T         0        0  1644488951   978814129  1644488951   978814129 "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/my_first_cfu/build/renode/CMakeFiles/libVtop.dir/Vcfu.dir/Vcfu__verFiles.dat"
+S      1608 13767860  1644485234   289506025  1644485234   285506043 "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/my_first_cfu/cfu.v"
+S   7484256  5390342  1643818413   480027305  1581264640           0 "/usr/bin/verilator_bin"

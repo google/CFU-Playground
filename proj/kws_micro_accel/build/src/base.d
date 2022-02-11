@@ -1,0 +1,24 @@
+src/base.o: src/base.c src/base.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc/include/stdint.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc/include/machine/_default_types.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc/include/sys/features.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/soc/build/digilent_arty.kws_micro_accel/software/libc/picolibc.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc/include/sys/_intsup.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc/include/sys/_stdint.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/litex/litex/soc/software/libbase/console.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/soc/build/digilent_arty.kws_micro_accel/software/include/generated/csr.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/soc/build/digilent_arty.kws_micro_accel/software/include/generated/soc.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/litex/litex/soc/cores/cpu/vexriscv/system.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/litex/litex/soc/cores/cpu/vexriscv/csr-defs.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/litex/litex/soc/software/include/hw/common.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/litex/litex/soc/cores/cpu/vexriscv/irq.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc/include/stdlib.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc/include/_ansi.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc/include/machine/stdlib.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc/include/alloca.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc/include/string.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc/include/sys/_locale.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc/include/strings.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc/include/sys/string.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/litex/litex/soc/software/libbase/uart.h \
+ src/instruction_handler.h src/riscv.h

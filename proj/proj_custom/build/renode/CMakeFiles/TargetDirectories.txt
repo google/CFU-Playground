@@ -1,0 +1,3 @@
+/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_custom/build/renode/CMakeFiles/rebuild_cache.dir
+/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_custom/build/renode/CMakeFiles/edit_cache.dir
+/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_custom/build/renode/CMakeFiles/libVtop.dir

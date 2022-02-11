@@ -14,9 +14,11 @@ limitations under the License.
 ==============================================================================*/
 #ifndef TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_CONV_H_
 #define TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_CONV_H_
-
+#include "cfu.h"
+#include "playground_util/print_params.h"
 #include "tensorflow/lite/kernels/internal/common.h"
 #include "perf.h"
+#include <stdio.h>
 namespace tflite {
 namespace reference_integer_ops {
 
@@ -28,14 +30,26 @@ inline void ConvPerChannel(
     const int8_t* filter_data, const RuntimeShape& bias_shape,
     const int32_t* bias_data, const RuntimeShape& output_shape,
     int8_t* output_data) {
+    
+  // Format is:
+  // "padding_type", "padding_width", "padding_height", "padding_width_offset",
+  // "padding_height_offset", "stride_width", "stride_height",
+  // "dilation_width_factor", "dilation_height_factor", "input_offset",
+  // "weights_offset", "output_offset", "output_multiplier", "output_shift",
+  // "quantized_activation_min", "quantized_activation_max",
+  // "input_batches", "input_height", "input_width", "input_depth",
+  // "filter_output_depth", "filter_height", "filter_width", "filter_input_depth",
+  // "output_batches", "output_height", "output_width", "output_depth",
+  //print_conv_params(params, input_shape, filter_shape, output_shape);
+  
   // Get parameters.
-  const int32_t input_offset = params.input_offset;  // r = s(q - Z)
-  const int stride_width = params.stride_width;
-  const int stride_height = params.stride_height;
-  const int dilation_width_factor = params.dilation_width_factor;
-  const int dilation_height_factor = params.dilation_height_factor;
-  const int pad_width = params.padding_values.width;
-  const int pad_height = params.padding_values.height;
+ // const int32_t input_offset = 128; //params.input_offset;  // r = s(q - Z)
+  const int stride_width = 1; //params.stride_width;
+  const int stride_height = 1; //params.stride_height;
+  const int dilation_width_factor = 1; //params.dilation_width_factor;
+  const int dilation_height_factor = 1; //params.dilation_height_factor;
+  const int pad_width = 0; //params.padding_values.width;
+  const int pad_height = 0; //params.padding_values.height;
   const int32_t output_offset = params.output_offset;
 
   // Set min and max value of the output.
@@ -57,8 +71,8 @@ inline void ConvPerChannel(
   // Check dimensions of the tensors.
   const int input_height = input_shape.Dims(1);
   const int input_width = input_shape.Dims(2);
-  const int filter_height = filter_shape.Dims(1);
-  const int filter_width = filter_shape.Dims(2);
+  const int filter_height = 1; //filter_shape.Dims(1);
+  const int filter_width = 1; //filter_shape.Dims(2);
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
   for (int batch = 0; batch < batches; ++batch) {
@@ -67,7 +81,10 @@ inline void ConvPerChannel(
       for (int out_x = 0; out_x < output_width; ++out_x) {
         const int in_x_origin = (out_x * stride_width) - pad_width;
         for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
-          int32_t acc = 0;
+          //int32_t acc = 0;
+          int32_t acc = cfu_op0(1,0,0);
+          //printf("acc_cfu_init %ld\n", acc);
+          //int32_t acc_test = 0;
           for (int filter_y = 0; filter_y < filter_height; ++filter_y) {
             const int in_y = in_y_origin + dilation_height_factor * filter_y;
             for (int filter_x = 0; filter_x < filter_width; ++filter_x) {
@@ -81,12 +98,15 @@ inline void ConvPerChannel(
               if (!is_point_inside_image) {
                 continue;
               }
-              perf_enable_counter(0);
-              for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-                int32_t input_val = input_data[Offset(input_shape, batch, in_y,
-                                                      in_x, in_channel)];
-                int32_t filter_val = filter_data[Offset(
-                    filter_shape, out_channel, filter_y, filter_x, in_channel)];
+              
+              //unsigned start = perf_get_mcycle();
+              //printf("Entering loop at: %u\n", perf_get_mcycle());
+              perf_enable_counter(0); 
+              for (int in_channel = 0; in_channel < input_depth; in_channel+=4) {
+                uint32_t input_val = *((uint32_t *)(input_data+ Offset(input_shape, batch, in_y,
+                                                      in_x, in_channel)));
+                uint32_t filter_val = *((uint32_t *)(filter_data+ Offset(
+                    filter_shape, out_channel, filter_y, filter_x, in_channel)));
                 // Accumulate with 32 bits accumulator.
                 // In the nudging process during model quantization, we force
                 // real value of 0.0 be represented by a quantized value. This
@@ -103,26 +123,34 @@ inline void ConvPerChannel(
                 // we have seen so far.
                 // TODO(b/174275578): Add a check to make sure the
                 // accumulator depth is smaller than 2^16.
-                acc += filter_val * (input_val + input_offset);
+                              
+                acc = cfu_op0(0, input_val,filter_val);
+                //printf("acc_val orig: %lu acc_val cfu: %lu\n ",acc_test,acc);
+ 
+                
               }
-              perf_disable_counter(0);
+             //printf("Exiting loop at: %u\n", perf_get_mcycle());
+             perf_disable_counter(0);
+             //unsigned end = perf_get_mcycle();
+             //printf("inner loop cycles %u\n", end-start);
             }
           }
 
           if (bias_data) {
             acc += bias_data[out_channel];
           }
-          acc = MultiplyByQuantizedMultiplier(
-              acc, output_multiplier[out_channel], output_shift[out_channel]);
+          acc = MultiplyByQuantizedMultiplier(              acc, output_multiplier[out_channel], output_shift[out_channel]);
           acc += output_offset;
           acc = std::max(acc, output_activation_min);
           acc = std::min(acc, output_activation_max);
-          output_data[Offset(output_shape, batch, out_y, out_x, out_channel)] =
-              static_cast<int8_t>(acc);
+          output_data[Offset(output_shape, batch, out_y, out_x, out_channel)] =               static_cast<int8_t>(acc);
+          
+    
         }
       }
     }
   }
+  //perf_print_all_counters();
 }
 
 // Fixed-point per-channel-quantization convolution reference kernel.

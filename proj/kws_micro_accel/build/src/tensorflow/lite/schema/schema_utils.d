@@ -1,0 +1,31 @@
+src/tensorflow/lite/schema/schema_utils.o: \
+ src/tensorflow/lite/schema/schema_utils.cc \
+ src/tensorflow/lite/schema/schema_utils.h \
+ src/third_party/flatbuffers/include/flatbuffers/flatbuffers.h \
+ src/third_party/flatbuffers/include/flatbuffers/array.h \
+ src/third_party/flatbuffers/include/flatbuffers/base.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc/include/assert.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc/include/_ansi.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc/include/newlib.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/soc/build/digilent_arty.kws_micro_accel/software/libc/picolibc.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc/include/sys/config.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc/include/machine/ieeefp.h \
+ /home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc/include/sys/features.h \
+ src/third_party/flatbuffers/include/flatbuffers/stl_emulation.h \
+ src/third_party/flatbuffers/include/flatbuffers/vector.h \
+ src/third_party/flatbuffers/include/flatbuffers/buffer.h \
+ src/third_party/flatbuffers/include/flatbuffers/buffer_ref.h \
+ src/third_party/flatbuffers/include/flatbuffers/verifier.h \
+ src/third_party/flatbuffers/include/flatbuffers/util.h \
+ src/third_party/flatbuffers/include/flatbuffers/detached_buffer.h \
+ src/third_party/flatbuffers/include/flatbuffers/allocator.h \
+ src/third_party/flatbuffers/include/flatbuffers/default_allocator.h \
+ src/third_party/flatbuffers/include/flatbuffers/flatbuffer_builder.h \
+ src/third_party/flatbuffers/include/flatbuffers/string.h \
+ src/third_party/flatbuffers/include/flatbuffers/struct.h \
+ src/third_party/flatbuffers/include/flatbuffers/table.h \
+ src/third_party/flatbuffers/include/flatbuffers/vector_downward.h \
+ src/tensorflow/lite/schema/schema_generated.h \
+ src/tensorflow/lite/kernels/internal/compatibility.h \
+ src/tensorflow/lite/kernels/op_macros.h \
+ src/tensorflow/lite/micro/debug_log.h

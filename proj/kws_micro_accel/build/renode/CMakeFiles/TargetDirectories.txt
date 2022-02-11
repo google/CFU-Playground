@@ -1,0 +1,3 @@
+/home/shivaubuntu/CFU-playground/CFU-Playground/proj/kws_micro_accel/build/renode/CMakeFiles/rebuild_cache.dir
+/home/shivaubuntu/CFU-playground/CFU-Playground/proj/kws_micro_accel/build/renode/CMakeFiles/edit_cache.dir
+/home/shivaubuntu/CFU-playground/CFU-Playground/proj/kws_micro_accel/build/renode/CMakeFiles/libVtop.dir

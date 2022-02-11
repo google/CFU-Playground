@@ -1,0 +1,13 @@
+Since `renode.h` comes from VerilatorPlugin then its include path is relative to Renode structure.
+This patch ensures that `renode_imports.h` will be looked for in a correct place.
+--- a/src/renode.h
++++ b/src/renode.h
+@@ -8,7 +8,7 @@ 
+ #define RENODE_H
+ #include <string.h>
+ #include <stdlib.h>
+-#include "../../../../Infrastructure/src/Emulator/Cores/renode/include/renode_imports.h"
++#include "../renode_imports.h"
+
+ // Protocol must be in sync with Renode's ProtocolMessage
+ #pragma pack(push, 1)
