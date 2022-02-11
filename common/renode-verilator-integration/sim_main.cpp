@@ -11,16 +11,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#if VM_TRACE
+
+#if VM_TRACE_VCD
 # include <verilated_vcd_c.h>
+# define VERILATED_DUMP VerilatedVcdC
+# define DEF_TRACE_FILEPATH "simx.vcd"
+#elif VM_TRACE_FST
+# include <verilated_fst_c.h>
+# define VERILATED_DUMP VerilatedFstC
+# define DEF_TRACE_FILEPATH "simx.fst"
 #endif
+
 #include "src/renode_cfu.h"
 #include "src/buses/cfu.h"
 
 RenodeAgent *cfu;
 Vcfu *top = new Vcfu;
-VerilatedVcdC *tfp;
 vluint64_t main_time = 0;
+
+#if VM_TRACE
+VERILATED_DUMP *tfp;
+#endif
 
 void eval() {
 #if VM_TRACE
@@ -60,10 +71,15 @@ RenodeAgent *Init() {
 
 #if VM_TRACE
     Verilated::traceEverOn(true);
-    tfp = new VerilatedVcdC;
+    tfp = new VERILATED_DUMP;
     top->trace(tfp, 99);
-    tfp->open("simx.vcd");
+  #ifndef TRACE_FILEPATH
+    tfp->open(DEF_TRACE_FILEPATH);
+  #else
+    tfp->open(TRACE_FILEPATH);
+  #endif
 #endif
 
     return cfu;
 }
+

@@ -57,8 +57,11 @@ RISCV, Custom Function Units and `Tensorflow Lite for Microcontrollers`_.
 
 :doc:`step-by-step` will guide you through creating your first accelerator.
 
+:doc:`renode` can tell you more about simulating your project in `Renode`_.
+
 .. _`Tensorflow Lite for Microcontrollers`: https://www.tensorflow.org/lite/microcontrollers
 .. _nMigen: https://github.com/nmigen/nmigen
+.. _Renode: https://renode.io
 
 .. raw:: html
 
@@ -78,6 +81,7 @@ Site Index
    setup-guide
    crash-course/index
    step-by-step
+   renode
    vivado-install
    docs/index
    projects/*
