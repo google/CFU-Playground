@@ -1132,9 +1132,9 @@ endmodule
 (* \nmigen.hierarchy  = "Cfu.fn0" *)
 (* generator = "nMigen" *)
 module fn0(done, start, in0, in1, rst, clk, \output );
-  (* src = "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_template/cfu.py:29" *)
+  (* src = "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn/cfu.py:29" *)
   wire [32:0] \$1 ;
-  (* src = "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_template/cfu.py:29" *)
+  (* src = "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn/cfu.py:29" *)
   wire [32:0] \$2 ;
   (* src = "/home/shivaubuntu/CFU-playground/CFU-Playground/third_party/python/nmigen/nmigen/hdl/ir.py:524" *)
   input clk;
@@ -1162,16 +1162,16 @@ module fn0(done, start, in0, in1, rst, clk, \output );
   input rst;
   (* src = "/home/shivaubuntu/CFU-playground/CFU-Playground/python/nmigen_cfu/cfu.py:52" *)
   input start;
-  assign \$2  = in0 + (* src = "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_template/cfu.py:29" *) in1;
+  assign \$2  = in0 + (* src = "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn/cfu.py:29" *) in1;
   always @(posedge clk)
       done <= \done$next ;
   always @(posedge clk)
       \output  <= \output$next ;
   always @* begin
     \output$next  = \output ;
-    (* src = "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_template/cfu.py:28" *)
+    (* src = "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn/cfu.py:28" *)
     casez (start)
-      /* src = "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_template/cfu.py:28" */
+      /* src = "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn/cfu.py:28" */
       1'h1:
           \output$next  = \$1 [31:0];
     endcase
@@ -1183,12 +1183,12 @@ module fn0(done, start, in0, in1, rst, clk, \output );
   end
   always @* begin
     \done$next  = done;
-    (* src = "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_template/cfu.py:28" *)
+    (* src = "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn/cfu.py:28" *)
     casez (start)
-      /* src = "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_template/cfu.py:28" */
+      /* src = "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn/cfu.py:28" */
       1'h1:
           \done$next  = 1'h1;
-      /* src = "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_template/cfu.py:31" */
+      /* src = "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn/cfu.py:31" */
       default:
           \done$next  = 1'h0;
     endcase

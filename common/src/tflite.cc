@@ -79,6 +79,9 @@ constexpr int kTensorArenaSize = const_max<int>(
 #ifdef INCLUDE_MODEL_PDTI8
     81 * 1024,
 #endif
+#ifdef INCLUDE_MODEL_NEURAL_NET_SVHN
+    800 * 1024,
+#endif
 #ifdef INCLUDE_MODEL_NEURAL_NET1
     50 * 1024,
 #endif
