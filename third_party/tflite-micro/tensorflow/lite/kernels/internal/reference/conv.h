@@ -17,7 +17,7 @@ limitations under the License.
 
 #include "tensorflow/lite/kernels/internal/common.h"
 #include "tensorflow/lite/kernels/internal/types.h"
-
+#include "stdio.h"
 namespace tflite {
 
 namespace reference_ops {
@@ -54,6 +54,7 @@ inline void Conv(const ConvParams& params, const RuntimeShape& input_shape,
   const int filter_width = filter_shape.Dims(2);
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
+  //printf("Conv in ref\n");
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
       const int in_y_origin = (out_y * stride_height) - pad_height;

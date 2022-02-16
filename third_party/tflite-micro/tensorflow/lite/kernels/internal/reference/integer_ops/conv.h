@@ -82,6 +82,7 @@ inline void ConvPerChannel(
                 continue;
               }
               perf_enable_counter(0);
+              
               for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
                 int32_t input_val = input_data[Offset(input_shape, batch, in_y,
                                                       in_x, in_channel)];
