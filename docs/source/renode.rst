@@ -61,9 +61,7 @@ The project will be built the first time you run it in Renode.
 Then the Renode's monitor and analyzer (for UART communication) windows should open.
 The simulation logs will be output to the shell terminal Renode has been started from.
 
-To **exit** Renode, type "quit" at the prompt in the monitor window.
-
-
+To **exit** Renode, type ``quit`` at the prompt in the monitor window.
 
 
 Using Renode without GUI
