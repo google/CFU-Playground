@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     if: |
-      github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+      github.repository_owner == 'google' && ( github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' )
 
     env:
       GH_SERVICE_ACCOUNT_NAME: "CFU-Playground-Bot"
