@@ -1,1 +1,0 @@
-/usr/bin/verilator_bin;--compiler;gcc;--prefix;Vcfu;--Mdir;/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn/build/renode/CMakeFiles/libVtop.dir/Vcfu.dir;--make;cmake;--cc;-y;/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn;-Wno-WIDTH;-Wno-CASEINCOMPLETE;-Wno-CASEOVERLAP;/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn/cfu.v
