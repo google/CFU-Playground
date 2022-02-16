@@ -1,0 +1,12 @@
+# DESCRIPTION: Verilator output: Timestamp data for --skip-identical.  Delete at will.
+C "--compiler gcc --prefix Vcfu --Mdir /home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn/build/renode/CMakeFiles/libVtop.dir/Vcfu.dir --make cmake --cc -y /home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn -Wno-WIDTH -Wno-CASEINCOMPLETE -Wno-CASEOVERLAP /home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn/cfu.v"
+T      2117 14436189  1645023449   150563879  1645023449   150563879 "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn/build/renode/CMakeFiles/libVtop.dir/Vcfu.dir/Vcfu.cmake"
+T     36713 14436226  1645023449   150563879  1645023449   150563879 "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn/build/renode/CMakeFiles/libVtop.dir/Vcfu.dir/Vcfu.cpp"
+T      3774 14436187  1645023449   150563879  1645023449   150563879 "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn/build/renode/CMakeFiles/libVtop.dir/Vcfu.dir/Vcfu.h"
+T       529 14436185  1645023449   150563879  1645023449   150563879 "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn/build/renode/CMakeFiles/libVtop.dir/Vcfu.dir/Vcfu__Syms.cpp"
+T       767 14436186  1645023449   150563879  1645023449   150563879 "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn/build/renode/CMakeFiles/libVtop.dir/Vcfu.dir/Vcfu__Syms.h"
+T       930 14436190  1645023449   150563879  1645023449   150563879 "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn/build/renode/CMakeFiles/libVtop.dir/Vcfu.dir/Vcfu__ver.d"
+T         0        0  1645023449   150563879  1645023449   150563879 "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn/build/renode/CMakeFiles/libVtop.dir/Vcfu.dir/Vcfu__verFiles.dat"
+S      1860 14435928  1645023411   742674047  1645023411   738674059 "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn/cfu.v"
+S      6206 14436293  1645021463   342197087  1645021463   338197116 "/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn/fp_mul.v"
+S   7484256  5390342  1643818413   480027305  1581264640           0 "/usr/bin/verilator_bin"

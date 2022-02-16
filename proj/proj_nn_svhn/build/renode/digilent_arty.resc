@@ -1,0 +1,11 @@
+
+using sysbus
+mach create "digilent_arty"
+machine LoadPlatformDescription $ORIGIN/digilent_arty.repl
+machine StartGdbServer 10001
+showAnalyzer sysbus.uart
+showAnalyzer sysbus.uart Antmicro.Renode.Analyzers.LoggingUartAnalyzer
+
+cpu.cfu0 SimulationFilePathLinux @/home/shivaubuntu/CFU-playground/CFU-Playground/proj/proj_nn_svhn/build/renode/libVtop.so
+
+sysbus LoadELF $ORIGIN/../software.elf

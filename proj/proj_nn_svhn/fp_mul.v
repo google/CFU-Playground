@@ -89,7 +89,7 @@ module multiplier(
         a_e <= a[30:23] - 127;
         b_e <= b[30:23] - 127;
         a_s <= a[31];
-        b_s <= b[31]];
+        b_s <= b[31];
         state <= special_cases;
       end
       
@@ -160,7 +160,7 @@ module multiplier(
           b_m[23] <=1;
         end
            
-        state <= noramlize_a;
+        state <= normalise_a;
       end
     end
     
