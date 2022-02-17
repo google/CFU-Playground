@@ -13,6 +13,7 @@ dependencies:
   - litex-hub::nextpnr-ice40
   - litex-hub::iceprog
   - litex-hub::yosys
+  - litex-hub::symbiflow-yosys-plugins
   - python=3.7
   - pip
   - pip:
