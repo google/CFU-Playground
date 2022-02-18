@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Mux, Signal, signed
-from nmigen_cfu import InstructionBase, SimpleElaboratable, TestBase, Cfu, CfuTestBase
+from amaranth import Mux, Signal, signed
+from amaranth_cfu import InstructionBase, SimpleElaboratable, TestBase, Cfu, CfuTestBase
 import unittest
 
 

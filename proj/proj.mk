@@ -170,7 +170,7 @@ else ifeq '$(PLATFORM)' 'common_soc'
 else ifeq '$(PLATFORM)' 'sim'
 	SOC_MK   := $(SIM_MK)
 else
-	$(error PLATFORM must be 'arty' or 'nexys_video' or 'qmtech_wukong' or 'sim')
+	$(error PLATFORM must be 'common_soc' or 'hps' or 'sim')
 endif
 
 TARGET_REPL := $(BUILD_DIR)/renode/$(TARGET)_generated.repl
@@ -179,14 +179,26 @@ ifneq '$(VERILATOR_TRACE_DEPTH)' ''
 	ENABLE_TRACE_ARG := --trace
 endif
 
+ifeq '$(ENABLE_TRACE_ARG)' '--trace'
+	VERILATOR_TRACE_PATH := $(BUILD_DIR)/simx.vcd
+else ifeq '$(ENABLE_TRACE_ARG)' '--trace-fst'
+	VERILATOR_TRACE_PATH := $(BUILD_DIR)/simx.fst
+endif
+
+BUILD_JOBS ?= 1
+
 .PHONY:	renode
 renode: renode-scripts
 	@echo Running interactively under renode
-	pushd $(PROJ_DIR)/build/renode/ && $(RENODE_DIR)/renode -e "s @$(TARGET).resc" && popd
+	pushd $(BUILD_DIR)/renode/ && $(RENODE_DIR)/renode -e "s @$(TARGET).resc" && popd
 
 .PHONY:	renode-headless
 renode-headless: renode-scripts
-	pushd $(PROJ_DIR)/build/renode/ && $(RENODE_DIR)/renode --console --disable-xwt --hide-log -e "s @$(TARGET).resc ; uart_connect sysbus.uart" && popd
+	pushd $(BUILD_DIR)/renode/ && $(RENODE_DIR)/renode --console --disable-xwt --hide-log -e "s @$(TARGET).resc ; uart_connect sysbus.uart" && popd
+
+.PHONY:	renode-test
+renode-test: renode-scripts
+	$(RENODE_DIR)/renode-test $(BUILD_DIR)/renode/$(TARGET).robot
 
 .PHONY: renode-scripts
 renode-scripts: $(SOFTWARE_ELF)
@@ -194,7 +206,7 @@ renode-scripts: $(SOFTWARE_ELF)
 ifneq '$(SW_ONLY)' '1'
 	pushd $(BUILD_DIR)/renode && cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_TRACE=$(ENABLE_TRACE_ARG) -DTRACE_DEPTH_VAL=$(VERILATOR_TRACE_DEPTH) \
 		-DINCLUDE_DIR="$(PROJ_DIR)" -DVTOP="$(CFU_VERILOG)" -DVIL_DIR="$(VIL_DIR)" $${VERILATOR_PATH:+"-DUSER_VERILATOR_DIR=$$VERILATOR_PATH"} \
-		"$(RVI_DIR)" && make libVtop && popd
+		-DTRACE_FILEPATH="$(VERILATOR_TRACE_PATH)" "$(RVI_DIR)" && make libVtop && popd
 	$(CFU_ROOT)/scripts/generate_renode_scripts.py $(SOC_BUILD_DIR)/csr.json $(TARGET) $(BUILD_DIR)/renode/ --repl $(TARGET_REPL)
 else
 	$(CFU_ROOT)/scripts/generate_renode_scripts.py $(SOC_BUILD_DIR)/csr.json $(TARGET) $(BUILD_DIR)/renode/ --repl $(TARGET_REPL) --sw-only
@@ -212,7 +224,7 @@ clean:
 software: $(SOFTWARE_BIN)
 
 $(SOFTWARE_BIN) $(SOFTWARE_ELF): litex-software build-dir
-	$(MAKE) -C $(BUILD_DIR) all
+	$(MAKE) -C $(BUILD_DIR) all -j $(BUILD_JOBS)
 
 # Always run cfu_gen when it exists
 # cfu_gen should not update cfu.v unless it has changed
@@ -276,16 +288,24 @@ endif
 litex-software: $(CFU_VERILOG)
 	$(SOC_MK) litex-software
 
-RUN_TARGETS := load unit run unit-renode run-renode
-.PHONY: $(RUN_TARGETS) prog bitstream
+TTY_TARGETS := load unit run
+.PHONY: $(TTY_TARGETS) prog bitstream run-renode unit-renode
 
 ifneq 'sim' '$(PLATFORM)'
-# $(PLATFORM) == 'arty'
+# $(PLATFORM) == 'common_soc' or 'hps'
 prog: $(CFU_VERILOG)
 	$(SOC_MK) prog
 
 bitstream: $(CFU_VERILOG)
 	$(SOC_MK) bitstream
+
+run-renode: $(SOFTWARE_ELF) renode-scripts
+	@echo Running automated test in Renode
+	$(BUILD_DIR)/interact.expect r $(RUN_MENU_ITEMS) |& tee $(SOFTWARE_LOG)
+
+unit-renode: $(SOFTWARE_ELF) renode-scripts
+	@echo Running unit test in Renode simulation
+	$(BUILD_DIR)/interact.expect r $(TEST_MENU_ITEMS) |& tee $(UNITTEST_LOG)
 
 ifeq '1' '$(words $(TTY))'
 run: $(SOFTWARE_BIN)
@@ -295,14 +315,6 @@ run: $(SOFTWARE_BIN)
 unit: $(SOFTWARE_BIN)
 	@echo Running unit test on board
 	$(BUILD_DIR)/interact.expect $(SOFTWARE_BIN) $(TTY) $(UART_SPEED) $(TEST_MENU_ITEMS) |& tee $(UNITTEST_LOG)
-
-run-renode: $(SOFTWARE_ELF) renode-scripts
-	@echo Running automated test in Renode
-	$(BUILD_DIR)/interact.expect r $(RUN_MENU_ITEMS) |& tee $(SOFTWARE_LOG)
-
-unit-renode: $(SOFTWARE_ELF) renode-scripts
-	@echo Running unit test in Renode simulation
-	$(BUILD_DIR)/interact.expect r $(TEST_MENU_ITEMS) |& tee $(UNITTEST_LOG)
 
 ifeq 'hps' '$(PLATFORM)'
 load: $(SOFTWARE_BIN)
@@ -328,7 +340,7 @@ connect:
 endif
 
 else
-$(RUN_TARGETS):
+$(TTY_TARGETS):
 	@echo Error: could not determine unique TTY
 	@echo TTY possibilities: $(TTY)
 	@echo Optionally, manually specify TTY= on the command line

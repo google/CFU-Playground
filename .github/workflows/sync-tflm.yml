@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     if: |
-      github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+      github.repository_owner == 'google' && ( github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' )
 
     env:
       GH_SERVICE_ACCOUNT_NAME: "CFU-Playground-Bot"
@@ -38,6 +38,7 @@ jobs:
           git config --global user.email $GH_SERVICE_ACCOUNT_EMAIL
 
       - name: Sync the code, commit and push
+        id: sync-and-commit
         run: |
           source environment
           python3 -m pip install -r conf/requirements.txt
@@ -47,12 +48,15 @@ jobs:
 
           if [ -n "$(git status --porcelain)" ]; then
             git commit -sm "Sync from tflite-micro at $TFLM_SHA."
+            echo "::set-output name=committed::true"
           else
-            echo "no changes"
+            echo "::notice title=Early exit::TFLM is up to date."
+            echo "::set-output name=committed::false"
           fi
 
       - name: Create Pull Request
         id: create-pr
+        if: steps.sync-and-commit.outputs.committed == 'true'
         uses: peter-evans/create-pull-request@v3
         with:
           branch: sync-from-tflite-micro

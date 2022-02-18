@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import unsigned, Signal
-from nmigen.hdl.ast import Mux
-from nmigen.hdl.dsl import Module
-from nmigen_cfu import InstructionBase, SimpleElaboratable, ValueBuffer
+from amaranth import unsigned, Signal
+from amaranth.hdl.ast import Mux
+from amaranth.hdl.dsl import Module
+from amaranth_cfu import InstructionBase, SimpleElaboratable, ValueBuffer
 from .constants import Constants
 from ..stream import Endpoint, connect
 

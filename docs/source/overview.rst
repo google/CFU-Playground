@@ -62,14 +62,14 @@ architecture is that the CFU does not have direct access to memory. It relies
 on the CPU to move data back and forth.
 
 CFUs may be written in Verilog or with any tool that outputs Verilog. We prefer
-using nMigen_, because it has good support for composition, reuse and unit
-testing. The CFU Playground includes nMigen library components to support
+using Amaranth_, because it has good support for composition, reuse and unit
+testing. The CFU Playground includes Amaranth library components to support
 CFU development.
 
 We are currently using Vivado_ to synthesize the FPGA bitstream, and intend to move 
 to Symbiflow_ in the near future.
 
-.. _nMigen: https://github.com/nmigen/nmigen
+.. _Amaranth: https://github.com/amaranth-lang/amaranth
 .. _Vivado: https://www.xilinx.com/products/design-tools/vivado.html
 .. _Symbiflow: https://symbiflow.readthedocs.io/
 
@@ -88,3 +88,15 @@ software includes:
 
 .. _`Tensorflow Lite for Microcontrollers`: https://www.tensorflow.org/lite/microcontrollers
 
+
+Testing and simulation
+----------------------
+
+We use Renode_, an open source simulation framework by Antmicro_, enabling you to run the software without having the hardware available.
+
+Renode simulates the whole SoC and is able to use co-simulation with verilated CFU models to test the end-to-end flow of your application.
+
+Consult the :doc:`renode` documentation for additional details.
+
+.. _Renode: https://renode.io
+.. _Antmicro: https://antmicro.com

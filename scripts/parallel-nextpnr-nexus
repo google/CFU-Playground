@@ -34,6 +34,9 @@ SEED="$5"
 if ! [[ ${BASH_VERSION} =~ "5.1" ]]; then
     echo Not doing parallel nextpnr run.
     nextpnr-nexus \
+        --placer-heap-timingweight 79 \
+        --estimate-delay-mult 30 \
+        --router router2 \
         --json "${JSON}" \
         --pdc "${PDC}" \
         --fasm "${RESULT_FASM}" \
@@ -54,13 +57,16 @@ set -o pipefail
 echo "$(basename $0): running ${SEED_COUNT} nextpnr-nexus instances."
 rm -rf runs 
 mkdir runs
-seed_base=$((RANDOM % 100 * 100))
-for s in $(seq ${SEED_COUNT}); do
+seed_base=${SEED}
+for s in $(seq 0 $(("${SEED_COUNT}"-1))); do
   seed=$((seed_base + s))
   DIR="runs/seed-${seed}"
   mkdir "${DIR}"
   ( 
     nextpnr-nexus \
+        --placer-heap-timingweight 79 \
+        --estimate-delay-mult 30 \
+        --router router2 \
         --json "${JSON}" \
         --pdc "${PDC}" \
         --fasm "${DIR}/output.fasm" \
@@ -90,6 +96,7 @@ update_pids() {
 }
 
 # Wait for a child to finish then check for success or failure
+date +%H:%M:%S
 while [[ ${#CHILD_PIDS} -gt 1 ]]; do
   wait -n -p TERMINATED "${CHILD_PIDS[@]}"
   result=$?
@@ -97,7 +104,7 @@ while [[ ${#CHILD_PIDS} -gt 1 ]]; do
   if [[ "${result}" -eq "0" ]]; then
     # Child succeeded - copy result and finish
     seed="${PID_TO_SEED[${TERMINATED}]}"
-    echo "SUCCESS: nextpnr with seed=${seed}"
+    echo "$(date +%H:%M:%S) SUCCESS: nextpnr with seed=${seed}"
     cp "runs/seed-${seed}/output.fasm" $RESULT_FASM
     cp "runs/seed-${seed}/nextpnr-nexus.log" nextpnr-nexus.log
     cp "runs/seed-${seed}/report.json" report.json
@@ -107,9 +114,10 @@ while [[ ${#CHILD_PIDS} -gt 1 ]]; do
   else
     # Child failed - remove TERMINATED from list of PIDS
     seed="${PID_TO_SEED[${TERMINATED}]}"
-    echo "FAIL: nextpnr with seed=${seed}"
+    echo "$(date +%H:%M:%S) FAIL: nextpnr with seed=${seed}"
   fi
 done
 
 # No success found
 echo "All seeds failed"
+exit 1

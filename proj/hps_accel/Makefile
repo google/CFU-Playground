@@ -83,6 +83,9 @@ TEST_MENU_ITEMS=3 q
 export EXTRA_LITEX_ARGS
 EXTRA_LITEX_ARGS += --cpu-variant slim+cfu
 
+# Pass gen argument to cfu_gen
+CFU_GEN_EXTRA_ARGS := gen$(GATEWARE_GEN)
+
 # gen2 needs special build args and only works on hps
 ifeq '$(GATEWARE_GEN)' '2'
 EXTRA_LITEX_ARGS += --separate-arena --cfu-mport
@@ -91,6 +94,7 @@ endif
 
 ifeq '$(PLATFORM)' 'hps'
 EXTRA_LITEX_ARGS += --parallel
+CFU_GEN_EXTRA_ARGS += --specialize-nx
 endif
 
 ifeq '$(TARGET)' 'digilent_arty'
@@ -98,11 +102,16 @@ ifeq '$(TARGET)' 'digilent_arty'
 EXTRA_LITEX_ARGS += --sys-clk-freq 75000000
 endif
 
+ifeq '$(BUILD_BIOS)' 'yes'
+# By default the BIOS is not built as not required by the HPS app
+EXTRA_LITEX_ARGS += --build-bios
+endif
+
 # Add constants defined in gateware/constants.py to C++ build
 BUILD_DIR_EXTRA_DEP = $(BUILD_DIR)/src/gateware_constants.h
 
-# Pass gen argument to cfu_gen
-CFU_GEN_EXTRA_ARGS = gen$(GATEWARE_GEN)
+# Number of parllel jobs
+BUILD_JOBS := 1
 
 #### Base rules ####
 include ../proj.mk

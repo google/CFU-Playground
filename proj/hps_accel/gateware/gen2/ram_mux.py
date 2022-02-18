@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Signal
-from nmigen_cfu.util import SimpleElaboratable
+from amaranth import Signal
+from amaranth_cfu.util import SimpleElaboratable
 
 
 class RamMux(SimpleElaboratable):

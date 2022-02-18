@@ -79,6 +79,12 @@ This starts a subshell; you can leave the environment by typing ``exit``.
 Later when you're building a project bitstream, 
 you need to add USE\_SYMBIFLOW=1 to your make command line.
 
+If you see no errors, but the compiled RISC-V executable does not run on the
+board, you may need to lower the target clock rate.
+This can be done by adding ``EXTRA_LITEX_ARGS="--sys-clk-freq {clockrate}"``
+to the make command, where {clockrate} if the desired clock rate in Hz.
+This will be required if you are using the suggested Arty A7 for the test run
+in Step 6 (try ``75000000`` Hz).
 
 
 Option 4b: Install Conda packages for Lattice FPGAs

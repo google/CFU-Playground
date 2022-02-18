@@ -18,19 +18,20 @@
 from collections import namedtuple
 import random
 
-from nmigen import unsigned, signed
-from nmigen.sim import Delay
+from amaranth import unsigned, signed
+from amaranth.sim import Delay
 
-from nmigen_cfu import TestBase
+from amaranth_cfu import TestBase
 
-from .macc import MaccBlock
+from .macc import StandardMaccBlock
 
 
 class MaccBlockTest(TestBase):
     """Tests MaccBlock"""
 
     def create_dut(self):
-        return MaccBlock(4, unsigned(8), signed(8), signed(24))
+        # Can only use standard implementation in Amaranth simulator
+        return StandardMaccBlock(4, unsigned(8), signed(8), signed(24))
 
     def test_basic_functions(self):
         D = namedtuple('D', ['a', 'b', 'first', 'last', 'expected'])

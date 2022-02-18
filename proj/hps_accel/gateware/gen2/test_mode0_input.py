@@ -14,9 +14,9 @@
 
 """Tests for mode0_input.py"""
 
-from nmigen import Memory
-from nmigen_cfu import TestBase
-from nmigen_cfu.util import pack_vals
+from amaranth import Memory
+from amaranth_cfu import TestBase
+from amaranth_cfu.util import pack_vals
 
 from .conv2d_data import fetch_data
 from .mode0_input import (

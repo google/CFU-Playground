@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Signal
-from nmigen.sim import Settle
+from amaranth import Signal
+from amaranth.sim import Settle
 
-from nmigen_cfu import InstructionTestBase, TestBase
+from amaranth_cfu import InstructionTestBase, TestBase
 
 from .registerfile import Xetter, RegisterSetter, RegisterFileInstruction
 

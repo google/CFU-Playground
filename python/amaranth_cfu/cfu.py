@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__package__ = 'nmigen_cfu'
+__package__ = 'amaranth_cfu'
 
-from nmigen import Array, Signal, signed
-from nmigen.hdl.dsl import Module
+from amaranth import Array, Signal, signed
+from amaranth.hdl.dsl import Module
 from .util import SimpleElaboratable, TestBase
-from nmigen.hdl import ResetSignal
+from amaranth.hdl import ResetSignal
 
 
 class InstructionBase(SimpleElaboratable):
@@ -358,7 +358,7 @@ def simple_cfu(instructions):
     """Simplified API for CFUs.
 
     This provides simplified API suitable for use only when each CFU
-    instruction is independent of the others. This API breaks nmigen
+    instruction is independent of the others. This API breaks amaranth
     conventions, and should only be used in very simple cases.
 
     For more complex cases, subclass Cfu directly.

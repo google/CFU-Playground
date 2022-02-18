@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import os.path
-from nmigen.back import verilog
+from amaranth.back import verilog
 
 from gateware.mnv2_cfu import make_cfu
 

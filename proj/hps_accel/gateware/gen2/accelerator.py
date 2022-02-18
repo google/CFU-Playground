@@ -15,7 +15,7 @@
 
 """Accelerator Gateware"""
 
-from nmigen import (
+from amaranth import (
     Const,
     Memory,
     Mux,
@@ -24,7 +24,7 @@ from nmigen import (
     Signal,
     signed,
     unsigned)
-from nmigen_cfu.util import SimpleElaboratable
+from amaranth_cfu.util import SimpleElaboratable
 
 from ..stream import connect, Endpoint
 from .constants import Constants
@@ -93,6 +93,11 @@ class AcceleratorCore(SimpleElaboratable):
     -   Post Process Parameter Write
     -   FIFO for output values
 
+    Arguments
+    ---------
+    specialize_nx: bool
+        Whether to generate specialized code for the Crosslink/NX-17.
+
     Attributes
     ----------
 
@@ -122,7 +127,8 @@ class AcceleratorCore(SimpleElaboratable):
       algorithm dependent order.
     """
 
-    def __init__(self):
+    def __init__(self, specialize_nx=False):
+        self._specialize_nx = specialize_nx
         self.reset = Signal()
         self.start = Signal()
         self.config = Record(ACCELERATOR_CONFIGURATION_LAYOUT)
@@ -251,7 +257,7 @@ class AcceleratorCore(SimpleElaboratable):
         first, last, activations = self.build_input_fetcher(m, stop_input)
 
         # Plumb in sysarray and its inputs
-        m.submodules['sysarray'] = sa = SystolicArray()
+        m.submodules['sysarray'] = sa = SystolicArray(self._specialize_nx)
         for j, (in_a, activation) in enumerate(zip(sa.input_a, activations)):
             # Assign activation values with input offset
             for i in range(4):

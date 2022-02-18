@@ -17,8 +17,8 @@
 
 import random
 
-from nmigen.sim import Delay
-from nmigen_cfu import TestBase
+from amaranth.sim import Delay
+from amaranth_cfu import TestBase
 
 from .mem import LoopingAddressGenerator, LoopingCounter, SinglePortMemory
 

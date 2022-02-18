@@ -14,6 +14,6 @@
 # limitations under the License.
 
 
-__package__ = 'nmigen_cfu'
+__package__ = 'amaranth_cfu'
 from .cfu import *
 from .util import *

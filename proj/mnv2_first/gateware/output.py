@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Signal
+from amaranth import Signal
 from .registerfile import Xetter
 
 class OutputQueueGetter(Xetter):

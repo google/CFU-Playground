@@ -14,7 +14,7 @@
 
 """Utility functions."""
 
-from nmigen import Signal, unsigned
+from amaranth import Signal, unsigned
 
 
 def unsigned_upto(maximum_value):

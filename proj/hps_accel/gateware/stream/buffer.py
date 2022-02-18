@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen_cfu.util import SimpleElaboratable
-from nmigen import Value, Module, Signal, Mux
-from nmigen.hdl.ast import Cat
-from nmigen.hdl.rec import Layout
+from amaranth_cfu.util import SimpleElaboratable
+from amaranth import Value, Module, Signal, Mux
+from amaranth.hdl.ast import Cat
+from amaranth.hdl.rec import Layout
 
 from .stream import Endpoint
 

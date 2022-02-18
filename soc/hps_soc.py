@@ -24,7 +24,8 @@ from litex.soc.integration.soc import SoCRegion
 from litex.soc.integration.builder import Builder, builder_args, builder_argdict
 from litex.soc.integration.soc import LiteXSoC, SoCRegion
 from litex.soc.cores.led import LedChaser
-from litex.soc.cores.spi_flash import SpiFlash
+
+from litex import get_data_mod
 
 from litex.build.lattice.radiant import radiant_build_args, radiant_build_argdict
 from litex.build.lattice.oxide import oxide_args, oxide_argdict
@@ -72,14 +73,16 @@ class HpsSoC(LiteXSoC):
 
     cpu_type = "vexriscv"
 
-    def __init__(self, platform, debug, litespi_flash=True, variant=None,
+    def __init__(self, platform, debug, variant=None,
                  cpu_cfu=None, execute_from_lram=False,
                  separate_arena=False,
-                 integrated_rom_init=[]):
+                 with_led_chaser=False,
+                 integrated_rom_init=[],
+                 build_bios=False):
         LiteXSoC.__init__(self,
                           platform=platform,
                           sys_clk_freq=platform.sys_clk_freq,
-                          csr_data_width=(32 if litespi_flash else 8))
+                          csr_data_width=32)
         if variant == None:
             variant = "full+debug" if debug else "full"
 
@@ -110,10 +113,7 @@ class HpsSoC(LiteXSoC):
         self.setup_arena(size=arena_size)
 
         # SPI Flash
-        if litespi_flash:
-            self.setup_litespi_flash()
-        else:
-            self.setup_flash()
+        self.setup_litespi_flash()
 
         # ROM (either part of SPI Flash, or embedded)
         if execute_from_lram:
@@ -126,11 +126,11 @@ class HpsSoC(LiteXSoC):
             self.setup_rom_in_flash()
 
         # "LEDS" - Just one LED on JTAG port
-        self.submodules.leds = LedChaser(
-            pads=platform.request_all("user_led"),
-            sys_clk_freq=platform.sys_clk_freq)
-        self.csr.add("leds")
-
+        if with_led_chaser:
+            self.submodules.leds = LedChaser(
+                pads=platform.request_all("user_led"),
+                sys_clk_freq=platform.sys_clk_freq)
+            self.csr.add("leds")
 
         # UART
         self.add_serial()
@@ -141,9 +141,11 @@ class HpsSoC(LiteXSoC):
             self.bus.add_slave(
                 "vexriscv_debug", self.cpu.debug_bus, self.vexriscv_region)
 
-        # Timer
-        self.add_timer(name="timer0")
-        self.timer0.add_uptime()
+        if build_bios:
+            # Timer (required for the BIOS build only)
+            self.add_timer(name="timer0")
+            self.timer0.add_uptime()
+
 
     def setup_ram(self, size):
         region = SoCRegion(self.sram_origin, size, cached=True, linker=True)
@@ -169,12 +171,6 @@ class HpsSoC(LiteXSoC):
         self.integrated_rom_initialized = False
         self.integrated_rom_size = region.size
 
-    def setup_flash(self):
-        self.submodules.spiflash = SpiFlash(self.platform.request("spiflash"), dummy=8,
-                                            endianness="little", div=4)
-        self.bus.add_slave("spiflash", self.spiflash.bus, self.spiflash_region)
-        self.csr.add("spiflash")
-
     def setup_litespi_flash(self):
         self.submodules.spiflash_phy = LiteSPIPHY(
             self.platform.request("spiflash4x"),
@@ -197,7 +193,7 @@ class HpsSoC(LiteXSoC):
         self.integrated_rom_size = region.size
 
     def add_serial(self):
-        self.add_uart("serial", baudrate=UART_SPEED)
+        self.add_uart("uart", baudrate=UART_SPEED)
 
     def connect_cfu_to_lram(self):
         # create cfu <-> lram bus
@@ -292,9 +288,6 @@ def main():
     parser.add_argument("--synth_mode", default="radiant",
                         help="Which synthesis mode to use with Radiant toolchain: "
                         "radiant/synplify (default), lse, or yosys")
-    parser.add_argument("--no-litespi-flash", dest="litespi_flash",
-                        action="store_false", default=True,
-                        help="Use Litex minimal SPI flash instead of Litespi")
     parser.add_argument("--cpu-cfu", default=None, help="Specify file containing CFU Verilog module")
     parser.add_argument("--cpu-variant", default=None, help="Which CPU variant to use")
     parser.add_argument("--separate-arena", action="store_true", help="Create separate RAM for tensor arena")
@@ -303,6 +296,8 @@ def main():
                         help="Make the CPU execute from integrated ROM stored in LRAM instead of flash")
     parser.add_argument("--integrated-rom-init", metavar="FILE",
                         help="Use FILE as integrated ROM data instead of default BIOS")
+    parser.add_argument("--build-bios", action="store_true",
+                        help="Flag to specify that the BIOS is built as well")
 
     args = parser.parse_args()
 
@@ -323,15 +318,22 @@ def main():
     copy_cpu_variant_if_needed(variant)
     soc = HpsSoC(Platform(args.toolchain, args.parallel_nextpnr, args.extra_nextpnr_params),
                     debug=args.debug,
-                    litespi_flash=args.litespi_flash,
                     variant=variant,
                     cpu_cfu=args.cpu_cfu,
                     execute_from_lram=args.execute_from_lram,
                     separate_arena=args.separate_arena,
-                    integrated_rom_init=integrated_rom_init)
+                    integrated_rom_init=integrated_rom_init,
+                    build_bios=args.build_bios)
 
     if args.cfu_mport:
         soc.connect_cfu_to_lram()
+
+    if not args.build_bios:
+        # To still allow building libraries needed
+        # by the HPS software, without the necessity of
+        # having the BIOS (and its gatware requirements such as the Timer)
+        # this flag needs to be set to True
+        soc.integrated_rom_initialized = True
 
     builder = create_builder(soc, args)
     builder_kwargs = {}

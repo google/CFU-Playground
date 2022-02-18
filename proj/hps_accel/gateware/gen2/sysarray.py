@@ -14,10 +14,10 @@
 
 """Gateware for the accelerator."""
 
-from nmigen import Signal, signed, unsigned
-from nmigen_cfu import SimpleElaboratable
+from amaranth import Signal, signed, unsigned
+from amaranth_cfu import SimpleElaboratable
 from .constants import Constants
-from .macc import MaccBlock
+from .macc import get_macc_block_class
 
 
 class SystolicArray(SimpleElaboratable):
@@ -25,6 +25,10 @@ class SystolicArray(SimpleElaboratable):
 
     Parameters
     ----------
+
+    specialize_nx: bool
+      True to explicitly use Crosslink/NX DSP blocks, otherwise use regular
+      verilog multiply operation.
 
     a_size: int
       The number of A words processed concurrently
@@ -74,10 +78,11 @@ class SystolicArray(SimpleElaboratable):
       The accumulator update strobe from each macc unit
     """
 
-    def __init__(self, a_size=Constants.SYS_ARRAY_HEIGHT,
+    def __init__(self, specialize_nx=False, a_size=Constants.SYS_ARRAY_HEIGHT,
                  b_size=Constants.SYS_ARRAY_WIDTH, n=4,
                  a_shape=signed(9), b_shape=signed(8),
                  accumulator_shape=signed(32)):
+        self._specialize_nx = specialize_nx
         self._a_size = a_size
         self._b_size = b_size
         self._n = n
@@ -99,10 +104,11 @@ class SystolicArray(SimpleElaboratable):
 
     def elab(self, m):
         maccs = [[None for _ in range(self._b_size)]
-                 for _ in range(self._a_size)]
+                  for _ in range(self._a_size)]
         for i in range(self._a_size):
             for j in range(self._b_size):
-                macc = MaccBlock(self._n, self._a_shape, self._b_shape,
+                klass = get_macc_block_class(self._specialize_nx)
+                macc = klass(self._n, self._a_shape, self._b_shape,
                                  self._accumulator_shape)
                 maccs[i][j] = macc
 

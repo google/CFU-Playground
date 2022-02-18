@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Cat, Memory, Module, Signal
-from nmigen_cfu.util import SimpleElaboratable
+from amaranth import Cat, Memory, Module, Signal
+from amaranth_cfu.util import SimpleElaboratable
 
 
 class WideReadMemory(SimpleElaboratable):

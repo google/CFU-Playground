@@ -2,7 +2,7 @@
 How To Get Help 
 ===============
 
-nMigen
+Amaranth
     IRC
 
 CFU-Playground

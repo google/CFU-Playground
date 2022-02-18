@@ -14,8 +14,8 @@
 
 """Post processing of accumulated values into 8 bit outputs."""
 
-from nmigen_cfu import SimpleElaboratable
-from nmigen import (
+from amaranth_cfu import SimpleElaboratable
+from amaranth import (
     signed, unsigned, Array, Cat, Module, Mux, Record, Signal, ResetInserter
 )
 
@@ -195,7 +195,7 @@ def delay(m, signal, cycles):
 
 
 POST_PROCESS_PARAMS = [
-    ('bias', signed(16)),
+    ('bias', signed(18)),
     ('multiplier', signed(32)),
     ('shift', unsigned(4)),
 ]

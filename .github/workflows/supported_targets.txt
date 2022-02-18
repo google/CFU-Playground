@@ -40,7 +40,7 @@ numato_mimas_a7
 numato_nereid
 numato_tagus
 pano_logic_g2
-qmtech_ep4ce15
+qmtech_ep4cex5
 qmtech_wukong
 qmtech_xc7a35t
 radiona_ulx3s

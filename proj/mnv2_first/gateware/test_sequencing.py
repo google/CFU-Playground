@@ -14,9 +14,9 @@
 # limitations under the License.
 
 
-from nmigen.sim import Delay
+from amaranth.sim import Delay
 
-from nmigen_cfu import TestBase
+from amaranth_cfu import TestBase
 
 from .delay import Delayer
 from .sequencing import Delayer, GateCalculator, Sequencer, UpCounter

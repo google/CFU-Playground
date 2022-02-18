@@ -17,8 +17,8 @@ import argparse
 import os.path
 import sys
 
-from nmigen import *
-from nmigen.back import verilog
+from amaranth import *
+from amaranth.back import verilog
 
 from gateware.gen1.hps_cfu import make_cfu as gen1_make_cfu
 from gateware.gen2.hps_cfu import make_cfu as gen2_make_cfu
@@ -30,6 +30,7 @@ make_cfu_fns = {
     'gen2': gen2_make_cfu,
 }
 
+
 def read_file():
     if os.path.exists(VERILOG_FILENAME):
         with open(VERILOG_FILENAME, "r") as f:
@@ -40,13 +41,15 @@ def read_file():
 def main():
     gen_list = list(make_cfu_fns.keys()).sort()
     parser = argparse.ArgumentParser(description='Generate cfu.v')
-    parser.add_argument('gen', metavar='GEN', type=str,
-                        choices=gen_list, help=f'Which kind of CFU to generate - one of {gen_list}')
+    parser.add_argument('gen', metavar='GEN', type=str, choices=gen_list,
+                        help=f'Which kind of CFU to generate - one of {gen_list}')
+    parser.add_argument('--specialize-nx', action='store_true',
+                        help='Generate code for Crosslink/NX-17.')
     args = parser.parse_args()
     if args.gen not in make_cfu_fns.keys():
         print(f'Unexpected GEN {args.gen}')
         sys.exit(5)
-    cfu = make_cfu_fns[args.gen]()
+    cfu = make_cfu_fns[args.gen](specialize_nx=args.specialize_nx)
 
     new_verilog = verilog.convert(cfu, name='Cfu', ports=cfu.ports)
     old_verilog = read_file()

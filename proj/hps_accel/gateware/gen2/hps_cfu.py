@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nmigen import Cat, Mux, Record, Signal, signed, unsigned
-from nmigen_cfu import Cfu, InstructionBase
+from amaranth import Cat, Mux, Record, Signal, signed, unsigned
+from amaranth_cfu import Cfu, InstructionBase
 
 from .accelerator import AcceleratorCore, ACCELERATOR_CONFIGURATION_LAYOUT
 from .constants import Constants
@@ -132,10 +132,6 @@ class SetInstruction(InstructionBase):
         m.d.sync += self.filter_output.valid.eq(0)
         m.d.sync += self.post_process_params.valid.eq(0)
 
-        # post process parameters
-        pp_bias = Signal(signed(16))
-        pp_shift = Signal(unsigned(4))
-
         # All sets take exactly one cycle
         m.d.sync += self.done.eq(0)
 
@@ -182,13 +178,13 @@ class SetInstruction(InstructionBase):
                 with m.Case(Constants.REG_NUM_OUTPUT_VALUES):
                     m.d.sync += self.config.num_output_values.eq(self.in0)
                 with m.Case(Constants.REG_POST_PROCESS_BIAS):
-                    m.d.sync += pp_bias.eq(self.in0s)
+                    m.d.sync += self.post_process_params.payload.bias.eq(
+                        self.in0s)
                 with m.Case(Constants.REG_POST_PROCESS_SHIFT):
-                    m.d.sync += pp_shift.eq(self.in0)
+                    m.d.sync += self.post_process_params.payload.shift.eq(
+                        self.in0)
                 with m.Case(Constants.REG_POST_PROCESS_MULTIPLIER):
                     m.d.sync += [
-                        self.post_process_params.payload.bias.eq(pp_bias),
-                        self.post_process_params.payload.shift.eq(pp_shift),
                         self.post_process_params.payload.multiplier.eq(
                             self.in0s),
                         self.post_process_params.valid.eq(1),
@@ -220,7 +216,7 @@ class PoolInstruction(InstructionBase):
         m.d.sync += self.done.eq(0)
         with m.If(self.start):
             this2 = Signal(32)
-            m.d.comb += this2.eq(max_(self.in0,self.in1))
+            m.d.comb += this2.eq(max_(self.in0, self.in1))
             m.d.sync += self.output.eq(max_(this2, last2))
             m.d.sync += last2.eq(this2)
             m.d.sync += self.done.eq(1)
@@ -229,13 +225,21 @@ class PoolInstruction(InstructionBase):
 class HpsCfu(Cfu):
     """Gen2 accelerator CFU.
     """
+    def __init__(self, specialize_nx=False):
+        """Constructor
+
+        Args:
+           specialize_nx: generate code for the Crosslink/NX-17.
+        """
+        super().__init__()
+        self._specialize_nx = specialize_nx
 
     def elab_instructions(self, m):
         m.submodules['ping'] = ping = PingInstruction()
         m.submodules['set'] = set_ = SetInstruction()
         m.submodules['get'] = get = GetInstruction()
         m.submodules['pool'] = pool = PoolInstruction()
-        m.submodules['core'] = core = AcceleratorCore()
+        m.submodules['core'] = core = AcceleratorCore(self._specialize_nx)
         m.submodules['fifo'] = fifo = StreamFifo(
             depth=Constants.OUTPUT_FIFO_DEPTH, type=unsigned(32))
 
@@ -269,5 +273,10 @@ class HpsCfu(Cfu):
         }
 
 
-def make_cfu():
-    return HpsCfu()
+def make_cfu(specialize_nx):
+    """Returns the gen2 CFU design.
+
+    Args:
+        specialize_nx: generate code for the Crosslink/NX-17.
+    """
+    return HpsCfu(specialize_nx)

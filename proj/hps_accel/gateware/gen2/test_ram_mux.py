@@ -16,9 +16,9 @@
 
 import itertools
 
-from nmigen import unsigned
-from nmigen.sim import Passive
-from nmigen_cfu import TestBase
+from amaranth import unsigned
+from amaranth.sim import Passive
+from amaranth_cfu import TestBase
 
 from .conv2d_data import fetch_data
 from .ram_mux import RamMux

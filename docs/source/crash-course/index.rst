@@ -12,7 +12,7 @@ work out where the gaps in your knowledge may be.
 
 * Tensorflow Lite for Microcontrollers 
 * RISCV and CFUs
-* Writing gateware with Verilog and nMigen
+* Writing gateware with Verilog and Amaranth
 * LiteX and SoCs.
 * Getting help.
 
@@ -33,7 +33,7 @@ C and C++ for Microcontrollers
     a lot more code than you'll be writing.
 
 Python
-    The nMigen framework uses Python_. It is remarkably easy to learn the
+    The Amaranth framework uses Python_. It is remarkably easy to learn the
     basics of Python. If you have a couple of days, we recommend working
     through chapters 0 to 11 of `Dive Into Python 3`_. Dive Into Python 3 is
     well paced and provides many practical exercises.
@@ -61,7 +61,7 @@ The Crash Course
 
 :doc:`gateware`
     At the lowest level, accelerators are built from gateware, and you'll need
-    to know how to write Verilog and/or nMigen_.
+    to know how to write Verilog and/or Amaranth_.
 
 :doc:`litex`
     LiteX is a framework for defining FPGA SoCs. CFU-Playground accelerators
@@ -74,7 +74,7 @@ The Crash Course
 :doc:`getting-help`
     Building accelerators is hard. It is essential to know how to ask for help.
 
-.. _nMigen: https://github.com/nmigen/nmigen
+.. _Amaranth: https://github.com/amaranth-lang/amaranth
 
 
 Index

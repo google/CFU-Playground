@@ -12,9 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from nmigen import Mux, Signal, signed
-from nmigen_cfu import SimpleElaboratable, TestBase
-from nmigen.sim import Settle
+from amaranth import Mux, Signal, signed
+from amaranth_cfu import SimpleElaboratable, TestBase
+from amaranth.sim import Settle
 import unittest
 
 
