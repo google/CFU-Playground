@@ -43,6 +43,8 @@ class DigilentArtySoCWorkflow(general.GeneralSoCWorkflow):
                             help='Arty variant: a7-35 (default) or a7-100')
         arty_args = parser.parse_known_args()[0]
         args = argparse.Namespace(**vars(arty_args), **vars(args))
+        if args.toolchain == 'symbiflow' and not args.sys_clk_freq:
+            args.sys_clk_freq = 75000000
         super().__init__(args, soc_constructor, builder_constructor)
 
     def make_soc(self, **kwargs) -> litex_soc.LiteXSoC:
