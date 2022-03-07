@@ -119,6 +119,13 @@ _oxide_router1_build_template = [
     'prjoxide pack {build_name}.fasm {build_name}.bit',
 ]
 
+# Template for Yosys synthesis script
+_oxide_yosys_template = oxide._yosys_template + [
+    "techmap -map +/nexus/cells_sim.v t:VLO t:VHI %u",
+    "plugin -i dsp-ff",
+    "dsp_ff -rules +/nexus/dsp_rules.txt",
+    "hilomap -singleton -hicell VHI Z -locell VLO Z",
+]
 
 class Platform(LatticePlatform):
     # The NX-17 has a 450 MHz oscillator. Our system clock should be a divisor
@@ -136,6 +143,7 @@ class Platform(LatticePlatform):
                                  connectors=[],
                                  toolchain=toolchain)
         if toolchain == "oxide":
+            self.toolchain.yosys_template = _oxide_yosys_template
             if custom_params:
                 self.toolchain.build_template = _oxide_custom_build_template
             elif parallel_pnr:
