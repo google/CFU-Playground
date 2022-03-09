@@ -306,6 +306,9 @@ unit-renode: $(SOFTWARE_ELF) renode-scripts
 	@echo Running unit test in Renode simulation
 	$(BUILD_DIR)/interact.expect r $(TEST_MENU_ITEMS) |& tee $(UNITTEST_LOG)
 
+synth: $(CFU_VERILOG)
+	$(SOC_MK) synth
+
 ifeq '1' '$(words $(TTY))'
 run: $(SOFTWARE_BIN)
 	@echo Running automated pdti8 test on board
