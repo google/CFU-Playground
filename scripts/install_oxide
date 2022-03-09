@@ -20,6 +20,7 @@ fi
 if [ -z "$UPDATE" ] ; then
 
   echo "Sudo Installing pre-requisites"
+  sudo apt update
   sudo apt install tcl-dev bison flex cmake libboost-all-dev libeigen3-dev clang
 
   if ! which cargo ; then

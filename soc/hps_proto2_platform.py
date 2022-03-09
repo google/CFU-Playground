@@ -70,11 +70,11 @@ class _CRG(Module):
         # Clock from HFOSC
         self.submodules.sys_clk = sys_osc = NXOSCA()
         sys_osc.create_hf_clk(self.cd_sys, sys_clk_freq)
-        # We make the period constraint 10% tighter than our actual system
+        # We make the period constraint 7% tighter than our actual system
         # clock frequency, because the CrossLink-NX internal oscillator runs
-        # at ±10% of nominal frequency.
+        # at ±7% of nominal frequency.
         platform.add_period_constraint(self.cd_sys.clk,
-                                       1e9 / (sys_clk_freq * 1.1))
+                                       1e9 / (sys_clk_freq * 1.07))
 
         # Power On Reset
         por_cycles = 4096
@@ -126,6 +126,13 @@ _oxide_router1_build_template = [
     'prjoxide pack {build_name}.fasm {build_name}.bit',
 ]
 
+# Template for Yosys synthesis script
+_oxide_yosys_template = oxide._yosys_template + [
+    "techmap -map +/nexus/cells_sim.v t:VLO t:VHI %u",
+    "plugin -i dsp-ff",
+    "dsp_ff -rules +/nexus/dsp_rules.txt",
+    "hilomap -singleton -hicell VHI Z -locell VLO Z",
+]
 
 class Platform(LatticePlatform):
     # The NX-17 has a 450 MHz oscillator. Our system clock should be a divisor
@@ -143,6 +150,7 @@ class Platform(LatticePlatform):
                                  connectors=[],
                                  toolchain=toolchain)
         if toolchain == "oxide":
+            self.toolchain.yosys_template = _oxide_yosys_template
             if just_synth:
                 self.toolchain.build_template = _oxide_synth_build_template
             elif custom_params:

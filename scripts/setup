@@ -60,11 +60,13 @@ if [ ${#missing[@]} -gt 0 ]; then
     echo "Missing packages: ${missing[@]}" >&2
     if which apt >/dev/null; then
         if [ $in_ci -gt 0 ]; then
+            sudo apt update
             sudo apt install -y "${missing[@]}"
         else
             echo -n "Install [y]/n? " >&2
             answer=$(read)
             if [ "$answer" == "y" -o -z "$answer" ]; then
+                sudo apt update
                 sudo apt install "${missing[@]}"
             fi
         fi
@@ -126,8 +128,8 @@ if ! which yosys >/dev/null || ! yosys -V | grep "Yosys 0.1" >/dev/null; then
     if [ ! -e "${CFU_ROOT}/third_party/usr/local/bin/yosys" ]; then
         echo "Getting Yosys."
         mkdir -p "${CFU_ROOT}/third_party/usr/local"
-        wget -qO- "https://anaconda.org/LiteX-Hub/yosys/0.13_39_g958c3a46a/download/linux-64/yosys-0.13_39_g958c3a46a-20220202_022309_py37.tar.bz2" | tar -xjC "${CFU_ROOT}/third_party/usr/local"
-        wget -qO- "https://anaconda.org/LiteX-Hub/yosys-symbiflow-plugins/1.0.0_7_640_gf184835/download/linux-64/yosys-symbiflow-plugins-1.0.0_7_640_gf184835-20220202_022309.tar.bz2" | tar -xjC "${CFU_ROOT}/third_party/usr/local"
+        wget -qO- "https://anaconda.org/LiteX-Hub/yosys/0.14_67_g3818e1160/download/linux-64/yosys-0.14_67_g3818e1160-20220302_164843_py37.tar.bz2" | tar -xjC "${CFU_ROOT}/third_party/usr/local"
+        wget -qO- "https://anaconda.org/LiteX-Hub/yosys-symbiflow-plugins/1.0.0_7_722_g6dfffa1/download/linux-64/yosys-symbiflow-plugins-1.0.0_7_722_g6dfffa1-20220223_095159.tar.bz2" | tar -xjC "${CFU_ROOT}/third_party/usr/local"
     else
         echo "Yosys already installed locally."
     fi

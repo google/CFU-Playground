@@ -252,6 +252,7 @@ tflite-micro-src: $(BUILD_DIR)/src
 		mkdir -p $(BUILD_DIR)/src/$$d; \
 		$(COPY) `find $(TFLM_SRC_DIR)/$$d $(TFLM_FIND_PARAMS)` $(BUILD_DIR)/src/$$d; \
 	done
+	$(RM) $(BUILD_DIR)/src/tensorflow/lite/c/common.cc
 	$(COPY) $(TFLM_SRC_DIR)/tensorflow/lite/micro/kernels/conv_test* $(BUILD_DIR)/src/tensorflow/lite/micro/kernels
 	$(COPY) $(TFLM_SRC_DIR)/tensorflow/lite/micro/kernels/depthwise_conv_test* $(BUILD_DIR)/src/tensorflow/lite/micro/kernels
 	@for d in $(TFLM_COPY_DATA_DIRS); do \

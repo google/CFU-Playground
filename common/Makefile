@@ -12,6 +12,9 @@ $(error SOC_SOFTWARE_DIR not set)
 endif
 
 
+# to get CPUFLAGS
+include $(SOC_SOFTWARE_DIR)/include/generated/variables.mak
+
 # These are found in the PATH
 NEWLIB_RISCV := $(shell command -v riscv32-elf-newlib-gcc 2> /dev/null)
 ifdef NEWLIB_RISCV
@@ -51,9 +54,7 @@ PACKAGE    := software
 DEFINE_FLAGS := $(DEFINES:%=-D %)
 
 SHARED_FLAGS := \
-	-march=rv32im  \
-	-mabi=ilp32 \
-	-D__vexriscv__ \
+	$(CPUFLAGS) \
 	$(DEFINE_FLAGS) \
 	-I$(SRC_DIR) \
 	-I$(SRC_DIR)/third_party/gemmlowp \
