@@ -19,6 +19,7 @@ SECTIONS
 		_etext = .;
 	} > rom
 
+
 	.rodata :
 	{
 		/*
@@ -28,6 +29,9 @@ SECTIONS
 		_frodata = .;
 		src/models/*/*(SORT(.rodata.*))
 		src/conv2d_??.o(SORT(.rodata.*))  /* specific to hps_accel */
+		src/conv2d_???.o(SORT(.rodata.*))  /* specific to hps_accel */
+		src/pool_??.o(SORT(.rodata.*))  /* specific to hps_accel */
+
 		. = ALIGN(4096);
 		*(SORT(.rodata))
 		*(SORT(.rodata.*))
@@ -35,7 +39,7 @@ SECTIONS
 		*(SORT(.rodata1))
 		*(SORT(.srodata))
 		*(SORT(.srodata.*))
-		. = ALIGN(8);
+		. = ALIGN(4096);
 		_erodata = .;
 	} > rom
 
@@ -77,12 +81,13 @@ SECTIONS
 		_end = .;
 	} > sram
 
-        .arena (NOLOAD) :
-        {
-                _farena = .;
-                *(.arena)
-                _earena = .;
-        } > arena
+
+    .arena (NOLOAD) :   /* For separate arena */
+    {
+		_farena = .;
+		*(.arena)
+		_earena = .;
+   } > arena
 }
 
 PROVIDE(_fstack = ORIGIN(sram) + LENGTH(sram) - 4);

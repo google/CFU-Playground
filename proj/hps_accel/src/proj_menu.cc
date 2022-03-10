@@ -26,11 +26,13 @@
 #include "conv2d_06.h"
 #include "conv2d_20.h"
 #include "conv2d_23.h"
+#include "conv2d_23p.h"
 #include "conv2d_call.h"
-#include "fixedpoint/fixedpoint.h"
 #include "hps_cfu.h"
 #include "menu.h"
 #include "playground_util/random.h"
+#include "pool_03.h"
+#include "pool_call.h"
 
 namespace {
 
@@ -76,6 +78,8 @@ void do_test_layer_23(void) { test_conv2d(&conv2d_layer_23_data); }
 void do_test_layer_04(void) { test_conv2d(&conv2d_layer_04_data); }
 void do_test_layer_05(void) { test_conv2d(&conv2d_layer_05_data); }
 void do_test_layer_06(void) { test_conv2d(&conv2d_layer_06_data); }
+void do_test_layer_23p(void) { test_conv2d(&conv2d_layer_23p_data); }
+void do_test_pool_03(void) { test_pool(&pool_03_data); }
 
 struct Menu MENU = {
     "Project Menu",
@@ -95,6 +99,8 @@ struct Menu MENU = {
         MENU_ITEM('4', "test layer 04", do_test_layer_04),
         MENU_ITEM('5', "test layer 05", do_test_layer_05),
         MENU_ITEM('6', "test layer 06", do_test_layer_06),
+        MENU_ITEM('7', "test layer 23p", do_test_layer_23p),
+        MENU_ITEM('a', "test pool 03", do_test_pool_03),
         MENU_END,
     },
 };

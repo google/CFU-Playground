@@ -226,7 +226,7 @@ inline void ConvPerChannel(
                                 output_shape, output_data);
   }
 
-#ifdef SHOW_OUTPUT_HASHES
+#ifdef SHOW_CONV_HASHES
   static int hash_layer = 0;
   int32_t hash = murmurhash3_32(reinterpret_cast<uint8_t*>(output_data),
                                 output_shape.FlatSize());
