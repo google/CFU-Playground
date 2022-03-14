@@ -81,7 +81,7 @@ TEST_MENU_ITEMS=3 q
 
 # Customise arguments to Litex:
 export EXTRA_LITEX_ARGS
-EXTRA_LITEX_ARGS += --cpu-variant slim+cfu
+EXTRA_LITEX_ARGS += --cpu-variant hps+cfu
 
 # Pass gen argument to cfu_gen
 CFU_GEN_EXTRA_ARGS := gen$(GATEWARE_GEN)
