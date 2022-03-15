@@ -16,7 +16,7 @@ VexRiscv_dbpl8Cfu.v: $(SRC) Makefile
 	sbt compile "runMain vexriscv.GenCoreDefault --dCacheSize 4096 --iCacheSize 2048 --csrPluginConfig all --cfu true --dBytesPerLine 8 --outputFile VexRiscv_dbpl8Cfu"
 
 VexRiscv_HpsCfu.v: $(SRC) Makefile
-	sbt compile "runMain vexriscv.GenCoreDefault --dCacheSize 4096 --iCacheSize 2048 --csrPluginConfig mcycle --cfu true --cfuRespReadyAlways false --outputFile VexRiscv_HpsCfu"
+	sbt compile "runMain vexriscv.GenCoreDefault --dCacheSize 4096 --iCacheSize 4096 --csrPluginConfig mcycle --cfu true --cfuRespReadyAlways false --outputFile VexRiscv_HpsCfu"
 
 VexRiscv_HpsdeltaCfu.v: $(SRC) Makefile
 	sbt compile "runMain vexriscv.GenCoreDefault --dCacheSize 4096 --iCacheSize 4096 --csrPluginConfig mcycle --cfu true --cfuRespReadyAlways false --outputFile VexRiscv_HpsdeltaCfu"
