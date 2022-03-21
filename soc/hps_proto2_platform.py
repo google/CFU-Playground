@@ -125,6 +125,7 @@ _oxide_yosys_template = oxide._yosys_template + [
     "plugin -i dsp-ff",
     "dsp_ff -rules +/nexus/dsp_rules.txt",
     "hilomap -singleton -hicell VHI Z -locell VLO Z",
+    "write_json {build_name}.json",
 ]
 
 class Platform(LatticePlatform):
