@@ -30,9 +30,13 @@ if { [lindex $argv 0] == "s" } {
   set choices [lrange $argv 3 end]
 }
 
+set timeout 5
+expect {
+   "CFU Playground"   {send_user "\n(At top level menu)\n"}
+   timeout            {send_user "\nLooking for top-level menu...\n"; send "x"; exp_continue}
+}
 
-expect "CFU Playground"
-
+set timeout 500
 
 foreach c $choices {
 
