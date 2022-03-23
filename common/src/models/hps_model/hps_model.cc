@@ -26,9 +26,10 @@
 #include "models/hps_model/hps_model_2022_01_05_74ops.h"
 #include "models/hps_model/hps_model_2022_01_05_89ops.h"
 #include "models/hps_model/presence_0_320_240_1_20220117_140437_201k_26k_96ops.h"
+#include "models/hps_model/presence_0_320_240_1_20220317_160803_201k_26k_96ops.h"
 #include "models/hps_model/second_0_320_240_1_20220117_135512_201k_26k_96ops.h"
+#include "models/hps_model/second_0_320_240_1_20220321_172314_201k_26k_96ops.h"
 #include "tflite.h"
-
 namespace {
 
 int loaded_model = 0;
@@ -70,6 +71,21 @@ void do_init_second_2022017_96ops(void) {
   loaded_model = 4;
 }
 
+// Initialize model
+void do_init_presence_20220317_96ops(void) {
+  puts("Loading Presence 20220317 96ops model");
+  tflite_load_model(presence_0_320_240_1_20220317_160803_201k_26k_96ops,
+                    presence_0_320_240_1_20220317_160803_201k_26k_96ops_len);
+  loaded_model = 5;
+}
+
+// Initialize model
+void do_init_second_20220321_96ops(void) {
+  puts("Loading Second 20220321 96ops model");
+  tflite_load_model(second_0_320_240_1_20220321_172314_201k_26k_96ops,
+                    second_0_320_240_1_20220321_172314_201k_26k_96ops_len);
+  loaded_model = 6;
+}
 // Run classification and interpret results
 int32_t classify() {
   tflite_classify();
@@ -128,16 +144,16 @@ void do_classify_hps_2() { printf("Result is %ld\n", classify_hps_2()); }
 struct GoldenTest {
   int32_t (*fn)();
   const char* name;
-  int32_t expected[5];
+  int32_t expected[7];
 };
 
 GoldenTest golden_tests[] = {
-    {classify_cat, "cat", {-77, -47, -47, -101, -117}},
-    {classify_diagram, "diagram", {-124, -123, -123, -124, -127}},
-    {classify_zeros, "zeroes", {-126, -128, -128, -128, -128}},
-    {classify_hps_0, "hps_0", {-119, -75, -75, -73, -125}},
-    {classify_hps_1, "hps_1", {124, 127, 127, 121, -119}},
-    {classify_hps_2, "hps_2", {126, 127, 127, 125, 127}},
+    {classify_cat, "cat", {-77, -47, -47, -101, -117, -67, -125}},
+    {classify_diagram, "diagram", {-124, -123, -123, -124, -127, -126, -127}},
+    {classify_zeros, "zeroes", {-126, -128, -128, -128, -128, -125, -126}},
+    {classify_hps_0, "hps_0", {-119, -75, -75, -73, -125, -116, -126}},
+    {classify_hps_1, "hps_1", {124, 127, 127, 121, -119, 127, -118}},
+    {classify_hps_2, "hps_2", {126, 127, 127, 125, 127, 127, 127}},
     {nullptr, "", 0},
 };
 
@@ -184,6 +200,10 @@ struct Menu MENU = {
                   do_init_presence_2022017_96ops),
         MENU_ITEM('4', "Reinitialize with second_2022017_96ops model",
                   do_init_second_2022017_96ops),
+        MENU_ITEM('5', "Reinitialize with presence_20220321_96ops model",
+                  do_init_presence_20220317_96ops),
+        MENU_ITEM('6', "Reinitialize with second_20220321_96ops model",
+                  do_init_second_20220321_96ops),
         MENU_END,
     },
 };
