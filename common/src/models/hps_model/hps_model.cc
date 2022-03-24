@@ -19,13 +19,17 @@
 #include "menu.h"
 #include "models/hps_model/cat_picture.h"
 #include "models/hps_model/diagram.h"
+#include "models/hps_model/hps_0.h"
+#include "models/hps_model/hps_1.h"
+#include "models/hps_model/hps_2.h"
 #include "models/hps_model/hps_model_2021_09_20_tiled.h"
 #include "models/hps_model/hps_model_2022_01_05_74ops.h"
 #include "models/hps_model/hps_model_2022_01_05_89ops.h"
 #include "models/hps_model/presence_0_320_240_1_20220117_140437_201k_26k_96ops.h"
+#include "models/hps_model/presence_0_320_240_1_20220317_160803_201k_26k_96ops.h"
 #include "models/hps_model/second_0_320_240_1_20220117_135512_201k_26k_96ops.h"
+#include "models/hps_model/second_0_320_240_1_20220321_172314_201k_26k_96ops.h"
 #include "tflite.h"
-
 namespace {
 
 int loaded_model = 0;
@@ -67,6 +71,21 @@ void do_init_second_2022017_96ops(void) {
   loaded_model = 4;
 }
 
+// Initialize model
+void do_init_presence_20220317_96ops(void) {
+  puts("Loading Presence 20220317 96ops model");
+  tflite_load_model(presence_0_320_240_1_20220317_160803_201k_26k_96ops,
+                    presence_0_320_240_1_20220317_160803_201k_26k_96ops_len);
+  loaded_model = 5;
+}
+
+// Initialize model
+void do_init_second_20220321_96ops(void) {
+  puts("Loading Second 20220321 96ops model");
+  tflite_load_model(second_0_320_240_1_20220321_172314_201k_26k_96ops,
+                    second_0_320_240_1_20220321_172314_201k_26k_96ops_len);
+  loaded_model = 6;
+}
 // Run classification and interpret results
 int32_t classify() {
   tflite_classify();
@@ -98,17 +117,43 @@ int32_t classify_zeros() {
 
 void do_classify_zeros() { printf("Result is %ld\n", classify_zeros()); }
 
+// Classify hps_* inputs
+
+int32_t classify_hps_0() {
+  tflite_set_input_unsigned(hps_0);
+  return classify();
+}
+
+void do_classify_hps_0() { printf("Result is %ld\n", classify_hps_0()); }
+
+int32_t classify_hps_1() {
+  tflite_set_input_unsigned(hps_1);
+  return classify();
+}
+
+void do_classify_hps_1() { printf("Result is %ld\n", classify_hps_1()); }
+
+int32_t classify_hps_2() {
+  tflite_set_input_unsigned(hps_2);
+  return classify();
+}
+
+void do_classify_hps_2() { printf("Result is %ld\n", classify_hps_2()); }
+
 // Golden tests: expected results
 struct GoldenTest {
   int32_t (*fn)();
   const char* name;
-  int32_t expected[5];
+  int32_t expected[7];
 };
 
-GoldenTest golden_tests[4] = {
-    {classify_cat, "cat", {-77, -47, -47, -101, -117}},
-    {classify_diagram, "diagram", {-124, -123, -123, -124, -127}},
-    {classify_zeros, "zeroes", {-126, -128, -128, -128, -128}},
+GoldenTest golden_tests[] = {
+    {classify_cat, "cat", {-77, -47, -47, -101, -117, -67, -125}},
+    {classify_diagram, "diagram", {-124, -123, -123, -124, -127, -126, -127}},
+    {classify_zeros, "zeroes", {-126, -128, -128, -128, -128, -125, -126}},
+    {classify_hps_0, "hps_0", {-119, -75, -75, -73, -125, -116, -126}},
+    {classify_hps_1, "hps_1", {124, 127, 127, 121, -119, 127, -118}},
+    {classify_hps_2, "hps_2", {126, 127, 127, 125, 127, 127, 127}},
     {nullptr, "", 0},
 };
 
@@ -138,9 +183,12 @@ struct Menu MENU = {
     "Tests for HPS model",
     "hps",
     {
-        MENU_ITEM('c', "Cat picture input", do_classify_cat),
-        MENU_ITEM('d', "Diagram input", do_classify_diagram),
-        MENU_ITEM('z', "Zeros input", do_classify_zeros),
+        MENU_ITEM('a', "Cat picture input", do_classify_cat),
+        MENU_ITEM('b', "Diagram input", do_classify_diagram),
+        MENU_ITEM('c', "Zeros input", do_classify_zeros),
+        MENU_ITEM('d', "hps_0", do_classify_hps_0),
+        MENU_ITEM('e', "hps_1", do_classify_hps_1),
+        MENU_ITEM('f', "hps_2", do_classify_hps_2),
         MENU_ITEM('g', "Golden tests (check for expected outputs)",
                   do_golden_tests),
         MENU_ITEM('0', "Reinitialize with 09_20 model", do_init_09_20),
@@ -152,6 +200,10 @@ struct Menu MENU = {
                   do_init_presence_2022017_96ops),
         MENU_ITEM('4', "Reinitialize with second_2022017_96ops model",
                   do_init_second_2022017_96ops),
+        MENU_ITEM('5', "Reinitialize with presence_20220321_96ops model",
+                  do_init_presence_20220317_96ops),
+        MENU_ITEM('6', "Reinitialize with second_20220321_96ops model",
+                  do_init_second_20220321_96ops),
         MENU_END,
     },
 };
