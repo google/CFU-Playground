@@ -21,6 +21,7 @@ from litex.soc.integration import soc_core
 from litex.soc.cores.cpu.vexriscv import core
 from typing import Callable
 from patch_cpu_variant import patch_cpu_variant, copy_cpu_variant_if_needed
+from patch_cpu_variant import build_cpu_variant_if_needed
 
 
 
@@ -77,6 +78,9 @@ class GeneralSoCWorkflow():
             base_soc_kwargs['toolchain'] = self.args.toolchain
         if self.args.sys_clk_freq:
             base_soc_kwargs['sys_clk_freq'] = self.args.sys_clk_freq
+
+        print("make_soc: cpu_variant is", self.args.cpu_variant)
+        build_cpu_variant_if_needed(self.args.cpu_variant)
 
         base_soc_kwargs.update(kwargs)
         return self.soc_constructor(**base_soc_kwargs)
