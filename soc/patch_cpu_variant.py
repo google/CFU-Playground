@@ -93,3 +93,67 @@ def copy_cpu_variant_if_needed(variant):
                 print(f"Couldn't find \"{custom_cpu}\".")
     else:
         print(f"Variant \"{variant}\" not known.")
+
+
+################################################################
+# This builds a CPU variant on demand 
+################################################################
+def build_cpu_variant_if_needed(variant):
+    if variant in core.CPU_VARIANTS:
+        print(f"Variant \"{variant}\" already known.")
+    else:
+        #
+        #  TODO: parse "variant" to determine configuration in "gen_args",
+        #    and create a canonical "cpu_filename_base" that is uniquely
+        #    determined by the config.
+        #
+        dsz = 4096
+        isz = 4096
+        gen_args = []
+        if "cfu" in variant:
+            gen_args.append(f"--cfu=true")
+        gen_args.append(f"--dCacheSize={dsz}")
+        gen_args.append(f"--iCacheSize={isz}")
+
+        cpu_filename_base = "VexRiscv_GEN"
+        gen_args.append(f"--outputFile={cpu_filename_base}")
+
+
+        cpu_filename = cpu_filename_base + ".v"
+        print(f"Generating variant \"{variant}\" in file \"{cpu_filename}\".")
+
+        cfu_root = os.environ.get('CFU_ROOT')
+        custom_dir = os.path.join(cfu_root, "soc", "vexriscv")
+        custom_cpu = os.path.join(custom_dir, cpu_filename)
+
+        vdir = get_data_mod("cpu", "vexriscv").data_location
+        fullpath = os.path.join(vdir, cpu_filename)
+
+
+        #
+        # build it if needed!
+        #
+        if not os.path.exists(custom_cpu):
+            cmd = 'cd {path} && sbt compile "runMain vexriscv.GenCoreDefault {args}"'.format(path=custom_dir, args=" ".join(gen_args))
+            if os.system(cmd) != 0:
+                raise OSError('Failed to run sbt')
+
+        #
+        # do some patching
+        #  TODO: 'arch' will depend on the CPU config.
+        #
+        arch  = "rv32im"
+        abi   = "ilp32"
+        gcc_flags = f"-march={arch} -mabi={abi}"
+
+        core.CPU_VARIANTS.update({
+            variant:             cpu_filename_base,
+        })
+        core.GCC_FLAGS.update({
+            variant:             gcc_flags,
+        })
+
+        #
+        # Copy file to where it goes
+        #
+        copyfile(custom_cpu, fullpath)
