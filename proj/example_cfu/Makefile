@@ -19,8 +19,25 @@ export DEFINES := PLACEHOLDER
 # Uncomment this line to use software defined CFU
 # DEFINES += CFU_SOFTWARE_DEFINED
 
-# Uncomment to include pdti8 in built binary
+# Uncomment this line to skip debug code (large effect on performance)
+DEFINES += NDEBUG
+
+# Uncomment this line to skip individual profiling output (has minor effect on performance).
+#DEFINES += NPROFILE
+
+# Uncomment to include specified model in built binary
 DEFINES += INCLUDE_MODEL_PDTI8
+#DEFINES += INCLUDE_MODEL_MICRO_SPEECH
+#DEFINES += INCLUDE_MODEL_MAGIC_WAND
+#DEFINES += INCLUDE_MODEL_MNV2
+#DEFINES += INCLUDE_MODEL_HPS
+#DEFINES += INLCUDE_MODEL_MLCOMMONS_TINY_V01_ANOMD
+#DEFINES += INLCUDE_MODEL_MLCOMMONS_TINY_V01_IMGC
+#DEFINES += INLCUDE_MODEL_MLCOMMONS_TINY_V01_KWS
+#DEFINES += INLCUDE_MODEL_MLCOMMONS_TINY_V01_VWW
+
+# Uncomment to include all TFLM examples (pdti8, micro_speech, magic_wand)
+#DEFINES += INCLUDE_ALL_TFLM_EXAMPLES
 
 # Tests are in implementation files in this project
 PYTEST_PATTERN := '*.py'
