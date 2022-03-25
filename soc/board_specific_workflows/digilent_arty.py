@@ -43,6 +43,20 @@ class DigilentArtySoCWorkflow(general.GeneralSoCWorkflow):
                             help='Arty variant: a7-35 (default) or a7-100')
         arty_args = parser.parse_known_args()[0]
         args = argparse.Namespace(**vars(arty_args), **vars(args))
+
+        #
+        # If using SymbiFlow, and the user hasn't specified the target freq,
+        # use 75MHz as default. Currently, using the litex-boards default 100MHz
+        # with SymbiFlow usually results in a bitstream that does not function
+        # on the board.
+        #
+        # This should be removed when SymbiFlow can reliably
+        # produce a working bitstream at 100MHz.
+        #
+        if args.toolchain == 'symbiflow' and not args.sys_clk_freq:
+            args.sys_clk_freq = 75000000
+            print("INFO:Workflow:Setting sys_clk_freq to 75MHz.");
+
         super().__init__(args, soc_constructor, builder_constructor)
 
     def make_soc(self, **kwargs) -> litex_soc.LiteXSoC:
