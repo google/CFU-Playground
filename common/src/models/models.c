@@ -28,6 +28,8 @@
 #include "models/mlcommons_tiny_v01/vww/vww.h"
 #include "models/mnv2/mnv2.h"
 #include "models/pdti8/pdti8.h"
+#include "models/neural_net1/neural_net1.h"
+#include "models/neural_net_svhn/neural_net_svhn.h"
 
 inline void no_menu() {}
 
@@ -40,6 +42,14 @@ static struct Menu MENU = {
     "TfLM Models",
     "models",
     {
+#if defined(INCLUDE_MODEL_NEURAL_NET1) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "Neural_net1 model", neural_net1_menu),
+#endif
+
+#if defined(INCLUDE_MODEL_NEURAL_NET_SVHN) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "Neural_net_svhn model", neural_net_svhn_menu),
+#endif
+    
 #if defined(INCLUDE_MODEL_PDTI8) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
         MENU_ITEM(AUTO_INC_CHAR, "Person Detection int8 model", pdti8_menu),
 #endif

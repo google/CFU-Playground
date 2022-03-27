@@ -17,6 +17,7 @@
 #ifndef CFU_PLAYGROUND_PERF_H_
 #define CFU_PLAYGROUND_PERF_H_
 
+#include <stdio.h>
 #include "generated/soc.h"
 #include <stdint.h>
 
@@ -24,12 +25,14 @@
 extern "C" {
 #endif
 
+
 #ifdef CONFIG_CPU_PERF_CSRS
 #define NUM_PERF_COUNTERS 8
 #else
 #define NUM_PERF_COUNTERS 0
 #endif
 
+//define NUM_PERF_COUNTERS 8
 
 extern unsigned CFU_start_counts[NUM_PERF_COUNTERS];
 
@@ -213,6 +216,7 @@ inline void perf_set_counter_enable(int counter_num, unsigned en) {
 }
 
 inline void perf_enable_counter(int counter_num) {
+   //printf("hi");
   perf_set_counter_enable(counter_num, 1);
 }
 

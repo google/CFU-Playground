@@ -1,0 +1,34 @@
+..................
+"Event","Tag","Ticks"
+0,CONV_2D,86280
+1,MUL,3169
+2,ADD,3455
+3,CONV_2D,1134070
+4,MUL,2827
+5,ADD,3367
+6,MAX_POOL_2D,1593
+7,CONV_2D,420361
+8,MUL,1028
+9,ADD,1190
+10,CONV_2D,574736
+11,MUL,700
+12,ADD,766
+13,MAX_POOL_2D,406
+14,RESHAPE,56
+15,FULLY_CONNECTED,127330
+16,FULLY_CONNECTED,652
+17,SOFTMAX,22
+Perf counters not enabled.
+  2419M (  2418698211) cycles total
+  
+Output of 10 elem final array for single svhn img inp:
+conf lvl for 0  : 50
+conf lvl for 1  : 86
+conf lvl for 2  : -32
+conf lvl for 3  : 58
+conf lvl for 4  : -108
+conf lvl for 5  : 32
+conf lvl for 6  : 100
+conf lvl for 7  : 63
+conf lvl for 8  : 92
+conf lvl for 9  : 117

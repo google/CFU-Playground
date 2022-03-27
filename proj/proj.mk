@@ -148,6 +148,7 @@ TFLM_COPY_DATA_DIRS := \
 	tensorflow/lite/micro/examples/magic_wand \
 	tensorflow/lite/micro/examples/micro_speech/micro_features \
 	tensorflow/lite/micro/examples/person_detection \
+	tensorflow/lite/micro/examples/neural_net1 \
 	tensorflow/lite/micro/models \
 	tensorflow/lite/micro/kernels/testdata \
 

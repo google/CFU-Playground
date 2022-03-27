@@ -16,7 +16,7 @@ limitations under the License.
 #define TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_CONV_H_
 
 #include "tensorflow/lite/kernels/internal/common.h"
-
+#include "perf.h"
 namespace tflite {
 namespace reference_integer_ops {
 
@@ -81,7 +81,8 @@ inline void ConvPerChannel(
               if (!is_point_inside_image) {
                 continue;
               }
-
+              perf_enable_counter(0);
+              
               for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
                 int32_t input_val = input_data[Offset(input_shape, batch, in_y,
                                                       in_x, in_channel)];
@@ -105,6 +106,7 @@ inline void ConvPerChannel(
                 // accumulator depth is smaller than 2^16.
                 acc += filter_val * (input_val + input_offset);
               }
+              perf_disable_counter(0);
             }
           }
 
