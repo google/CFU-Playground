@@ -32,6 +32,7 @@
 #include "proj_menu.h"
 #include "spiflash.h"
 #include "tflite_unit_tests.h"
+#include "cfu_clk_menu.h"
 
 #ifdef PLATFORM_sim
 static void trace_sim() {
@@ -48,6 +49,7 @@ static struct Menu MENU = {
     "CFU Playground",
     "main",
     {
+        MENU_ITEM('c', "CFU clock control menu", cfu_clk_menu),
         MENU_ITEM('1', "TfLM Models menu", models_menu),
         MENU_ITEM('2', "Functional CFU Tests", do_functional_cfu_tests),
         MENU_ITEM('3', "Project menu", do_proj_menu),
