@@ -24,6 +24,7 @@ from litex.soc.integration.soc import SoCRegion
 from litex.soc.integration.builder import Builder, builder_args, builder_argdict
 from litex.soc.integration.soc import LiteXSoC, SoCRegion
 from litex.soc.cores.led import LedChaser
+from litex.soc.interconnect.csr import *
 
 from litex import get_data_mod
 
@@ -52,6 +53,21 @@ UART_SPEED = 115200
 RAM_SIZE = 320 * KB
 
 SOC_DIR = os.path.dirname(os.path.realpath(__file__))
+
+class CfuClockCtrl(Module, AutoCSR):
+    """
+    A simple class with a 2-bit CSR used to directly control CFU clock enable
+    and reset.
+    """
+
+    def __init__(self):
+        self.csr = CSRStorage(2, description="CFU clock & reset control")
+
+        self.cen = Signal() # Clock enable
+        self.rst = Signal() # Clock reset
+
+        self.sync += If(self.csr.re, self.cen.eq(self.csr.storage[0]))
+        self.sync += If(self.csr.re, self.rst.eq(self.csr.storage[1]))
 
 
 class HpsSoC(LiteXSoC):
@@ -97,6 +113,13 @@ class HpsSoC(LiteXSoC):
                      variant=variant,
                      reset_address=reset_address,
                      cfu=cpu_cfu)
+
+        # CFU clock and reset controller
+        self.submodules.cfu_ctl = CfuClockCtrl()
+        self.csr.add("cfu_ctl")
+
+        self.cpu.cfu_params.update(i_cfu_cen=self.cfu_ctl.cen)
+        self.cpu.cfu_params.update(i_cfu_rst=self.cfu_ctl.rst)
 
         # RAM
         if separate_arena:
