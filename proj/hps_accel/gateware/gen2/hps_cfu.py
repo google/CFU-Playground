@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from amaranth import Cat, Mux, Record, Signal, signed, unsigned
+from amaranth import Instance, ClockSignal, ResetSignal, ClockDomain, DomainRenamer, Module, Elaboratable
 from amaranth_cfu import Cfu, InstructionBase
 
 from .accelerator import AcceleratorCore, ACCELERATOR_CONFIGURATION_LAYOUT
@@ -222,6 +223,49 @@ class PoolInstruction(InstructionBase):
             m.d.sync += self.done.eq(1)
 
 
+class ClockGate(Elaboratable):
+    """
+    A wrapper module that allows clock gating and reset control of wrapped
+    modules.
+    """
+
+    def __init__(self, mod):
+        super().__init__()
+
+        self.mod = mod
+        self.ports = mod.ports
+
+        # Clock enable and reset
+        self.cfu_cen = Signal()
+        self.cfu_rst = Signal()
+
+        self.ports += [self.cfu_cen, self.cfu_rst]
+
+    def elaborate(self, platform):
+        m = Module()
+
+        clki = ClockSignal("sync")
+        rsti = ResetSignal("sync")
+
+        clko = ClockSignal("gated")
+
+        m.domains += ClockDomain("gated", local=True)
+
+        m.submodules.dcc = Instance(
+            "DCC",
+            i_CLKI=clki,
+            i_CE=self.cfu_cen,
+            o_CLKO=clko,
+        )
+
+        # TODO: Use system rst plus cfu_rst for gated reset. Amaranth doesn't
+        # seem to like that...
+
+        m.submodules += DomainRenamer("gated")(self.mod)
+
+        return m
+
+
 class HpsCfu(Cfu):
     """Gen2 accelerator CFU.
     """
@@ -279,4 +323,4 @@ def make_cfu(specialize_nx):
     Args:
         specialize_nx: generate code for the Crosslink/NX-17.
     """
-    return HpsCfu(specialize_nx)
+    return ClockGate(HpsCfu(specialize_nx))
