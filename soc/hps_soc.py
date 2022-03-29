@@ -61,10 +61,10 @@ class CfuClockCtrl(Module, AutoCSR):
     """
 
     def __init__(self):
-        self.csr = CSRStorage(2, description="CFU clock & reset control")
+        self.csr = CSRStorage(2, reset=1, description="CFU clock & reset control")
 
-        self.cen = Signal() # Clock enable
-        self.rst = Signal() # Clock reset
+        self.cen = Signal(reset=1) # Clock enable
+        self.rst = Signal(reset=0) # Clock reset
 
         self.sync += If(self.csr.re, self.cen.eq(self.csr.storage[0]))
         self.sync += If(self.csr.re, self.rst.eq(self.csr.storage[1]))

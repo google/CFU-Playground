@@ -23,12 +23,26 @@
 
 static void do_cfu_clk_enable () {
     puts("Enabling CFU clock\n");
-    cfu_ctl_csr_write(1);
+    uint32_t csr = cfu_ctl_csr_read();
+    cfu_ctl_csr_write(csr |  0x01);
 }
 
 static void do_cfu_clk_disable () {
     puts("Disabling CFU clock\n");
-    cfu_ctl_csr_write(0);
+    uint32_t csr = cfu_ctl_csr_read();
+    cfu_ctl_csr_write(csr & ~0x01);
+}
+
+static void do_cfu_rst_enable () {
+    puts("Asserting CFU reset\n");
+    uint32_t csr = cfu_ctl_csr_read();
+    cfu_ctl_csr_write(csr |  0x02);
+}
+
+static void do_cfu_rst_disable () {
+    puts("Releasing CFU reset\n");
+    uint32_t csr = cfu_ctl_csr_read();
+    cfu_ctl_csr_write(csr & ~0x02);
 }
 
 struct Menu MENU = {
@@ -36,7 +50,9 @@ struct Menu MENU = {
     "cfu_clock",
     {
         MENU_ITEM('1', "Enable CFU clock", do_cfu_clk_enable),
-        MENU_ITEM('0', "Disable CFU clock", do_cfu_clk_disable),
+        MENU_ITEM('2', "Disable CFU clock", do_cfu_clk_disable),
+        MENU_ITEM('3', "Hold CFU in reset", do_cfu_rst_enable),
+        MENU_ITEM('4', "Release CFU from reset", do_cfu_rst_disable),
         MENU_END,
     },
 };

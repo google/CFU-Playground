@@ -233,34 +233,49 @@ class ClockGate(Elaboratable):
         super().__init__()
 
         self.mod = mod
-        self.ports = mod.ports
+        self.ports = list(mod.ports)
 
-        # Clock enable and reset
-        self.cfu_cen = Signal()
-        self.cfu_rst = Signal()
+        # Clock enable and reset signals
+        self.cfu_cen = Signal(name="cfu_cen")
+        self.cfu_rst = Signal(name="cfu_rst")
 
         self.ports += [self.cfu_cen, self.cfu_rst]
+
+        # Get the module's reset port (assume it's name "reset") and remove
+        # it from the ports list. It will be connected to a new reset.
+        #
+        # Cannot use the reset signal from the "sync" domain here as its name
+        # is "rst" and its driven by "reset" (issue #110).
+        for p in self.ports:
+            if p.name == "reset":
+                self.mod_reset = p
+                break
+        else:
+            assert False
+
+        self.ports = [s for s in self.ports if s.name != "reset"]
+
+        # Create own reset port
+        self.reset = Signal(name="reset")
+        self.ports += [self.reset]
 
     def elaborate(self, platform):
         m = Module()
 
-        clki = ClockSignal("sync")
-        rsti = ResetSignal("sync")
-
-        clko = ClockSignal("gated")
-
+        # Create a domain for gated clock
         m.domains += ClockDomain("gated", local=True)
 
+        # Insert clock gate and reset injector
         m.submodules.dcc = Instance(
             "DCC",
-            i_CLKI=clki,
+            i_CLKI=ClockSignal("sync"),
+            o_CLKO=ClockSignal("gated"),
             i_CE=self.cfu_cen,
-            o_CLKO=clko,
         )
 
-        # TODO: Use system rst plus cfu_rst for gated reset. Amaranth doesn't
-        # seem to like that...
+        m.d.comb += self.mod_reset.eq(self.reset | self.cfu_rst)
 
+        # Add the submodule with gated clock
         m.submodules += DomainRenamer("gated")(self.mod)
 
         return m
