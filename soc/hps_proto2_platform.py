@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from migen import Module, ClockDomain, Signal, If, log2_int
+from migen import Module, ClockDomain, Signal, If, log2_int, Instance
 from migen.genlib.resetsync import AsyncResetSynchronizer
 from litex.build.generic_platform import Pins, Subsignal, IOStandard, Misc
 from litex.build.lattice import LatticePlatform, oxide
@@ -59,6 +59,34 @@ hps_debug_common = [
     ("user_led", 0, Pins("G3"), IOStandard("LVCMOS18H")),
 ]
 
+class NXOSCA_Switchable(NXOSCA):
+    """
+    A derivative of NXOSCA with exposes HFOUTEN output
+    """
+
+    def __init__(self):
+        super(NXOSCA_Switchable, self).__init__()
+        self.enable = Signal()
+
+    def do_finalize(self):
+        if self.hf_clk_out:
+            divisor = self.compute_divisor(self.hf_clk_out[1], self.hf_clk_out[2])
+            self.params["i_HFOUTEN"]      = self.enable
+            self.params["p_HF_CLK_DIV"]   = divisor
+            self.params["o_HFCLKOUT"]     = self.hf_clk_out[0]
+            self.params["p_HF_OSC_EN"]    = "ENABLED"
+
+        if self.hfsdc_clk_out:
+            divisor = self.compute_divisor(self.hfsdc_clk_out[1], self.hfsdc_clk_out[2])
+            self.params["i_HFSDSCEN"]        = self.enable
+            self.params["p_HF_SED_SEC_DIV"]  = divisor
+            self.params["o_HFSDCOUT"]        = self.hfsdc_clk_out[0]
+
+        if self.lf_clk_out is not None:
+            self.params["o_LFCLKOUT"] = self.lf_clk_out[0]
+            self.params["p_LF_OUTPUT_EN"] = "ENABLED"
+
+        self.specials += Instance("OSCA", **self.params)
 
 class _CRG(Module):
     """Clock Reset Generator"""
@@ -68,7 +96,7 @@ class _CRG(Module):
         self.clock_domains.cd_por = ClockDomain()
 
         # Clock from HFOSC
-        self.submodules.sys_clk = sys_osc = NXOSCA()
+        self.submodules.sys_clk = sys_osc = NXOSCA_Switchable()
         sys_osc.create_hf_clk(self.cd_sys, sys_clk_freq)
         # We make the period constraint 7% tighter than our actual system
         # clock frequency, because the CrossLink-NX internal oscillator runs

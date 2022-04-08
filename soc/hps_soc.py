@@ -61,13 +61,15 @@ class CfuClockCtrl(Module, AutoCSR):
     """
 
     def __init__(self):
-        self.csr = CSRStorage(2, reset=1, description="CFU clock & reset control")
+        self.csr = CSRStorage(3, reset=5, description="CFU clock & reset control")
 
-        self.cen = Signal(reset=1) # Clock enable
-        self.rst = Signal(reset=0) # Clock reset
+        self.gcen = Signal(reset=1) # Global clock enable
+        self.cen  = Signal(reset=1) # Clock enable
+        self.rst  = Signal(reset=0) # Clock reset
 
         self.sync += If(self.csr.re, self.cen.eq(self.csr.storage[0]))
         self.sync += If(self.csr.re, self.rst.eq(self.csr.storage[1]))
+        self.sync += If(self.csr.re, self.gcen.eq(self.csr.storage[2]))
 
 
 class HpsSoC(LiteXSoC):
@@ -120,6 +122,8 @@ class HpsSoC(LiteXSoC):
 
         self.cpu.cfu_params.update(i_cfu_cen=self.cfu_ctl.cen)
         self.cpu.cfu_params.update(i_cfu_rst=self.cfu_ctl.rst)
+
+        self.comb += self.crg.sys_clk.enable.eq(self.cfu_ctl.gcen)
 
         # RAM
         if separate_arena:

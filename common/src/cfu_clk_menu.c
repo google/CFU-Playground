@@ -45,6 +45,12 @@ static void do_cfu_rst_disable () {
     cfu_ctl_csr_write(csr & ~0x02);
 }
 
+static void do_cfu_suicide () {
+    puts("Turning of clock to myself. Bye bye!\n");
+    uint32_t csr = cfu_ctl_csr_read();
+    cfu_ctl_csr_write(csr & ~0x04);
+}
+
 struct Menu MENU = {
     "CFU clock control menu",
     "cfu_clock",
@@ -53,6 +59,7 @@ struct Menu MENU = {
         MENU_ITEM('2', "Disable CFU clock", do_cfu_clk_disable),
         MENU_ITEM('3', "Hold CFU in reset", do_cfu_rst_enable),
         MENU_ITEM('4', "Release CFU from reset", do_cfu_rst_disable),
+        MENU_ITEM('0', "Turn off self clock (suicide)", do_cfu_suicide),
         MENU_END,
     },
 };
