@@ -508,10 +508,12 @@ and extendable.
 Verilog CFU Development
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Developing CFUs in Verilog is more advanced, harder to test, but does give you
-more control over the CFU. Firstly, delete the ``cfu.py`` and ``cfu_gen.py``
-files from your project folder, we'll directly be creating and editing a file
-named ``cfu.v``.
+Developing CFUs in Verilog is lower-level and doesn't give you access to the nice
+testing features of Amaranth, but it does give you more control over the CFU. 
+Firstly, delete the ``cfu.py`` and ``cfu_gen.py``
+files from your project folder; we'll directly be creating and editing a file
+named ``cfu.v``.   To add the ``cfu.v`` file in ``git``, you'll need to use the 
+force option: ``git add -f cfu.v``.
 
 When doing CFU development with Amaranth, the CFU-CPU handshaking is implemented
 for you in the ``Cfu`` base class. In Verilog you will need to implement your
@@ -533,6 +535,13 @@ accept another transfer by pulling its ``ready`` signal low. A transfer takes
 place only when both ``valid`` from the sender and ``ready`` from the receiver
 are high.
 
+.. note:: The data values from the CPU (``cmd_function_id``, ``cmd_inputs_0``, 
+          and ``cmd_inputs_1``) are valid ONLY during the cycle that the
+          handshake is active (when both ``cmd_valid`` and ``cmd_ready`` are
+          asserted).   If your CFU needs to use these values in subsequent 
+          cycles, it must store them in registers.
+
+
 ::
 
         >--- cmd_valid --------------->
@@ -546,7 +555,7 @@ are high.
         <--- rsp_outputs_0[31:0] -----<
 
 With the previous specification in mind, here's an implementation of our
-SIMD multiply-and-accumulate instruction:
+SIMD multiply-and-accumulate instruction in ``cfu.v``:
 
 .. code-block:: Verilog
 
