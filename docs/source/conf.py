@@ -51,6 +51,7 @@ extensions = [
     'sphinx_tabs.tabs',
     'sphinxcontrib.jinja',
     'recommonmark',
+    'sphinxcontrib.wavedrom',
 ]
 
 source_parsers = {

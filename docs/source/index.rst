@@ -81,6 +81,7 @@ Site Index
    setup-guide
    crash-course/index
    step-by-step
+   interface
    renode
    vivado-install
    docs/index
