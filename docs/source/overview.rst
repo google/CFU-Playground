@@ -15,6 +15,10 @@ we advise skimming this page briefly before moving on to :doc:`crash-course/inde
 Hardware
 --------
 
+.. note:: We originally supported only the Arty A7 35T board, and the docs below have not
+          yet been updated.  We now support many other boards -- check the Wiki!
+
+
 The hardware is based around the Xilinx_ `Artix 7 35T`_ FPGA_. The Artix 7 has:
 
 * 33,000 logic cells, which is sufficient for the soft CPU and quite a bit more
