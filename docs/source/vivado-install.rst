@@ -1,7 +1,7 @@
 Vivado HLS WebPack Installation
-================================
+===============================
 
-This page is a guide ton installing `Vivado HL WebPack`_ on Linux.
+This page is a guide on installing `Vivado HL WebPack`_ on Linux.
 
 .. _`Vivado HL WebPack`: https://www.xilinx.com/products/design-tools/vivado/vivado-webpack.html
 
