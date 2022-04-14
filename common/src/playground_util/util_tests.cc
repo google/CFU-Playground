@@ -104,11 +104,32 @@ void do_murmur_tests(void) {
   printf("%d out of %d passed\n", passed, count);
 }
 
+
+void print_float(const char *name, float x)
+{
+  int i_i = (int)x;
+  float r = x - (float)(i_i);
+  printf("%s: %d . %03d\n", name, i_i, (int)(r * 1000));
+}
+
+void do_fpu(void) {
+  for (int j = 0; j < 10; j++) {
+      float a = ((double)j) + (double)0.5;
+      float b = 4.9;
+      //printf("%f + %f = %f\n", (double)a, (double)b, (double)(a+b));
+      print_float("a", a);
+      print_float("b", b);
+      print_float("a+b", a+b);
+  }
+}
+
+
 struct Menu MENU = {
     "Project Menu",
     "project",
     {
         MENU_ITEM('1', "murmurhash tests", do_murmur_tests),
+        MENU_ITEM('f', "FPU tests", do_fpu),
         MENU_END,
     },
 };
