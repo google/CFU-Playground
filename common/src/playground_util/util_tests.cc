@@ -109,13 +109,13 @@ void print_float(const char *name, float x)
 {
   int i_i = (int)x;
   float r = x - (float)(i_i);
-  printf("%s: %d . %03d\n", name, i_i, (int)(r * 1000));
+  printf("%s: %d . %03d\n", name, i_i, (int)(r * 1000.0f));
 }
 
 void do_fpu(void) {
   for (int j = 0; j < 10; j++) {
-      float a = ((double)j) + (double)0.5;
-      float b = 4.9;
+      float a = ((float)j) + 0.5f;
+      float b = 4.9f;
       //printf("%f + %f = %f\n", (double)a, (double)b, (double)(a+b));
       print_float("a", a);
       print_float("b", b);
