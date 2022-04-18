@@ -1,6 +1,6 @@
 # Source Overlay directory
 
-The files in this directory will be "overlaid" on a copy of the common source tree and Tensorflow Lite for Microcontrollers. 
+The files in this directory will be "overlaid" on a copy of the common source tree and Tensorflow Lite for Microcontrollers.
 
 For example:
 
@@ -11,4 +11,3 @@ For example:
 
         tensorflow/lite/kernels/interal/reference/integer_ops/conv.h.
 
-    

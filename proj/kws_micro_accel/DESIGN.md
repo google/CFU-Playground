@@ -96,7 +96,7 @@ Common features of the CFUs in these projects include: [a SIMD multiply and accu
 
 ## **Detailed design**
 
-The design of this micro-accelerator can be described as a series of smaller optimizations for inference of the keyword spotting model. The speed of inference is measured in "ticks" where each tick is 1024 clock cycles, these ticks are broken down into the total number of ticks spent in each TFLM Operation (which can be invoked multiple times). Optimizations can be in software, hardware, or both. 
+The design of this micro-accelerator can be described as a series of smaller optimizations for inference of the keyword spotting model. The speed of inference is measured in "ticks" where each tick is 1024 clock cycles, these ticks are broken down into the total number of ticks spent in each TFLM Operation (which can be invoked multiple times). Optimizations can be in software, hardware, or both.
 
 
 #### **Baseline Model Benchmark**
@@ -772,7 +772,7 @@ Similar to the previous optimization, by "pinning" our model weights in SRAM usi
 
 **Type of optimization**: Hardware
 
-**Explanation**: 
+**Explanation**:
 
 By increasing the size of the instruction cache, we can decrease the number of cache misses and therefore decrease Average Memory Access Time (AMAT). Despite the fact that increasing the size of the instruction cache is cheap in terms of LCs (because we can make use of the Embedded Block Ram (EBR) primitives in the cache), cheap isn't free and we don't have enough LCs to fit more of the instruction cache.
 
@@ -939,7 +939,7 @@ To get around this, we removed as many unnecessary Control and Status Registers 
 
 **Explanation**:
 
-Because of our previous LC-saving changes, we have room to add single-cycle multiplication (rather than our iterative ≈30 cycle multiplication) in our CPU. This uses 4 of our DSP tiles, but the cost is well worth the performance increase. 
+Because of our previous LC-saving changes, we have room to add single-cycle multiplication (rather than our iterative ≈30 cycle multiplication) in our CPU. This uses 4 of our DSP tiles, but the cost is well worth the performance increase.
 
 **Performance**:
 
