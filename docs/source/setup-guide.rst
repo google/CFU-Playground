@@ -120,11 +120,13 @@ make sure that they're in your PATH.
 Option 4d: Install/Use Vivado
 ----------------------------------
 
-If you are using a board with a Xilinx part, such as Arty A7 or Nexys Video, and you **don't** want to use
-open source SymbiFlow tools, then install Vivado if it is not already installed on your system.
+If you are using a board with a Xilinx part, such as Arty A7 or Nexys Video,
+and you **don't** want to use open source SymbiFlow tools, then install
+Vivado if it is not already installed on your system.
 
-See https://cfu-playground.readthedocs.io/en/latest/vivado-install.html for a comprehensive guide.
-Note that the software can take up to 8 hours to download
+See https://cfu-playground.readthedocs.io/en/latest/vivado-install.html for
+a comprehensive guide. Note that the software can take up to **8 hours** to
+download, so plan to do that ahead of time.
 
 You will need to source the settings64.sh script each time you start a shell,
 or do it in your .bashrc.
@@ -166,6 +168,9 @@ to each of the ``make`` commands.   For example, to target iCEBreaker, add ``TAR
 
 .. code-block:: bash
 
+   # If using Symbiflow (option 4a)
+   $ make enter-sf
+
    # Go to the proj_template directory
    $ cd proj/proj_template
 
@@ -173,13 +178,19 @@ to each of the ``make`` commands.   For example, to target iCEBreaker, add ``TAR
    $ make clean
 
    # Program the bitstream onto the board. The first run will take several minutes
-   # as Vivado synthesizes a bitstream
+   # as the bitstream is synthesized.
+   # Set TARGET and USE_* flags to match your installation.
+   $ make prog TARGET=digilent_arty USE_SYMBIFLOW=1
+   #  OR
+   $ make prog TARGET=digilent_arty USE_VIVADO=1
+
    # If this works fine, you will get a chasing LED pattern with the 4 LEDs
-   $ make prog
 
    # Build the RISCV program and load it onto the board
    # Also starts a terminal ( exit the terminal by hitting CTRL+C twice rapidly )
-   $ make load
+   # Set TARGET to match your board
+   # Set BUILD_JOBS to match the number of CPUs available on your system
+   $ make load BUILD_JOBS=4 TARGET=digilent_arty
    (...)
    /home/merlin/fpga/CFU-Playground/soc/bin/litex_term --speed 3686400  --kernel /home/merlin/fpga/CFU-Playground/proj/proj_template/build/software.bin /dev/ttyUSB1
    (nothing happens, type ENTER)
