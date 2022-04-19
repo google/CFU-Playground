@@ -101,3 +101,5 @@ third_party/yosys
 
 # Environment
 env
+conf/environment.yml
+conf/requirements.txt
