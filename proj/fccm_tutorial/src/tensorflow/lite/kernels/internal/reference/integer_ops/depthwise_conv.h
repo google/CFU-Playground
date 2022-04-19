@@ -19,7 +19,8 @@ limitations under the License.
 
 namespace tflite {
 namespace reference_integer_ops {
-inline void DepthwiseConvPerChannel(
+
+inline void OriginalDepthwiseConvPerChannel(
     const DepthwiseParams& params, const int32_t* output_multiplier,
     const int32_t* output_shift, const RuntimeShape& input_shape,
     const int8_t* input_data, const RuntimeShape& filter_shape,
@@ -118,6 +119,22 @@ inline void DepthwiseConvPerChannel(
     }
   }
 }
+
+inline void DepthwiseConvPerChannel(
+    const DepthwiseParams& params, const int32_t* output_multiplier,
+    const int32_t* output_shift, const RuntimeShape& input_shape,
+    const int8_t* input_data, const RuntimeShape& filter_shape,
+    const int8_t* filter_data, const RuntimeShape& bias_shape,
+    const int32_t* bias_data, const RuntimeShape& output_shape,
+    int8_t* output_data) {
+
+  // Call original
+  OriginalDepthwiseConvPerChannel(params, output_multiplier, output_shift,
+                                  input_shape, input_data, filter_shape,
+                                  filter_data, bias_shape, bias_data,
+                                  output_shape, output_data);
+}
+
 
 inline void DepthwiseConvPerChannel(
     const DepthwiseParams& params, const int32_t* output_multiplier,
