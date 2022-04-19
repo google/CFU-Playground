@@ -13,13 +13,13 @@ but is significantly more expensive.
 
 .. _`Digilent Store`: https://store.digilentinc.com/arty-a7-artix-7-fpga-development-board/
 .. _`Element 14`: https://au.element14.com/avnet/aes-a7mb-7a35t-g/eval-board-arty-artix-7-low-cost/dp/277520502?st=arty%20a7
-.. _`Mouser`: https://au.mouser.com/ProductDetail/Digilent/410-319?qs=%2Fha2pyFaduiP6GD6DfdhNp6rR4rT1KTVOohSnRQ%252BMgra5hr4M7aEiQ%3D%3D 
+.. _`Mouser`: https://au.mouser.com/ProductDetail/Digilent/410-319?qs=%2Fha2pyFaduiP6GD6DfdhNp6rR4rT1KTVOohSnRQ%252BMgra5hr4M7aEiQ%3D%3D
 
 
-Other options that have been tested: 
+Other options that have been tested:
 
 * iCEBreaker by 1BitSquared
-* OrangeCrab by GSD 
+* OrangeCrab by GSD
 * ULX3S by Radiona
 * FOMU by Kosagi
 * Nexys Video by Digilent
@@ -49,18 +49,18 @@ This updates submodules, builds some local executables, and installs missing Lin
 Step 4: Install Toolchain
 --------------------------------------------
 
-There are a few options depending on whether your board has a Xilinx FPGA 
+There are a few options depending on whether your board has a Xilinx FPGA
 or not, and whether you want to use Conda or not.  If you have already installed
-a toolchain and can build bitstreams for your board, you probably 
-don't need to do anything.   
+a toolchain and can build bitstreams for your board, you probably
+don't need to do anything.
 
 
 Option 4a: Install Conda package for SymbiFlow (for Xilinx)
 --------------------------------------------------------------
 
-To download and install the open source SymbiFlow tools and databases, 
+To download and install the open source SymbiFlow tools and databases,
 run the following from the top directory of the CFU Playground.
-It will take about six minutes in the best case, 
+It will take about six minutes in the best case,
 and use approximately 25GB of disk space.
 You normally only need to do this once.
 
@@ -76,7 +76,7 @@ Then, each time to enter the environment, type:
 
 This starts a subshell; you can leave the environment by typing ``exit``.
 
-Later when you're building a project bitstream, 
+Later when you're building a project bitstream,
 you need to add USE\_SYMBIFLOW=1 to your make command line.
 
 If you see no errors, but the compiled RISC-V executable does not run on the
@@ -108,35 +108,37 @@ This starts a subshell; you can leave the environment by typing ``exit``.
 
 
 
-Option 4c: Use already-installed Yosys, Nextpnr, and other required tools 
+Option 4c: Use already-installed Yosys, Nextpnr, and other required tools
 --------------------------------------------------------------------------
 
-This option makes sense if you have already installed the necessary open-source 
+This option makes sense if you have already installed the necessary open-source
 tools for your board.   In that case you don't need to do anything other than
 make sure that they're in your PATH.
 
 
 
-Option 4d: Install/Use Vivado 
+Option 4d: Install/Use Vivado
 ----------------------------------
 
-If you are using a board with a Xilinx part, such as Arty A7 or Nexys Video, and you **don't** want to use
-open source SymbiFlow tools, then install Vivado if it is not already installed on your system.
+If you are using a board with a Xilinx part, such as Arty A7 or Nexys Video,
+and you **don't** want to use open source SymbiFlow tools, then install
+Vivado if it is not already installed on your system.
 
-See https://cfu-playground.readthedocs.io/en/latest/vivado-install.html for a comprehensive guide. 
-Note that the software can take up to 8 hours to download
+See https://cfu-playground.readthedocs.io/en/latest/vivado-install.html for
+a comprehensive guide. Note that the software can take up to **8 hours** to
+download, so plan to do that ahead of time.
 
 You will need to source the settings64.sh script each time you start a shell,
 or do it in your .bashrc.
 
 
 
-Step 5: Install RISC-V toolchain 
+Step 5: Install RISC-V toolchain
 ---------------------------------
 
 .. note::
 
-   This is only required if you don't use one of the Conda options above.  
+   This is only required if you don't use one of the Conda options above.
    All of the Conda packages include the RISC-V toolchain.
 
 1. Download the `August 2020`_ toolchain from freedom-tools and unpack the binaries to your home directory:
@@ -166,6 +168,9 @@ to each of the ``make`` commands.   For example, to target iCEBreaker, add ``TAR
 
 .. code-block:: bash
 
+   # If using Symbiflow (option 4a)
+   $ make enter-sf
+
    # Go to the proj_template directory
    $ cd proj/proj_template
 
@@ -173,13 +178,19 @@ to each of the ``make`` commands.   For example, to target iCEBreaker, add ``TAR
    $ make clean
 
    # Program the bitstream onto the board. The first run will take several minutes
-   # as Vivado synthesizes a bitstream
+   # as the bitstream is synthesized.
+   # Set TARGET and USE_* flags to match your installation.
+   $ make prog TARGET=digilent_arty USE_SYMBIFLOW=1
+   #  OR
+   $ make prog TARGET=digilent_arty USE_VIVADO=1
+
    # If this works fine, you will get a chasing LED pattern with the 4 LEDs
-   $ make prog
 
    # Build the RISCV program and load it onto the board
    # Also starts a terminal ( exit the terminal by hitting CTRL+C twice rapidly )
-   $ make load
+   # Set TARGET to match your board
+   # Set BUILD_JOBS to match the number of CPUs available on your system
+   $ make load BUILD_JOBS=4 TARGET=digilent_arty
    (...)
    /home/merlin/fpga/CFU-Playground/soc/bin/litex_term --speed 3686400  --kernel /home/merlin/fpga/CFU-Playground/proj/proj_template/build/software.bin /dev/ttyUSB1
    (nothing happens, type ENTER)
@@ -194,11 +205,11 @@ to each of the ``make`` commands.   For example, to target iCEBreaker, add ``TAR
    [LXTERM] Booting the device.
    [LXTERM] Done.
    Executing booted program at 0x40000000
-   
+
    --============= Liftoff! ===============--
    Hello, World!
    initTfLite()
-   
+
    CFU Playground
    ==============
    1: TfLM Models menu
@@ -208,7 +219,7 @@ to each of the ``make`` commands.   For example, to target iCEBreaker, add ``TAR
    5: TFLite Unit Tests
    6: Benchmarks
    7: Util Tests
-   main> 
+   main>
 
 
 * Select `1` - TfLM Models menu
