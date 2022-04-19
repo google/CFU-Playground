@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 The CFU-Playground Authors
+ * Copyright 2022 The CFU-Playground Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 #include <stdio.h>
 
-#include "cfu.h"
+#include "fccm_cfu.h"
 #include "menu.h"
 
 namespace {
@@ -26,40 +26,24 @@ namespace {
 // Template Fn
 void do_hello_world(void) { puts("Hello, World!!!\n"); }
 
-// Test template instruction
-void do_exercise_cfu_op0(void) {
-  puts("\r\nExercise CFU Op0 aka ADD\r\n");
+// Tests multiply-add CFU
+void do_test_cfu(void) {
+  printf("\r\nCFU Test... ");
 
-  unsigned int a = 0;
-  unsigned int b = 0;
-  unsigned int cfu = 0;
-  unsigned int count = 0;
-  unsigned int pass_count = 0;
-  unsigned int fail_count = 0;
-
-  for (a = 0x00004567; a < 0xF8000000; a += 0x00212345) {
-    for (b = 0x0000ba98; b < 0xFF000000; b += 0x00770077) {
-      cfu = cfu_op0(0, a, b);
-      if (cfu != a + b) {
-        printf("[%4d] a: %08x b:%08x a+b=%08x cfu=%08x FAIL\r\n", count, a, b,
-               a + b, cfu);
-        fail_count++;
-      } else {
-        pass_count++;
-      }
-      count++;
-    }
-  }
-
-  printf("\r\nPerformed %d comparisons, %d pass, %d fail\r\n", count,
-         pass_count, fail_count);
+  // Calculated on a spreadsheet
+  cfu_reset();
+  cfu_accumulate(0x884CF61A, 0xE49F2F1C);
+  cfu_accumulate(0x0BE31854, 0x527FDBCF);
+  cfu_accumulate(0xADB43251, 0x4E36D172);
+  cfu_accumulate(0x6F867FFB, 0x442C7B76);
+  printf("%s\n", static_cast<int32_t>(cfu_read()) == 81978 ? "PASS!" : "FAIL");
 }
 
 struct Menu MENU = {
     "Project Menu",
     "project",
     {
-        MENU_ITEM('0', "exercise cfu op0", do_exercise_cfu_op0),
+        MENU_ITEM('1', "test cfu", do_test_cfu),
         MENU_ITEM('h', "say Hello", do_hello_world),
         MENU_END,
     },
