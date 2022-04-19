@@ -12,6 +12,6 @@ jobs:
       - run: which pip3 && which python3 && which pip
       - run: make install-sf
       - run: echo `pwd`/"env/symbiflow/bin" >> $GITHUB_PATH
-      - run: pwd && source env/conda/bin/activate cfu-common && riscv32-elf-newlib-gcc --version && which python3
-      - run: pwd && source env/conda/bin/activate cfu-common && source environment && cd proj/proj_template_v && pip3 list && make USE_SYMBIFLOW=1 EXTRA_LITEX_ARGS="--cpu-variant=slimopt+cfu --sys-clk-freq=50000000" clean bitstream
-      - run: pwd && source env/conda/bin/activate cfu-common && source environment && ulimit -S -t 1200 && ulimit -H -t 1200 &&  cd proj/hps_accel && pip3 list && make USE_SYMBIFLOW=1 PLATFORM=common_soc TARGET=digilent_arty EXTRA_LITEX_ARGS="--cpu-variant=slimopt+cfu --sys-clk-freq=50000000" clean bitstream || true
+      - run: pwd && source env/conda/bin/activate cfu-symbiflow && riscv32-elf-newlib-gcc --version && which python3
+      - run: pwd && source env/conda/bin/activate cfu-symbiflow && source environment && cd proj/proj_template_v && pip3 list && make USE_SYMBIFLOW=1 EXTRA_LITEX_ARGS="--cpu-variant=slimopt+cfu --sys-clk-freq=50000000" clean bitstream
+      - run: pwd && source env/conda/bin/activate cfu-symbiflow && source environment && ulimit -S -t 1200 && ulimit -H -t 1200 &&  cd proj/hps_accel && pip3 list && make USE_SYMBIFLOW=1 PLATFORM=common_soc TARGET=digilent_arty EXTRA_LITEX_ARGS="--cpu-variant=slimopt+cfu --sys-clk-freq=50000000" clean bitstream || true
