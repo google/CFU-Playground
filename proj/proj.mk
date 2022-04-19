@@ -184,7 +184,7 @@ else ifeq '$(ENABLE_TRACE_ARG)' '--trace-fst'
 	VERILATOR_TRACE_PATH := $(BUILD_DIR)/simx.fst
 endif
 
-BUILD_JOBS ?= 1
+BUILD_JOBS ?= $(shell nproc)
 
 .PHONY:	renode
 renode: renode-scripts
