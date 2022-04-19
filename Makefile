@@ -2,6 +2,18 @@
 # The top directory where environment will be created.
 TOP_DIR := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 
+ifdef USE_SYMBIFLOW
+
+# A pip `requirements.txt` file.
+# https://pip.pypa.io/en/stable/reference/pip_install/#requirements-file-format
+REQUIREMENTS_FILE := $(TOP_DIR)/conf/requirements-symbiflow.txt
+
+# A conda `environment.yml` file.
+# https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
+ENVIRONMENT_FILE := $(TOP_DIR)/conf/environment-symbiflow.yml
+
+else
+
 # A pip `requirements.txt` file.
 # https://pip.pypa.io/en/stable/reference/pip_install/#requirements-file-format
 REQUIREMENTS_FILE := $(TOP_DIR)/conf/requirements.txt
@@ -9,6 +21,9 @@ REQUIREMENTS_FILE := $(TOP_DIR)/conf/requirements.txt
 # A conda `environment.yml` file.
 # https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html
 ENVIRONMENT_FILE := $(TOP_DIR)/conf/environment.yml
+
+endif
+
 
 include third_party/make-env/conda.mk
 
@@ -43,19 +58,17 @@ install-sf:
 		exit 1; \
 	fi
 	@mkdir -p $(SF_INSTALL)
-	@/bin/cp conf/environment-symbiflow.yml conf/environment.yml
-	@/bin/cp conf/requirements-symbiflow.txt conf/requirements.txt
 	wget -qO- "https://www.googleapis.com/download/storage/v1/b/symbiflow-arch-defs/o/artifacts%2Fprod%2Ffoss-fpga-tools%2Fsymbiflow-arch-defs%2Fcontinuous%2Finstall%2F497%2F20211222-000718%2Fsymbiflow-arch-defs-install-f9aa1caf.tar.xz?generation=1640179068316994&alt=media" | tar -xJC $(SF_INSTALL)
 	wget -qO- "https://www.googleapis.com/download/storage/v1/b/symbiflow-arch-defs/o/artifacts%2Fprod%2Ffoss-fpga-tools%2Fsymbiflow-arch-defs%2Fcontinuous%2Finstall%2F497%2F20211222-000718%2Fsymbiflow-arch-defs-xc7a50t_test-f9aa1caf.tar.xz?generation=1640179069641023&alt=media" | tar -xJC $(SF_INSTALL)
 	wget -qO- "https://www.googleapis.com/download/storage/v1/b/symbiflow-arch-defs/o/artifacts%2Fprod%2Ffoss-fpga-tools%2Fsymbiflow-arch-defs%2Fcontinuous%2Finstall%2F497%2F20211222-000718%2Fsymbiflow-arch-defs-xc7a100t_test-f9aa1caf.tar.xz?generation=1640179071622610&alt=media" | tar -xJC $(SF_INSTALL)
 	wget -qO- "https://www.googleapis.com/download/storage/v1/b/symbiflow-arch-defs/o/artifacts%2Fprod%2Ffoss-fpga-tools%2Fsymbiflow-arch-defs%2Fcontinuous%2Finstall%2F497%2F20211222-000718%2Fsymbiflow-arch-defs-xc7a200t_test-f9aa1caf.tar.xz?generation=1640179073346556&alt=media" | tar -xJC $(SF_INSTALL)
-	$(MAKE) env
+	$(MAKE) USE_SYMBIFLOW=1 env
 	@echo
 	@echo "Done installing SymbiFlow.  To enter the environment, type 'make enter-sf', which creates a new subshell, and 'exit' when done."
 	@echo
 
 enter-sf:
-	-@export PATH=$(TOP_DIR)/env/symbiflow/bin:$(PATH) && $(MAKE) enter
+	-@export PATH=$(TOP_DIR)/env/symbiflow/bin:$(PATH) && $(MAKE) USE_SYMBIFLOW=1 enter
 
 
 .PHONY: enter-sf install-sf info

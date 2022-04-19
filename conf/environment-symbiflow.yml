@@ -1,4 +1,4 @@
-name: cfu-common
+name: cfu-symbiflow
 channels:
   - defaults
   - litex-hub
@@ -23,7 +23,7 @@ dependencies:
   - python=3.7
   - pip
   - pip:
-    - -r ./requirements.txt
+    - -r ./requirements-symbiflow.txt
 
 
 
