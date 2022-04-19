@@ -15,6 +15,7 @@ limitations under the License.
 #ifndef TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_DEPTHWISE_CONV_H_
 #define TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_DEPTHWISE_CONV_H_
 
+#include "playground_util/print_params.h"
 #include "tensorflow/lite/kernels/internal/common.h"
 
 namespace tflite {
@@ -128,13 +129,20 @@ inline void DepthwiseConvPerChannel(
     const int32_t* bias_data, const RuntimeShape& output_shape,
     int8_t* output_data) {
 
+#ifdef DEPTHWISE_PRINT_PARAMS
+  print_depthwise_params(params, input_shape, filter_shape, output_shape);
+#endif
+
+#ifdef DEPTHWISE_ACCELERATE
+  // Check whether we can accelerate
+#endif
+
   // Call original
   OriginalDepthwiseConvPerChannel(params, output_multiplier, output_shift,
                                   input_shape, input_data, filter_shape,
                                   filter_data, bias_shape, bias_data,
                                   output_shape, output_data);
 }
-
 
 inline void DepthwiseConvPerChannel(
     const DepthwiseParams& params, const int32_t* output_multiplier,
