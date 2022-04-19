@@ -17,7 +17,13 @@
 export DEFINES :=
 
 # Uncomment this line to use software defined CFU functions in software_cfu.cc
-DEFINES += CFU_SOFTWARE_DEFINED
+#DEFINES += CFU_SOFTWARE_DEFINED
+
+# Uncomment this line to print parameters of the conv2d operation
+DEFINES += DEPTHWISE_PRIMT_PARAMS
+
+# Uncomment this line to allow acceleration
+DEFINES += DEPTHWISE_ACCELERATE
 
 # Uncomment this line to skip debug code (large effect on performance)
 DEFINES += NDEBUG
