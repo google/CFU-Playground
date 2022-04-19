@@ -11,9 +11,8 @@ https://www.fccm.org/workshop-tutorial-2022/
 these functions:
 
 * Operation 0: Reset accumulator
-* Operation 1: Read accumulator
-* Operation 2: Set signed offset
-* Operation 3: 4-way multiply accumulate.
+* Operation 1: 4-way multiply accumulate.
+* Operation 2: Read accumulator
 
 Test cases can be run by executing `cfu.py`:
 

@@ -15,10 +15,10 @@
 
 from amaranth import *
 from amaranth.sim import Delay, Tick
-from amaranth_cfu import TestBase, SimpleElaboratable, pack_vals
+from amaranth_cfu import TestBase, SimpleElaboratable, pack_vals, CfuBase, CfuTestBase
 import unittest
 
-class MultiplyAdd4(SimpleElaboratable):
+class MultiplyAccumulate4(SimpleElaboratable):
     """Performs four, 8 bit wide multiply-accumulates in parallel.
 
     Uses `SimpleElaboratable` helper class as a convenience.
@@ -53,9 +53,9 @@ class MultiplyAdd4(SimpleElaboratable):
             m.d.sync += self.accumulator.eq(self.accumulator + summed)
 
 
-class MultiplyAdd4Test(TestBase):
+class MultiplyAccumulate4Test(TestBase):
     def create_dut(self):
-        return MultiplyAdd4()
+        return MultiplyAccumulate4()
 
     def test(self):
 
@@ -102,6 +102,72 @@ class MultiplyAdd4Test(TestBase):
                 yield Tick()
 
         self.run_sim(process, write_trace=False)
+
+
+class Cfu(CfuBase):
+    """Simple CFU that provides access to a MultiplyAccumulate4.
+
+    The supported operations are:
+        * Operation 0: Reset accumulator
+        * Operation 1: 4-way multiply accumulate.
+        * Operation 2: Read accumulator
+
+    The implementation here assumes the CPU is always ready to read a response.
+    """
+
+    def elab(self, m):
+        # Build the submodule
+        m.submodules.macc4 = macc4 = MultiplyAccumulate4()
+
+        # Check operation number
+        funct3 = Signal(3)
+        m.d.comb += funct3.eq(self.cmd_function_id[:3])
+
+        # All commands take 1 cycle. CFU is always read to receive a command
+        m.d.comb += self.cmd_ready.eq(1)
+
+        # There is only one response, and it is always valid
+        m.d.comb += self.rsp_out.eq(macc4.accumulator)
+        m.d.comb += self.rsp_valid.eq(1)
+
+        # Inputs to Macc4 always set to CFU inputs
+        m.d.comb += macc4.a_word.eq(self.cmd_in0)
+        m.d.comb += macc4.b_word.eq(self.cmd_in1)
+
+        # clear on zero, enable on 1
+        m.d.comb += macc4.clear.eq(self.cmd_valid & (funct3 == 0))
+        m.d.comb += macc4.enable.eq(self.cmd_valid & (funct3 == 1))
+
+def make_cfu():
+    return Cfu()
+
+class CfuTest(CfuTestBase):
+    def create_dut(self):
+        return make_cfu()
+
+    def test(self):
+        "Tests CFU plumbs to Madd4 correctly"
+        def a(a, b, c, d): return pack_vals(a, b, c, d, offset=-128)
+        def b(a, b, c, d): return pack_vals(a, b, c, d, offset=0)
+        # These values were calculated with a spreadsheet
+        DATA = [
+            # ((fn3, op1, op2), result)
+            ((0, 0, 0), None),  #reset
+            ((1, a(130, 7, 76, 47), b(104, -14, -24, 71)), None), # calculate
+            ((1, a(84, 90, 36, 191), b(109, 57, -50, -1)), None),
+            ((1, a(203, 246, 89, 178), b(-87, 26, 77, 71)), None),
+            ((1, a(43, 27, 78, 167), b(-24, -8, 65, 124)), None),
+            ((2, 0, 0), 59986), # read result
+
+            ((0, 0, 0), None),  #reset
+            ((1, a(67, 81, 184, 130), b(81, 38, -116, 65)), None),
+            ((1, a(208, 175, 180, 198), b(-120, -70, 8, 11)), None),
+            ((1, a(185, 81, 101, 108), b(90, 6, -92, 83)), None),
+            ((1, a(219, 216, 114, 236), b(-116, -9, -109, -16)), None),
+            ((2, 0, 0), -64723), # read result
+        ]
+        self.run_ops(DATA)
+
 
 if __name__ == '__main__':
     unittest.main()
