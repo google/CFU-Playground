@@ -37,6 +37,11 @@ if [ -z "$UPDATE" ] ; then
     git -C yosys pull --ff-only origin master
     git -C yosys submodule update
   fi
+  if [ ! -d yosys-f4pga-plugins ]; then
+    git clone --recursive https://github.com/chipsalliance/yosys-f4pga-plugins.git
+    git -C yosys pull --ff-only origin master
+    git -C yosys submodule update
+  fi
   if [ ! -d prjoxide ]; then
     git clone --recursive https://github.com/gatecat/prjoxide.git
     git -C prjoxide pull --ff-only origin master
@@ -69,6 +74,16 @@ echo "BUILDING YOSYS"
 cd "${CFU_ROOT}/third_party/yosys"
 make -j$(nproc)
 make DESTDIR=${DESTDIR} install
+
+echo
+echo "BUILDING YOSYS PLUGINS"
+cd "${CFU_ROOT}/third_party/yosys-f4pga-plugins/dsp-ff-plugin"
+make -j$(nproc)
+# DESTDIR not respected in this repo, so we can't do `make install`
+# make DESTDIR=${DESTDIR} install
+mkdir -p "${DESTDIR}/usr/local/share/yosys/plugins"
+cp "${CFU_ROOT}/third_party/yosys-f4pga-plugins/dsp-ff-plugin/dsp-ff.so" "${DESTDIR}/usr/local/share/yosys/plugins/dsp-ff.so"
+cp "${CFU_ROOT}/third_party/yosys-f4pga-plugins/dsp-ff-plugin/nexus-dsp_rules.txt" "${DESTDIR}/usr/local/share/yosys/nexus/dsp_rules.txt"
 
 echo
 echo "BUILDING PRJOXIDE"
