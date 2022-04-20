@@ -72,13 +72,14 @@ DESTDIR=${CFU_ROOT}/third_party
 echo
 echo "BUILDING YOSYS"
 cd "${CFU_ROOT}/third_party/yosys"
-make -j$(nproc)
+make DESTDIR=${DESTDIR} -j$(nproc)
 make DESTDIR=${DESTDIR} install
+export PATH="${DESTDIR}/usr/local/bin:${PATH}"
 
 echo
 echo "BUILDING YOSYS PLUGINS"
 cd "${CFU_ROOT}/third_party/yosys-f4pga-plugins/dsp-ff-plugin"
-make -j$(nproc)
+YOSYS_PATH=${DESTDIR}/usr/local make -j$(nproc)
 # DESTDIR not respected in this repo, so we can't do `make install`
 # make DESTDIR=${DESTDIR} install
 mkdir -p "${DESTDIR}/usr/local/share/yosys/plugins"
