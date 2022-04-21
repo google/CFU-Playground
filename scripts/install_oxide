@@ -67,39 +67,39 @@ else
 
 fi
 
-DESTDIR=${CFU_ROOT}/third_party
+INSTALL_ROOT=${CFU_ROOT}/third_party
 
 echo
 echo "BUILDING YOSYS"
 cd "${CFU_ROOT}/third_party/yosys"
-make DESTDIR=${DESTDIR} -j$(nproc)
-make DESTDIR=${DESTDIR} install
-export PATH="${DESTDIR}/usr/local/bin:${PATH}"
+make PREFIX=${INSTALL_ROOT}/usr/local -j$(nproc)
+make PREFIX=${INSTALL_ROOT}/usr/local install
+export PATH="${INSTALL_ROOT}/usr/local/bin:${PATH}"
 
 echo
 echo "BUILDING YOSYS PLUGINS"
 cd "${CFU_ROOT}/third_party/yosys-f4pga-plugins/dsp-ff-plugin"
-YOSYS_PATH=${DESTDIR}/usr/local make -j$(nproc)
-# DESTDIR not respected in this repo, so we can't do `make install`
-# make DESTDIR=${DESTDIR} install
-mkdir -p "${DESTDIR}/usr/local/share/yosys/plugins"
-cp "${CFU_ROOT}/third_party/yosys-f4pga-plugins/dsp-ff-plugin/dsp-ff.so" "${DESTDIR}/usr/local/share/yosys/plugins/dsp-ff.so"
-cp "${CFU_ROOT}/third_party/yosys-f4pga-plugins/dsp-ff-plugin/nexus-dsp_rules.txt" "${DESTDIR}/usr/local/share/yosys/nexus/dsp_rules.txt"
+YOSYS_PATH=${INSTALL_ROOT}/usr/local make -j$(nproc)
+# INSTALL_ROOT not respected in this repo, so we can't do `make install`
+# make INSTALL_ROOT=${INSTALL_ROOT} install
+mkdir -p "${INSTALL_ROOT}/usr/local/share/yosys/plugins"
+cp "${CFU_ROOT}/third_party/yosys-f4pga-plugins/dsp-ff-plugin/dsp-ff.so" "${INSTALL_ROOT}/usr/local/share/yosys/plugins/dsp-ff.so"
+cp "${CFU_ROOT}/third_party/yosys-f4pga-plugins/dsp-ff-plugin/nexus-dsp_rules.txt" "${INSTALL_ROOT}/usr/local/share/yosys/nexus/dsp_rules.txt"
 
 echo
 echo "BUILDING PRJOXIDE"
-OXIDE_INSTALL_PREFIX="${CFU_ROOT}/third_party/.cargo"
+OXIDE_INSTALL_PREFIX="${INSTALL_ROOT}/.cargo"
 mkdir -p "${OXIDE_INSTALL_PREFIX}"
 cd "${CFU_ROOT}/third_party/prjoxide/libprjoxide"
 cargo install --path prjoxide --root "${OXIDE_INSTALL_PREFIX}"
-cp "${CFU_ROOT}/third_party/.cargo/bin/prjoxide" "${DESTDIR}/usr/local/bin"
+cp "${CFU_ROOT}/third_party/.cargo/bin/prjoxide" "${INSTALL_ROOT}/usr/local/bin"
 
 echo
 echo "BUILDING NEXTPNR-NEXUS"
 cd "${CFU_ROOT}/third_party/nextpnr"
-cmake -DARCH=nexus -DOXIDE_INSTALL_PREFIX="${OXIDE_INSTALL_PREFIX}" .
+cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_ROOT}/usr/local" -DARCH=nexus -DOXIDE_INSTALL_PREFIX="${OXIDE_INSTALL_PREFIX}" .
 make -j$(nproc)
-make DESTDIR="${DESTDIR}" install
+make install
 
 echo
 echo "IMPORTANT"
