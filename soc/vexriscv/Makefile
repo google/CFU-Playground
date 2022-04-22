@@ -26,6 +26,9 @@ VexRiscv_HpsdeltaCfu.v: $(SRC) Makefile
 #======== standard CFU models already being used in CFU Playground.   They now live here. =======
 #================================================================================================
 
+VexRiscv_MinCfu.v: $(SRC)
+	sbt compile "runMain vexriscv.GenCoreDefault --iCacheSize 0 --dCacheSize 0 --csrPluginConfig mcycle --cfu true --mulDiv false --singleCycleShift false --singleCycleMulDiv false --bypass false --prediction none --outputFile VexRiscv_MinCfu"
+
 VexRiscv_PerfCfu.v: $(SRC) Makefile
 	sbt compile "runMain vexriscv.GenCoreDefault --dCacheSize 8192 --iCacheSize 8192 --csrPluginConfig all --cfu true --perfCSRs 8 --outputFile VexRiscv_PerfCfu"
 
