@@ -17,6 +17,7 @@
 #include <stdio.h>
 
 #include "riscv.h"
+#include "generated/soc.h"
 
 // Integer arithmetic routines linked later in compilation.
 extern "C" {
@@ -86,6 +87,7 @@ void instruction_handler(uint32_t* reg_base) {
 
 bool do_div_tests() {
   bool all_passed = true;
+#ifndef CONFIG_CPU_VARIANT_MINIMAL
   auto div_test = ASM_R_TEST("div");
 
   // Test instruction is division.
@@ -101,12 +103,14 @@ bool do_div_tests() {
   // Test RISC-V signed division overflow semantics.
   all_passed &= div_test(/* src1= */ 0x80000000, /* src2= */ -1,
                          /* expected= */ 0x80000000);
+#endif
 
   return all_passed;
 }
 
 bool do_divu_tests() {
   bool all_passed = true;
+#ifndef CONFIG_CPU_VARIANT_MINIMAL
   auto divu_test = ASM_R_TEST("divu");
 
   // Test instruction is division.
@@ -118,12 +122,14 @@ bool do_divu_tests() {
 
   // Test RISC-V divide by 0 semantics.
   all_passed &= divu_test(/* src1= */ 1, /* src2= */ 0, /* expected= */ -1);
+#endif
 
   return all_passed;
 }
 
 bool do_rem_tests() {
   bool all_passed = true;
+#ifndef CONFIG_CPU_VARIANT_MINIMAL
   auto rem_test = ASM_R_TEST("rem");
 
   // Test instruction is mod.
@@ -135,12 +141,14 @@ bool do_rem_tests() {
 
   // Test RISC-V mod by 0 semantics.
   all_passed &= rem_test(/* src1= */ 9, /* src2= */ 0, /* expected= */ 9);
+#endif
 
   return all_passed;
 }
 
 bool do_remu_tests() {
   bool all_passed = true;
+#ifndef CONFIG_CPU_VARIANT_MINIMAL
   auto remu_test = ASM_R_TEST("remu");
 
   // Test instruction is mod.
@@ -152,6 +160,7 @@ bool do_remu_tests() {
 
   // Test RISC-V mod by 0 semantics.
   all_passed &= remu_test(/* src1= */ 9, /* src2= */ 0, /* expected= */ 9);
+#endif
 
   return all_passed;
 }
