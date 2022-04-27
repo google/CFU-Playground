@@ -39,8 +39,8 @@ if [ -z "$UPDATE" ] ; then
   fi
   if [ ! -d yosys-f4pga-plugins ]; then
     git clone --recursive https://github.com/chipsalliance/yosys-f4pga-plugins.git
-    git -C yosys pull --ff-only origin master
-    git -C yosys submodule update
+    git -C yosys-f4pga-plugins pull --ff-only origin main
+    git -C yosys-f4pga-plugins submodule update
   fi
   if [ ! -d prjoxide ]; then
     git clone --recursive https://github.com/gatecat/prjoxide.git
