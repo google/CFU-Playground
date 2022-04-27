@@ -27,6 +27,8 @@ import os
 def patch_cpu_variant():
     """Monkey patches custom variants into LiteX."""
     core.CPU_VARIANTS.update({
+        'fomu':                 'VexRiscv_Fomu',
+        'fomu+cfu':             'VexRiscv_FomuCfu',
         'custom':               'VexRiscv_Custom',
         'custom+cfu':           'VexRiscv_CustomCfu',
         'hps+cfu':              'VexRiscv_HpsCfu',
@@ -42,6 +44,8 @@ def patch_cpu_variant():
         'slimperf+cfu+debug':   'VexRiscv_SlimPerfCfuDebug',
     })
     core.GCC_FLAGS.update({
+        'fomu':                 '-march=rv32im -mabi=ilp32 -mno-div',
+        'fomu+cfu':             '-march=rv32im -mabi=ilp32 -mno-div',
         'custom':               '-march=rv32im -mabi=ilp32',
         'custom+cfu':           '-march=rv32im -mabi=ilp32',
         'hps+cfu':              '-march=rv32im -mabi=ilp32',
@@ -62,8 +66,16 @@ def patch_cpu_variant():
 
     def new_add_soc_components(self, soc, soc_region_cls):
         old_add_soc_components(self, soc, soc_region_cls)
+
         if 'perf' in self.variant:
             soc.add_config('CPU_PERF_CSRS', 8)
+
+        if 'fomu' in self.variant:
+            soc.add_config('CPU_DIV_UNIMPLEMENTED')
+
+            # Fomu variant has *no* Dcache.
+            # This is here to avoid the dcache flush instruction (system.h).
+            soc.constants.pop('CONFIG_CPU_HAS_DCACHE', None)
 
     core.VexRiscv.add_soc_components = new_add_soc_components
 
