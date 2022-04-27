@@ -76,7 +76,7 @@ SHARED_FLAGS := \
 	-Wdouble-promotion\
 	-Wshadow\
 	-Wunused-variable\
-	-Wmissing-field-initializers\
+	-Wno-missing-field-initializers\
 	-Wunused-function\
 	-Wno-maybe-uninitialized\
 	-Wswitch\
