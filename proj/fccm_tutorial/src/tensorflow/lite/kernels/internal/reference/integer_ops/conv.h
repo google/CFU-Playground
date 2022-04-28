@@ -15,13 +15,14 @@ limitations under the License.
 #ifndef TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_CONV_H_
 #define TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_CONV_H_
 
+#include "playground_util/print_params.h"
 #include "tensorflow/lite/kernels/internal/common.h"
 
 namespace tflite {
 namespace reference_integer_ops {
 
 // Fixed-point per-channel-quantization convolution reference kernel.
-inline void ConvPerChannel(
+inline void OriginalConvPerChannel(
     const ConvParams& params, const int32_t* output_multiplier,
     const int32_t* output_shift, const RuntimeShape& input_shape,
     const int8_t* input_data, const RuntimeShape& filter_shape,
@@ -129,6 +130,28 @@ inline void ConvPerChannel(
       }
     }
   }
+}
+
+inline void ConvPerChannel(
+    const ConvParams& params, const int32_t* output_multiplier,
+    const int32_t* output_shift, const RuntimeShape& input_shape,
+    const int8_t* input_data, const RuntimeShape& filter_shape,
+    const int8_t* filter_data, const RuntimeShape& bias_shape,
+    const int32_t* bias_data, const RuntimeShape& output_shape,
+    int8_t* output_data) {
+
+
+#ifdef CONV_PRINT_PARAMS
+  print_conv_params(params, input_shape, filter_shape, output_shape);
+#endif
+
+#ifdef CONV_ACCELERATE
+  // Check whether we can accelerate
+#endif      
+  // Call original
+  OriginalConvPerChannel(params, output_multiplier, output_shift, input_shape,
+                         input_data, filter_shape, filter_data, bias_shape,
+                         bias_data, output_shape, output_data);
 }
 
 // Fixed-point per-channel-quantization convolution reference kernel.
