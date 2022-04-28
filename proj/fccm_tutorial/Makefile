@@ -19,10 +19,12 @@ export DEFINES :=
 # Uncomment this line to use software defined CFU functions in software_cfu.cc
 #DEFINES += CFU_SOFTWARE_DEFINED
 
-# Uncomment this line to print parameters of the conv2d operation
-DEFINES += DEPTHWISE_PRIMT_PARAMS
+# Uncomment these line to print parameters of the conv2d operation
+DEFINES += CONV_PRINT_PARAMS
+DEFINES += DEPTHWISE_PRINT_PARAMS
 
 # Uncomment this line to allow acceleration
+DEFINES += CONV_ACCELERATE
 DEFINES += DEPTHWISE_ACCELERATE
 
 # Uncomment this line to skip debug code (large effect on performance)
@@ -33,13 +35,13 @@ DEFINES += NDEBUG
 
 # Uncomment to include specified model in built binary
 #DEFINES += INCLUDE_MODEL_PDTI8
-DEFINES += INCLUDE_MODEL_MICRO_SPEECH
+#DEFINES += INCLUDE_MODEL_MICRO_SPEECH
 #DEFINES += INCLUDE_MODEL_MAGIC_WAND
 #DEFINES += INCLUDE_MODEL_MNV2
 #DEFINES += INCLUDE_MODEL_HPS
 #DEFINES += INLCUDE_MODEL_MLCOMMONS_TINY_V01_ANOMD
 #DEFINES += INLCUDE_MODEL_MLCOMMONS_TINY_V01_IMGC
-#DEFINES += INLCUDE_MODEL_MLCOMMONS_TINY_V01_KWS
+DEFINES += INLCUDE_MODEL_MLCOMMONS_TINY_V01_KWS
 #DEFINES += INLCUDE_MODEL_MLCOMMONS_TINY_V01_VWW
 
 # Uncomment to include all TFLM examples (pdti8, micro_speech, magic_wand)
