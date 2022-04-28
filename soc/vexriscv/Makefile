@@ -6,6 +6,12 @@ YAMLS    := $(VERILOGS:.v=.yaml)
 
 all: $(VERILOGS)
 
+VexRiscv_Fpu.v: $(SRC) Makefile
+	sbt compile "runMain vexriscv.GenCoreDefault --dCacheSize 4096 --iCacheSize 2048 --csrPluginConfig all --cfu false --fpu true --outputFile VexRiscv_Fpu"
+
+VexRiscv_FpuCfu.v: $(SRC) Makefile
+	sbt compile "runMain vexriscv.GenCoreDefault --dCacheSize 4096 --iCacheSize 2048 --csrPluginConfig all --cfu true --fpu true --outputFile VexRiscv_FpuCfu"
+
 VexRiscv_Custom.v: $(SRC) Makefile
 	sbt compile "runMain vexriscv.GenCoreDefault --dCacheSize 4096 --iCacheSize 2048 --csrPluginConfig all --cfu false --outputFile VexRiscv_Custom"
 

@@ -8,6 +8,8 @@ import vexriscv.ip.{DataCacheConfig, InstructionCacheConfig}
 import vexriscv.plugin.CsrAccess.WRITE_ONLY
 import vexriscv.plugin.CsrAccess.READ_ONLY
 import vexriscv.plugin._
+import vexriscv.ip.fpu._
+
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -32,6 +34,7 @@ case class ArgConfig(
   pmpGranularity : Int = 256,
   mulDiv : Boolean = true,
   cfu : Boolean = false,
+  fpu : Boolean = false,
   cfuRespReadyAlways : Boolean = false,
   perfCSRs : Int = 0,
   atomics: Boolean = false,
@@ -77,6 +80,7 @@ object GenCoreDefault{
       opt[Int]("pmpGranularity")    action { (v, c) => c.copy(pmpGranularity = v)   } text("Granularity of PMP regions (in bytes)")
       opt[Boolean]("mulDiv")    action { (v, c) => c.copy(mulDiv = v)   } text("set RV32IM")
       opt[Boolean]("cfu")       action { (v, c) => c.copy(cfu = v)   } text("If true, add SIMD ADD custom function unit")
+      opt[Boolean]("fpu")       action { (v, c) => c.copy(fpu = v)   } text("If true, add FPU")
       opt[Boolean]("safe")      action { (v, c) => c.copy(safe = v)   } text("Default true; if false, disable many checks.")
       opt[Int]("perfCSRs")       action { (v, c) => c.copy(perfCSRs = v)   } text("Number of pausable performance counter CSRs to add (default 0)")
       opt[Boolean]("atomics")    action { (v, c) => c.copy(atomics = v)   } text("set RV32I[A]")
@@ -299,6 +303,16 @@ object GenCoreDefault{
       if(argConfig.perfCSRs > 0) {
         plugins ++= List(
           new PerfCsrPlugin(argConfig.perfCSRs)
+        )
+      }
+
+     if(argConfig.fpu) {
+        plugins ++= List(
+          new FpuPlugin(
+              externalFpu = false,
+              simHalt = false,
+              p = FpuParameter(withDouble = false)
+          )
         )
       }
 
