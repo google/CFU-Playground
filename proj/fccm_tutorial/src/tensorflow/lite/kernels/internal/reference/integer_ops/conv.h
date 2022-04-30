@@ -15,6 +15,8 @@ limitations under the License.
 #ifndef TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_CONV_H_
 #define TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_CONV_H_
 
+#include <cstdio>
+
 #include "playground_util/print_params.h"
 #include "tensorflow/lite/kernels/internal/common.h"
 
@@ -132,6 +134,15 @@ inline void OriginalConvPerChannel(
   }
 }
 
+void OneByOneConvPerChannel(
+    const ConvParams& params, const int32_t* output_multiplier,
+    const int32_t* output_shift, const RuntimeShape& input_shape,
+    const int8_t* input_data, const RuntimeShape& filter_shape,
+    const int8_t* filter_data, const RuntimeShape& bias_shape,
+    const int32_t* bias_data, const RuntimeShape& output_shape,
+    int8_t* output_data);
+
+
 inline void ConvPerChannel(
     const ConvParams& params, const int32_t* output_multiplier,
     const int32_t* output_shift, const RuntimeShape& input_shape,
@@ -139,15 +150,22 @@ inline void ConvPerChannel(
     const int8_t* filter_data, const RuntimeShape& bias_shape,
     const int32_t* bias_data, const RuntimeShape& output_shape,
     int8_t* output_data) {
-
-
 #ifdef CONV_PRINT_PARAMS
   print_conv_params(params, input_shape, filter_shape, output_shape);
 #endif
 
 #ifdef CONV_ACCELERATE
-  // Check whether we can accelerate
-#endif      
+  // Accelerate 1x1 Conv2Ds
+  if (filter_shape.Dims(1) == 1 &&     // width is 1
+      filter_shape.Dims(2) == 1 &&     // height 1x1
+      (filter_shape.Dims(3) % 4 == 0)  // check input depth is a multiple of 4
+  ) {
+    OneByOneConvPerChannel(params, output_multiplier, output_shift, input_shape,
+                           input_data, filter_shape, filter_data, bias_shape,
+                           bias_data, output_shape, output_data);
+    return;
+  }
+#endif
   // Call original
   OriginalConvPerChannel(params, output_multiplier, output_shift, input_shape,
                          input_data, filter_shape, filter_data, bias_shape,

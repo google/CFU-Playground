@@ -20,8 +20,8 @@ export DEFINES :=
 #DEFINES += CFU_SOFTWARE_DEFINED
 
 # Uncomment these line to print parameters of the conv2d operation
-DEFINES += CONV_PRINT_PARAMS
-DEFINES += DEPTHWISE_PRINT_PARAMS
+#DEFINES += CONV_PRINT_PARAMS
+#DEFINES += DEPTHWISE_PRINT_PARAMS
 
 # Uncomment this line to allow acceleration
 DEFINES += CONV_ACCELERATE
