@@ -40,7 +40,7 @@ int32_t multiply_add4(uint32_t rs1, uint32_t rs2){
 // hardware and emulated CFU by setting the CFU_SOFTWARE_DEFINED DEFINE in
 // the Makefile.
 uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
-  switch (funct3) {
+  switch (funct7) {
     case 0:
       accumulator = 0;
       break;

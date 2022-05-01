@@ -20,7 +20,7 @@
 #define _FCCM_CFU_H
 
 #define cfu_reset() cfu_op0(0, 0, 0)
-#define cfu_accumulate(a, b) cfu_op1(0, a, b)
-#define cfu_read() cfu_op1(0, 0, 0)
+#define cfu_accumulate(a, b) cfu_op0(1, a, b)
+#define cfu_read() cfu_op0(2, 0, 0)
 
 #endif

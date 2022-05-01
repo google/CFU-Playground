@@ -15,14 +15,16 @@
 
 from amaranth import *
 from amaranth.sim import Delay, Tick
-from amaranth_cfu import TestBase, SimpleElaboratable, pack_vals, CfuBase, CfuTestBase
+from amaranth_cfu import TestBase, SimpleElaboratable, pack_vals, simple_cfu, InstructionBase, CfuTestBase
 import unittest
+
 
 class MultiplyAccumulate4(SimpleElaboratable):
     """Performs four, 8 bit wide multiply-accumulates in parallel.
 
     Uses `SimpleElaboratable` helper class as a convenience.
     """
+
     def __init__(self):
         # "a" and "b" inputs - each four, 8 bit signed numbers
         self.a_word = Signal(32)
@@ -46,7 +48,7 @@ class MultiplyAccumulate4(SimpleElaboratable):
         calculations = [(a + Const(128)) * b for a, b in zip(a_bytes, b_bytes)]
         summed = Signal(signed(32))
         m.d.comb += summed.eq(sum(calculations))
-            
+
         with m.If(self.clear):
             m.d.sync += self.accumulator.eq(0)
         with m.Elif(self.enable):
@@ -84,7 +86,14 @@ class MultiplyAccumulate4Test(TestBase):
             ((a(131, 92, 21, 83),   b(-114, -72, -31, -44), 1, 0),  -33997),
             ((a(74, 68, 170, 39),   b(102, 12, 53, -128), 1, 0),    -59858),
             ((a(16, 63, 1, 198),    b(29, 36, 106, 62), 1, 0),      -47476),
-            ((a(0, 0, 0, 0),        b(0, 0, 0, 0), 0, 1),           -32362),        
+            ((a(0, 0, 0, 0),        b(0, 0, 0, 0), 0, 1),           -32362),
+
+            # Interesting bug
+            ((a(128, 0, 0, 0), b(-104, 0, 0, 0), 1, 0), 0),
+            ((a(0, 51, 0, 0), b(0, 43, 0, 0), 1, 0), -13312),
+            ((a(0, 0, 97, 0), b(0, 0, -82, 0), 1, 0), -11119),
+            ((a(0, 0, 0, 156), b(0, 0, 0, -83), 1, 0), -19073),
+            ((a(0, 0, 0, 0), b(0, 0, 0, 0), 1, 0), -32021),
         ]
 
         dut = self.dut
@@ -95,7 +104,7 @@ class MultiplyAccumulate4Test(TestBase):
                 yield dut.b_word.eq(b_word)
                 yield dut.enable.eq(enable)
                 yield dut.clear.eq(clear)
-                yield Delay(0.1) # Wait for input values to settle
+                yield Delay(0.1)  # Wait for input values to settle
 
                 # Check on accumulator, as calcuated last cycle
                 self.assertEqual(expected, (yield dut.accumulator))
@@ -104,42 +113,41 @@ class MultiplyAccumulate4Test(TestBase):
         self.run_sim(process, write_trace=False)
 
 
-class Cfu(CfuBase):
-    """Simple CFU that provides access to a MultiplyAccumulate4.
+class Macc4Instruction(InstructionBase):
+    """Simple instruction that provides access to a Macc4
 
-    The supported operations are:
-        * Operation 0: Reset accumulator
-        * Operation 1: 4-way multiply accumulate.
-        * Operation 2: Read accumulator
-
-    The implementation here assumes the CPU is always ready to read a response.
+    The supported functions are:
+        * 0: Reset accumulator
+        * 1: 4-way multiply accumulate.
+        * 2: Read accumulator
     """
 
     def elab(self, m):
         # Build the submodule
         m.submodules.macc4 = macc4 = MultiplyAccumulate4()
 
-        # Check operation number
-        funct3 = Signal(3)
-        m.d.comb += funct3.eq(self.cmd_function_id[:3])
+        # Inputs to the macc4
+        m.d.comb += macc4.a_word.eq(self.in0)
+        m.d.comb += macc4.b_word.eq(self.in1)
 
-        # All commands take 1 cycle. CFU is always read to receive a command
-        m.d.comb += self.cmd_ready.eq(1)
+        # Only function 2 has a defined response, so we can
+        # unconditionally set it.
+        m.d.comb += self.output.eq(macc4.accumulator)
 
-        # There is only one response, and it is always valid
-        m.d.comb += self.rsp_out.eq(macc4.accumulator)
-        m.d.comb += self.rsp_valid.eq(1)
+        with m.If(self.start):
+            m.d.comb += [
+                # We can always return control to the CPU on next cycle
+                self.done.eq(1),
 
-        # Inputs to Macc4 always set to CFU inputs
-        m.d.comb += macc4.a_word.eq(self.cmd_in0)
-        m.d.comb += macc4.b_word.eq(self.cmd_in1)
+                # clear on function 0, enable on function 1
+                macc4.clear.eq(self.funct7 == 0),
+                macc4.enable.eq(self.funct7 == 1),
+            ]
 
-        # clear on zero, enable on 1
-        m.d.comb += macc4.clear.eq(self.cmd_valid & (funct3 == 0))
-        m.d.comb += macc4.enable.eq(self.cmd_valid & (funct3 == 1))
 
 def make_cfu():
-    return Cfu()
+    return simple_cfu({0: Macc4Instruction()})
+
 
 class CfuTest(CfuTestBase):
     def create_dut(self):
@@ -151,20 +159,27 @@ class CfuTest(CfuTestBase):
         def b(a, b, c, d): return pack_vals(a, b, c, d, offset=0)
         # These values were calculated with a spreadsheet
         DATA = [
-            # ((fn3, op1, op2), result)
-            ((0, 0, 0), None),  #reset
-            ((1, a(130, 7, 76, 47), b(104, -14, -24, 71)), None), # calculate
-            ((1, a(84, 90, 36, 191), b(109, 57, -50, -1)), None),
-            ((1, a(203, 246, 89, 178), b(-87, 26, 77, 71)), None),
-            ((1, a(43, 27, 78, 167), b(-24, -8, 65, 124)), None),
-            ((2, 0, 0), 59986), # read result
+            # ((fn3, fn7, op1, op2), result)
+            ((0, 0, 0, 0), None),  # reset
+            ((0, 1, a(130, 7, 76, 47), b(104, -14, -24, 71)), None),  # calculate
+            ((0, 1, a(84, 90, 36, 191), b(109, 57, -50, -1)), None),
+            ((0, 1, a(203, 246, 89, 178), b(-87, 26, 77, 71)), None),
+            ((0, 1, a(43, 27, 78, 167), b(-24, -8, 65, 124)), None),
+            ((0, 2, 0, 0), 59986),  # read result
 
-            ((0, 0, 0), None),  #reset
-            ((1, a(67, 81, 184, 130), b(81, 38, -116, 65)), None),
-            ((1, a(208, 175, 180, 198), b(-120, -70, 8, 11)), None),
-            ((1, a(185, 81, 101, 108), b(90, 6, -92, 83)), None),
-            ((1, a(219, 216, 114, 236), b(-116, -9, -109, -16)), None),
-            ((2, 0, 0), -64723), # read result
+            ((0, 0, 0, 0), None),  # reset
+            ((0, 1, a(67, 81, 184, 130), b(81, 38, -116, 65)), None),
+            ((0, 1, a(208, 175, 180, 198), b(-120, -70, 8, 11)), None),
+            ((0, 1, a(185, 81, 101, 108), b(90, 6, -92, 83)), None),
+            ((0, 1, a(219, 216, 114, 236), b(-116, -9, -109, -16)), None),
+            ((0, 2, 0, 0), -64723),  # read result
+
+            ((0, 0, 0, 0), None),  # reset
+            ((0, 1, a(128, 0, 0, 0), b(-104, 0, 0, 0)), None),
+            ((0, 1, a(0, 51, 0, 0),  b(0, 43, 0, 0)), None),
+            ((0, 1, a(0, 0, 97, 0),  b(0, 0, -82, 0)), None),
+            ((0, 1, a(0, 0, 0, 156), b(0, 0, 0, -83)), None),
+            ((0, 2, a(0, 0, 0, 0),   b(0, 0, 0, 0)), -32021),
         ]
         self.run_ops(DATA)
 
