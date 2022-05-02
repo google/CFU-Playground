@@ -17,6 +17,7 @@ limitations under the License.
 
 #include <cstdio>
 
+#include "playground_util/murmurhash.h"
 #include "playground_util/print_params.h"
 #include "tensorflow/lite/kernels/internal/common.h"
 
@@ -150,26 +151,45 @@ inline void ConvPerChannel(
     const int8_t* filter_data, const RuntimeShape& bias_shape,
     const int32_t* bias_data, const RuntimeShape& output_shape,
     int8_t* output_data) {
+#ifdef CONV_PRINT_HASH
+  static int layer = 0;
+  auto hash = murmurhash3_32(reinterpret_cast<const uint8_t*>(input_data),
+                             input_shape.FlatSize());
+  printf("\n%d, 0x%08lx,", layer, hash);
+#endif
 #ifdef CONV_PRINT_PARAMS
   print_conv_params(params, input_shape, filter_shape, output_shape);
 #endif
 
 #ifdef CONV_ACCELERATE
   // Accelerate 1x1 Conv2Ds
-  if (filter_shape.Dims(1) == 1 &&     // width is 1
-      filter_shape.Dims(2) == 1 &&     // height 1x1
-      (filter_shape.Dims(3) % 4 == 0)  // check input depth is a multiple of 4
-  ) {
+  if (
+      // Look for 1x1 convs where depth is divisible by 4
+      filter_shape.Dims(1) == 1 && filter_shape.Dims(2) == 1 &&
+      (filter_shape.Dims(3) % 4 == 0) &&
+      // Input offset is 128
+      params.input_offset == 128 &&
+      // Input depth and Filter input depth are the same
+      input_shape.Dims(3) == filter_shape.Dims(3)) {
     OneByOneConvPerChannel(params, output_multiplier, output_shift, input_shape,
                            input_data, filter_shape, filter_data, bias_shape,
                            bias_data, output_shape, output_data);
-    return;
+  } else {
+#endif
+    // Call original
+    OriginalConvPerChannel(params, output_multiplier, output_shift, input_shape,
+                           input_data, filter_shape, filter_data, bias_shape,
+                           bias_data, output_shape, output_data);
+#ifdef CONV_ACCELERATE
   }
 #endif
-  // Call original
-  OriginalConvPerChannel(params, output_multiplier, output_shift, input_shape,
-                         input_data, filter_shape, filter_data, bias_shape,
-                         bias_data, output_shape, output_data);
+
+#ifdef CONV_PRINT_HASH
+  hash = murmurhash3_32(reinterpret_cast<const uint8_t*>(output_data),
+                        input_shape.FlatSize());
+  printf(" 0x%08lx\n", hash);
+  layer++;
+#endif
 }
 
 // Fixed-point per-channel-quantization convolution reference kernel.
