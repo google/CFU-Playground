@@ -13,11 +13,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+#include <cstdio>
+
+#include "fccm_cfu.h"
 #include "tensorflow/lite/kernels/internal/common.h"
 #include "tensorflow/lite/kernels/internal/reference/integer_ops/conv.h"
 
 namespace tflite {
 namespace reference_integer_ops {
+
+inline const uint32_t* as_word_ptr(const int8_t* byte_ptr) {
+  return reinterpret_cast<const uint32_t*>(byte_ptr);
+}
 
 // Fixed-point per-channel-quantization convolution reference kernel.
 void OneByOneConvPerChannel(
@@ -28,7 +35,6 @@ void OneByOneConvPerChannel(
     const int32_t* bias_data, const RuntimeShape& output_shape,
     int8_t* output_data) {
   // Get parameters.
-  const int32_t input_offset = params.input_offset;  // r = s(q - Z)
   const int stride_width = params.stride_width;
   const int stride_height = params.stride_height;
   const int dilation_width_factor = params.dilation_width_factor;
@@ -71,7 +77,7 @@ void OneByOneConvPerChannel(
         const int in_x_origin = (out_x * stride_width) - pad_width;
         for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
           auto group = out_channel / filters_per_group;
-          int32_t acc = 0;
+          cfu_reset();
           for (int filter_y = 0; filter_y < filter_height; ++filter_y) {
             const int in_y = in_y_origin + dilation_height_factor * filter_y;
             for (int filter_x = 0; filter_x < filter_width; ++filter_x) {
@@ -86,34 +92,20 @@ void OneByOneConvPerChannel(
                 continue;
               }
 
+              // filter_input_depth is divisible by 4
               for (int in_channel = 0; in_channel < filter_input_depth;
-                   ++in_channel) {
-                int32_t input_val =
-                    input_data[Offset(input_shape, batch, in_y, in_x,
-                                      in_channel + group * filter_input_depth)];
-                int32_t filter_val = filter_data[Offset(
-                    filter_shape, out_channel, filter_y, filter_x, in_channel)];
-                // Accumulate with 32 bits accumulator.
-                // In the nudging process during model quantization, we force
-                // real value of 0.0 be represented by a quantized value. This
-                // guarantees that the input_offset is a int8_t, even though
-                // it is represented using int32_t. int32_t += int8_t *
-                // (int8_t - int8_t) so the highest value we can get from each
-                // accumulation is [-127, 127] * ([-128, 127] -
-                // [-128, 127]), which is [-32512, 32512]. log2(32512)
-                // = 14.98, which means we can accumulate at least 2^16
-                // multiplications without overflow. The accumulator is
-                // applied to a filter so the accumulation logic will hold as
-                // long as the filter size (filter_y * filter_x * in_channel)
-                // does not exceed 2^16, which is the case in all the models
-                // we have seen so far.
-                // TODO(b/174275578): Add a check to make sure the
-                // accumulator depth is smaller than 2^16.
-                acc += filter_val * (input_val + input_offset);
+                   in_channel += 4) {
+
+                const uint32_t * input_ptr = as_word_ptr(input_data+Offset(input_shape, batch, in_y, in_x,
+                                      in_channel + group * filter_input_depth));
+                const uint32_t * filter_ptr = as_word_ptr(filter_data + Offset(
+                    filter_shape, out_channel, filter_y, filter_x, in_channel));
+                cfu_accumulate(*input_ptr, *filter_ptr);
               }
             }
           }
 
+          int32_t acc = cfu_read();
           if (bias_data) {
             acc += bias_data[out_channel];
           }
