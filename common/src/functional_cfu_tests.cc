@@ -22,6 +22,7 @@
 #include "cfu.h"
 #include "menu.h"
 #include "riscv.h"
+#include "perf.h"
 
 namespace {
 
@@ -86,6 +87,20 @@ void do_interactive_tests(void) {
   print_result(7, v0, v1, cfu_op7(0, v0, v1));
 }
 
+void do_timed_interactive_tests(void) {
+  puts("CFU Timed Interactive Test:");
+
+  uint32_t v0 = read_val("  First operand value  ");
+  uint32_t v1 = read_val("  Second operand value ");
+
+  uint32_t start = perf_get_mcycle();
+  uint32_t r = cfu_op0(0, v0, v1);
+  uint32_t end = perf_get_mcycle();
+
+  print_result(0, v0, v1, r);
+  printf("Elapsed cycles: %lu\n", end-start);
+}
+
 struct Menu MENU = {
     "Tests for Functional CFUs",
     "functional",
@@ -93,6 +108,7 @@ struct Menu MENU = {
         MENU_ITEM('f', "Run fixed CFU tests", do_fixed_tests),
         MENU_ITEM('c', "Run hw/sw compare tests", do_compare_tests),
         MENU_ITEM('i', "Run interactive tests", do_interactive_tests),
+        MENU_ITEM('t', "Run timed interactive tests", do_timed_interactive_tests),
         MENU_END,
     },
 };
