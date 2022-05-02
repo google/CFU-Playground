@@ -143,7 +143,6 @@ void OneByOneConvPerChannel(
     const int32_t* bias_data, const RuntimeShape& output_shape,
     int8_t* output_data);
 
-
 inline void ConvPerChannel(
     const ConvParams& params, const int32_t* output_multiplier,
     const int32_t* output_shift, const RuntimeShape& input_shape,
@@ -170,7 +169,15 @@ inline void ConvPerChannel(
       // Input offset is 128
       params.input_offset == 128 &&
       // Input depth and Filter input depth are the same
-      input_shape.Dims(3) == filter_shape.Dims(3)) {
+      input_shape.Dims(3) == filter_shape.Dims(3) &&
+      // No dialation
+      params.dilation_height_factor == 1 && params.dilation_width_factor == 1 &&
+      // No padding
+      params.padding_values.height == 0 && params.padding_values.width == 0 &&
+      // Stride is 1
+      params.stride_height == 1 && params.stride_width == 1 &&
+      // Depth is 64
+      input_shape.Dims(3) == 64) {
     OneByOneConvPerChannel(params, output_multiplier, output_shift, input_shape,
                            input_data, filter_shape, filter_data, bias_shape,
                            bias_data, output_shape, output_data);

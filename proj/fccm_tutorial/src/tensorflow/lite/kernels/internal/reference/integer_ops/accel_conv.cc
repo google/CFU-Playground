@@ -35,12 +35,6 @@ void OneByOneConvPerChannel(
     const int32_t* bias_data, const RuntimeShape& output_shape,
     int8_t* output_data) {
   // Get parameters.
-  const int stride_width = params.stride_width;
-  const int stride_height = params.stride_height;
-  const int dilation_width_factor = params.dilation_width_factor;
-  const int dilation_height_factor = params.dilation_height_factor;
-  const int pad_width = params.padding_values.width;
-  const int pad_height = params.padding_values.height;
   const int32_t output_offset = params.output_offset;
 
   // Set min and max value of the output.
@@ -53,57 +47,46 @@ void OneByOneConvPerChannel(
   TFLITE_DCHECK_EQ(filter_shape.DimensionsCount(), 4);
   TFLITE_DCHECK_EQ(output_shape.DimensionsCount(), 4);
   const int batches = MatchingDim(input_shape, 0, output_shape, 0);
-  const int input_depth = input_shape.Dims(3);
   const int output_depth = MatchingDim(filter_shape, 0, output_shape, 3);
   if (bias_data) {
     TFLITE_DCHECK_EQ(bias_shape.FlatSize(), output_depth);
   }
 
   // Check dimensions of the tensors.
-  const int input_height = input_shape.Dims(1);
-  const int input_width = input_shape.Dims(2);
-  const int filter_height = filter_shape.Dims(1);
-  const int filter_width = filter_shape.Dims(2);
-  const int filter_input_depth = filter_shape.Dims(3);
-  const int groups = input_depth / filter_input_depth;
-  TFLITE_DCHECK_EQ(input_depth % filter_input_depth, 0);
-  const int filters_per_group = output_depth / groups;
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
-      const int in_y_origin = (out_y * stride_height) - pad_height;
       for (int out_x = 0; out_x < output_width; ++out_x) {
-        const int in_x_origin = (out_x * stride_width) - pad_width;
         for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
-          auto group = out_channel / filters_per_group;
+          const int in_y = out_y;
+          const int in_x = out_x;
+          const uint32_t* input_ptr = as_word_ptr(
+              input_data + Offset(input_shape, batch, in_y, in_x, 0));
+          const uint32_t* filter_ptr = as_word_ptr(
+              filter_data + Offset(filter_shape, out_channel, 0, 0, 0));
+
+          // We do 16 of these to Multiply-Accumulate 64 values
           cfu_reset();
-          for (int filter_y = 0; filter_y < filter_height; ++filter_y) {
-            const int in_y = in_y_origin + dilation_height_factor * filter_y;
-            for (int filter_x = 0; filter_x < filter_width; ++filter_x) {
-              const int in_x = in_x_origin + dilation_width_factor * filter_x;
+          cfu_accumulate(*input_ptr++, *filter_ptr++);
+          cfu_accumulate(*input_ptr++, *filter_ptr++);
+          cfu_accumulate(*input_ptr++, *filter_ptr++);
+          cfu_accumulate(*input_ptr++, *filter_ptr++);
 
-              // Zero padding by omitting the areas outside the image.
-              const bool is_point_inside_image =
-                  (in_x >= 0) && (in_x < input_width) && (in_y >= 0) &&
-                  (in_y < input_height);
+          cfu_accumulate(*input_ptr++, *filter_ptr++);
+          cfu_accumulate(*input_ptr++, *filter_ptr++);
+          cfu_accumulate(*input_ptr++, *filter_ptr++);
+          cfu_accumulate(*input_ptr++, *filter_ptr++);
 
-              if (!is_point_inside_image) {
-                continue;
-              }
+          cfu_accumulate(*input_ptr++, *filter_ptr++);
+          cfu_accumulate(*input_ptr++, *filter_ptr++);
+          cfu_accumulate(*input_ptr++, *filter_ptr++);
+          cfu_accumulate(*input_ptr++, *filter_ptr++);
 
-              // filter_input_depth is divisible by 4
-              for (int in_channel = 0; in_channel < filter_input_depth;
-                   in_channel += 4) {
-
-                const uint32_t * input_ptr = as_word_ptr(input_data+Offset(input_shape, batch, in_y, in_x,
-                                      in_channel + group * filter_input_depth));
-                const uint32_t * filter_ptr = as_word_ptr(filter_data + Offset(
-                    filter_shape, out_channel, filter_y, filter_x, in_channel));
-                cfu_accumulate(*input_ptr, *filter_ptr);
-              }
-            }
-          }
+          cfu_accumulate(*input_ptr++, *filter_ptr++);
+          cfu_accumulate(*input_ptr++, *filter_ptr++);
+          cfu_accumulate(*input_ptr++, *filter_ptr++);
+          cfu_accumulate(*input_ptr++, *filter_ptr++);
 
           int32_t acc = cfu_read();
           if (bias_data) {
