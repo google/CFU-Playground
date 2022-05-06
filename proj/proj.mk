@@ -76,6 +76,11 @@ SOC_GATEWARE_DIR := $(SOC_BUILD_DIR)/gateware
 export DEFINES    += PLATFORM_$(PLATFORM)
 export DEFINES    += PLATFORM=$(PLATFORM)
 
+# We can specify NOT compiling the TFLite-micro library
+ifdef SKIP_TFLM
+export DEFINES    += SKIP_TFLM
+endif
+
 SHELL           := /bin/bash
 CRC             := 
 #CRC             := --no-crc
@@ -248,6 +253,7 @@ $(BUILD_DIR)/src:
 
 .PHONY: tflite-micro-src
 tflite-micro-src: $(BUILD_DIR)/src
+ifndef SKIP_TFLM
 	@echo "Copying tflite-micro files"
 	for d in $(TFLM_COPY_SRC_DIRS); do \
 		mkdir -p $(BUILD_DIR)/src/$$d; \
@@ -270,6 +276,8 @@ tflite-micro-src: $(BUILD_DIR)/src
 	$(COPY) $(TFLM_TP_DIR)/flatbuffers/include/* $(BUILD_DIR)/src/third_party/flatbuffers/include
 	mkdir -p $(BUILD_DIR)/src/third_party/ruy/ruy/profiler
 	$(COPY) $(TFLM_TP_DIR)/ruy/ruy/profiler/instrumentation.h $(BUILD_DIR)/src/third_party/ruy/ruy/profiler
+endif
+
 
 .PHONY: build-dir
 build-dir: $(BUILD_DIR)/src tflite-micro-src $(BUILD_DIR_EXTRA_DEP) 
@@ -279,6 +287,11 @@ build-dir: $(BUILD_DIR)/src tflite-micro-src $(BUILD_DIR_EXTRA_DEP)
 	$(COPY) $(SAXON_SRC_DIR)/riscv.h     $(BUILD_DIR)/src
 	$(COPY) $(SRC_DIR)/*                 $(BUILD_DIR)/src
 	$(RM)			             $(BUILD_DIR)/_*
+ifdef SKIP_TFLM
+	$(RM)                                $(BUILD_DIR)/src/tensorflow
+	$(RM)                                $(BUILD_DIR)/src/tiny
+	$(RM)                                $(BUILD_DIR)/src/models
+endif
 # Overlay platform / target specific changes.
 ifneq ($(wildcard $(COMMON_DIR)/_$(PLATFORM)/$(TARGET)/*),)
 	$(COPY) $(COMMON_DIR)/_$(PLATFORM)/$(TARGET)/* $(BUILD_DIR)

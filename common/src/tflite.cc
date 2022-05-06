@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef  SKIP_TFLM
+
 #include "tflite.h"
 
 #include <cstdint>
@@ -264,3 +266,5 @@ void tflite_classify() {
 }
 
 int8_t* get_input() { return interpreter->input(0)->data.int8; }
+
+#endif // SKIP_TFLM
