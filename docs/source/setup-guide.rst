@@ -45,6 +45,12 @@ This updates submodules, builds some local executables, and installs missing Lin
    cd CFU-Playground
    ./scripts/setup
 
+If you intend to use Amaranth to build CFUs, you may need a compatible version of Yosys,
+which can be installed with:
+
+.. code-block:: bash
+
+ pip3 install amaranth-yosys
 
 Step 4: Install Toolchain
 --------------------------------------------
