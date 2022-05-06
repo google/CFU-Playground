@@ -23,7 +23,7 @@ export DEFINES :=
 DEFINES += NDEBUG
 
 # This says to NOT compile the TFLM library or any models
-SKIP_TFLM=1
+export SKIP_TFLM=1
 
 # Uncomment this line to skip individual profiling output (has minor effect on performance).
 #DEFINES += NPROFILE
