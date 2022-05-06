@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef SKIP_TFLM
+
 #include "tflite_unit_tests.h"
 
 #include <cstdio>
@@ -32,3 +34,5 @@ void tflite_do_tests() {
   puts("DEPTHWISE_CONV TEST:");
   depthwise_conv_test(0, NULL);
 }
+
+#endif // SKIP_TFLM

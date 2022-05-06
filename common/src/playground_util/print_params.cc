@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#ifndef SKIP_TFLM
+
 #include "print_params.h"
 
 #include <cstdio>
@@ -185,3 +187,5 @@ void print_int32_array(const int32_t* data, size_t count) {
     printf("\n");
   }
 }
+
+#endif
