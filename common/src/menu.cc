@@ -40,7 +40,10 @@ void menu_print(struct Menu* menu) {
 
 // Get the menu selection
 struct MenuItem* menu_get_selection(struct Menu* menu) {
-  char c = readchar();
+  char c = '\0';
+  do {
+    c = readchar();
+  } while (c == '\n' || c == '\r');
   putchar(c);
   for (struct MenuItem* p = menu->items; p->selection; p++) {
     if (c == p->selection) {
