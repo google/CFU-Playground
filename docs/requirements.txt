@@ -1,5 +1,0 @@
-Sphinx==4.3.0
-sphinx-material==0.0.32
-sphinx-tabs==3.2.0
-sphinx-jinja==1.1.1
-recommonmark==0.7.1

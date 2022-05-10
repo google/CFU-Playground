@@ -1,9 +1,0 @@
-simplejson
-termcolor
-tqdm
-yapf
-requests
-meson
-Pillow
-six
-Wave

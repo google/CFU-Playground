@@ -1,3 +1,0 @@
-proj_template
-mnv2_first
-example_cfu
