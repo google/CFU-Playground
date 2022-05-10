@@ -18,15 +18,15 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: CFU-Playground-Workshop
+title: "CFU-Playground Workshop"
 email: your-email@example.com
 description: >- # this means to ignore newlines until "baseurl:"
-  A full stack workshop for designing TinyML accelerators
-baseurl: "/CFU-Playground/workshop" # the subpath of your site, e.g. /blog
+  A full stack workshop for accelerating TinyML 
+baseurl: "/CFU-Playground/workshops/fccm2022" # the subpath of your site, e.g. /blog
 url: "google.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 #twitter_username: jekyllrb
 #github_username:  jekyll
-version: 0.1
+version: "FCCM 2022"
 
 # Build settings
 theme: jekyll-theme-dinky

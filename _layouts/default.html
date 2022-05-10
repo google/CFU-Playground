@@ -1,0 +1,116 @@
+
+<!DOCTYPE html>
+<html lang="en-us">
+
+  <style>
+    .parallax > .parallax-img {
+      background-image: url("assets/bgimg3.jpg");
+      background-size: cover;
+      /* Set a specific height */
+      height: 100vh;
+
+      /* Create the parallax scrolling effect */
+      background-attachment: fixed;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+      opacity:0.95;
+    }
+
+    /*.parallax-content {
+      background: inherit;
+      position: relative;
+      display: block;
+      overflow: auto;
+      width: 100%;
+      height: 60%;
+      margin-left: -125px;
+      margin-top: -250px;
+      margin-right: -125px;
+      margin-bottom: -175px;
+      border-radius: 8px;
+    }
+
+    .parallax-content::before {
+      content: " ";
+      background: inherit;
+      position: absolute;
+      left: -25px;
+      right: 0;
+      top: -25px;
+      bottom: 0;
+      box-shadow: inset 0 0 0 200px rgba(255,255,255,0.2);
+      filter: blur(10px);
+    }
+
+    .parallax-content-top {
+      position: absolute;
+    }*/
+    #toc_container {
+        background: #f9f9f9 none repeat scroll 0 0;
+        /*border: 1px solid #aaa;*/
+        display: table;
+        font-size: 75%;
+        padding: 1rem;
+        width: 20%;
+        position: absolute;
+        right: 2rem;
+        top: 5rem;
+    }
+    {% if page.title == "Home" %}
+    #toc_container {
+        position: absolute;
+        top: 40rem;
+    }
+    {% endif %}
+
+    .toc_title {
+        font-weight: 700;
+        text-align: center;
+    }
+
+    #toc_container li, #toc_container ul, #toc_container ul li {
+        list-style: outside !important;
+    }
+  </style>
+
+  {% include head.html %}
+
+  <body class="theme-base-08">
+
+    {% include sidebar.html %}
+
+    <!-- Wrap is the content to shift when toggling the sidebar. We wrap the
+         content to avoid any CSS collisions with our real content. -->
+    <div class="wrap">
+      <div class="masthead">
+        <div class="container">
+          <h3 class="masthead-title">
+            <a href="{{ site.baseurl }}/" title="Home">{{ site.title }}</a>
+            <small>{{ site.tagline }}</small>
+          </h3>
+        </div>
+      </div>
+      {% if page.title == "Home" %}
+        <div class="parallax">
+          <div class="parallax-img" style="display: flex; align-items: center">
+          <div class="container content parallax-content">
+            <div class="parallax-content-top">
+              {% include header.md %}
+            </div>
+          </div>
+        </div>
+        </div>
+      {% endif %}
+
+      <div class="container content">
+        <div style="margin-bottom: 3rem"></div>
+        {{ content }}
+      </div>
+    </div>
+
+    <label for="sidebar-checkbox" class="sidebar-toggle"></label>
+
+    <script src='{{ site.baseurl }}/public/js/script.js'></script>
+  </body>
+</html>

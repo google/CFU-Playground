@@ -1,0 +1,40 @@
+---
+layout: default
+---
+
+<style>
+	.circle {
+		border-radius: 50%;
+		height: 10rem;
+		width: 10rem;
+		object-fit: cover;
+		object-position: center;
+		overflow: hidden;
+	}
+
+	.person {
+		margin-top: 3rem;
+		padding-bottom: 3rem;
+	}
+
+	.person table {
+		width: 100%
+	}
+
+	.person table, tr, td {
+		border: none;
+		border-collapse: collapse;
+		padding: 1rem;
+		background: white !important;
+	}
+
+	.person-img {
+		width: flex;
+	}
+
+</style>
+
+<div class="page">
+  <h1 class="page-title">{{ page.title }}</h1>
+  {{ content }}
+</div>

@@ -1,0 +1,52 @@
+<!-- Target for toggling the sidebar `.sidebar-checkbox` is for regular
+     styles, `#sidebar-checkbox` for behavior. -->
+<input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox">
+<!-- <input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox" {% if page.title =="Home" %}checked{% endif %}> -->
+
+
+<!-- Toggleable sidebar -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-item">
+    <p>{{ site.description }}</p>
+    <div style="display:inline-block;">
+      <a style="text-decoration:none" href="https://cfu-playground.readthedocs.io/en/latest/">
+        <img src="{{ '/assets/logos/google.svg' | relative_url }}" alt="Google" style="height: 2.5rem">
+      </a>
+    </div>
+    <div style="display:inline-block;">
+      <a style="text-decoration:none" href="https://www.seas.harvard.edu/">
+        <img src="{{ '/assets/logos/seas.svg' | relative_url }}" alt="Harvard SEAS" style="height: 2.5rem">
+      </a>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="sidebar-nav-item{% if page.title == 'Home' %} active{% endif %}" href="{{ '/' | prepend: site.baseurl }}">Home</a>
+
+    {% assign pages_list = site.pages | sort:"url" %}
+    {% for node in pages_list %}
+      {% if node.title != "Staff"%}
+        {% if node.innav != "exclude" %}
+          {% if node.layout == "page" %}
+            <a class="sidebar-nav-item{% if page.url == node.url %} active{% endif %}" href="{{ node.url | prepend: site.baseurl }}">{{ node.title }}</a>
+          {% endif %}
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+    {% assign events_list = site.event_pages | sort:"url" %}
+    {% for event in events_list %}
+      <a class="sidebar-nav-item{% if page.url == event.url %} active{% endif %}" href="{{ event.url | prepend: site.baseurl }}">{{ event.title }}</a>
+    {% endfor %}
+    <a class="sidebar-nav-item{% if page.url == '/staff.html' %} active{% endif %}" href="{{ site.baseurl }}/staff.html">Staff</a>
+
+    <!-- <a class="sidebar-nav-item" href="{{ site.github.repo }}/archive/v{{ site.version }}.zip">Download</a>
+    <a class="sidebar-nav-item" href="{{ site.github.repo }}">GitHub project</a> -->
+    <span class="sidebar-nav-item">{{ site.version }}</span>
+  </nav>
+
+  <!-- <div class="sidebar-item">
+    <p>
+      &copy; {{ site.time | date: '%Y' }}. All rights reserved.
+    </p>
+  </div> -->
+</div>
