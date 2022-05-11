@@ -42,8 +42,8 @@ Running machine learning (ML) on embedded edge devices, as opposed to in the clo
 To this end, we present CFU Playground, a full-stack open-source framework that enables rapid and iterative design of tightly-coupled accelerators for tinyML systems. Our toolchain integrates open-source software, RTL generators, and FPGA tools for synthesis, place, and route. This full-stack development framework gives engineers access to explore bespoke architectures that are customized and co-optimized for tinyML. The rapid deploy-profile-optimization feedback loop lets ML hardware and software developers achieve significant returns out of a relatively small investment in customization for repetitive ML computations. CFU Playground is available as an open-source project here: https://github.com/google/CFU-Playground.
 
 #### What is the goal of the workshop?
-- What are some of the challenges and opportunities for designing tinyML hardware?
-- How can we design and develop model-specific accelerators quickly on FPGAs?
+- Learn what are the challenges and opportunities for designing TinyML hardware.
+- Design and develop model-specific accelerators quickly on FPGAs.
 - Get hands-on knowledge on how to build an ML accelerator using CFU playground!
 
 #### Who is the audience for this workshop?
