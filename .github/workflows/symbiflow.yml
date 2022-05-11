@@ -1,5 +1,13 @@
 name: symbiflow
-on: [push, pull_request]
+on: 
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+      - 'LICENSE'
+      - 'CONTRIBUTING.md'
+      - 'CODE_OF_CONDUCT.md'
+      - 'AUTHORS'
 jobs:
   install-use-symbiflow:
     runs-on: ubuntu-latest

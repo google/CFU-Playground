@@ -47,7 +47,8 @@ at which point the CFU asserts the `rsp_ready` signal.
           These values can be held in registers enabled by the `cmd_valid` signal.
 
 The latency from start to finish can be fixed or variable.   The CPU will stall as needed until
-the result is produced.  Of course, this means that a bug in your CFU may hang the CPU and entire system.
+the result is produced and `rsp_valid` is asserted by the CFU.  
+Of course, this means that a bug in your CFU may hang the CPU and entire system.
 
 .. wavedrom::
 
