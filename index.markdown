@@ -56,17 +56,17 @@ New ML accelerators are being announced and released each month for a variety of
 
 ### Requirements
 #### Pre-requisites
-- Familiarity with ML “cycle” (inputs, preprocessing, training, inference, etc.)
-- Knowledge of computer organization (datapath, registers, opcodes, etc.)
-- Basic experience with HDL & synthesis concepts for FPGAs
-  - Having used Vivado before & Linux OS is a big plus
-  - Must come to the workshop with Vivado already installed
-- Need to know C and Python
+- Knowledge of computer organization (RISC pipeline, registers, opcodes, etc.)
+- Basic experience with HDL (being able to read Verilog) & synthesis concepts for FPGAs
+- Familiarity with C and Python
+- Familiarity with ML “cycle” (inputs, preprocessing, training, inference, etc.) is helpful but not required
 
 #### Hardware
-- Renode will be used to emulate Arty A7-35T
+- For the *workshop*, or to experiment with CFU-Playground using simulators, none is required.
+- To develop on an FPGA, one of the supported FPGA boards is required (or you might be able to add support!)
 
 #### Software
+- For the workshop, we expect most people will use the colabs, in which case only a Google account is needed.
 - All software (RISCV toolchain, Symbiflow, etc.) installed in via environment pre-packaged with CFU Playground. 
 
 ### Schedule
@@ -95,8 +95,8 @@ New ML accelerators are being announced and released each month for a variety of
     <td>TensorFlow Lite Microcontrollers (TFLM)
     	<ul>
     		<li>Challenges for running tinyML models</li>
-			<li>TF vs. TFLite vs TFLite Micro - deep dive</li>
-			<li>Profiling and benchmarking tinyML systems</li>
+                <li>TF vs. TFLite vs TFLite Micro - deep dive</li>
+                <li>Profiling and benchmarking (??) tinyML systems</li>
     	</ul>
 	</td>
   </tr>
@@ -104,10 +104,10 @@ New ML accelerators are being announced and released each month for a variety of
     <td>2:00 PM</td>
     <td>Benchmarking of TinyML Systems
     	<ul>
-    		<li>General overview of CFU</li>
-			<li>Make sure Vivado hardware manager can find board</li>
-			<li>Install RISC-V toolchain</li>
-			<li>Pass golden tests</li>
+    		<li>...</li>
+                <li>...</li>
+                <li>...</li>
+                <li>...</li>
     	</ul>
 	</td>
   </tr>
@@ -116,38 +116,37 @@ New ML accelerators are being announced and released each month for a variety of
     <td>Custom Function Units
     	<ul>
     		<li>General overview of CFU</li>
-			<li>Make sure Vivado hardware manager can find board</li>
-			<li>Install RISC-V toolchain</li>
-			<li>Pass golden tests</li>
+                <li>Tour of CFU Playground</li>
+                <li>Build your first CFU in a Colab</li>
     	</ul>
 	</td>
   </tr>
   <tr>
     <td>3:00 PM</td>
     <td>Introduction to Amaranth
-		<ul>
-			<li>What is Litex</li>
-			<li>Explain basic Litex SoC with an example</li>
-			<li>Walkthrough simple end-to-end example from README</li>
-		</ul>
+        <ul>
+                <li>Using Amaranth to design a CFU</li>
+                <li>Unit testing in Amaranth</li>
+                <li>....</li>
+        </ul>
 	</td>
   </tr>
   <tr>
     <td>3:30 PM</td>
     <td>Renode/Antmicro
     	<ul>
-			<li>TBD</li>
+                <li>TBD</li>
     	</ul>
     </td>
   </tr>
   <tr>
     <td>4:00 PM</td>
-    <td>Accelerate your own TinyML Model
+    <td>Accelerate a TinyML Model
     	<ul>
-			<li>Pick a task and train a model using TFLM</li>
-			<li>Get it running on the board</li>
-			<li>Build your own CFU</li>
-			<li>Measure performance speed up</li>
+                <li>Case study of model and profiling results provided</li>
+                <li>Implement a new instruction in the CFU</li>
+                <li>Use the new instruction in a TFLM kernel</li>
+                <li>Measure performance speed up</li>
     	</ul>
     </td>
   </tr>
