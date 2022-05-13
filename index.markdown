@@ -104,10 +104,10 @@ New ML accelerators are being announced and released each month for a variety of
     <td>2:00 PM</td>
     <td>Benchmarking of TinyML Systems
     	<ul>
-    		<li>...</li>
-                <li>...</li>
-                <li>...</li>
-                <li>...</li>
+         <li>Importance of benchmarking and challenges of benchmarking TinyML systems</li>
+         <li>MLPerf Tiny and it's workloads well suited for CFUs</li>
+         <li>FPGA submissions to MLPerf Tiny</li>
+         <li>Demo of Profiling/Microbenchmarking support in CFU-Playground</li>
     	</ul>
 	</td>
   </tr>
