@@ -65,7 +65,8 @@ static struct Menu MENU = {
         MENU_ITEM('8', "SPI Flash Debugging", spiflash_menu),
 #endif
 #ifdef CONFIG_CPU_DIV_UNIMPLEMENTED
-        MENU_ITEM('I', "Illegal Instruction Tests", do_instruction_tests),
+        MENU_ITEM('I', "Illegal Instruction Tests (these *WILL* hang on Fomu!)",
+                  do_instruction_tests),
 #endif
 #ifdef CSR_VIDEO_FRAMEBUFFER_BASE
         MENU_ITEM('9', "Framebuffer Debugging", framebuffer_menu),

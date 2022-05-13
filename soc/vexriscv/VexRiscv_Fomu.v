@@ -1,6 +1,6 @@
 // Generator : SpinalHDL v1.6.0    git head : 73c8d8e2b86b45646e9d0b2e729291f2b65e6be3
 // Component : VexRiscv
-// Git hash  : 22555b464a02d8b7f8ed23cbb87c57aa9acddc90
+// Git hash  : ddacb0edf866dadfc6743ecb3c298a6fc237815f
 
 
 `define EnvCtrlEnum_binary_sequential_type [1:0]
@@ -108,24 +108,6 @@ module VexRiscv (
   wire       [31:0]   _zz_execute_SHIFT_RIGHT;
   wire       [32:0]   _zz_execute_SHIFT_RIGHT_1;
   wire       [32:0]   _zz_execute_SHIFT_RIGHT_2;
-  wire       [31:0]   _zz_decode_LEGAL_INSTRUCTION;
-  wire       [31:0]   _zz_decode_LEGAL_INSTRUCTION_1;
-  wire       [31:0]   _zz_decode_LEGAL_INSTRUCTION_2;
-  wire                _zz_decode_LEGAL_INSTRUCTION_3;
-  wire       [0:0]    _zz_decode_LEGAL_INSTRUCTION_4;
-  wire       [13:0]   _zz_decode_LEGAL_INSTRUCTION_5;
-  wire       [31:0]   _zz_decode_LEGAL_INSTRUCTION_6;
-  wire       [31:0]   _zz_decode_LEGAL_INSTRUCTION_7;
-  wire       [31:0]   _zz_decode_LEGAL_INSTRUCTION_8;
-  wire                _zz_decode_LEGAL_INSTRUCTION_9;
-  wire       [0:0]    _zz_decode_LEGAL_INSTRUCTION_10;
-  wire       [7:0]    _zz_decode_LEGAL_INSTRUCTION_11;
-  wire       [31:0]   _zz_decode_LEGAL_INSTRUCTION_12;
-  wire       [31:0]   _zz_decode_LEGAL_INSTRUCTION_13;
-  wire       [31:0]   _zz_decode_LEGAL_INSTRUCTION_14;
-  wire                _zz_decode_LEGAL_INSTRUCTION_15;
-  wire       [0:0]    _zz_decode_LEGAL_INSTRUCTION_16;
-  wire       [1:0]    _zz_decode_LEGAL_INSTRUCTION_17;
   wire       [1:0]    _zz_IBusCachedPlugin_jump_pcLoad_payload_1;
   wire       [1:0]    _zz_IBusCachedPlugin_jump_pcLoad_payload_2;
   wire       [31:0]   _zz_IBusCachedPlugin_fetchPc_pc;
@@ -419,7 +401,6 @@ module VexRiscv (
   reg                 _zz_1;
   wire       [31:0]   decode_INSTRUCTION_ANTICIPATED;
   reg                 decode_REGFILE_WRITE_VALID;
-  wire                decode_LEGAL_INSTRUCTION;
   wire       `EnvCtrlEnum_binary_sequential_type _zz_decode_ENV_CTRL_1;
   wire       `BranchCtrlEnum_binary_sequential_type _zz_decode_BRANCH_CTRL_1;
   wire       `ShiftCtrlEnum_binary_sequential_type _zz_decode_SHIFT_CTRL_1;
@@ -452,7 +433,7 @@ module VexRiscv (
   reg                 decode_arbitration_haltByOther;
   reg                 decode_arbitration_removeIt;
   wire                decode_arbitration_flushIt;
-  reg                 decode_arbitration_flushNext;
+  wire                decode_arbitration_flushNext;
   wire                decode_arbitration_isValid;
   wire                decode_arbitration_isStuck;
   wire                decode_arbitration_isStuckByOthers;
@@ -517,9 +498,6 @@ module VexRiscv (
   wire                IBusCachedPlugin_mmuBus_rsp_bypassTranslation;
   wire                IBusCachedPlugin_mmuBus_end;
   wire                IBusCachedPlugin_mmuBus_busy;
-  wire                decodeExceptionPort_valid;
-  wire       [3:0]    decodeExceptionPort_payload_code;
-  wire       [31:0]   decodeExceptionPort_payload_badAddr;
   wire                BranchPlugin_jumpInterface_valid;
   wire       [31:0]   BranchPlugin_jumpInterface_payload;
   wire       [31:0]   CsrPlugin_csrMapping_readDataSignal;
@@ -759,11 +737,11 @@ module VexRiscv (
   wire                _zz_when_CsrPlugin_l952;
   wire                _zz_when_CsrPlugin_l952_1;
   wire                _zz_when_CsrPlugin_l952_2;
-  reg                 CsrPlugin_exceptionPortCtrl_exceptionValids_decode;
+  wire                CsrPlugin_exceptionPortCtrl_exceptionValids_decode;
   reg                 CsrPlugin_exceptionPortCtrl_exceptionValids_execute;
   reg                 CsrPlugin_exceptionPortCtrl_exceptionValids_memory;
   reg                 CsrPlugin_exceptionPortCtrl_exceptionValids_writeBack;
-  reg                 CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_decode;
+  wire                CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_decode;
   reg                 CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_execute;
   reg                 CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_memory;
   reg                 CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_writeBack;
@@ -774,7 +752,6 @@ module VexRiscv (
   wire                when_CsrPlugin_l909;
   wire                when_CsrPlugin_l909_1;
   wire                when_CsrPlugin_l909_2;
-  wire                when_CsrPlugin_l909_3;
   wire                when_CsrPlugin_l922;
   reg                 CsrPlugin_interrupt_valid;
   reg        [3:0]    CsrPlugin_interrupt_code /* verilator public */ ;
@@ -1128,24 +1105,6 @@ module VexRiscv (
   assign _zz_iBusWishbone_ADR_1 = (iBus_cmd_payload_address >>> 5);
   assign _zz_decode_RegFilePlugin_rs1Data = 1'b1;
   assign _zz_decode_RegFilePlugin_rs2Data = 1'b1;
-  assign _zz_decode_LEGAL_INSTRUCTION = 32'h0000107f;
-  assign _zz_decode_LEGAL_INSTRUCTION_1 = (decode_INSTRUCTION & 32'h0000207f);
-  assign _zz_decode_LEGAL_INSTRUCTION_2 = 32'h00002073;
-  assign _zz_decode_LEGAL_INSTRUCTION_3 = ((decode_INSTRUCTION & 32'h0000407f) == 32'h00004063);
-  assign _zz_decode_LEGAL_INSTRUCTION_4 = ((decode_INSTRUCTION & 32'h0000207f) == 32'h00002013);
-  assign _zz_decode_LEGAL_INSTRUCTION_5 = {((decode_INSTRUCTION & 32'h0000603f) == 32'h00000023),{((decode_INSTRUCTION & 32'h0000207f) == 32'h00000003),{((decode_INSTRUCTION & _zz_decode_LEGAL_INSTRUCTION_6) == 32'h00000003),{(_zz_decode_LEGAL_INSTRUCTION_7 == _zz_decode_LEGAL_INSTRUCTION_8),{_zz_decode_LEGAL_INSTRUCTION_9,{_zz_decode_LEGAL_INSTRUCTION_10,_zz_decode_LEGAL_INSTRUCTION_11}}}}}};
-  assign _zz_decode_LEGAL_INSTRUCTION_6 = 32'h0000505f;
-  assign _zz_decode_LEGAL_INSTRUCTION_7 = (decode_INSTRUCTION & 32'h0000707b);
-  assign _zz_decode_LEGAL_INSTRUCTION_8 = 32'h00000063;
-  assign _zz_decode_LEGAL_INSTRUCTION_9 = ((decode_INSTRUCTION & 32'h0000607f) == 32'h0000000f);
-  assign _zz_decode_LEGAL_INSTRUCTION_10 = ((decode_INSTRUCTION & 32'hfc00407f) == 32'h00000033);
-  assign _zz_decode_LEGAL_INSTRUCTION_11 = {((decode_INSTRUCTION & 32'hfe00007f) == 32'h00000033),{((decode_INSTRUCTION & 32'hbc00707f) == 32'h00005013),{((decode_INSTRUCTION & _zz_decode_LEGAL_INSTRUCTION_12) == 32'h00001013),{(_zz_decode_LEGAL_INSTRUCTION_13 == _zz_decode_LEGAL_INSTRUCTION_14),{_zz_decode_LEGAL_INSTRUCTION_15,{_zz_decode_LEGAL_INSTRUCTION_16,_zz_decode_LEGAL_INSTRUCTION_17}}}}}};
-  assign _zz_decode_LEGAL_INSTRUCTION_12 = 32'hfc00307f;
-  assign _zz_decode_LEGAL_INSTRUCTION_13 = (decode_INSTRUCTION & 32'hbe00707f);
-  assign _zz_decode_LEGAL_INSTRUCTION_14 = 32'h00005033;
-  assign _zz_decode_LEGAL_INSTRUCTION_15 = ((decode_INSTRUCTION & 32'hbe00707f) == 32'h00000033);
-  assign _zz_decode_LEGAL_INSTRUCTION_16 = ((decode_INSTRUCTION & 32'hdfffffff) == 32'h10200073);
-  assign _zz_decode_LEGAL_INSTRUCTION_17 = {((decode_INSTRUCTION & 32'hffffffff) == 32'h10500073),((decode_INSTRUCTION & 32'hffffffff) == 32'h00000073)};
   assign _zz__zz_decode_IS_MUL = 32'h02000074;
   assign _zz__zz_decode_IS_MUL_1 = (decode_INSTRUCTION & 32'h10003050);
   assign _zz__zz_decode_IS_MUL_2 = 32'h00000050;
@@ -2147,7 +2106,6 @@ module VexRiscv (
     end
   end
 
-  assign decode_LEGAL_INSTRUCTION = ({((decode_INSTRUCTION & 32'h0000005f) == 32'h00000017),{((decode_INSTRUCTION & 32'h0000007f) == 32'h0000006f),{((decode_INSTRUCTION & 32'h0000106f) == 32'h00000003),{((decode_INSTRUCTION & _zz_decode_LEGAL_INSTRUCTION) == 32'h00001073),{(_zz_decode_LEGAL_INSTRUCTION_1 == _zz_decode_LEGAL_INSTRUCTION_2),{_zz_decode_LEGAL_INSTRUCTION_3,{_zz_decode_LEGAL_INSTRUCTION_4,_zz_decode_LEGAL_INSTRUCTION_5}}}}}}} != 21'h0);
   assign writeBack_MEMORY_STORE = memory_to_writeBack_MEMORY_STORE;
   always @(*) begin
     _zz_lastStageRegFileWrite_payload_data = writeBack_REGFILE_WRITE_DATA;
@@ -2219,22 +2177,13 @@ module VexRiscv (
 
   always @(*) begin
     decode_arbitration_removeIt = 1'b0;
-    if(decodeExceptionPort_valid) begin
-      decode_arbitration_removeIt = 1'b1;
-    end
     if(decode_arbitration_isFlushed) begin
       decode_arbitration_removeIt = 1'b1;
     end
   end
 
   assign decode_arbitration_flushIt = 1'b0;
-  always @(*) begin
-    decode_arbitration_flushNext = 1'b0;
-    if(decodeExceptionPort_valid) begin
-      decode_arbitration_flushNext = 1'b1;
-    end
-  end
-
+  assign decode_arbitration_flushNext = 1'b0;
   always @(*) begin
     execute_arbitration_haltItself = 1'b0;
     if(when_DBusSimplePlugin_l426) begin
@@ -2696,9 +2645,6 @@ module VexRiscv (
   assign _zz_decode_BRANCH_CTRL_1 = _zz_decode_BRANCH_CTRL_2;
   assign _zz_decode_ENV_CTRL_2 = _zz_decode_IS_MUL[26 : 25];
   assign _zz_decode_ENV_CTRL_1 = _zz_decode_ENV_CTRL_2;
-  assign decodeExceptionPort_valid = (decode_arbitration_isValid && (! decode_LEGAL_INSTRUCTION));
-  assign decodeExceptionPort_payload_code = 4'b0010;
-  assign decodeExceptionPort_payload_badAddr = decode_INSTRUCTION;
   assign when_RegFilePlugin_l63 = (decode_INSTRUCTION[11 : 7] == 5'h0);
   assign decode_RegFilePlugin_regFileReadAddress1 = decode_INSTRUCTION_ANTICIPATED[19 : 15];
   assign decode_RegFilePlugin_regFileReadAddress2 = decode_INSTRUCTION_ANTICIPATED[24 : 20];
@@ -3130,18 +3076,10 @@ module VexRiscv (
   assign _zz_when_CsrPlugin_l952 = (CsrPlugin_mip_MTIP && CsrPlugin_mie_MTIE);
   assign _zz_when_CsrPlugin_l952_1 = (CsrPlugin_mip_MSIP && CsrPlugin_mie_MSIE);
   assign _zz_when_CsrPlugin_l952_2 = (CsrPlugin_mip_MEIP && CsrPlugin_mie_MEIE);
+  assign CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_decode = 1'b0;
   assign CsrPlugin_exceptionPortCtrl_exceptionTargetPrivilegeUncapped = 2'b11;
   assign CsrPlugin_exceptionPortCtrl_exceptionTargetPrivilege = ((CsrPlugin_privilege < CsrPlugin_exceptionPortCtrl_exceptionTargetPrivilegeUncapped) ? CsrPlugin_exceptionPortCtrl_exceptionTargetPrivilegeUncapped : CsrPlugin_privilege);
-  always @(*) begin
-    CsrPlugin_exceptionPortCtrl_exceptionValids_decode = CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_decode;
-    if(decodeExceptionPort_valid) begin
-      CsrPlugin_exceptionPortCtrl_exceptionValids_decode = 1'b1;
-    end
-    if(decode_arbitration_isFlushed) begin
-      CsrPlugin_exceptionPortCtrl_exceptionValids_decode = 1'b0;
-    end
-  end
-
+  assign CsrPlugin_exceptionPortCtrl_exceptionValids_decode = CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_decode;
   always @(*) begin
     CsrPlugin_exceptionPortCtrl_exceptionValids_execute = CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_execute;
     if(CsrPlugin_selfException_valid) begin
@@ -3166,10 +3104,9 @@ module VexRiscv (
     end
   end
 
-  assign when_CsrPlugin_l909 = (! decode_arbitration_isStuck);
-  assign when_CsrPlugin_l909_1 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l909_2 = (! memory_arbitration_isStuck);
-  assign when_CsrPlugin_l909_3 = (! writeBack_arbitration_isStuck);
+  assign when_CsrPlugin_l909 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l909_1 = (! memory_arbitration_isStuck);
+  assign when_CsrPlugin_l909_2 = (! writeBack_arbitration_isStuck);
   assign when_CsrPlugin_l922 = ({CsrPlugin_exceptionPortCtrl_exceptionValids_writeBack,{CsrPlugin_exceptionPortCtrl_exceptionValids_memory,{CsrPlugin_exceptionPortCtrl_exceptionValids_execute,CsrPlugin_exceptionPortCtrl_exceptionValids_decode}}} != 4'b0000);
   assign CsrPlugin_exceptionPendings_0 = CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_decode;
   assign CsrPlugin_exceptionPendings_1 = CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_execute;
@@ -3696,7 +3633,6 @@ module VexRiscv (
       CsrPlugin_mie_MEIE <= 1'b0;
       CsrPlugin_mie_MTIE <= 1'b0;
       CsrPlugin_mie_MSIE <= 1'b0;
-      CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_decode <= 1'b0;
       CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_execute <= 1'b0;
       CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_memory <= 1'b0;
       CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_writeBack <= 1'b0;
@@ -3813,21 +3749,16 @@ module VexRiscv (
       _zz_2 <= 1'b0;
       HazardSimplePlugin_writeBackBuffer_valid <= HazardSimplePlugin_writeBackWrites_valid;
       if(when_CsrPlugin_l909) begin
-        CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_decode <= 1'b0;
-      end else begin
-        CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_decode <= CsrPlugin_exceptionPortCtrl_exceptionValids_decode;
-      end
-      if(when_CsrPlugin_l909_1) begin
-        CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_execute <= (CsrPlugin_exceptionPortCtrl_exceptionValids_decode && (! decode_arbitration_isStuck));
+        CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_execute <= 1'b0;
       end else begin
         CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_execute <= CsrPlugin_exceptionPortCtrl_exceptionValids_execute;
       end
-      if(when_CsrPlugin_l909_2) begin
+      if(when_CsrPlugin_l909_1) begin
         CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_memory <= (CsrPlugin_exceptionPortCtrl_exceptionValids_execute && (! execute_arbitration_isStuck));
       end else begin
         CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_memory <= CsrPlugin_exceptionPortCtrl_exceptionValids_memory;
       end
-      if(when_CsrPlugin_l909_3) begin
+      if(when_CsrPlugin_l909_2) begin
         CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_writeBack <= (CsrPlugin_exceptionPortCtrl_exceptionValids_memory && (! memory_arbitration_isStuck));
       end else begin
         CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_writeBack <= 1'b0;
@@ -3957,10 +3888,6 @@ module VexRiscv (
     CsrPlugin_mcycle <= (CsrPlugin_mcycle + 64'h0000000000000001);
     if(writeBack_arbitration_isFiring) begin
       CsrPlugin_minstret <= (CsrPlugin_minstret + 64'h0000000000000001);
-    end
-    if(decodeExceptionPort_valid) begin
-      CsrPlugin_exceptionPortCtrl_exceptionContext_code <= decodeExceptionPort_payload_code;
-      CsrPlugin_exceptionPortCtrl_exceptionContext_badAddr <= decodeExceptionPort_payload_badAddr;
     end
     if(CsrPlugin_selfException_valid) begin
       CsrPlugin_exceptionPortCtrl_exceptionContext_code <= CsrPlugin_selfException_payload_code;
