@@ -208,6 +208,12 @@ asm(".set regnum_t6  , 31");
 asm(".set CUSTOM0  , 0x0B");
 asm(".set CUSTOM1  , 0x2B");
 
+#ifdef ISSUE_582_WORKAROUND
+#define CUSTOM_INSTRUCTION_NOP "nop\n"
+#else
+#define CUSTOM_INSTRUCTION_NOP
+#endif
+
 #define opcode_R(opcode, func3, func7, rs1, rs2)   \
 ({                                                 \
     register unsigned long result;                 \
@@ -217,7 +223,8 @@ asm(".set CUSTOM1  , 0x2B");
      (regnum_%[arg1] << 15) |                      \
      (regnum_%[arg2] << 20) |                      \
      ((" #func3 ") << 12) |                        \
-     ((" #func7 ") << 25));"                       \
+     ((" #func7 ") << 25));\n"                     \
+     CUSTOM_INSTRUCTION_NOP                        \
      : [result] "=r" (result)                      \
      : [arg1] "r" (rs1), [arg2] "r" (rs2)          \
     );                                             \
