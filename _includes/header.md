@@ -27,4 +27,9 @@ FCCM May 18, 2022<br>
     <img src="{{ '/assets/logos/seas.svg' | relative_url }}" alt="Harvard SEAS" style="height: 2.5rem">
   </a>
 </div>
+<div style="display:inline-block;">
+  <a style="text-decoration:none" href="https://www.antmicro.com">
+    <img src="{{ '/assets/logos/AntMicro.svg' | relative_url }}" alt="AntMicro" style="height: 2.5rem">
+  </a>
+</div>
 </div>
