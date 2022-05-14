@@ -78,6 +78,7 @@ inline void ConvPerChannel(
   //   stride_height == 1
   //   stride_width == 1
   //   batches == 1
+  //   groups == 1
   //
 
   // Check if this matches KWS specialization
@@ -85,7 +86,7 @@ inline void ConvPerChannel(
        && input_offset == 128 && output_offset == -128
        && pad_height == 0 && pad_width == 0
        && stride_height == 1 && stride_width == 1
-       && batches == 1
+       && batches == 1 && groups == 1
   ) {
     KwsConvPerChannel(params, output_multiplier, 
                     output_shift, input_shape, 

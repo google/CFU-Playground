@@ -32,6 +32,7 @@ namespace reference_integer_ops {
 //   stride_height == 1
 //   stride_width == 1
 //   batches == 1
+//   groups == 1
 //
 // Fixed-point per-channel-quantization convolution reference kernel.
 inline void KwsConvPerChannel(
