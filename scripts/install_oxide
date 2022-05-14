@@ -79,7 +79,7 @@ export PATH="${INSTALL_ROOT}/usr/local/bin:${PATH}"
 echo
 echo "BUILDING YOSYS PLUGINS"
 cd "${CFU_ROOT}/third_party/yosys-f4pga-plugins/dsp-ff-plugin"
-YOSYS_PATH=${INSTALL_ROOT}/usr/local make -j$(nproc)
+YOSYS_PATH=${INSTALL_ROOT}/usr/local make -j$(nproc) all
 # INSTALL_ROOT not respected in this repo, so we can't do `make install`
 # make INSTALL_ROOT=${INSTALL_ROOT} install
 mkdir -p "${INSTALL_ROOT}/usr/local/share/yosys/plugins"
