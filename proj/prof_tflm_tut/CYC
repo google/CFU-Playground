@@ -1,0 +1,23 @@
+
+renode
+
+orig: 47M
+specialized sw: 41M    (-13%)
+
+
+
+
+
+real fomu:
+
+orig: 766M
+specialized sw: 614M  (-20%)
+
+
+
+
+
+real fomu see weird artifacts from code placement affecting cache misses
+
+
+
