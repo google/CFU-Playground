@@ -185,7 +185,8 @@ object GenCoreDefault{
         ),
 
         new DecoderSimplePlugin(
-          catchIllegalInstruction = argConfig.safe || !argConfig.hardwareDiv
+          // catchIllegalInstruction = argConfig.safe || !argConfig.hardwareDiv
+          catchIllegalInstruction = argConfig.safe
         ),
         new RegFilePlugin(
           regFileReadyKind = plugin.SYNC,

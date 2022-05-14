@@ -57,7 +57,7 @@ VexRiscv_SlimPerfCfuDebug.v: $(SRC) Makefile
 	sbt compile "runMain vexriscv.GenCoreDefault --dCacheSize 4096 --iCacheSize 2048 --csrPluginConfig all -d --cfu true --perfCSRs 8 --outputFile VexRiscv_SlimPerfCfuDebug"
 
 VexRiscv_Fomu.v: $(SRC) Makefile
-	sbt compile "runMain vexriscv.GenCoreDefault --safe false --iCacheSize 2048 --dCacheSize 0 --csrPluginConfig mcycle --mulDiv true --singleCycleShift true --singleCycleMulDiv true --bypass false --prediction none --hardwareDiv false --outputFile VexRiscv_Fomu"
+	sbt compile "runMain vexriscv.GenCoreDefault --safe false --iCacheSize 2048 --dCacheSize 0 --csrPluginConfig mcycle --mulDiv true --singleCycleShift false --singleCycleMulDiv true --bypass false --prediction none --hardwareDiv false --outputFile VexRiscv_Fomu"
 
 VexRiscv_FomuCfu.v: $(SRC) Makefile
-	sbt compile "runMain vexriscv.GenCoreDefault --safe false --cfu true --iCacheSize 2048 --dCacheSize 0 --csrPluginConfig mcycle --mulDiv true --singleCycleShift true --singleCycleMulDiv true --bypass false --prediction none --hardwareDiv false --outputFile VexRiscv_FomuCfu"
+	sbt compile "runMain vexriscv.GenCoreDefault --safe false --cfu true --iCacheSize 2048 --dCacheSize 0 --csrPluginConfig mcycle --mulDiv true --singleCycleShift false --singleCycleMulDiv true --bypass false --prediction none --hardwareDiv false --outputFile VexRiscv_FomuCfu"
