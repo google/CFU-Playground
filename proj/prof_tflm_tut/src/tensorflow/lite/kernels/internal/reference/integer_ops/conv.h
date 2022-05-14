@@ -67,8 +67,26 @@ inline void ConvPerChannel(
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
 
+  //
+  // SPECIALIZED FOR KWS:
+  //   filter_height == 1
+  //   filter_width == 1
+  //   input_offset == 128
+  //   output_offset == -128
+  //   pad_height == 0
+  //   pad_width == 0
+  //   stride_height == 1
+  //   stride_width == 1
+  //   batches == 1
+  //
+
   // Check if this matches KWS specialization
-  if (filter_height ==1 && filter_width == 1 && input_offset == 128) {
+  if (filter_height == 1 && filter_width == 1 
+       && input_offset == 128 && output_offset == -128
+       && pad_height == 0 && pad_width == 0
+       && stride_height == 1 && stride_width == 1
+       && batches == 1
+  ) {
     KwsConvPerChannel(params, output_multiplier, 
                     output_shift, input_shape, 
                     input_data, filter_shape, 
