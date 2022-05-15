@@ -92,22 +92,22 @@ New ML accelerators are being announced and released each month for a variety of
   </tr>
   <tr>
     <td>1:30 PM</td>
-    <td>TensorFlow Lite Microcontrollers (TFLM)
-    	<ul>
-    		<li>Challenges for running tinyML models</li>
-                <li>TF vs. TFLite vs TFLite Micro - deep dive</li>
-                <li>Profiling and benchmarking (??) tinyML systems</li>
-    	</ul>
-	</td>
-  </tr>
-  <tr>
-    <td>2:00 PM</td>
     <td>Benchmarking of TinyML Systems
     	<ul>
          <li>Importance of benchmarking and challenges of benchmarking TinyML systems</li>
          <li>MLPerf Tiny and it's workloads well suited for CFUs</li>
          <li>FPGA submissions to MLPerf Tiny</li>
          <li>Demo of Profiling/Microbenchmarking support in CFU-Playground</li>
+    	</ul>
+	</td>
+  </tr>
+  <tr>
+    <td>2:00 PM</td>
+    <td>TensorFlow Lite Microcontrollers (TFLM)
+    	<ul>
+    		<li>What is TF Lite Micro</li>
+         <li>TF vs. TF Lite vs TF Lite Micro</li>
+         <li>Running TF Lite on-device</li>
     	</ul>
 	</td>
   </tr>
