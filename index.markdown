@@ -135,7 +135,10 @@ New ML accelerators are being announced and released each month for a variety of
     <td>3:30 PM</td>
     <td>Renode/Antmicro
     	<ul>
-                <li>TBD</li>
+                <li>Renode's simulation solution</li>
+                <li>Renode Development Lifecycle</li>
+                <li>Verilator Integration</li>
+                <li>Integration with CFU</li>
     	</ul>
     </td>
   </tr>
