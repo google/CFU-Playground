@@ -3,7 +3,6 @@ layout: page
 title:  "Renode/Antmicro"
 ---
 
-TODO
 
 <div id="toc_container" style="position: absolute" markdown="1">
 <p class="toc_title">Contents</p>
