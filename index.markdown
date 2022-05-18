@@ -127,7 +127,6 @@ New ML accelerators are being announced and released each month for a variety of
         <ul>
                 <li>Using Amaranth to design a CFU</li>
                 <li>Unit testing in Amaranth</li>
-                <li>....</li>
         </ul>
 	</td>
   </tr>
