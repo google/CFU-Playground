@@ -59,7 +59,7 @@ categories: jekyll update
 		    		</a>
 	    		</div>
          </td>
-			<td class="person-bio">Michael Gielda is a member of the AntMicro Team.</td>
+			<td class="person-bio">Michael Gielda is a co-founder of the AntMicro Team.</td>
 		</tr>
 		<tr>
 			<td class="person-img">
@@ -79,7 +79,7 @@ categories: jekyll update
 		    		</a>
 	    		</div>
          </td>
-			<td class="person-bio">Alan V. Green is a member of Google's...</td>
+			<td class="person-bio">Alan V. Green is a member of Google's ChromeOS team and leader of the HPS project.</td>
 		</tr>
 	</table>
 </div> 
