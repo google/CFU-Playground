@@ -12,7 +12,5 @@ TODO
 {:toc}
 </div>
 
-### Pick a task and train a model using TFLM
-### Get it running on the board
-### Build your own CFU
-### Measure performance speed up
+## Renode
+<iframe src="https://docs.google.com/presentation/d/e/2PACX-1vRZ19FPKIJzMVu3CFqRBZ3M-Zl_X1qFVjxjSupdeE4G_85npsBXEVB1o9dUAzhZ8jDvzzj_1TF28EDi/embed?start=false&loop=false&delayms=10000" frameborder="0" width="746" height="449" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
