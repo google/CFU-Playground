@@ -1,0 +1,6 @@
+
+To collect waveforms:
+
+make ENABLE_TRACE_ARG=--trace VERILATOR_TRACE_DEPTH=1 VERILATOR_TRACE_PATH=/tmp/vtrace.vcd renode
+
+

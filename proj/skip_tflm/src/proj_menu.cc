@@ -32,14 +32,32 @@ void do_grid_cfu_op0(void) {
   puts("\nExercise CFU Op0\n");
   printf("a   b-->");
   for (int b = 0; b < 6; b++) {
-    printf("%8d", b);
+    printf("%12d", b);
   }
-  puts("\n-------------------------------------------------------");
+  puts("\n--------------------------------------------------------------------------------");
   for (int a = 0; a < 6; a++) {
-    printf("%-8d", a);
+    printf("%-12d", a);
     for (int b = 0; b < 6; b++) {
       int cfu = cfu_op0(0, a, b);
-      printf("%8d", cfu);
+      printf("%12d", cfu);
+    }
+    puts("");
+  }
+}
+
+// Test template instruction
+void do_hex_grid_cfu_op0(void) {
+  puts("\nExercise CFU Op0\n");
+  printf("a   b-->");
+  for (int b = 0; b < 6; b++) {
+    printf("%12x", b);
+  }
+  puts("\n--------------------------------------------------------------------------------");
+  for (int a = 0; a < 6; a++) {
+    printf("%-12x", a);
+    for (int b = 0; b < 6; b++) {
+      int cfu = cfu_op0(0, a, b);
+      printf("%12x", cfu);
     }
     puts("");
   }
@@ -68,7 +86,8 @@ struct Menu MENU = {
     "project",
     {
         MENU_ITEM('0', "exercise cfu op0", do_exercise_cfu_op0),
-        MENU_ITEM('g', "grid cfu op0", do_grid_cfu_op0),
+        MENU_ITEM('g', "grid -- show cfu op0", do_grid_cfu_op0),
+        MENU_ITEM('G', "hexadecimal grid -- show cfu op0", do_hex_grid_cfu_op0),
         MENU_ITEM('h', "say Hello", do_hello_world),
         MENU_END,
     },
