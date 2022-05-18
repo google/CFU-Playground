@@ -3,9 +3,9 @@ layout: page
 title:  "Benchmarking TinyML Systems"
 ---
 
-TODO: More info about nMigen should be included, maybe
+<!-- TODO: More info about nMigen should be included, maybe
 [this](https://github.com/JosephBushagour/tour-of-nmigen/blob/main/tour_of_nmigen.md)
-language reference I made. Alternatively, we could skip nMigen and just do Verilog?
+language reference I made. Alternatively, we could skip nMigen and just do Verilog? -->
 
 <div id="toc_container" style="position: absolute" markdown="1">
 <p class="toc_title">Contents</p>
@@ -13,7 +13,7 @@ language reference I made. Alternatively, we could skip nMigen and just do Veril
 * TOC
 {:toc}
 </div>
-
+<!-- 
 # Simple End-to-End Example of Creating a CFU
 
 This tutorial will walk through the steps for building a basic CFU in your
@@ -757,4 +757,7 @@ steps include:
 -   Moving entire loops from software to gateware
 -   Optimization of other TensorFlow operations
 -   Investigation of other models
--   Generalizing instructions so they can be used in multiple places
+-   Generalizing instructions so they can be used in multiple places -->
+
+## Benchmarking TinyML Systems
+<iframe src="https://docs.google.com/presentation/d/e/2PACX-1vTlO8VLt6IufnACiAlFaVELEZCdBUWx9u4n5WF91DHMcqdKiXRuW9PMX_FyZeYsFhAFdKD8o5qqvAyC/embed?start=false&loop=false&delayms=1000" frameborder="0" width="746" height="449" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
