@@ -13,6 +13,9 @@ language reference I made. Alternatively, we could skip nMigen and just do Veril
 * TOC
 {:toc}
 </div>
+## Benchmarking TinyML Systems
+<iframe src="https://docs.google.com/presentation/d/e/2PACX-1vTlO8VLt6IufnACiAlFaVELEZCdBUWx9u4n5WF91DHMcqdKiXRuW9PMX_FyZeYsFhAFdKD8o5qqvAyC/embed?start=false&loop=false&delayms=1000" frameborder="0" width="746" height="449" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+
 <!-- 
 # Simple End-to-End Example of Creating a CFU
 
@@ -759,5 +762,4 @@ steps include:
 -   Investigation of other models
 -   Generalizing instructions so they can be used in multiple places -->
 
-## Benchmarking TinyML Systems
-<iframe src="https://docs.google.com/presentation/d/e/2PACX-1vTlO8VLt6IufnACiAlFaVELEZCdBUWx9u4n5WF91DHMcqdKiXRuW9PMX_FyZeYsFhAFdKD8o5qqvAyC/embed?start=false&loop=false&delayms=1000" frameborder="0" width="746" height="449" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+
