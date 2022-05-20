@@ -20,5 +20,6 @@ sympy
 textx
 python-constraint
 fasm
+matplotlib
 git+https://github.com/SymbiFlow/prjxray.git@e25c20a8f158cc5e94eb62e3b74e16fc9d6c1d26#egg=prjxray
 git+https://github.com/symbiflow/xc-fasm.git@14afc2bae24cbf6ee5e7d057a58b4cbd776358d0#egg=xc-fasm
