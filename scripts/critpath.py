@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env python3
 # Copyright 2022 The CFU-Playground Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,9 +33,9 @@ fig, ax = plt.subplots(dpi=200)
 with open('placement_data.txt', 'r') as pfile:
     placement_data=pfile.readlines()
 
-if False:
+if True:
     # read critical path file
-    with open('hps_proto2_platform-report.json', 'r') as myfile:
+    with open('kosagi_fomu_pvt-report.json', 'r') as myfile:
         data=myfile.read()
 
     # parse file
@@ -102,10 +102,12 @@ if 'cp' in locals():
 
     plt.plot(xs, ys, marker='x', linewidth=3, color='black', label=delay)
 
+    print("");
     for k,v in accum.items():
         delay = "%.2f" % v
         print(f"total {k}: {delay}")
 
+print("");
 for line in placement_data:
   if 'KEY' in line:
     print(line.rstrip())
@@ -114,6 +116,6 @@ print("KEY Memory Square")
 
 plt.xlim([0, 27])
 plt.ylim([0, 32])
-plt.show()
+# plt.show()
 plt.savefig("critpath.png", format="png", dpi=300)
 print("Done writing critical path image.\n")

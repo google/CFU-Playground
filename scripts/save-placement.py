@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env python3
 # Copyright 2022 The CFU-Playground Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -64,4 +64,4 @@ with open('placement_data.txt', 'w') as f:
 
 print("\nDone\n")
 
-sys.exit()
+# sys.exit()
