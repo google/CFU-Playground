@@ -115,9 +115,12 @@ class NXLRAM(Module):
         print("sel_bits_start ", sel_bits_start)
         print("adr_bits_start ", adr_bits_start)
 
+        self.a_clkens = []
+
         if dual_port:
             self.b_addrs = []
             self.b_douts = []
+            self.b_clkens = []
 
         # Combine RAMs to increase Depth.
         for d in range(self.depth_cascading):
@@ -146,7 +149,9 @@ class NXLRAM(Module):
                         self.bus.dat_r[32*w:32*(w+1)].eq(dataout)
                     ]
 
+                a_clken = Signal()
                 if dual_port:
+                    b_clken = Signal()
                     b_addr = Signal(14)
                     b_dout = Signal(32)
                     lram_block = Instance("DPSC512K",
@@ -154,7 +159,7 @@ class NXLRAM(Module):
                         i_DIA       = datain,
                         i_ADA       = self.bus.adr[adr_bits_start:adr_bits_start+14],
                         i_CLK       = ClockSignal(),
-                        i_CEA       = 0b1,
+                        i_CEA       = a_clken,
                         i_WEA       = wren,
                         i_CSA       = cs,
                         i_RSTA      = 0b0,
@@ -164,12 +169,13 @@ class NXLRAM(Module):
                         # port B read only
                         i_ADB       = b_addr,
                         o_DOB       = b_dout,
-                        i_CEB       = 0b1,
+                        i_CEB       = b_clken,
                         i_WEB       = 0b0,
                         i_CSB       = 0b1,
                         i_RSTB      = 0b0,
                         i_CEOUTB    = 0b0
                     )
+                    self.b_clkens.append(b_clken)
                     self.b_addrs.append(b_addr)
                     self.b_douts.append(b_dout)
 
@@ -179,7 +185,7 @@ class NXLRAM(Module):
                         i_DI       = datain,
                         i_AD       = self.bus.adr[adr_bits_start:adr_bits_start+14],
                         i_CLK      = ClockSignal(),
-                        i_CE       = 0b1,
+                        i_CE       = a_clken,
                         i_WE       = wren,
                         i_CS       = cs,
                         i_RSTOUT   = 0b0,
@@ -187,6 +193,8 @@ class NXLRAM(Module):
                         i_BYTEEN_N = ~self.bus.sel[4*w:4*(w+1)],
                         o_DO       = dataout
                     )
+                self.a_clkens.append(a_clken)
+
                 self.lram_blocks[d].append(lram_block)
                 self.specials += lram_block
 
