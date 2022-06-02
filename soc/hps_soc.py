@@ -148,6 +148,20 @@ class HpsSoC(LiteXSoC):
                      reset_address=reset_address,
                      cfu=cpu_cfu)
 
+        # RAM
+        if separate_arena:
+            ram_size = 64*KB
+            arena_size = RAM_SIZE - ram_size
+        elif execute_from_lram:
+            # Leave one LRAM free for ROM
+            ram_size = RAM_SIZE - 64*KB
+            arena_size = 0
+        else:
+            ram_size = RAM_SIZE
+            arena_size = 0
+        self.setup_ram(size=ram_size)
+        self.setup_arena(size=arena_size)
+
         # Dynamic clock control between CPU and CFU
         if dynamic_clock_control:
             cfu_cen = Signal()
@@ -170,19 +184,12 @@ class HpsSoC(LiteXSoC):
             self.submodules.cfu_cpu_clk_ctl = ClockDomainsRenamer("osc")(
                     CfuCpuClockCtrl(self.cpu.cfu_bus, cfu_cen, cpu_cen))
 
-        # RAM
-        if separate_arena:
-            ram_size = 64*KB
-            arena_size = RAM_SIZE - ram_size
-        elif execute_from_lram:
-            # Leave one LRAM free for ROM
-            ram_size = RAM_SIZE - 64*KB
-            arena_size = 0
-        else:
-            ram_size = RAM_SIZE
-            arena_size = 0
-        self.setup_ram(size=ram_size)
-        self.setup_arena(size=arena_size)
+            # Connect clock enable signals to RAM and Arena
+            self.comb += [
+                [self.lram.a_clkens[i].eq(cpu_cen) for i in range(len(self.lram.a_clkens))],
+                [self.arena.a_clkens[i].eq(cpu_cen) for i in range(len(self.arena.a_clkens))],
+                [self.arena.b_clkens[i].eq(cfu_cen) for i in range(len(self.arena.b_clkens))],
+            ]
 
         # SPI Flash
         self.setup_litespi_flash()
