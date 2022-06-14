@@ -24,6 +24,9 @@ fi
 if ! which bzip2 >/dev/null; then
     missing+=(bzip2)
 fi
+if ! which python3 >/dev/null; then
+    missing+=(python3)
+fi
 if ! which gcc >/dev/null; then
     missing+=(gcc)
 fi
