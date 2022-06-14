@@ -21,6 +21,9 @@ missing=()
 if ! which wget >/dev/null; then
     missing+=(wget)
 fi
+if ! which bzip2 >/dev/null; then
+    missing+=(bzip2)
+fi
 if ! which gcc >/dev/null; then
     missing+=(gcc)
 fi
