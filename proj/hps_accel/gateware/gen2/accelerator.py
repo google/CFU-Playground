@@ -264,12 +264,12 @@ class AcceleratorCore(SimpleElaboratable):
                 raw_val = Signal(signed(8), name=f"raw_{j}_{i}")
                 m.d.comb += raw_val.eq(activation[i * 8:i * 8 + 8])
                 with_offset = Signal(signed(9), name=f"val_{j}_{i}")
-                m.d.comb += with_offset.eq(raw_val + self.config.input_offset)
+                m.d.sync += with_offset.eq(raw_val + self.config.input_offset)
                 m.d.comb += in_a[i * 9:i * 9 + 9].eq(with_offset)
         for in_b, value in zip(sa.input_b, filter_values):
-            m.d.comb += in_b.eq(value)
-        m.d.comb += sa.first.eq(first)
-        m.d.comb += sa.last.eq(last)
+            m.d.sync += in_b.eq(value)
+        m.d.sync += sa.first.eq(first)
+        m.d.sync += sa.last.eq(last)
 
         # Get pipeline inputs from systolic array and parameters
         accumulator_stream, finished = self.build_accumulator_reader(
