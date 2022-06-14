@@ -18,6 +18,18 @@ CFU_ROOT="$(dirname $(dirname $(realpath ${BASH_SOURCE[0]})))"
 # Verify dependencies that can be installed with apt (if available)
 missing=()
 
+if ! which wget >/dev/null; then
+    missing+=(wget)
+fi
+if ! which bzip2 >/dev/null; then
+    missing+=(bzip2)
+fi
+if ! which python3 >/dev/null; then
+    missing+=(python3)
+fi
+if ! which unzip >/dev/null; then
+    missing+=(unzip)
+fi
 if ! which gcc >/dev/null; then
     missing+=(gcc)
 fi
