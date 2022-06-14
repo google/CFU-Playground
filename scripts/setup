@@ -27,6 +27,9 @@ fi
 if ! which python3 >/dev/null; then
     missing+=(python3)
 fi
+if ! which unzip >/dev/null; then
+    missing+=(unzip)
+fi
 if ! which gcc >/dev/null; then
     missing+=(gcc)
 fi
