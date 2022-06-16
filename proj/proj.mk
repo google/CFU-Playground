@@ -368,7 +368,7 @@ load: $(CFU_VERILOG) $(SOFTWARE_BIN)
 
 run: $(SOFTWARE_BIN)
 	@echo Running automated test in Verilator simulation
-	$(BUILD_DIR)/interact.expect s $(RUN_MENU_ITEMS) |& tee $(UNITTEST_LOG)
+	$(BUILD_DIR)/interact.expect s $(RUN_MENU_ITEMS) |& tee $(SOFTWARE_LOG)
 
 unit: $(SOFTWARE_BIN)
 	@echo Running unit test in Verilator simulation
