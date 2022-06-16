@@ -44,7 +44,7 @@ foreach c $choices {
   expect ">"
   send_user "Sending $c...\n"
   send $c
-  sleep 1
+# sleep 1
 
 }
 
