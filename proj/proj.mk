@@ -366,11 +366,15 @@ else
 load: $(CFU_VERILOG) $(SOFTWARE_BIN)
 	$(SIM_MK) run
 
+run: $(SOFTWARE_BIN)
+	@echo Running automated test in Verilator simulation
+	$(BUILD_DIR)/interact.expect s $(RUN_MENU_ITEMS) |& tee $(SOFTWARE_LOG)
+
 unit: $(SOFTWARE_BIN)
 	@echo Running unit test in Verilator simulation
 	$(BUILD_DIR)/interact.expect s $(TEST_MENU_ITEMS) |& tee $(UNITTEST_LOG)
 
-prog bitstream run:
+prog bitstream:
 	@echo Target not supported when PLATFORM=sim
 
 endif
