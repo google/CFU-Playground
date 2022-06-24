@@ -7,9 +7,9 @@ from migen.genlib.resetsync import AsyncResetSynchronizer
 from litex.build.generic_platform import Pins, Subsignal, IOStandard, Misc
 from litex.build.lattice import LatticePlatform, oxide
 from litex.build.lattice.programmer import LatticeProgrammer
-from litex.soc.cores.clock import NXOSCA, NXPLL
+from litex.soc.cores.clock import NXOSCA
 # from litex.soc.cores.ram import NXLRAM
-from hps_lattice_nx import NXLRAM
+from hps_lattice_nx import NXLRAM, NXPLL
 
 hps_io = [
     ("done", 0, Pins("A5"), IOStandard("LVCMOS18H")),
@@ -98,6 +98,12 @@ class _CRG(Module):
         self.specials += [
             AsyncResetSynchronizer(self.cd_sys, ~self.sys_pll.locked | (por_counter != 0)),
             AsyncResetSynchronizer(self.cd_cfu, ~self.sys_pll.locked | (por_counter != 0)),
+        ]
+
+    def do_finalize(self):
+        self.comb += [
+            self.sys_pll.enable.sys.eq(self.sys_clk_enable),
+            self.sys_pll.enable.cfu.eq(self.cfu_clk_enable),
         ]
 
 
