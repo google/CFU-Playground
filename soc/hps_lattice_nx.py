@@ -248,6 +248,8 @@ class NXPLL(Module):
         NXPLL.instance_num += 1
         self.platform   = platform
         self.create_output_port_clocks = create_output_port_clocks
+        self.clk_names  = []
+        self.enable     = []
 
         self.calc_valid_io_i2()
         self.calc_tf_coefficients()
@@ -271,6 +273,7 @@ class NXPLL(Module):
         assert self.nclkouts < self.nclkouts_max
         self.clkouts[self.nclkouts] = (cd.clk, freq, phase, margin)
         create_clkout_log(self.logger, cd.name, freq, margin, self.nclkouts)
+        self.clk_names.append(cd.name)
         self.nclkouts += 1
 
     def compute_config(self):
@@ -357,6 +360,7 @@ class NXPLL(Module):
         self.params.update(analog_params)
         n_to_l = {0: "P", 1: "S", 2: "S2", 3:"S3", 4:"S4"}
 
+        enables = []
         for n, (clk, f, p, m) in sorted(self.clkouts.items()):
             div    = config["clko{}_div".format(n)]
             phase = int((1+p/360) * div)
@@ -366,6 +370,7 @@ class NXPLL(Module):
             self.params["p_PHI{}".format(letter)] = "0"
             self.params["p_DEL{}".format(letter)] = str(phase - 1)
             self.params["o_CLKO{}".format(n_to_l[n])] = clk
+            enables.append((self.clk_names[n], 1))
 
             # In theory this really shouldn't be necessary, in practice
             # the tooling seems to have suspicous clock latency values
@@ -373,6 +378,10 @@ class NXPLL(Module):
             # hasn't responded to my support requests on the matter.
             if self.platform and self.create_output_port_clocks:
                 self.platform.add_platform_command("create_clock -period {} -name {} [get_pins {}.PLL_inst/CLKO{}]".format(str(1/f*1e9), self.name + "_" + n_to_l[n],self.name, n_to_l[n]))
+
+        self.enable = Record(enables)
+        for n, _ in sorted(self.clkouts.items()):
+            self.params["i_ENCLKO{}".format(n_to_l[n])] = getattr(self.enable, self.clk_names[n])
 
         if self.platform and self.create_output_port_clocks:
             i = 0
