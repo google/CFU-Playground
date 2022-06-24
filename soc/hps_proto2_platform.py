@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from migen import Module, ClockDomain, Signal, If, log2_int
+from migen import Module, ClockDomain, Signal, If, log2_int, Instance, ClockSignal
 from migen.genlib.resetsync import AsyncResetSynchronizer
 from litex.build.generic_platform import Pins, Subsignal, IOStandard, Misc
 from litex.build.lattice import LatticePlatform, oxide
@@ -64,25 +64,34 @@ class _CRG(Module):
     """Clock Reset Generator"""
 
     def __init__(self, platform, sys_clk_freq):
+        self.clock_domains.cd_osc = ClockDomain()
         self.clock_domains.cd_sys = ClockDomain()
         self.clock_domains.cd_por = ClockDomain()
+        self.sys_clk_enable = Signal(reset=1)
 
         # Clock from HFOSC
-        self.submodules.sys_clk = sys_osc = NXOSCA()
-        sys_osc.create_hf_clk(self.cd_sys, sys_clk_freq)
+        self.submodules.osc_clk = sys_osc = NXOSCA()
+        sys_osc.create_hf_clk(self.cd_osc, sys_clk_freq)
+
+        self.specials += Instance(
+            "DCC",
+            i_CLKI=ClockSignal("osc"),
+            o_CLKO=ClockSignal("sys"),
+            i_CE=self.sys_clk_enable,
+        )
         # We make the period constraint 7% tighter than our actual system
         # clock frequency, because the CrossLink-NX internal oscillator runs
         # at ±7% of nominal frequency.
-        platform.add_period_constraint(self.cd_sys.clk,
+        platform.add_period_constraint(self.cd_osc.clk,
                                        1e9 / (sys_clk_freq * 1.07))
 
         # Power On Reset
         por_cycles = 4096
         por_counter = Signal(log2_int(por_cycles), reset=por_cycles - 1)
-        self.comb += self.cd_por.clk.eq(self.cd_sys.clk)
+        self.comb += self.cd_por.clk.eq(self.cd_osc.clk)
         self.sync.por += If(por_counter != 0, por_counter.eq(por_counter - 1))
         self.specials += AsyncResetSynchronizer(
-            self.cd_sys, (por_counter != 0))
+            self.cd_osc, (por_counter != 0))
 
 
 _nextpnr_report_filename = 'nextpnr-nexus-report.json'
