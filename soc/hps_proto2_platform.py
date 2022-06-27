@@ -69,9 +69,11 @@ class _CRG(Module):
 
         # Outputs from PLL
         self.clock_domains.cd_sys = ClockDomain()
+        self.clock_domains.cd_cfu = ClockDomain()
 
         # PLL output clocks' enable signals
         self.sys_clk_enable = Signal(reset=1)
+        self.cfu_clk_enable = Signal(reset=1)
 
         # Clock from HFOSC
         self.submodules.osc_clk = sys_osc = NXOSCA()
@@ -91,9 +93,11 @@ class _CRG(Module):
         self.submodules.sys_pll = sys_pll = NXPLL(platform=platform, create_output_port_clocks=True)
         sys_pll.register_clkin(self.cd_por.clk, clk_freq)
         sys_pll.create_clkout(self.cd_sys, clk_freq)
+        sys_pll.create_clkout(self.cd_cfu, clk_freq)
 
         self.specials += [
             AsyncResetSynchronizer(self.cd_sys, ~self.sys_pll.locked | (por_counter != 0)),
+            AsyncResetSynchronizer(self.cd_cfu, ~self.sys_pll.locked | (por_counter != 0)),
         ]
 
 
