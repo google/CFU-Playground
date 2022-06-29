@@ -126,59 +126,81 @@ def copy_cpu_variant_if_needed(variant):
 def build_cpu_variant_if_needed(variant):
     if variant in core.CPU_VARIANTS:
         print(f"Variant \"{variant}\" already known.")
+        return
+
+    cpu_params = {
+        "csrPluginConfig":    "mcycle",
+        "bypass":             "true",
+        "cfu":                "false",
+        "dCacheSize":         "4096",  
+        "hardwareDiv":        "false",
+        "iCacheSize":         "4096", 
+        "mulDiv":             "true", 
+        "prediction":         "none", 
+        "safe":               "true", 
+        "singleCycleShift":   "true", 
+        "singleCycleMulDiv":  "true" 
+    }
+
+    # Parse variant into param list w/o 'generate' keyword
+    params = variant.split("+")[1:]
+    for param in params:
+        if "cfu" in param:
+            cpu_params[param] = "true"
+        else:
+            param_name, val = param.split(":")
+            # Modify deafult params with user defined val
+            if param_name not in cpu_params.keys():
+                raise ValueError(param_name + " parameter not recognized.")
+            cpu_params[param_name] = val
+
+    gen_args = []
+    cpu_filename_base = "VexRiscv"
+    for param_name, val in sorted(cpu_params.items()):
+        gen_args.append(f"--{param_name}={val}")
+        cpu_filename_base = cpu_filename_base + "_" +  param_name + "-" + val
+
+    gen_args.append(f"--outputFile={cpu_filename_base}")
+    cpu_filename = cpu_filename_base + ".v"
+
+    cfu_root = os.environ.get('CFU_ROOT')
+    custom_dir = os.path.join(cfu_root, "soc", "vexriscv")
+    custom_cpu = os.path.join(custom_dir, cpu_filename)
+    print("CUSTOM CPU: " + custom_cpu)
+    vdir = get_data_mod("cpu", "vexriscv").data_location
+    print("VDIR: " + vdir)
+    fullpath = os.path.join(vdir, cpu_filename)
+    print("FULL PATH: " + fullpath)
+
+    if os.path.exists(custom_cpu):
+        print(f"Variant \"{variant}\" already known.")
     else:
         #
-        #  TODO: parse "variant" to determine configuration in "gen_args",
-        #    and create a canonical "cpu_filename_base" that is uniquely
-        #    determined by the config.
-        #
-        dsz = 4096
-        isz = 4096
-        gen_args = []
-        if "cfu" in variant:
-            gen_args.append(f"--cfu=true")
-        gen_args.append(f"--dCacheSize={dsz}")
-        gen_args.append(f"--iCacheSize={isz}")
-
-        cpu_filename_base = "VexRiscv_GEN"
-        gen_args.append(f"--outputFile={cpu_filename_base}")
-
-
-        cpu_filename = cpu_filename_base + ".v"
-        print(f"Generating variant \"{variant}\" in file \"{cpu_filename}\".")
-
-        cfu_root = os.environ.get('CFU_ROOT')
-        custom_dir = os.path.join(cfu_root, "soc", "vexriscv")
-        custom_cpu = os.path.join(custom_dir, cpu_filename)
-
-        vdir = get_data_mod("cpu", "vexriscv").data_location
-        fullpath = os.path.join(vdir, cpu_filename)
-
-
-        #
+        # build it if needed!
         # build it if needed!
         #
+        print(f"Generating variant \"{variant}\" in file \"{cpu_filename}\".")
         if not os.path.exists(custom_cpu):
             cmd = 'cd {path} && sbt compile "runMain vexriscv.GenCoreDefault {args}"'.format(path=custom_dir, args=" ".join(gen_args))
             if os.system(cmd) != 0:
                 raise OSError('Failed to run sbt')
 
-        #
-        # do some patching
-        #  TODO: 'arch' will depend on the CPU config.
-        #
-        arch  = "rv32im"
-        abi   = "ilp32"
-        gcc_flags = f"-march={arch} -mabi={abi}"
+    #
+    # do some patching
+    #  TODO: 'arch' will depend on the CPU config.
+    #
+    arch  = "rv32im"
+    abi   = "ilp32"
+    gcc_flags = f"-march={arch} -mabi={abi}"
 
-        core.CPU_VARIANTS.update({
-            variant:             cpu_filename_base,
-        })
-        core.GCC_FLAGS.update({
-            variant:             gcc_flags,
-        })
+    core.CPU_VARIANTS.update({
+        variant:             cpu_filename_base,
+    })
+    core.GCC_FLAGS.update({
+        variant:             gcc_flags,
+    })
 
-        #
-        # Copy file to where it goes
-        #
-        copyfile(custom_cpu, fullpath)
+    #
+    # Copy file to where it goes
+    #
+    copyfile(custom_cpu, fullpath) 
