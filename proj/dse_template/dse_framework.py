@@ -1,6 +1,7 @@
 #!/bin/python3
 
 import os
+import sys
 import random
 import subprocess
 import time
@@ -106,18 +107,36 @@ def dse(csrPluginConfig, bypass, cfu, dCacheSize, hardwareDiv,
 
 
 if __name__ == "__main__":
-    # Sample example of how to use dse framework
-    csrPluginConfig="mcycle"
-    bypass=True
-    cfu=False
-    dCacheSize=4096
-    hardwareDiv=True
-    iCacheSize=4096 
-    mulDiv=True
-    prediction="none"
-    safe=True
-    singleCycleShift=True
-    singleCycleMulDiv=True
-    TARGET = "digilent_arty"  
+    if len(sys.argv) > 1 :
+        # Used for running dse vis cmd line
+        # Sample command that would be equivalent to default params:
+        # ./dse_framework.py mcycle True False 4096 True 4096 True none True True True 
+        csrPluginConfig   = sys.argv[1]
+        bypass            = True if sys.argv[2] == "True" else False
+        cfu               = True if sys.argv[3] == "True" else False
+        dCacheSize        = int(sys.argv[4])
+        hardwareDiv       = True if sys.argv[5] == "True" else False
+        iCacheSize        = int(sys.argv[6])
+        mulDiv            = True if sys.argv[7] == "True" else False
+        prediction        = sys.argv[8] 
+        safe              = True if sys.argv[9] == "True" else False
+        singleCycleShift  = True if sys.argv[10] == "True" else False
+        singleCycleMulDiv = True if sys.argv[11] == "True" else False
+        TARGET            = "digilent_arty"  
+    else:
+        # Sample example of how to use dse framework
+        csrPluginConfig="mcycle"
+        bypass=True
+        cfu=False
+        dCacheSize=4096
+        hardwareDiv=True
+        iCacheSize=4096 
+        mulDiv=True
+        prediction="none"
+        safe=True
+        singleCycleShift=True
+        singleCycleMulDiv=True
+        TARGET = "digilent_arty"  
+    
     dse(csrPluginConfig, bypass, cfu, dCacheSize, hardwareDiv, iCacheSize, 
         mulDiv, prediction, safe, singleCycleShift, singleCycleMulDiv, TARGET)
