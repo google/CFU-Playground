@@ -21,7 +21,7 @@
 #include <string.h>
 
 #include "playground_util/console.h"
-
+int CHAR_COUNTER = 0;
 namespace {
 
 // Print the whole menu
@@ -41,9 +41,13 @@ void menu_print(struct Menu* menu) {
 // Get the menu selection
 struct MenuItem* menu_get_selection(struct Menu* menu) {
   char c = '\0';
-  do {
-    c = readchar();
-  } while (c == '\n' || c == '\r');
+  //do {
+  //  c = readchar();
+  //} while (c == '\n' || c == '\r');
+  if (CHAR_COUNTER == 0 || CHAR_COUNTER == 1) c = 49; // ASCII value of '1'
+  else if (CHAR_COUNTER == 2) c = 103; // ASCII value of 'g'
+  else return NULL; 
+  CHAR_COUNTER++;
   putchar(c);
   for (struct MenuItem* p = menu->items; p->selection; p++) {
     if (c == p->selection) {
@@ -72,6 +76,9 @@ extern "C" void menu_run(struct Menu* menu) {
         item->fn();
         puts("---");
       }
+    }
+    else {
+        exit_now = true;
     }
   }
 }
