@@ -56,10 +56,10 @@ def get_resource_util(target):
     return cells
 
 
-def get_cycle_count(filename):
+def get_cycle_count():
 
     # Open output of simulation and find max cycle count
-    cycle_file = open(filename, 'r')
+    cycle_file = open('cycle_count.rpt', 'r')
     lines = cycle_file.readlines()
      
     cycles = float('inf')
@@ -83,14 +83,13 @@ def run_config(variant, target):
     subprocess.run(['make', 'clean']) 
     subprocess.run(['make', 'bitstream', 'TARGET=' + target, EXTRA_LITEX_ARGS, "USE_SYMBIFLOW=1"])
     workload_cmd = ['make', 'load', 'PLATFORM=sim', EXTRA_LITEX_ARGS]
-    filename = "cycle_counts-" + str(datetime.datetime.now()).split(' ')[1] + ".rpt"
+    filename = 'cycle_count.rpt'
     outfile  = open(filename, "w")
     workload = subprocess.Popen(workload_cmd, stdout=outfile)
     time.sleep(2100)
     workload.terminate()
-    cycles = get_cycle_count(filename)
+    cycles = get_cycle_count()
     cells  = get_resource_util(target)
-    print("Simulation Output file: " + filename)
 
     return (cycles, cells)
 
