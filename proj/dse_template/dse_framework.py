@@ -5,6 +5,7 @@ import sys
 import random
 import subprocess
 import time
+import datetime
 
 
 def make_variant_string(csrPluginConfig="mcycle", bypass=True, cfu=False, dCacheSize=4096, hardwareDiv=False, 
@@ -55,10 +56,10 @@ def get_resource_util(target):
     return cells
 
 
-def get_cycle_count():
+def get_cycle_count(filename):
 
     # Open output of simulation and find max cycle count
-    cycle_file = open('./cycle_counts.rpt', 'r')
+    cycle_file = open(filename, 'r')
     lines = cycle_file.readlines()
      
     cycles = float('inf')
@@ -82,12 +83,14 @@ def run_config(variant, target):
     subprocess.run(['make', 'clean']) 
     subprocess.run(['make', 'bitstream', 'TARGET=' + target, EXTRA_LITEX_ARGS, "USE_SYMBIFLOW=1"])
     workload_cmd = ['make', 'load', 'PLATFORM=sim', EXTRA_LITEX_ARGS]
-    outfile = open("cycle_counts.rpt", "w")
+    filename = "cycle_counts-" + str(datetime.datetime.now()).split(' ')[1] + ".rpt"
+    outfile  = open(filename, "w")
     workload = subprocess.Popen(workload_cmd, stdout=outfile)
     time.sleep(2100)
     workload.terminate()
-    cycles = get_cycle_count()
+    cycles = get_cycle_count(filename)
     cells  = get_resource_util(target)
+    print("Simulation Output file: " + filename)
 
     return (cycles, cells)
 
@@ -132,7 +135,7 @@ if __name__ == "__main__":
         hardwareDiv=True
         iCacheSize=4096 
         mulDiv=True
-        prediction="none"
+        prediction="static"
         safe=True
         singleCycleShift=True
         singleCycleMulDiv=True
