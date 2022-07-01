@@ -86,7 +86,7 @@ def run_config(variant, target):
     filename = 'cycle_count.rpt'
     outfile  = open(filename, "w")
     workload = subprocess.Popen(workload_cmd, stdout=outfile)
-    time.sleep(2100)
+    time.sleep(2100*2)
     workload.terminate()
     cycles = get_cycle_count()
     cells  = get_resource_util(target)
