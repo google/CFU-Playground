@@ -140,5 +140,5 @@ if __name__ == "__main__":
         singleCycleMulDiv=True
         TARGET = "digilent_arty"  
     
-    dse(csrPluginConfig, bypass, cfu, dCacheSize, hardwareDiv, iCacheSize, 
-        mulDiv, prediction, safe, singleCycleShift, singleCycleMulDiv, TARGET)
+    #dse(csrPluginConfig, bypass, cfu, dCacheSize, hardwareDiv, iCacheSize, 
+    #    mulDiv, prediction, safe, singleCycleShift, singleCycleMulDiv, TARGET)
