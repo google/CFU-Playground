@@ -62,11 +62,11 @@ def get_cycle_count():
     cycle_file = open('cycle_count.rpt', 'r')
     lines = cycle_file.readlines()
      
-    cycles = float('inf')
+    cycles = sys.float_info.max 
     cycles_found = False
     for line in lines:
         if 'cycles total' in line:
-            cur_cycles = int(line.strip().split(' ')[4][:-1])
+            cur_cycles = float(line.strip().split(' ')[4][:-1])
             if not cycles_found:
                 cycles = cur_cycles
                 cycles_found = True
