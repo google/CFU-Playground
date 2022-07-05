@@ -26,6 +26,7 @@ bool CanAccelerateConv4x4(const ConvParams& params,
                           const RuntimeShape& input_shape,
                           const RuntimeShape& filter_shape,
                           const RuntimeShape& output_shape,
+                          const int32_t* output_shift,
                           const int32_t* bias_data);
 
 // Accelerated version of ConvPerChannel() specialised for:

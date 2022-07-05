@@ -231,6 +231,7 @@ bool CanAccelerateConv4x4(const ConvParams& params,
                           const RuntimeShape& input_shape,
                           const RuntimeShape& filter_shape,
                           const RuntimeShape& output_shape,
+                          const int32_t* output_shift,
                           const int32_t* bias_data) {
   // No padding allowed
   if (params.padding_type != PaddingType::kValid) return false;
@@ -257,6 +258,15 @@ bool CanAccelerateConv4x4(const ConvParams& params,
     // Input depth must be multiple of 16, and output depth a multiple of 4
     if (input_depth % 16 != 0) return false;
     if (output_depth % 4 != 0) return false;
+  }
+
+  // RoundingDivideByPowerOfTwo only supports certain shifts. See
+  // CFU-Playground/proj/hps_accel/gateware/gen2/post_process.py
+  for (int i = 0; i < output_depth; i++) {
+    int32_t shift = output_shift[i];
+    if (shift < -12 || shift > -2) {
+      return false;
+    }
   }
 
   // Must be 4x4

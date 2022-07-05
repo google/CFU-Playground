@@ -210,7 +210,7 @@ inline void ConvPerChannel(
   bool accelerated = false;
 #ifdef ACCEL_CONV
   if (CanAccelerateConv4x4(params, input_shape, filter_shape, output_shape,
-                           bias_data)) {
+                           output_shift, bias_data)) {
     ConvPerChannel4x4(params, output_multiplier, output_shift, input_shape,
                       input_data, filter_shape, filter_data, bias_shape,
                       bias_data, output_shape, output_data);
