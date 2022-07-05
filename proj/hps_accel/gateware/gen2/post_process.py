@@ -123,7 +123,7 @@ class RoundingDivideByPowerOfTwo(BinaryPipelineActor):
         threshold = Signal(signed(32))
         quotient = Signal(signed(32))
         with m.Switch(shift):
-            for n in range(3, 12):
+            for n in range(2, 13):
                 with m.Case(n):
                     mask = (1 << n) - 1
                     m.d.comb += remainder.eq(dividend & mask)
