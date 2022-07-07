@@ -187,11 +187,20 @@ def build_cpu_variant_if_needed(variant):
 
     #
     # do some patching
-    #  TODO: 'arch' will depend on the CPU config.
     #
     arch  = "rv32im"
     abi   = "ilp32"
-    gcc_flags = f"-march={arch} -mabi={abi}"
+    hwDiv = ""
+    if cpu_params["mulDiv"] == "false":
+        arch  = "rv32i"
+        hwDiv = "  -mno-div"
+    else: 
+        if cpu_params["hardwareDiv"] == "false":
+            hwDiv = "  -mno-div"
+        
+    gcc_flags = f"-march={arch} -mabi={abi} {hwDiv}"
+
+
 
     core.CPU_VARIANTS.update({
         variant:             cpu_filename_base,

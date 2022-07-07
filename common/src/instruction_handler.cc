@@ -88,21 +88,21 @@ void instruction_handler(uint32_t* reg_base) {
 bool do_div_tests() {
   bool all_passed = true;
 #ifndef CONFIG_CPU_VARIANT_MINIMAL
-  auto div_test = ASM_R_TEST("div");
-
-  // Test instruction is division.
-  all_passed &= div_test(/* src1= */ 10, /* src2= */ 3, /* expected= */ 3);
-  all_passed &= div_test(/* src1= */ 0, /* src2= */ 1, /* expected= */ 0);
-
-  // Test division is signed.
-  all_passed &= div_test(/* src1= */ 1, /* src2= */ -1, /* expected= */ -1);
-
-  // Test RISC-V divide by 0 semantics.
-  all_passed &= div_test(/* src1= */ 1, /* src2= */ 0, /* expected= */ -1);
-
-  // Test RISC-V signed division overflow semantics.
-  all_passed &= div_test(/* src1= */ 0x80000000, /* src2= */ -1,
-                         /* expected= */ 0x80000000);
+//  auto div_test = ASM_R_TEST("div");
+//
+//  // Test instruction is division.
+//  all_passed &= div_test(/* src1= */ 10, /* src2= */ 3, /* expected= */ 3);
+//  all_passed &= div_test(/* src1= */ 0, /* src2= */ 1, /* expected= */ 0);
+//
+//  // Test division is signed.
+//  all_passed &= div_test(/* src1= */ 1, /* src2= */ -1, /* expected= */ -1);
+//
+//  // Test RISC-V divide by 0 semantics.
+//  all_passed &= div_test(/* src1= */ 1, /* src2= */ 0, /* expected= */ -1);
+//
+//  // Test RISC-V signed division overflow semantics.
+//  all_passed &= div_test(/* src1= */ 0x80000000, /* src2= */ -1,
+//                         /* expected= */ 0x80000000);
 #endif
 
   return all_passed;
@@ -111,17 +111,17 @@ bool do_div_tests() {
 bool do_divu_tests() {
   bool all_passed = true;
 #ifndef CONFIG_CPU_VARIANT_MINIMAL
-  auto divu_test = ASM_R_TEST("divu");
-
-  // Test instruction is division.
-  all_passed &= divu_test(/* src1= */ 10, /* src2= */ 3, /* expected= */ 3);
-  all_passed &= divu_test(/* src1= */ 0, /* src2= */ 1, /* expected= */ 0);
-
-  // Test division is unsigned.
-  all_passed &= divu_test(/* src1= */ 1, /* src2= */ -1, /* expected= */ 0);
-
-  // Test RISC-V divide by 0 semantics.
-  all_passed &= divu_test(/* src1= */ 1, /* src2= */ 0, /* expected= */ -1);
+//  auto divu_test = ASM_R_TEST("divu");
+//
+//  // Test instruction is division.
+//  all_passed &= divu_test(/* src1= */ 10, /* src2= */ 3, /* expected= */ 3);
+//  all_passed &= divu_test(/* src1= */ 0, /* src2= */ 1, /* expected= */ 0);
+//
+//  // Test division is unsigned.
+//  all_passed &= divu_test(/* src1= */ 1, /* src2= */ -1, /* expected= */ 0);
+//
+//  // Test RISC-V divide by 0 semantics.
+//  all_passed &= divu_test(/* src1= */ 1, /* src2= */ 0, /* expected= */ -1);
 #endif
 
   return all_passed;
@@ -130,17 +130,17 @@ bool do_divu_tests() {
 bool do_rem_tests() {
   bool all_passed = true;
 #ifndef CONFIG_CPU_VARIANT_MINIMAL
-  auto rem_test = ASM_R_TEST("rem");
-
-  // Test instruction is mod.
-  all_passed &= rem_test(/* src1= */ 13, /* src2= */ 4, /* expected= */ 1);
-  all_passed &= rem_test(/* src1= */ 0, /* src2= */ 4, /* expected= */ 0);
-
-  // Test mod is signed.
-  all_passed &= rem_test(/* src1= */ 4, /* src2= */ -3, /* expected= */ 1);
-
-  // Test RISC-V mod by 0 semantics.
-  all_passed &= rem_test(/* src1= */ 9, /* src2= */ 0, /* expected= */ 9);
+//  auto rem_test = ASM_R_TEST("rem");
+//
+//  // Test instruction is mod.
+//  all_passed &= rem_test(/* src1= */ 13, /* src2= */ 4, /* expected= */ 1);
+//  all_passed &= rem_test(/* src1= */ 0, /* src2= */ 4, /* expected= */ 0);
+//
+//  // Test mod is signed.
+//  all_passed &= rem_test(/* src1= */ 4, /* src2= */ -3, /* expected= */ 1);
+//
+//  // Test RISC-V mod by 0 semantics.
+//  all_passed &= rem_test(/* src1= */ 9, /* src2= */ 0, /* expected= */ 9);
 #endif
 
   return all_passed;
@@ -149,17 +149,17 @@ bool do_rem_tests() {
 bool do_remu_tests() {
   bool all_passed = true;
 #ifndef CONFIG_CPU_VARIANT_MINIMAL
-  auto remu_test = ASM_R_TEST("remu");
-
-  // Test instruction is mod.
-  all_passed &= remu_test(/* src1= */ 13, /* src2= */ 4, /* expected= */ 1);
-  all_passed &= remu_test(/* src1= */ 0, /* src2= */ 4, /* expected= */ 0);
-
-  // Test mod is unsigned.
-  all_passed &= remu_test(/* src1= */ 4, /* src2= */ -3, /* expected= */ 4);
-
-  // Test RISC-V mod by 0 semantics.
-  all_passed &= remu_test(/* src1= */ 9, /* src2= */ 0, /* expected= */ 9);
+//  auto remu_test = ASM_R_TEST("remu");
+//
+//  // Test instruction is mod.
+//  all_passed &= remu_test(/* src1= */ 13, /* src2= */ 4, /* expected= */ 1);
+//  all_passed &= remu_test(/* src1= */ 0, /* src2= */ 4, /* expected= */ 0);
+//
+//  // Test mod is unsigned.
+//  all_passed &= remu_test(/* src1= */ 4, /* src2= */ -3, /* expected= */ 4);
+//
+//  // Test RISC-V mod by 0 semantics.
+//  all_passed &= remu_test(/* src1= */ 9, /* src2= */ 0, /* expected= */ 9);
 #endif
 
   return all_passed;
