@@ -21,7 +21,11 @@
 #include <string.h>
 
 #include "playground_util/console.h"
-int CHAR_COUNTER = 0;
+
+// Sim_sequence is string of chars to be passed to menu while running in simulation
+char sim_sequence[] = "1xQ";
+char* sim_ptr = sim_sequence;
+
 namespace {
 
 // Print the whole menu
@@ -41,13 +45,10 @@ void menu_print(struct Menu* menu) {
 // Get the menu selection
 struct MenuItem* menu_get_selection(struct Menu* menu) {
   char c = '\0';
-  //do {
-  //  c = readchar();
-  //} while (c == '\n' || c == '\r');
-  if (CHAR_COUNTER == 0 || CHAR_COUNTER == 1) c = 49; // ASCII value of '1'
-  else if (CHAR_COUNTER == 2) c = 103; // ASCII value of 'g'
-  else return NULL; 
-  CHAR_COUNTER++;
+  if (*sim_ptr == '\0') return NULL;
+  else {
+    c = *(sim_ptr++);
+  }
   putchar(c);
   for (struct MenuItem* p = menu->items; p->selection; p++) {
     if (c == p->selection) {
