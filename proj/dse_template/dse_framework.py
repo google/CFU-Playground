@@ -85,9 +85,7 @@ def run_config(variant, target):
     workload_cmd = ['make', 'load', 'PLATFORM=sim', EXTRA_LITEX_ARGS]
     filename = 'cycle_count.rpt'
     outfile  = open(filename, "w")
-    workload = subprocess.Popen(workload_cmd, stdout=outfile)
-    time.sleep(2100*2)
-    workload.terminate()
+    workload = subprocess.run(workload_cmd, stdout=outfile)
     cycles = get_cycle_count()
     cells  = get_resource_util(target)
 
