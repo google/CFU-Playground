@@ -120,17 +120,21 @@ class RoundingDivideByPowerOfTwo(BinaryPipelineActor):
         # Cycle 1: calculate
         result = Signal(signed(32))
         remainder = Signal(signed(32))
+        # Our threshold looks like 010, 0100, 01000 etc for positive values and
+        # 011, 0101, 01001 etc for negative values.
         threshold = Signal(signed(32))
         quotient = Signal(signed(32))
+        negative = Signal()
+        m.d.comb += negative.eq(dividend < 0)
         with m.Switch(shift):
             for n in range(2, 13):
                 with m.Case(n):
                     mask = (1 << n) - 1
                     m.d.comb += remainder.eq(dividend & mask)
-                    m.d.comb += threshold.eq((mask >> 1) +
-                                             Mux(dividend < 0, 1, 0))
+                    m.d.comb += threshold[1:].eq(1 << (n - 2))
                     m.d.comb += quotient.eq(dividend >> n)
-        m.d.sync += result.eq(quotient + Mux(remainder > threshold, 1, 0))
+        m.d.comb += threshold[0].eq(negative)
+        m.d.sync += result.eq(quotient + Mux(remainder >= threshold, 1, 0))
 
         # Cycle 2: send output
         m.d.sync += out_value.eq(result)
