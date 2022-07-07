@@ -139,6 +139,7 @@ def main():
         build=args.run,
         run=args.run,
         sim_config=sim_config,
+        interactive=False,
         trace=args.sim_trace,
         trace_fst=True,
         trace_start=int(float(args.sim_trace_start)),
