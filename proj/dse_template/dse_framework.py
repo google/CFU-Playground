@@ -66,7 +66,8 @@ def get_cycle_count():
     cycles_found = False
     for line in lines:
         if 'cycles total' in line:
-            cur_cycles = float(line.strip().split(' ')[4][:-1])
+            cycles_list = [float(s) for s in line.split() if s.isdigit()]
+            cur_cycles = cycles_list[0] 
             if not cycles_found:
                 cycles = cur_cycles
                 cycles_found = True
