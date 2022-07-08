@@ -6,17 +6,23 @@ dependencies:
   - litex-hub::gcc-riscv32-elf-newlib
   - litex-hub::dfu-util
   - litex-hub::flterm
-  - litex-hub::openocd
+  #- litex-hub::openocd
   - litex-hub::verilator
   - litex-hub::nextpnr-nexus
   - litex-hub::nextpnr-ecp5
   - litex-hub::nextpnr-ice40
-  - litex-hub::yosys
+  #- litex-hub::yosys
   - litex-hub::iceprog
-  - litex-hub::prjxray-tools
-  - litex-hub::prjxray-db
-  - litex-hub::vtr-optimized
-  - litex-hub::symbiflow-yosys-plugins
+  #- litex-hub::prjxray-tools
+  #- litex-hub::prjxray-db
+  #- litex-hub::vtr-optimized
+  #- litex-hub::symbiflow-yosys-plugins
+  - litex-hub::openocd=0.10.0_1514_ga8edbd020=20201119_154304
+  - litex-hub::prjxray-tools=0.1_2986_g5937733d=20220512_085338
+  - litex-hub::prjxray-db=0.0_257_g0a0adde=20220512_085338
+  - litex-hub::vtr-optimized=8.0.0_5383_gc012f19d3=20220512_085338
+  - litex-hub::yosys=0.17_7_g990c9b8e1=20220512_085338_py37
+  - litex-hub::symbiflow-yosys-plugins=1.0.0_7_919_g2fa356d=20220512_085338
   - lxml
   - simplejson
   - intervaltree
