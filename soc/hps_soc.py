@@ -35,7 +35,8 @@ from litespi.opcodes import SpiNorFlashOpCodes as Codes
 from litespi.phy.generic import LiteSPIPHY
 from litespi import LiteSPI
 
-from migen import Module, Instance, Signal, Record
+from migen import Module, Signal, Record, ClockSignal, ResetSignal, \
+                  ClockDomainsRenamer, FSM, NextValue, NextState, If
 
 from patch import Patch
 # from cam_control import CameraControl
@@ -52,6 +53,73 @@ UART_SPEED = 115200
 RAM_SIZE = 320 * KB
 
 SOC_DIR = os.path.dirname(os.path.realpath(__file__))
+
+
+class CfuCpuClockCtrl(Module):
+    """
+    A module that controls clocks between CFU and CPU so that power usage is
+    optimized.
+    """
+
+    def __init__(self, cfu_bus, cfu_cen, cpu_cen):
+        """Constructor
+
+        Args:
+            cfu_bus: bus between CFU and CPU
+            cfu_cen: clock enable signal for CFU
+            cpu_cen: clock enable signal for CPU
+        """
+        self.cfu_bus = cfu_bus
+        self.cfu_cen = cfu_cen
+        self.cpu_cen = cpu_cen
+
+        delay = Signal(max=10)
+
+        self.submodules.fsm = fsm = FSM()
+        # It's just an initial state, once left it's not entered again
+        fsm.act("RESET",
+            # Enable both CFU and CPU
+            self.cfu_cen.eq(1),
+            self.cpu_cen.eq(1),
+
+            NextValue(delay, delay + 1),
+
+            # After 10 cycles disable CFU and go to next state
+            # Leave immediately if CPU has a command prepared
+            If(delay == 9,
+                NextState("CPU_ENABLED"),
+            ).Elif(self.cfu_bus.cmd.valid,
+                NextState("CFU_ENABLED")
+            )
+        )
+
+        fsm.act("CPU_ENABLED",
+            self.cpu_cen.eq(1),
+            self.cfu_cen.eq(0),
+
+            # If CPU has prepared a command, enable CFU
+            If(self.cfu_bus.cmd.valid,
+                self.cfu_cen.eq(1),
+                NextState("CFU_ENABLED"),
+            )
+        )
+
+        fsm.act("CFU_ENABLED",
+            self.cfu_cen.eq(1),
+            self.cpu_cen.eq(1),
+
+            # Disable CPU if CFU received a command (cmd.valid deasserted)
+            # And CFU didn't already respond to that command
+            If(~self.cfu_bus.rsp.valid & ~self.cfu_bus.cmd.valid,
+                self.cpu_cen.eq(0),
+            ),
+
+            # If CFU has prepared a response, enable CPU
+            If(self.cfu_bus.rsp.valid,
+                self.cpu_cen.eq(1),
+                NextState("CPU_ENABLED"),
+            )
+        )
 
 
 class HpsSoC(LiteXSoC):
@@ -97,6 +165,19 @@ class HpsSoC(LiteXSoC):
                      variant=variant,
                      reset_address=reset_address,
                      cfu=cpu_cfu)
+
+        cfu_cen = Signal()
+        cpu_cen = Signal()
+        self.comb += [
+            self.crg.sys_clk_enable.eq(cpu_cen),
+            self.crg.cfu_clk_enable.eq(cfu_cen)
+        ]
+
+        self.cpu.cfu_params.update(i_clk=ClockSignal("cfu"))
+        self.cpu.cfu_params.update(i_reset=ResetSignal("cfu"))
+
+        self.submodules.cfu_cpu_clk_ctl = ClockDomainsRenamer("por")(
+                CfuCpuClockCtrl(self.cpu.cfu_bus, cfu_cen, cpu_cen))
 
         # RAM
         if separate_arena:
@@ -149,7 +230,7 @@ class HpsSoC(LiteXSoC):
 
     def setup_ram(self, size):
         region = SoCRegion(self.sram_origin, size, cached=True, linker=True)
-        self.submodules.lram = self.platform.create_ram(32, size)
+        self.submodules.lram = ClockDomainsRenamer("por")(self.platform.create_ram(32, size))
         self.bus.add_slave("sram_lram", self.lram.bus, region)
         self.bus.add_region("sram", region)
 
@@ -158,7 +239,7 @@ class HpsSoC(LiteXSoC):
         region = SoCRegion(self.arena_origin, size, cached=True, linker=True)
         self.bus.add_region("arena", region)
         if size > 0:
-            self.submodules.arena = self.platform.create_ram(32, size, dual_port=True)
+            self.submodules.arena = ClockDomainsRenamer("por")(self.platform.create_ram(32, size, dual_port=True))
             self.bus.add_slave("arena_lram", self.arena.bus, region)
             self.add_config('SOC_SEPARATE_ARENA')
 

@@ -9,7 +9,7 @@ from litex.build.lattice import LatticePlatform, oxide
 from litex.build.lattice.programmer import LatticeProgrammer
 from litex.soc.cores.clock import NXOSCA
 # from litex.soc.cores.ram import NXLRAM
-from hps_lattice_nx import NXLRAM
+from hps_lattice_nx import NXLRAM, NXPLL
 
 hps_io = [
     ("done", 0, Pins("A5"), IOStandard("LVCMOS18H")),
@@ -64,25 +64,47 @@ class _CRG(Module):
     """Clock Reset Generator"""
 
     def __init__(self, platform, sys_clk_freq):
-        self.clock_domains.cd_sys = ClockDomain()
+        # Input for PLL
         self.clock_domains.cd_por = ClockDomain()
 
+        # Outputs from PLL
+        self.clock_domains.cd_sys = ClockDomain()
+        self.clock_domains.cd_cfu = ClockDomain()
+
+        # PLL output clocks' enable signals
+        self.sys_clk_enable = Signal(reset=1)
+        self.cfu_clk_enable = Signal(reset=1)
+
         # Clock from HFOSC
-        self.submodules.sys_clk = sys_osc = NXOSCA()
-        sys_osc.create_hf_clk(self.cd_sys, sys_clk_freq)
+        self.submodules.osc_clk = sys_osc = NXOSCA()
+        sys_osc.create_hf_clk(self.cd_por, sys_clk_freq)
+
         # We make the period constraint 7% tighter than our actual system
         # clock frequency, because the CrossLink-NX internal oscillator runs
         # at ±7% of nominal frequency.
-        platform.add_period_constraint(self.cd_sys.clk,
-                                       1e9 / (sys_clk_freq * 1.07))
+        clk_freq = sys_clk_freq * 1.07
 
         # Power On Reset
         por_cycles = 4096
         por_counter = Signal(log2_int(por_cycles), reset=por_cycles - 1)
-        self.comb += self.cd_por.clk.eq(self.cd_sys.clk)
         self.sync.por += If(por_counter != 0, por_counter.eq(por_counter - 1))
-        self.specials += AsyncResetSynchronizer(
-            self.cd_sys, (por_counter != 0))
+
+        # PLL
+        self.submodules.sys_pll = sys_pll = NXPLL(platform=platform, create_output_port_clocks=True)
+        sys_pll.register_clkin(self.cd_por.clk, clk_freq)
+        sys_pll.create_clkout(self.cd_sys, clk_freq)
+        sys_pll.create_clkout(self.cd_cfu, clk_freq)
+
+        self.specials += [
+            AsyncResetSynchronizer(self.cd_sys, ~self.sys_pll.locked | (por_counter != 0)),
+            AsyncResetSynchronizer(self.cd_cfu, ~self.sys_pll.locked | (por_counter != 0)),
+        ]
+
+    def do_finalize(self):
+        self.comb += [
+            self.sys_pll.enable.sys.eq(self.sys_clk_enable),
+            self.sys_pll.enable.cfu.eq(self.cfu_clk_enable),
+        ]
 
 
 _nextpnr_report_filename = 'nextpnr-nexus-report.json'
