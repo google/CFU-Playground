@@ -58,14 +58,12 @@ install-sf:
 		exit 1; \
 	fi
 	@mkdir -p $(SF_INSTALL)
-
-	F4PGA_TIMESTAMP='20220523-230829'
-	F4PGA_HASH='934b12d'
-
-	for PKG in install xc7a50t_test xc7a100t_test xc7z010_test; do
-  	  wget -qO- "https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/${F4PGA_TIMESTAMP}/symbiflow-arch-defs-${PKG}-${F4PGA_HASH}.tar.xz" | tar -xJC $(SF_INSTALL)
-	done
-
+	
+	wget -qO- "https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/20220523-230829/symbiflow-arch-defs-install-934b12d.tar.xz" | tar -xJC $(SF_INSTALL)
+	wget -qO- "https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/20220523-230829/symbiflow-arch-defs-xc7a50t_test-934b12d.tar.xz" | tar -xJC $(SF_INSTALL)
+	wget -qO- "https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/20220523-230829/symbiflow-arch-defs-xc7a100t_test-934b12d.tar.xz" | tar -xJC $(SF_INSTALL)
+	wget -qO- "https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/20220523-230829/symbiflow-arch-defs-xc7z010_test-934b12d.tar.xz" | tar -xJC $(SF_INSTALL)
+	
 	#wget -qO- "https://www.googleapis.com/download/storage/v1/b/symbiflow-arch-defs/o/artifacts%2Fprod%2Ffoss-fpga-tools%2Fsymbiflow-arch-defs%2Fcontinuous%2Finstall%2F497%2F20211222-000718%2Fsymbiflow-arch-defs-install-f9aa1caf.tar.xz?generation=1640179068316994&alt=media" | tar -xJC $(SF_INSTALL)
 	#wget -qO- "https://www.googleapis.com/download/storage/v1/b/symbiflow-arch-defs/o/artifacts%2Fprod%2Ffoss-fpga-tools%2Fsymbiflow-arch-defs%2Fcontinuous%2Finstall%2F497%2F20211222-000718%2Fsymbiflow-arch-defs-xc7a50t_test-f9aa1caf.tar.xz?generation=1640179069641023&alt=media" | tar -xJC $(SF_INSTALL)
 	#wget -qO- "https://www.googleapis.com/download/storage/v1/b/symbiflow-arch-defs/o/artifacts%2Fprod%2Ffoss-fpga-tools%2Fsymbiflow-arch-defs%2Fcontinuous%2Finstall%2F497%2F20211222-000718%2Fsymbiflow-arch-defs-xc7a100t_test-f9aa1caf.tar.xz?generation=1640179071622610&alt=media" | tar -xJC $(SF_INSTALL)
