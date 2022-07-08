@@ -23,7 +23,7 @@
 #include "playground_util/console.h"
 
 // Sim_sequence is string of chars to be passed to menu while running in simulation
-char sim_sequence[] = "1xQ";
+char sim_sequence[] = "11gxxQ";
 char* sim_ptr = sim_sequence;
 
 namespace {
