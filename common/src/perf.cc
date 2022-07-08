@@ -32,7 +32,7 @@ void perf_print_human(uint64_t n) {
 
 void perf_print_value(uint64_t n) {
   perf_print_human(n);
-  printf(" (%12llu)", n);
+  printf("  %12llu  ", n);
 }
 
 // Set each individual perf counter to zero
