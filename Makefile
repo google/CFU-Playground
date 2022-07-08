@@ -59,10 +59,10 @@ install-sf:
 	fi
 	@mkdir -p $(SF_INSTALL)
 	
-	wget "https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/20220523-230829/symbiflow-arch-defs-install-934b12d.tar.xz" | tar -xJC $(SF_INSTALL)
-	wget "https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/20220523-230829/symbiflow-arch-defs-xc7a50t_test-934b12d.tar.xz" | tar -xJC $(SF_INSTALL)
-	wget "https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/20220523-230829/symbiflow-arch-defs-xc7a100t_test-934b12d.tar.xz" | tar -xJC $(SF_INSTALL)
-	wget "https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/20220523-230829/symbiflow-arch-defs-xc7z010_test-934b12d.tar.xz" | tar -xJC $(SF_INSTALL)
+	wget -qO- "https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/20220523-230829/symbiflow-arch-defs-install-934b12d.tar.xz" | tar -xJC $(SF_INSTALL)
+	wget -qO- "https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/20220523-230829/symbiflow-arch-defs-xc7a50t_test-934b12d.tar.xz" | tar -xJC $(SF_INSTALL)
+	wget -qO- "https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/20220523-230829/symbiflow-arch-defs-xc7a100t_test-934b12d.tar.xz" | tar -xJC $(SF_INSTALL)
+	wget -qO- "https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/20220523-230829/symbiflow-arch-defs-xc7z010_test-934b12d.tar.xz" | tar -xJC $(SF_INSTALL)
 	
 	$(MAKE) USE_SYMBIFLOW=1 env
 	@echo
