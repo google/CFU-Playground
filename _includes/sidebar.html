@@ -42,7 +42,7 @@
     {% for event in events_list %}
       <a class="sidebar-nav-item{% if page.url == event.url %} active{% endif %}" href="{{ event.url | prepend: site.baseurl }}">{{ event.title }}</a>
     {% endfor %}
-    <a class="sidebar-nav-item{% if page.url == '/staff.html' %} active{% endif %}" href="{{ site.baseurl }}/staff.html">Staff</a>
+    <a class="sidebar-nav-item{% if page.url == '/team.html' %} active{% endif %}" href="{{ site.baseurl }}/team.html">Team</a>
 
     <!-- <a class="sidebar-nav-item" href="{{ site.github.repo }}/archive/v{{ site.version }}.zip">Download</a>
     <a class="sidebar-nav-item" href="{{ site.github.repo }}">GitHub project</a> -->
