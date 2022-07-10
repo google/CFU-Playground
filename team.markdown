@@ -1,6 +1,6 @@
 ---
 layout: page
-title:  "Staff"
+title:  "Team"
 date:   2021-06-28 19:54:01 -0700
 categories: jekyll update
 ---
@@ -84,13 +84,18 @@ categories: jekyll update
 	</table>
 </div> 
 
+## Organizers
+* Shvetank Prakash
+* Tim Callahan
+* Vijay Janapa Reddi
+* Tim Ansell
+
+
 ## Acknowledgements
 
-We would like to thank the many others who are not speaking but have contributed significantly towards making this workshop possible! 
+We would like to thank others who are not speaking but have contributed significantly towards making this workshop possible! 
 We hope we did not miss anyone and appreciate the support. 
 
-* Tim Ansell
-* Vijay Janapa Reddi
 * Kian Abbot
 * Bowen Chen
 * Moni Radev
