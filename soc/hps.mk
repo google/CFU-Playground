@@ -89,10 +89,8 @@ $(BIOS_BIN): $(CFU_V)
 	$(HPS_RUN)
 
 $(BITSTREAM): $(CFU_V)
-	@echo Building bitstream for Arty. CFU option: $(CFU_ARGS)
-	$(HPS_RUN) --build --no-compile-software
 	@echo Building bitstream for Nexus. CFU option: $(CFU_ARGS)
-	$(HPS_RUN) --build
+	$(HPS_RUN) --build --no-compile-software
 
 $(SYNTH): $(CFU_V)
 	@echo Synthesizing sources for Nexus. CFU option: $(CFU_ARGS)
