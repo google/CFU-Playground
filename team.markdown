@@ -85,11 +85,46 @@ categories: jekyll update
 </div> 
 
 ## Organizers
-* Shvetank Prakash
-* Tim Callahan
-* Vijay Janapa Reddi
-* Tim Ansell
-
+<div class="person">
+	<table>
+		<tr>
+			<td class="person-img">
+				<div class="circle">
+					<a style = "text-decoration: none;">
+		    		<img src="{{ '/assets/team/shvetankprakash.jpg' | relative_url }}"  alt="Shvetank Prakash">
+		    		</a>
+	    		</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="person-img">
+				<div class="circle">
+					<a style = "text-decoration: none;">
+		    		<img src="{{ '/assets/team/timcallahan.jpg' | relative_url }}"  alt="Tim Callahan">
+		    		</a>
+	    		</div>
+         </td>
+		</tr>
+		<tr>
+			<td class="person-img">
+				<div class="circle">
+					<a style = "text-decoration: none;"> 
+		    		<img src="{{ '/assets/team/vijay.png' | relative_url }}"  alt="Vijay Janapa Reddi">
+		    		</a>
+	    		</div>
+         </td>
+		</tr>
+		<tr>
+			<td class="person-img">
+				<div class="circle">
+					<a style = "text-decoration: none;"> 
+		    		<img src="{{ '/assets/team/timansell.png' | relative_url }}"  alt="Tim Ansell">
+		    		</a>
+	    		</div>
+         </td>
+		</tr>
+	</table>
+</div> 
 
 ## Acknowledgements
 
