@@ -88,13 +88,18 @@ categories: jekyll update
 <div class="person">
 	<table>
 		<tr>
+			<th>Shvetank Prakash</th>
+			<th>Tim Callahan</th>
+			<th>Vijay Janapa Reddi</th>
+			<th>Tim Ansell</th>
+		</tr>
+		<tr>
 			<td class="person-img">
 				<div class="circle">
 					<a style = "text-decoration: none;">
 		    		<img src="{{ '/assets/team/shvetankprakash.jpg' | relative_url }}"  alt="Shvetank Prakash">
 		    		</a>
 	    		</div>
-				Shvetank Prakash
 	</td>
 			<td class="person-img">
 				<div class="circle">
@@ -102,7 +107,6 @@ categories: jekyll update
 		    		<img src="{{ '/assets/team/timcallahan.jpg' | relative_url }}"  alt="Tim Callahan">
 		    		</a>
 	    		</div>
-				Tim Callahan
          </td>
 			<td class="person-img">
 				<div class="circle">
@@ -110,7 +114,6 @@ categories: jekyll update
 		    		<img src="{{ '/assets/team/vijay.png' | relative_url }}"  alt="Vijay Janapa Reddi">
 		    		</a>
 	    		</div>
-				Vijay Janapa Reddi
          </td>
 			<td class="person-img">
 				<div class="circle">
@@ -118,7 +121,6 @@ categories: jekyll update
 		    		<img src="{{ '/assets/team/timansell.png' | relative_url }}"  alt="Tim Ansell">
 		    		</a>
 	    		</div>
-				Tim Ansell
          </td>
 		</tr>
 	</table>
