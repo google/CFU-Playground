@@ -23,6 +23,16 @@ from litex.soc.integration import builder
 from typing import Callable
 
 
+_ice40_placement_build_template = [
+    "yosys -l {build_name}.rpt {build_name}.ys",
+    "nextpnr-ice40 --json {build_name}.json --pcf {build_name}.pcf --asc {build_name}.txt \
+     --pre-route ../../../../scripts/save-placement.py \
+     --report={build_name}-report.json \
+     --pre-pack {build_name}_pre_pack.py --{architecture} --package {package} {timefailarg} {ignoreloops} --seed {seed}",
+    "icepack -s {build_name}.txt {build_name}.bin",
+    "critpath.py > critpath.log"
+]
+
 
 class Ice40UP5KWorkflow(general.GeneralSoCWorkflow):
     """Workflow for boards derived from the Ice40UP5K.
@@ -64,6 +74,10 @@ class Ice40UP5KWorkflow(general.GeneralSoCWorkflow):
         soc.bus.regions["sram"].size = 128 * 1024;
         soc.bus.regions["main_ram"].origin = 128 * 1024;
         soc.bus.regions["main_ram"].size = 0;
+
+        # add scripts for plotting placement
+        soc.platform.toolchain.build_template = _ice40_placement_build_template
+
         return soc
 
     def software_load(
