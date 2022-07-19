@@ -79,6 +79,7 @@ def initval_parameters(contents, width):
 class NXLRAM(Module):
     def __init__(self, width=32, size=128*kB, dual_port=False, init=[]):
         self.bus = wishbone.Interface(width)
+        bus_bursting = True
         assert width in [32, 64]
         self.width = width
         self.size = size
@@ -115,6 +116,85 @@ class NXLRAM(Module):
         print("sel_bits_start ", sel_bits_start)
         print("adr_bits_start ", adr_bits_start)
 
+        # # #
+
+        adr_burst = Signal()
+
+        # Incrementing address burst cycles support - address generator
+
+        if bus_bursting:
+            adr_wrap_mask = Array((0b0000, 0b0011, 0b0111, 0b1111))
+            adr_wrap_max  = adr_wrap_mask[-1].bit_length()
+
+            adr_latched = Signal()
+
+            adr_counter        = Signal(len(self.bus.adr))
+            adr_counter_base   = Signal(len(self.bus.adr))
+            adr_counter_offset = Signal(adr_wrap_max)
+            adr_offset_lsb     = Signal(adr_wrap_max)
+            adr_offset_msb     = Signal(len(self.bus.adr))
+
+            adr_next = Signal(len(self.bus.adr))
+
+            # Only incrementing burst cycles are supported
+            self.comb += [
+                Case(self.bus.cti, {
+                    # incrementing address burst cycle
+                    0b010: adr_burst.eq(1),
+                    # end current burst cycle
+                    0b111: adr_burst.eq(0),
+                    # unsupported burst cycle
+                    "default": adr_burst.eq(0)
+                }),
+                adr_counter_base.eq(
+                    Cat(self.bus.adr & ~adr_wrap_mask[self.bus.bte],
+                        self.bus.adr[adr_wrap_max:]
+                        )
+                )
+            ]
+
+            # Latch initial address - initial address without wrapping bits and wrap offset
+            self.sync += [
+                If(self.bus.cyc & self.bus.stb & adr_burst,
+                    adr_latched.eq(1),
+                    # latch initial address, then increment it every clock cycle
+                    If(adr_latched,
+                        adr_counter.eq(adr_counter + 1)
+                    ).Else(
+                        adr_counter_offset.eq(self.bus.adr & adr_wrap_mask[self.bus.bte]),
+                        adr_counter.eq(adr_counter_base +
+                            Cat(~self.bus.we, Replicate(0, len(adr_counter)-1))
+                        ),
+                    ),
+                    If(self.bus.cti == 0b111,
+                        adr_latched.eq(0),
+                        adr_counter.eq(0),
+                        adr_counter_offset.eq(0)
+                    )
+                ).Else(
+                    adr_latched.eq(0),
+                    adr_counter.eq(0),
+                    adr_counter_offset.eq(0)
+                ),
+            ]
+
+            # Next address = sum of counter value without wrapped bits
+            #                and wrapped counter bits with offset
+            self.comb += [
+                adr_offset_lsb.eq((adr_counter + adr_counter_offset) & adr_wrap_mask[self.bus.bte]),
+                adr_offset_msb.eq(adr_counter &
+                    Cat(~adr_wrap_mask[self.bus.bte], Replicate(1, len(adr_offset_msb)-len(adr_offset_lsb)))
+                ),
+                adr_next.eq(adr_offset_msb +
+                    Cat(adr_offset_lsb, Replicate(0, len(adr_next) - len(adr_offset_lsb)))
+                )
+            ]
+
+        else:  # bus_bursting = False
+            self.comb += adr_burst.eq(0)
+
+        # # #
+
         if dual_port:
             self.b_addrs = []
             self.b_douts = []
@@ -124,6 +204,7 @@ class NXLRAM(Module):
             self.lram_blocks.append([])
             # Combine RAMs to increase Width.
             for w in range(self.width_cascading):
+                address = Signal(self.width)
                 datain  = Signal(32)
                 dataout = Signal(32)
                 cs      = Signal()
@@ -146,13 +227,19 @@ class NXLRAM(Module):
                         self.bus.dat_r[32*w:32*(w+1)].eq(dataout)
                     ]
 
+                self.comb += address.eq(self.bus.adr[adr_bits_start:adr_bits_start+14])
+                if bus_bursting:
+                    self.comb += If(adr_burst & adr_latched,
+                            address.eq(adr_next[adr_bits_start:adr_bits_start+14]),
+                    )
+
                 if dual_port:
                     b_addr = Signal(14)
                     b_dout = Signal(32)
                     lram_block = Instance("DPSC512K",
                         p_ECC_BYTE_SEL = "BYTE_EN",
                         i_DIA       = datain,
-                        i_ADA       = self.bus.adr[adr_bits_start:adr_bits_start+14],
+                        i_ADA       = address,
                         i_CLK       = ClockSignal(),
                         i_CEA       = 0b1,
                         i_WEA       = wren,
@@ -177,7 +264,7 @@ class NXLRAM(Module):
                     lram_block = Instance("SP512K",
                         p_ECC_BYTE_SEL = "BYTE_EN",
                         i_DI       = datain,
-                        i_AD       = self.bus.adr[adr_bits_start:adr_bits_start+14],
+                        i_AD       = address,
                         i_CLK      = ClockSignal(),
                         i_CE       = 0b1,
                         i_WE       = wren,
@@ -190,7 +277,7 @@ class NXLRAM(Module):
                 self.lram_blocks[d].append(lram_block)
                 self.specials += lram_block
 
-        self.sync += self.bus.ack.eq(self.bus.stb & self.bus.cyc & ~self.bus.ack)
+        self.sync += self.bus.ack.eq(self.bus.cyc & self.bus.stb & (~self.bus.ack | adr_burst))
 
         if init != []:
             self.add_init(init)
