@@ -35,8 +35,8 @@ from litespi.opcodes import SpiNorFlashOpCodes as Codes
 from litespi.phy.generic import LiteSPIPHY
 from litespi import LiteSPI
 
-from migen import Module, Instance, Signal, Record, ClockSignal, ResetSignal, \
-                  ClockDomainsRenamer, FSM, NextValue, NextState, If, ClockDomain
+from migen import Instance, Record, ClockSignal, ResetSignal, \
+                  ClockDomainsRenamer, ClockDomain
 
 from patch import Patch
 # from cam_control import CameraControl
@@ -53,54 +53,6 @@ UART_SPEED = 115200
 RAM_SIZE = 320 * KB
 
 SOC_DIR = os.path.dirname(os.path.realpath(__file__))
-
-
-class CfuCpuClockCtrl(Module):
-    """
-    A module that controls clocks between CFU and CPU so that power usage is
-    optimized.
-    """
-
-    def __init__(self, cfu_bus, cfu_cen, cpu_cen):
-        """Constructor
-
-        Args:
-            cfu_bus: bus between CFU and CPU
-            cfu_cen: clock enable signal for CFU
-            cpu_cen: clock enable signal for CPU
-        """
-        self.cfu_bus = cfu_bus
-        self.cfu_cen = cfu_cen
-        self.cpu_cen = cpu_cen
-
-        self.submodules.fsm = fsm = FSM(reset_state="CPU_ENABLED")
-
-        fsm.act("CPU_ENABLED",
-            self.cpu_cen.eq(1),
-            self.cfu_cen.eq(0),
-
-            # If CPU has prepared a command, enable CFU
-            If(self.cfu_bus.cmd.valid,
-                self.cfu_cen.eq(1),
-                NextState("CFU_ENABLED"),
-            )
-        )
-
-        fsm.act("CFU_ENABLED",
-            self.cfu_cen.eq(1),
-            self.cpu_cen.eq(1),
-
-            # Disable CPU if CFU is calculating response
-            If(~self.cfu_bus.rsp.valid & ~self.cfu_bus.cmd.valid,
-                self.cpu_cen.eq(0),
-
-                # Enable CPU and disable CFU if CPU received a response and has no next command
-                If(self.cfu_bus.cmd.ready,
-                    self.cpu_cen.eq(1),
-                    NextState("CPU_ENABLED"),
-                )
-            )
-        )
 
 
 class HpsSoC(LiteXSoC):
@@ -165,12 +117,28 @@ class HpsSoC(LiteXSoC):
 
         # Dynamic clock control between CPU and CFU
         if dynamic_clock_control:
-            cfu_cen = Signal()
-            cpu_cen = Signal()
+            # Add dynamic clock control logic
+            from clock_control import CfuCpuClockCtrl
+            self.submodules.cfu_cpu_clk_ctl = ClockDomainsRenamer("osc")(CfuCpuClockCtrl())
+            cfu_cen = self.cfu_cpu_clk_ctl.cfu_cen
+            cpu_cen = self.cfu_cpu_clk_ctl.cpu_cen
+            ctl_cfu_bus = self.cfu_cpu_clk_ctl.cfu_bus
+            cpu_cfu_bus = self.cpu.cfu_bus
+
+            self.comb += [
+                # Connect dynamic clock control bus to CPU <-> CFU BUS
+                ctl_cfu_bus.rsp.valid.eq(cpu_cfu_bus.rsp.valid),
+                ctl_cfu_bus.rsp.ready.eq(cpu_cfu_bus.rsp.ready),
+                ctl_cfu_bus.cmd.valid.eq(cpu_cfu_bus.cmd.valid),
+                ctl_cfu_bus.cmd.ready.eq(cpu_cfu_bus.cmd.ready),
+
+                # Connect system clock to dynamic clock enable
+                self.crg.sys_clk_enable.eq(cpu_cen),
+            ]
+
+            # Create separate clock for CFU
             clko = ClockSignal("cfu")
             self.clock_domains.cd_cfu = ClockDomain("cfu")
-
-            self.comb += self.crg.sys_clk_enable.eq(cpu_cen)
             self.specials += Instance(
                 "DCC",
                 i_CLKI=ClockSignal("osc"),
@@ -178,11 +146,9 @@ class HpsSoC(LiteXSoC):
                 i_CE=cfu_cen,
             )
 
+            # Connect separate clock to CFU, keep reset from oscillator clock domain
             self.cpu.cfu_params.update(i_clk=clko)
             self.cpu.cfu_params.update(i_reset=ResetSignal("osc"))
-
-            self.submodules.cfu_cpu_clk_ctl = ClockDomainsRenamer("osc")(
-                    CfuCpuClockCtrl(self.cpu.cfu_bus, cfu_cen, cpu_cen))
 
             # Connect clock enable signals to RAM and Arena
             self.comb += [self.lram.a_clkens[i].eq(cpu_cen) for i in range(len(self.lram.a_clkens))]
