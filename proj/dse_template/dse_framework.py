@@ -29,7 +29,7 @@ def make_variant_string(csrPluginConfig="mcycle", bypass=True, cfu=False, dCache
     variant = "generate"
     for param_name, val in sorted(CPU_PARAMS.items()):
         if param_name == "cfu":
-            if val is True:
+            if val is True or val == "True":
                 variant = variant + "+cfu"
         else:
             variant = variant + "+" + param_name + ":" + str(val).lower()
