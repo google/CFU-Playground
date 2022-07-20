@@ -265,6 +265,12 @@ class HpsCfu(Cfu):
         # Connect verify functionality
         m.d.comb += get.reg_verify_value.eq(set_.reg_verify_value + 1)
 
+        # Connect LRAM start/stop from accelerator to CFU ports
+        m.d.comb += [
+            self.lram_access_start.eq(core.mem_access_start),
+            self.lram_access_stop.eq(core.mem_access_stop),
+        ]
+
         return {
             Constants.INS_GET: get,
             Constants.INS_SET: set_,

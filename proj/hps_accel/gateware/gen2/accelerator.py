@@ -123,8 +123,14 @@ class AcceleratorCore(SimpleElaboratable):
         Stream of data to write to post_process memory.
 
     output: Endpoint(unsigned(32)), out
-      The 8 bit output values as 4 byte words. Values are produced in an
-      algorithm dependent order.
+        The 8 bit output values as 4 byte words. Values are produced in an
+        algorithm dependent order.
+
+    mem_access_start: Signal(), out
+        Indicates that accelerator requires access to memory.
+
+    mem_access_stop: Signal(), out
+        Indicates that accelerator does not require access to memory.
     """
 
     def __init__(self, specialize_nx=False):
@@ -138,6 +144,9 @@ class AcceleratorCore(SimpleElaboratable):
         self.lram_data = [Signal(32, name=f"lram_data{i}") for i in range(4)]
         self.post_process_params = Endpoint(POST_PROCESS_PARAMS)
         self.output = Endpoint(unsigned(32))
+
+        self.mem_access_start = Signal()
+        self.mem_access_stop = Signal()
 
     def build_filter_store(self, m):
         m.submodules['filter_store'] = store = FilterStore()
@@ -296,3 +305,9 @@ class AcceleratorCore(SimpleElaboratable):
         m.d.comb += owa.half_mode.eq(~self.config.mode)
         m.d.comb += connect(ppp.output, owa.input)
         m.d.comb += connect(owa.output, self.output)
+
+        # Connect the same start/stop as fetchers
+        m.d.comb += [
+            self.mem_access_start.eq(self.start),
+            self.mem_access_stop.eq(self.reset | finished),
+        ]

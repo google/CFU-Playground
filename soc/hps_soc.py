@@ -35,7 +35,7 @@ from litespi.opcodes import SpiNorFlashOpCodes as Codes
 from litespi.phy.generic import LiteSPIPHY
 from litespi import LiteSPI
 
-from migen import Instance, Record, ClockSignal, ResetSignal, \
+from migen import Signal, Instance, Record, ClockSignal, ResetSignal, \
                   ClockDomainsRenamer, ClockDomain
 
 from patch import Patch
@@ -125,6 +125,9 @@ class HpsSoC(LiteXSoC):
             ctl_cfu_bus = self.cfu_cpu_clk_ctl.cfu_bus
             cpu_cfu_bus = self.cpu.cfu_bus
 
+            lram_access_start = Signal()
+            lram_access_stop = Signal()
+
             self.comb += [
                 # Connect dynamic clock control bus to CPU <-> CFU BUS
                 ctl_cfu_bus.rsp.valid.eq(cpu_cfu_bus.rsp.valid),
@@ -149,13 +152,28 @@ class HpsSoC(LiteXSoC):
             # Connect separate clock to CFU, keep reset from oscillator clock domain
             self.cpu.cfu_params.update(i_clk=clko)
             self.cpu.cfu_params.update(i_reset=ResetSignal("osc"))
+            self.cpu.cfu_params.update(o_lram_access_start=lram_access_start)
+            self.cpu.cfu_params.update(o_lram_access_stop=lram_access_stop)
 
             # Connect clock enable signals to RAM and Arena
             self.comb += [self.lram.a_clkens[i].eq(cpu_cen) for i in range(len(self.lram.a_clkens))]
             if separate_arena:
                 self.comb += [self.arena.a_clkens[i].eq(cpu_cen) for i in range(len(self.arena.a_clkens))]
                 if cfu_mport:
-                    self.comb += [self.arena.b_clkens[i].eq(cfu_cen) for i in range(len(self.arena.b_clkens))]
+                    from clock_control import StartStopEnableCtl
+                    self.submodules.port_b_clk_ctrl = ClockDomainsRenamer("osc")(StartStopEnableCtl())
+                    lram_start = self.port_b_clk_ctrl.start
+                    lram_stop  = self.port_b_clk_ctrl.stop
+                    lram_cen   = self.port_b_clk_ctrl.enable
+
+                    self.comb += [
+                        # Connect LRAM clock control module to CFU LRAM access signals
+                        lram_start.eq(lram_access_start),
+                        lram_stop.eq(lram_access_stop),
+
+                        # Connect LRAM clock enable to LRAM clock control module for all existing ports
+                        [self.arena.b_clkens[i].eq(lram_cen & cfu_cen) for i in range(len(self.arena.b_clkens))]
+                    ]
         else:
             # If dynamic clock control is disabled, assert all memory clock enable signals
             self.comb += [self.lram.a_clkens[i].eq(1) for i in range(len(self.lram.a_clkens))]

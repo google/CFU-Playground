@@ -1,4 +1,4 @@
-from migen import Module, Signal, Record, FSM, NextState, If
+from migen import Module, Signal, Record, FSM, NextState, NextValue, If
 
 # CFU:CPU bus layout but just handshake signals
 cfu_bus_minimized_layout = [
@@ -13,8 +13,7 @@ cfu_bus_minimized_layout = [
 ]
 
 class CfuCpuClockCtrl(Module):
-    """
-    A module that controls clocks between CFU and CPU so that power usage is
+    """A module that controls clocks between CFU and CPU so that power usage is
     optimized.
 
     Attributes
@@ -22,8 +21,10 @@ class CfuCpuClockCtrl(Module):
 
     cfu_bus: Record(cfu_bus_layout), in
         Bus connecting CFU and CPU.
+
     cfu_cen: Signal(1), out
         Clock enable signal for CFU.
+
     cpu_cen: Signal(1), out
         Clock enable signal for CPU.
     """
@@ -61,3 +62,74 @@ class CfuCpuClockCtrl(Module):
                 )
             )
         )
+
+class StartStopEnableCtl(Module):
+    """This module takes two input signals and returns an enable output signal
+    based on them.
+
+    Output signal `enable` is asserted between each `start` and `stop` signal.
+    Additionaly it may stay asserted for `stop_cycles` number of cycles after
+    asserting `stop` signal. It will not catch `start` signal during additional
+    cycles if it occurs.
+
+    Parameters
+    ----------
+
+    stop_cycles: int, optional
+        A number of cycles that clock should stay enabled after receiving stop signal.
+
+    Attributes
+    ----------
+
+    start: Signal(1), in
+        Start signal, asserted when clock should be enabled.
+
+    stop: Signal(1), in
+        Stop signal, asserted when clock should be disabled.
+
+    enable: Signal(1), out
+        Enable signal, asserted from (`start`) to (`stop` + `stop_cycles`).
+    """
+
+    def __init__(self, stop_cycles=0):
+        self.start  = start  = Signal()
+        self.stop   = stop   = Signal()
+        self.enable = enable = Signal()
+
+        self.submodules.fsm = fsm = FSM(reset_state="WAIT_FOR_START")
+
+        fsm.act("WAIT_FOR_START",
+            enable.eq(0),
+            If(start,
+                enable.eq(1),
+                NextState("WAIT_FOR_STOP")
+            )
+        )
+
+        if stop_cycles > 0:
+            delay = Signal(max=stop_cycles+1)
+
+            fsm.act("WAIT_FOR_STOP",
+                enable.eq(1),
+                If(stop,
+                    delay.eq(1),
+                    NextState("DELAY_STOP")
+                ),
+            )
+
+            fsm.act("DELAY_STOP",
+                enable.eq(1),
+                NextValue(delay, delay + 1),
+                If(delay == stop_cycles,
+                    enable.eq(0),
+                    NextState("WAIT_FOR_START")
+                )
+            )
+        else:
+            fsm.act("WAIT_FOR_STOP",
+                enable.eq(1),
+                If(stop,
+                    enable.eq(0),
+                    NextState("WAIT_FOR_START")
+                ),
+            )

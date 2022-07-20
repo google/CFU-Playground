@@ -168,6 +168,8 @@ class CfuBase(SimpleElaboratable):
         output     [31:0]   rsp_payload_outputs_0,
         input               clk
         input               reset
+        output              lram_access_start,
+        output              lram_access_stop,
         output    [13:0]    port0_addr,
         output    [13:0]    port1_addr,
         output    [13:0]    port2_addr,
@@ -189,6 +191,8 @@ class CfuBase(SimpleElaboratable):
         self.rsp_ready = Signal(name='rsp_ready')
         self.rsp_out = Signal(32, name='rsp_payload_outputs_0')
         self.reset = Signal(name='reset')
+        self.lram_access_start = Signal(name='lram_access_start')
+        self.lram_access_stop = Signal(name='lram_access_stop')
         self.lram_addr = [Signal(32, name=f'port{i}_addr') for i in range(4)]
         self.lram_data = [Signal(32, name=f'port{i}_din') for i in range(4)]
         self.ports = [
@@ -201,6 +205,8 @@ class CfuBase(SimpleElaboratable):
             self.rsp_ready,
             self.rsp_out,
             self.reset,
+            self.lram_access_start,
+            self.lram_access_stop,
         ] + self.lram_addr + self.lram_data
 
 
