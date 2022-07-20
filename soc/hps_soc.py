@@ -128,7 +128,8 @@ class HpsSoC(LiteXSoC):
                  with_led_chaser=False,
                  integrated_rom_init=[],
                  build_bios=False,
-                 dynamic_clock_control=True):
+                 cfu_mport=False,
+                 dynamic_clock_control=False):
         LiteXSoC.__init__(self,
                           platform=platform,
                           sys_clk_freq=platform.sys_clk_freq,
@@ -170,7 +171,6 @@ class HpsSoC(LiteXSoC):
             self.clock_domains.cd_cfu = ClockDomain("cfu")
 
             self.comb += self.crg.sys_clk_enable.eq(cpu_cen)
-
             self.specials += Instance(
                 "DCC",
                 i_CLKI=ClockSignal("osc"),
@@ -185,11 +185,22 @@ class HpsSoC(LiteXSoC):
                     CfuCpuClockCtrl(self.cpu.cfu_bus, cfu_cen, cpu_cen))
 
             # Connect clock enable signals to RAM and Arena
-            self.comb += [
-                [self.lram.a_clkens[i].eq(cpu_cen) for i in range(len(self.lram.a_clkens))],
-                [self.arena.a_clkens[i].eq(cpu_cen) for i in range(len(self.arena.a_clkens))],
-                [self.arena.b_clkens[i].eq(cfu_cen) for i in range(len(self.arena.b_clkens))],
-            ]
+            self.comb += [self.lram.a_clkens[i].eq(cpu_cen) for i in range(len(self.lram.a_clkens))]
+            if separate_arena:
+                self.comb += [self.arena.a_clkens[i].eq(cpu_cen) for i in range(len(self.arena.a_clkens))]
+                if cfu_mport:
+                    self.comb += [self.arena.b_clkens[i].eq(cfu_cen) for i in range(len(self.arena.b_clkens))]
+        else:
+            # If dynamic clock control is disabled, assert all memory clock enable signals
+            self.comb += [self.lram.a_clkens[i].eq(1) for i in range(len(self.lram.a_clkens))]
+            if separate_arena:
+                self.comb += [self.arena.a_clkens[i].eq(1) for i in range(len(self.arena.a_clkens))]
+                if cfu_mport:
+                    self.comb += [self.arena.b_clkens[i].eq(1) for i in range(len(self.arena.b_clkens))]
+
+        # Connect CFU directly to Arena LRAM memory
+        if cfu_mport:
+            self.connect_cfu_to_lram()
 
         # SPI Flash
         self.setup_litespi_flash()
@@ -308,7 +319,6 @@ class HpsSoC(LiteXSoC):
             cfu_lram_bus.lram3.din.eq(self.arena.b_douts[3]),
         ]
 
-
     # This method is defined on SoCCore and the builder assumes it exists.
     def initialize_rom(self, data):
         if hasattr(self, 'rom') and not self.integrated_rom_initialized:
@@ -378,6 +388,8 @@ def main():
     parser.add_argument("--build-bios", action="store_true",
                         help="Flag to specify that the BIOS is built as well")
     parser.add_argument("--just-synth", action='store_true', help="Stop after synthesis")
+    parser.add_argument("--dynamic-clock-control", action="store_true",
+                        help="Enable dynamic clock control between CPU and CFU to reduce FPGA power consumption.")
 
     args = parser.parse_args()
 
@@ -403,10 +415,9 @@ def main():
                     execute_from_lram=args.execute_from_lram,
                     separate_arena=args.separate_arena,
                     integrated_rom_init=integrated_rom_init,
-                    build_bios=args.build_bios)
-
-    if args.cfu_mport:
-        soc.connect_cfu_to_lram()
+                    build_bios=args.build_bios,
+                    cfu_mport=args.cfu_mport,
+                    dynamic_clock_control=args.dynamic_clock_control)
 
     if not args.build_bios:
         # To still allow building libraries needed
