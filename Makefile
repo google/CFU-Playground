@@ -59,18 +59,18 @@ install-sf:
 		echo ; \
 		exit 1; \
 	fi
-	@mkdir -p $(SF_INSTALL)
-	wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/${F4PGA_TIMESTAMP}/symbiflow-arch-defs-install-${F4PGA_HASH}.tar.xz | tar -xJC $(SF_INSTALL)
-	wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/${F4PGA_TIMESTAMP}/symbiflow-arch-defs-xc7a50t_test-${F4PGA_HASH}.tar.xz | tar -xJC $(SF_INSTALL)
-	wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/${F4PGA_TIMESTAMP}/symbiflow-arch-defs-xc7a100t_test-${F4PGA_HASH}.tar.xz | tar -xJC $(SF_INSTALL)
-	wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/${F4PGA_TIMESTAMP}/symbiflow-arch-defs-xc7a200t_test-${F4PGA_HASH}.tar.xz | tar -xJC $(SF_INSTALL)
+	@mkdir -p $(SF_INSTALL)/xc7/install
+	wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/${F4PGA_TIMESTAMP}/symbiflow-arch-defs-install-${F4PGA_HASH}.tar.xz | tar -xJC $(SF_INSTALL)/xc7/install
+	wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/${F4PGA_TIMESTAMP}/symbiflow-arch-defs-xc7a50t_test-${F4PGA_HASH}.tar.xz | tar -xJC $(SF_INSTALL)/xc7/install
+	wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/${F4PGA_TIMESTAMP}/symbiflow-arch-defs-xc7a100t_test-${F4PGA_HASH}.tar.xz | tar -xJC $(SF_INSTALL)/xc7/install
+	wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/${F4PGA_TIMESTAMP}/symbiflow-arch-defs-xc7a200t_test-${F4PGA_HASH}.tar.xz | tar -xJC $(SF_INSTALL)/xc7/install
 	$(MAKE) USE_SYMBIFLOW=1 env
 	@echo
 	@echo "Done installing SymbiFlow.  To enter the environment, type 'make enter-sf', which creates a new subshell, and 'exit' when done."
 	@echo
 
 enter-sf:
-	-@export PATH=$(TOP_DIR)/env/symbiflow/bin:$(PATH) && $(MAKE) USE_SYMBIFLOW=1 enter
+	-@export F4PGA_INSTALL_DIR=$(TOP_DIR)/$(SF_INSTALL) && $(MAKE) USE_SYMBIFLOW=1 enter
 
 
 .PHONY: enter-sf install-sf info

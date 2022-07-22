@@ -4,6 +4,7 @@ channels:
   - litex-hub
 dependencies:
   - litex-hub::gcc-riscv32-elf-newlib
+  - litex-hub::openfpgaloader
   - litex-hub::dfu-util
   - litex-hub::flterm
   - litex-hub::openocd
