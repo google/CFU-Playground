@@ -20,5 +20,6 @@ sympy
 textx
 python-constraint
 fasm
-git+https://github.com/SymbiFlow/prjxray.git@e25c20a8f158cc5e94eb62e3b74e16fc9d6c1d26#egg=prjxray
-git+https://github.com/symbiflow/xc-fasm.git@14afc2bae24cbf6ee5e7d057a58b4cbd776358d0#egg=xc-fasm
+https://github.com/chipsalliance/f4pga/archive/main.zip#subdirectory=f4pga
+git+https://github.com/f4pga/prjxray.git@ae546d6b7648bf4df9cf63f0b25b2028b5623c43#egg=prjxray
+git+https://github.com/chipsalliance/f4pga-xc-fasm.git@25dc605c9c0896204f0c3425b52a332034cf5e5c#egg=xc-fasm
