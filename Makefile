@@ -49,6 +49,8 @@ help:
 	@echo ================================================================
 	@echo
 
+F4PGA_TIMESTAMP=20220714-173445
+F4PGA_HASH=f7afc12
 
 install-sf:
 	@if [ -d "$(SF_INSTALL)" ]; then \
@@ -58,10 +60,10 @@ install-sf:
 		exit 1; \
 	fi
 	@mkdir -p $(SF_INSTALL)
-	wget -qO- "https://www.googleapis.com/download/storage/v1/b/symbiflow-arch-defs/o/artifacts%2Fprod%2Ffoss-fpga-tools%2Fsymbiflow-arch-defs%2Fcontinuous%2Finstall%2F497%2F20211222-000718%2Fsymbiflow-arch-defs-install-f9aa1caf.tar.xz?generation=1640179068316994&alt=media" | tar -xJC $(SF_INSTALL)
-	wget -qO- "https://www.googleapis.com/download/storage/v1/b/symbiflow-arch-defs/o/artifacts%2Fprod%2Ffoss-fpga-tools%2Fsymbiflow-arch-defs%2Fcontinuous%2Finstall%2F497%2F20211222-000718%2Fsymbiflow-arch-defs-xc7a50t_test-f9aa1caf.tar.xz?generation=1640179069641023&alt=media" | tar -xJC $(SF_INSTALL)
-	wget -qO- "https://www.googleapis.com/download/storage/v1/b/symbiflow-arch-defs/o/artifacts%2Fprod%2Ffoss-fpga-tools%2Fsymbiflow-arch-defs%2Fcontinuous%2Finstall%2F497%2F20211222-000718%2Fsymbiflow-arch-defs-xc7a100t_test-f9aa1caf.tar.xz?generation=1640179071622610&alt=media" | tar -xJC $(SF_INSTALL)
-	wget -qO- "https://www.googleapis.com/download/storage/v1/b/symbiflow-arch-defs/o/artifacts%2Fprod%2Ffoss-fpga-tools%2Fsymbiflow-arch-defs%2Fcontinuous%2Finstall%2F497%2F20211222-000718%2Fsymbiflow-arch-defs-xc7a200t_test-f9aa1caf.tar.xz?generation=1640179073346556&alt=media" | tar -xJC $(SF_INSTALL)
+	wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/${F4PGA_TIMESTAMP}/symbiflow-arch-defs-install-${F4PGA_HASH}.tar.xz | tar -xJC $(SF_INSTALL)
+	wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/${F4PGA_TIMESTAMP}/symbiflow-arch-defs-xc7a50t_test-${F4PGA_HASH}.tar.xz | tar -xJC $(SF_INSTALL)
+	wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/${F4PGA_TIMESTAMP}/symbiflow-arch-defs-xc7a100t_test-${F4PGA_HASH}.tar.xz | tar -xJC $(SF_INSTALL)
+	wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/${F4PGA_TIMESTAMP}/symbiflow-arch-defs-xc7a200t_test-${F4PGA_HASH}.tar.xz | tar -xJC $(SF_INSTALL)
 	$(MAKE) USE_SYMBIFLOW=1 env
 	@echo
 	@echo "Done installing SymbiFlow.  To enter the environment, type 'make enter-sf', which creates a new subshell, and 'exit' when done."
