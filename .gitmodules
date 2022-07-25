@@ -64,3 +64,7 @@
 [submodule "third_party/python/amaranth"]
 	path = third_party/python/amaranth
 	url = https://github.com/amaranth-lang/amaranth
+[submodule "third_party/python/valentyusb"]
+	path = third_party/python/valentyusb
+	url = https://github.com/litex-hub/valentyusb
+	branch = hw_cdc_eptri

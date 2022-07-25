@@ -21,7 +21,9 @@ CFU_ROOT=$(dirname $(realpath ${BASH_SOURCE[0]}))
 PYTHONPATH="${CFU_ROOT}/python:${CFU_ROOT}/soc/board_specific_workflows"
 for i in "${CFU_ROOT}/third_party/python/"*; do
     # Avoid adding files such as README.md to our path
-    if [ -d "$i/src" ]; then
+    # - ValentyUsb is special-cased: it has a src/ directory
+    #    that is *not* for Python
+    if [ -d "$i/src" ] && [[ "$i" != *"valentyusb"* ]]; then
         PYTHONPATH="${PYTHONPATH}:${i}/src"
     elif [ -d "$i" ]; then
         PYTHONPATH="${PYTHONPATH}:${i}"
