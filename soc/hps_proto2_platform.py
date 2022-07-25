@@ -135,8 +135,8 @@ _oxide_router1_build_template = [
     'prjoxide pack {build_name}.fasm {build_name}.bit',
 ]
 
-# Template for Yosys synthesis script
-_oxide_yosys_template = oxide._yosys_template + [
+# Additions to Yosys synthesis script
+_extra_yosys_template = [
     "techmap -map +/nexus/cells_sim.v t:VLO t:VHI %u",
     "plugin -i dsp-ff",
     "dsp_ff -rules +/nexus/dsp_rules.txt",
@@ -160,7 +160,7 @@ class Platform(LatticePlatform):
                                  connectors=[],
                                  toolchain=toolchain)
         if toolchain == "oxide":
-            self.toolchain.yosys_template = _oxide_yosys_template
+            self.toolchain.yosys_template = self.toolchain._yosys_template + _extra_yosys_template
             if just_synth:
                 self.toolchain.build_template = _oxide_synth_build_template
             elif custom_params:
