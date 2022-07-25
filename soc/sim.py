@@ -19,7 +19,7 @@
 
 from migen import *
 
-from litex_boards.targets.arty import BaseSoC
+from litex_boards.targets.digilent_arty import BaseSoC
 
 from litex.build.generic_platform import *
 from litex.build.sim.config import SimConfig
