@@ -170,7 +170,7 @@ project is designed to be used a base for your own projects, and it also serves
 as a useful "minimal" system.
 
 The following assumes the default Arty A7-35T.   If you use a different board, add ``TARGET=board``
-to each of the ``make`` commands.   For example, to target iCEBreaker, add ``TARGET=1bitsquared_icebreaker``.
+to each of the ``make`` commands.   For example, to target iCEBreaker, add ``TARGET=icebreaker``.
 
 .. code-block:: bash
 

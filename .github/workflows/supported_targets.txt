@@ -1,5 +1,5 @@
-1bitsquared_icebreaker
-1bitsquared_icebreaker_bitsy
+icebreaker
+icebreaker_bitsy
 antmicro_lpddr4_test_board
 camlink_4k
 colorlight_5a_75x

@@ -1,4 +1,4 @@
-1bitsquared_icebreaker_bitsy
+icebreaker_bitsy
 colorlight_5a_75x
 decklink_intensity_pro_4k
 digilent_basys3
