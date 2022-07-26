@@ -33,7 +33,7 @@ def workflow_factory(target: str) -> GeneralSoCWorkflow:
     """
     return {
         'digilent_arty': DigilentArtySoCWorkflow,
-        '1bitsquared_icebreaker': IcebreakerSoCWorkflow,
+        'icebreaker': IcebreakerSoCWorkflow,
         'kosagi_fomu': KosagiFomuSoCWorkflow,
         'lattice_crosslink_nx_evn': LatticeCrossLinkNXEVNSoCWorkflow,
     }.get(target, GeneralSoCWorkflow)

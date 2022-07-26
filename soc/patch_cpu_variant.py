@@ -63,6 +63,13 @@ def patch_cpu_variant():
         'perf+cfu+debug':       '-march=rv32im -mabi=ilp32',
         'slimperf+cfu':         '-march=rv32im -mabi=ilp32',
         'slimperf+cfu+debug':   '-march=rv32im -mabi=ilp32',
+
+        # FIXME
+        # This is a workaround for PR #619; vexriscv has changed to
+        #   '-march=rv32i2p0_m', and this undoes that for these variants.
+        #   If we don't have this workaround, we get a link error.
+        'full+cfu':             '-march=rv32im -mabi=ilp32',
+        'full+cfu+debug':       '-march=rv32im -mabi=ilp32',
     })
 
     ########### ADD code to existing add_soc_components() #######

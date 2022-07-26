@@ -22,7 +22,7 @@ You can build and simulate your project in Renode without having any FPGA toolch
 Renode accurately models the memory resources available on a specific board, specified using ``TARGET=<board>``.
 Example target boards you can pass to ``make`` commands with ``TARGET=`` include:
 
-* ``1bitsquared_icebreaker`` to choose a Lattice FPGA-based iCEBreaker board by 1BitSquared,
+* ``icebreaker`` to choose a Lattice FPGA-based iCEBreaker board by 1BitSquared,
 * ``digilent_arty`` to choose a Xilinx FPGA-based Arty A7-35T board by Digilent.
 
 By default, if you don't set the ``TARGET`` variable, projects are built for the Arty A7 board.
@@ -140,17 +140,17 @@ For example after running these commands in the Monitor:
 .. code-block::
 
     Renode, version 1.12.0.4321 (47a5d2ff-202201210224)
-    (monitor) s @1bitsquared_icebreaker.resc  # This command is run automatically by 'make renode'.
-    (1bitsquared_icebreaker) logFile @test.log
-    (1bitsquared_icebreaker) sysbus.cpu LogFunctionNames true true
+    (monitor) s @icebreaker.resc  # This command is run automatically by 'make renode'.
+    (icebreaker) logFile @test.log
+    (icebreaker) sysbus.cpu LogFunctionNames true true
 
 Renode will print an address and a function name with each function change during the simulation (the "comments" show external actions which influence the log):
 
 ::
 
     # Monitor: Executing 'logFile' and 'LogFunctionNames' commands.
-    11:55:59.2861 [INFO] 1bitsquared_icebreaker: Machine paused.
-    11:55:59.2862 [INFO] 1bitsquared_icebreaker: Machine resumed.
+    11:55:59.2861 [INFO] icebreaker: Machine paused.
+    11:55:59.2862 [INFO] icebreaker: Machine resumed.
     11:55:59.3868 [INFO] cpu: Entering function litex_getc at 0x8009F910
     # UART: Writing '8'.
     11:56:12.8248 [INFO] cpu: Entering function trap_entry (entry) at 0x8009F6DC
