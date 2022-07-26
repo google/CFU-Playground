@@ -79,6 +79,7 @@ class _CRG(Module):
             o_CLKO=ClockSignal("sys"),
             i_CE=self.sys_clk_enable,
         )
+        self.comb += self.cd_sys.rst.eq(self.cd_osc.rst)
         # We make the period constraint 7% tighter than our actual system
         # clock frequency, because the CrossLink-NX internal oscillator runs
         # at ±7% of nominal frequency.
