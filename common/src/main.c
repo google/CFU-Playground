@@ -31,6 +31,7 @@
 #include "proj_menu.h"
 #include "spiflash.h"
 #include "tflite_unit_tests.h"
+#include "third_party/embench_iot_v1/embench.h"
 #ifndef SKIP_TFLM
 #include "models/models.h"
 #endif
@@ -61,15 +62,16 @@ static struct Menu MENU = {
 #endif
         MENU_ITEM('6', "Benchmarks", do_benchmarks_menu),
         MENU_ITEM('7', "Util Tests", do_util_tests_menu),
+        MENU_ITEM('8', "Embench IoT", embench_menu),
 #ifdef SPIFLASH_BASE
-        MENU_ITEM('8', "SPI Flash Debugging", spiflash_menu),
+        MENU_ITEM('9', "SPI Flash Debugging", spiflash_menu),
 #endif
 #ifdef CONFIG_CPU_DIV_UNIMPLEMENTED
         MENU_ITEM('I', "Illegal Instruction Tests (these *WILL* hang on Fomu!)",
                   do_instruction_tests),
 #endif
 #ifdef CSR_VIDEO_FRAMEBUFFER_BASE
-        MENU_ITEM('9', "Framebuffer Debugging", framebuffer_menu),
+        MENU_ITEM('10', "Framebuffer Debugging", framebuffer_menu),
 #endif
 #ifdef PLATFORM_sim
         MENU_ITEM('t', "trace (only works in simulation)", trace_sim),
