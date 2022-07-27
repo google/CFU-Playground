@@ -23,6 +23,7 @@ extern "C" {
 
 // For integration into menu system
 void models_menu();
+void no_menu();
 
 #ifdef __cplusplus
 }
