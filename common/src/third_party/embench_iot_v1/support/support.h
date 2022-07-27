@@ -19,11 +19,7 @@
 #include "config.h"
 #endif
 
-/* Include board support header if we have one */
-
-#ifdef HAVE_BOARDSUPPORT_H
 #include "third_party/embench_iot_v1/support/boardsupport.h"
-#endif
 
 /* Benchmarks must implement verify_benchmark, which must return -1 if no
    verification is done. */

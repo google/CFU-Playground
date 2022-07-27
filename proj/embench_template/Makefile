@@ -39,9 +39,6 @@ DEFINES += INCLUDE_MODEL_PDTI8
 # Uncomment to include all TFLM examples (pdti8, micro_speech, magic_wand)
 #DEFINES += INCLUDE_ALL_TFLM_EXAMPLES
 
-# DO NOT comment out if including any Embench workloads
-DEFINES += HAVE_BOARDSUPPORT_H
-
 # Uncomment to include specified Embench workload in built binary
 DEFINES += INCLUDE_EMBENCH_PRIMECOUNT 
 #DEFINES += INCLUDE_EMBENCH_MINVER 
