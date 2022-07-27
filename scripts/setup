@@ -141,18 +141,22 @@ fi
 
 
 # Yosys -- get local copy if there isn't a sufficiently recent system verion 
-if ! which yosys >/dev/null || ! yosys -V | grep "Yosys 0.1" >/dev/null; then
-    if [ ! -e "${CFU_ROOT}/third_party/usr/local/bin/yosys" ]; then
-        echo "Getting Yosys."
-        mkdir -p "${CFU_ROOT}/third_party/usr/local"
-        wget -qO- "https://anaconda.org/LiteX-Hub/yosys/0.14_67_g3818e1160/download/linux-64/yosys-0.14_67_g3818e1160-20220302_164843_py37.tar.bz2" | tar -xjC "${CFU_ROOT}/third_party/usr/local"
-        wget -qO- "https://anaconda.org/LiteX-Hub/yosys-symbiflow-plugins/1.0.0_7_722_g6dfffa1/download/linux-64/yosys-symbiflow-plugins-1.0.0_7_722_g6dfffa1-20220223_095159.tar.bz2" | tar -xjC "${CFU_ROOT}/third_party/usr/local"
+# DISABLED for now -- caused too many problems
+# Use Conda if you need to get Yosys.
+if false; then
+    if ! which yosys >/dev/null || ! yosys -V | grep "Yosys 0.1" >/dev/null; then
+        if [ ! -e "${CFU_ROOT}/third_party/usr/local/bin/yosys" ]; then
+            echo "Getting Yosys."
+            mkdir -p "${CFU_ROOT}/third_party/usr/local"
+            wget -qO- "https://anaconda.org/LiteX-Hub/yosys/0.14_67_g3818e1160/download/linux-64/yosys-0.14_67_g3818e1160-20220302_164843_py37.tar.bz2" | tar -xjC "${CFU_ROOT}/third_party/usr/local"
+            wget -qO- "https://anaconda.org/LiteX-Hub/yosys-symbiflow-plugins/1.0.0_7_722_g6dfffa1/download/linux-64/yosys-symbiflow-plugins-1.0.0_7_722_g6dfffa1-20220223_095159.tar.bz2" | tar -xjC "${CFU_ROOT}/third_party/usr/local"
+        else
+            echo "Yosys already installed locally."
+        fi
     else
-        echo "Yosys already installed locally."
+        echo -n "Found satisfactory system Yosys: "
+        yosys -V
     fi
-else
-    echo -n "Found satisfactory system Yosys: "
-    yosys -V
 fi
 
 
