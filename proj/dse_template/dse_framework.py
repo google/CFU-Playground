@@ -80,15 +80,23 @@ def get_cycle_count():
 def run_config(variant, target):
     
     # Generate bitstream and run simulation for given CPU variant and return metric results
-    EXTRA_LITEX_ARGS = 'EXTRA_LITEX_ARGS="--cpu-variant=' + variant +'"'
-    subprocess.run(['make', 'clean']) 
-    subprocess.run(['make', 'bitstream', 'TARGET=' + target, EXTRA_LITEX_ARGS, "USE_SYMBIFLOW=1"])
-    workload_cmd = ['make', 'load', 'PLATFORM=sim', EXTRA_LITEX_ARGS]
-    filename = 'cycle_count.rpt'
-    outfile  = open(filename, "w")
-    workload = subprocess.run(workload_cmd, stdout=outfile)
-    cycles = get_cycle_count()
-    cells  = get_resource_util(target)
+    cycles = None
+    cells  = None
+    run_succeeds = False 
+    while not run_succeeds:
+        EXTRA_LITEX_ARGS = 'EXTRA_LITEX_ARGS="--cpu-variant=' + variant +'"'
+        subprocess.run(['make', 'clean']) 
+        subprocess.run(['make', 'bitstream', 'TARGET=' + target, EXTRA_LITEX_ARGS, "USE_SYMBIFLOW=1"])
+        workload_cmd = ['make', 'load', 'PLATFORM=sim', EXTRA_LITEX_ARGS]
+        filename = 'cycle_count.rpt'
+        outfile  = open(filename, "w")
+        workload = subprocess.run(workload_cmd, stdout=outfile)
+        try:
+            cycles = get_cycle_count()
+            run_succeeds = True
+        except UnicodeDecodeError:
+            run_succeeds = False
+        cells  = get_resource_util(target)
 
     return (cycles, cells)
 
