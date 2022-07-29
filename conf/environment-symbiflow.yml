@@ -23,6 +23,7 @@ dependencies:
   - intervaltree
   - json-c
   - libevent
+  - sysroot_linux-64>=2.17
   - python=3.7
   - pip
   - pip:

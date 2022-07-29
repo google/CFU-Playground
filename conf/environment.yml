@@ -16,6 +16,7 @@ dependencies:
   - litex-hub::symbiflow-yosys-plugins
   - libevent
   - json-c
+  - sysroot_linux-64>=2.17
   - python=3.7
   - pip
   - pip:
