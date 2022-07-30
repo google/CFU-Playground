@@ -1,6 +1,7 @@
 ---
 layout: page
 title:  "Tiny Machine Learning"
+collectionid: 'fccm-2022-pages' 
 ---
 
 

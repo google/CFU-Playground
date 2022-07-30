@@ -1,6 +1,7 @@
 ---
 layout: page
 title:  "Custom Function Units"
+collectionid: 'fccm-2022-pages' 
 ---
 
 <div id="toc_container" style="position: absolute" markdown="1">

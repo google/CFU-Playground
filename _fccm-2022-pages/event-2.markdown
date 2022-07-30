@@ -1,6 +1,7 @@
 ---
 layout: page
 title:  "Benchmarking TinyML Systems"
+collectionid: 'fccm-2022-pages' 
 ---
 
 

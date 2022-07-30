@@ -14,7 +14,9 @@
 
 <p>
 A full-stack workshop for accelerating TinyML<br>
-FCCM May 18, 2022<br>
+{% if page.conference %}
+{{page.conference}} | {{page.conference-date}}<br>
+{% endif %}
 </p>
 
 <div style="display:inline-block;">

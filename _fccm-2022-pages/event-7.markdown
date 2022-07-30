@@ -1,6 +1,7 @@
 ---
 layout: page
 title:  "Accelerate Your Own Model"
+collectionid: 'fccm-2022-pages' 
 ---
 
 

@@ -1,6 +1,7 @@
 ---
 layout: page
 title:  "Navigating CFU Playground"
+collectionid: 'fccm-2022-pages' 
 ---
 
 CFU Playground is a collection of many different packages. 

@@ -19,14 +19,12 @@
 # in the templates via {{ site.myvariable }}.
 
 title: "CFU-Playground Workshop"
-email: your-email@example.com
+github: "https://github.com/google/CFU-Playground/"
 description: >- # this means to ignore newlines until "baseurl:"
   A full stack workshop for accelerating TinyML 
-baseurl: "/CFU-Playground/workshops" # the subpath of your site, e.g. /blog
+baseurl: "/CFU-Playground" # the subpath of your site, e.g. /blog
 url: "google.github.io" # the base hostname & protocol for your site, e.g. http://example.com
-#twitter_username: jekyllrb
-#github_username:  jekyll
-version: "FCCM 2022"
+version: "July 2022"
 
 # Build settings
 theme: jekyll-theme-dinky
@@ -35,9 +33,15 @@ plugins:
 markdown: kramdown
 
 collections:
-  event_pages:
+  workshops:
     output: true
-    permalink: /:name
+    permalink: /:collection/:name
+  fccm-2022-pages:
+    output: true 
+    permalink: /workshops/fccm-2022/:name
+  micro-2022-pages:
+    output: true
+    permalink: /workshops/micro-2022/:name
 
 # Exclude from processing.
 # The following items will not be processed, by default.

@@ -4,7 +4,7 @@
 
   <style>
     .parallax > .parallax-img {
-      background-image: url("/CFU-Playground/assets/bgimg3.jpg");
+      background-image: url("assets/bgimg3.jpg");
       background-size: cover;
       /* Set a specific height */
       height: 100vh;
@@ -78,7 +78,6 @@
 
   <body class="theme-base-08">
 
-    {% include sidebar.html %}
 
     <!-- Wrap is the content to shift when toggling the sidebar. We wrap the
          content to avoid any CSS collisions with our real content. -->
@@ -86,12 +85,11 @@
       <div class="masthead">
         <div class="container">
           <h3 class="masthead-title">
-            <a href="{{ site.baseurl }}/" title="Home">{{ site.title }}</a>
             <small>{{ site.tagline }}</small>
           </h3>
         </div>
       </div>
-      {% if page.title == "Home" or page.conference %}
+      {% if page.title == "Home" %}
         <div class="parallax">
           <div class="parallax-img" style="display: flex; align-items: center">
           <div class="container content parallax-content">
@@ -109,7 +107,6 @@
       </div>
     </div>
 
-    <label for="sidebar-checkbox" class="sidebar-toggle"></label>
 
     <script src='{{ site.baseurl }}/public/js/script.js'></script>
   </body>

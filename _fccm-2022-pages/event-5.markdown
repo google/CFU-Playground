@@ -1,6 +1,7 @@
 ---
 layout: page
 title:  "Introduction to Amaranth"
+collectionid: 'fccm-2022-pages' 
 ---
 
 
