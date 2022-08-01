@@ -49,8 +49,8 @@ help:
 	@echo ================================================================
 	@echo
 
-F4PGA_TIMESTAMP=20220714-173445
-F4PGA_HASH=f7afc12
+F4PGA_TIMESTAMP=20220729-181657
+F4PGA_HASH=7833050
 
 install-sf:
 	@if [ -d "$(SF_INSTALL)" ]; then \
@@ -60,7 +60,7 @@ install-sf:
 		exit 1; \
 	fi
 	@mkdir -p $(SF_INSTALL)/xc7/install
-	wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/${F4PGA_TIMESTAMP}/symbiflow-arch-defs-install-${F4PGA_HASH}.tar.xz | tar -xJC $(SF_INSTALL)/xc7/install
+	wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/${F4PGA_TIMESTAMP}/symbiflow-arch-defs-install-xc7-${F4PGA_HASH}.tar.xz | tar -xJC $(SF_INSTALL)/xc7/install
 	wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/${F4PGA_TIMESTAMP}/symbiflow-arch-defs-xc7a50t_test-${F4PGA_HASH}.tar.xz | tar -xJC $(SF_INSTALL)/xc7/install
 	wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/${F4PGA_TIMESTAMP}/symbiflow-arch-defs-xc7a100t_test-${F4PGA_HASH}.tar.xz | tar -xJC $(SF_INSTALL)/xc7/install
 	wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/${F4PGA_TIMESTAMP}/symbiflow-arch-defs-xc7a200t_test-${F4PGA_HASH}.tar.xz | tar -xJC $(SF_INSTALL)/xc7/install
