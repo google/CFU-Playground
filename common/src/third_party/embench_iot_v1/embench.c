@@ -32,10 +32,64 @@ static struct Menu MENU = {
     "benchmarks",
     {
 #if defined(INCLUDE_EMBENCH_PRIMECOUNT) || defined(INCLUDE_ALL_EMBENCH_EXAMPLES)
-        MENU_ITEM(AUTO_INC_CHAR, "Primecount", embench_wrapper_primecount),
+        MENU_ITEM(AUTO_INC_CHAR, "primecount", embench_wrapper_primecount),
 #endif
 #if defined(INCLUDE_EMBENCH_MINVER) || defined(INCLUDE_ALL_EMBENCH_EXAMPLES)
-        MENU_ITEM(AUTO_INC_CHAR, "Minver", embench_wrapper_minver),
+        MENU_ITEM(AUTO_INC_CHAR, "minver", embench_wrapper_minver),
+#endif
+#if defined(INCLUDE_EMBENCH_AHA_MONT64) || defined(INCLUDE_ALL_EMBENCH_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "aha-mont64", embench_wrapper_aha_mont64),
+#endif
+#if defined(INCLUDE_EMBENCH_CRC_32) || defined(INCLUDE_ALL_EMBENCH_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "crc_32", embench_wrapper_crc_32),
+#endif
+#if defined(INCLUDE_EMBENCH_CUBIC) || defined(INCLUDE_ALL_EMBENCH_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "cubic", embench_wrapper_cubic),
+#endif
+#if defined(INCLUDE_EMBENCH_EDN) || defined(INCLUDE_ALL_EMBENCH_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "edn", embench_wrapper_edn),
+#endif
+#if defined(INCLUDE_EMBENCH_HUFFBENCH) || defined(INCLUDE_ALL_EMBENCH_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "huffbench", embench_wrapper_huffbench),
+#endif
+#if defined(INCLUDE_EMBENCH_MATMUL) || defined(INCLUDE_ALL_EMBENCH_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "matmul", embench_wrapper_matmul),
+#endif
+#if defined(INCLUDE_EMBENCH_MD5) || defined(INCLUDE_ALL_EMBENCH_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "md5sum", embench_wrapper_md5),
+#endif
+#if defined(INCLUDE_EMBENCH_NBODY) || defined(INCLUDE_ALL_EMBENCH_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "nbody", embench_wrapper_nbody),
+#endif
+#if defined(INCLUDE_EMBENCH_NETTLE_AES) || defined(INCLUDE_ALL_EMBENCH_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "nettle-aes", embench_wrapper_nettle_aes),
+#endif
+#if defined(INCLUDE_EMBENCH_NETTLE_SHA256) || defined(INCLUDE_ALL_EMBENCH_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "nettle-sha256", embench_wrapper_nettle_sha256),
+#endif
+#if defined(INCLUDE_EMBENCH_NSICHNEU) || defined(INCLUDE_ALL_EMBENCH_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "nsichneu", embench_wrapper_nsichneu),
+#endif
+#if defined(INCLUDE_EMBENCH_QRDUINO) || defined(INCLUDE_ALL_EMBENCH_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "qrduino", embench_wrapper_qrduino),
+#endif
+#if defined(INCLUDE_EMBENCH_SLRE) || defined(INCLUDE_ALL_EMBENCH_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "slre", embench_wrapper_slre),
+#endif
+#if defined(INCLUDE_EMBENCH_ST) || defined(INCLUDE_ALL_EMBENCH_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "st", embench_wrapper_st),
+#endif
+#if defined(INCLUDE_EMBENCH_STATEMATE) || defined(INCLUDE_ALL_EMBENCH_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "statemate", embench_wrapper_statemate),
+#endif
+#if defined(INCLUDE_EMBENCH_TARFIND) || defined(INCLUDE_ALL_EMBENCH_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "tarfind", embench_wrapper_tarfind),
+#endif
+#if defined(INCLUDE_EMBENCH_UD) || defined(INCLUDE_ALL_EMBENCH_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "ud", embench_wrapper_ud),
+#endif
+#if defined(INCLUDE_EMBENCH_WIKISORT) || defined(INCLUDE_ALL_EMBENCH_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "wikisort", embench_wrapper_wikisort),
 #endif
 #if AUTO_INC_CHAR == STARTING_SEL_CHAR
         MENU_ITEM('!', "No Embench workloads selected! Check defines in Makefile!",
