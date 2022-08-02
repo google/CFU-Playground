@@ -21,6 +21,7 @@ object SpinalConfig extends spinal.core.SpinalConfig(
 ){
   //Insert a compilation phase which will add a  (* ram_style = "block" *) on all synchronous rams.
   phasesInserters += {(array) => array.insert(array.indexWhere(_.isInstanceOf[PhaseAllocateNames]) + 1, new ForceRamBlockPhase)}
+  phasesInserters += {(array) => array.insert(array.indexWhere(_.isInstanceOf[PhaseAllocateNames]) + 1, new NoRwCheckPhase)}
 }
 
 case class ArgConfig(
@@ -267,6 +268,7 @@ object GenCoreDefault{
           new CfuPlugin(
             stageCount = 1,
             allowZeroLatency = true,
+            withEnable = false,
             encodings = List(
               // CFU R-type
               CfuPluginEncoding (
@@ -373,6 +375,26 @@ class ForceRamBlockPhase() extends spinal.core.internals.Phase{
   override def hasNetlistImpact: Boolean = false
 }
 
+class NoRwCheckPhase() extends spinal.core.internals.Phase{
+  override def impl(pc: PhaseContext): Unit = {
+    pc.walkBaseNodes{
+      case mem: Mem[_] => {
+        var doit = false
+        mem.dlcForeach[MemPortStatement]{
+          case _ : MemReadSync => doit = true
+          case _ =>
+        }
+        mem.dlcForeach[MemPortStatement]{
+          case p : MemReadSync if p.readUnderWrite != dontCare  => doit = false
+          case _ =>
+        }
+        if(doit) mem.addAttribute("no_rw_check")
+      }
+      case _ =>
+    }
+  }
+  override def hasNetlistImpact: Boolean = false
+}
 
 class PerfCsrPlugin( val csrCount : Int ) extends Plugin[VexRiscv]{
   override def build(pipeline: VexRiscv): Unit = {
