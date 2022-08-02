@@ -1,81 +1,8 @@
-// Generator : SpinalHDL v1.6.0    git head : 73c8d8e2b86b45646e9d0b2e729291f2b65e6be3
+// Generator : SpinalHDL v1.7.1    git head : 0444bb76ab1d6e19f0ec46bc03c4769776deb7d5
 // Component : VexRiscv
-// Git hash  : e695a6d139f77e4c1099f09f0880f22e85a17e82
+// Git hash  : aed4e3554313dff5ba711d4fd1ce9a97a9f53b82
 
-
-`define FpuOpcode_binary_sequential_type [3:0]
-`define FpuOpcode_binary_sequential_LOAD 4'b0000
-`define FpuOpcode_binary_sequential_STORE 4'b0001
-`define FpuOpcode_binary_sequential_MUL 4'b0010
-`define FpuOpcode_binary_sequential_ADD 4'b0011
-`define FpuOpcode_binary_sequential_FMA 4'b0100
-`define FpuOpcode_binary_sequential_I2F 4'b0101
-`define FpuOpcode_binary_sequential_F2I 4'b0110
-`define FpuOpcode_binary_sequential_CMP 4'b0111
-`define FpuOpcode_binary_sequential_DIV 4'b1000
-`define FpuOpcode_binary_sequential_SQRT 4'b1001
-`define FpuOpcode_binary_sequential_MIN_MAX 4'b1010
-`define FpuOpcode_binary_sequential_SGNJ 4'b1011
-`define FpuOpcode_binary_sequential_FMV_X_W 4'b1100
-`define FpuOpcode_binary_sequential_FMV_W_X 4'b1101
-`define FpuOpcode_binary_sequential_FCLASS 4'b1110
-`define FpuOpcode_binary_sequential_FCVT_X_X 4'b1111
-
-`define Input2Kind_binary_sequential_type [0:0]
-`define Input2Kind_binary_sequential_RS 1'b0
-`define Input2Kind_binary_sequential_IMM_I 1'b1
-
-`define EnvCtrlEnum_binary_sequential_type [1:0]
-`define EnvCtrlEnum_binary_sequential_NONE 2'b00
-`define EnvCtrlEnum_binary_sequential_XRET 2'b01
-`define EnvCtrlEnum_binary_sequential_WFI 2'b10
-`define EnvCtrlEnum_binary_sequential_ECALL 2'b11
-
-`define BranchCtrlEnum_binary_sequential_type [1:0]
-`define BranchCtrlEnum_binary_sequential_INC 2'b00
-`define BranchCtrlEnum_binary_sequential_B 2'b01
-`define BranchCtrlEnum_binary_sequential_JAL 2'b10
-`define BranchCtrlEnum_binary_sequential_JALR 2'b11
-
-`define ShiftCtrlEnum_binary_sequential_type [1:0]
-`define ShiftCtrlEnum_binary_sequential_DISABLE_1 2'b00
-`define ShiftCtrlEnum_binary_sequential_SLL_1 2'b01
-`define ShiftCtrlEnum_binary_sequential_SRL_1 2'b10
-`define ShiftCtrlEnum_binary_sequential_SRA_1 2'b11
-
-`define AluBitwiseCtrlEnum_binary_sequential_type [1:0]
-`define AluBitwiseCtrlEnum_binary_sequential_XOR_1 2'b00
-`define AluBitwiseCtrlEnum_binary_sequential_OR_1 2'b01
-`define AluBitwiseCtrlEnum_binary_sequential_AND_1 2'b10
-
-`define Src2CtrlEnum_binary_sequential_type [1:0]
-`define Src2CtrlEnum_binary_sequential_RS 2'b00
-`define Src2CtrlEnum_binary_sequential_IMI 2'b01
-`define Src2CtrlEnum_binary_sequential_IMS 2'b10
-`define Src2CtrlEnum_binary_sequential_PC 2'b11
-
-`define AluCtrlEnum_binary_sequential_type [1:0]
-`define AluCtrlEnum_binary_sequential_ADD_SUB 2'b00
-`define AluCtrlEnum_binary_sequential_SLT_SLTU 2'b01
-`define AluCtrlEnum_binary_sequential_BITWISE 2'b10
-
-`define Src1CtrlEnum_binary_sequential_type [1:0]
-`define Src1CtrlEnum_binary_sequential_RS 2'b00
-`define Src1CtrlEnum_binary_sequential_IMU 2'b01
-`define Src1CtrlEnum_binary_sequential_PC_INCREMENT 2'b10
-`define Src1CtrlEnum_binary_sequential_URS1 2'b11
-
-`define FpuFormat_binary_sequential_type [0:0]
-`define FpuFormat_binary_sequential_FLOAT 1'b0
-`define FpuFormat_binary_sequential_DOUBLE 1'b1
-
-`define FpuRoundMode_opt_type [2:0]
-`define FpuRoundMode_opt_RNE 3'b000
-`define FpuRoundMode_opt_RTZ 3'b001
-`define FpuRoundMode_opt_RDN 3'b010
-`define FpuRoundMode_opt_RUP 3'b011
-`define FpuRoundMode_opt_RMM 3'b100
-
+`timescale 1ns/1ps
 
 module VexRiscv (
   input      [31:0]   externalResetVector,
@@ -115,6 +42,58 @@ module VexRiscv (
   input               clk,
   input               reset
 );
+  localparam ShiftCtrlEnum_DISABLE_1 = 2'd0;
+  localparam ShiftCtrlEnum_SLL_1 = 2'd1;
+  localparam ShiftCtrlEnum_SRL_1 = 2'd2;
+  localparam ShiftCtrlEnum_SRA_1 = 2'd3;
+  localparam FpuOpcode_LOAD = 4'd0;
+  localparam FpuOpcode_STORE = 4'd1;
+  localparam FpuOpcode_MUL = 4'd2;
+  localparam FpuOpcode_ADD = 4'd3;
+  localparam FpuOpcode_FMA = 4'd4;
+  localparam FpuOpcode_I2F = 4'd5;
+  localparam FpuOpcode_F2I = 4'd6;
+  localparam FpuOpcode_CMP = 4'd7;
+  localparam FpuOpcode_DIV = 4'd8;
+  localparam FpuOpcode_SQRT = 4'd9;
+  localparam FpuOpcode_MIN_MAX = 4'd10;
+  localparam FpuOpcode_SGNJ = 4'd11;
+  localparam FpuOpcode_FMV_X_W = 4'd12;
+  localparam FpuOpcode_FMV_W_X = 4'd13;
+  localparam FpuOpcode_FCLASS = 4'd14;
+  localparam FpuOpcode_FCVT_X_X = 4'd15;
+  localparam Input2Kind_RS = 1'd0;
+  localparam Input2Kind_IMM_I = 1'd1;
+  localparam EnvCtrlEnum_NONE = 2'd0;
+  localparam EnvCtrlEnum_XRET = 2'd1;
+  localparam EnvCtrlEnum_WFI = 2'd2;
+  localparam EnvCtrlEnum_ECALL = 2'd3;
+  localparam BranchCtrlEnum_INC = 2'd0;
+  localparam BranchCtrlEnum_B = 2'd1;
+  localparam BranchCtrlEnum_JAL = 2'd2;
+  localparam BranchCtrlEnum_JALR = 2'd3;
+  localparam AluBitwiseCtrlEnum_XOR_1 = 2'd0;
+  localparam AluBitwiseCtrlEnum_OR_1 = 2'd1;
+  localparam AluBitwiseCtrlEnum_AND_1 = 2'd2;
+  localparam Src2CtrlEnum_RS = 2'd0;
+  localparam Src2CtrlEnum_IMI = 2'd1;
+  localparam Src2CtrlEnum_IMS = 2'd2;
+  localparam Src2CtrlEnum_PC = 2'd3;
+  localparam AluCtrlEnum_ADD_SUB = 2'd0;
+  localparam AluCtrlEnum_SLT_SLTU = 2'd1;
+  localparam AluCtrlEnum_BITWISE = 2'd2;
+  localparam Src1CtrlEnum_RS = 2'd0;
+  localparam Src1CtrlEnum_IMU = 2'd1;
+  localparam Src1CtrlEnum_PC_INCREMENT = 2'd2;
+  localparam Src1CtrlEnum_URS1 = 2'd3;
+  localparam FpuFormat_FLOAT = 1'd0;
+  localparam FpuFormat_DOUBLE = 1'd1;
+  localparam FpuRoundMode_RNE = 3'd0;
+  localparam FpuRoundMode_RTZ = 3'd1;
+  localparam FpuRoundMode_RDN = 3'd2;
+  localparam FpuRoundMode_RUP = 3'd3;
+  localparam FpuRoundMode_RMM = 3'd4;
+
   wire                IBusCachedPlugin_cache_io_flush;
   wire                IBusCachedPlugin_cache_io_cpu_prefetch_isValid;
   wire                IBusCachedPlugin_cache_io_cpu_fetch_isValid;
@@ -143,6 +122,8 @@ module VexRiscv (
   wire                dataCache_1_io_cpu_writeBack_fence_PI;
   wire       [3:0]    dataCache_1_io_cpu_writeBack_fence_FM;
   wire                dataCache_1_io_cpu_flush_valid;
+  wire                dataCache_1_io_cpu_flush_payload_singleLine;
+  wire       [6:0]    dataCache_1_io_cpu_flush_payload_lineId;
   wire                dataCache_1_io_mem_cmd_ready;
   reg        [31:0]   _zz_RegFilePlugin_regFile_port0;
   reg        [31:0]   _zz_RegFilePlugin_regFile_port1;
@@ -249,6 +230,8 @@ module VexRiscv (
   wire                _zz_IBusCachedPlugin_predictionJumpInterface_payload_4;
   wire                _zz_IBusCachedPlugin_predictionJumpInterface_payload_5;
   wire                _zz_IBusCachedPlugin_predictionJumpInterface_payload_6;
+  wire       [26:0]   _zz_io_cpu_flush_payload_lineId;
+  wire       [26:0]   _zz_io_cpu_flush_payload_lineId_1;
   wire       [2:0]    _zz_DBusCachedPlugin_exceptionBus_payload_code;
   wire       [2:0]    _zz_DBusCachedPlugin_exceptionBus_payload_code_1;
   reg        [7:0]    _zz_writeBack_DBusCachedPlugin_rspShifted;
@@ -271,240 +254,227 @@ module VexRiscv (
   wire       [31:0]   _zz__zz_decode_FPU_RSP_13;
   wire                _zz__zz_decode_FPU_RSP_14;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_15;
-  wire       [2:0]    _zz__zz_decode_FPU_RSP_16;
+  wire                _zz__zz_decode_FPU_RSP_16;
   wire                _zz__zz_decode_FPU_RSP_17;
-  wire                _zz__zz_decode_FPU_RSP_18;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_19;
-  wire                _zz__zz_decode_FPU_RSP_20;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_21;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_18;
+  wire                _zz__zz_decode_FPU_RSP_19;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_20;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_21;
   wire       [0:0]    _zz__zz_decode_FPU_RSP_22;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_23;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_23;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_24;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_25;
-  wire       [2:0]    _zz__zz_decode_FPU_RSP_26;
-  wire                _zz__zz_decode_FPU_RSP_27;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_28;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_29;
+  wire       [2:0]    _zz__zz_decode_FPU_RSP_25;
+  wire                _zz__zz_decode_FPU_RSP_26;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_27;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_28;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_29;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_30;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_31;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_32;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_31;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_32;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_33;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_34;
-  wire       [37:0]   _zz__zz_decode_FPU_RSP_35;
-  wire       [4:0]    _zz__zz_decode_FPU_RSP_36;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_37;
+  wire       [37:0]   _zz__zz_decode_FPU_RSP_34;
+  wire       [4:0]    _zz__zz_decode_FPU_RSP_35;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_36;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_37;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_38;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_39;
-  wire       [2:0]    _zz__zz_decode_FPU_RSP_40;
-  wire                _zz__zz_decode_FPU_RSP_41;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_42;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_43;
+  wire       [2:0]    _zz__zz_decode_FPU_RSP_39;
+  wire                _zz__zz_decode_FPU_RSP_40;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_41;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_42;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_43;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_44;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_45;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_46;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_45;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_46;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_47;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_48;
-  wire       [4:0]    _zz__zz_decode_FPU_RSP_49;
-  wire                _zz__zz_decode_FPU_RSP_50;
+  wire                _zz__zz_decode_FPU_RSP_48;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_49;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_50;
   wire       [0:0]    _zz__zz_decode_FPU_RSP_51;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_52;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_53;
-  wire       [2:0]    _zz__zz_decode_FPU_RSP_54;
-  wire                _zz__zz_decode_FPU_RSP_55;
+  wire       [2:0]    _zz__zz_decode_FPU_RSP_52;
+  wire                _zz__zz_decode_FPU_RSP_53;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_54;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_55;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_56;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_57;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_58;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_57;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_58;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_59;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_60;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_61;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_62;
-  wire       [2:0]    _zz__zz_decode_FPU_RSP_63;
-  wire       [34:0]   _zz__zz_decode_FPU_RSP_64;
-  wire                _zz__zz_decode_FPU_RSP_65;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_60;
+  wire       [34:0]   _zz__zz_decode_FPU_RSP_61;
+  wire                _zz__zz_decode_FPU_RSP_62;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_63;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_64;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_65;
   wire       [0:0]    _zz__zz_decode_FPU_RSP_66;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_67;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_68;
   wire       [0:0]    _zz__zz_decode_FPU_RSP_69;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_70;
-  wire       [32:0]   _zz__zz_decode_FPU_RSP_71;
-  wire                _zz__zz_decode_FPU_RSP_72;
+  wire       [32:0]   _zz__zz_decode_FPU_RSP_70;
+  wire                _zz__zz_decode_FPU_RSP_71;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_72;
   wire       [0:0]    _zz__zz_decode_FPU_RSP_73;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_74;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_75;
-  wire       [30:0]   _zz__zz_decode_FPU_RSP_76;
-  wire                _zz__zz_decode_FPU_RSP_77;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_78;
+  wire       [30:0]   _zz__zz_decode_FPU_RSP_74;
+  wire                _zz__zz_decode_FPU_RSP_75;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_76;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_77;
+  wire       [28:0]   _zz__zz_decode_FPU_RSP_78;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_79;
-  wire       [28:0]   _zz__zz_decode_FPU_RSP_80;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_81;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_82;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_83;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_84;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_85;
-  wire       [1:0]    _zz__zz_decode_FPU_RSP_86;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_80;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_81;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_82;
+  wire       [1:0]    _zz__zz_decode_FPU_RSP_83;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_84;
+  wire                _zz__zz_decode_FPU_RSP_85;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_86;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_87;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_88;
-  wire       [1:0]    _zz__zz_decode_FPU_RSP_89;
-  wire                _zz__zz_decode_FPU_RSP_90;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_89;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_90;
   wire                _zz__zz_decode_FPU_RSP_91;
-  wire                _zz__zz_decode_FPU_RSP_92;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_93;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_94;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_95;
+  wire       [23:0]   _zz__zz_decode_FPU_RSP_92;
+  wire                _zz__zz_decode_FPU_RSP_93;
+  wire       [1:0]    _zz__zz_decode_FPU_RSP_94;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_95;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_96;
-  wire       [23:0]   _zz__zz_decode_FPU_RSP_97;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_98;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_99;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_100;
-  wire                _zz__zz_decode_FPU_RSP_101;
-  wire                _zz__zz_decode_FPU_RSP_102;
-  wire                _zz__zz_decode_FPU_RSP_103;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_104;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_97;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_98;
+  wire                _zz__zz_decode_FPU_RSP_99;
+  wire                _zz__zz_decode_FPU_RSP_100;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_101;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_102;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_103;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_104;
   wire       [0:0]    _zz__zz_decode_FPU_RSP_105;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_106;
-  wire       [1:0]    _zz__zz_decode_FPU_RSP_107;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_108;
+  wire                _zz__zz_decode_FPU_RSP_106;
+  wire       [19:0]   _zz__zz_decode_FPU_RSP_107;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_108;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_109;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_110;
+  wire                _zz__zz_decode_FPU_RSP_110;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_111;
-  wire       [20:0]   _zz__zz_decode_FPU_RSP_112;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_112;
   wire       [0:0]    _zz__zz_decode_FPU_RSP_113;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_114;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_115;
-  wire                _zz__zz_decode_FPU_RSP_116;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_114;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_115;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_116;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_117;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_118;
+  wire       [16:0]   _zz__zz_decode_FPU_RSP_118;
   wire       [0:0]    _zz__zz_decode_FPU_RSP_119;
-  wire                _zz__zz_decode_FPU_RSP_120;
-  wire       [17:0]   _zz__zz_decode_FPU_RSP_121;
-  wire       [1:0]    _zz__zz_decode_FPU_RSP_122;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_123;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_124;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_120;
+  wire                _zz__zz_decode_FPU_RSP_121;
+  wire                _zz__zz_decode_FPU_RSP_122;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_123;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_124;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_125;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_126;
-  wire       [1:0]    _zz__zz_decode_FPU_RSP_127;
-  wire                _zz__zz_decode_FPU_RSP_128;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_129;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_126;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_127;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_128;
+  wire       [4:0]    _zz__zz_decode_FPU_RSP_129;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_130;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_131;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_132;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_131;
+  wire                _zz__zz_decode_FPU_RSP_132;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_133;
-  wire       [1:0]    _zz__zz_decode_FPU_RSP_134;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_134;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_135;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_136;
-  wire       [14:0]   _zz__zz_decode_FPU_RSP_137;
-  wire       [5:0]    _zz__zz_decode_FPU_RSP_138;
+  wire       [1:0]    _zz__zz_decode_FPU_RSP_137;
+  wire                _zz__zz_decode_FPU_RSP_138;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_139;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_140;
-  wire                _zz__zz_decode_FPU_RSP_141;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_142;
+  wire       [13:0]   _zz__zz_decode_FPU_RSP_140;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_141;
+  wire                _zz__zz_decode_FPU_RSP_142;
   wire       [0:0]    _zz__zz_decode_FPU_RSP_143;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_144;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_145;
-  wire       [2:0]    _zz__zz_decode_FPU_RSP_146;
-  wire                _zz__zz_decode_FPU_RSP_147;
+  wire       [3:0]    _zz__zz_decode_FPU_RSP_144;
+  wire                _zz__zz_decode_FPU_RSP_145;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_146;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_147;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_148;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_149;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_150;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_151;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_149;
+  wire       [1:0]    _zz__zz_decode_FPU_RSP_150;
+  wire                _zz__zz_decode_FPU_RSP_151;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_152;
-  wire       [5:0]    _zz__zz_decode_FPU_RSP_153;
-  wire                _zz__zz_decode_FPU_RSP_154;
+  wire                _zz__zz_decode_FPU_RSP_153;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_154;
   wire       [0:0]    _zz__zz_decode_FPU_RSP_155;
   wire       [0:0]    _zz__zz_decode_FPU_RSP_156;
-  wire       [4:0]    _zz__zz_decode_FPU_RSP_157;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_158;
+  wire       [3:0]    _zz__zz_decode_FPU_RSP_157;
+  wire                _zz__zz_decode_FPU_RSP_158;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_159;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_160;
-  wire       [2:0]    _zz__zz_decode_FPU_RSP_161;
-  wire                _zz__zz_decode_FPU_RSP_162;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_163;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_164;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_160;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_161;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_162;
+  wire       [1:0]    _zz__zz_decode_FPU_RSP_163;
+  wire                _zz__zz_decode_FPU_RSP_164;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_165;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_166;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_167;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_168;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_169;
-  wire       [11:0]   _zz__zz_decode_FPU_RSP_170;
-  wire       [4:0]    _zz__zz_decode_FPU_RSP_171;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_172;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_173;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_174;
-  wire       [2:0]    _zz__zz_decode_FPU_RSP_175;
-  wire                _zz__zz_decode_FPU_RSP_176;
+  wire                _zz__zz_decode_FPU_RSP_166;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_167;
+  wire       [10:0]   _zz__zz_decode_FPU_RSP_168;
+  wire       [6:0]    _zz__zz_decode_FPU_RSP_169;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_170;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_171;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_172;
+  wire       [4:0]    _zz__zz_decode_FPU_RSP_173;
+  wire                _zz__zz_decode_FPU_RSP_174;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_175;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_176;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_177;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_178;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_179;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_180;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_181;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_182;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_178;
+  wire       [2:0]    _zz__zz_decode_FPU_RSP_179;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_180;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_181;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_182;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_183;
-  wire       [4:0]    _zz__zz_decode_FPU_RSP_184;
-  wire                _zz__zz_decode_FPU_RSP_185;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_186;
-  wire       [5:0]    _zz__zz_decode_FPU_RSP_187;
-  wire                _zz__zz_decode_FPU_RSP_188;
+  wire                _zz__zz_decode_FPU_RSP_184;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_185;
+  wire       [2:0]    _zz__zz_decode_FPU_RSP_186;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_187;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_188;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_189;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_190;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_191;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_192;
-  wire       [3:0]    _zz__zz_decode_FPU_RSP_193;
-  wire                _zz__zz_decode_FPU_RSP_194;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_190;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_191;
+  wire       [2:0]    _zz__zz_decode_FPU_RSP_192;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_193;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_194;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_195;
   wire       [0:0]    _zz__zz_decode_FPU_RSP_196;
-  wire       [1:0]    _zz__zz_decode_FPU_RSP_197;
+  wire       [7:0]    _zz__zz_decode_FPU_RSP_197;
   wire                _zz__zz_decode_FPU_RSP_198;
   wire                _zz__zz_decode_FPU_RSP_199;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_200;
-  wire       [3:0]    _zz__zz_decode_FPU_RSP_201;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_200;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_201;
   wire       [0:0]    _zz__zz_decode_FPU_RSP_202;
-  wire       [1:0]    _zz__zz_decode_FPU_RSP_203;
-  wire                _zz__zz_decode_FPU_RSP_204;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_205;
-  wire       [3:0]    _zz__zz_decode_FPU_RSP_206;
-  wire       [8:0]    _zz__zz_decode_FPU_RSP_207;
-  wire                _zz__zz_decode_FPU_RSP_208;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_209;
-  wire       [1:0]    _zz__zz_decode_FPU_RSP_210;
-  wire                _zz__zz_decode_FPU_RSP_211;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_212;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_203;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_204;
+  wire       [5:0]    _zz__zz_decode_FPU_RSP_205;
+  wire                _zz__zz_decode_FPU_RSP_206;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_207;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_208;
+  wire       [5:0]    _zz__zz_decode_FPU_RSP_209;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_210;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_211;
+  wire                _zz__zz_decode_FPU_RSP_212;
   wire       [0:0]    _zz__zz_decode_FPU_RSP_213;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_214;
+  wire       [2:0]    _zz__zz_decode_FPU_RSP_214;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_215;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_216;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_217;
-  wire       [6:0]    _zz__zz_decode_FPU_RSP_218;
-  wire                _zz__zz_decode_FPU_RSP_219;
-  wire                _zz__zz_decode_FPU_RSP_220;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_221;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_222;
-  wire       [5:0]    _zz__zz_decode_FPU_RSP_223;
-  wire                _zz__zz_decode_FPU_RSP_224;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_225;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_226;
-  wire       [3:0]    _zz__zz_decode_FPU_RSP_227;
-  wire                _zz__zz_decode_FPU_RSP_228;
+  wire                _zz__zz_decode_FPU_RSP_217;
+  wire                _zz__zz_decode_FPU_RSP_218;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_219;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_220;
+  wire       [3:0]    _zz__zz_decode_FPU_RSP_221;
+  wire                _zz__zz_decode_FPU_RSP_222;
+  wire                _zz__zz_decode_FPU_RSP_223;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_224;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_225;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_226;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_227;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_228;
   wire       [0:0]    _zz__zz_decode_FPU_RSP_229;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_230;
-  wire       [5:0]    _zz__zz_decode_FPU_RSP_231;
-  wire       [4:0]    _zz__zz_decode_FPU_RSP_232;
-  wire                _zz__zz_decode_FPU_RSP_233;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_234;
-  wire       [2:0]    _zz__zz_decode_FPU_RSP_235;
+  wire       [1:0]    _zz__zz_decode_FPU_RSP_230;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_231;
+  wire       [31:0]   _zz__zz_decode_FPU_RSP_232;
+  wire       [1:0]    _zz__zz_decode_FPU_RSP_233;
+  wire       [1:0]    _zz__zz_decode_FPU_RSP_234;
+  wire       [0:0]    _zz__zz_decode_FPU_RSP_235;
   wire       [31:0]   _zz__zz_decode_FPU_RSP_236;
-  wire       [31:0]   _zz__zz_decode_FPU_RSP_237;
-  wire                _zz__zz_decode_FPU_RSP_238;
-  wire                _zz__zz_decode_FPU_RSP_239;
-  wire       [2:0]    _zz__zz_decode_FPU_RSP_240;
-  wire       [2:0]    _zz__zz_decode_FPU_RSP_241;
-  wire                _zz__zz_decode_FPU_RSP_242;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_243;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_244;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_245;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_246;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_247;
-  wire       [0:0]    _zz__zz_decode_FPU_RSP_248;
-  wire                _zz__zz_decode_FPU_RSP_249;
   wire                _zz_RegFilePlugin_regFile_port;
   wire                _zz_decode_RegFilePlugin_rs1Data;
   wire                _zz_RegFilePlugin_regFile_port_1;
@@ -591,16 +561,16 @@ module VexRiscv (
   wire                decode_PREDICTION_HAD_BRANCHED2;
   wire                decode_SRC2_FORCE_ZERO;
   wire       [31:0]   memory_RS1;
-  wire       `FpuOpcode_binary_sequential_type memory_FPU_OPCODE;
-  wire       `FpuOpcode_binary_sequential_type _zz_memory_FPU_OPCODE;
-  wire       `FpuOpcode_binary_sequential_type _zz_memory_to_writeBack_FPU_OPCODE;
-  wire       `FpuOpcode_binary_sequential_type _zz_memory_to_writeBack_FPU_OPCODE_1;
-  wire       `FpuOpcode_binary_sequential_type execute_FPU_OPCODE;
-  wire       `FpuOpcode_binary_sequential_type _zz_execute_FPU_OPCODE;
-  wire       `FpuOpcode_binary_sequential_type _zz_execute_to_memory_FPU_OPCODE;
-  wire       `FpuOpcode_binary_sequential_type _zz_execute_to_memory_FPU_OPCODE_1;
-  wire       `FpuOpcode_binary_sequential_type _zz_decode_to_execute_FPU_OPCODE;
-  wire       `FpuOpcode_binary_sequential_type _zz_decode_to_execute_FPU_OPCODE_1;
+  wire       [3:0]    memory_FPU_OPCODE;
+  wire       [3:0]    _zz_memory_FPU_OPCODE;
+  wire       [3:0]    _zz_memory_to_writeBack_FPU_OPCODE;
+  wire       [3:0]    _zz_memory_to_writeBack_FPU_OPCODE_1;
+  wire       [3:0]    execute_FPU_OPCODE;
+  wire       [3:0]    _zz_execute_FPU_OPCODE;
+  wire       [3:0]    _zz_execute_to_memory_FPU_OPCODE;
+  wire       [3:0]    _zz_execute_to_memory_FPU_OPCODE_1;
+  wire       [3:0]    _zz_decode_to_execute_FPU_OPCODE;
+  wire       [3:0]    _zz_decode_to_execute_FPU_OPCODE_1;
   wire                memory_FPU_RSP;
   wire                execute_FPU_RSP;
   wire                decode_FPU_RSP;
@@ -609,10 +579,10 @@ module VexRiscv (
   wire                decode_FPU_COMMIT;
   wire                memory_FPU_ENABLE;
   wire                execute_FPU_ENABLE;
-  wire       `Input2Kind_binary_sequential_type decode_CfuPlugin_CFU_INPUT_2_KIND;
-  wire       `Input2Kind_binary_sequential_type _zz_decode_CfuPlugin_CFU_INPUT_2_KIND;
-  wire       `Input2Kind_binary_sequential_type _zz_decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND;
-  wire       `Input2Kind_binary_sequential_type _zz_decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND_1;
+  wire       [0:0]    decode_CfuPlugin_CFU_INPUT_2_KIND;
+  wire       [0:0]    _zz_decode_CfuPlugin_CFU_INPUT_2_KIND;
+  wire       [0:0]    _zz_decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND;
+  wire       [0:0]    _zz_decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND_1;
   wire                decode_CfuPlugin_CFU_ENABLE;
   wire                decode_IS_RS2_SIGNED;
   wire                decode_IS_RS1_SIGNED;
@@ -620,46 +590,48 @@ module VexRiscv (
   wire                memory_IS_MUL;
   wire                execute_IS_MUL;
   wire                decode_IS_MUL;
-  wire       `EnvCtrlEnum_binary_sequential_type _zz_memory_to_writeBack_ENV_CTRL;
-  wire       `EnvCtrlEnum_binary_sequential_type _zz_memory_to_writeBack_ENV_CTRL_1;
-  wire       `EnvCtrlEnum_binary_sequential_type _zz_execute_to_memory_ENV_CTRL;
-  wire       `EnvCtrlEnum_binary_sequential_type _zz_execute_to_memory_ENV_CTRL_1;
-  wire       `EnvCtrlEnum_binary_sequential_type decode_ENV_CTRL;
-  wire       `EnvCtrlEnum_binary_sequential_type _zz_decode_ENV_CTRL;
-  wire       `EnvCtrlEnum_binary_sequential_type _zz_decode_to_execute_ENV_CTRL;
-  wire       `EnvCtrlEnum_binary_sequential_type _zz_decode_to_execute_ENV_CTRL_1;
+  wire       [1:0]    _zz_memory_to_writeBack_ENV_CTRL;
+  wire       [1:0]    _zz_memory_to_writeBack_ENV_CTRL_1;
+  wire       [1:0]    _zz_execute_to_memory_ENV_CTRL;
+  wire       [1:0]    _zz_execute_to_memory_ENV_CTRL_1;
+  wire       [1:0]    decode_ENV_CTRL;
+  wire       [1:0]    _zz_decode_ENV_CTRL;
+  wire       [1:0]    _zz_decode_to_execute_ENV_CTRL;
+  wire       [1:0]    _zz_decode_to_execute_ENV_CTRL_1;
   wire                decode_IS_CSR;
-  wire       `BranchCtrlEnum_binary_sequential_type _zz_decode_to_execute_BRANCH_CTRL;
-  wire       `BranchCtrlEnum_binary_sequential_type _zz_decode_to_execute_BRANCH_CTRL_1;
-  wire       `ShiftCtrlEnum_binary_sequential_type _zz_execute_to_memory_SHIFT_CTRL;
-  wire       `ShiftCtrlEnum_binary_sequential_type _zz_execute_to_memory_SHIFT_CTRL_1;
-  wire       `ShiftCtrlEnum_binary_sequential_type decode_SHIFT_CTRL;
-  wire       `ShiftCtrlEnum_binary_sequential_type _zz_decode_SHIFT_CTRL;
-  wire       `ShiftCtrlEnum_binary_sequential_type _zz_decode_to_execute_SHIFT_CTRL;
-  wire       `ShiftCtrlEnum_binary_sequential_type _zz_decode_to_execute_SHIFT_CTRL_1;
-  wire       `AluBitwiseCtrlEnum_binary_sequential_type decode_ALU_BITWISE_CTRL;
-  wire       `AluBitwiseCtrlEnum_binary_sequential_type _zz_decode_ALU_BITWISE_CTRL;
-  wire       `AluBitwiseCtrlEnum_binary_sequential_type _zz_decode_to_execute_ALU_BITWISE_CTRL;
-  wire       `AluBitwiseCtrlEnum_binary_sequential_type _zz_decode_to_execute_ALU_BITWISE_CTRL_1;
+  wire       [1:0]    _zz_decode_to_execute_BRANCH_CTRL;
+  wire       [1:0]    _zz_decode_to_execute_BRANCH_CTRL_1;
+  wire       [1:0]    _zz_execute_to_memory_SHIFT_CTRL;
+  wire       [1:0]    _zz_execute_to_memory_SHIFT_CTRL_1;
+  wire       [1:0]    decode_SHIFT_CTRL;
+  wire       [1:0]    _zz_decode_SHIFT_CTRL;
+  wire       [1:0]    _zz_decode_to_execute_SHIFT_CTRL;
+  wire       [1:0]    _zz_decode_to_execute_SHIFT_CTRL_1;
+  wire       [1:0]    decode_ALU_BITWISE_CTRL;
+  wire       [1:0]    _zz_decode_ALU_BITWISE_CTRL;
+  wire       [1:0]    _zz_decode_to_execute_ALU_BITWISE_CTRL;
+  wire       [1:0]    _zz_decode_to_execute_ALU_BITWISE_CTRL_1;
   wire                decode_SRC_LESS_UNSIGNED;
   wire                decode_MEMORY_MANAGMENT;
+  wire                execute_HAS_SIDE_EFFECT;
+  wire                decode_HAS_SIDE_EFFECT;
   wire                memory_MEMORY_WR;
   wire                decode_MEMORY_WR;
   wire                execute_BYPASSABLE_MEMORY_STAGE;
   wire                decode_BYPASSABLE_MEMORY_STAGE;
   wire                decode_BYPASSABLE_EXECUTE_STAGE;
-  wire       `Src2CtrlEnum_binary_sequential_type decode_SRC2_CTRL;
-  wire       `Src2CtrlEnum_binary_sequential_type _zz_decode_SRC2_CTRL;
-  wire       `Src2CtrlEnum_binary_sequential_type _zz_decode_to_execute_SRC2_CTRL;
-  wire       `Src2CtrlEnum_binary_sequential_type _zz_decode_to_execute_SRC2_CTRL_1;
-  wire       `AluCtrlEnum_binary_sequential_type decode_ALU_CTRL;
-  wire       `AluCtrlEnum_binary_sequential_type _zz_decode_ALU_CTRL;
-  wire       `AluCtrlEnum_binary_sequential_type _zz_decode_to_execute_ALU_CTRL;
-  wire       `AluCtrlEnum_binary_sequential_type _zz_decode_to_execute_ALU_CTRL_1;
-  wire       `Src1CtrlEnum_binary_sequential_type decode_SRC1_CTRL;
-  wire       `Src1CtrlEnum_binary_sequential_type _zz_decode_SRC1_CTRL;
-  wire       `Src1CtrlEnum_binary_sequential_type _zz_decode_to_execute_SRC1_CTRL;
-  wire       `Src1CtrlEnum_binary_sequential_type _zz_decode_to_execute_SRC1_CTRL_1;
+  wire       [1:0]    decode_SRC2_CTRL;
+  wire       [1:0]    _zz_decode_SRC2_CTRL;
+  wire       [1:0]    _zz_decode_to_execute_SRC2_CTRL;
+  wire       [1:0]    _zz_decode_to_execute_SRC2_CTRL_1;
+  wire       [1:0]    decode_ALU_CTRL;
+  wire       [1:0]    _zz_decode_ALU_CTRL;
+  wire       [1:0]    _zz_decode_to_execute_ALU_CTRL;
+  wire       [1:0]    _zz_decode_to_execute_ALU_CTRL_1;
+  wire       [1:0]    decode_SRC1_CTRL;
+  wire       [1:0]    _zz_decode_SRC1_CTRL;
+  wire       [1:0]    _zz_decode_to_execute_SRC1_CTRL;
+  wire       [1:0]    _zz_decode_to_execute_SRC1_CTRL_1;
   wire                decode_MEMORY_FORCE_CONSTISTENCY;
   wire       [31:0]   writeBack_FORMAL_PC_NEXT;
   wire       [31:0]   memory_FORMAL_PC_NEXT;
@@ -676,18 +648,20 @@ module VexRiscv (
   wire                writeBack_FPU_RSP;
   wire                writeBack_FPU_FORKED;
   wire       [1:0]    decode_FPU_ARG;
-  wire       `FpuOpcode_binary_sequential_type decode_FPU_OPCODE;
-  wire       `FpuOpcode_binary_sequential_type _zz_decode_FPU_OPCODE;
+  wire       [3:0]    decode_FPU_OPCODE;
+  wire       [3:0]    _zz_decode_FPU_OPCODE;
   wire                decode_FPU_ENABLE;
-  wire       `FpuOpcode_binary_sequential_type writeBack_FPU_OPCODE;
-  wire       `FpuOpcode_binary_sequential_type _zz_writeBack_FPU_OPCODE;
+  wire       [3:0]    writeBack_FPU_OPCODE;
+  wire       [3:0]    _zz_writeBack_FPU_OPCODE;
   wire                writeBack_FPU_ENABLE;
   reg                 _zz_memory_to_writeBack_CfuPlugin_CFU_IN_FLIGHT;
   reg                 _zz_execute_to_memory_CfuPlugin_CFU_IN_FLIGHT;
   wire                memory_CfuPlugin_CFU_IN_FLIGHT;
-  wire       `Input2Kind_binary_sequential_type execute_CfuPlugin_CFU_INPUT_2_KIND;
-  wire       `Input2Kind_binary_sequential_type _zz_execute_CfuPlugin_CFU_INPUT_2_KIND;
+  wire       [0:0]    execute_CfuPlugin_CFU_INPUT_2_KIND;
+  wire       [0:0]    _zz_execute_CfuPlugin_CFU_INPUT_2_KIND;
   wire                execute_CfuPlugin_CFU_ENABLE;
+  wire                writeBack_HAS_SIDE_EFFECT;
+  wire                memory_HAS_SIDE_EFFECT;
   wire                execute_IS_RS1_SIGNED;
   wire                execute_IS_DIV;
   wire                execute_IS_RS2_SIGNED;
@@ -701,20 +675,19 @@ module VexRiscv (
   wire                execute_CSR_READ_OPCODE;
   wire                execute_CSR_WRITE_OPCODE;
   wire                execute_IS_CSR;
-  wire       `EnvCtrlEnum_binary_sequential_type memory_ENV_CTRL;
-  wire       `EnvCtrlEnum_binary_sequential_type _zz_memory_ENV_CTRL;
-  wire       `EnvCtrlEnum_binary_sequential_type execute_ENV_CTRL;
-  wire       `EnvCtrlEnum_binary_sequential_type _zz_execute_ENV_CTRL;
-  wire       `EnvCtrlEnum_binary_sequential_type writeBack_ENV_CTRL;
-  wire       `EnvCtrlEnum_binary_sequential_type _zz_writeBack_ENV_CTRL;
+  wire       [1:0]    memory_ENV_CTRL;
+  wire       [1:0]    _zz_memory_ENV_CTRL;
+  wire       [1:0]    execute_ENV_CTRL;
+  wire       [1:0]    _zz_execute_ENV_CTRL;
+  wire       [1:0]    writeBack_ENV_CTRL;
+  wire       [1:0]    _zz_writeBack_ENV_CTRL;
   wire       [31:0]   execute_BRANCH_CALC;
   wire                execute_BRANCH_DO;
   wire       [31:0]   execute_PC;
   wire                execute_PREDICTION_HAD_BRANCHED2;
-  (* keep , syn_keep *) wire       [31:0]   execute_RS1 /* synthesis syn_keep = 1 */ ;
   wire                execute_BRANCH_COND_RESULT;
-  wire       `BranchCtrlEnum_binary_sequential_type execute_BRANCH_CTRL;
-  wire       `BranchCtrlEnum_binary_sequential_type _zz_execute_BRANCH_CTRL;
+  wire       [1:0]    execute_BRANCH_CTRL;
+  wire       [1:0]    _zz_execute_BRANCH_CTRL;
   wire                decode_RS2_USE;
   wire                decode_RS1_USE;
   reg        [31:0]   _zz_decode_RS2;
@@ -728,44 +701,44 @@ module VexRiscv (
   reg        [31:0]   decode_RS1;
   wire       [31:0]   memory_SHIFT_RIGHT;
   reg        [31:0]   _zz_decode_RS2_1;
-  wire       `ShiftCtrlEnum_binary_sequential_type memory_SHIFT_CTRL;
-  wire       `ShiftCtrlEnum_binary_sequential_type _zz_memory_SHIFT_CTRL;
-  wire       `ShiftCtrlEnum_binary_sequential_type execute_SHIFT_CTRL;
-  wire       `ShiftCtrlEnum_binary_sequential_type _zz_execute_SHIFT_CTRL;
+  wire       [1:0]    memory_SHIFT_CTRL;
+  wire       [1:0]    _zz_memory_SHIFT_CTRL;
+  wire       [1:0]    execute_SHIFT_CTRL;
+  wire       [1:0]    _zz_execute_SHIFT_CTRL;
   wire                execute_SRC_LESS_UNSIGNED;
   wire                execute_SRC2_FORCE_ZERO;
   wire                execute_SRC_USE_SUB_LESS;
   wire       [31:0]   _zz_execute_SRC2;
-  wire       `Src2CtrlEnum_binary_sequential_type execute_SRC2_CTRL;
-  wire       `Src2CtrlEnum_binary_sequential_type _zz_execute_SRC2_CTRL;
+  wire       [1:0]    execute_SRC2_CTRL;
+  wire       [1:0]    _zz_execute_SRC2_CTRL;
   wire       [31:0]   _zz_execute_SRC1;
-  wire       `Src1CtrlEnum_binary_sequential_type execute_SRC1_CTRL;
-  wire       `Src1CtrlEnum_binary_sequential_type _zz_execute_SRC1_CTRL;
+  wire       [1:0]    execute_SRC1_CTRL;
+  wire       [1:0]    _zz_execute_SRC1_CTRL;
   wire                decode_SRC_USE_SUB_LESS;
   wire                decode_SRC_ADD_ZERO;
   wire       [31:0]   execute_SRC_ADD_SUB;
   wire                execute_SRC_LESS;
-  wire       `AluCtrlEnum_binary_sequential_type execute_ALU_CTRL;
-  wire       `AluCtrlEnum_binary_sequential_type _zz_execute_ALU_CTRL;
+  wire       [1:0]    execute_ALU_CTRL;
+  wire       [1:0]    _zz_execute_ALU_CTRL;
   wire       [31:0]   execute_SRC2;
   wire       [31:0]   execute_SRC1;
-  wire       `AluBitwiseCtrlEnum_binary_sequential_type execute_ALU_BITWISE_CTRL;
-  wire       `AluBitwiseCtrlEnum_binary_sequential_type _zz_execute_ALU_BITWISE_CTRL;
+  wire       [1:0]    execute_ALU_BITWISE_CTRL;
+  wire       [1:0]    _zz_execute_ALU_BITWISE_CTRL;
   wire       [31:0]   _zz_lastStageRegFileWrite_payload_address;
   wire                _zz_lastStageRegFileWrite_valid;
   reg                 _zz_1;
   wire       [31:0]   decode_INSTRUCTION_ANTICIPATED;
   reg                 decode_REGFILE_WRITE_VALID;
   wire                decode_LEGAL_INSTRUCTION;
-  wire       `FpuOpcode_binary_sequential_type _zz_decode_FPU_OPCODE_1;
-  wire       `Input2Kind_binary_sequential_type _zz_decode_CfuPlugin_CFU_INPUT_2_KIND_1;
-  wire       `EnvCtrlEnum_binary_sequential_type _zz_decode_ENV_CTRL_1;
-  wire       `BranchCtrlEnum_binary_sequential_type _zz_decode_BRANCH_CTRL;
-  wire       `ShiftCtrlEnum_binary_sequential_type _zz_decode_SHIFT_CTRL_1;
-  wire       `AluBitwiseCtrlEnum_binary_sequential_type _zz_decode_ALU_BITWISE_CTRL_1;
-  wire       `Src2CtrlEnum_binary_sequential_type _zz_decode_SRC2_CTRL_1;
-  wire       `AluCtrlEnum_binary_sequential_type _zz_decode_ALU_CTRL_1;
-  wire       `Src1CtrlEnum_binary_sequential_type _zz_decode_SRC1_CTRL_1;
+  wire       [3:0]    _zz_decode_FPU_OPCODE_1;
+  wire       [0:0]    _zz_decode_CfuPlugin_CFU_INPUT_2_KIND_1;
+  wire       [1:0]    _zz_decode_ENV_CTRL_1;
+  wire       [1:0]    _zz_decode_BRANCH_CTRL;
+  wire       [1:0]    _zz_decode_SHIFT_CTRL_1;
+  wire       [1:0]    _zz_decode_ALU_BITWISE_CTRL_1;
+  wire       [1:0]    _zz_decode_SRC2_CTRL_1;
+  wire       [1:0]    _zz_decode_ALU_CTRL_1;
+  wire       [1:0]    _zz_decode_SRC1_CTRL_1;
   reg        [31:0]   _zz_decode_RS2_2;
   wire                writeBack_MEMORY_WR;
   wire       [31:0]   writeBack_MEMORY_STORE_DATA_RF;
@@ -774,6 +747,7 @@ module VexRiscv (
   wire       [31:0]   memory_REGFILE_WRITE_DATA;
   wire                memory_MEMORY_ENABLE;
   wire                execute_MEMORY_FORCE_CONSTISTENCY;
+  (* keep , syn_keep *) wire       [31:0]   execute_RS1 /* synthesis syn_keep = 1 */ ;
   wire                execute_MEMORY_MANAGMENT;
   (* keep , syn_keep *) wire       [31:0]   execute_RS2 /* synthesis syn_keep = 1 */ ;
   wire                execute_MEMORY_WR;
@@ -786,8 +760,8 @@ module VexRiscv (
   reg                 IBusCachedPlugin_rsp_issueDetected_3;
   reg                 IBusCachedPlugin_rsp_issueDetected_2;
   reg                 IBusCachedPlugin_rsp_issueDetected_1;
-  wire       `BranchCtrlEnum_binary_sequential_type decode_BRANCH_CTRL;
-  wire       `BranchCtrlEnum_binary_sequential_type _zz_decode_BRANCH_CTRL_1;
+  wire       [1:0]    decode_BRANCH_CTRL;
+  wire       [1:0]    _zz_decode_BRANCH_CTRL_1;
   wire       [31:0]   decode_INSTRUCTION;
   reg        [31:0]   _zz_execute_to_memory_FORMAL_PC_NEXT;
   reg        [31:0]   _zz_decode_to_execute_FORMAL_PC_NEXT;
@@ -799,7 +773,7 @@ module VexRiscv (
   reg                 decode_arbitration_removeIt;
   wire                decode_arbitration_flushIt;
   reg                 decode_arbitration_flushNext;
-  wire                decode_arbitration_isValid;
+  reg                 decode_arbitration_isValid;
   wire                decode_arbitration_isStuck;
   wire                decode_arbitration_isStuckByOthers;
   wire                decode_arbitration_isFlushed;
@@ -843,6 +817,7 @@ module VexRiscv (
   wire                lastStageIsValid /* verilator public */ ;
   wire                lastStageIsFiring /* verilator public */ ;
   reg                 IBusCachedPlugin_fetcherHalt;
+  wire                IBusCachedPlugin_forceNoDecodeCond;
   reg                 IBusCachedPlugin_incomingInstruction;
   wire                IBusCachedPlugin_predictionJumpInterface_valid;
   (* keep , syn_keep *) wire       [31:0]   IBusCachedPlugin_predictionJumpInterface_payload /* synthesis syn_keep = 1 */ ;
@@ -911,6 +886,7 @@ module VexRiscv (
   reg                 BranchPlugin_branchExceptionPort_valid;
   wire       [3:0]    BranchPlugin_branchExceptionPort_payload_code;
   wire       [31:0]   BranchPlugin_branchExceptionPort_payload_badAddr;
+  wire                BranchPlugin_inDebugNoFetchFlag;
   wire       [31:0]   CsrPlugin_csrMapping_readDataSignal;
   wire       [31:0]   CsrPlugin_csrMapping_readDataInit;
   wire       [31:0]   CsrPlugin_csrMapping_writeDataSignal;
@@ -936,17 +912,17 @@ module VexRiscv (
   wire                CsrPlugin_allowEbreakException;
   wire                FpuPlugin_port_cmd_valid /* verilator public */ ;
   wire                FpuPlugin_port_cmd_ready /* verilator public */ ;
-  wire       `FpuOpcode_binary_sequential_type FpuPlugin_port_cmd_payload_opcode /* verilator public */ ;
+  wire       [3:0]    FpuPlugin_port_cmd_payload_opcode /* verilator public */ ;
   wire       [1:0]    FpuPlugin_port_cmd_payload_arg /* verilator public */ ;
   wire       [4:0]    FpuPlugin_port_cmd_payload_rs1 /* verilator public */ ;
   wire       [4:0]    FpuPlugin_port_cmd_payload_rs2 /* verilator public */ ;
   wire       [4:0]    FpuPlugin_port_cmd_payload_rs3 /* verilator public */ ;
   wire       [4:0]    FpuPlugin_port_cmd_payload_rd /* verilator public */ ;
-  wire       `FpuFormat_binary_sequential_type FpuPlugin_port_cmd_payload_format /* verilator public */ ;
-  wire       `FpuRoundMode_opt_type FpuPlugin_port_cmd_payload_roundMode /* verilator public */ ;
+  wire       [0:0]    FpuPlugin_port_cmd_payload_format /* verilator public */ ;
+  wire       [2:0]    FpuPlugin_port_cmd_payload_roundMode /* verilator public */ ;
   wire                FpuPlugin_port_commit_valid /* verilator public */ ;
   wire                FpuPlugin_port_commit_ready /* verilator public */ ;
-  wire       `FpuOpcode_binary_sequential_type FpuPlugin_port_commit_payload_opcode /* verilator public */ ;
+  wire       [3:0]    FpuPlugin_port_commit_payload_opcode /* verilator public */ ;
   wire       [4:0]    FpuPlugin_port_commit_payload_rd /* verilator public */ ;
   wire                FpuPlugin_port_commit_payload_write /* verilator public */ ;
   wire       [31:0]   FpuPlugin_port_commit_payload_value /* verilator public */ ;
@@ -981,14 +957,14 @@ module VexRiscv (
   reg                 IBusCachedPlugin_fetchPc_pcRegPropagate;
   reg                 IBusCachedPlugin_fetchPc_booted;
   reg                 IBusCachedPlugin_fetchPc_inc;
-  wire                when_Fetcher_l131;
+  wire                when_Fetcher_l134;
   wire                IBusCachedPlugin_fetchPc_output_fire_1;
-  wire                when_Fetcher_l131_1;
+  wire                when_Fetcher_l134_1;
   reg        [31:0]   IBusCachedPlugin_fetchPc_pc;
   wire                IBusCachedPlugin_fetchPc_redo_valid;
   wire       [31:0]   IBusCachedPlugin_fetchPc_redo_payload;
   reg                 IBusCachedPlugin_fetchPc_flushed;
-  wire                when_Fetcher_l158;
+  wire                when_Fetcher_l161;
   reg                 IBusCachedPlugin_iBusRsp_redoFetch;
   wire                IBusCachedPlugin_iBusRsp_stages_0_input_valid;
   wire                IBusCachedPlugin_iBusRsp_stages_0_input_ready;
@@ -1030,18 +1006,18 @@ module VexRiscv (
   wire                IBusCachedPlugin_iBusRsp_output_payload_rsp_error;
   wire       [31:0]   IBusCachedPlugin_iBusRsp_output_payload_rsp_inst;
   wire                IBusCachedPlugin_iBusRsp_output_payload_isRvc;
-  wire                when_Fetcher_l240;
-  wire                when_Fetcher_l320;
+  wire                when_Fetcher_l243;
+  wire                when_Fetcher_l323;
   reg                 IBusCachedPlugin_injector_nextPcCalc_valids_0;
-  wire                when_Fetcher_l329;
+  wire                when_Fetcher_l332;
   reg                 IBusCachedPlugin_injector_nextPcCalc_valids_1;
-  wire                when_Fetcher_l329_1;
+  wire                when_Fetcher_l332_1;
   reg                 IBusCachedPlugin_injector_nextPcCalc_valids_2;
-  wire                when_Fetcher_l329_2;
+  wire                when_Fetcher_l332_2;
   reg                 IBusCachedPlugin_injector_nextPcCalc_valids_3;
-  wire                when_Fetcher_l329_3;
+  wire                when_Fetcher_l332_3;
   reg                 IBusCachedPlugin_injector_nextPcCalc_valids_4;
-  wire                when_Fetcher_l329_4;
+  wire                when_Fetcher_l332_4;
   wire                _zz_IBusCachedPlugin_decodePrediction_cmd_hadBranch;
   reg        [18:0]   _zz_IBusCachedPlugin_decodePrediction_cmd_hadBranch_1;
   wire                _zz_2;
@@ -1060,7 +1036,6 @@ module VexRiscv (
   wire                iBus_rsp_valid;
   wire       [31:0]   iBus_rsp_payload_data;
   wire                iBus_rsp_payload_error;
-  wire       [31:0]   _zz_IBusCachedPlugin_rspCounter;
   reg        [31:0]   IBusCachedPlugin_rspCounter;
   wire                IBusCachedPlugin_s0_tightlyCoupledHit;
   reg                 IBusCachedPlugin_s1_tightlyCoupledHit;
@@ -1107,31 +1082,30 @@ module VexRiscv (
   reg        [3:0]    dataCache_1_io_mem_cmd_s2mPipe_rData_mask;
   reg        [2:0]    dataCache_1_io_mem_cmd_s2mPipe_rData_size;
   reg                 dataCache_1_io_mem_cmd_s2mPipe_rData_last;
-  wire                when_Stream_l342;
-  wire       [31:0]   _zz_DBusCachedPlugin_rspCounter;
+  wire                when_Stream_l368;
   reg        [31:0]   DBusCachedPlugin_rspCounter;
-  wire                when_DBusCachedPlugin_l303;
+  wire                when_DBusCachedPlugin_l308;
   wire       [1:0]    execute_DBusCachedPlugin_size;
   reg        [31:0]   _zz_execute_MEMORY_STORE_DATA_RF;
   wire                dataCache_1_io_cpu_flush_isStall;
-  wire                when_DBusCachedPlugin_l343;
-  wire                when_DBusCachedPlugin_l359;
-  wire                when_DBusCachedPlugin_l386;
-  wire                when_DBusCachedPlugin_l438;
-  wire                when_DBusCachedPlugin_l458;
+  wire                when_DBusCachedPlugin_l350;
+  wire                when_DBusCachedPlugin_l366;
+  wire                when_DBusCachedPlugin_l393;
+  wire                when_DBusCachedPlugin_l446;
+  wire                when_DBusCachedPlugin_l466;
   wire       [7:0]    writeBack_DBusCachedPlugin_rspSplits_0;
   wire       [7:0]    writeBack_DBusCachedPlugin_rspSplits_1;
   wire       [7:0]    writeBack_DBusCachedPlugin_rspSplits_2;
   wire       [7:0]    writeBack_DBusCachedPlugin_rspSplits_3;
   reg        [31:0]   writeBack_DBusCachedPlugin_rspShifted;
   wire       [31:0]   writeBack_DBusCachedPlugin_rspRf;
-  wire       [1:0]    switch_Misc_l200;
+  wire       [1:0]    switch_Misc_l210;
   wire                _zz_writeBack_DBusCachedPlugin_rspFormated;
   reg        [31:0]   _zz_writeBack_DBusCachedPlugin_rspFormated_1;
   wire                _zz_writeBack_DBusCachedPlugin_rspFormated_2;
   reg        [31:0]   _zz_writeBack_DBusCachedPlugin_rspFormated_3;
   reg        [31:0]   writeBack_DBusCachedPlugin_rspFormated;
-  wire                when_DBusCachedPlugin_l484;
+  wire                when_DBusCachedPlugin_l492;
   wire       [43:0]   _zz_decode_FPU_RSP;
   wire                _zz_decode_FPU_RSP_1;
   wire                _zz_decode_FPU_RSP_2;
@@ -1145,16 +1119,15 @@ module VexRiscv (
   wire                _zz_decode_FPU_RSP_10;
   wire                _zz_decode_FPU_RSP_11;
   wire                _zz_decode_FPU_RSP_12;
-  wire                _zz_decode_FPU_RSP_13;
-  wire       `Src1CtrlEnum_binary_sequential_type _zz_decode_SRC1_CTRL_2;
-  wire       `AluCtrlEnum_binary_sequential_type _zz_decode_ALU_CTRL_2;
-  wire       `Src2CtrlEnum_binary_sequential_type _zz_decode_SRC2_CTRL_2;
-  wire       `AluBitwiseCtrlEnum_binary_sequential_type _zz_decode_ALU_BITWISE_CTRL_2;
-  wire       `ShiftCtrlEnum_binary_sequential_type _zz_decode_SHIFT_CTRL_2;
-  wire       `BranchCtrlEnum_binary_sequential_type _zz_decode_BRANCH_CTRL_2;
-  wire       `EnvCtrlEnum_binary_sequential_type _zz_decode_ENV_CTRL_2;
-  wire       `Input2Kind_binary_sequential_type _zz_decode_CfuPlugin_CFU_INPUT_2_KIND_2;
-  wire       `FpuOpcode_binary_sequential_type _zz_decode_FPU_OPCODE_2;
+  wire       [1:0]    _zz_decode_SRC1_CTRL_2;
+  wire       [1:0]    _zz_decode_ALU_CTRL_2;
+  wire       [1:0]    _zz_decode_SRC2_CTRL_2;
+  wire       [1:0]    _zz_decode_ALU_BITWISE_CTRL_2;
+  wire       [1:0]    _zz_decode_SHIFT_CTRL_2;
+  wire       [1:0]    _zz_decode_BRANCH_CTRL_2;
+  wire       [1:0]    _zz_decode_ENV_CTRL_2;
+  wire       [0:0]    _zz_decode_CfuPlugin_CFU_INPUT_2_KIND_2;
+  wire       [3:0]    _zz_decode_FPU_OPCODE_2;
   wire                when_RegFilePlugin_l63;
   wire       [4:0]    decode_RegFilePlugin_regFileReadAddress1;
   wire       [4:0]    decode_RegFilePlugin_regFileReadAddress2;
@@ -1208,7 +1181,7 @@ module VexRiscv (
   wire                when_HazardSimplePlugin_l108;
   wire                when_HazardSimplePlugin_l113;
   wire                execute_BranchPlugin_eq;
-  wire       [2:0]    switch_Misc_l200_1;
+  wire       [2:0]    switch_Misc_l210_1;
   reg                 _zz_execute_BRANCH_COND_RESULT;
   reg                 _zz_execute_BRANCH_COND_RESULT_1;
   wire                _zz_execute_BranchPlugin_missAlignedTarget;
@@ -1228,7 +1201,7 @@ module VexRiscv (
   wire                _zz_execute_BranchPlugin_branch_src2_4;
   reg        [18:0]   _zz_execute_BranchPlugin_branch_src2_5;
   wire       [31:0]   execute_BranchPlugin_branchAdder;
-  wire                when_BranchPlugin_l296;
+  wire                when_BranchPlugin_l302;
   reg        [1:0]    CsrPlugin_misa_base;
   reg        [25:0]   CsrPlugin_misa_extensions;
   reg        [1:0]    CsrPlugin_mtvec_mode;
@@ -1247,11 +1220,11 @@ module VexRiscv (
   reg                 CsrPlugin_mcause_interrupt;
   reg        [3:0]    CsrPlugin_mcause_exceptionCode;
   reg        [31:0]   CsrPlugin_mtval;
-  reg        [63:0]   CsrPlugin_mcycle = 64'b0000000000000000000000000000000000000000000000000000000000000000;
-  reg        [63:0]   CsrPlugin_minstret = 64'b0000000000000000000000000000000000000000000000000000000000000000;
-  wire                _zz_when_CsrPlugin_l952;
-  wire                _zz_when_CsrPlugin_l952_1;
-  wire                _zz_when_CsrPlugin_l952_2;
+  reg        [63:0]   CsrPlugin_mcycle;
+  reg        [63:0]   CsrPlugin_minstret;
+  wire                _zz_when_CsrPlugin_l965;
+  wire                _zz_when_CsrPlugin_l965_1;
+  wire                _zz_when_CsrPlugin_l965_2;
   reg                 CsrPlugin_exceptionPortCtrl_exceptionValids_decode;
   reg                 CsrPlugin_exceptionPortCtrl_exceptionValids_execute;
   reg                 CsrPlugin_exceptionPortCtrl_exceptionValids_memory;
@@ -1268,59 +1241,59 @@ module VexRiscv (
   wire                _zz_CsrPlugin_exceptionPortCtrl_exceptionContext_code_1;
   wire       [1:0]    _zz_CsrPlugin_exceptionPortCtrl_exceptionContext_code_2;
   wire                _zz_CsrPlugin_exceptionPortCtrl_exceptionContext_code_3;
-  wire                when_CsrPlugin_l909;
-  wire                when_CsrPlugin_l909_1;
-  wire                when_CsrPlugin_l909_2;
-  wire                when_CsrPlugin_l909_3;
   wire                when_CsrPlugin_l922;
+  wire                when_CsrPlugin_l922_1;
+  wire                when_CsrPlugin_l922_2;
+  wire                when_CsrPlugin_l922_3;
+  wire                when_CsrPlugin_l935;
   reg                 CsrPlugin_interrupt_valid;
   reg        [3:0]    CsrPlugin_interrupt_code /* verilator public */ ;
   reg        [1:0]    CsrPlugin_interrupt_targetPrivilege;
-  wire                when_CsrPlugin_l946;
-  wire                when_CsrPlugin_l952;
-  wire                when_CsrPlugin_l952_1;
-  wire                when_CsrPlugin_l952_2;
+  wire                when_CsrPlugin_l959;
+  wire                when_CsrPlugin_l965;
+  wire                when_CsrPlugin_l965_1;
+  wire                when_CsrPlugin_l965_2;
   wire                CsrPlugin_exception;
   reg                 CsrPlugin_lastStageWasWfi;
   reg                 CsrPlugin_pipelineLiberator_pcValids_0;
   reg                 CsrPlugin_pipelineLiberator_pcValids_1;
   reg                 CsrPlugin_pipelineLiberator_pcValids_2;
   wire                CsrPlugin_pipelineLiberator_active;
-  wire                when_CsrPlugin_l980;
-  wire                when_CsrPlugin_l980_1;
-  wire                when_CsrPlugin_l980_2;
-  wire                when_CsrPlugin_l985;
+  wire                when_CsrPlugin_l993;
+  wire                when_CsrPlugin_l993_1;
+  wire                when_CsrPlugin_l993_2;
+  wire                when_CsrPlugin_l998;
   reg                 CsrPlugin_pipelineLiberator_done;
-  wire                when_CsrPlugin_l991;
+  wire                when_CsrPlugin_l1004;
   wire                CsrPlugin_interruptJump /* verilator public */ ;
   reg                 CsrPlugin_hadException /* verilator public */ ;
   reg        [1:0]    CsrPlugin_targetPrivilege;
   reg        [3:0]    CsrPlugin_trapCause;
   reg        [1:0]    CsrPlugin_xtvec_mode;
   reg        [29:0]   CsrPlugin_xtvec_base;
-  wire                when_CsrPlugin_l1019;
-  wire                when_CsrPlugin_l1064;
-  wire       [1:0]    switch_CsrPlugin_l1068;
+  wire                when_CsrPlugin_l1032;
+  wire                when_CsrPlugin_l1077;
+  wire       [1:0]    switch_CsrPlugin_l1081;
   reg                 execute_CsrPlugin_wfiWake;
-  wire                when_CsrPlugin_l1108;
-  wire                when_CsrPlugin_l1110;
-  wire                when_CsrPlugin_l1116;
+  wire                when_CsrPlugin_l1121;
+  wire                when_CsrPlugin_l1123;
+  wire                when_CsrPlugin_l1129;
   wire                execute_CsrPlugin_blockedBySideEffects;
   reg                 execute_CsrPlugin_illegalAccess;
   reg                 execute_CsrPlugin_illegalInstruction;
-  wire                when_CsrPlugin_l1129;
-  wire                when_CsrPlugin_l1136;
-  wire                when_CsrPlugin_l1137;
-  wire                when_CsrPlugin_l1144;
+  wire                when_CsrPlugin_l1142;
+  wire                when_CsrPlugin_l1149;
+  wire                when_CsrPlugin_l1150;
+  wire                when_CsrPlugin_l1157;
   reg                 execute_CsrPlugin_writeInstruction;
   reg                 execute_CsrPlugin_readInstruction;
   wire                execute_CsrPlugin_writeEnable;
   wire                execute_CsrPlugin_readEnable;
   wire       [31:0]   execute_CsrPlugin_readToWriteData;
-  wire                switch_Misc_l200_2;
+  wire                switch_Misc_l210_2;
   reg        [31:0]   _zz_CsrPlugin_csrMapping_writeDataSignal;
-  wire                when_CsrPlugin_l1176;
-  wire                when_CsrPlugin_l1180;
+  wire                when_CsrPlugin_l1189;
+  wire                when_CsrPlugin_l1193;
   wire       [11:0]   execute_CsrPlugin_csrAddress;
   reg                 execute_MulPlugin_aSigned;
   reg                 execute_MulPlugin_bSigned;
@@ -1368,22 +1341,25 @@ module VexRiscv (
   reg        [31:0]   externalInterruptArray_regNext;
   reg        [31:0]   _zz_CsrPlugin_csrMapping_readDataInit;
   wire       [31:0]   _zz_CsrPlugin_csrMapping_readDataInit_1;
+  wire                execute_CfuPlugin_hazard;
+  wire                execute_CfuPlugin_scheduleWish;
   wire                execute_CfuPlugin_schedule;
+  wire                when_CfuPlugin_l194;
   reg                 execute_CfuPlugin_hold;
   reg                 execute_CfuPlugin_fired;
   wire                CfuPlugin_bus_cmd_fire;
-  wire                when_CfuPlugin_l171;
-  wire                when_CfuPlugin_l175;
+  wire                when_CfuPlugin_l197;
+  wire                when_CfuPlugin_l201;
   wire       [9:0]    execute_CfuPlugin_functionsIds_0;
   wire                _zz_CfuPlugin_bus_cmd_payload_inputs_1;
   reg        [23:0]   _zz_CfuPlugin_bus_cmd_payload_inputs_1_1;
   reg        [31:0]   _zz_CfuPlugin_bus_cmd_payload_inputs_1_2;
-  wire                CfuPlugin_bus_rsp_rsp_valid;
-  reg                 CfuPlugin_bus_rsp_rsp_ready;
-  wire       [31:0]   CfuPlugin_bus_rsp_rsp_payload_outputs_0;
+  wire                memory_CfuPlugin_rsp_valid;
+  reg                 memory_CfuPlugin_rsp_ready;
+  wire       [31:0]   memory_CfuPlugin_rsp_payload_outputs_0;
   reg                 CfuPlugin_bus_rsp_rValid;
   reg        [31:0]   CfuPlugin_bus_rsp_rData_outputs_0;
-  wire                when_CfuPlugin_l208;
+  wire                when_CfuPlugin_l237;
   reg        [5:0]    FpuPlugin_pendings;
   wire                FpuPlugin_port_cmd_fire;
   wire                FpuPlugin_port_rsp_fire;
@@ -1412,8 +1388,8 @@ module VexRiscv (
   wire                FpuPlugin_port_cmd_isStall;
   wire       [2:0]    decode_FpuPlugin_iRoundMode;
   wire       [2:0]    decode_FpuPlugin_roundMode;
-  wire       `FpuRoundMode_opt_type _zz_FpuPlugin_port_cmd_payload_roundMode;
-  wire       `FpuRoundMode_opt_type _zz_FpuPlugin_port_cmd_payload_roundMode_1;
+  wire       [2:0]    _zz_FpuPlugin_port_cmd_payload_roundMode;
+  wire       [2:0]    _zz_FpuPlugin_port_cmd_payload_roundMode_1;
   wire                FpuPlugin_port_cmd_fire_2;
   wire                writeBack_FpuPlugin_isRsp;
   wire                writeBack_FpuPlugin_isCommit;
@@ -1424,23 +1400,23 @@ module VexRiscv (
   wire                when_FpuPlugin_l287;
   wire                writeBack_FpuPlugin_commit_valid /* verilator public */ ;
   wire                writeBack_FpuPlugin_commit_ready /* verilator public */ ;
-  wire       `FpuOpcode_binary_sequential_type writeBack_FpuPlugin_commit_payload_opcode /* verilator public */ ;
+  wire       [3:0]    writeBack_FpuPlugin_commit_payload_opcode /* verilator public */ ;
   wire       [4:0]    writeBack_FpuPlugin_commit_payload_rd /* verilator public */ ;
   wire                writeBack_FpuPlugin_commit_payload_write /* verilator public */ ;
   wire       [31:0]   writeBack_FpuPlugin_commit_payload_value /* verilator public */ ;
   wire                when_FpuPlugin_l301;
   wire                writeBack_FpuPlugin_commit_s2mPipe_valid;
   wire                writeBack_FpuPlugin_commit_s2mPipe_ready;
-  wire       `FpuOpcode_binary_sequential_type writeBack_FpuPlugin_commit_s2mPipe_payload_opcode;
+  wire       [3:0]    writeBack_FpuPlugin_commit_s2mPipe_payload_opcode;
   wire       [4:0]    writeBack_FpuPlugin_commit_s2mPipe_payload_rd;
   wire                writeBack_FpuPlugin_commit_s2mPipe_payload_write;
   wire       [31:0]   writeBack_FpuPlugin_commit_s2mPipe_payload_value;
   reg                 writeBack_FpuPlugin_commit_rValid;
-  reg        `FpuOpcode_binary_sequential_type writeBack_FpuPlugin_commit_rData_opcode;
+  reg        [3:0]    writeBack_FpuPlugin_commit_rData_opcode;
   reg        [4:0]    writeBack_FpuPlugin_commit_rData_rd;
   reg                 writeBack_FpuPlugin_commit_rData_write;
   reg        [31:0]   writeBack_FpuPlugin_commit_rData_value;
-  wire       `FpuOpcode_binary_sequential_type _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode;
+  wire       [3:0]    _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode;
   wire                when_Pipeline_l124;
   reg        [31:0]   decode_to_execute_PC;
   wire                when_Pipeline_l124_1;
@@ -1462,7 +1438,7 @@ module VexRiscv (
   wire                when_Pipeline_l124_9;
   reg                 decode_to_execute_MEMORY_FORCE_CONSTISTENCY;
   wire                when_Pipeline_l124_10;
-  reg        `Src1CtrlEnum_binary_sequential_type decode_to_execute_SRC1_CTRL;
+  reg        [1:0]    decode_to_execute_SRC1_CTRL;
   wire                when_Pipeline_l124_11;
   reg                 decode_to_execute_SRC_USE_SUB_LESS;
   wire                when_Pipeline_l124_12;
@@ -1472,9 +1448,9 @@ module VexRiscv (
   wire                when_Pipeline_l124_14;
   reg                 memory_to_writeBack_MEMORY_ENABLE;
   wire                when_Pipeline_l124_15;
-  reg        `AluCtrlEnum_binary_sequential_type decode_to_execute_ALU_CTRL;
+  reg        [1:0]    decode_to_execute_ALU_CTRL;
   wire                when_Pipeline_l124_16;
-  reg        `Src2CtrlEnum_binary_sequential_type decode_to_execute_SRC2_CTRL;
+  reg        [1:0]    decode_to_execute_SRC2_CTRL;
   wire                when_Pipeline_l124_17;
   reg                 decode_to_execute_REGFILE_WRITE_VALID;
   wire                when_Pipeline_l124_18;
@@ -1494,120 +1470,126 @@ module VexRiscv (
   wire                when_Pipeline_l124_25;
   reg                 memory_to_writeBack_MEMORY_WR;
   wire                when_Pipeline_l124_26;
-  reg                 decode_to_execute_MEMORY_MANAGMENT;
+  reg                 decode_to_execute_HAS_SIDE_EFFECT;
   wire                when_Pipeline_l124_27;
-  reg                 decode_to_execute_SRC_LESS_UNSIGNED;
+  reg                 execute_to_memory_HAS_SIDE_EFFECT;
   wire                when_Pipeline_l124_28;
-  reg        `AluBitwiseCtrlEnum_binary_sequential_type decode_to_execute_ALU_BITWISE_CTRL;
+  reg                 memory_to_writeBack_HAS_SIDE_EFFECT;
   wire                when_Pipeline_l124_29;
-  reg        `ShiftCtrlEnum_binary_sequential_type decode_to_execute_SHIFT_CTRL;
+  reg                 decode_to_execute_MEMORY_MANAGMENT;
   wire                when_Pipeline_l124_30;
-  reg        `ShiftCtrlEnum_binary_sequential_type execute_to_memory_SHIFT_CTRL;
+  reg                 decode_to_execute_SRC_LESS_UNSIGNED;
   wire                when_Pipeline_l124_31;
-  reg        `BranchCtrlEnum_binary_sequential_type decode_to_execute_BRANCH_CTRL;
+  reg        [1:0]    decode_to_execute_ALU_BITWISE_CTRL;
   wire                when_Pipeline_l124_32;
-  reg                 decode_to_execute_IS_CSR;
+  reg        [1:0]    decode_to_execute_SHIFT_CTRL;
   wire                when_Pipeline_l124_33;
-  reg        `EnvCtrlEnum_binary_sequential_type decode_to_execute_ENV_CTRL;
+  reg        [1:0]    execute_to_memory_SHIFT_CTRL;
   wire                when_Pipeline_l124_34;
-  reg        `EnvCtrlEnum_binary_sequential_type execute_to_memory_ENV_CTRL;
+  reg        [1:0]    decode_to_execute_BRANCH_CTRL;
   wire                when_Pipeline_l124_35;
-  reg        `EnvCtrlEnum_binary_sequential_type memory_to_writeBack_ENV_CTRL;
+  reg                 decode_to_execute_IS_CSR;
   wire                when_Pipeline_l124_36;
-  reg                 decode_to_execute_IS_MUL;
+  reg        [1:0]    decode_to_execute_ENV_CTRL;
   wire                when_Pipeline_l124_37;
-  reg                 execute_to_memory_IS_MUL;
+  reg        [1:0]    execute_to_memory_ENV_CTRL;
   wire                when_Pipeline_l124_38;
-  reg                 memory_to_writeBack_IS_MUL;
+  reg        [1:0]    memory_to_writeBack_ENV_CTRL;
   wire                when_Pipeline_l124_39;
-  reg                 decode_to_execute_IS_DIV;
+  reg                 decode_to_execute_IS_MUL;
   wire                when_Pipeline_l124_40;
-  reg                 execute_to_memory_IS_DIV;
+  reg                 execute_to_memory_IS_MUL;
   wire                when_Pipeline_l124_41;
-  reg                 decode_to_execute_IS_RS1_SIGNED;
+  reg                 memory_to_writeBack_IS_MUL;
   wire                when_Pipeline_l124_42;
-  reg                 decode_to_execute_IS_RS2_SIGNED;
+  reg                 decode_to_execute_IS_DIV;
   wire                when_Pipeline_l124_43;
-  reg                 decode_to_execute_CfuPlugin_CFU_ENABLE;
+  reg                 execute_to_memory_IS_DIV;
   wire                when_Pipeline_l124_44;
-  reg        `Input2Kind_binary_sequential_type decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND;
+  reg                 decode_to_execute_IS_RS1_SIGNED;
   wire                when_Pipeline_l124_45;
-  reg                 decode_to_execute_FPU_ENABLE;
+  reg                 decode_to_execute_IS_RS2_SIGNED;
   wire                when_Pipeline_l124_46;
-  reg                 execute_to_memory_FPU_ENABLE;
+  reg                 decode_to_execute_CfuPlugin_CFU_ENABLE;
   wire                when_Pipeline_l124_47;
-  reg                 memory_to_writeBack_FPU_ENABLE;
+  reg        [0:0]    decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND;
   wire                when_Pipeline_l124_48;
-  reg                 decode_to_execute_FPU_COMMIT;
+  reg                 decode_to_execute_FPU_ENABLE;
   wire                when_Pipeline_l124_49;
-  reg                 execute_to_memory_FPU_COMMIT;
+  reg                 execute_to_memory_FPU_ENABLE;
   wire                when_Pipeline_l124_50;
-  reg                 memory_to_writeBack_FPU_COMMIT;
+  reg                 memory_to_writeBack_FPU_ENABLE;
   wire                when_Pipeline_l124_51;
-  reg                 decode_to_execute_FPU_RSP;
+  reg                 decode_to_execute_FPU_COMMIT;
   wire                when_Pipeline_l124_52;
-  reg                 execute_to_memory_FPU_RSP;
+  reg                 execute_to_memory_FPU_COMMIT;
   wire                when_Pipeline_l124_53;
-  reg                 memory_to_writeBack_FPU_RSP;
+  reg                 memory_to_writeBack_FPU_COMMIT;
   wire                when_Pipeline_l124_54;
-  reg        `FpuOpcode_binary_sequential_type decode_to_execute_FPU_OPCODE;
+  reg                 decode_to_execute_FPU_RSP;
   wire                when_Pipeline_l124_55;
-  reg        `FpuOpcode_binary_sequential_type execute_to_memory_FPU_OPCODE;
+  reg                 execute_to_memory_FPU_RSP;
   wire                when_Pipeline_l124_56;
-  reg        `FpuOpcode_binary_sequential_type memory_to_writeBack_FPU_OPCODE;
+  reg                 memory_to_writeBack_FPU_RSP;
   wire                when_Pipeline_l124_57;
-  reg        [31:0]   decode_to_execute_RS1;
+  reg        [3:0]    decode_to_execute_FPU_OPCODE;
   wire                when_Pipeline_l124_58;
-  reg        [31:0]   execute_to_memory_RS1;
+  reg        [3:0]    execute_to_memory_FPU_OPCODE;
   wire                when_Pipeline_l124_59;
-  reg        [31:0]   memory_to_writeBack_RS1;
+  reg        [3:0]    memory_to_writeBack_FPU_OPCODE;
   wire                when_Pipeline_l124_60;
-  reg        [31:0]   decode_to_execute_RS2;
+  reg        [31:0]   decode_to_execute_RS1;
   wire                when_Pipeline_l124_61;
-  reg                 decode_to_execute_SRC2_FORCE_ZERO;
+  reg        [31:0]   execute_to_memory_RS1;
   wire                when_Pipeline_l124_62;
-  reg                 decode_to_execute_PREDICTION_HAD_BRANCHED2;
+  reg        [31:0]   memory_to_writeBack_RS1;
   wire                when_Pipeline_l124_63;
-  reg                 decode_to_execute_CSR_WRITE_OPCODE;
+  reg        [31:0]   decode_to_execute_RS2;
   wire                when_Pipeline_l124_64;
-  reg                 decode_to_execute_CSR_READ_OPCODE;
+  reg                 decode_to_execute_SRC2_FORCE_ZERO;
   wire                when_Pipeline_l124_65;
-  reg                 decode_to_execute_FPU_FORKED;
+  reg                 decode_to_execute_PREDICTION_HAD_BRANCHED2;
   wire                when_Pipeline_l124_66;
-  reg                 execute_to_memory_FPU_FORKED;
+  reg                 decode_to_execute_CSR_WRITE_OPCODE;
   wire                when_Pipeline_l124_67;
-  reg                 memory_to_writeBack_FPU_FORKED;
+  reg                 decode_to_execute_CSR_READ_OPCODE;
   wire                when_Pipeline_l124_68;
-  reg                 decode_to_execute_FPU_COMMIT_LOAD;
+  reg                 decode_to_execute_FPU_FORKED;
   wire                when_Pipeline_l124_69;
-  reg                 execute_to_memory_FPU_COMMIT_LOAD;
+  reg                 execute_to_memory_FPU_FORKED;
   wire                when_Pipeline_l124_70;
-  reg                 memory_to_writeBack_FPU_COMMIT_LOAD;
+  reg                 memory_to_writeBack_FPU_FORKED;
   wire                when_Pipeline_l124_71;
-  reg        [31:0]   execute_to_memory_MEMORY_STORE_DATA_RF;
+  reg                 decode_to_execute_FPU_COMMIT_LOAD;
   wire                when_Pipeline_l124_72;
-  reg        [31:0]   memory_to_writeBack_MEMORY_STORE_DATA_RF;
+  reg                 execute_to_memory_FPU_COMMIT_LOAD;
   wire                when_Pipeline_l124_73;
-  reg        [31:0]   execute_to_memory_REGFILE_WRITE_DATA;
+  reg                 memory_to_writeBack_FPU_COMMIT_LOAD;
   wire                when_Pipeline_l124_74;
-  reg        [31:0]   memory_to_writeBack_REGFILE_WRITE_DATA;
+  reg        [31:0]   execute_to_memory_MEMORY_STORE_DATA_RF;
   wire                when_Pipeline_l124_75;
-  reg        [31:0]   execute_to_memory_SHIFT_RIGHT;
+  reg        [31:0]   memory_to_writeBack_MEMORY_STORE_DATA_RF;
   wire                when_Pipeline_l124_76;
-  reg        [31:0]   execute_to_memory_MUL_LL;
+  reg        [31:0]   execute_to_memory_REGFILE_WRITE_DATA;
   wire                when_Pipeline_l124_77;
-  reg        [33:0]   execute_to_memory_MUL_LH;
+  reg        [31:0]   memory_to_writeBack_REGFILE_WRITE_DATA;
   wire                when_Pipeline_l124_78;
-  reg        [33:0]   execute_to_memory_MUL_HL;
+  reg        [31:0]   execute_to_memory_SHIFT_RIGHT;
   wire                when_Pipeline_l124_79;
-  reg        [33:0]   execute_to_memory_MUL_HH;
+  reg        [31:0]   execute_to_memory_MUL_LL;
   wire                when_Pipeline_l124_80;
-  reg        [33:0]   memory_to_writeBack_MUL_HH;
+  reg        [33:0]   execute_to_memory_MUL_LH;
   wire                when_Pipeline_l124_81;
-  reg                 execute_to_memory_CfuPlugin_CFU_IN_FLIGHT;
+  reg        [33:0]   execute_to_memory_MUL_HL;
   wire                when_Pipeline_l124_82;
-  reg                 memory_to_writeBack_CfuPlugin_CFU_IN_FLIGHT;
+  reg        [33:0]   execute_to_memory_MUL_HH;
   wire                when_Pipeline_l124_83;
+  reg        [33:0]   memory_to_writeBack_MUL_HH;
+  wire                when_Pipeline_l124_84;
+  reg                 execute_to_memory_CfuPlugin_CFU_IN_FLIGHT;
+  wire                when_Pipeline_l124_85;
+  reg                 memory_to_writeBack_CfuPlugin_CFU_IN_FLIGHT;
+  wire                when_Pipeline_l124_86;
   reg        [51:0]   memory_to_writeBack_MUL_LOW;
   wire                when_Pipeline_l151;
   wire                when_Pipeline_l154;
@@ -1615,67 +1597,68 @@ module VexRiscv (
   wire                when_Pipeline_l154_1;
   wire                when_Pipeline_l151_2;
   wire                when_Pipeline_l154_2;
-  wire                when_CsrPlugin_l1264;
+  wire                when_CsrPlugin_l1277;
   reg                 execute_CsrPlugin_csr_3264;
-  wire                when_CsrPlugin_l1264_1;
+  wire                when_CsrPlugin_l1277_1;
   reg                 execute_CsrPlugin_csr_3857;
-  wire                when_CsrPlugin_l1264_2;
+  wire                when_CsrPlugin_l1277_2;
   reg                 execute_CsrPlugin_csr_3858;
-  wire                when_CsrPlugin_l1264_3;
+  wire                when_CsrPlugin_l1277_3;
   reg                 execute_CsrPlugin_csr_3859;
-  wire                when_CsrPlugin_l1264_4;
+  wire                when_CsrPlugin_l1277_4;
   reg                 execute_CsrPlugin_csr_3860;
-  wire                when_CsrPlugin_l1264_5;
+  wire                when_CsrPlugin_l1277_5;
   reg                 execute_CsrPlugin_csr_769;
-  wire                when_CsrPlugin_l1264_6;
+  wire                when_CsrPlugin_l1277_6;
   reg                 execute_CsrPlugin_csr_768;
-  wire                when_CsrPlugin_l1264_7;
+  wire                when_CsrPlugin_l1277_7;
   reg                 execute_CsrPlugin_csr_836;
-  wire                when_CsrPlugin_l1264_8;
+  wire                when_CsrPlugin_l1277_8;
   reg                 execute_CsrPlugin_csr_772;
-  wire                when_CsrPlugin_l1264_9;
+  wire                when_CsrPlugin_l1277_9;
   reg                 execute_CsrPlugin_csr_773;
-  wire                when_CsrPlugin_l1264_10;
+  wire                when_CsrPlugin_l1277_10;
   reg                 execute_CsrPlugin_csr_833;
-  wire                when_CsrPlugin_l1264_11;
+  wire                when_CsrPlugin_l1277_11;
   reg                 execute_CsrPlugin_csr_832;
-  wire                when_CsrPlugin_l1264_12;
+  wire                when_CsrPlugin_l1277_12;
   reg                 execute_CsrPlugin_csr_834;
-  wire                when_CsrPlugin_l1264_13;
+  wire                when_CsrPlugin_l1277_13;
   reg                 execute_CsrPlugin_csr_835;
-  wire                when_CsrPlugin_l1264_14;
+  wire                when_CsrPlugin_l1277_14;
   reg                 execute_CsrPlugin_csr_2816;
-  wire                when_CsrPlugin_l1264_15;
+  wire                when_CsrPlugin_l1277_15;
   reg                 execute_CsrPlugin_csr_2944;
-  wire                when_CsrPlugin_l1264_16;
+  wire                when_CsrPlugin_l1277_16;
   reg                 execute_CsrPlugin_csr_2818;
-  wire                when_CsrPlugin_l1264_17;
+  wire                when_CsrPlugin_l1277_17;
   reg                 execute_CsrPlugin_csr_2946;
-  wire                when_CsrPlugin_l1264_18;
+  wire                when_CsrPlugin_l1277_18;
   reg                 execute_CsrPlugin_csr_3072;
-  wire                when_CsrPlugin_l1264_19;
+  wire                when_CsrPlugin_l1277_19;
   reg                 execute_CsrPlugin_csr_3200;
-  wire                when_CsrPlugin_l1264_20;
+  wire                when_CsrPlugin_l1277_20;
   reg                 execute_CsrPlugin_csr_3074;
-  wire                when_CsrPlugin_l1264_21;
+  wire                when_CsrPlugin_l1277_21;
   reg                 execute_CsrPlugin_csr_3202;
-  wire                when_CsrPlugin_l1264_22;
+  wire                when_CsrPlugin_l1277_22;
   reg                 execute_CsrPlugin_csr_3008;
-  wire                when_CsrPlugin_l1264_23;
+  wire                when_CsrPlugin_l1277_23;
   reg                 execute_CsrPlugin_csr_4032;
-  wire                when_CsrPlugin_l1264_24;
+  wire                when_CsrPlugin_l1277_24;
   reg                 execute_CsrPlugin_csr_3;
-  wire                when_CsrPlugin_l1264_25;
+  wire                when_CsrPlugin_l1277_25;
   reg                 execute_CsrPlugin_csr_2;
-  wire                when_CsrPlugin_l1264_26;
+  wire                when_CsrPlugin_l1277_26;
   reg                 execute_CsrPlugin_csr_1;
-  wire                when_CsrPlugin_l1264_27;
+  wire                when_CsrPlugin_l1277_27;
   reg                 execute_CsrPlugin_csr_256;
   reg        [31:0]   _zz_CsrPlugin_csrMapping_readDataInit_2;
   reg        [31:0]   _zz_CsrPlugin_csrMapping_readDataInit_3;
   reg        [31:0]   _zz_CsrPlugin_csrMapping_readDataInit_4;
   reg        [31:0]   _zz_CsrPlugin_csrMapping_readDataInit_5;
   reg        [31:0]   _zz_CsrPlugin_csrMapping_readDataInit_6;
+  wire       [1:0]    switch_CsrPlugin_l723;
   reg        [31:0]   _zz_CsrPlugin_csrMapping_readDataInit_7;
   reg        [31:0]   _zz_CsrPlugin_csrMapping_readDataInit_8;
   reg        [31:0]   _zz_CsrPlugin_csrMapping_readDataInit_9;
@@ -1700,8 +1683,8 @@ module VexRiscv (
   wire       [4:0]    _zz_FpuPlugin_flags_NX_1;
   reg        [31:0]   _zz_CsrPlugin_csrMapping_readDataInit_27;
   reg        [31:0]   _zz_CsrPlugin_csrMapping_readDataInit_28;
-  wire                when_CsrPlugin_l1297;
-  wire                when_CsrPlugin_l1302;
+  wire                when_CsrPlugin_l1310;
+  wire                when_CsrPlugin_l1315;
   reg        [2:0]    _zz_iBusWishbone_ADR;
   wire                when_InstructionCache_l239;
   reg                 _zz_iBus_rsp_valid;
@@ -1833,7 +1816,7 @@ module VexRiscv (
   reg [63:0] memory_to_writeBack_FPU_OPCODE_string;
   `endif
 
-  (* ram_style = "block" *) reg [31:0] RegFilePlugin_regFile [0:31] /* verilator public */ ;
+  (* no_rw_check , ram_style = "block" *) reg [31:0] RegFilePlugin_regFile [0:31] /* verilator public */ ;
 
   assign _zz_when = ({decodeExceptionPort_valid,IBusCachedPlugin_decodeExceptionPort_valid} != 2'b00);
   assign _zz_when_1 = ({CsrPlugin_selfException_valid,BranchPlugin_branchExceptionPort_valid} != 2'b00);
@@ -1848,7 +1831,7 @@ module VexRiscv (
   assign _zz_memory_MUL_LOW_7 = {{2{_zz_memory_MUL_LOW_8[49]}}, _zz_memory_MUL_LOW_8};
   assign _zz_execute_SHIFT_RIGHT_1 = ($signed(_zz_execute_SHIFT_RIGHT_2) >>> execute_FullBarrelShifterPlugin_amplitude);
   assign _zz_execute_SHIFT_RIGHT = _zz_execute_SHIFT_RIGHT_1[31 : 0];
-  assign _zz_execute_SHIFT_RIGHT_2 = {((execute_SHIFT_CTRL == `ShiftCtrlEnum_binary_sequential_SRA_1) && execute_FullBarrelShifterPlugin_reversed[31]),execute_FullBarrelShifterPlugin_reversed};
+  assign _zz_execute_SHIFT_RIGHT_2 = {((execute_SHIFT_CTRL == ShiftCtrlEnum_SRA_1) && execute_FullBarrelShifterPlugin_reversed[31]),execute_FullBarrelShifterPlugin_reversed};
   assign _zz__zz_IBusCachedPlugin_jump_pcLoad_payload_1 = (_zz_IBusCachedPlugin_jump_pcLoad_payload - 4'b0001);
   assign _zz_IBusCachedPlugin_fetchPc_pc_1 = {IBusCachedPlugin_fetchPc_inc,2'b00};
   assign _zz_IBusCachedPlugin_fetchPc_pc = {29'd0, _zz_IBusCachedPlugin_fetchPc_pc_1};
@@ -1860,6 +1843,8 @@ module VexRiscv (
   assign _zz__zz_6_1 = {{_zz_5,{{{decode_INSTRUCTION[31],decode_INSTRUCTION[7]},decode_INSTRUCTION[30 : 25]},decode_INSTRUCTION[11 : 8]}},1'b0};
   assign _zz__zz_IBusCachedPlugin_predictionJumpInterface_payload = {{{decode_INSTRUCTION[31],decode_INSTRUCTION[19 : 12]},decode_INSTRUCTION[20]},decode_INSTRUCTION[30 : 21]};
   assign _zz__zz_IBusCachedPlugin_predictionJumpInterface_payload_2 = {{{decode_INSTRUCTION[31],decode_INSTRUCTION[7]},decode_INSTRUCTION[30 : 25]},decode_INSTRUCTION[11 : 8]};
+  assign _zz_io_cpu_flush_payload_lineId = _zz_io_cpu_flush_payload_lineId_1;
+  assign _zz_io_cpu_flush_payload_lineId_1 = (execute_RS1 >>> 5);
   assign _zz_DBusCachedPlugin_exceptionBus_payload_code = (writeBack_MEMORY_WR ? 3'b111 : 3'b101);
   assign _zz_DBusCachedPlugin_exceptionBus_payload_code_1 = (writeBack_MEMORY_WR ? 3'b110 : 3'b100);
   assign _zz__zz_execute_REGFILE_WRITE_DATA = execute_SRC_LESS;
@@ -1956,10 +1941,9 @@ module VexRiscv (
   assign _zz__zz_decode_FPU_RSP_2 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_3) == 32'h20001010);
   assign _zz__zz_decode_FPU_RSP_4 = {(_zz__zz_decode_FPU_RSP_5 == _zz__zz_decode_FPU_RSP_6),(_zz__zz_decode_FPU_RSP_7 == _zz__zz_decode_FPU_RSP_8)};
   assign _zz__zz_decode_FPU_RSP_9 = {(_zz__zz_decode_FPU_RSP_10 == _zz__zz_decode_FPU_RSP_11),{_zz__zz_decode_FPU_RSP_12,_zz__zz_decode_FPU_RSP_14}};
-  assign _zz__zz_decode_FPU_RSP_16 = 3'b000;
-  assign _zz__zz_decode_FPU_RSP_17 = ({_zz__zz_decode_FPU_RSP_18,_zz__zz_decode_FPU_RSP_20} != 2'b00);
-  assign _zz__zz_decode_FPU_RSP_22 = ({_zz__zz_decode_FPU_RSP_23,_zz__zz_decode_FPU_RSP_26} != 4'b0000);
-  assign _zz__zz_decode_FPU_RSP_35 = {(_zz__zz_decode_FPU_RSP_36 != _zz__zz_decode_FPU_RSP_49),{_zz__zz_decode_FPU_RSP_50,{_zz__zz_decode_FPU_RSP_53,_zz__zz_decode_FPU_RSP_64}}};
+  assign _zz__zz_decode_FPU_RSP_16 = (|{_zz__zz_decode_FPU_RSP_17,_zz__zz_decode_FPU_RSP_19});
+  assign _zz__zz_decode_FPU_RSP_21 = (|{_zz__zz_decode_FPU_RSP_22,_zz__zz_decode_FPU_RSP_25});
+  assign _zz__zz_decode_FPU_RSP_34 = {(|_zz__zz_decode_FPU_RSP_35),{_zz__zz_decode_FPU_RSP_48,{_zz__zz_decode_FPU_RSP_51,_zz__zz_decode_FPU_RSP_61}}};
   assign _zz__zz_decode_FPU_RSP_3 = 32'h20001010;
   assign _zz__zz_decode_FPU_RSP_5 = (decode_INSTRUCTION & 32'h28000010);
   assign _zz__zz_decode_FPU_RSP_6 = 32'h08000010;
@@ -1969,238 +1953,226 @@ module VexRiscv (
   assign _zz__zz_decode_FPU_RSP_11 = 32'h60000010;
   assign _zz__zz_decode_FPU_RSP_12 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_13) == 32'h18000010);
   assign _zz__zz_decode_FPU_RSP_14 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_15) == 32'h20000010);
-  assign _zz__zz_decode_FPU_RSP_18 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_19) == 32'h80000000);
-  assign _zz__zz_decode_FPU_RSP_20 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_21) == 32'h00000040);
-  assign _zz__zz_decode_FPU_RSP_23 = (_zz__zz_decode_FPU_RSP_24 == _zz__zz_decode_FPU_RSP_25);
-  assign _zz__zz_decode_FPU_RSP_26 = {_zz__zz_decode_FPU_RSP_27,{_zz__zz_decode_FPU_RSP_29,_zz__zz_decode_FPU_RSP_32}};
-  assign _zz__zz_decode_FPU_RSP_36 = {_zz_decode_FPU_RSP_9,{_zz__zz_decode_FPU_RSP_37,_zz__zz_decode_FPU_RSP_40}};
-  assign _zz__zz_decode_FPU_RSP_49 = 5'h0;
-  assign _zz__zz_decode_FPU_RSP_50 = ({_zz__zz_decode_FPU_RSP_51,_zz__zz_decode_FPU_RSP_52} != 2'b00);
-  assign _zz__zz_decode_FPU_RSP_53 = (_zz__zz_decode_FPU_RSP_54 != _zz__zz_decode_FPU_RSP_63);
-  assign _zz__zz_decode_FPU_RSP_64 = {_zz__zz_decode_FPU_RSP_65,{_zz__zz_decode_FPU_RSP_70,_zz__zz_decode_FPU_RSP_71}};
+  assign _zz__zz_decode_FPU_RSP_17 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_18) == 32'h80000000);
+  assign _zz__zz_decode_FPU_RSP_19 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_20) == 32'h00000040);
+  assign _zz__zz_decode_FPU_RSP_22 = (_zz__zz_decode_FPU_RSP_23 == _zz__zz_decode_FPU_RSP_24);
+  assign _zz__zz_decode_FPU_RSP_25 = {_zz__zz_decode_FPU_RSP_26,{_zz__zz_decode_FPU_RSP_28,_zz__zz_decode_FPU_RSP_31}};
+  assign _zz__zz_decode_FPU_RSP_35 = {_zz_decode_FPU_RSP_9,{_zz__zz_decode_FPU_RSP_36,_zz__zz_decode_FPU_RSP_39}};
+  assign _zz__zz_decode_FPU_RSP_48 = (|{_zz__zz_decode_FPU_RSP_49,_zz__zz_decode_FPU_RSP_50});
+  assign _zz__zz_decode_FPU_RSP_51 = (|_zz__zz_decode_FPU_RSP_52);
+  assign _zz__zz_decode_FPU_RSP_61 = {_zz__zz_decode_FPU_RSP_62,{_zz__zz_decode_FPU_RSP_69,_zz__zz_decode_FPU_RSP_70}};
   assign _zz__zz_decode_FPU_RSP_13 = 32'h18000010;
   assign _zz__zz_decode_FPU_RSP_15 = 32'ha0000010;
-  assign _zz__zz_decode_FPU_RSP_19 = 32'h80000004;
-  assign _zz__zz_decode_FPU_RSP_21 = 32'h00000050;
-  assign _zz__zz_decode_FPU_RSP_24 = (decode_INSTRUCTION & 32'h10001010);
-  assign _zz__zz_decode_FPU_RSP_25 = 32'h00001010;
-  assign _zz__zz_decode_FPU_RSP_27 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_28) == 32'h00000010);
-  assign _zz__zz_decode_FPU_RSP_29 = (_zz__zz_decode_FPU_RSP_30 == _zz__zz_decode_FPU_RSP_31);
-  assign _zz__zz_decode_FPU_RSP_32 = (_zz__zz_decode_FPU_RSP_33 == _zz__zz_decode_FPU_RSP_34);
-  assign _zz__zz_decode_FPU_RSP_37 = (_zz__zz_decode_FPU_RSP_38 == _zz__zz_decode_FPU_RSP_39);
-  assign _zz__zz_decode_FPU_RSP_40 = {_zz__zz_decode_FPU_RSP_41,{_zz__zz_decode_FPU_RSP_43,_zz__zz_decode_FPU_RSP_46}};
-  assign _zz__zz_decode_FPU_RSP_51 = _zz_decode_FPU_RSP_9;
-  assign _zz__zz_decode_FPU_RSP_52 = _zz_decode_FPU_RSP_6;
-  assign _zz__zz_decode_FPU_RSP_54 = {_zz__zz_decode_FPU_RSP_55,{_zz__zz_decode_FPU_RSP_57,_zz__zz_decode_FPU_RSP_60}};
-  assign _zz__zz_decode_FPU_RSP_63 = 3'b000;
-  assign _zz__zz_decode_FPU_RSP_65 = ({_zz__zz_decode_FPU_RSP_66,_zz__zz_decode_FPU_RSP_69} != 2'b00);
-  assign _zz__zz_decode_FPU_RSP_70 = 1'b0;
-  assign _zz__zz_decode_FPU_RSP_71 = {_zz__zz_decode_FPU_RSP_72,{_zz__zz_decode_FPU_RSP_73,_zz__zz_decode_FPU_RSP_76}};
-  assign _zz__zz_decode_FPU_RSP_28 = 32'h30000010;
-  assign _zz__zz_decode_FPU_RSP_30 = (decode_INSTRUCTION & 32'h88000010);
-  assign _zz__zz_decode_FPU_RSP_31 = 32'h00000010;
-  assign _zz__zz_decode_FPU_RSP_33 = (decode_INSTRUCTION & 32'h50000010);
-  assign _zz__zz_decode_FPU_RSP_34 = 32'h00000010;
-  assign _zz__zz_decode_FPU_RSP_38 = (decode_INSTRUCTION & 32'h90000010);
-  assign _zz__zz_decode_FPU_RSP_39 = 32'h90000010;
-  assign _zz__zz_decode_FPU_RSP_41 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_42) == 32'h40000010);
-  assign _zz__zz_decode_FPU_RSP_43 = (_zz__zz_decode_FPU_RSP_44 == _zz__zz_decode_FPU_RSP_45);
-  assign _zz__zz_decode_FPU_RSP_46 = (_zz__zz_decode_FPU_RSP_47 == _zz__zz_decode_FPU_RSP_48);
-  assign _zz__zz_decode_FPU_RSP_55 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_56) == 32'h10000000);
-  assign _zz__zz_decode_FPU_RSP_57 = (_zz__zz_decode_FPU_RSP_58 == _zz__zz_decode_FPU_RSP_59);
-  assign _zz__zz_decode_FPU_RSP_60 = (_zz__zz_decode_FPU_RSP_61 == _zz__zz_decode_FPU_RSP_62);
+  assign _zz__zz_decode_FPU_RSP_18 = 32'h80000004;
+  assign _zz__zz_decode_FPU_RSP_20 = 32'h00000050;
+  assign _zz__zz_decode_FPU_RSP_23 = (decode_INSTRUCTION & 32'h10001010);
+  assign _zz__zz_decode_FPU_RSP_24 = 32'h00001010;
+  assign _zz__zz_decode_FPU_RSP_26 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_27) == 32'h00000010);
+  assign _zz__zz_decode_FPU_RSP_28 = (_zz__zz_decode_FPU_RSP_29 == _zz__zz_decode_FPU_RSP_30);
+  assign _zz__zz_decode_FPU_RSP_31 = (_zz__zz_decode_FPU_RSP_32 == _zz__zz_decode_FPU_RSP_33);
+  assign _zz__zz_decode_FPU_RSP_36 = (_zz__zz_decode_FPU_RSP_37 == _zz__zz_decode_FPU_RSP_38);
+  assign _zz__zz_decode_FPU_RSP_39 = {_zz__zz_decode_FPU_RSP_40,{_zz__zz_decode_FPU_RSP_42,_zz__zz_decode_FPU_RSP_45}};
+  assign _zz__zz_decode_FPU_RSP_49 = _zz_decode_FPU_RSP_9;
+  assign _zz__zz_decode_FPU_RSP_50 = _zz_decode_FPU_RSP_6;
+  assign _zz__zz_decode_FPU_RSP_52 = {_zz__zz_decode_FPU_RSP_53,{_zz__zz_decode_FPU_RSP_55,_zz__zz_decode_FPU_RSP_58}};
+  assign _zz__zz_decode_FPU_RSP_62 = (|{_zz__zz_decode_FPU_RSP_63,_zz__zz_decode_FPU_RSP_66});
+  assign _zz__zz_decode_FPU_RSP_69 = 1'b0;
+  assign _zz__zz_decode_FPU_RSP_70 = {_zz__zz_decode_FPU_RSP_71,{_zz__zz_decode_FPU_RSP_72,_zz__zz_decode_FPU_RSP_74}};
+  assign _zz__zz_decode_FPU_RSP_27 = 32'h30000010;
+  assign _zz__zz_decode_FPU_RSP_29 = (decode_INSTRUCTION & 32'h88000010);
+  assign _zz__zz_decode_FPU_RSP_30 = 32'h00000010;
+  assign _zz__zz_decode_FPU_RSP_32 = (decode_INSTRUCTION & 32'h50000010);
+  assign _zz__zz_decode_FPU_RSP_33 = 32'h00000010;
+  assign _zz__zz_decode_FPU_RSP_37 = (decode_INSTRUCTION & 32'h90000010);
+  assign _zz__zz_decode_FPU_RSP_38 = 32'h90000010;
+  assign _zz__zz_decode_FPU_RSP_40 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_41) == 32'h40000010);
+  assign _zz__zz_decode_FPU_RSP_42 = (_zz__zz_decode_FPU_RSP_43 == _zz__zz_decode_FPU_RSP_44);
+  assign _zz__zz_decode_FPU_RSP_45 = (_zz__zz_decode_FPU_RSP_46 == _zz__zz_decode_FPU_RSP_47);
+  assign _zz__zz_decode_FPU_RSP_53 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_54) == 32'h10000000);
+  assign _zz__zz_decode_FPU_RSP_55 = (_zz__zz_decode_FPU_RSP_56 == _zz__zz_decode_FPU_RSP_57);
+  assign _zz__zz_decode_FPU_RSP_58 = (_zz__zz_decode_FPU_RSP_59 == _zz__zz_decode_FPU_RSP_60);
+  assign _zz__zz_decode_FPU_RSP_63 = (_zz__zz_decode_FPU_RSP_64 == _zz__zz_decode_FPU_RSP_65);
   assign _zz__zz_decode_FPU_RSP_66 = (_zz__zz_decode_FPU_RSP_67 == _zz__zz_decode_FPU_RSP_68);
-  assign _zz__zz_decode_FPU_RSP_69 = _zz_decode_FPU_RSP_10;
-  assign _zz__zz_decode_FPU_RSP_72 = (_zz_decode_FPU_RSP_11 != 1'b0);
-  assign _zz__zz_decode_FPU_RSP_73 = (_zz__zz_decode_FPU_RSP_74 != _zz__zz_decode_FPU_RSP_75);
-  assign _zz__zz_decode_FPU_RSP_76 = {_zz__zz_decode_FPU_RSP_77,{_zz__zz_decode_FPU_RSP_78,_zz__zz_decode_FPU_RSP_80}};
-  assign _zz__zz_decode_FPU_RSP_42 = 32'hc0000010;
-  assign _zz__zz_decode_FPU_RSP_44 = (decode_INSTRUCTION & 32'h58000010);
-  assign _zz__zz_decode_FPU_RSP_45 = 32'h00000010;
-  assign _zz__zz_decode_FPU_RSP_47 = (decode_INSTRUCTION & 32'hb0000010);
-  assign _zz__zz_decode_FPU_RSP_48 = 32'h00000010;
-  assign _zz__zz_decode_FPU_RSP_56 = 32'h10000020;
-  assign _zz__zz_decode_FPU_RSP_58 = (decode_INSTRUCTION & 32'h80000020);
-  assign _zz__zz_decode_FPU_RSP_59 = 32'h0;
-  assign _zz__zz_decode_FPU_RSP_61 = (decode_INSTRUCTION & 32'h00000030);
-  assign _zz__zz_decode_FPU_RSP_62 = 32'h0;
-  assign _zz__zz_decode_FPU_RSP_67 = (decode_INSTRUCTION & 32'h00000060);
-  assign _zz__zz_decode_FPU_RSP_68 = 32'h00000040;
-  assign _zz__zz_decode_FPU_RSP_74 = _zz_decode_FPU_RSP_13;
-  assign _zz__zz_decode_FPU_RSP_75 = 1'b0;
-  assign _zz__zz_decode_FPU_RSP_77 = (_zz_decode_FPU_RSP_13 != 1'b0);
-  assign _zz__zz_decode_FPU_RSP_78 = (((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_79) == 32'h02004020) != 1'b0);
-  assign _zz__zz_decode_FPU_RSP_80 = {((_zz__zz_decode_FPU_RSP_81 == _zz__zz_decode_FPU_RSP_82) != 1'b0),{({_zz__zz_decode_FPU_RSP_83,_zz__zz_decode_FPU_RSP_84} != 2'b00),{(_zz__zz_decode_FPU_RSP_86 != _zz__zz_decode_FPU_RSP_89),{_zz__zz_decode_FPU_RSP_90,{_zz__zz_decode_FPU_RSP_93,_zz__zz_decode_FPU_RSP_97}}}}};
-  assign _zz__zz_decode_FPU_RSP_79 = 32'h02004064;
-  assign _zz__zz_decode_FPU_RSP_81 = (decode_INSTRUCTION & 32'h02004074);
-  assign _zz__zz_decode_FPU_RSP_82 = 32'h02000030;
-  assign _zz__zz_decode_FPU_RSP_83 = _zz_decode_FPU_RSP_12;
-  assign _zz__zz_decode_FPU_RSP_84 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_85) == 32'h10000030);
-  assign _zz__zz_decode_FPU_RSP_86 = {_zz_decode_FPU_RSP_12,(_zz__zz_decode_FPU_RSP_87 == _zz__zz_decode_FPU_RSP_88)};
-  assign _zz__zz_decode_FPU_RSP_89 = 2'b00;
-  assign _zz__zz_decode_FPU_RSP_90 = ({_zz__zz_decode_FPU_RSP_91,_zz__zz_decode_FPU_RSP_92} != 2'b00);
-  assign _zz__zz_decode_FPU_RSP_93 = ({_zz__zz_decode_FPU_RSP_94,_zz__zz_decode_FPU_RSP_95} != 2'b00);
-  assign _zz__zz_decode_FPU_RSP_97 = {(_zz__zz_decode_FPU_RSP_98 != _zz__zz_decode_FPU_RSP_100),{_zz__zz_decode_FPU_RSP_101,{_zz__zz_decode_FPU_RSP_104,_zz__zz_decode_FPU_RSP_112}}};
-  assign _zz__zz_decode_FPU_RSP_85 = 32'h10203034;
-  assign _zz__zz_decode_FPU_RSP_87 = (decode_INSTRUCTION & 32'h10403034);
-  assign _zz__zz_decode_FPU_RSP_88 = 32'h10000030;
-  assign _zz__zz_decode_FPU_RSP_91 = ((decode_INSTRUCTION & 32'h00001070) == 32'h00001070);
-  assign _zz__zz_decode_FPU_RSP_92 = ((decode_INSTRUCTION & 32'h00002070) == 32'h00002070);
-  assign _zz__zz_decode_FPU_RSP_94 = _zz_decode_FPU_RSP_7;
-  assign _zz__zz_decode_FPU_RSP_95 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_96) == 32'h00000024);
-  assign _zz__zz_decode_FPU_RSP_98 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_99) == 32'h00000060);
-  assign _zz__zz_decode_FPU_RSP_100 = 1'b0;
-  assign _zz__zz_decode_FPU_RSP_101 = ({_zz__zz_decode_FPU_RSP_102,_zz__zz_decode_FPU_RSP_103} != 2'b00);
-  assign _zz__zz_decode_FPU_RSP_104 = ({_zz__zz_decode_FPU_RSP_105,_zz__zz_decode_FPU_RSP_107} != 3'b000);
-  assign _zz__zz_decode_FPU_RSP_112 = {(_zz__zz_decode_FPU_RSP_113 != _zz__zz_decode_FPU_RSP_115),{_zz__zz_decode_FPU_RSP_116,{_zz__zz_decode_FPU_RSP_119,_zz__zz_decode_FPU_RSP_121}}};
-  assign _zz__zz_decode_FPU_RSP_96 = 32'h00002034;
-  assign _zz__zz_decode_FPU_RSP_99 = 32'h00000078;
-  assign _zz__zz_decode_FPU_RSP_102 = ((decode_INSTRUCTION & 32'h00007074) == 32'h00005010);
-  assign _zz__zz_decode_FPU_RSP_103 = ((decode_INSTRUCTION & 32'h02007064) == 32'h00005020);
-  assign _zz__zz_decode_FPU_RSP_105 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_106) == 32'h40001010);
-  assign _zz__zz_decode_FPU_RSP_107 = {(_zz__zz_decode_FPU_RSP_108 == _zz__zz_decode_FPU_RSP_109),(_zz__zz_decode_FPU_RSP_110 == _zz__zz_decode_FPU_RSP_111)};
-  assign _zz__zz_decode_FPU_RSP_113 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_114) == 32'h00000034);
-  assign _zz__zz_decode_FPU_RSP_115 = 1'b0;
-  assign _zz__zz_decode_FPU_RSP_116 = ((_zz__zz_decode_FPU_RSP_117 == _zz__zz_decode_FPU_RSP_118) != 1'b0);
-  assign _zz__zz_decode_FPU_RSP_119 = (_zz__zz_decode_FPU_RSP_120 != 1'b0);
-  assign _zz__zz_decode_FPU_RSP_121 = {(_zz__zz_decode_FPU_RSP_122 != _zz__zz_decode_FPU_RSP_127),{_zz__zz_decode_FPU_RSP_128,{_zz__zz_decode_FPU_RSP_131,_zz__zz_decode_FPU_RSP_137}}};
-  assign _zz__zz_decode_FPU_RSP_106 = 32'h40003054;
-  assign _zz__zz_decode_FPU_RSP_108 = (decode_INSTRUCTION & 32'h00007074);
-  assign _zz__zz_decode_FPU_RSP_109 = 32'h00001010;
-  assign _zz__zz_decode_FPU_RSP_110 = (decode_INSTRUCTION & 32'h02007054);
-  assign _zz__zz_decode_FPU_RSP_111 = 32'h00001010;
-  assign _zz__zz_decode_FPU_RSP_114 = 32'h00000034;
-  assign _zz__zz_decode_FPU_RSP_117 = (decode_INSTRUCTION & 32'h00001000);
-  assign _zz__zz_decode_FPU_RSP_118 = 32'h00001000;
-  assign _zz__zz_decode_FPU_RSP_120 = ((decode_INSTRUCTION & 32'h00003000) == 32'h00002000);
-  assign _zz__zz_decode_FPU_RSP_122 = {(_zz__zz_decode_FPU_RSP_123 == _zz__zz_decode_FPU_RSP_124),(_zz__zz_decode_FPU_RSP_125 == _zz__zz_decode_FPU_RSP_126)};
-  assign _zz__zz_decode_FPU_RSP_127 = 2'b00;
-  assign _zz__zz_decode_FPU_RSP_128 = ((_zz__zz_decode_FPU_RSP_129 == _zz__zz_decode_FPU_RSP_130) != 1'b0);
-  assign _zz__zz_decode_FPU_RSP_131 = ({_zz__zz_decode_FPU_RSP_132,_zz__zz_decode_FPU_RSP_134} != 3'b000);
-  assign _zz__zz_decode_FPU_RSP_137 = {(_zz__zz_decode_FPU_RSP_138 != _zz__zz_decode_FPU_RSP_153),{_zz__zz_decode_FPU_RSP_154,{_zz__zz_decode_FPU_RSP_155,_zz__zz_decode_FPU_RSP_170}}};
-  assign _zz__zz_decode_FPU_RSP_123 = (decode_INSTRUCTION & 32'h00002010);
-  assign _zz__zz_decode_FPU_RSP_124 = 32'h00002000;
-  assign _zz__zz_decode_FPU_RSP_125 = (decode_INSTRUCTION & 32'h00005000);
-  assign _zz__zz_decode_FPU_RSP_126 = 32'h00001000;
-  assign _zz__zz_decode_FPU_RSP_129 = (decode_INSTRUCTION & 32'h00004054);
-  assign _zz__zz_decode_FPU_RSP_130 = 32'h00004004;
-  assign _zz__zz_decode_FPU_RSP_132 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_133) == 32'h00000020);
-  assign _zz__zz_decode_FPU_RSP_134 = {_zz_decode_FPU_RSP_11,(_zz__zz_decode_FPU_RSP_135 == _zz__zz_decode_FPU_RSP_136)};
-  assign _zz__zz_decode_FPU_RSP_138 = {(_zz__zz_decode_FPU_RSP_139 == _zz__zz_decode_FPU_RSP_140),{_zz__zz_decode_FPU_RSP_141,{_zz__zz_decode_FPU_RSP_143,_zz__zz_decode_FPU_RSP_146}}};
-  assign _zz__zz_decode_FPU_RSP_153 = 6'h0;
-  assign _zz__zz_decode_FPU_RSP_154 = (_zz_decode_FPU_RSP_9 != 1'b0);
-  assign _zz__zz_decode_FPU_RSP_155 = ({_zz__zz_decode_FPU_RSP_156,_zz__zz_decode_FPU_RSP_157} != 6'h0);
-  assign _zz__zz_decode_FPU_RSP_170 = {(_zz__zz_decode_FPU_RSP_171 != _zz__zz_decode_FPU_RSP_184),{_zz__zz_decode_FPU_RSP_185,{_zz__zz_decode_FPU_RSP_200,_zz__zz_decode_FPU_RSP_207}}};
-  assign _zz__zz_decode_FPU_RSP_133 = 32'h00000034;
-  assign _zz__zz_decode_FPU_RSP_135 = (decode_INSTRUCTION & 32'h00000064);
-  assign _zz__zz_decode_FPU_RSP_136 = 32'h00000020;
-  assign _zz__zz_decode_FPU_RSP_139 = (decode_INSTRUCTION & 32'h00001060);
-  assign _zz__zz_decode_FPU_RSP_140 = 32'h00001060;
-  assign _zz__zz_decode_FPU_RSP_141 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_142) == 32'h00002060);
-  assign _zz__zz_decode_FPU_RSP_143 = (_zz__zz_decode_FPU_RSP_144 == _zz__zz_decode_FPU_RSP_145);
-  assign _zz__zz_decode_FPU_RSP_146 = {_zz__zz_decode_FPU_RSP_147,{_zz__zz_decode_FPU_RSP_149,_zz__zz_decode_FPU_RSP_150}};
-  assign _zz__zz_decode_FPU_RSP_156 = _zz_decode_FPU_RSP_3;
-  assign _zz__zz_decode_FPU_RSP_157 = {_zz_decode_FPU_RSP_8,{_zz__zz_decode_FPU_RSP_158,_zz__zz_decode_FPU_RSP_161}};
-  assign _zz__zz_decode_FPU_RSP_171 = {_zz_decode_FPU_RSP_8,{_zz__zz_decode_FPU_RSP_172,_zz__zz_decode_FPU_RSP_175}};
-  assign _zz__zz_decode_FPU_RSP_184 = 5'h0;
-  assign _zz__zz_decode_FPU_RSP_185 = ({_zz__zz_decode_FPU_RSP_186,_zz__zz_decode_FPU_RSP_187} != 7'h0);
-  assign _zz__zz_decode_FPU_RSP_200 = (_zz__zz_decode_FPU_RSP_201 != _zz__zz_decode_FPU_RSP_206);
-  assign _zz__zz_decode_FPU_RSP_207 = {_zz__zz_decode_FPU_RSP_208,{_zz__zz_decode_FPU_RSP_213,_zz__zz_decode_FPU_RSP_218}};
-  assign _zz__zz_decode_FPU_RSP_142 = 32'h00002060;
-  assign _zz__zz_decode_FPU_RSP_144 = (decode_INSTRUCTION & 32'h00400060);
-  assign _zz__zz_decode_FPU_RSP_145 = 32'h00000060;
-  assign _zz__zz_decode_FPU_RSP_147 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_148) == 32'h00000060);
-  assign _zz__zz_decode_FPU_RSP_149 = _zz_decode_FPU_RSP_10;
-  assign _zz__zz_decode_FPU_RSP_150 = (_zz__zz_decode_FPU_RSP_151 == _zz__zz_decode_FPU_RSP_152);
-  assign _zz__zz_decode_FPU_RSP_158 = (_zz__zz_decode_FPU_RSP_159 == _zz__zz_decode_FPU_RSP_160);
-  assign _zz__zz_decode_FPU_RSP_161 = {_zz__zz_decode_FPU_RSP_162,{_zz__zz_decode_FPU_RSP_164,_zz__zz_decode_FPU_RSP_167}};
-  assign _zz__zz_decode_FPU_RSP_172 = (_zz__zz_decode_FPU_RSP_173 == _zz__zz_decode_FPU_RSP_174);
-  assign _zz__zz_decode_FPU_RSP_175 = {_zz__zz_decode_FPU_RSP_176,{_zz__zz_decode_FPU_RSP_178,_zz__zz_decode_FPU_RSP_181}};
-  assign _zz__zz_decode_FPU_RSP_186 = _zz_decode_FPU_RSP_7;
-  assign _zz__zz_decode_FPU_RSP_187 = {_zz__zz_decode_FPU_RSP_188,{_zz__zz_decode_FPU_RSP_190,_zz__zz_decode_FPU_RSP_193}};
-  assign _zz__zz_decode_FPU_RSP_201 = {_zz_decode_FPU_RSP_3,{_zz__zz_decode_FPU_RSP_202,_zz__zz_decode_FPU_RSP_203}};
-  assign _zz__zz_decode_FPU_RSP_206 = 4'b0000;
-  assign _zz__zz_decode_FPU_RSP_208 = ({_zz__zz_decode_FPU_RSP_209,_zz__zz_decode_FPU_RSP_210} != 3'b000);
-  assign _zz__zz_decode_FPU_RSP_213 = (_zz__zz_decode_FPU_RSP_214 != _zz__zz_decode_FPU_RSP_217);
-  assign _zz__zz_decode_FPU_RSP_218 = {_zz__zz_decode_FPU_RSP_219,{_zz__zz_decode_FPU_RSP_222,_zz__zz_decode_FPU_RSP_232}};
-  assign _zz__zz_decode_FPU_RSP_148 = 32'h00000070;
-  assign _zz__zz_decode_FPU_RSP_151 = (decode_INSTRUCTION & 32'h00000078);
-  assign _zz__zz_decode_FPU_RSP_152 = 32'h0;
-  assign _zz__zz_decode_FPU_RSP_159 = (decode_INSTRUCTION & 32'h00004020);
-  assign _zz__zz_decode_FPU_RSP_160 = 32'h00004020;
-  assign _zz__zz_decode_FPU_RSP_162 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_163) == 32'h00000060);
-  assign _zz__zz_decode_FPU_RSP_164 = (_zz__zz_decode_FPU_RSP_165 == _zz__zz_decode_FPU_RSP_166);
-  assign _zz__zz_decode_FPU_RSP_167 = (_zz__zz_decode_FPU_RSP_168 == _zz__zz_decode_FPU_RSP_169);
-  assign _zz__zz_decode_FPU_RSP_173 = (decode_INSTRUCTION & 32'h00002070);
-  assign _zz__zz_decode_FPU_RSP_174 = 32'h00002010;
-  assign _zz__zz_decode_FPU_RSP_176 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_177) == 32'h00002020);
-  assign _zz__zz_decode_FPU_RSP_178 = (_zz__zz_decode_FPU_RSP_179 == _zz__zz_decode_FPU_RSP_180);
-  assign _zz__zz_decode_FPU_RSP_181 = (_zz__zz_decode_FPU_RSP_182 == _zz__zz_decode_FPU_RSP_183);
-  assign _zz__zz_decode_FPU_RSP_188 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_189) == 32'h00000010);
-  assign _zz__zz_decode_FPU_RSP_190 = (_zz__zz_decode_FPU_RSP_191 == _zz__zz_decode_FPU_RSP_192);
-  assign _zz__zz_decode_FPU_RSP_193 = {_zz__zz_decode_FPU_RSP_194,{_zz__zz_decode_FPU_RSP_196,_zz__zz_decode_FPU_RSP_197}};
-  assign _zz__zz_decode_FPU_RSP_202 = _zz_decode_FPU_RSP_2;
-  assign _zz__zz_decode_FPU_RSP_203 = {_zz_decode_FPU_RSP_5,_zz__zz_decode_FPU_RSP_204};
-  assign _zz__zz_decode_FPU_RSP_209 = _zz_decode_FPU_RSP_3;
-  assign _zz__zz_decode_FPU_RSP_210 = {_zz__zz_decode_FPU_RSP_211,_zz_decode_FPU_RSP_5};
-  assign _zz__zz_decode_FPU_RSP_214 = (_zz__zz_decode_FPU_RSP_215 == _zz__zz_decode_FPU_RSP_216);
-  assign _zz__zz_decode_FPU_RSP_217 = 1'b0;
-  assign _zz__zz_decode_FPU_RSP_219 = (_zz__zz_decode_FPU_RSP_220 != 1'b0);
-  assign _zz__zz_decode_FPU_RSP_222 = (_zz__zz_decode_FPU_RSP_223 != _zz__zz_decode_FPU_RSP_231);
-  assign _zz__zz_decode_FPU_RSP_232 = {_zz__zz_decode_FPU_RSP_233,{_zz__zz_decode_FPU_RSP_234,_zz__zz_decode_FPU_RSP_241}};
-  assign _zz__zz_decode_FPU_RSP_163 = 32'h00000060;
-  assign _zz__zz_decode_FPU_RSP_165 = (decode_INSTRUCTION & 32'h02000020);
-  assign _zz__zz_decode_FPU_RSP_166 = 32'h00000020;
-  assign _zz__zz_decode_FPU_RSP_168 = (decode_INSTRUCTION & 32'h00000070);
-  assign _zz__zz_decode_FPU_RSP_169 = 32'h00000010;
-  assign _zz__zz_decode_FPU_RSP_177 = 32'h02002060;
-  assign _zz__zz_decode_FPU_RSP_179 = (decode_INSTRUCTION & 32'h00001070);
-  assign _zz__zz_decode_FPU_RSP_180 = 32'h00000010;
-  assign _zz__zz_decode_FPU_RSP_182 = (decode_INSTRUCTION & 32'h02003020);
-  assign _zz__zz_decode_FPU_RSP_183 = 32'h00000020;
-  assign _zz__zz_decode_FPU_RSP_189 = 32'h00000050;
-  assign _zz__zz_decode_FPU_RSP_191 = (decode_INSTRUCTION & 32'h00001030);
-  assign _zz__zz_decode_FPU_RSP_192 = 32'h00001030;
-  assign _zz__zz_decode_FPU_RSP_194 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_195) == 32'h00002030);
-  assign _zz__zz_decode_FPU_RSP_196 = _zz_decode_FPU_RSP_6;
-  assign _zz__zz_decode_FPU_RSP_197 = {_zz__zz_decode_FPU_RSP_198,_zz__zz_decode_FPU_RSP_199};
-  assign _zz__zz_decode_FPU_RSP_204 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_205) == 32'h00000020);
-  assign _zz__zz_decode_FPU_RSP_211 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_212) == 32'h0);
-  assign _zz__zz_decode_FPU_RSP_215 = (decode_INSTRUCTION & 32'h00004014);
-  assign _zz__zz_decode_FPU_RSP_216 = 32'h00004010;
-  assign _zz__zz_decode_FPU_RSP_220 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_221) == 32'h00002010);
-  assign _zz__zz_decode_FPU_RSP_223 = {_zz__zz_decode_FPU_RSP_224,{_zz__zz_decode_FPU_RSP_225,_zz__zz_decode_FPU_RSP_227}};
-  assign _zz__zz_decode_FPU_RSP_231 = 6'h0;
-  assign _zz__zz_decode_FPU_RSP_233 = (_zz_decode_FPU_RSP_4 != 1'b0);
-  assign _zz__zz_decode_FPU_RSP_234 = (_zz__zz_decode_FPU_RSP_235 != _zz__zz_decode_FPU_RSP_240);
-  assign _zz__zz_decode_FPU_RSP_241 = {_zz__zz_decode_FPU_RSP_242,{_zz__zz_decode_FPU_RSP_245,_zz__zz_decode_FPU_RSP_248}};
-  assign _zz__zz_decode_FPU_RSP_195 = 32'h00002030;
-  assign _zz__zz_decode_FPU_RSP_198 = ((decode_INSTRUCTION & 32'h00002024) == 32'h00000024);
-  assign _zz__zz_decode_FPU_RSP_199 = ((decode_INSTRUCTION & 32'h00000064) == 32'h0);
-  assign _zz__zz_decode_FPU_RSP_205 = 32'h00000070;
-  assign _zz__zz_decode_FPU_RSP_212 = 32'h00000020;
-  assign _zz__zz_decode_FPU_RSP_221 = 32'h00006014;
-  assign _zz__zz_decode_FPU_RSP_224 = ((decode_INSTRUCTION & 32'h00000044) == 32'h0);
-  assign _zz__zz_decode_FPU_RSP_225 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_226) == 32'h00000020);
-  assign _zz__zz_decode_FPU_RSP_227 = {_zz_decode_FPU_RSP_4,{_zz__zz_decode_FPU_RSP_228,{_zz__zz_decode_FPU_RSP_229,_zz__zz_decode_FPU_RSP_230}}};
-  assign _zz__zz_decode_FPU_RSP_235 = {(_zz__zz_decode_FPU_RSP_236 == _zz__zz_decode_FPU_RSP_237),{_zz__zz_decode_FPU_RSP_238,_zz__zz_decode_FPU_RSP_239}};
-  assign _zz__zz_decode_FPU_RSP_240 = 3'b000;
-  assign _zz__zz_decode_FPU_RSP_242 = ({_zz_decode_FPU_RSP_3,{_zz__zz_decode_FPU_RSP_243,_zz__zz_decode_FPU_RSP_244}} != 3'b000);
-  assign _zz__zz_decode_FPU_RSP_245 = ({_zz__zz_decode_FPU_RSP_246,_zz__zz_decode_FPU_RSP_247} != 2'b00);
-  assign _zz__zz_decode_FPU_RSP_248 = (_zz__zz_decode_FPU_RSP_249 != 1'b0);
-  assign _zz__zz_decode_FPU_RSP_226 = 32'h00000038;
-  assign _zz__zz_decode_FPU_RSP_228 = ((decode_INSTRUCTION & 32'h00006024) == 32'h00002020);
-  assign _zz__zz_decode_FPU_RSP_229 = ((decode_INSTRUCTION & 32'h00005024) == 32'h00001020);
-  assign _zz__zz_decode_FPU_RSP_230 = ((decode_INSTRUCTION & 32'h90000034) == 32'h90000010);
-  assign _zz__zz_decode_FPU_RSP_236 = (decode_INSTRUCTION & 32'h00000044);
-  assign _zz__zz_decode_FPU_RSP_237 = 32'h00000040;
-  assign _zz__zz_decode_FPU_RSP_238 = ((decode_INSTRUCTION & 32'h00002014) == 32'h00002010);
-  assign _zz__zz_decode_FPU_RSP_239 = ((decode_INSTRUCTION & 32'h40000034) == 32'h40000030);
-  assign _zz__zz_decode_FPU_RSP_243 = _zz_decode_FPU_RSP_1;
-  assign _zz__zz_decode_FPU_RSP_244 = ((decode_INSTRUCTION & 32'h00002014) == 32'h00000004);
-  assign _zz__zz_decode_FPU_RSP_246 = _zz_decode_FPU_RSP_2;
-  assign _zz__zz_decode_FPU_RSP_247 = _zz_decode_FPU_RSP_1;
-  assign _zz__zz_decode_FPU_RSP_249 = ((decode_INSTRUCTION & 32'h00005054) == 32'h00001004);
+  assign _zz__zz_decode_FPU_RSP_71 = (|_zz_decode_FPU_RSP_10);
+  assign _zz__zz_decode_FPU_RSP_72 = (|_zz__zz_decode_FPU_RSP_73);
+  assign _zz__zz_decode_FPU_RSP_74 = {_zz__zz_decode_FPU_RSP_75,{_zz__zz_decode_FPU_RSP_76,_zz__zz_decode_FPU_RSP_78}};
+  assign _zz__zz_decode_FPU_RSP_41 = 32'hc0000010;
+  assign _zz__zz_decode_FPU_RSP_43 = (decode_INSTRUCTION & 32'h58000010);
+  assign _zz__zz_decode_FPU_RSP_44 = 32'h00000010;
+  assign _zz__zz_decode_FPU_RSP_46 = (decode_INSTRUCTION & 32'hb0000010);
+  assign _zz__zz_decode_FPU_RSP_47 = 32'h00000010;
+  assign _zz__zz_decode_FPU_RSP_54 = 32'h10000020;
+  assign _zz__zz_decode_FPU_RSP_56 = (decode_INSTRUCTION & 32'h80000020);
+  assign _zz__zz_decode_FPU_RSP_57 = 32'h0;
+  assign _zz__zz_decode_FPU_RSP_59 = (decode_INSTRUCTION & 32'h00000030);
+  assign _zz__zz_decode_FPU_RSP_60 = 32'h0;
+  assign _zz__zz_decode_FPU_RSP_64 = (decode_INSTRUCTION & 32'h00000060);
+  assign _zz__zz_decode_FPU_RSP_65 = 32'h00000040;
+  assign _zz__zz_decode_FPU_RSP_67 = (decode_INSTRUCTION & 32'h0000005c);
+  assign _zz__zz_decode_FPU_RSP_68 = 32'h00000004;
+  assign _zz__zz_decode_FPU_RSP_73 = _zz_decode_FPU_RSP_12;
+  assign _zz__zz_decode_FPU_RSP_75 = (|_zz_decode_FPU_RSP_12);
+  assign _zz__zz_decode_FPU_RSP_76 = (|((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_77) == 32'h02004020));
+  assign _zz__zz_decode_FPU_RSP_78 = {(|(_zz__zz_decode_FPU_RSP_79 == _zz__zz_decode_FPU_RSP_80)),{(|{_zz__zz_decode_FPU_RSP_81,_zz__zz_decode_FPU_RSP_82}),{(|_zz__zz_decode_FPU_RSP_83),{_zz__zz_decode_FPU_RSP_85,{_zz__zz_decode_FPU_RSP_90,_zz__zz_decode_FPU_RSP_92}}}}};
+  assign _zz__zz_decode_FPU_RSP_77 = 32'h02004064;
+  assign _zz__zz_decode_FPU_RSP_79 = (decode_INSTRUCTION & 32'h02004074);
+  assign _zz__zz_decode_FPU_RSP_80 = 32'h02000030;
+  assign _zz__zz_decode_FPU_RSP_81 = _zz_decode_FPU_RSP_11;
+  assign _zz__zz_decode_FPU_RSP_82 = ((decode_INSTRUCTION & 32'h10203034) == 32'h10000030);
+  assign _zz__zz_decode_FPU_RSP_83 = {_zz_decode_FPU_RSP_11,((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_84) == 32'h10000030)};
+  assign _zz__zz_decode_FPU_RSP_85 = (|{(_zz__zz_decode_FPU_RSP_86 == _zz__zz_decode_FPU_RSP_87),(_zz__zz_decode_FPU_RSP_88 == _zz__zz_decode_FPU_RSP_89)});
+  assign _zz__zz_decode_FPU_RSP_90 = (|{_zz_decode_FPU_RSP_7,_zz__zz_decode_FPU_RSP_91});
+  assign _zz__zz_decode_FPU_RSP_92 = {(|_zz__zz_decode_FPU_RSP_93),{(|_zz__zz_decode_FPU_RSP_94),{_zz__zz_decode_FPU_RSP_99,{_zz__zz_decode_FPU_RSP_105,_zz__zz_decode_FPU_RSP_107}}}};
+  assign _zz__zz_decode_FPU_RSP_84 = 32'h10403034;
+  assign _zz__zz_decode_FPU_RSP_86 = (decode_INSTRUCTION & 32'h00001070);
+  assign _zz__zz_decode_FPU_RSP_87 = 32'h00001070;
+  assign _zz__zz_decode_FPU_RSP_88 = (decode_INSTRUCTION & 32'h00002070);
+  assign _zz__zz_decode_FPU_RSP_89 = 32'h00002070;
+  assign _zz__zz_decode_FPU_RSP_91 = ((decode_INSTRUCTION & 32'h00002034) == 32'h00000024);
+  assign _zz__zz_decode_FPU_RSP_93 = ((decode_INSTRUCTION & 32'h00000078) == 32'h00000060);
+  assign _zz__zz_decode_FPU_RSP_94 = {(_zz__zz_decode_FPU_RSP_95 == _zz__zz_decode_FPU_RSP_96),(_zz__zz_decode_FPU_RSP_97 == _zz__zz_decode_FPU_RSP_98)};
+  assign _zz__zz_decode_FPU_RSP_99 = (|{_zz__zz_decode_FPU_RSP_100,{_zz__zz_decode_FPU_RSP_101,_zz__zz_decode_FPU_RSP_103}});
+  assign _zz__zz_decode_FPU_RSP_105 = (|_zz__zz_decode_FPU_RSP_106);
+  assign _zz__zz_decode_FPU_RSP_107 = {(|_zz__zz_decode_FPU_RSP_108),{_zz__zz_decode_FPU_RSP_110,{_zz__zz_decode_FPU_RSP_113,_zz__zz_decode_FPU_RSP_118}}};
+  assign _zz__zz_decode_FPU_RSP_95 = (decode_INSTRUCTION & 32'h00007074);
+  assign _zz__zz_decode_FPU_RSP_96 = 32'h00005010;
+  assign _zz__zz_decode_FPU_RSP_97 = (decode_INSTRUCTION & 32'h02007064);
+  assign _zz__zz_decode_FPU_RSP_98 = 32'h00005020;
+  assign _zz__zz_decode_FPU_RSP_100 = ((decode_INSTRUCTION & 32'h40003054) == 32'h40001010);
+  assign _zz__zz_decode_FPU_RSP_101 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_102) == 32'h00001010);
+  assign _zz__zz_decode_FPU_RSP_103 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_104) == 32'h00001010);
+  assign _zz__zz_decode_FPU_RSP_106 = ((decode_INSTRUCTION & 32'h00000034) == 32'h00000034);
+  assign _zz__zz_decode_FPU_RSP_108 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_109) == 32'h00001000);
+  assign _zz__zz_decode_FPU_RSP_110 = (|(_zz__zz_decode_FPU_RSP_111 == _zz__zz_decode_FPU_RSP_112));
+  assign _zz__zz_decode_FPU_RSP_113 = (|{_zz__zz_decode_FPU_RSP_114,_zz__zz_decode_FPU_RSP_116});
+  assign _zz__zz_decode_FPU_RSP_118 = {(|_zz__zz_decode_FPU_RSP_119),{_zz__zz_decode_FPU_RSP_121,{_zz__zz_decode_FPU_RSP_126,_zz__zz_decode_FPU_RSP_140}}};
+  assign _zz__zz_decode_FPU_RSP_102 = 32'h00007074;
+  assign _zz__zz_decode_FPU_RSP_104 = 32'h02007054;
+  assign _zz__zz_decode_FPU_RSP_109 = 32'h00001000;
+  assign _zz__zz_decode_FPU_RSP_111 = (decode_INSTRUCTION & 32'h00003000);
+  assign _zz__zz_decode_FPU_RSP_112 = 32'h00002000;
+  assign _zz__zz_decode_FPU_RSP_114 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_115) == 32'h00002000);
+  assign _zz__zz_decode_FPU_RSP_116 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_117) == 32'h00001000);
+  assign _zz__zz_decode_FPU_RSP_119 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_120) == 32'h00004004);
+  assign _zz__zz_decode_FPU_RSP_121 = (|{_zz__zz_decode_FPU_RSP_122,{_zz__zz_decode_FPU_RSP_123,_zz__zz_decode_FPU_RSP_124}});
+  assign _zz__zz_decode_FPU_RSP_126 = (|{_zz__zz_decode_FPU_RSP_127,_zz__zz_decode_FPU_RSP_129});
+  assign _zz__zz_decode_FPU_RSP_140 = {(|_zz__zz_decode_FPU_RSP_141),{_zz__zz_decode_FPU_RSP_142,{_zz__zz_decode_FPU_RSP_155,_zz__zz_decode_FPU_RSP_168}}};
+  assign _zz__zz_decode_FPU_RSP_115 = 32'h00002010;
+  assign _zz__zz_decode_FPU_RSP_117 = 32'h00005000;
+  assign _zz__zz_decode_FPU_RSP_120 = 32'h00004054;
+  assign _zz__zz_decode_FPU_RSP_122 = ((decode_INSTRUCTION & 32'h00000034) == 32'h00000020);
+  assign _zz__zz_decode_FPU_RSP_123 = _zz_decode_FPU_RSP_10;
+  assign _zz__zz_decode_FPU_RSP_124 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_125) == 32'h00000020);
+  assign _zz__zz_decode_FPU_RSP_127 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_128) == 32'h00000020);
+  assign _zz__zz_decode_FPU_RSP_129 = {(_zz__zz_decode_FPU_RSP_130 == _zz__zz_decode_FPU_RSP_131),{_zz__zz_decode_FPU_RSP_132,{_zz__zz_decode_FPU_RSP_134,_zz__zz_decode_FPU_RSP_137}}};
+  assign _zz__zz_decode_FPU_RSP_141 = _zz_decode_FPU_RSP_9;
+  assign _zz__zz_decode_FPU_RSP_142 = (|{_zz_decode_FPU_RSP_3,{_zz__zz_decode_FPU_RSP_143,_zz__zz_decode_FPU_RSP_144}});
+  assign _zz__zz_decode_FPU_RSP_155 = (|{_zz__zz_decode_FPU_RSP_156,_zz__zz_decode_FPU_RSP_157});
+  assign _zz__zz_decode_FPU_RSP_168 = {(|_zz__zz_decode_FPU_RSP_169),{_zz__zz_decode_FPU_RSP_184,{_zz__zz_decode_FPU_RSP_191,_zz__zz_decode_FPU_RSP_197}}};
+  assign _zz__zz_decode_FPU_RSP_125 = 32'h00000064;
+  assign _zz__zz_decode_FPU_RSP_128 = 32'h00000030;
+  assign _zz__zz_decode_FPU_RSP_130 = (decode_INSTRUCTION & 32'h00001060);
+  assign _zz__zz_decode_FPU_RSP_131 = 32'h00001060;
+  assign _zz__zz_decode_FPU_RSP_132 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_133) == 32'h00002060);
+  assign _zz__zz_decode_FPU_RSP_134 = (_zz__zz_decode_FPU_RSP_135 == _zz__zz_decode_FPU_RSP_136);
+  assign _zz__zz_decode_FPU_RSP_137 = {_zz_decode_FPU_RSP_4,_zz__zz_decode_FPU_RSP_138};
+  assign _zz__zz_decode_FPU_RSP_143 = _zz_decode_FPU_RSP_8;
+  assign _zz__zz_decode_FPU_RSP_144 = {_zz__zz_decode_FPU_RSP_145,{_zz__zz_decode_FPU_RSP_147,_zz__zz_decode_FPU_RSP_150}};
+  assign _zz__zz_decode_FPU_RSP_156 = _zz_decode_FPU_RSP_8;
+  assign _zz__zz_decode_FPU_RSP_157 = {_zz__zz_decode_FPU_RSP_158,{_zz__zz_decode_FPU_RSP_160,_zz__zz_decode_FPU_RSP_163}};
+  assign _zz__zz_decode_FPU_RSP_169 = {_zz_decode_FPU_RSP_7,{_zz__zz_decode_FPU_RSP_170,_zz__zz_decode_FPU_RSP_173}};
+  assign _zz__zz_decode_FPU_RSP_184 = (|{_zz__zz_decode_FPU_RSP_185,_zz__zz_decode_FPU_RSP_186});
+  assign _zz__zz_decode_FPU_RSP_191 = (|_zz__zz_decode_FPU_RSP_192);
+  assign _zz__zz_decode_FPU_RSP_197 = {_zz__zz_decode_FPU_RSP_198,{_zz__zz_decode_FPU_RSP_201,_zz__zz_decode_FPU_RSP_205}};
+  assign _zz__zz_decode_FPU_RSP_133 = 32'h00002060;
+  assign _zz__zz_decode_FPU_RSP_135 = (decode_INSTRUCTION & 32'h10000060);
+  assign _zz__zz_decode_FPU_RSP_136 = 32'h00000060;
+  assign _zz__zz_decode_FPU_RSP_138 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_139) == 32'h10000020);
+  assign _zz__zz_decode_FPU_RSP_145 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_146) == 32'h00004020);
+  assign _zz__zz_decode_FPU_RSP_147 = (_zz__zz_decode_FPU_RSP_148 == _zz__zz_decode_FPU_RSP_149);
+  assign _zz__zz_decode_FPU_RSP_150 = {_zz__zz_decode_FPU_RSP_151,_zz__zz_decode_FPU_RSP_153};
+  assign _zz__zz_decode_FPU_RSP_158 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_159) == 32'h00002010);
+  assign _zz__zz_decode_FPU_RSP_160 = (_zz__zz_decode_FPU_RSP_161 == _zz__zz_decode_FPU_RSP_162);
+  assign _zz__zz_decode_FPU_RSP_163 = {_zz__zz_decode_FPU_RSP_164,_zz__zz_decode_FPU_RSP_166};
+  assign _zz__zz_decode_FPU_RSP_170 = (_zz__zz_decode_FPU_RSP_171 == _zz__zz_decode_FPU_RSP_172);
+  assign _zz__zz_decode_FPU_RSP_173 = {_zz__zz_decode_FPU_RSP_174,{_zz__zz_decode_FPU_RSP_176,_zz__zz_decode_FPU_RSP_179}};
+  assign _zz__zz_decode_FPU_RSP_185 = _zz_decode_FPU_RSP_3;
+  assign _zz__zz_decode_FPU_RSP_186 = {_zz_decode_FPU_RSP_2,{_zz__zz_decode_FPU_RSP_187,_zz__zz_decode_FPU_RSP_188}};
+  assign _zz__zz_decode_FPU_RSP_192 = {_zz_decode_FPU_RSP_3,{_zz__zz_decode_FPU_RSP_193,_zz__zz_decode_FPU_RSP_196}};
+  assign _zz__zz_decode_FPU_RSP_198 = (|_zz__zz_decode_FPU_RSP_199);
+  assign _zz__zz_decode_FPU_RSP_201 = (|_zz__zz_decode_FPU_RSP_202);
+  assign _zz__zz_decode_FPU_RSP_205 = {_zz__zz_decode_FPU_RSP_206,{_zz__zz_decode_FPU_RSP_219,_zz__zz_decode_FPU_RSP_221}};
+  assign _zz__zz_decode_FPU_RSP_139 = 32'h10400024;
+  assign _zz__zz_decode_FPU_RSP_146 = 32'h00004020;
+  assign _zz__zz_decode_FPU_RSP_148 = (decode_INSTRUCTION & 32'h00000060);
+  assign _zz__zz_decode_FPU_RSP_149 = 32'h00000060;
+  assign _zz__zz_decode_FPU_RSP_151 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_152) == 32'h00000020);
+  assign _zz__zz_decode_FPU_RSP_153 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_154) == 32'h00000010);
+  assign _zz__zz_decode_FPU_RSP_159 = 32'h00002070;
+  assign _zz__zz_decode_FPU_RSP_161 = (decode_INSTRUCTION & 32'h02002060);
+  assign _zz__zz_decode_FPU_RSP_162 = 32'h00002020;
+  assign _zz__zz_decode_FPU_RSP_164 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_165) == 32'h00000010);
+  assign _zz__zz_decode_FPU_RSP_166 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_167) == 32'h00000020);
+  assign _zz__zz_decode_FPU_RSP_171 = (decode_INSTRUCTION & 32'h00000050);
+  assign _zz__zz_decode_FPU_RSP_172 = 32'h00000010;
+  assign _zz__zz_decode_FPU_RSP_174 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_175) == 32'h00001030);
+  assign _zz__zz_decode_FPU_RSP_176 = (_zz__zz_decode_FPU_RSP_177 == _zz__zz_decode_FPU_RSP_178);
+  assign _zz__zz_decode_FPU_RSP_179 = {_zz_decode_FPU_RSP_6,{_zz__zz_decode_FPU_RSP_180,_zz__zz_decode_FPU_RSP_182}};
+  assign _zz__zz_decode_FPU_RSP_187 = _zz_decode_FPU_RSP_5;
+  assign _zz__zz_decode_FPU_RSP_188 = (_zz__zz_decode_FPU_RSP_189 == _zz__zz_decode_FPU_RSP_190);
+  assign _zz__zz_decode_FPU_RSP_193 = (_zz__zz_decode_FPU_RSP_194 == _zz__zz_decode_FPU_RSP_195);
+  assign _zz__zz_decode_FPU_RSP_196 = _zz_decode_FPU_RSP_5;
+  assign _zz__zz_decode_FPU_RSP_199 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_200) == 32'h00004010);
+  assign _zz__zz_decode_FPU_RSP_202 = (_zz__zz_decode_FPU_RSP_203 == _zz__zz_decode_FPU_RSP_204);
+  assign _zz__zz_decode_FPU_RSP_206 = (|{_zz__zz_decode_FPU_RSP_207,_zz__zz_decode_FPU_RSP_209});
+  assign _zz__zz_decode_FPU_RSP_219 = (|_zz__zz_decode_FPU_RSP_220);
+  assign _zz__zz_decode_FPU_RSP_221 = {_zz__zz_decode_FPU_RSP_222,{_zz__zz_decode_FPU_RSP_228,_zz__zz_decode_FPU_RSP_233}};
+  assign _zz__zz_decode_FPU_RSP_152 = 32'h02000020;
+  assign _zz__zz_decode_FPU_RSP_154 = 32'h00000070;
+  assign _zz__zz_decode_FPU_RSP_165 = 32'h00001070;
+  assign _zz__zz_decode_FPU_RSP_167 = 32'h02003020;
+  assign _zz__zz_decode_FPU_RSP_175 = 32'h00001030;
+  assign _zz__zz_decode_FPU_RSP_177 = (decode_INSTRUCTION & 32'h00002030);
+  assign _zz__zz_decode_FPU_RSP_178 = 32'h00002030;
+  assign _zz__zz_decode_FPU_RSP_180 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_181) == 32'h00000024);
+  assign _zz__zz_decode_FPU_RSP_182 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_183) == 32'h0);
+  assign _zz__zz_decode_FPU_RSP_189 = (decode_INSTRUCTION & 32'h00000070);
+  assign _zz__zz_decode_FPU_RSP_190 = 32'h00000020;
+  assign _zz__zz_decode_FPU_RSP_194 = (decode_INSTRUCTION & 32'h00000020);
+  assign _zz__zz_decode_FPU_RSP_195 = 32'h0;
+  assign _zz__zz_decode_FPU_RSP_200 = 32'h00004014;
+  assign _zz__zz_decode_FPU_RSP_203 = (decode_INSTRUCTION & 32'h00006014);
+  assign _zz__zz_decode_FPU_RSP_204 = 32'h00002010;
+  assign _zz__zz_decode_FPU_RSP_207 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_208) == 32'h0);
+  assign _zz__zz_decode_FPU_RSP_209 = {(_zz__zz_decode_FPU_RSP_210 == _zz__zz_decode_FPU_RSP_211),{_zz__zz_decode_FPU_RSP_212,{_zz__zz_decode_FPU_RSP_213,_zz__zz_decode_FPU_RSP_214}}};
+  assign _zz__zz_decode_FPU_RSP_220 = _zz_decode_FPU_RSP_4;
+  assign _zz__zz_decode_FPU_RSP_222 = (|{_zz__zz_decode_FPU_RSP_223,{_zz__zz_decode_FPU_RSP_224,_zz__zz_decode_FPU_RSP_226}});
+  assign _zz__zz_decode_FPU_RSP_228 = (|{_zz__zz_decode_FPU_RSP_229,_zz__zz_decode_FPU_RSP_230});
+  assign _zz__zz_decode_FPU_RSP_233 = {(|_zz__zz_decode_FPU_RSP_234),(|_zz__zz_decode_FPU_RSP_235)};
+  assign _zz__zz_decode_FPU_RSP_181 = 32'h00002024;
+  assign _zz__zz_decode_FPU_RSP_183 = 32'h00000064;
+  assign _zz__zz_decode_FPU_RSP_208 = 32'h00000044;
+  assign _zz__zz_decode_FPU_RSP_210 = (decode_INSTRUCTION & 32'h00000038);
+  assign _zz__zz_decode_FPU_RSP_211 = 32'h00000020;
+  assign _zz__zz_decode_FPU_RSP_212 = ((decode_INSTRUCTION & 32'h00004050) == 32'h00004000);
+  assign _zz__zz_decode_FPU_RSP_213 = _zz_decode_FPU_RSP_4;
+  assign _zz__zz_decode_FPU_RSP_214 = {(_zz__zz_decode_FPU_RSP_215 == _zz__zz_decode_FPU_RSP_216),{_zz__zz_decode_FPU_RSP_217,_zz__zz_decode_FPU_RSP_218}};
+  assign _zz__zz_decode_FPU_RSP_223 = ((decode_INSTRUCTION & 32'h00000044) == 32'h00000040);
+  assign _zz__zz_decode_FPU_RSP_224 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_225) == 32'h00002010);
+  assign _zz__zz_decode_FPU_RSP_226 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_227) == 32'h40000030);
+  assign _zz__zz_decode_FPU_RSP_229 = _zz_decode_FPU_RSP_3;
+  assign _zz__zz_decode_FPU_RSP_230 = {_zz_decode_FPU_RSP_1,(_zz__zz_decode_FPU_RSP_231 == _zz__zz_decode_FPU_RSP_232)};
+  assign _zz__zz_decode_FPU_RSP_234 = {_zz_decode_FPU_RSP_2,_zz_decode_FPU_RSP_1};
+  assign _zz__zz_decode_FPU_RSP_235 = ((decode_INSTRUCTION & _zz__zz_decode_FPU_RSP_236) == 32'h00001004);
+  assign _zz__zz_decode_FPU_RSP_215 = (decode_INSTRUCTION & 32'h00006024);
+  assign _zz__zz_decode_FPU_RSP_216 = 32'h00002020;
+  assign _zz__zz_decode_FPU_RSP_217 = ((decode_INSTRUCTION & 32'h00005024) == 32'h00001020);
+  assign _zz__zz_decode_FPU_RSP_218 = ((decode_INSTRUCTION & 32'h90000034) == 32'h90000010);
+  assign _zz__zz_decode_FPU_RSP_225 = 32'h00002014;
+  assign _zz__zz_decode_FPU_RSP_227 = 32'h40000034;
+  assign _zz__zz_decode_FPU_RSP_231 = (decode_INSTRUCTION & 32'h00002014);
+  assign _zz__zz_decode_FPU_RSP_232 = 32'h00000004;
+  assign _zz__zz_decode_FPU_RSP_236 = 32'h00005054;
   assign _zz_execute_BranchPlugin_branch_src2_6 = execute_INSTRUCTION[31];
   assign _zz_execute_BranchPlugin_branch_src2_7 = execute_INSTRUCTION[31];
   assign _zz_execute_BranchPlugin_branch_src2_8 = execute_INSTRUCTION[7];
@@ -2224,1493 +2196,1476 @@ module VexRiscv (
   end
 
   InstructionCache IBusCachedPlugin_cache (
-    .io_flush                                 (IBusCachedPlugin_cache_io_flush                       ), //i
-    .io_cpu_prefetch_isValid                  (IBusCachedPlugin_cache_io_cpu_prefetch_isValid        ), //i
-    .io_cpu_prefetch_haltIt                   (IBusCachedPlugin_cache_io_cpu_prefetch_haltIt         ), //o
-    .io_cpu_prefetch_pc                       (IBusCachedPlugin_iBusRsp_stages_0_input_payload       ), //i
-    .io_cpu_fetch_isValid                     (IBusCachedPlugin_cache_io_cpu_fetch_isValid           ), //i
-    .io_cpu_fetch_isStuck                     (IBusCachedPlugin_cache_io_cpu_fetch_isStuck           ), //i
-    .io_cpu_fetch_isRemoved                   (IBusCachedPlugin_cache_io_cpu_fetch_isRemoved         ), //i
-    .io_cpu_fetch_pc                          (IBusCachedPlugin_iBusRsp_stages_1_input_payload       ), //i
-    .io_cpu_fetch_data                        (IBusCachedPlugin_cache_io_cpu_fetch_data              ), //o
-    .io_cpu_fetch_mmuRsp_physicalAddress      (IBusCachedPlugin_mmuBus_rsp_physicalAddress           ), //i
-    .io_cpu_fetch_mmuRsp_isIoAccess           (IBusCachedPlugin_mmuBus_rsp_isIoAccess                ), //i
-    .io_cpu_fetch_mmuRsp_isPaging             (IBusCachedPlugin_mmuBus_rsp_isPaging                  ), //i
-    .io_cpu_fetch_mmuRsp_allowRead            (IBusCachedPlugin_mmuBus_rsp_allowRead                 ), //i
-    .io_cpu_fetch_mmuRsp_allowWrite           (IBusCachedPlugin_mmuBus_rsp_allowWrite                ), //i
-    .io_cpu_fetch_mmuRsp_allowExecute         (IBusCachedPlugin_mmuBus_rsp_allowExecute              ), //i
-    .io_cpu_fetch_mmuRsp_exception            (IBusCachedPlugin_mmuBus_rsp_exception                 ), //i
-    .io_cpu_fetch_mmuRsp_refilling            (IBusCachedPlugin_mmuBus_rsp_refilling                 ), //i
-    .io_cpu_fetch_mmuRsp_bypassTranslation    (IBusCachedPlugin_mmuBus_rsp_bypassTranslation         ), //i
-    .io_cpu_fetch_physicalAddress             (IBusCachedPlugin_cache_io_cpu_fetch_physicalAddress   ), //o
-    .io_cpu_decode_isValid                    (IBusCachedPlugin_cache_io_cpu_decode_isValid          ), //i
-    .io_cpu_decode_isStuck                    (IBusCachedPlugin_cache_io_cpu_decode_isStuck          ), //i
-    .io_cpu_decode_pc                         (IBusCachedPlugin_iBusRsp_stages_2_input_payload       ), //i
-    .io_cpu_decode_physicalAddress            (IBusCachedPlugin_cache_io_cpu_decode_physicalAddress  ), //o
-    .io_cpu_decode_data                       (IBusCachedPlugin_cache_io_cpu_decode_data             ), //o
-    .io_cpu_decode_cacheMiss                  (IBusCachedPlugin_cache_io_cpu_decode_cacheMiss        ), //o
-    .io_cpu_decode_error                      (IBusCachedPlugin_cache_io_cpu_decode_error            ), //o
-    .io_cpu_decode_mmuRefilling               (IBusCachedPlugin_cache_io_cpu_decode_mmuRefilling     ), //o
-    .io_cpu_decode_mmuException               (IBusCachedPlugin_cache_io_cpu_decode_mmuException     ), //o
-    .io_cpu_decode_isUser                     (IBusCachedPlugin_cache_io_cpu_decode_isUser           ), //i
-    .io_cpu_fill_valid                        (IBusCachedPlugin_cache_io_cpu_fill_valid              ), //i
-    .io_cpu_fill_payload                      (IBusCachedPlugin_cache_io_cpu_decode_physicalAddress  ), //i
-    .io_mem_cmd_valid                         (IBusCachedPlugin_cache_io_mem_cmd_valid               ), //o
-    .io_mem_cmd_ready                         (iBus_cmd_ready                                        ), //i
-    .io_mem_cmd_payload_address               (IBusCachedPlugin_cache_io_mem_cmd_payload_address     ), //o
-    .io_mem_cmd_payload_size                  (IBusCachedPlugin_cache_io_mem_cmd_payload_size        ), //o
-    .io_mem_rsp_valid                         (iBus_rsp_valid                                        ), //i
-    .io_mem_rsp_payload_data                  (iBus_rsp_payload_data                                 ), //i
-    .io_mem_rsp_payload_error                 (iBus_rsp_payload_error                                ), //i
-    .clk                                      (clk                                                   ), //i
-    .reset                                    (reset                                                 )  //i
+    .io_flush                              (IBusCachedPlugin_cache_io_flush                           ), //i
+    .io_cpu_prefetch_isValid               (IBusCachedPlugin_cache_io_cpu_prefetch_isValid            ), //i
+    .io_cpu_prefetch_haltIt                (IBusCachedPlugin_cache_io_cpu_prefetch_haltIt             ), //o
+    .io_cpu_prefetch_pc                    (IBusCachedPlugin_iBusRsp_stages_0_input_payload[31:0]     ), //i
+    .io_cpu_fetch_isValid                  (IBusCachedPlugin_cache_io_cpu_fetch_isValid               ), //i
+    .io_cpu_fetch_isStuck                  (IBusCachedPlugin_cache_io_cpu_fetch_isStuck               ), //i
+    .io_cpu_fetch_isRemoved                (IBusCachedPlugin_cache_io_cpu_fetch_isRemoved             ), //i
+    .io_cpu_fetch_pc                       (IBusCachedPlugin_iBusRsp_stages_1_input_payload[31:0]     ), //i
+    .io_cpu_fetch_data                     (IBusCachedPlugin_cache_io_cpu_fetch_data[31:0]            ), //o
+    .io_cpu_fetch_mmuRsp_physicalAddress   (IBusCachedPlugin_mmuBus_rsp_physicalAddress[31:0]         ), //i
+    .io_cpu_fetch_mmuRsp_isIoAccess        (IBusCachedPlugin_mmuBus_rsp_isIoAccess                    ), //i
+    .io_cpu_fetch_mmuRsp_isPaging          (IBusCachedPlugin_mmuBus_rsp_isPaging                      ), //i
+    .io_cpu_fetch_mmuRsp_allowRead         (IBusCachedPlugin_mmuBus_rsp_allowRead                     ), //i
+    .io_cpu_fetch_mmuRsp_allowWrite        (IBusCachedPlugin_mmuBus_rsp_allowWrite                    ), //i
+    .io_cpu_fetch_mmuRsp_allowExecute      (IBusCachedPlugin_mmuBus_rsp_allowExecute                  ), //i
+    .io_cpu_fetch_mmuRsp_exception         (IBusCachedPlugin_mmuBus_rsp_exception                     ), //i
+    .io_cpu_fetch_mmuRsp_refilling         (IBusCachedPlugin_mmuBus_rsp_refilling                     ), //i
+    .io_cpu_fetch_mmuRsp_bypassTranslation (IBusCachedPlugin_mmuBus_rsp_bypassTranslation             ), //i
+    .io_cpu_fetch_physicalAddress          (IBusCachedPlugin_cache_io_cpu_fetch_physicalAddress[31:0] ), //o
+    .io_cpu_decode_isValid                 (IBusCachedPlugin_cache_io_cpu_decode_isValid              ), //i
+    .io_cpu_decode_isStuck                 (IBusCachedPlugin_cache_io_cpu_decode_isStuck              ), //i
+    .io_cpu_decode_pc                      (IBusCachedPlugin_iBusRsp_stages_2_input_payload[31:0]     ), //i
+    .io_cpu_decode_physicalAddress         (IBusCachedPlugin_cache_io_cpu_decode_physicalAddress[31:0]), //o
+    .io_cpu_decode_data                    (IBusCachedPlugin_cache_io_cpu_decode_data[31:0]           ), //o
+    .io_cpu_decode_cacheMiss               (IBusCachedPlugin_cache_io_cpu_decode_cacheMiss            ), //o
+    .io_cpu_decode_error                   (IBusCachedPlugin_cache_io_cpu_decode_error                ), //o
+    .io_cpu_decode_mmuRefilling            (IBusCachedPlugin_cache_io_cpu_decode_mmuRefilling         ), //o
+    .io_cpu_decode_mmuException            (IBusCachedPlugin_cache_io_cpu_decode_mmuException         ), //o
+    .io_cpu_decode_isUser                  (IBusCachedPlugin_cache_io_cpu_decode_isUser               ), //i
+    .io_cpu_fill_valid                     (IBusCachedPlugin_cache_io_cpu_fill_valid                  ), //i
+    .io_cpu_fill_payload                   (IBusCachedPlugin_cache_io_cpu_decode_physicalAddress[31:0]), //i
+    .io_mem_cmd_valid                      (IBusCachedPlugin_cache_io_mem_cmd_valid                   ), //o
+    .io_mem_cmd_ready                      (iBus_cmd_ready                                            ), //i
+    .io_mem_cmd_payload_address            (IBusCachedPlugin_cache_io_mem_cmd_payload_address[31:0]   ), //o
+    .io_mem_cmd_payload_size               (IBusCachedPlugin_cache_io_mem_cmd_payload_size[2:0]       ), //o
+    .io_mem_rsp_valid                      (iBus_rsp_valid                                            ), //i
+    .io_mem_rsp_payload_data               (iBus_rsp_payload_data[31:0]                               ), //i
+    .io_mem_rsp_payload_error              (iBus_rsp_payload_error                                    ), //i
+    .clk                                   (clk                                                       ), //i
+    .reset                                 (reset                                                     )  //i
   );
   DataCache dataCache_1 (
-    .io_cpu_execute_isValid                    (dataCache_1_io_cpu_execute_isValid             ), //i
-    .io_cpu_execute_address                    (dataCache_1_io_cpu_execute_address             ), //i
-    .io_cpu_execute_haltIt                     (dataCache_1_io_cpu_execute_haltIt              ), //o
-    .io_cpu_execute_args_wr                    (execute_MEMORY_WR                              ), //i
-    .io_cpu_execute_args_size                  (execute_DBusCachedPlugin_size                  ), //i
-    .io_cpu_execute_args_totalyConsistent      (execute_MEMORY_FORCE_CONSTISTENCY              ), //i
-    .io_cpu_execute_refilling                  (dataCache_1_io_cpu_execute_refilling           ), //o
-    .io_cpu_memory_isValid                     (dataCache_1_io_cpu_memory_isValid              ), //i
-    .io_cpu_memory_isStuck                     (memory_arbitration_isStuck                     ), //i
-    .io_cpu_memory_isWrite                     (dataCache_1_io_cpu_memory_isWrite              ), //o
-    .io_cpu_memory_address                     (dataCache_1_io_cpu_memory_address              ), //i
-    .io_cpu_memory_mmuRsp_physicalAddress      (DBusCachedPlugin_mmuBus_rsp_physicalAddress    ), //i
-    .io_cpu_memory_mmuRsp_isIoAccess           (dataCache_1_io_cpu_memory_mmuRsp_isIoAccess    ), //i
-    .io_cpu_memory_mmuRsp_isPaging             (DBusCachedPlugin_mmuBus_rsp_isPaging           ), //i
-    .io_cpu_memory_mmuRsp_allowRead            (DBusCachedPlugin_mmuBus_rsp_allowRead          ), //i
-    .io_cpu_memory_mmuRsp_allowWrite           (DBusCachedPlugin_mmuBus_rsp_allowWrite         ), //i
-    .io_cpu_memory_mmuRsp_allowExecute         (DBusCachedPlugin_mmuBus_rsp_allowExecute       ), //i
-    .io_cpu_memory_mmuRsp_exception            (DBusCachedPlugin_mmuBus_rsp_exception          ), //i
-    .io_cpu_memory_mmuRsp_refilling            (DBusCachedPlugin_mmuBus_rsp_refilling          ), //i
-    .io_cpu_memory_mmuRsp_bypassTranslation    (DBusCachedPlugin_mmuBus_rsp_bypassTranslation  ), //i
-    .io_cpu_writeBack_isValid                  (dataCache_1_io_cpu_writeBack_isValid           ), //i
-    .io_cpu_writeBack_isStuck                  (writeBack_arbitration_isStuck                  ), //i
-    .io_cpu_writeBack_isUser                   (dataCache_1_io_cpu_writeBack_isUser            ), //i
-    .io_cpu_writeBack_haltIt                   (dataCache_1_io_cpu_writeBack_haltIt            ), //o
-    .io_cpu_writeBack_isWrite                  (dataCache_1_io_cpu_writeBack_isWrite           ), //o
-    .io_cpu_writeBack_storeData                (dataCache_1_io_cpu_writeBack_storeData         ), //i
-    .io_cpu_writeBack_data                     (dataCache_1_io_cpu_writeBack_data              ), //o
-    .io_cpu_writeBack_address                  (dataCache_1_io_cpu_writeBack_address           ), //i
-    .io_cpu_writeBack_mmuException             (dataCache_1_io_cpu_writeBack_mmuException      ), //o
-    .io_cpu_writeBack_unalignedAccess          (dataCache_1_io_cpu_writeBack_unalignedAccess   ), //o
-    .io_cpu_writeBack_accessError              (dataCache_1_io_cpu_writeBack_accessError       ), //o
-    .io_cpu_writeBack_keepMemRspData           (dataCache_1_io_cpu_writeBack_keepMemRspData    ), //o
-    .io_cpu_writeBack_fence_SW                 (dataCache_1_io_cpu_writeBack_fence_SW          ), //i
-    .io_cpu_writeBack_fence_SR                 (dataCache_1_io_cpu_writeBack_fence_SR          ), //i
-    .io_cpu_writeBack_fence_SO                 (dataCache_1_io_cpu_writeBack_fence_SO          ), //i
-    .io_cpu_writeBack_fence_SI                 (dataCache_1_io_cpu_writeBack_fence_SI          ), //i
-    .io_cpu_writeBack_fence_PW                 (dataCache_1_io_cpu_writeBack_fence_PW          ), //i
-    .io_cpu_writeBack_fence_PR                 (dataCache_1_io_cpu_writeBack_fence_PR          ), //i
-    .io_cpu_writeBack_fence_PO                 (dataCache_1_io_cpu_writeBack_fence_PO          ), //i
-    .io_cpu_writeBack_fence_PI                 (dataCache_1_io_cpu_writeBack_fence_PI          ), //i
-    .io_cpu_writeBack_fence_FM                 (dataCache_1_io_cpu_writeBack_fence_FM          ), //i
-    .io_cpu_writeBack_exclusiveOk              (dataCache_1_io_cpu_writeBack_exclusiveOk       ), //o
-    .io_cpu_redo                               (dataCache_1_io_cpu_redo                        ), //o
-    .io_cpu_flush_valid                        (dataCache_1_io_cpu_flush_valid                 ), //i
-    .io_cpu_flush_ready                        (dataCache_1_io_cpu_flush_ready                 ), //o
-    .io_mem_cmd_valid                          (dataCache_1_io_mem_cmd_valid                   ), //o
-    .io_mem_cmd_ready                          (dataCache_1_io_mem_cmd_ready                   ), //i
-    .io_mem_cmd_payload_wr                     (dataCache_1_io_mem_cmd_payload_wr              ), //o
-    .io_mem_cmd_payload_uncached               (dataCache_1_io_mem_cmd_payload_uncached        ), //o
-    .io_mem_cmd_payload_address                (dataCache_1_io_mem_cmd_payload_address         ), //o
-    .io_mem_cmd_payload_data                   (dataCache_1_io_mem_cmd_payload_data            ), //o
-    .io_mem_cmd_payload_mask                   (dataCache_1_io_mem_cmd_payload_mask            ), //o
-    .io_mem_cmd_payload_size                   (dataCache_1_io_mem_cmd_payload_size            ), //o
-    .io_mem_cmd_payload_last                   (dataCache_1_io_mem_cmd_payload_last            ), //o
-    .io_mem_rsp_valid                          (dBus_rsp_valid                                 ), //i
-    .io_mem_rsp_payload_last                   (dBus_rsp_payload_last                          ), //i
-    .io_mem_rsp_payload_data                   (dBus_rsp_payload_data                          ), //i
-    .io_mem_rsp_payload_error                  (dBus_rsp_payload_error                         ), //i
-    .clk                                       (clk                                            ), //i
-    .reset                                     (reset                                          )  //i
+    .io_cpu_execute_isValid                 (dataCache_1_io_cpu_execute_isValid               ), //i
+    .io_cpu_execute_address                 (dataCache_1_io_cpu_execute_address[31:0]         ), //i
+    .io_cpu_execute_haltIt                  (dataCache_1_io_cpu_execute_haltIt                ), //o
+    .io_cpu_execute_args_wr                 (execute_MEMORY_WR                                ), //i
+    .io_cpu_execute_args_size               (execute_DBusCachedPlugin_size[1:0]               ), //i
+    .io_cpu_execute_args_totalyConsistent   (execute_MEMORY_FORCE_CONSTISTENCY                ), //i
+    .io_cpu_execute_refilling               (dataCache_1_io_cpu_execute_refilling             ), //o
+    .io_cpu_memory_isValid                  (dataCache_1_io_cpu_memory_isValid                ), //i
+    .io_cpu_memory_isStuck                  (memory_arbitration_isStuck                       ), //i
+    .io_cpu_memory_isWrite                  (dataCache_1_io_cpu_memory_isWrite                ), //o
+    .io_cpu_memory_address                  (dataCache_1_io_cpu_memory_address[31:0]          ), //i
+    .io_cpu_memory_mmuRsp_physicalAddress   (DBusCachedPlugin_mmuBus_rsp_physicalAddress[31:0]), //i
+    .io_cpu_memory_mmuRsp_isIoAccess        (dataCache_1_io_cpu_memory_mmuRsp_isIoAccess      ), //i
+    .io_cpu_memory_mmuRsp_isPaging          (DBusCachedPlugin_mmuBus_rsp_isPaging             ), //i
+    .io_cpu_memory_mmuRsp_allowRead         (DBusCachedPlugin_mmuBus_rsp_allowRead            ), //i
+    .io_cpu_memory_mmuRsp_allowWrite        (DBusCachedPlugin_mmuBus_rsp_allowWrite           ), //i
+    .io_cpu_memory_mmuRsp_allowExecute      (DBusCachedPlugin_mmuBus_rsp_allowExecute         ), //i
+    .io_cpu_memory_mmuRsp_exception         (DBusCachedPlugin_mmuBus_rsp_exception            ), //i
+    .io_cpu_memory_mmuRsp_refilling         (DBusCachedPlugin_mmuBus_rsp_refilling            ), //i
+    .io_cpu_memory_mmuRsp_bypassTranslation (DBusCachedPlugin_mmuBus_rsp_bypassTranslation    ), //i
+    .io_cpu_writeBack_isValid               (dataCache_1_io_cpu_writeBack_isValid             ), //i
+    .io_cpu_writeBack_isStuck               (writeBack_arbitration_isStuck                    ), //i
+    .io_cpu_writeBack_isFiring              (writeBack_arbitration_isFiring                   ), //i
+    .io_cpu_writeBack_isUser                (dataCache_1_io_cpu_writeBack_isUser              ), //i
+    .io_cpu_writeBack_haltIt                (dataCache_1_io_cpu_writeBack_haltIt              ), //o
+    .io_cpu_writeBack_isWrite               (dataCache_1_io_cpu_writeBack_isWrite             ), //o
+    .io_cpu_writeBack_storeData             (dataCache_1_io_cpu_writeBack_storeData[31:0]     ), //i
+    .io_cpu_writeBack_data                  (dataCache_1_io_cpu_writeBack_data[31:0]          ), //o
+    .io_cpu_writeBack_address               (dataCache_1_io_cpu_writeBack_address[31:0]       ), //i
+    .io_cpu_writeBack_mmuException          (dataCache_1_io_cpu_writeBack_mmuException        ), //o
+    .io_cpu_writeBack_unalignedAccess       (dataCache_1_io_cpu_writeBack_unalignedAccess     ), //o
+    .io_cpu_writeBack_accessError           (dataCache_1_io_cpu_writeBack_accessError         ), //o
+    .io_cpu_writeBack_keepMemRspData        (dataCache_1_io_cpu_writeBack_keepMemRspData      ), //o
+    .io_cpu_writeBack_fence_SW              (dataCache_1_io_cpu_writeBack_fence_SW            ), //i
+    .io_cpu_writeBack_fence_SR              (dataCache_1_io_cpu_writeBack_fence_SR            ), //i
+    .io_cpu_writeBack_fence_SO              (dataCache_1_io_cpu_writeBack_fence_SO            ), //i
+    .io_cpu_writeBack_fence_SI              (dataCache_1_io_cpu_writeBack_fence_SI            ), //i
+    .io_cpu_writeBack_fence_PW              (dataCache_1_io_cpu_writeBack_fence_PW            ), //i
+    .io_cpu_writeBack_fence_PR              (dataCache_1_io_cpu_writeBack_fence_PR            ), //i
+    .io_cpu_writeBack_fence_PO              (dataCache_1_io_cpu_writeBack_fence_PO            ), //i
+    .io_cpu_writeBack_fence_PI              (dataCache_1_io_cpu_writeBack_fence_PI            ), //i
+    .io_cpu_writeBack_fence_FM              (dataCache_1_io_cpu_writeBack_fence_FM[3:0]       ), //i
+    .io_cpu_writeBack_exclusiveOk           (dataCache_1_io_cpu_writeBack_exclusiveOk         ), //o
+    .io_cpu_redo                            (dataCache_1_io_cpu_redo                          ), //o
+    .io_cpu_flush_valid                     (dataCache_1_io_cpu_flush_valid                   ), //i
+    .io_cpu_flush_ready                     (dataCache_1_io_cpu_flush_ready                   ), //o
+    .io_cpu_flush_payload_singleLine        (dataCache_1_io_cpu_flush_payload_singleLine      ), //i
+    .io_cpu_flush_payload_lineId            (dataCache_1_io_cpu_flush_payload_lineId[6:0]     ), //i
+    .io_mem_cmd_valid                       (dataCache_1_io_mem_cmd_valid                     ), //o
+    .io_mem_cmd_ready                       (dataCache_1_io_mem_cmd_ready                     ), //i
+    .io_mem_cmd_payload_wr                  (dataCache_1_io_mem_cmd_payload_wr                ), //o
+    .io_mem_cmd_payload_uncached            (dataCache_1_io_mem_cmd_payload_uncached          ), //o
+    .io_mem_cmd_payload_address             (dataCache_1_io_mem_cmd_payload_address[31:0]     ), //o
+    .io_mem_cmd_payload_data                (dataCache_1_io_mem_cmd_payload_data[31:0]        ), //o
+    .io_mem_cmd_payload_mask                (dataCache_1_io_mem_cmd_payload_mask[3:0]         ), //o
+    .io_mem_cmd_payload_size                (dataCache_1_io_mem_cmd_payload_size[2:0]         ), //o
+    .io_mem_cmd_payload_last                (dataCache_1_io_mem_cmd_payload_last              ), //o
+    .io_mem_rsp_valid                       (dBus_rsp_valid                                   ), //i
+    .io_mem_rsp_payload_last                (dBus_rsp_payload_last                            ), //i
+    .io_mem_rsp_payload_data                (dBus_rsp_payload_data[31:0]                      ), //i
+    .io_mem_rsp_payload_error               (dBus_rsp_payload_error                           ), //i
+    .clk                                    (clk                                              ), //i
+    .reset                                  (reset                                            )  //i
   );
   FpuCore FpuPlugin_fpu (
-    .io_port_0_cmd_valid                      (FpuPlugin_port_cmd_valid                             ), //i
-    .io_port_0_cmd_ready                      (FpuPlugin_fpu_io_port_0_cmd_ready                    ), //o
-    .io_port_0_cmd_payload_opcode             (FpuPlugin_port_cmd_payload_opcode                    ), //i
-    .io_port_0_cmd_payload_arg                (FpuPlugin_port_cmd_payload_arg                       ), //i
-    .io_port_0_cmd_payload_rs1                (FpuPlugin_port_cmd_payload_rs1                       ), //i
-    .io_port_0_cmd_payload_rs2                (FpuPlugin_port_cmd_payload_rs2                       ), //i
-    .io_port_0_cmd_payload_rs3                (FpuPlugin_port_cmd_payload_rs3                       ), //i
-    .io_port_0_cmd_payload_rd                 (FpuPlugin_port_cmd_payload_rd                        ), //i
-    .io_port_0_cmd_payload_format             (FpuPlugin_port_cmd_payload_format                    ), //i
-    .io_port_0_cmd_payload_roundMode          (FpuPlugin_port_cmd_payload_roundMode                 ), //i
-    .io_port_0_commit_valid                   (FpuPlugin_port_commit_valid                          ), //i
-    .io_port_0_commit_ready                   (FpuPlugin_fpu_io_port_0_commit_ready                 ), //o
-    .io_port_0_commit_payload_opcode          (FpuPlugin_port_commit_payload_opcode                 ), //i
-    .io_port_0_commit_payload_rd              (FpuPlugin_port_commit_payload_rd                     ), //i
-    .io_port_0_commit_payload_write           (FpuPlugin_port_commit_payload_write                  ), //i
-    .io_port_0_commit_payload_value           (FpuPlugin_port_commit_payload_value                  ), //i
-    .io_port_0_rsp_valid                      (FpuPlugin_fpu_io_port_0_rsp_valid                    ), //o
-    .io_port_0_rsp_ready                      (FpuPlugin_port_rsp_ready                             ), //i
-    .io_port_0_rsp_payload_value              (FpuPlugin_fpu_io_port_0_rsp_payload_value            ), //o
-    .io_port_0_rsp_payload_NV                 (FpuPlugin_fpu_io_port_0_rsp_payload_NV               ), //o
-    .io_port_0_rsp_payload_NX                 (FpuPlugin_fpu_io_port_0_rsp_payload_NX               ), //o
-    .io_port_0_completion_valid               (FpuPlugin_fpu_io_port_0_completion_valid             ), //o
-    .io_port_0_completion_payload_flags_NX    (FpuPlugin_fpu_io_port_0_completion_payload_flags_NX  ), //o
-    .io_port_0_completion_payload_flags_UF    (FpuPlugin_fpu_io_port_0_completion_payload_flags_UF  ), //o
-    .io_port_0_completion_payload_flags_OF    (FpuPlugin_fpu_io_port_0_completion_payload_flags_OF  ), //o
-    .io_port_0_completion_payload_flags_DZ    (FpuPlugin_fpu_io_port_0_completion_payload_flags_DZ  ), //o
-    .io_port_0_completion_payload_flags_NV    (FpuPlugin_fpu_io_port_0_completion_payload_flags_NV  ), //o
-    .io_port_0_completion_payload_written     (FpuPlugin_fpu_io_port_0_completion_payload_written   ), //o
-    .clk                                      (clk                                                  ), //i
-    .reset                                    (reset                                                )  //i
+    .io_port_0_cmd_valid                   (FpuPlugin_port_cmd_valid                           ), //i
+    .io_port_0_cmd_ready                   (FpuPlugin_fpu_io_port_0_cmd_ready                  ), //o
+    .io_port_0_cmd_payload_opcode          (FpuPlugin_port_cmd_payload_opcode[3:0]             ), //i
+    .io_port_0_cmd_payload_arg             (FpuPlugin_port_cmd_payload_arg[1:0]                ), //i
+    .io_port_0_cmd_payload_rs1             (FpuPlugin_port_cmd_payload_rs1[4:0]                ), //i
+    .io_port_0_cmd_payload_rs2             (FpuPlugin_port_cmd_payload_rs2[4:0]                ), //i
+    .io_port_0_cmd_payload_rs3             (FpuPlugin_port_cmd_payload_rs3[4:0]                ), //i
+    .io_port_0_cmd_payload_rd              (FpuPlugin_port_cmd_payload_rd[4:0]                 ), //i
+    .io_port_0_cmd_payload_format          (FpuPlugin_port_cmd_payload_format                  ), //i
+    .io_port_0_cmd_payload_roundMode       (FpuPlugin_port_cmd_payload_roundMode[2:0]          ), //i
+    .io_port_0_commit_valid                (FpuPlugin_port_commit_valid                        ), //i
+    .io_port_0_commit_ready                (FpuPlugin_fpu_io_port_0_commit_ready               ), //o
+    .io_port_0_commit_payload_opcode       (FpuPlugin_port_commit_payload_opcode[3:0]          ), //i
+    .io_port_0_commit_payload_rd           (FpuPlugin_port_commit_payload_rd[4:0]              ), //i
+    .io_port_0_commit_payload_write        (FpuPlugin_port_commit_payload_write                ), //i
+    .io_port_0_commit_payload_value        (FpuPlugin_port_commit_payload_value[31:0]          ), //i
+    .io_port_0_rsp_valid                   (FpuPlugin_fpu_io_port_0_rsp_valid                  ), //o
+    .io_port_0_rsp_ready                   (FpuPlugin_port_rsp_ready                           ), //i
+    .io_port_0_rsp_payload_value           (FpuPlugin_fpu_io_port_0_rsp_payload_value[31:0]    ), //o
+    .io_port_0_rsp_payload_NV              (FpuPlugin_fpu_io_port_0_rsp_payload_NV             ), //o
+    .io_port_0_rsp_payload_NX              (FpuPlugin_fpu_io_port_0_rsp_payload_NX             ), //o
+    .io_port_0_completion_valid            (FpuPlugin_fpu_io_port_0_completion_valid           ), //o
+    .io_port_0_completion_payload_flags_NX (FpuPlugin_fpu_io_port_0_completion_payload_flags_NX), //o
+    .io_port_0_completion_payload_flags_UF (FpuPlugin_fpu_io_port_0_completion_payload_flags_UF), //o
+    .io_port_0_completion_payload_flags_OF (FpuPlugin_fpu_io_port_0_completion_payload_flags_OF), //o
+    .io_port_0_completion_payload_flags_DZ (FpuPlugin_fpu_io_port_0_completion_payload_flags_DZ), //o
+    .io_port_0_completion_payload_flags_NV (FpuPlugin_fpu_io_port_0_completion_payload_flags_NV), //o
+    .io_port_0_completion_payload_written  (FpuPlugin_fpu_io_port_0_completion_payload_written ), //o
+    .clk                                   (clk                                                ), //i
+    .reset                                 (reset                                              )  //i
   );
   always @(*) begin
     case(_zz_IBusCachedPlugin_jump_pcLoad_payload_6)
-      2'b00 : begin
-        _zz_IBusCachedPlugin_jump_pcLoad_payload_5 = DBusCachedPlugin_redoBranch_payload;
-      end
-      2'b01 : begin
-        _zz_IBusCachedPlugin_jump_pcLoad_payload_5 = CsrPlugin_jumpInterface_payload;
-      end
-      2'b10 : begin
-        _zz_IBusCachedPlugin_jump_pcLoad_payload_5 = BranchPlugin_jumpInterface_payload;
-      end
-      default : begin
-        _zz_IBusCachedPlugin_jump_pcLoad_payload_5 = IBusCachedPlugin_predictionJumpInterface_payload;
-      end
+      2'b00 : _zz_IBusCachedPlugin_jump_pcLoad_payload_5 = DBusCachedPlugin_redoBranch_payload;
+      2'b01 : _zz_IBusCachedPlugin_jump_pcLoad_payload_5 = CsrPlugin_jumpInterface_payload;
+      2'b10 : _zz_IBusCachedPlugin_jump_pcLoad_payload_5 = BranchPlugin_jumpInterface_payload;
+      default : _zz_IBusCachedPlugin_jump_pcLoad_payload_5 = IBusCachedPlugin_predictionJumpInterface_payload;
     endcase
   end
 
   always @(*) begin
     case(_zz_writeBack_DBusCachedPlugin_rspShifted_1)
-      2'b00 : begin
-        _zz_writeBack_DBusCachedPlugin_rspShifted = writeBack_DBusCachedPlugin_rspSplits_0;
-      end
-      2'b01 : begin
-        _zz_writeBack_DBusCachedPlugin_rspShifted = writeBack_DBusCachedPlugin_rspSplits_1;
-      end
-      2'b10 : begin
-        _zz_writeBack_DBusCachedPlugin_rspShifted = writeBack_DBusCachedPlugin_rspSplits_2;
-      end
-      default : begin
-        _zz_writeBack_DBusCachedPlugin_rspShifted = writeBack_DBusCachedPlugin_rspSplits_3;
-      end
+      2'b00 : _zz_writeBack_DBusCachedPlugin_rspShifted = writeBack_DBusCachedPlugin_rspSplits_0;
+      2'b01 : _zz_writeBack_DBusCachedPlugin_rspShifted = writeBack_DBusCachedPlugin_rspSplits_1;
+      2'b10 : _zz_writeBack_DBusCachedPlugin_rspShifted = writeBack_DBusCachedPlugin_rspSplits_2;
+      default : _zz_writeBack_DBusCachedPlugin_rspShifted = writeBack_DBusCachedPlugin_rspSplits_3;
     endcase
   end
 
   always @(*) begin
     case(_zz_writeBack_DBusCachedPlugin_rspShifted_3)
-      1'b0 : begin
-        _zz_writeBack_DBusCachedPlugin_rspShifted_2 = writeBack_DBusCachedPlugin_rspSplits_1;
-      end
-      default : begin
-        _zz_writeBack_DBusCachedPlugin_rspShifted_2 = writeBack_DBusCachedPlugin_rspSplits_3;
-      end
+      1'b0 : _zz_writeBack_DBusCachedPlugin_rspShifted_2 = writeBack_DBusCachedPlugin_rspSplits_1;
+      default : _zz_writeBack_DBusCachedPlugin_rspShifted_2 = writeBack_DBusCachedPlugin_rspSplits_3;
     endcase
   end
 
   `ifndef SYNTHESIS
   always @(*) begin
     case(memory_FPU_OPCODE)
-      `FpuOpcode_binary_sequential_LOAD : memory_FPU_OPCODE_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : memory_FPU_OPCODE_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : memory_FPU_OPCODE_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : memory_FPU_OPCODE_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : memory_FPU_OPCODE_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : memory_FPU_OPCODE_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : memory_FPU_OPCODE_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : memory_FPU_OPCODE_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : memory_FPU_OPCODE_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : memory_FPU_OPCODE_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : memory_FPU_OPCODE_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : memory_FPU_OPCODE_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : memory_FPU_OPCODE_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : memory_FPU_OPCODE_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : memory_FPU_OPCODE_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : memory_FPU_OPCODE_string = "FCVT_X_X";
+      FpuOpcode_LOAD : memory_FPU_OPCODE_string = "LOAD    ";
+      FpuOpcode_STORE : memory_FPU_OPCODE_string = "STORE   ";
+      FpuOpcode_MUL : memory_FPU_OPCODE_string = "MUL     ";
+      FpuOpcode_ADD : memory_FPU_OPCODE_string = "ADD     ";
+      FpuOpcode_FMA : memory_FPU_OPCODE_string = "FMA     ";
+      FpuOpcode_I2F : memory_FPU_OPCODE_string = "I2F     ";
+      FpuOpcode_F2I : memory_FPU_OPCODE_string = "F2I     ";
+      FpuOpcode_CMP : memory_FPU_OPCODE_string = "CMP     ";
+      FpuOpcode_DIV : memory_FPU_OPCODE_string = "DIV     ";
+      FpuOpcode_SQRT : memory_FPU_OPCODE_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : memory_FPU_OPCODE_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : memory_FPU_OPCODE_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : memory_FPU_OPCODE_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : memory_FPU_OPCODE_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : memory_FPU_OPCODE_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : memory_FPU_OPCODE_string = "FCVT_X_X";
       default : memory_FPU_OPCODE_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_memory_FPU_OPCODE)
-      `FpuOpcode_binary_sequential_LOAD : _zz_memory_FPU_OPCODE_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : _zz_memory_FPU_OPCODE_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : _zz_memory_FPU_OPCODE_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : _zz_memory_FPU_OPCODE_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : _zz_memory_FPU_OPCODE_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : _zz_memory_FPU_OPCODE_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : _zz_memory_FPU_OPCODE_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : _zz_memory_FPU_OPCODE_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : _zz_memory_FPU_OPCODE_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : _zz_memory_FPU_OPCODE_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : _zz_memory_FPU_OPCODE_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : _zz_memory_FPU_OPCODE_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : _zz_memory_FPU_OPCODE_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : _zz_memory_FPU_OPCODE_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : _zz_memory_FPU_OPCODE_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : _zz_memory_FPU_OPCODE_string = "FCVT_X_X";
+      FpuOpcode_LOAD : _zz_memory_FPU_OPCODE_string = "LOAD    ";
+      FpuOpcode_STORE : _zz_memory_FPU_OPCODE_string = "STORE   ";
+      FpuOpcode_MUL : _zz_memory_FPU_OPCODE_string = "MUL     ";
+      FpuOpcode_ADD : _zz_memory_FPU_OPCODE_string = "ADD     ";
+      FpuOpcode_FMA : _zz_memory_FPU_OPCODE_string = "FMA     ";
+      FpuOpcode_I2F : _zz_memory_FPU_OPCODE_string = "I2F     ";
+      FpuOpcode_F2I : _zz_memory_FPU_OPCODE_string = "F2I     ";
+      FpuOpcode_CMP : _zz_memory_FPU_OPCODE_string = "CMP     ";
+      FpuOpcode_DIV : _zz_memory_FPU_OPCODE_string = "DIV     ";
+      FpuOpcode_SQRT : _zz_memory_FPU_OPCODE_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : _zz_memory_FPU_OPCODE_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : _zz_memory_FPU_OPCODE_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : _zz_memory_FPU_OPCODE_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : _zz_memory_FPU_OPCODE_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : _zz_memory_FPU_OPCODE_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : _zz_memory_FPU_OPCODE_string = "FCVT_X_X";
       default : _zz_memory_FPU_OPCODE_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_memory_to_writeBack_FPU_OPCODE)
-      `FpuOpcode_binary_sequential_LOAD : _zz_memory_to_writeBack_FPU_OPCODE_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : _zz_memory_to_writeBack_FPU_OPCODE_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : _zz_memory_to_writeBack_FPU_OPCODE_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : _zz_memory_to_writeBack_FPU_OPCODE_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : _zz_memory_to_writeBack_FPU_OPCODE_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : _zz_memory_to_writeBack_FPU_OPCODE_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : _zz_memory_to_writeBack_FPU_OPCODE_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : _zz_memory_to_writeBack_FPU_OPCODE_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : _zz_memory_to_writeBack_FPU_OPCODE_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : _zz_memory_to_writeBack_FPU_OPCODE_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : _zz_memory_to_writeBack_FPU_OPCODE_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : _zz_memory_to_writeBack_FPU_OPCODE_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : _zz_memory_to_writeBack_FPU_OPCODE_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : _zz_memory_to_writeBack_FPU_OPCODE_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : _zz_memory_to_writeBack_FPU_OPCODE_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : _zz_memory_to_writeBack_FPU_OPCODE_string = "FCVT_X_X";
+      FpuOpcode_LOAD : _zz_memory_to_writeBack_FPU_OPCODE_string = "LOAD    ";
+      FpuOpcode_STORE : _zz_memory_to_writeBack_FPU_OPCODE_string = "STORE   ";
+      FpuOpcode_MUL : _zz_memory_to_writeBack_FPU_OPCODE_string = "MUL     ";
+      FpuOpcode_ADD : _zz_memory_to_writeBack_FPU_OPCODE_string = "ADD     ";
+      FpuOpcode_FMA : _zz_memory_to_writeBack_FPU_OPCODE_string = "FMA     ";
+      FpuOpcode_I2F : _zz_memory_to_writeBack_FPU_OPCODE_string = "I2F     ";
+      FpuOpcode_F2I : _zz_memory_to_writeBack_FPU_OPCODE_string = "F2I     ";
+      FpuOpcode_CMP : _zz_memory_to_writeBack_FPU_OPCODE_string = "CMP     ";
+      FpuOpcode_DIV : _zz_memory_to_writeBack_FPU_OPCODE_string = "DIV     ";
+      FpuOpcode_SQRT : _zz_memory_to_writeBack_FPU_OPCODE_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : _zz_memory_to_writeBack_FPU_OPCODE_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : _zz_memory_to_writeBack_FPU_OPCODE_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : _zz_memory_to_writeBack_FPU_OPCODE_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : _zz_memory_to_writeBack_FPU_OPCODE_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : _zz_memory_to_writeBack_FPU_OPCODE_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : _zz_memory_to_writeBack_FPU_OPCODE_string = "FCVT_X_X";
       default : _zz_memory_to_writeBack_FPU_OPCODE_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_memory_to_writeBack_FPU_OPCODE_1)
-      `FpuOpcode_binary_sequential_LOAD : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "FCVT_X_X";
+      FpuOpcode_LOAD : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "LOAD    ";
+      FpuOpcode_STORE : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "STORE   ";
+      FpuOpcode_MUL : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "MUL     ";
+      FpuOpcode_ADD : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "ADD     ";
+      FpuOpcode_FMA : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "FMA     ";
+      FpuOpcode_I2F : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "I2F     ";
+      FpuOpcode_F2I : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "F2I     ";
+      FpuOpcode_CMP : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "CMP     ";
+      FpuOpcode_DIV : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "DIV     ";
+      FpuOpcode_SQRT : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "FCVT_X_X";
       default : _zz_memory_to_writeBack_FPU_OPCODE_1_string = "????????";
     endcase
   end
   always @(*) begin
     case(execute_FPU_OPCODE)
-      `FpuOpcode_binary_sequential_LOAD : execute_FPU_OPCODE_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : execute_FPU_OPCODE_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : execute_FPU_OPCODE_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : execute_FPU_OPCODE_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : execute_FPU_OPCODE_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : execute_FPU_OPCODE_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : execute_FPU_OPCODE_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : execute_FPU_OPCODE_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : execute_FPU_OPCODE_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : execute_FPU_OPCODE_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : execute_FPU_OPCODE_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : execute_FPU_OPCODE_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : execute_FPU_OPCODE_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : execute_FPU_OPCODE_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : execute_FPU_OPCODE_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : execute_FPU_OPCODE_string = "FCVT_X_X";
+      FpuOpcode_LOAD : execute_FPU_OPCODE_string = "LOAD    ";
+      FpuOpcode_STORE : execute_FPU_OPCODE_string = "STORE   ";
+      FpuOpcode_MUL : execute_FPU_OPCODE_string = "MUL     ";
+      FpuOpcode_ADD : execute_FPU_OPCODE_string = "ADD     ";
+      FpuOpcode_FMA : execute_FPU_OPCODE_string = "FMA     ";
+      FpuOpcode_I2F : execute_FPU_OPCODE_string = "I2F     ";
+      FpuOpcode_F2I : execute_FPU_OPCODE_string = "F2I     ";
+      FpuOpcode_CMP : execute_FPU_OPCODE_string = "CMP     ";
+      FpuOpcode_DIV : execute_FPU_OPCODE_string = "DIV     ";
+      FpuOpcode_SQRT : execute_FPU_OPCODE_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : execute_FPU_OPCODE_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : execute_FPU_OPCODE_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : execute_FPU_OPCODE_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : execute_FPU_OPCODE_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : execute_FPU_OPCODE_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : execute_FPU_OPCODE_string = "FCVT_X_X";
       default : execute_FPU_OPCODE_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_execute_FPU_OPCODE)
-      `FpuOpcode_binary_sequential_LOAD : _zz_execute_FPU_OPCODE_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : _zz_execute_FPU_OPCODE_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : _zz_execute_FPU_OPCODE_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : _zz_execute_FPU_OPCODE_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : _zz_execute_FPU_OPCODE_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : _zz_execute_FPU_OPCODE_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : _zz_execute_FPU_OPCODE_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : _zz_execute_FPU_OPCODE_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : _zz_execute_FPU_OPCODE_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : _zz_execute_FPU_OPCODE_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : _zz_execute_FPU_OPCODE_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : _zz_execute_FPU_OPCODE_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : _zz_execute_FPU_OPCODE_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : _zz_execute_FPU_OPCODE_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : _zz_execute_FPU_OPCODE_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : _zz_execute_FPU_OPCODE_string = "FCVT_X_X";
+      FpuOpcode_LOAD : _zz_execute_FPU_OPCODE_string = "LOAD    ";
+      FpuOpcode_STORE : _zz_execute_FPU_OPCODE_string = "STORE   ";
+      FpuOpcode_MUL : _zz_execute_FPU_OPCODE_string = "MUL     ";
+      FpuOpcode_ADD : _zz_execute_FPU_OPCODE_string = "ADD     ";
+      FpuOpcode_FMA : _zz_execute_FPU_OPCODE_string = "FMA     ";
+      FpuOpcode_I2F : _zz_execute_FPU_OPCODE_string = "I2F     ";
+      FpuOpcode_F2I : _zz_execute_FPU_OPCODE_string = "F2I     ";
+      FpuOpcode_CMP : _zz_execute_FPU_OPCODE_string = "CMP     ";
+      FpuOpcode_DIV : _zz_execute_FPU_OPCODE_string = "DIV     ";
+      FpuOpcode_SQRT : _zz_execute_FPU_OPCODE_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : _zz_execute_FPU_OPCODE_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : _zz_execute_FPU_OPCODE_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : _zz_execute_FPU_OPCODE_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : _zz_execute_FPU_OPCODE_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : _zz_execute_FPU_OPCODE_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : _zz_execute_FPU_OPCODE_string = "FCVT_X_X";
       default : _zz_execute_FPU_OPCODE_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_execute_to_memory_FPU_OPCODE)
-      `FpuOpcode_binary_sequential_LOAD : _zz_execute_to_memory_FPU_OPCODE_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : _zz_execute_to_memory_FPU_OPCODE_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : _zz_execute_to_memory_FPU_OPCODE_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : _zz_execute_to_memory_FPU_OPCODE_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : _zz_execute_to_memory_FPU_OPCODE_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : _zz_execute_to_memory_FPU_OPCODE_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : _zz_execute_to_memory_FPU_OPCODE_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : _zz_execute_to_memory_FPU_OPCODE_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : _zz_execute_to_memory_FPU_OPCODE_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : _zz_execute_to_memory_FPU_OPCODE_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : _zz_execute_to_memory_FPU_OPCODE_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : _zz_execute_to_memory_FPU_OPCODE_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : _zz_execute_to_memory_FPU_OPCODE_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : _zz_execute_to_memory_FPU_OPCODE_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : _zz_execute_to_memory_FPU_OPCODE_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : _zz_execute_to_memory_FPU_OPCODE_string = "FCVT_X_X";
+      FpuOpcode_LOAD : _zz_execute_to_memory_FPU_OPCODE_string = "LOAD    ";
+      FpuOpcode_STORE : _zz_execute_to_memory_FPU_OPCODE_string = "STORE   ";
+      FpuOpcode_MUL : _zz_execute_to_memory_FPU_OPCODE_string = "MUL     ";
+      FpuOpcode_ADD : _zz_execute_to_memory_FPU_OPCODE_string = "ADD     ";
+      FpuOpcode_FMA : _zz_execute_to_memory_FPU_OPCODE_string = "FMA     ";
+      FpuOpcode_I2F : _zz_execute_to_memory_FPU_OPCODE_string = "I2F     ";
+      FpuOpcode_F2I : _zz_execute_to_memory_FPU_OPCODE_string = "F2I     ";
+      FpuOpcode_CMP : _zz_execute_to_memory_FPU_OPCODE_string = "CMP     ";
+      FpuOpcode_DIV : _zz_execute_to_memory_FPU_OPCODE_string = "DIV     ";
+      FpuOpcode_SQRT : _zz_execute_to_memory_FPU_OPCODE_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : _zz_execute_to_memory_FPU_OPCODE_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : _zz_execute_to_memory_FPU_OPCODE_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : _zz_execute_to_memory_FPU_OPCODE_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : _zz_execute_to_memory_FPU_OPCODE_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : _zz_execute_to_memory_FPU_OPCODE_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : _zz_execute_to_memory_FPU_OPCODE_string = "FCVT_X_X";
       default : _zz_execute_to_memory_FPU_OPCODE_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_execute_to_memory_FPU_OPCODE_1)
-      `FpuOpcode_binary_sequential_LOAD : _zz_execute_to_memory_FPU_OPCODE_1_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : _zz_execute_to_memory_FPU_OPCODE_1_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : _zz_execute_to_memory_FPU_OPCODE_1_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : _zz_execute_to_memory_FPU_OPCODE_1_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : _zz_execute_to_memory_FPU_OPCODE_1_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : _zz_execute_to_memory_FPU_OPCODE_1_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : _zz_execute_to_memory_FPU_OPCODE_1_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : _zz_execute_to_memory_FPU_OPCODE_1_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : _zz_execute_to_memory_FPU_OPCODE_1_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : _zz_execute_to_memory_FPU_OPCODE_1_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : _zz_execute_to_memory_FPU_OPCODE_1_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : _zz_execute_to_memory_FPU_OPCODE_1_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : _zz_execute_to_memory_FPU_OPCODE_1_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : _zz_execute_to_memory_FPU_OPCODE_1_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : _zz_execute_to_memory_FPU_OPCODE_1_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : _zz_execute_to_memory_FPU_OPCODE_1_string = "FCVT_X_X";
+      FpuOpcode_LOAD : _zz_execute_to_memory_FPU_OPCODE_1_string = "LOAD    ";
+      FpuOpcode_STORE : _zz_execute_to_memory_FPU_OPCODE_1_string = "STORE   ";
+      FpuOpcode_MUL : _zz_execute_to_memory_FPU_OPCODE_1_string = "MUL     ";
+      FpuOpcode_ADD : _zz_execute_to_memory_FPU_OPCODE_1_string = "ADD     ";
+      FpuOpcode_FMA : _zz_execute_to_memory_FPU_OPCODE_1_string = "FMA     ";
+      FpuOpcode_I2F : _zz_execute_to_memory_FPU_OPCODE_1_string = "I2F     ";
+      FpuOpcode_F2I : _zz_execute_to_memory_FPU_OPCODE_1_string = "F2I     ";
+      FpuOpcode_CMP : _zz_execute_to_memory_FPU_OPCODE_1_string = "CMP     ";
+      FpuOpcode_DIV : _zz_execute_to_memory_FPU_OPCODE_1_string = "DIV     ";
+      FpuOpcode_SQRT : _zz_execute_to_memory_FPU_OPCODE_1_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : _zz_execute_to_memory_FPU_OPCODE_1_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : _zz_execute_to_memory_FPU_OPCODE_1_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : _zz_execute_to_memory_FPU_OPCODE_1_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : _zz_execute_to_memory_FPU_OPCODE_1_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : _zz_execute_to_memory_FPU_OPCODE_1_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : _zz_execute_to_memory_FPU_OPCODE_1_string = "FCVT_X_X";
       default : _zz_execute_to_memory_FPU_OPCODE_1_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_to_execute_FPU_OPCODE)
-      `FpuOpcode_binary_sequential_LOAD : _zz_decode_to_execute_FPU_OPCODE_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : _zz_decode_to_execute_FPU_OPCODE_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : _zz_decode_to_execute_FPU_OPCODE_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : _zz_decode_to_execute_FPU_OPCODE_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : _zz_decode_to_execute_FPU_OPCODE_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : _zz_decode_to_execute_FPU_OPCODE_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : _zz_decode_to_execute_FPU_OPCODE_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : _zz_decode_to_execute_FPU_OPCODE_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : _zz_decode_to_execute_FPU_OPCODE_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : _zz_decode_to_execute_FPU_OPCODE_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : _zz_decode_to_execute_FPU_OPCODE_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : _zz_decode_to_execute_FPU_OPCODE_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : _zz_decode_to_execute_FPU_OPCODE_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : _zz_decode_to_execute_FPU_OPCODE_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : _zz_decode_to_execute_FPU_OPCODE_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : _zz_decode_to_execute_FPU_OPCODE_string = "FCVT_X_X";
+      FpuOpcode_LOAD : _zz_decode_to_execute_FPU_OPCODE_string = "LOAD    ";
+      FpuOpcode_STORE : _zz_decode_to_execute_FPU_OPCODE_string = "STORE   ";
+      FpuOpcode_MUL : _zz_decode_to_execute_FPU_OPCODE_string = "MUL     ";
+      FpuOpcode_ADD : _zz_decode_to_execute_FPU_OPCODE_string = "ADD     ";
+      FpuOpcode_FMA : _zz_decode_to_execute_FPU_OPCODE_string = "FMA     ";
+      FpuOpcode_I2F : _zz_decode_to_execute_FPU_OPCODE_string = "I2F     ";
+      FpuOpcode_F2I : _zz_decode_to_execute_FPU_OPCODE_string = "F2I     ";
+      FpuOpcode_CMP : _zz_decode_to_execute_FPU_OPCODE_string = "CMP     ";
+      FpuOpcode_DIV : _zz_decode_to_execute_FPU_OPCODE_string = "DIV     ";
+      FpuOpcode_SQRT : _zz_decode_to_execute_FPU_OPCODE_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : _zz_decode_to_execute_FPU_OPCODE_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : _zz_decode_to_execute_FPU_OPCODE_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : _zz_decode_to_execute_FPU_OPCODE_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : _zz_decode_to_execute_FPU_OPCODE_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : _zz_decode_to_execute_FPU_OPCODE_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : _zz_decode_to_execute_FPU_OPCODE_string = "FCVT_X_X";
       default : _zz_decode_to_execute_FPU_OPCODE_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_to_execute_FPU_OPCODE_1)
-      `FpuOpcode_binary_sequential_LOAD : _zz_decode_to_execute_FPU_OPCODE_1_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : _zz_decode_to_execute_FPU_OPCODE_1_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : _zz_decode_to_execute_FPU_OPCODE_1_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : _zz_decode_to_execute_FPU_OPCODE_1_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : _zz_decode_to_execute_FPU_OPCODE_1_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : _zz_decode_to_execute_FPU_OPCODE_1_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : _zz_decode_to_execute_FPU_OPCODE_1_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : _zz_decode_to_execute_FPU_OPCODE_1_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : _zz_decode_to_execute_FPU_OPCODE_1_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : _zz_decode_to_execute_FPU_OPCODE_1_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : _zz_decode_to_execute_FPU_OPCODE_1_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : _zz_decode_to_execute_FPU_OPCODE_1_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : _zz_decode_to_execute_FPU_OPCODE_1_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : _zz_decode_to_execute_FPU_OPCODE_1_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : _zz_decode_to_execute_FPU_OPCODE_1_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : _zz_decode_to_execute_FPU_OPCODE_1_string = "FCVT_X_X";
+      FpuOpcode_LOAD : _zz_decode_to_execute_FPU_OPCODE_1_string = "LOAD    ";
+      FpuOpcode_STORE : _zz_decode_to_execute_FPU_OPCODE_1_string = "STORE   ";
+      FpuOpcode_MUL : _zz_decode_to_execute_FPU_OPCODE_1_string = "MUL     ";
+      FpuOpcode_ADD : _zz_decode_to_execute_FPU_OPCODE_1_string = "ADD     ";
+      FpuOpcode_FMA : _zz_decode_to_execute_FPU_OPCODE_1_string = "FMA     ";
+      FpuOpcode_I2F : _zz_decode_to_execute_FPU_OPCODE_1_string = "I2F     ";
+      FpuOpcode_F2I : _zz_decode_to_execute_FPU_OPCODE_1_string = "F2I     ";
+      FpuOpcode_CMP : _zz_decode_to_execute_FPU_OPCODE_1_string = "CMP     ";
+      FpuOpcode_DIV : _zz_decode_to_execute_FPU_OPCODE_1_string = "DIV     ";
+      FpuOpcode_SQRT : _zz_decode_to_execute_FPU_OPCODE_1_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : _zz_decode_to_execute_FPU_OPCODE_1_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : _zz_decode_to_execute_FPU_OPCODE_1_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : _zz_decode_to_execute_FPU_OPCODE_1_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : _zz_decode_to_execute_FPU_OPCODE_1_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : _zz_decode_to_execute_FPU_OPCODE_1_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : _zz_decode_to_execute_FPU_OPCODE_1_string = "FCVT_X_X";
       default : _zz_decode_to_execute_FPU_OPCODE_1_string = "????????";
     endcase
   end
   always @(*) begin
     case(decode_CfuPlugin_CFU_INPUT_2_KIND)
-      `Input2Kind_binary_sequential_RS : decode_CfuPlugin_CFU_INPUT_2_KIND_string = "RS   ";
-      `Input2Kind_binary_sequential_IMM_I : decode_CfuPlugin_CFU_INPUT_2_KIND_string = "IMM_I";
+      Input2Kind_RS : decode_CfuPlugin_CFU_INPUT_2_KIND_string = "RS   ";
+      Input2Kind_IMM_I : decode_CfuPlugin_CFU_INPUT_2_KIND_string = "IMM_I";
       default : decode_CfuPlugin_CFU_INPUT_2_KIND_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_CfuPlugin_CFU_INPUT_2_KIND)
-      `Input2Kind_binary_sequential_RS : _zz_decode_CfuPlugin_CFU_INPUT_2_KIND_string = "RS   ";
-      `Input2Kind_binary_sequential_IMM_I : _zz_decode_CfuPlugin_CFU_INPUT_2_KIND_string = "IMM_I";
+      Input2Kind_RS : _zz_decode_CfuPlugin_CFU_INPUT_2_KIND_string = "RS   ";
+      Input2Kind_IMM_I : _zz_decode_CfuPlugin_CFU_INPUT_2_KIND_string = "IMM_I";
       default : _zz_decode_CfuPlugin_CFU_INPUT_2_KIND_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND)
-      `Input2Kind_binary_sequential_RS : _zz_decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND_string = "RS   ";
-      `Input2Kind_binary_sequential_IMM_I : _zz_decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND_string = "IMM_I";
+      Input2Kind_RS : _zz_decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND_string = "RS   ";
+      Input2Kind_IMM_I : _zz_decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND_string = "IMM_I";
       default : _zz_decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND_1)
-      `Input2Kind_binary_sequential_RS : _zz_decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND_1_string = "RS   ";
-      `Input2Kind_binary_sequential_IMM_I : _zz_decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND_1_string = "IMM_I";
+      Input2Kind_RS : _zz_decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND_1_string = "RS   ";
+      Input2Kind_IMM_I : _zz_decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND_1_string = "IMM_I";
       default : _zz_decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND_1_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_memory_to_writeBack_ENV_CTRL)
-      `EnvCtrlEnum_binary_sequential_NONE : _zz_memory_to_writeBack_ENV_CTRL_string = "NONE ";
-      `EnvCtrlEnum_binary_sequential_XRET : _zz_memory_to_writeBack_ENV_CTRL_string = "XRET ";
-      `EnvCtrlEnum_binary_sequential_WFI : _zz_memory_to_writeBack_ENV_CTRL_string = "WFI  ";
-      `EnvCtrlEnum_binary_sequential_ECALL : _zz_memory_to_writeBack_ENV_CTRL_string = "ECALL";
+      EnvCtrlEnum_NONE : _zz_memory_to_writeBack_ENV_CTRL_string = "NONE ";
+      EnvCtrlEnum_XRET : _zz_memory_to_writeBack_ENV_CTRL_string = "XRET ";
+      EnvCtrlEnum_WFI : _zz_memory_to_writeBack_ENV_CTRL_string = "WFI  ";
+      EnvCtrlEnum_ECALL : _zz_memory_to_writeBack_ENV_CTRL_string = "ECALL";
       default : _zz_memory_to_writeBack_ENV_CTRL_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_memory_to_writeBack_ENV_CTRL_1)
-      `EnvCtrlEnum_binary_sequential_NONE : _zz_memory_to_writeBack_ENV_CTRL_1_string = "NONE ";
-      `EnvCtrlEnum_binary_sequential_XRET : _zz_memory_to_writeBack_ENV_CTRL_1_string = "XRET ";
-      `EnvCtrlEnum_binary_sequential_WFI : _zz_memory_to_writeBack_ENV_CTRL_1_string = "WFI  ";
-      `EnvCtrlEnum_binary_sequential_ECALL : _zz_memory_to_writeBack_ENV_CTRL_1_string = "ECALL";
+      EnvCtrlEnum_NONE : _zz_memory_to_writeBack_ENV_CTRL_1_string = "NONE ";
+      EnvCtrlEnum_XRET : _zz_memory_to_writeBack_ENV_CTRL_1_string = "XRET ";
+      EnvCtrlEnum_WFI : _zz_memory_to_writeBack_ENV_CTRL_1_string = "WFI  ";
+      EnvCtrlEnum_ECALL : _zz_memory_to_writeBack_ENV_CTRL_1_string = "ECALL";
       default : _zz_memory_to_writeBack_ENV_CTRL_1_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_execute_to_memory_ENV_CTRL)
-      `EnvCtrlEnum_binary_sequential_NONE : _zz_execute_to_memory_ENV_CTRL_string = "NONE ";
-      `EnvCtrlEnum_binary_sequential_XRET : _zz_execute_to_memory_ENV_CTRL_string = "XRET ";
-      `EnvCtrlEnum_binary_sequential_WFI : _zz_execute_to_memory_ENV_CTRL_string = "WFI  ";
-      `EnvCtrlEnum_binary_sequential_ECALL : _zz_execute_to_memory_ENV_CTRL_string = "ECALL";
+      EnvCtrlEnum_NONE : _zz_execute_to_memory_ENV_CTRL_string = "NONE ";
+      EnvCtrlEnum_XRET : _zz_execute_to_memory_ENV_CTRL_string = "XRET ";
+      EnvCtrlEnum_WFI : _zz_execute_to_memory_ENV_CTRL_string = "WFI  ";
+      EnvCtrlEnum_ECALL : _zz_execute_to_memory_ENV_CTRL_string = "ECALL";
       default : _zz_execute_to_memory_ENV_CTRL_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_execute_to_memory_ENV_CTRL_1)
-      `EnvCtrlEnum_binary_sequential_NONE : _zz_execute_to_memory_ENV_CTRL_1_string = "NONE ";
-      `EnvCtrlEnum_binary_sequential_XRET : _zz_execute_to_memory_ENV_CTRL_1_string = "XRET ";
-      `EnvCtrlEnum_binary_sequential_WFI : _zz_execute_to_memory_ENV_CTRL_1_string = "WFI  ";
-      `EnvCtrlEnum_binary_sequential_ECALL : _zz_execute_to_memory_ENV_CTRL_1_string = "ECALL";
+      EnvCtrlEnum_NONE : _zz_execute_to_memory_ENV_CTRL_1_string = "NONE ";
+      EnvCtrlEnum_XRET : _zz_execute_to_memory_ENV_CTRL_1_string = "XRET ";
+      EnvCtrlEnum_WFI : _zz_execute_to_memory_ENV_CTRL_1_string = "WFI  ";
+      EnvCtrlEnum_ECALL : _zz_execute_to_memory_ENV_CTRL_1_string = "ECALL";
       default : _zz_execute_to_memory_ENV_CTRL_1_string = "?????";
     endcase
   end
   always @(*) begin
     case(decode_ENV_CTRL)
-      `EnvCtrlEnum_binary_sequential_NONE : decode_ENV_CTRL_string = "NONE ";
-      `EnvCtrlEnum_binary_sequential_XRET : decode_ENV_CTRL_string = "XRET ";
-      `EnvCtrlEnum_binary_sequential_WFI : decode_ENV_CTRL_string = "WFI  ";
-      `EnvCtrlEnum_binary_sequential_ECALL : decode_ENV_CTRL_string = "ECALL";
+      EnvCtrlEnum_NONE : decode_ENV_CTRL_string = "NONE ";
+      EnvCtrlEnum_XRET : decode_ENV_CTRL_string = "XRET ";
+      EnvCtrlEnum_WFI : decode_ENV_CTRL_string = "WFI  ";
+      EnvCtrlEnum_ECALL : decode_ENV_CTRL_string = "ECALL";
       default : decode_ENV_CTRL_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_ENV_CTRL)
-      `EnvCtrlEnum_binary_sequential_NONE : _zz_decode_ENV_CTRL_string = "NONE ";
-      `EnvCtrlEnum_binary_sequential_XRET : _zz_decode_ENV_CTRL_string = "XRET ";
-      `EnvCtrlEnum_binary_sequential_WFI : _zz_decode_ENV_CTRL_string = "WFI  ";
-      `EnvCtrlEnum_binary_sequential_ECALL : _zz_decode_ENV_CTRL_string = "ECALL";
+      EnvCtrlEnum_NONE : _zz_decode_ENV_CTRL_string = "NONE ";
+      EnvCtrlEnum_XRET : _zz_decode_ENV_CTRL_string = "XRET ";
+      EnvCtrlEnum_WFI : _zz_decode_ENV_CTRL_string = "WFI  ";
+      EnvCtrlEnum_ECALL : _zz_decode_ENV_CTRL_string = "ECALL";
       default : _zz_decode_ENV_CTRL_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_to_execute_ENV_CTRL)
-      `EnvCtrlEnum_binary_sequential_NONE : _zz_decode_to_execute_ENV_CTRL_string = "NONE ";
-      `EnvCtrlEnum_binary_sequential_XRET : _zz_decode_to_execute_ENV_CTRL_string = "XRET ";
-      `EnvCtrlEnum_binary_sequential_WFI : _zz_decode_to_execute_ENV_CTRL_string = "WFI  ";
-      `EnvCtrlEnum_binary_sequential_ECALL : _zz_decode_to_execute_ENV_CTRL_string = "ECALL";
+      EnvCtrlEnum_NONE : _zz_decode_to_execute_ENV_CTRL_string = "NONE ";
+      EnvCtrlEnum_XRET : _zz_decode_to_execute_ENV_CTRL_string = "XRET ";
+      EnvCtrlEnum_WFI : _zz_decode_to_execute_ENV_CTRL_string = "WFI  ";
+      EnvCtrlEnum_ECALL : _zz_decode_to_execute_ENV_CTRL_string = "ECALL";
       default : _zz_decode_to_execute_ENV_CTRL_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_to_execute_ENV_CTRL_1)
-      `EnvCtrlEnum_binary_sequential_NONE : _zz_decode_to_execute_ENV_CTRL_1_string = "NONE ";
-      `EnvCtrlEnum_binary_sequential_XRET : _zz_decode_to_execute_ENV_CTRL_1_string = "XRET ";
-      `EnvCtrlEnum_binary_sequential_WFI : _zz_decode_to_execute_ENV_CTRL_1_string = "WFI  ";
-      `EnvCtrlEnum_binary_sequential_ECALL : _zz_decode_to_execute_ENV_CTRL_1_string = "ECALL";
+      EnvCtrlEnum_NONE : _zz_decode_to_execute_ENV_CTRL_1_string = "NONE ";
+      EnvCtrlEnum_XRET : _zz_decode_to_execute_ENV_CTRL_1_string = "XRET ";
+      EnvCtrlEnum_WFI : _zz_decode_to_execute_ENV_CTRL_1_string = "WFI  ";
+      EnvCtrlEnum_ECALL : _zz_decode_to_execute_ENV_CTRL_1_string = "ECALL";
       default : _zz_decode_to_execute_ENV_CTRL_1_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_to_execute_BRANCH_CTRL)
-      `BranchCtrlEnum_binary_sequential_INC : _zz_decode_to_execute_BRANCH_CTRL_string = "INC ";
-      `BranchCtrlEnum_binary_sequential_B : _zz_decode_to_execute_BRANCH_CTRL_string = "B   ";
-      `BranchCtrlEnum_binary_sequential_JAL : _zz_decode_to_execute_BRANCH_CTRL_string = "JAL ";
-      `BranchCtrlEnum_binary_sequential_JALR : _zz_decode_to_execute_BRANCH_CTRL_string = "JALR";
+      BranchCtrlEnum_INC : _zz_decode_to_execute_BRANCH_CTRL_string = "INC ";
+      BranchCtrlEnum_B : _zz_decode_to_execute_BRANCH_CTRL_string = "B   ";
+      BranchCtrlEnum_JAL : _zz_decode_to_execute_BRANCH_CTRL_string = "JAL ";
+      BranchCtrlEnum_JALR : _zz_decode_to_execute_BRANCH_CTRL_string = "JALR";
       default : _zz_decode_to_execute_BRANCH_CTRL_string = "????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_to_execute_BRANCH_CTRL_1)
-      `BranchCtrlEnum_binary_sequential_INC : _zz_decode_to_execute_BRANCH_CTRL_1_string = "INC ";
-      `BranchCtrlEnum_binary_sequential_B : _zz_decode_to_execute_BRANCH_CTRL_1_string = "B   ";
-      `BranchCtrlEnum_binary_sequential_JAL : _zz_decode_to_execute_BRANCH_CTRL_1_string = "JAL ";
-      `BranchCtrlEnum_binary_sequential_JALR : _zz_decode_to_execute_BRANCH_CTRL_1_string = "JALR";
+      BranchCtrlEnum_INC : _zz_decode_to_execute_BRANCH_CTRL_1_string = "INC ";
+      BranchCtrlEnum_B : _zz_decode_to_execute_BRANCH_CTRL_1_string = "B   ";
+      BranchCtrlEnum_JAL : _zz_decode_to_execute_BRANCH_CTRL_1_string = "JAL ";
+      BranchCtrlEnum_JALR : _zz_decode_to_execute_BRANCH_CTRL_1_string = "JALR";
       default : _zz_decode_to_execute_BRANCH_CTRL_1_string = "????";
     endcase
   end
   always @(*) begin
     case(_zz_execute_to_memory_SHIFT_CTRL)
-      `ShiftCtrlEnum_binary_sequential_DISABLE_1 : _zz_execute_to_memory_SHIFT_CTRL_string = "DISABLE_1";
-      `ShiftCtrlEnum_binary_sequential_SLL_1 : _zz_execute_to_memory_SHIFT_CTRL_string = "SLL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRL_1 : _zz_execute_to_memory_SHIFT_CTRL_string = "SRL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRA_1 : _zz_execute_to_memory_SHIFT_CTRL_string = "SRA_1    ";
+      ShiftCtrlEnum_DISABLE_1 : _zz_execute_to_memory_SHIFT_CTRL_string = "DISABLE_1";
+      ShiftCtrlEnum_SLL_1 : _zz_execute_to_memory_SHIFT_CTRL_string = "SLL_1    ";
+      ShiftCtrlEnum_SRL_1 : _zz_execute_to_memory_SHIFT_CTRL_string = "SRL_1    ";
+      ShiftCtrlEnum_SRA_1 : _zz_execute_to_memory_SHIFT_CTRL_string = "SRA_1    ";
       default : _zz_execute_to_memory_SHIFT_CTRL_string = "?????????";
     endcase
   end
   always @(*) begin
     case(_zz_execute_to_memory_SHIFT_CTRL_1)
-      `ShiftCtrlEnum_binary_sequential_DISABLE_1 : _zz_execute_to_memory_SHIFT_CTRL_1_string = "DISABLE_1";
-      `ShiftCtrlEnum_binary_sequential_SLL_1 : _zz_execute_to_memory_SHIFT_CTRL_1_string = "SLL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRL_1 : _zz_execute_to_memory_SHIFT_CTRL_1_string = "SRL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRA_1 : _zz_execute_to_memory_SHIFT_CTRL_1_string = "SRA_1    ";
+      ShiftCtrlEnum_DISABLE_1 : _zz_execute_to_memory_SHIFT_CTRL_1_string = "DISABLE_1";
+      ShiftCtrlEnum_SLL_1 : _zz_execute_to_memory_SHIFT_CTRL_1_string = "SLL_1    ";
+      ShiftCtrlEnum_SRL_1 : _zz_execute_to_memory_SHIFT_CTRL_1_string = "SRL_1    ";
+      ShiftCtrlEnum_SRA_1 : _zz_execute_to_memory_SHIFT_CTRL_1_string = "SRA_1    ";
       default : _zz_execute_to_memory_SHIFT_CTRL_1_string = "?????????";
     endcase
   end
   always @(*) begin
     case(decode_SHIFT_CTRL)
-      `ShiftCtrlEnum_binary_sequential_DISABLE_1 : decode_SHIFT_CTRL_string = "DISABLE_1";
-      `ShiftCtrlEnum_binary_sequential_SLL_1 : decode_SHIFT_CTRL_string = "SLL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRL_1 : decode_SHIFT_CTRL_string = "SRL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRA_1 : decode_SHIFT_CTRL_string = "SRA_1    ";
+      ShiftCtrlEnum_DISABLE_1 : decode_SHIFT_CTRL_string = "DISABLE_1";
+      ShiftCtrlEnum_SLL_1 : decode_SHIFT_CTRL_string = "SLL_1    ";
+      ShiftCtrlEnum_SRL_1 : decode_SHIFT_CTRL_string = "SRL_1    ";
+      ShiftCtrlEnum_SRA_1 : decode_SHIFT_CTRL_string = "SRA_1    ";
       default : decode_SHIFT_CTRL_string = "?????????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_SHIFT_CTRL)
-      `ShiftCtrlEnum_binary_sequential_DISABLE_1 : _zz_decode_SHIFT_CTRL_string = "DISABLE_1";
-      `ShiftCtrlEnum_binary_sequential_SLL_1 : _zz_decode_SHIFT_CTRL_string = "SLL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRL_1 : _zz_decode_SHIFT_CTRL_string = "SRL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRA_1 : _zz_decode_SHIFT_CTRL_string = "SRA_1    ";
+      ShiftCtrlEnum_DISABLE_1 : _zz_decode_SHIFT_CTRL_string = "DISABLE_1";
+      ShiftCtrlEnum_SLL_1 : _zz_decode_SHIFT_CTRL_string = "SLL_1    ";
+      ShiftCtrlEnum_SRL_1 : _zz_decode_SHIFT_CTRL_string = "SRL_1    ";
+      ShiftCtrlEnum_SRA_1 : _zz_decode_SHIFT_CTRL_string = "SRA_1    ";
       default : _zz_decode_SHIFT_CTRL_string = "?????????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_to_execute_SHIFT_CTRL)
-      `ShiftCtrlEnum_binary_sequential_DISABLE_1 : _zz_decode_to_execute_SHIFT_CTRL_string = "DISABLE_1";
-      `ShiftCtrlEnum_binary_sequential_SLL_1 : _zz_decode_to_execute_SHIFT_CTRL_string = "SLL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRL_1 : _zz_decode_to_execute_SHIFT_CTRL_string = "SRL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRA_1 : _zz_decode_to_execute_SHIFT_CTRL_string = "SRA_1    ";
+      ShiftCtrlEnum_DISABLE_1 : _zz_decode_to_execute_SHIFT_CTRL_string = "DISABLE_1";
+      ShiftCtrlEnum_SLL_1 : _zz_decode_to_execute_SHIFT_CTRL_string = "SLL_1    ";
+      ShiftCtrlEnum_SRL_1 : _zz_decode_to_execute_SHIFT_CTRL_string = "SRL_1    ";
+      ShiftCtrlEnum_SRA_1 : _zz_decode_to_execute_SHIFT_CTRL_string = "SRA_1    ";
       default : _zz_decode_to_execute_SHIFT_CTRL_string = "?????????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_to_execute_SHIFT_CTRL_1)
-      `ShiftCtrlEnum_binary_sequential_DISABLE_1 : _zz_decode_to_execute_SHIFT_CTRL_1_string = "DISABLE_1";
-      `ShiftCtrlEnum_binary_sequential_SLL_1 : _zz_decode_to_execute_SHIFT_CTRL_1_string = "SLL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRL_1 : _zz_decode_to_execute_SHIFT_CTRL_1_string = "SRL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRA_1 : _zz_decode_to_execute_SHIFT_CTRL_1_string = "SRA_1    ";
+      ShiftCtrlEnum_DISABLE_1 : _zz_decode_to_execute_SHIFT_CTRL_1_string = "DISABLE_1";
+      ShiftCtrlEnum_SLL_1 : _zz_decode_to_execute_SHIFT_CTRL_1_string = "SLL_1    ";
+      ShiftCtrlEnum_SRL_1 : _zz_decode_to_execute_SHIFT_CTRL_1_string = "SRL_1    ";
+      ShiftCtrlEnum_SRA_1 : _zz_decode_to_execute_SHIFT_CTRL_1_string = "SRA_1    ";
       default : _zz_decode_to_execute_SHIFT_CTRL_1_string = "?????????";
     endcase
   end
   always @(*) begin
     case(decode_ALU_BITWISE_CTRL)
-      `AluBitwiseCtrlEnum_binary_sequential_XOR_1 : decode_ALU_BITWISE_CTRL_string = "XOR_1";
-      `AluBitwiseCtrlEnum_binary_sequential_OR_1 : decode_ALU_BITWISE_CTRL_string = "OR_1 ";
-      `AluBitwiseCtrlEnum_binary_sequential_AND_1 : decode_ALU_BITWISE_CTRL_string = "AND_1";
+      AluBitwiseCtrlEnum_XOR_1 : decode_ALU_BITWISE_CTRL_string = "XOR_1";
+      AluBitwiseCtrlEnum_OR_1 : decode_ALU_BITWISE_CTRL_string = "OR_1 ";
+      AluBitwiseCtrlEnum_AND_1 : decode_ALU_BITWISE_CTRL_string = "AND_1";
       default : decode_ALU_BITWISE_CTRL_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_ALU_BITWISE_CTRL)
-      `AluBitwiseCtrlEnum_binary_sequential_XOR_1 : _zz_decode_ALU_BITWISE_CTRL_string = "XOR_1";
-      `AluBitwiseCtrlEnum_binary_sequential_OR_1 : _zz_decode_ALU_BITWISE_CTRL_string = "OR_1 ";
-      `AluBitwiseCtrlEnum_binary_sequential_AND_1 : _zz_decode_ALU_BITWISE_CTRL_string = "AND_1";
+      AluBitwiseCtrlEnum_XOR_1 : _zz_decode_ALU_BITWISE_CTRL_string = "XOR_1";
+      AluBitwiseCtrlEnum_OR_1 : _zz_decode_ALU_BITWISE_CTRL_string = "OR_1 ";
+      AluBitwiseCtrlEnum_AND_1 : _zz_decode_ALU_BITWISE_CTRL_string = "AND_1";
       default : _zz_decode_ALU_BITWISE_CTRL_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_to_execute_ALU_BITWISE_CTRL)
-      `AluBitwiseCtrlEnum_binary_sequential_XOR_1 : _zz_decode_to_execute_ALU_BITWISE_CTRL_string = "XOR_1";
-      `AluBitwiseCtrlEnum_binary_sequential_OR_1 : _zz_decode_to_execute_ALU_BITWISE_CTRL_string = "OR_1 ";
-      `AluBitwiseCtrlEnum_binary_sequential_AND_1 : _zz_decode_to_execute_ALU_BITWISE_CTRL_string = "AND_1";
+      AluBitwiseCtrlEnum_XOR_1 : _zz_decode_to_execute_ALU_BITWISE_CTRL_string = "XOR_1";
+      AluBitwiseCtrlEnum_OR_1 : _zz_decode_to_execute_ALU_BITWISE_CTRL_string = "OR_1 ";
+      AluBitwiseCtrlEnum_AND_1 : _zz_decode_to_execute_ALU_BITWISE_CTRL_string = "AND_1";
       default : _zz_decode_to_execute_ALU_BITWISE_CTRL_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_to_execute_ALU_BITWISE_CTRL_1)
-      `AluBitwiseCtrlEnum_binary_sequential_XOR_1 : _zz_decode_to_execute_ALU_BITWISE_CTRL_1_string = "XOR_1";
-      `AluBitwiseCtrlEnum_binary_sequential_OR_1 : _zz_decode_to_execute_ALU_BITWISE_CTRL_1_string = "OR_1 ";
-      `AluBitwiseCtrlEnum_binary_sequential_AND_1 : _zz_decode_to_execute_ALU_BITWISE_CTRL_1_string = "AND_1";
+      AluBitwiseCtrlEnum_XOR_1 : _zz_decode_to_execute_ALU_BITWISE_CTRL_1_string = "XOR_1";
+      AluBitwiseCtrlEnum_OR_1 : _zz_decode_to_execute_ALU_BITWISE_CTRL_1_string = "OR_1 ";
+      AluBitwiseCtrlEnum_AND_1 : _zz_decode_to_execute_ALU_BITWISE_CTRL_1_string = "AND_1";
       default : _zz_decode_to_execute_ALU_BITWISE_CTRL_1_string = "?????";
     endcase
   end
   always @(*) begin
     case(decode_SRC2_CTRL)
-      `Src2CtrlEnum_binary_sequential_RS : decode_SRC2_CTRL_string = "RS ";
-      `Src2CtrlEnum_binary_sequential_IMI : decode_SRC2_CTRL_string = "IMI";
-      `Src2CtrlEnum_binary_sequential_IMS : decode_SRC2_CTRL_string = "IMS";
-      `Src2CtrlEnum_binary_sequential_PC : decode_SRC2_CTRL_string = "PC ";
+      Src2CtrlEnum_RS : decode_SRC2_CTRL_string = "RS ";
+      Src2CtrlEnum_IMI : decode_SRC2_CTRL_string = "IMI";
+      Src2CtrlEnum_IMS : decode_SRC2_CTRL_string = "IMS";
+      Src2CtrlEnum_PC : decode_SRC2_CTRL_string = "PC ";
       default : decode_SRC2_CTRL_string = "???";
     endcase
   end
   always @(*) begin
     case(_zz_decode_SRC2_CTRL)
-      `Src2CtrlEnum_binary_sequential_RS : _zz_decode_SRC2_CTRL_string = "RS ";
-      `Src2CtrlEnum_binary_sequential_IMI : _zz_decode_SRC2_CTRL_string = "IMI";
-      `Src2CtrlEnum_binary_sequential_IMS : _zz_decode_SRC2_CTRL_string = "IMS";
-      `Src2CtrlEnum_binary_sequential_PC : _zz_decode_SRC2_CTRL_string = "PC ";
+      Src2CtrlEnum_RS : _zz_decode_SRC2_CTRL_string = "RS ";
+      Src2CtrlEnum_IMI : _zz_decode_SRC2_CTRL_string = "IMI";
+      Src2CtrlEnum_IMS : _zz_decode_SRC2_CTRL_string = "IMS";
+      Src2CtrlEnum_PC : _zz_decode_SRC2_CTRL_string = "PC ";
       default : _zz_decode_SRC2_CTRL_string = "???";
     endcase
   end
   always @(*) begin
     case(_zz_decode_to_execute_SRC2_CTRL)
-      `Src2CtrlEnum_binary_sequential_RS : _zz_decode_to_execute_SRC2_CTRL_string = "RS ";
-      `Src2CtrlEnum_binary_sequential_IMI : _zz_decode_to_execute_SRC2_CTRL_string = "IMI";
-      `Src2CtrlEnum_binary_sequential_IMS : _zz_decode_to_execute_SRC2_CTRL_string = "IMS";
-      `Src2CtrlEnum_binary_sequential_PC : _zz_decode_to_execute_SRC2_CTRL_string = "PC ";
+      Src2CtrlEnum_RS : _zz_decode_to_execute_SRC2_CTRL_string = "RS ";
+      Src2CtrlEnum_IMI : _zz_decode_to_execute_SRC2_CTRL_string = "IMI";
+      Src2CtrlEnum_IMS : _zz_decode_to_execute_SRC2_CTRL_string = "IMS";
+      Src2CtrlEnum_PC : _zz_decode_to_execute_SRC2_CTRL_string = "PC ";
       default : _zz_decode_to_execute_SRC2_CTRL_string = "???";
     endcase
   end
   always @(*) begin
     case(_zz_decode_to_execute_SRC2_CTRL_1)
-      `Src2CtrlEnum_binary_sequential_RS : _zz_decode_to_execute_SRC2_CTRL_1_string = "RS ";
-      `Src2CtrlEnum_binary_sequential_IMI : _zz_decode_to_execute_SRC2_CTRL_1_string = "IMI";
-      `Src2CtrlEnum_binary_sequential_IMS : _zz_decode_to_execute_SRC2_CTRL_1_string = "IMS";
-      `Src2CtrlEnum_binary_sequential_PC : _zz_decode_to_execute_SRC2_CTRL_1_string = "PC ";
+      Src2CtrlEnum_RS : _zz_decode_to_execute_SRC2_CTRL_1_string = "RS ";
+      Src2CtrlEnum_IMI : _zz_decode_to_execute_SRC2_CTRL_1_string = "IMI";
+      Src2CtrlEnum_IMS : _zz_decode_to_execute_SRC2_CTRL_1_string = "IMS";
+      Src2CtrlEnum_PC : _zz_decode_to_execute_SRC2_CTRL_1_string = "PC ";
       default : _zz_decode_to_execute_SRC2_CTRL_1_string = "???";
     endcase
   end
   always @(*) begin
     case(decode_ALU_CTRL)
-      `AluCtrlEnum_binary_sequential_ADD_SUB : decode_ALU_CTRL_string = "ADD_SUB ";
-      `AluCtrlEnum_binary_sequential_SLT_SLTU : decode_ALU_CTRL_string = "SLT_SLTU";
-      `AluCtrlEnum_binary_sequential_BITWISE : decode_ALU_CTRL_string = "BITWISE ";
+      AluCtrlEnum_ADD_SUB : decode_ALU_CTRL_string = "ADD_SUB ";
+      AluCtrlEnum_SLT_SLTU : decode_ALU_CTRL_string = "SLT_SLTU";
+      AluCtrlEnum_BITWISE : decode_ALU_CTRL_string = "BITWISE ";
       default : decode_ALU_CTRL_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_ALU_CTRL)
-      `AluCtrlEnum_binary_sequential_ADD_SUB : _zz_decode_ALU_CTRL_string = "ADD_SUB ";
-      `AluCtrlEnum_binary_sequential_SLT_SLTU : _zz_decode_ALU_CTRL_string = "SLT_SLTU";
-      `AluCtrlEnum_binary_sequential_BITWISE : _zz_decode_ALU_CTRL_string = "BITWISE ";
+      AluCtrlEnum_ADD_SUB : _zz_decode_ALU_CTRL_string = "ADD_SUB ";
+      AluCtrlEnum_SLT_SLTU : _zz_decode_ALU_CTRL_string = "SLT_SLTU";
+      AluCtrlEnum_BITWISE : _zz_decode_ALU_CTRL_string = "BITWISE ";
       default : _zz_decode_ALU_CTRL_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_to_execute_ALU_CTRL)
-      `AluCtrlEnum_binary_sequential_ADD_SUB : _zz_decode_to_execute_ALU_CTRL_string = "ADD_SUB ";
-      `AluCtrlEnum_binary_sequential_SLT_SLTU : _zz_decode_to_execute_ALU_CTRL_string = "SLT_SLTU";
-      `AluCtrlEnum_binary_sequential_BITWISE : _zz_decode_to_execute_ALU_CTRL_string = "BITWISE ";
+      AluCtrlEnum_ADD_SUB : _zz_decode_to_execute_ALU_CTRL_string = "ADD_SUB ";
+      AluCtrlEnum_SLT_SLTU : _zz_decode_to_execute_ALU_CTRL_string = "SLT_SLTU";
+      AluCtrlEnum_BITWISE : _zz_decode_to_execute_ALU_CTRL_string = "BITWISE ";
       default : _zz_decode_to_execute_ALU_CTRL_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_to_execute_ALU_CTRL_1)
-      `AluCtrlEnum_binary_sequential_ADD_SUB : _zz_decode_to_execute_ALU_CTRL_1_string = "ADD_SUB ";
-      `AluCtrlEnum_binary_sequential_SLT_SLTU : _zz_decode_to_execute_ALU_CTRL_1_string = "SLT_SLTU";
-      `AluCtrlEnum_binary_sequential_BITWISE : _zz_decode_to_execute_ALU_CTRL_1_string = "BITWISE ";
+      AluCtrlEnum_ADD_SUB : _zz_decode_to_execute_ALU_CTRL_1_string = "ADD_SUB ";
+      AluCtrlEnum_SLT_SLTU : _zz_decode_to_execute_ALU_CTRL_1_string = "SLT_SLTU";
+      AluCtrlEnum_BITWISE : _zz_decode_to_execute_ALU_CTRL_1_string = "BITWISE ";
       default : _zz_decode_to_execute_ALU_CTRL_1_string = "????????";
     endcase
   end
   always @(*) begin
     case(decode_SRC1_CTRL)
-      `Src1CtrlEnum_binary_sequential_RS : decode_SRC1_CTRL_string = "RS          ";
-      `Src1CtrlEnum_binary_sequential_IMU : decode_SRC1_CTRL_string = "IMU         ";
-      `Src1CtrlEnum_binary_sequential_PC_INCREMENT : decode_SRC1_CTRL_string = "PC_INCREMENT";
-      `Src1CtrlEnum_binary_sequential_URS1 : decode_SRC1_CTRL_string = "URS1        ";
+      Src1CtrlEnum_RS : decode_SRC1_CTRL_string = "RS          ";
+      Src1CtrlEnum_IMU : decode_SRC1_CTRL_string = "IMU         ";
+      Src1CtrlEnum_PC_INCREMENT : decode_SRC1_CTRL_string = "PC_INCREMENT";
+      Src1CtrlEnum_URS1 : decode_SRC1_CTRL_string = "URS1        ";
       default : decode_SRC1_CTRL_string = "????????????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_SRC1_CTRL)
-      `Src1CtrlEnum_binary_sequential_RS : _zz_decode_SRC1_CTRL_string = "RS          ";
-      `Src1CtrlEnum_binary_sequential_IMU : _zz_decode_SRC1_CTRL_string = "IMU         ";
-      `Src1CtrlEnum_binary_sequential_PC_INCREMENT : _zz_decode_SRC1_CTRL_string = "PC_INCREMENT";
-      `Src1CtrlEnum_binary_sequential_URS1 : _zz_decode_SRC1_CTRL_string = "URS1        ";
+      Src1CtrlEnum_RS : _zz_decode_SRC1_CTRL_string = "RS          ";
+      Src1CtrlEnum_IMU : _zz_decode_SRC1_CTRL_string = "IMU         ";
+      Src1CtrlEnum_PC_INCREMENT : _zz_decode_SRC1_CTRL_string = "PC_INCREMENT";
+      Src1CtrlEnum_URS1 : _zz_decode_SRC1_CTRL_string = "URS1        ";
       default : _zz_decode_SRC1_CTRL_string = "????????????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_to_execute_SRC1_CTRL)
-      `Src1CtrlEnum_binary_sequential_RS : _zz_decode_to_execute_SRC1_CTRL_string = "RS          ";
-      `Src1CtrlEnum_binary_sequential_IMU : _zz_decode_to_execute_SRC1_CTRL_string = "IMU         ";
-      `Src1CtrlEnum_binary_sequential_PC_INCREMENT : _zz_decode_to_execute_SRC1_CTRL_string = "PC_INCREMENT";
-      `Src1CtrlEnum_binary_sequential_URS1 : _zz_decode_to_execute_SRC1_CTRL_string = "URS1        ";
+      Src1CtrlEnum_RS : _zz_decode_to_execute_SRC1_CTRL_string = "RS          ";
+      Src1CtrlEnum_IMU : _zz_decode_to_execute_SRC1_CTRL_string = "IMU         ";
+      Src1CtrlEnum_PC_INCREMENT : _zz_decode_to_execute_SRC1_CTRL_string = "PC_INCREMENT";
+      Src1CtrlEnum_URS1 : _zz_decode_to_execute_SRC1_CTRL_string = "URS1        ";
       default : _zz_decode_to_execute_SRC1_CTRL_string = "????????????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_to_execute_SRC1_CTRL_1)
-      `Src1CtrlEnum_binary_sequential_RS : _zz_decode_to_execute_SRC1_CTRL_1_string = "RS          ";
-      `Src1CtrlEnum_binary_sequential_IMU : _zz_decode_to_execute_SRC1_CTRL_1_string = "IMU         ";
-      `Src1CtrlEnum_binary_sequential_PC_INCREMENT : _zz_decode_to_execute_SRC1_CTRL_1_string = "PC_INCREMENT";
-      `Src1CtrlEnum_binary_sequential_URS1 : _zz_decode_to_execute_SRC1_CTRL_1_string = "URS1        ";
+      Src1CtrlEnum_RS : _zz_decode_to_execute_SRC1_CTRL_1_string = "RS          ";
+      Src1CtrlEnum_IMU : _zz_decode_to_execute_SRC1_CTRL_1_string = "IMU         ";
+      Src1CtrlEnum_PC_INCREMENT : _zz_decode_to_execute_SRC1_CTRL_1_string = "PC_INCREMENT";
+      Src1CtrlEnum_URS1 : _zz_decode_to_execute_SRC1_CTRL_1_string = "URS1        ";
       default : _zz_decode_to_execute_SRC1_CTRL_1_string = "????????????";
     endcase
   end
   always @(*) begin
     case(decode_FPU_OPCODE)
-      `FpuOpcode_binary_sequential_LOAD : decode_FPU_OPCODE_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : decode_FPU_OPCODE_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : decode_FPU_OPCODE_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : decode_FPU_OPCODE_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : decode_FPU_OPCODE_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : decode_FPU_OPCODE_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : decode_FPU_OPCODE_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : decode_FPU_OPCODE_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : decode_FPU_OPCODE_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : decode_FPU_OPCODE_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : decode_FPU_OPCODE_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : decode_FPU_OPCODE_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : decode_FPU_OPCODE_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : decode_FPU_OPCODE_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : decode_FPU_OPCODE_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : decode_FPU_OPCODE_string = "FCVT_X_X";
+      FpuOpcode_LOAD : decode_FPU_OPCODE_string = "LOAD    ";
+      FpuOpcode_STORE : decode_FPU_OPCODE_string = "STORE   ";
+      FpuOpcode_MUL : decode_FPU_OPCODE_string = "MUL     ";
+      FpuOpcode_ADD : decode_FPU_OPCODE_string = "ADD     ";
+      FpuOpcode_FMA : decode_FPU_OPCODE_string = "FMA     ";
+      FpuOpcode_I2F : decode_FPU_OPCODE_string = "I2F     ";
+      FpuOpcode_F2I : decode_FPU_OPCODE_string = "F2I     ";
+      FpuOpcode_CMP : decode_FPU_OPCODE_string = "CMP     ";
+      FpuOpcode_DIV : decode_FPU_OPCODE_string = "DIV     ";
+      FpuOpcode_SQRT : decode_FPU_OPCODE_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : decode_FPU_OPCODE_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : decode_FPU_OPCODE_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : decode_FPU_OPCODE_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : decode_FPU_OPCODE_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : decode_FPU_OPCODE_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : decode_FPU_OPCODE_string = "FCVT_X_X";
       default : decode_FPU_OPCODE_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_FPU_OPCODE)
-      `FpuOpcode_binary_sequential_LOAD : _zz_decode_FPU_OPCODE_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : _zz_decode_FPU_OPCODE_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : _zz_decode_FPU_OPCODE_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : _zz_decode_FPU_OPCODE_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : _zz_decode_FPU_OPCODE_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : _zz_decode_FPU_OPCODE_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : _zz_decode_FPU_OPCODE_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : _zz_decode_FPU_OPCODE_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : _zz_decode_FPU_OPCODE_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : _zz_decode_FPU_OPCODE_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : _zz_decode_FPU_OPCODE_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : _zz_decode_FPU_OPCODE_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : _zz_decode_FPU_OPCODE_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : _zz_decode_FPU_OPCODE_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : _zz_decode_FPU_OPCODE_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : _zz_decode_FPU_OPCODE_string = "FCVT_X_X";
+      FpuOpcode_LOAD : _zz_decode_FPU_OPCODE_string = "LOAD    ";
+      FpuOpcode_STORE : _zz_decode_FPU_OPCODE_string = "STORE   ";
+      FpuOpcode_MUL : _zz_decode_FPU_OPCODE_string = "MUL     ";
+      FpuOpcode_ADD : _zz_decode_FPU_OPCODE_string = "ADD     ";
+      FpuOpcode_FMA : _zz_decode_FPU_OPCODE_string = "FMA     ";
+      FpuOpcode_I2F : _zz_decode_FPU_OPCODE_string = "I2F     ";
+      FpuOpcode_F2I : _zz_decode_FPU_OPCODE_string = "F2I     ";
+      FpuOpcode_CMP : _zz_decode_FPU_OPCODE_string = "CMP     ";
+      FpuOpcode_DIV : _zz_decode_FPU_OPCODE_string = "DIV     ";
+      FpuOpcode_SQRT : _zz_decode_FPU_OPCODE_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : _zz_decode_FPU_OPCODE_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : _zz_decode_FPU_OPCODE_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : _zz_decode_FPU_OPCODE_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : _zz_decode_FPU_OPCODE_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : _zz_decode_FPU_OPCODE_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : _zz_decode_FPU_OPCODE_string = "FCVT_X_X";
       default : _zz_decode_FPU_OPCODE_string = "????????";
     endcase
   end
   always @(*) begin
     case(writeBack_FPU_OPCODE)
-      `FpuOpcode_binary_sequential_LOAD : writeBack_FPU_OPCODE_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : writeBack_FPU_OPCODE_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : writeBack_FPU_OPCODE_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : writeBack_FPU_OPCODE_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : writeBack_FPU_OPCODE_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : writeBack_FPU_OPCODE_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : writeBack_FPU_OPCODE_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : writeBack_FPU_OPCODE_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : writeBack_FPU_OPCODE_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : writeBack_FPU_OPCODE_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : writeBack_FPU_OPCODE_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : writeBack_FPU_OPCODE_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : writeBack_FPU_OPCODE_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : writeBack_FPU_OPCODE_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : writeBack_FPU_OPCODE_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : writeBack_FPU_OPCODE_string = "FCVT_X_X";
+      FpuOpcode_LOAD : writeBack_FPU_OPCODE_string = "LOAD    ";
+      FpuOpcode_STORE : writeBack_FPU_OPCODE_string = "STORE   ";
+      FpuOpcode_MUL : writeBack_FPU_OPCODE_string = "MUL     ";
+      FpuOpcode_ADD : writeBack_FPU_OPCODE_string = "ADD     ";
+      FpuOpcode_FMA : writeBack_FPU_OPCODE_string = "FMA     ";
+      FpuOpcode_I2F : writeBack_FPU_OPCODE_string = "I2F     ";
+      FpuOpcode_F2I : writeBack_FPU_OPCODE_string = "F2I     ";
+      FpuOpcode_CMP : writeBack_FPU_OPCODE_string = "CMP     ";
+      FpuOpcode_DIV : writeBack_FPU_OPCODE_string = "DIV     ";
+      FpuOpcode_SQRT : writeBack_FPU_OPCODE_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : writeBack_FPU_OPCODE_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : writeBack_FPU_OPCODE_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : writeBack_FPU_OPCODE_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : writeBack_FPU_OPCODE_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : writeBack_FPU_OPCODE_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : writeBack_FPU_OPCODE_string = "FCVT_X_X";
       default : writeBack_FPU_OPCODE_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_writeBack_FPU_OPCODE)
-      `FpuOpcode_binary_sequential_LOAD : _zz_writeBack_FPU_OPCODE_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : _zz_writeBack_FPU_OPCODE_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : _zz_writeBack_FPU_OPCODE_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : _zz_writeBack_FPU_OPCODE_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : _zz_writeBack_FPU_OPCODE_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : _zz_writeBack_FPU_OPCODE_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : _zz_writeBack_FPU_OPCODE_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : _zz_writeBack_FPU_OPCODE_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : _zz_writeBack_FPU_OPCODE_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : _zz_writeBack_FPU_OPCODE_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : _zz_writeBack_FPU_OPCODE_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : _zz_writeBack_FPU_OPCODE_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : _zz_writeBack_FPU_OPCODE_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : _zz_writeBack_FPU_OPCODE_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : _zz_writeBack_FPU_OPCODE_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : _zz_writeBack_FPU_OPCODE_string = "FCVT_X_X";
+      FpuOpcode_LOAD : _zz_writeBack_FPU_OPCODE_string = "LOAD    ";
+      FpuOpcode_STORE : _zz_writeBack_FPU_OPCODE_string = "STORE   ";
+      FpuOpcode_MUL : _zz_writeBack_FPU_OPCODE_string = "MUL     ";
+      FpuOpcode_ADD : _zz_writeBack_FPU_OPCODE_string = "ADD     ";
+      FpuOpcode_FMA : _zz_writeBack_FPU_OPCODE_string = "FMA     ";
+      FpuOpcode_I2F : _zz_writeBack_FPU_OPCODE_string = "I2F     ";
+      FpuOpcode_F2I : _zz_writeBack_FPU_OPCODE_string = "F2I     ";
+      FpuOpcode_CMP : _zz_writeBack_FPU_OPCODE_string = "CMP     ";
+      FpuOpcode_DIV : _zz_writeBack_FPU_OPCODE_string = "DIV     ";
+      FpuOpcode_SQRT : _zz_writeBack_FPU_OPCODE_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : _zz_writeBack_FPU_OPCODE_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : _zz_writeBack_FPU_OPCODE_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : _zz_writeBack_FPU_OPCODE_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : _zz_writeBack_FPU_OPCODE_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : _zz_writeBack_FPU_OPCODE_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : _zz_writeBack_FPU_OPCODE_string = "FCVT_X_X";
       default : _zz_writeBack_FPU_OPCODE_string = "????????";
     endcase
   end
   always @(*) begin
     case(execute_CfuPlugin_CFU_INPUT_2_KIND)
-      `Input2Kind_binary_sequential_RS : execute_CfuPlugin_CFU_INPUT_2_KIND_string = "RS   ";
-      `Input2Kind_binary_sequential_IMM_I : execute_CfuPlugin_CFU_INPUT_2_KIND_string = "IMM_I";
+      Input2Kind_RS : execute_CfuPlugin_CFU_INPUT_2_KIND_string = "RS   ";
+      Input2Kind_IMM_I : execute_CfuPlugin_CFU_INPUT_2_KIND_string = "IMM_I";
       default : execute_CfuPlugin_CFU_INPUT_2_KIND_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_execute_CfuPlugin_CFU_INPUT_2_KIND)
-      `Input2Kind_binary_sequential_RS : _zz_execute_CfuPlugin_CFU_INPUT_2_KIND_string = "RS   ";
-      `Input2Kind_binary_sequential_IMM_I : _zz_execute_CfuPlugin_CFU_INPUT_2_KIND_string = "IMM_I";
+      Input2Kind_RS : _zz_execute_CfuPlugin_CFU_INPUT_2_KIND_string = "RS   ";
+      Input2Kind_IMM_I : _zz_execute_CfuPlugin_CFU_INPUT_2_KIND_string = "IMM_I";
       default : _zz_execute_CfuPlugin_CFU_INPUT_2_KIND_string = "?????";
     endcase
   end
   always @(*) begin
     case(memory_ENV_CTRL)
-      `EnvCtrlEnum_binary_sequential_NONE : memory_ENV_CTRL_string = "NONE ";
-      `EnvCtrlEnum_binary_sequential_XRET : memory_ENV_CTRL_string = "XRET ";
-      `EnvCtrlEnum_binary_sequential_WFI : memory_ENV_CTRL_string = "WFI  ";
-      `EnvCtrlEnum_binary_sequential_ECALL : memory_ENV_CTRL_string = "ECALL";
+      EnvCtrlEnum_NONE : memory_ENV_CTRL_string = "NONE ";
+      EnvCtrlEnum_XRET : memory_ENV_CTRL_string = "XRET ";
+      EnvCtrlEnum_WFI : memory_ENV_CTRL_string = "WFI  ";
+      EnvCtrlEnum_ECALL : memory_ENV_CTRL_string = "ECALL";
       default : memory_ENV_CTRL_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_memory_ENV_CTRL)
-      `EnvCtrlEnum_binary_sequential_NONE : _zz_memory_ENV_CTRL_string = "NONE ";
-      `EnvCtrlEnum_binary_sequential_XRET : _zz_memory_ENV_CTRL_string = "XRET ";
-      `EnvCtrlEnum_binary_sequential_WFI : _zz_memory_ENV_CTRL_string = "WFI  ";
-      `EnvCtrlEnum_binary_sequential_ECALL : _zz_memory_ENV_CTRL_string = "ECALL";
+      EnvCtrlEnum_NONE : _zz_memory_ENV_CTRL_string = "NONE ";
+      EnvCtrlEnum_XRET : _zz_memory_ENV_CTRL_string = "XRET ";
+      EnvCtrlEnum_WFI : _zz_memory_ENV_CTRL_string = "WFI  ";
+      EnvCtrlEnum_ECALL : _zz_memory_ENV_CTRL_string = "ECALL";
       default : _zz_memory_ENV_CTRL_string = "?????";
     endcase
   end
   always @(*) begin
     case(execute_ENV_CTRL)
-      `EnvCtrlEnum_binary_sequential_NONE : execute_ENV_CTRL_string = "NONE ";
-      `EnvCtrlEnum_binary_sequential_XRET : execute_ENV_CTRL_string = "XRET ";
-      `EnvCtrlEnum_binary_sequential_WFI : execute_ENV_CTRL_string = "WFI  ";
-      `EnvCtrlEnum_binary_sequential_ECALL : execute_ENV_CTRL_string = "ECALL";
+      EnvCtrlEnum_NONE : execute_ENV_CTRL_string = "NONE ";
+      EnvCtrlEnum_XRET : execute_ENV_CTRL_string = "XRET ";
+      EnvCtrlEnum_WFI : execute_ENV_CTRL_string = "WFI  ";
+      EnvCtrlEnum_ECALL : execute_ENV_CTRL_string = "ECALL";
       default : execute_ENV_CTRL_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_execute_ENV_CTRL)
-      `EnvCtrlEnum_binary_sequential_NONE : _zz_execute_ENV_CTRL_string = "NONE ";
-      `EnvCtrlEnum_binary_sequential_XRET : _zz_execute_ENV_CTRL_string = "XRET ";
-      `EnvCtrlEnum_binary_sequential_WFI : _zz_execute_ENV_CTRL_string = "WFI  ";
-      `EnvCtrlEnum_binary_sequential_ECALL : _zz_execute_ENV_CTRL_string = "ECALL";
+      EnvCtrlEnum_NONE : _zz_execute_ENV_CTRL_string = "NONE ";
+      EnvCtrlEnum_XRET : _zz_execute_ENV_CTRL_string = "XRET ";
+      EnvCtrlEnum_WFI : _zz_execute_ENV_CTRL_string = "WFI  ";
+      EnvCtrlEnum_ECALL : _zz_execute_ENV_CTRL_string = "ECALL";
       default : _zz_execute_ENV_CTRL_string = "?????";
     endcase
   end
   always @(*) begin
     case(writeBack_ENV_CTRL)
-      `EnvCtrlEnum_binary_sequential_NONE : writeBack_ENV_CTRL_string = "NONE ";
-      `EnvCtrlEnum_binary_sequential_XRET : writeBack_ENV_CTRL_string = "XRET ";
-      `EnvCtrlEnum_binary_sequential_WFI : writeBack_ENV_CTRL_string = "WFI  ";
-      `EnvCtrlEnum_binary_sequential_ECALL : writeBack_ENV_CTRL_string = "ECALL";
+      EnvCtrlEnum_NONE : writeBack_ENV_CTRL_string = "NONE ";
+      EnvCtrlEnum_XRET : writeBack_ENV_CTRL_string = "XRET ";
+      EnvCtrlEnum_WFI : writeBack_ENV_CTRL_string = "WFI  ";
+      EnvCtrlEnum_ECALL : writeBack_ENV_CTRL_string = "ECALL";
       default : writeBack_ENV_CTRL_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_writeBack_ENV_CTRL)
-      `EnvCtrlEnum_binary_sequential_NONE : _zz_writeBack_ENV_CTRL_string = "NONE ";
-      `EnvCtrlEnum_binary_sequential_XRET : _zz_writeBack_ENV_CTRL_string = "XRET ";
-      `EnvCtrlEnum_binary_sequential_WFI : _zz_writeBack_ENV_CTRL_string = "WFI  ";
-      `EnvCtrlEnum_binary_sequential_ECALL : _zz_writeBack_ENV_CTRL_string = "ECALL";
+      EnvCtrlEnum_NONE : _zz_writeBack_ENV_CTRL_string = "NONE ";
+      EnvCtrlEnum_XRET : _zz_writeBack_ENV_CTRL_string = "XRET ";
+      EnvCtrlEnum_WFI : _zz_writeBack_ENV_CTRL_string = "WFI  ";
+      EnvCtrlEnum_ECALL : _zz_writeBack_ENV_CTRL_string = "ECALL";
       default : _zz_writeBack_ENV_CTRL_string = "?????";
     endcase
   end
   always @(*) begin
     case(execute_BRANCH_CTRL)
-      `BranchCtrlEnum_binary_sequential_INC : execute_BRANCH_CTRL_string = "INC ";
-      `BranchCtrlEnum_binary_sequential_B : execute_BRANCH_CTRL_string = "B   ";
-      `BranchCtrlEnum_binary_sequential_JAL : execute_BRANCH_CTRL_string = "JAL ";
-      `BranchCtrlEnum_binary_sequential_JALR : execute_BRANCH_CTRL_string = "JALR";
+      BranchCtrlEnum_INC : execute_BRANCH_CTRL_string = "INC ";
+      BranchCtrlEnum_B : execute_BRANCH_CTRL_string = "B   ";
+      BranchCtrlEnum_JAL : execute_BRANCH_CTRL_string = "JAL ";
+      BranchCtrlEnum_JALR : execute_BRANCH_CTRL_string = "JALR";
       default : execute_BRANCH_CTRL_string = "????";
     endcase
   end
   always @(*) begin
     case(_zz_execute_BRANCH_CTRL)
-      `BranchCtrlEnum_binary_sequential_INC : _zz_execute_BRANCH_CTRL_string = "INC ";
-      `BranchCtrlEnum_binary_sequential_B : _zz_execute_BRANCH_CTRL_string = "B   ";
-      `BranchCtrlEnum_binary_sequential_JAL : _zz_execute_BRANCH_CTRL_string = "JAL ";
-      `BranchCtrlEnum_binary_sequential_JALR : _zz_execute_BRANCH_CTRL_string = "JALR";
+      BranchCtrlEnum_INC : _zz_execute_BRANCH_CTRL_string = "INC ";
+      BranchCtrlEnum_B : _zz_execute_BRANCH_CTRL_string = "B   ";
+      BranchCtrlEnum_JAL : _zz_execute_BRANCH_CTRL_string = "JAL ";
+      BranchCtrlEnum_JALR : _zz_execute_BRANCH_CTRL_string = "JALR";
       default : _zz_execute_BRANCH_CTRL_string = "????";
     endcase
   end
   always @(*) begin
     case(memory_SHIFT_CTRL)
-      `ShiftCtrlEnum_binary_sequential_DISABLE_1 : memory_SHIFT_CTRL_string = "DISABLE_1";
-      `ShiftCtrlEnum_binary_sequential_SLL_1 : memory_SHIFT_CTRL_string = "SLL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRL_1 : memory_SHIFT_CTRL_string = "SRL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRA_1 : memory_SHIFT_CTRL_string = "SRA_1    ";
+      ShiftCtrlEnum_DISABLE_1 : memory_SHIFT_CTRL_string = "DISABLE_1";
+      ShiftCtrlEnum_SLL_1 : memory_SHIFT_CTRL_string = "SLL_1    ";
+      ShiftCtrlEnum_SRL_1 : memory_SHIFT_CTRL_string = "SRL_1    ";
+      ShiftCtrlEnum_SRA_1 : memory_SHIFT_CTRL_string = "SRA_1    ";
       default : memory_SHIFT_CTRL_string = "?????????";
     endcase
   end
   always @(*) begin
     case(_zz_memory_SHIFT_CTRL)
-      `ShiftCtrlEnum_binary_sequential_DISABLE_1 : _zz_memory_SHIFT_CTRL_string = "DISABLE_1";
-      `ShiftCtrlEnum_binary_sequential_SLL_1 : _zz_memory_SHIFT_CTRL_string = "SLL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRL_1 : _zz_memory_SHIFT_CTRL_string = "SRL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRA_1 : _zz_memory_SHIFT_CTRL_string = "SRA_1    ";
+      ShiftCtrlEnum_DISABLE_1 : _zz_memory_SHIFT_CTRL_string = "DISABLE_1";
+      ShiftCtrlEnum_SLL_1 : _zz_memory_SHIFT_CTRL_string = "SLL_1    ";
+      ShiftCtrlEnum_SRL_1 : _zz_memory_SHIFT_CTRL_string = "SRL_1    ";
+      ShiftCtrlEnum_SRA_1 : _zz_memory_SHIFT_CTRL_string = "SRA_1    ";
       default : _zz_memory_SHIFT_CTRL_string = "?????????";
     endcase
   end
   always @(*) begin
     case(execute_SHIFT_CTRL)
-      `ShiftCtrlEnum_binary_sequential_DISABLE_1 : execute_SHIFT_CTRL_string = "DISABLE_1";
-      `ShiftCtrlEnum_binary_sequential_SLL_1 : execute_SHIFT_CTRL_string = "SLL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRL_1 : execute_SHIFT_CTRL_string = "SRL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRA_1 : execute_SHIFT_CTRL_string = "SRA_1    ";
+      ShiftCtrlEnum_DISABLE_1 : execute_SHIFT_CTRL_string = "DISABLE_1";
+      ShiftCtrlEnum_SLL_1 : execute_SHIFT_CTRL_string = "SLL_1    ";
+      ShiftCtrlEnum_SRL_1 : execute_SHIFT_CTRL_string = "SRL_1    ";
+      ShiftCtrlEnum_SRA_1 : execute_SHIFT_CTRL_string = "SRA_1    ";
       default : execute_SHIFT_CTRL_string = "?????????";
     endcase
   end
   always @(*) begin
     case(_zz_execute_SHIFT_CTRL)
-      `ShiftCtrlEnum_binary_sequential_DISABLE_1 : _zz_execute_SHIFT_CTRL_string = "DISABLE_1";
-      `ShiftCtrlEnum_binary_sequential_SLL_1 : _zz_execute_SHIFT_CTRL_string = "SLL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRL_1 : _zz_execute_SHIFT_CTRL_string = "SRL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRA_1 : _zz_execute_SHIFT_CTRL_string = "SRA_1    ";
+      ShiftCtrlEnum_DISABLE_1 : _zz_execute_SHIFT_CTRL_string = "DISABLE_1";
+      ShiftCtrlEnum_SLL_1 : _zz_execute_SHIFT_CTRL_string = "SLL_1    ";
+      ShiftCtrlEnum_SRL_1 : _zz_execute_SHIFT_CTRL_string = "SRL_1    ";
+      ShiftCtrlEnum_SRA_1 : _zz_execute_SHIFT_CTRL_string = "SRA_1    ";
       default : _zz_execute_SHIFT_CTRL_string = "?????????";
     endcase
   end
   always @(*) begin
     case(execute_SRC2_CTRL)
-      `Src2CtrlEnum_binary_sequential_RS : execute_SRC2_CTRL_string = "RS ";
-      `Src2CtrlEnum_binary_sequential_IMI : execute_SRC2_CTRL_string = "IMI";
-      `Src2CtrlEnum_binary_sequential_IMS : execute_SRC2_CTRL_string = "IMS";
-      `Src2CtrlEnum_binary_sequential_PC : execute_SRC2_CTRL_string = "PC ";
+      Src2CtrlEnum_RS : execute_SRC2_CTRL_string = "RS ";
+      Src2CtrlEnum_IMI : execute_SRC2_CTRL_string = "IMI";
+      Src2CtrlEnum_IMS : execute_SRC2_CTRL_string = "IMS";
+      Src2CtrlEnum_PC : execute_SRC2_CTRL_string = "PC ";
       default : execute_SRC2_CTRL_string = "???";
     endcase
   end
   always @(*) begin
     case(_zz_execute_SRC2_CTRL)
-      `Src2CtrlEnum_binary_sequential_RS : _zz_execute_SRC2_CTRL_string = "RS ";
-      `Src2CtrlEnum_binary_sequential_IMI : _zz_execute_SRC2_CTRL_string = "IMI";
-      `Src2CtrlEnum_binary_sequential_IMS : _zz_execute_SRC2_CTRL_string = "IMS";
-      `Src2CtrlEnum_binary_sequential_PC : _zz_execute_SRC2_CTRL_string = "PC ";
+      Src2CtrlEnum_RS : _zz_execute_SRC2_CTRL_string = "RS ";
+      Src2CtrlEnum_IMI : _zz_execute_SRC2_CTRL_string = "IMI";
+      Src2CtrlEnum_IMS : _zz_execute_SRC2_CTRL_string = "IMS";
+      Src2CtrlEnum_PC : _zz_execute_SRC2_CTRL_string = "PC ";
       default : _zz_execute_SRC2_CTRL_string = "???";
     endcase
   end
   always @(*) begin
     case(execute_SRC1_CTRL)
-      `Src1CtrlEnum_binary_sequential_RS : execute_SRC1_CTRL_string = "RS          ";
-      `Src1CtrlEnum_binary_sequential_IMU : execute_SRC1_CTRL_string = "IMU         ";
-      `Src1CtrlEnum_binary_sequential_PC_INCREMENT : execute_SRC1_CTRL_string = "PC_INCREMENT";
-      `Src1CtrlEnum_binary_sequential_URS1 : execute_SRC1_CTRL_string = "URS1        ";
+      Src1CtrlEnum_RS : execute_SRC1_CTRL_string = "RS          ";
+      Src1CtrlEnum_IMU : execute_SRC1_CTRL_string = "IMU         ";
+      Src1CtrlEnum_PC_INCREMENT : execute_SRC1_CTRL_string = "PC_INCREMENT";
+      Src1CtrlEnum_URS1 : execute_SRC1_CTRL_string = "URS1        ";
       default : execute_SRC1_CTRL_string = "????????????";
     endcase
   end
   always @(*) begin
     case(_zz_execute_SRC1_CTRL)
-      `Src1CtrlEnum_binary_sequential_RS : _zz_execute_SRC1_CTRL_string = "RS          ";
-      `Src1CtrlEnum_binary_sequential_IMU : _zz_execute_SRC1_CTRL_string = "IMU         ";
-      `Src1CtrlEnum_binary_sequential_PC_INCREMENT : _zz_execute_SRC1_CTRL_string = "PC_INCREMENT";
-      `Src1CtrlEnum_binary_sequential_URS1 : _zz_execute_SRC1_CTRL_string = "URS1        ";
+      Src1CtrlEnum_RS : _zz_execute_SRC1_CTRL_string = "RS          ";
+      Src1CtrlEnum_IMU : _zz_execute_SRC1_CTRL_string = "IMU         ";
+      Src1CtrlEnum_PC_INCREMENT : _zz_execute_SRC1_CTRL_string = "PC_INCREMENT";
+      Src1CtrlEnum_URS1 : _zz_execute_SRC1_CTRL_string = "URS1        ";
       default : _zz_execute_SRC1_CTRL_string = "????????????";
     endcase
   end
   always @(*) begin
     case(execute_ALU_CTRL)
-      `AluCtrlEnum_binary_sequential_ADD_SUB : execute_ALU_CTRL_string = "ADD_SUB ";
-      `AluCtrlEnum_binary_sequential_SLT_SLTU : execute_ALU_CTRL_string = "SLT_SLTU";
-      `AluCtrlEnum_binary_sequential_BITWISE : execute_ALU_CTRL_string = "BITWISE ";
+      AluCtrlEnum_ADD_SUB : execute_ALU_CTRL_string = "ADD_SUB ";
+      AluCtrlEnum_SLT_SLTU : execute_ALU_CTRL_string = "SLT_SLTU";
+      AluCtrlEnum_BITWISE : execute_ALU_CTRL_string = "BITWISE ";
       default : execute_ALU_CTRL_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_execute_ALU_CTRL)
-      `AluCtrlEnum_binary_sequential_ADD_SUB : _zz_execute_ALU_CTRL_string = "ADD_SUB ";
-      `AluCtrlEnum_binary_sequential_SLT_SLTU : _zz_execute_ALU_CTRL_string = "SLT_SLTU";
-      `AluCtrlEnum_binary_sequential_BITWISE : _zz_execute_ALU_CTRL_string = "BITWISE ";
+      AluCtrlEnum_ADD_SUB : _zz_execute_ALU_CTRL_string = "ADD_SUB ";
+      AluCtrlEnum_SLT_SLTU : _zz_execute_ALU_CTRL_string = "SLT_SLTU";
+      AluCtrlEnum_BITWISE : _zz_execute_ALU_CTRL_string = "BITWISE ";
       default : _zz_execute_ALU_CTRL_string = "????????";
     endcase
   end
   always @(*) begin
     case(execute_ALU_BITWISE_CTRL)
-      `AluBitwiseCtrlEnum_binary_sequential_XOR_1 : execute_ALU_BITWISE_CTRL_string = "XOR_1";
-      `AluBitwiseCtrlEnum_binary_sequential_OR_1 : execute_ALU_BITWISE_CTRL_string = "OR_1 ";
-      `AluBitwiseCtrlEnum_binary_sequential_AND_1 : execute_ALU_BITWISE_CTRL_string = "AND_1";
+      AluBitwiseCtrlEnum_XOR_1 : execute_ALU_BITWISE_CTRL_string = "XOR_1";
+      AluBitwiseCtrlEnum_OR_1 : execute_ALU_BITWISE_CTRL_string = "OR_1 ";
+      AluBitwiseCtrlEnum_AND_1 : execute_ALU_BITWISE_CTRL_string = "AND_1";
       default : execute_ALU_BITWISE_CTRL_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_execute_ALU_BITWISE_CTRL)
-      `AluBitwiseCtrlEnum_binary_sequential_XOR_1 : _zz_execute_ALU_BITWISE_CTRL_string = "XOR_1";
-      `AluBitwiseCtrlEnum_binary_sequential_OR_1 : _zz_execute_ALU_BITWISE_CTRL_string = "OR_1 ";
-      `AluBitwiseCtrlEnum_binary_sequential_AND_1 : _zz_execute_ALU_BITWISE_CTRL_string = "AND_1";
+      AluBitwiseCtrlEnum_XOR_1 : _zz_execute_ALU_BITWISE_CTRL_string = "XOR_1";
+      AluBitwiseCtrlEnum_OR_1 : _zz_execute_ALU_BITWISE_CTRL_string = "OR_1 ";
+      AluBitwiseCtrlEnum_AND_1 : _zz_execute_ALU_BITWISE_CTRL_string = "AND_1";
       default : _zz_execute_ALU_BITWISE_CTRL_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_FPU_OPCODE_1)
-      `FpuOpcode_binary_sequential_LOAD : _zz_decode_FPU_OPCODE_1_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : _zz_decode_FPU_OPCODE_1_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : _zz_decode_FPU_OPCODE_1_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : _zz_decode_FPU_OPCODE_1_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : _zz_decode_FPU_OPCODE_1_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : _zz_decode_FPU_OPCODE_1_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : _zz_decode_FPU_OPCODE_1_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : _zz_decode_FPU_OPCODE_1_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : _zz_decode_FPU_OPCODE_1_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : _zz_decode_FPU_OPCODE_1_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : _zz_decode_FPU_OPCODE_1_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : _zz_decode_FPU_OPCODE_1_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : _zz_decode_FPU_OPCODE_1_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : _zz_decode_FPU_OPCODE_1_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : _zz_decode_FPU_OPCODE_1_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : _zz_decode_FPU_OPCODE_1_string = "FCVT_X_X";
+      FpuOpcode_LOAD : _zz_decode_FPU_OPCODE_1_string = "LOAD    ";
+      FpuOpcode_STORE : _zz_decode_FPU_OPCODE_1_string = "STORE   ";
+      FpuOpcode_MUL : _zz_decode_FPU_OPCODE_1_string = "MUL     ";
+      FpuOpcode_ADD : _zz_decode_FPU_OPCODE_1_string = "ADD     ";
+      FpuOpcode_FMA : _zz_decode_FPU_OPCODE_1_string = "FMA     ";
+      FpuOpcode_I2F : _zz_decode_FPU_OPCODE_1_string = "I2F     ";
+      FpuOpcode_F2I : _zz_decode_FPU_OPCODE_1_string = "F2I     ";
+      FpuOpcode_CMP : _zz_decode_FPU_OPCODE_1_string = "CMP     ";
+      FpuOpcode_DIV : _zz_decode_FPU_OPCODE_1_string = "DIV     ";
+      FpuOpcode_SQRT : _zz_decode_FPU_OPCODE_1_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : _zz_decode_FPU_OPCODE_1_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : _zz_decode_FPU_OPCODE_1_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : _zz_decode_FPU_OPCODE_1_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : _zz_decode_FPU_OPCODE_1_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : _zz_decode_FPU_OPCODE_1_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : _zz_decode_FPU_OPCODE_1_string = "FCVT_X_X";
       default : _zz_decode_FPU_OPCODE_1_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_CfuPlugin_CFU_INPUT_2_KIND_1)
-      `Input2Kind_binary_sequential_RS : _zz_decode_CfuPlugin_CFU_INPUT_2_KIND_1_string = "RS   ";
-      `Input2Kind_binary_sequential_IMM_I : _zz_decode_CfuPlugin_CFU_INPUT_2_KIND_1_string = "IMM_I";
+      Input2Kind_RS : _zz_decode_CfuPlugin_CFU_INPUT_2_KIND_1_string = "RS   ";
+      Input2Kind_IMM_I : _zz_decode_CfuPlugin_CFU_INPUT_2_KIND_1_string = "IMM_I";
       default : _zz_decode_CfuPlugin_CFU_INPUT_2_KIND_1_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_ENV_CTRL_1)
-      `EnvCtrlEnum_binary_sequential_NONE : _zz_decode_ENV_CTRL_1_string = "NONE ";
-      `EnvCtrlEnum_binary_sequential_XRET : _zz_decode_ENV_CTRL_1_string = "XRET ";
-      `EnvCtrlEnum_binary_sequential_WFI : _zz_decode_ENV_CTRL_1_string = "WFI  ";
-      `EnvCtrlEnum_binary_sequential_ECALL : _zz_decode_ENV_CTRL_1_string = "ECALL";
+      EnvCtrlEnum_NONE : _zz_decode_ENV_CTRL_1_string = "NONE ";
+      EnvCtrlEnum_XRET : _zz_decode_ENV_CTRL_1_string = "XRET ";
+      EnvCtrlEnum_WFI : _zz_decode_ENV_CTRL_1_string = "WFI  ";
+      EnvCtrlEnum_ECALL : _zz_decode_ENV_CTRL_1_string = "ECALL";
       default : _zz_decode_ENV_CTRL_1_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_BRANCH_CTRL)
-      `BranchCtrlEnum_binary_sequential_INC : _zz_decode_BRANCH_CTRL_string = "INC ";
-      `BranchCtrlEnum_binary_sequential_B : _zz_decode_BRANCH_CTRL_string = "B   ";
-      `BranchCtrlEnum_binary_sequential_JAL : _zz_decode_BRANCH_CTRL_string = "JAL ";
-      `BranchCtrlEnum_binary_sequential_JALR : _zz_decode_BRANCH_CTRL_string = "JALR";
+      BranchCtrlEnum_INC : _zz_decode_BRANCH_CTRL_string = "INC ";
+      BranchCtrlEnum_B : _zz_decode_BRANCH_CTRL_string = "B   ";
+      BranchCtrlEnum_JAL : _zz_decode_BRANCH_CTRL_string = "JAL ";
+      BranchCtrlEnum_JALR : _zz_decode_BRANCH_CTRL_string = "JALR";
       default : _zz_decode_BRANCH_CTRL_string = "????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_SHIFT_CTRL_1)
-      `ShiftCtrlEnum_binary_sequential_DISABLE_1 : _zz_decode_SHIFT_CTRL_1_string = "DISABLE_1";
-      `ShiftCtrlEnum_binary_sequential_SLL_1 : _zz_decode_SHIFT_CTRL_1_string = "SLL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRL_1 : _zz_decode_SHIFT_CTRL_1_string = "SRL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRA_1 : _zz_decode_SHIFT_CTRL_1_string = "SRA_1    ";
+      ShiftCtrlEnum_DISABLE_1 : _zz_decode_SHIFT_CTRL_1_string = "DISABLE_1";
+      ShiftCtrlEnum_SLL_1 : _zz_decode_SHIFT_CTRL_1_string = "SLL_1    ";
+      ShiftCtrlEnum_SRL_1 : _zz_decode_SHIFT_CTRL_1_string = "SRL_1    ";
+      ShiftCtrlEnum_SRA_1 : _zz_decode_SHIFT_CTRL_1_string = "SRA_1    ";
       default : _zz_decode_SHIFT_CTRL_1_string = "?????????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_ALU_BITWISE_CTRL_1)
-      `AluBitwiseCtrlEnum_binary_sequential_XOR_1 : _zz_decode_ALU_BITWISE_CTRL_1_string = "XOR_1";
-      `AluBitwiseCtrlEnum_binary_sequential_OR_1 : _zz_decode_ALU_BITWISE_CTRL_1_string = "OR_1 ";
-      `AluBitwiseCtrlEnum_binary_sequential_AND_1 : _zz_decode_ALU_BITWISE_CTRL_1_string = "AND_1";
+      AluBitwiseCtrlEnum_XOR_1 : _zz_decode_ALU_BITWISE_CTRL_1_string = "XOR_1";
+      AluBitwiseCtrlEnum_OR_1 : _zz_decode_ALU_BITWISE_CTRL_1_string = "OR_1 ";
+      AluBitwiseCtrlEnum_AND_1 : _zz_decode_ALU_BITWISE_CTRL_1_string = "AND_1";
       default : _zz_decode_ALU_BITWISE_CTRL_1_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_SRC2_CTRL_1)
-      `Src2CtrlEnum_binary_sequential_RS : _zz_decode_SRC2_CTRL_1_string = "RS ";
-      `Src2CtrlEnum_binary_sequential_IMI : _zz_decode_SRC2_CTRL_1_string = "IMI";
-      `Src2CtrlEnum_binary_sequential_IMS : _zz_decode_SRC2_CTRL_1_string = "IMS";
-      `Src2CtrlEnum_binary_sequential_PC : _zz_decode_SRC2_CTRL_1_string = "PC ";
+      Src2CtrlEnum_RS : _zz_decode_SRC2_CTRL_1_string = "RS ";
+      Src2CtrlEnum_IMI : _zz_decode_SRC2_CTRL_1_string = "IMI";
+      Src2CtrlEnum_IMS : _zz_decode_SRC2_CTRL_1_string = "IMS";
+      Src2CtrlEnum_PC : _zz_decode_SRC2_CTRL_1_string = "PC ";
       default : _zz_decode_SRC2_CTRL_1_string = "???";
     endcase
   end
   always @(*) begin
     case(_zz_decode_ALU_CTRL_1)
-      `AluCtrlEnum_binary_sequential_ADD_SUB : _zz_decode_ALU_CTRL_1_string = "ADD_SUB ";
-      `AluCtrlEnum_binary_sequential_SLT_SLTU : _zz_decode_ALU_CTRL_1_string = "SLT_SLTU";
-      `AluCtrlEnum_binary_sequential_BITWISE : _zz_decode_ALU_CTRL_1_string = "BITWISE ";
+      AluCtrlEnum_ADD_SUB : _zz_decode_ALU_CTRL_1_string = "ADD_SUB ";
+      AluCtrlEnum_SLT_SLTU : _zz_decode_ALU_CTRL_1_string = "SLT_SLTU";
+      AluCtrlEnum_BITWISE : _zz_decode_ALU_CTRL_1_string = "BITWISE ";
       default : _zz_decode_ALU_CTRL_1_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_SRC1_CTRL_1)
-      `Src1CtrlEnum_binary_sequential_RS : _zz_decode_SRC1_CTRL_1_string = "RS          ";
-      `Src1CtrlEnum_binary_sequential_IMU : _zz_decode_SRC1_CTRL_1_string = "IMU         ";
-      `Src1CtrlEnum_binary_sequential_PC_INCREMENT : _zz_decode_SRC1_CTRL_1_string = "PC_INCREMENT";
-      `Src1CtrlEnum_binary_sequential_URS1 : _zz_decode_SRC1_CTRL_1_string = "URS1        ";
+      Src1CtrlEnum_RS : _zz_decode_SRC1_CTRL_1_string = "RS          ";
+      Src1CtrlEnum_IMU : _zz_decode_SRC1_CTRL_1_string = "IMU         ";
+      Src1CtrlEnum_PC_INCREMENT : _zz_decode_SRC1_CTRL_1_string = "PC_INCREMENT";
+      Src1CtrlEnum_URS1 : _zz_decode_SRC1_CTRL_1_string = "URS1        ";
       default : _zz_decode_SRC1_CTRL_1_string = "????????????";
     endcase
   end
   always @(*) begin
     case(decode_BRANCH_CTRL)
-      `BranchCtrlEnum_binary_sequential_INC : decode_BRANCH_CTRL_string = "INC ";
-      `BranchCtrlEnum_binary_sequential_B : decode_BRANCH_CTRL_string = "B   ";
-      `BranchCtrlEnum_binary_sequential_JAL : decode_BRANCH_CTRL_string = "JAL ";
-      `BranchCtrlEnum_binary_sequential_JALR : decode_BRANCH_CTRL_string = "JALR";
+      BranchCtrlEnum_INC : decode_BRANCH_CTRL_string = "INC ";
+      BranchCtrlEnum_B : decode_BRANCH_CTRL_string = "B   ";
+      BranchCtrlEnum_JAL : decode_BRANCH_CTRL_string = "JAL ";
+      BranchCtrlEnum_JALR : decode_BRANCH_CTRL_string = "JALR";
       default : decode_BRANCH_CTRL_string = "????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_BRANCH_CTRL_1)
-      `BranchCtrlEnum_binary_sequential_INC : _zz_decode_BRANCH_CTRL_1_string = "INC ";
-      `BranchCtrlEnum_binary_sequential_B : _zz_decode_BRANCH_CTRL_1_string = "B   ";
-      `BranchCtrlEnum_binary_sequential_JAL : _zz_decode_BRANCH_CTRL_1_string = "JAL ";
-      `BranchCtrlEnum_binary_sequential_JALR : _zz_decode_BRANCH_CTRL_1_string = "JALR";
+      BranchCtrlEnum_INC : _zz_decode_BRANCH_CTRL_1_string = "INC ";
+      BranchCtrlEnum_B : _zz_decode_BRANCH_CTRL_1_string = "B   ";
+      BranchCtrlEnum_JAL : _zz_decode_BRANCH_CTRL_1_string = "JAL ";
+      BranchCtrlEnum_JALR : _zz_decode_BRANCH_CTRL_1_string = "JALR";
       default : _zz_decode_BRANCH_CTRL_1_string = "????";
     endcase
   end
   always @(*) begin
     case(FpuPlugin_port_cmd_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : FpuPlugin_port_cmd_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : FpuPlugin_port_cmd_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : FpuPlugin_port_cmd_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : FpuPlugin_port_cmd_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : FpuPlugin_port_cmd_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : FpuPlugin_port_cmd_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : FpuPlugin_port_cmd_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : FpuPlugin_port_cmd_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : FpuPlugin_port_cmd_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : FpuPlugin_port_cmd_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : FpuPlugin_port_cmd_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : FpuPlugin_port_cmd_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : FpuPlugin_port_cmd_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : FpuPlugin_port_cmd_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : FpuPlugin_port_cmd_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : FpuPlugin_port_cmd_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : FpuPlugin_port_cmd_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : FpuPlugin_port_cmd_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : FpuPlugin_port_cmd_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : FpuPlugin_port_cmd_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : FpuPlugin_port_cmd_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : FpuPlugin_port_cmd_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : FpuPlugin_port_cmd_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : FpuPlugin_port_cmd_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : FpuPlugin_port_cmd_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : FpuPlugin_port_cmd_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : FpuPlugin_port_cmd_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : FpuPlugin_port_cmd_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : FpuPlugin_port_cmd_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : FpuPlugin_port_cmd_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : FpuPlugin_port_cmd_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : FpuPlugin_port_cmd_payload_opcode_string = "FCVT_X_X";
       default : FpuPlugin_port_cmd_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(FpuPlugin_port_cmd_payload_format)
-      `FpuFormat_binary_sequential_FLOAT : FpuPlugin_port_cmd_payload_format_string = "FLOAT ";
-      `FpuFormat_binary_sequential_DOUBLE : FpuPlugin_port_cmd_payload_format_string = "DOUBLE";
+      FpuFormat_FLOAT : FpuPlugin_port_cmd_payload_format_string = "FLOAT ";
+      FpuFormat_DOUBLE : FpuPlugin_port_cmd_payload_format_string = "DOUBLE";
       default : FpuPlugin_port_cmd_payload_format_string = "??????";
     endcase
   end
   always @(*) begin
     case(FpuPlugin_port_cmd_payload_roundMode)
-      `FpuRoundMode_opt_RNE : FpuPlugin_port_cmd_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : FpuPlugin_port_cmd_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : FpuPlugin_port_cmd_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : FpuPlugin_port_cmd_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : FpuPlugin_port_cmd_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : FpuPlugin_port_cmd_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : FpuPlugin_port_cmd_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : FpuPlugin_port_cmd_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : FpuPlugin_port_cmd_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : FpuPlugin_port_cmd_payload_roundMode_string = "RMM";
       default : FpuPlugin_port_cmd_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(FpuPlugin_port_commit_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : FpuPlugin_port_commit_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : FpuPlugin_port_commit_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : FpuPlugin_port_commit_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : FpuPlugin_port_commit_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : FpuPlugin_port_commit_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : FpuPlugin_port_commit_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : FpuPlugin_port_commit_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : FpuPlugin_port_commit_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : FpuPlugin_port_commit_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : FpuPlugin_port_commit_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : FpuPlugin_port_commit_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : FpuPlugin_port_commit_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : FpuPlugin_port_commit_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : FpuPlugin_port_commit_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : FpuPlugin_port_commit_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : FpuPlugin_port_commit_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : FpuPlugin_port_commit_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : FpuPlugin_port_commit_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : FpuPlugin_port_commit_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : FpuPlugin_port_commit_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : FpuPlugin_port_commit_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : FpuPlugin_port_commit_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : FpuPlugin_port_commit_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : FpuPlugin_port_commit_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : FpuPlugin_port_commit_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : FpuPlugin_port_commit_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : FpuPlugin_port_commit_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : FpuPlugin_port_commit_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : FpuPlugin_port_commit_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : FpuPlugin_port_commit_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : FpuPlugin_port_commit_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : FpuPlugin_port_commit_payload_opcode_string = "FCVT_X_X";
       default : FpuPlugin_port_commit_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_SRC1_CTRL_2)
-      `Src1CtrlEnum_binary_sequential_RS : _zz_decode_SRC1_CTRL_2_string = "RS          ";
-      `Src1CtrlEnum_binary_sequential_IMU : _zz_decode_SRC1_CTRL_2_string = "IMU         ";
-      `Src1CtrlEnum_binary_sequential_PC_INCREMENT : _zz_decode_SRC1_CTRL_2_string = "PC_INCREMENT";
-      `Src1CtrlEnum_binary_sequential_URS1 : _zz_decode_SRC1_CTRL_2_string = "URS1        ";
+      Src1CtrlEnum_RS : _zz_decode_SRC1_CTRL_2_string = "RS          ";
+      Src1CtrlEnum_IMU : _zz_decode_SRC1_CTRL_2_string = "IMU         ";
+      Src1CtrlEnum_PC_INCREMENT : _zz_decode_SRC1_CTRL_2_string = "PC_INCREMENT";
+      Src1CtrlEnum_URS1 : _zz_decode_SRC1_CTRL_2_string = "URS1        ";
       default : _zz_decode_SRC1_CTRL_2_string = "????????????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_ALU_CTRL_2)
-      `AluCtrlEnum_binary_sequential_ADD_SUB : _zz_decode_ALU_CTRL_2_string = "ADD_SUB ";
-      `AluCtrlEnum_binary_sequential_SLT_SLTU : _zz_decode_ALU_CTRL_2_string = "SLT_SLTU";
-      `AluCtrlEnum_binary_sequential_BITWISE : _zz_decode_ALU_CTRL_2_string = "BITWISE ";
+      AluCtrlEnum_ADD_SUB : _zz_decode_ALU_CTRL_2_string = "ADD_SUB ";
+      AluCtrlEnum_SLT_SLTU : _zz_decode_ALU_CTRL_2_string = "SLT_SLTU";
+      AluCtrlEnum_BITWISE : _zz_decode_ALU_CTRL_2_string = "BITWISE ";
       default : _zz_decode_ALU_CTRL_2_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_SRC2_CTRL_2)
-      `Src2CtrlEnum_binary_sequential_RS : _zz_decode_SRC2_CTRL_2_string = "RS ";
-      `Src2CtrlEnum_binary_sequential_IMI : _zz_decode_SRC2_CTRL_2_string = "IMI";
-      `Src2CtrlEnum_binary_sequential_IMS : _zz_decode_SRC2_CTRL_2_string = "IMS";
-      `Src2CtrlEnum_binary_sequential_PC : _zz_decode_SRC2_CTRL_2_string = "PC ";
+      Src2CtrlEnum_RS : _zz_decode_SRC2_CTRL_2_string = "RS ";
+      Src2CtrlEnum_IMI : _zz_decode_SRC2_CTRL_2_string = "IMI";
+      Src2CtrlEnum_IMS : _zz_decode_SRC2_CTRL_2_string = "IMS";
+      Src2CtrlEnum_PC : _zz_decode_SRC2_CTRL_2_string = "PC ";
       default : _zz_decode_SRC2_CTRL_2_string = "???";
     endcase
   end
   always @(*) begin
     case(_zz_decode_ALU_BITWISE_CTRL_2)
-      `AluBitwiseCtrlEnum_binary_sequential_XOR_1 : _zz_decode_ALU_BITWISE_CTRL_2_string = "XOR_1";
-      `AluBitwiseCtrlEnum_binary_sequential_OR_1 : _zz_decode_ALU_BITWISE_CTRL_2_string = "OR_1 ";
-      `AluBitwiseCtrlEnum_binary_sequential_AND_1 : _zz_decode_ALU_BITWISE_CTRL_2_string = "AND_1";
+      AluBitwiseCtrlEnum_XOR_1 : _zz_decode_ALU_BITWISE_CTRL_2_string = "XOR_1";
+      AluBitwiseCtrlEnum_OR_1 : _zz_decode_ALU_BITWISE_CTRL_2_string = "OR_1 ";
+      AluBitwiseCtrlEnum_AND_1 : _zz_decode_ALU_BITWISE_CTRL_2_string = "AND_1";
       default : _zz_decode_ALU_BITWISE_CTRL_2_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_SHIFT_CTRL_2)
-      `ShiftCtrlEnum_binary_sequential_DISABLE_1 : _zz_decode_SHIFT_CTRL_2_string = "DISABLE_1";
-      `ShiftCtrlEnum_binary_sequential_SLL_1 : _zz_decode_SHIFT_CTRL_2_string = "SLL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRL_1 : _zz_decode_SHIFT_CTRL_2_string = "SRL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRA_1 : _zz_decode_SHIFT_CTRL_2_string = "SRA_1    ";
+      ShiftCtrlEnum_DISABLE_1 : _zz_decode_SHIFT_CTRL_2_string = "DISABLE_1";
+      ShiftCtrlEnum_SLL_1 : _zz_decode_SHIFT_CTRL_2_string = "SLL_1    ";
+      ShiftCtrlEnum_SRL_1 : _zz_decode_SHIFT_CTRL_2_string = "SRL_1    ";
+      ShiftCtrlEnum_SRA_1 : _zz_decode_SHIFT_CTRL_2_string = "SRA_1    ";
       default : _zz_decode_SHIFT_CTRL_2_string = "?????????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_BRANCH_CTRL_2)
-      `BranchCtrlEnum_binary_sequential_INC : _zz_decode_BRANCH_CTRL_2_string = "INC ";
-      `BranchCtrlEnum_binary_sequential_B : _zz_decode_BRANCH_CTRL_2_string = "B   ";
-      `BranchCtrlEnum_binary_sequential_JAL : _zz_decode_BRANCH_CTRL_2_string = "JAL ";
-      `BranchCtrlEnum_binary_sequential_JALR : _zz_decode_BRANCH_CTRL_2_string = "JALR";
+      BranchCtrlEnum_INC : _zz_decode_BRANCH_CTRL_2_string = "INC ";
+      BranchCtrlEnum_B : _zz_decode_BRANCH_CTRL_2_string = "B   ";
+      BranchCtrlEnum_JAL : _zz_decode_BRANCH_CTRL_2_string = "JAL ";
+      BranchCtrlEnum_JALR : _zz_decode_BRANCH_CTRL_2_string = "JALR";
       default : _zz_decode_BRANCH_CTRL_2_string = "????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_ENV_CTRL_2)
-      `EnvCtrlEnum_binary_sequential_NONE : _zz_decode_ENV_CTRL_2_string = "NONE ";
-      `EnvCtrlEnum_binary_sequential_XRET : _zz_decode_ENV_CTRL_2_string = "XRET ";
-      `EnvCtrlEnum_binary_sequential_WFI : _zz_decode_ENV_CTRL_2_string = "WFI  ";
-      `EnvCtrlEnum_binary_sequential_ECALL : _zz_decode_ENV_CTRL_2_string = "ECALL";
+      EnvCtrlEnum_NONE : _zz_decode_ENV_CTRL_2_string = "NONE ";
+      EnvCtrlEnum_XRET : _zz_decode_ENV_CTRL_2_string = "XRET ";
+      EnvCtrlEnum_WFI : _zz_decode_ENV_CTRL_2_string = "WFI  ";
+      EnvCtrlEnum_ECALL : _zz_decode_ENV_CTRL_2_string = "ECALL";
       default : _zz_decode_ENV_CTRL_2_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_CfuPlugin_CFU_INPUT_2_KIND_2)
-      `Input2Kind_binary_sequential_RS : _zz_decode_CfuPlugin_CFU_INPUT_2_KIND_2_string = "RS   ";
-      `Input2Kind_binary_sequential_IMM_I : _zz_decode_CfuPlugin_CFU_INPUT_2_KIND_2_string = "IMM_I";
+      Input2Kind_RS : _zz_decode_CfuPlugin_CFU_INPUT_2_KIND_2_string = "RS   ";
+      Input2Kind_IMM_I : _zz_decode_CfuPlugin_CFU_INPUT_2_KIND_2_string = "IMM_I";
       default : _zz_decode_CfuPlugin_CFU_INPUT_2_KIND_2_string = "?????";
     endcase
   end
   always @(*) begin
     case(_zz_decode_FPU_OPCODE_2)
-      `FpuOpcode_binary_sequential_LOAD : _zz_decode_FPU_OPCODE_2_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : _zz_decode_FPU_OPCODE_2_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : _zz_decode_FPU_OPCODE_2_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : _zz_decode_FPU_OPCODE_2_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : _zz_decode_FPU_OPCODE_2_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : _zz_decode_FPU_OPCODE_2_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : _zz_decode_FPU_OPCODE_2_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : _zz_decode_FPU_OPCODE_2_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : _zz_decode_FPU_OPCODE_2_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : _zz_decode_FPU_OPCODE_2_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : _zz_decode_FPU_OPCODE_2_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : _zz_decode_FPU_OPCODE_2_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : _zz_decode_FPU_OPCODE_2_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : _zz_decode_FPU_OPCODE_2_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : _zz_decode_FPU_OPCODE_2_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : _zz_decode_FPU_OPCODE_2_string = "FCVT_X_X";
+      FpuOpcode_LOAD : _zz_decode_FPU_OPCODE_2_string = "LOAD    ";
+      FpuOpcode_STORE : _zz_decode_FPU_OPCODE_2_string = "STORE   ";
+      FpuOpcode_MUL : _zz_decode_FPU_OPCODE_2_string = "MUL     ";
+      FpuOpcode_ADD : _zz_decode_FPU_OPCODE_2_string = "ADD     ";
+      FpuOpcode_FMA : _zz_decode_FPU_OPCODE_2_string = "FMA     ";
+      FpuOpcode_I2F : _zz_decode_FPU_OPCODE_2_string = "I2F     ";
+      FpuOpcode_F2I : _zz_decode_FPU_OPCODE_2_string = "F2I     ";
+      FpuOpcode_CMP : _zz_decode_FPU_OPCODE_2_string = "CMP     ";
+      FpuOpcode_DIV : _zz_decode_FPU_OPCODE_2_string = "DIV     ";
+      FpuOpcode_SQRT : _zz_decode_FPU_OPCODE_2_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : _zz_decode_FPU_OPCODE_2_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : _zz_decode_FPU_OPCODE_2_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : _zz_decode_FPU_OPCODE_2_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : _zz_decode_FPU_OPCODE_2_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : _zz_decode_FPU_OPCODE_2_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : _zz_decode_FPU_OPCODE_2_string = "FCVT_X_X";
       default : _zz_decode_FPU_OPCODE_2_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_FpuPlugin_port_cmd_payload_roundMode)
-      `FpuRoundMode_opt_RNE : _zz_FpuPlugin_port_cmd_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : _zz_FpuPlugin_port_cmd_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : _zz_FpuPlugin_port_cmd_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : _zz_FpuPlugin_port_cmd_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : _zz_FpuPlugin_port_cmd_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : _zz_FpuPlugin_port_cmd_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : _zz_FpuPlugin_port_cmd_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : _zz_FpuPlugin_port_cmd_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : _zz_FpuPlugin_port_cmd_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : _zz_FpuPlugin_port_cmd_payload_roundMode_string = "RMM";
       default : _zz_FpuPlugin_port_cmd_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(_zz_FpuPlugin_port_cmd_payload_roundMode_1)
-      `FpuRoundMode_opt_RNE : _zz_FpuPlugin_port_cmd_payload_roundMode_1_string = "RNE";
-      `FpuRoundMode_opt_RTZ : _zz_FpuPlugin_port_cmd_payload_roundMode_1_string = "RTZ";
-      `FpuRoundMode_opt_RDN : _zz_FpuPlugin_port_cmd_payload_roundMode_1_string = "RDN";
-      `FpuRoundMode_opt_RUP : _zz_FpuPlugin_port_cmd_payload_roundMode_1_string = "RUP";
-      `FpuRoundMode_opt_RMM : _zz_FpuPlugin_port_cmd_payload_roundMode_1_string = "RMM";
+      FpuRoundMode_RNE : _zz_FpuPlugin_port_cmd_payload_roundMode_1_string = "RNE";
+      FpuRoundMode_RTZ : _zz_FpuPlugin_port_cmd_payload_roundMode_1_string = "RTZ";
+      FpuRoundMode_RDN : _zz_FpuPlugin_port_cmd_payload_roundMode_1_string = "RDN";
+      FpuRoundMode_RUP : _zz_FpuPlugin_port_cmd_payload_roundMode_1_string = "RUP";
+      FpuRoundMode_RMM : _zz_FpuPlugin_port_cmd_payload_roundMode_1_string = "RMM";
       default : _zz_FpuPlugin_port_cmd_payload_roundMode_1_string = "???";
     endcase
   end
   always @(*) begin
     case(writeBack_FpuPlugin_commit_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : writeBack_FpuPlugin_commit_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : writeBack_FpuPlugin_commit_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : writeBack_FpuPlugin_commit_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : writeBack_FpuPlugin_commit_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : writeBack_FpuPlugin_commit_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : writeBack_FpuPlugin_commit_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : writeBack_FpuPlugin_commit_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : writeBack_FpuPlugin_commit_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : writeBack_FpuPlugin_commit_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : writeBack_FpuPlugin_commit_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : writeBack_FpuPlugin_commit_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : writeBack_FpuPlugin_commit_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : writeBack_FpuPlugin_commit_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : writeBack_FpuPlugin_commit_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : writeBack_FpuPlugin_commit_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : writeBack_FpuPlugin_commit_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : writeBack_FpuPlugin_commit_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : writeBack_FpuPlugin_commit_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : writeBack_FpuPlugin_commit_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : writeBack_FpuPlugin_commit_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : writeBack_FpuPlugin_commit_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : writeBack_FpuPlugin_commit_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : writeBack_FpuPlugin_commit_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : writeBack_FpuPlugin_commit_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : writeBack_FpuPlugin_commit_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : writeBack_FpuPlugin_commit_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : writeBack_FpuPlugin_commit_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : writeBack_FpuPlugin_commit_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : writeBack_FpuPlugin_commit_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : writeBack_FpuPlugin_commit_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : writeBack_FpuPlugin_commit_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : writeBack_FpuPlugin_commit_payload_opcode_string = "FCVT_X_X";
       default : writeBack_FpuPlugin_commit_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(writeBack_FpuPlugin_commit_s2mPipe_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "FCVT_X_X";
       default : writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(writeBack_FpuPlugin_commit_rData_opcode)
-      `FpuOpcode_binary_sequential_LOAD : writeBack_FpuPlugin_commit_rData_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : writeBack_FpuPlugin_commit_rData_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : writeBack_FpuPlugin_commit_rData_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : writeBack_FpuPlugin_commit_rData_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : writeBack_FpuPlugin_commit_rData_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : writeBack_FpuPlugin_commit_rData_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : writeBack_FpuPlugin_commit_rData_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : writeBack_FpuPlugin_commit_rData_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : writeBack_FpuPlugin_commit_rData_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : writeBack_FpuPlugin_commit_rData_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : writeBack_FpuPlugin_commit_rData_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : writeBack_FpuPlugin_commit_rData_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : writeBack_FpuPlugin_commit_rData_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : writeBack_FpuPlugin_commit_rData_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : writeBack_FpuPlugin_commit_rData_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : writeBack_FpuPlugin_commit_rData_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : writeBack_FpuPlugin_commit_rData_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : writeBack_FpuPlugin_commit_rData_opcode_string = "STORE   ";
+      FpuOpcode_MUL : writeBack_FpuPlugin_commit_rData_opcode_string = "MUL     ";
+      FpuOpcode_ADD : writeBack_FpuPlugin_commit_rData_opcode_string = "ADD     ";
+      FpuOpcode_FMA : writeBack_FpuPlugin_commit_rData_opcode_string = "FMA     ";
+      FpuOpcode_I2F : writeBack_FpuPlugin_commit_rData_opcode_string = "I2F     ";
+      FpuOpcode_F2I : writeBack_FpuPlugin_commit_rData_opcode_string = "F2I     ";
+      FpuOpcode_CMP : writeBack_FpuPlugin_commit_rData_opcode_string = "CMP     ";
+      FpuOpcode_DIV : writeBack_FpuPlugin_commit_rData_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : writeBack_FpuPlugin_commit_rData_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : writeBack_FpuPlugin_commit_rData_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : writeBack_FpuPlugin_commit_rData_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : writeBack_FpuPlugin_commit_rData_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : writeBack_FpuPlugin_commit_rData_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : writeBack_FpuPlugin_commit_rData_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : writeBack_FpuPlugin_commit_rData_opcode_string = "FCVT_X_X";
       default : writeBack_FpuPlugin_commit_rData_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "FCVT_X_X";
       default : _zz_writeBack_FpuPlugin_commit_s2mPipe_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(decode_to_execute_SRC1_CTRL)
-      `Src1CtrlEnum_binary_sequential_RS : decode_to_execute_SRC1_CTRL_string = "RS          ";
-      `Src1CtrlEnum_binary_sequential_IMU : decode_to_execute_SRC1_CTRL_string = "IMU         ";
-      `Src1CtrlEnum_binary_sequential_PC_INCREMENT : decode_to_execute_SRC1_CTRL_string = "PC_INCREMENT";
-      `Src1CtrlEnum_binary_sequential_URS1 : decode_to_execute_SRC1_CTRL_string = "URS1        ";
+      Src1CtrlEnum_RS : decode_to_execute_SRC1_CTRL_string = "RS          ";
+      Src1CtrlEnum_IMU : decode_to_execute_SRC1_CTRL_string = "IMU         ";
+      Src1CtrlEnum_PC_INCREMENT : decode_to_execute_SRC1_CTRL_string = "PC_INCREMENT";
+      Src1CtrlEnum_URS1 : decode_to_execute_SRC1_CTRL_string = "URS1        ";
       default : decode_to_execute_SRC1_CTRL_string = "????????????";
     endcase
   end
   always @(*) begin
     case(decode_to_execute_ALU_CTRL)
-      `AluCtrlEnum_binary_sequential_ADD_SUB : decode_to_execute_ALU_CTRL_string = "ADD_SUB ";
-      `AluCtrlEnum_binary_sequential_SLT_SLTU : decode_to_execute_ALU_CTRL_string = "SLT_SLTU";
-      `AluCtrlEnum_binary_sequential_BITWISE : decode_to_execute_ALU_CTRL_string = "BITWISE ";
+      AluCtrlEnum_ADD_SUB : decode_to_execute_ALU_CTRL_string = "ADD_SUB ";
+      AluCtrlEnum_SLT_SLTU : decode_to_execute_ALU_CTRL_string = "SLT_SLTU";
+      AluCtrlEnum_BITWISE : decode_to_execute_ALU_CTRL_string = "BITWISE ";
       default : decode_to_execute_ALU_CTRL_string = "????????";
     endcase
   end
   always @(*) begin
     case(decode_to_execute_SRC2_CTRL)
-      `Src2CtrlEnum_binary_sequential_RS : decode_to_execute_SRC2_CTRL_string = "RS ";
-      `Src2CtrlEnum_binary_sequential_IMI : decode_to_execute_SRC2_CTRL_string = "IMI";
-      `Src2CtrlEnum_binary_sequential_IMS : decode_to_execute_SRC2_CTRL_string = "IMS";
-      `Src2CtrlEnum_binary_sequential_PC : decode_to_execute_SRC2_CTRL_string = "PC ";
+      Src2CtrlEnum_RS : decode_to_execute_SRC2_CTRL_string = "RS ";
+      Src2CtrlEnum_IMI : decode_to_execute_SRC2_CTRL_string = "IMI";
+      Src2CtrlEnum_IMS : decode_to_execute_SRC2_CTRL_string = "IMS";
+      Src2CtrlEnum_PC : decode_to_execute_SRC2_CTRL_string = "PC ";
       default : decode_to_execute_SRC2_CTRL_string = "???";
     endcase
   end
   always @(*) begin
     case(decode_to_execute_ALU_BITWISE_CTRL)
-      `AluBitwiseCtrlEnum_binary_sequential_XOR_1 : decode_to_execute_ALU_BITWISE_CTRL_string = "XOR_1";
-      `AluBitwiseCtrlEnum_binary_sequential_OR_1 : decode_to_execute_ALU_BITWISE_CTRL_string = "OR_1 ";
-      `AluBitwiseCtrlEnum_binary_sequential_AND_1 : decode_to_execute_ALU_BITWISE_CTRL_string = "AND_1";
+      AluBitwiseCtrlEnum_XOR_1 : decode_to_execute_ALU_BITWISE_CTRL_string = "XOR_1";
+      AluBitwiseCtrlEnum_OR_1 : decode_to_execute_ALU_BITWISE_CTRL_string = "OR_1 ";
+      AluBitwiseCtrlEnum_AND_1 : decode_to_execute_ALU_BITWISE_CTRL_string = "AND_1";
       default : decode_to_execute_ALU_BITWISE_CTRL_string = "?????";
     endcase
   end
   always @(*) begin
     case(decode_to_execute_SHIFT_CTRL)
-      `ShiftCtrlEnum_binary_sequential_DISABLE_1 : decode_to_execute_SHIFT_CTRL_string = "DISABLE_1";
-      `ShiftCtrlEnum_binary_sequential_SLL_1 : decode_to_execute_SHIFT_CTRL_string = "SLL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRL_1 : decode_to_execute_SHIFT_CTRL_string = "SRL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRA_1 : decode_to_execute_SHIFT_CTRL_string = "SRA_1    ";
+      ShiftCtrlEnum_DISABLE_1 : decode_to_execute_SHIFT_CTRL_string = "DISABLE_1";
+      ShiftCtrlEnum_SLL_1 : decode_to_execute_SHIFT_CTRL_string = "SLL_1    ";
+      ShiftCtrlEnum_SRL_1 : decode_to_execute_SHIFT_CTRL_string = "SRL_1    ";
+      ShiftCtrlEnum_SRA_1 : decode_to_execute_SHIFT_CTRL_string = "SRA_1    ";
       default : decode_to_execute_SHIFT_CTRL_string = "?????????";
     endcase
   end
   always @(*) begin
     case(execute_to_memory_SHIFT_CTRL)
-      `ShiftCtrlEnum_binary_sequential_DISABLE_1 : execute_to_memory_SHIFT_CTRL_string = "DISABLE_1";
-      `ShiftCtrlEnum_binary_sequential_SLL_1 : execute_to_memory_SHIFT_CTRL_string = "SLL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRL_1 : execute_to_memory_SHIFT_CTRL_string = "SRL_1    ";
-      `ShiftCtrlEnum_binary_sequential_SRA_1 : execute_to_memory_SHIFT_CTRL_string = "SRA_1    ";
+      ShiftCtrlEnum_DISABLE_1 : execute_to_memory_SHIFT_CTRL_string = "DISABLE_1";
+      ShiftCtrlEnum_SLL_1 : execute_to_memory_SHIFT_CTRL_string = "SLL_1    ";
+      ShiftCtrlEnum_SRL_1 : execute_to_memory_SHIFT_CTRL_string = "SRL_1    ";
+      ShiftCtrlEnum_SRA_1 : execute_to_memory_SHIFT_CTRL_string = "SRA_1    ";
       default : execute_to_memory_SHIFT_CTRL_string = "?????????";
     endcase
   end
   always @(*) begin
     case(decode_to_execute_BRANCH_CTRL)
-      `BranchCtrlEnum_binary_sequential_INC : decode_to_execute_BRANCH_CTRL_string = "INC ";
-      `BranchCtrlEnum_binary_sequential_B : decode_to_execute_BRANCH_CTRL_string = "B   ";
-      `BranchCtrlEnum_binary_sequential_JAL : decode_to_execute_BRANCH_CTRL_string = "JAL ";
-      `BranchCtrlEnum_binary_sequential_JALR : decode_to_execute_BRANCH_CTRL_string = "JALR";
+      BranchCtrlEnum_INC : decode_to_execute_BRANCH_CTRL_string = "INC ";
+      BranchCtrlEnum_B : decode_to_execute_BRANCH_CTRL_string = "B   ";
+      BranchCtrlEnum_JAL : decode_to_execute_BRANCH_CTRL_string = "JAL ";
+      BranchCtrlEnum_JALR : decode_to_execute_BRANCH_CTRL_string = "JALR";
       default : decode_to_execute_BRANCH_CTRL_string = "????";
     endcase
   end
   always @(*) begin
     case(decode_to_execute_ENV_CTRL)
-      `EnvCtrlEnum_binary_sequential_NONE : decode_to_execute_ENV_CTRL_string = "NONE ";
-      `EnvCtrlEnum_binary_sequential_XRET : decode_to_execute_ENV_CTRL_string = "XRET ";
-      `EnvCtrlEnum_binary_sequential_WFI : decode_to_execute_ENV_CTRL_string = "WFI  ";
-      `EnvCtrlEnum_binary_sequential_ECALL : decode_to_execute_ENV_CTRL_string = "ECALL";
+      EnvCtrlEnum_NONE : decode_to_execute_ENV_CTRL_string = "NONE ";
+      EnvCtrlEnum_XRET : decode_to_execute_ENV_CTRL_string = "XRET ";
+      EnvCtrlEnum_WFI : decode_to_execute_ENV_CTRL_string = "WFI  ";
+      EnvCtrlEnum_ECALL : decode_to_execute_ENV_CTRL_string = "ECALL";
       default : decode_to_execute_ENV_CTRL_string = "?????";
     endcase
   end
   always @(*) begin
     case(execute_to_memory_ENV_CTRL)
-      `EnvCtrlEnum_binary_sequential_NONE : execute_to_memory_ENV_CTRL_string = "NONE ";
-      `EnvCtrlEnum_binary_sequential_XRET : execute_to_memory_ENV_CTRL_string = "XRET ";
-      `EnvCtrlEnum_binary_sequential_WFI : execute_to_memory_ENV_CTRL_string = "WFI  ";
-      `EnvCtrlEnum_binary_sequential_ECALL : execute_to_memory_ENV_CTRL_string = "ECALL";
+      EnvCtrlEnum_NONE : execute_to_memory_ENV_CTRL_string = "NONE ";
+      EnvCtrlEnum_XRET : execute_to_memory_ENV_CTRL_string = "XRET ";
+      EnvCtrlEnum_WFI : execute_to_memory_ENV_CTRL_string = "WFI  ";
+      EnvCtrlEnum_ECALL : execute_to_memory_ENV_CTRL_string = "ECALL";
       default : execute_to_memory_ENV_CTRL_string = "?????";
     endcase
   end
   always @(*) begin
     case(memory_to_writeBack_ENV_CTRL)
-      `EnvCtrlEnum_binary_sequential_NONE : memory_to_writeBack_ENV_CTRL_string = "NONE ";
-      `EnvCtrlEnum_binary_sequential_XRET : memory_to_writeBack_ENV_CTRL_string = "XRET ";
-      `EnvCtrlEnum_binary_sequential_WFI : memory_to_writeBack_ENV_CTRL_string = "WFI  ";
-      `EnvCtrlEnum_binary_sequential_ECALL : memory_to_writeBack_ENV_CTRL_string = "ECALL";
+      EnvCtrlEnum_NONE : memory_to_writeBack_ENV_CTRL_string = "NONE ";
+      EnvCtrlEnum_XRET : memory_to_writeBack_ENV_CTRL_string = "XRET ";
+      EnvCtrlEnum_WFI : memory_to_writeBack_ENV_CTRL_string = "WFI  ";
+      EnvCtrlEnum_ECALL : memory_to_writeBack_ENV_CTRL_string = "ECALL";
       default : memory_to_writeBack_ENV_CTRL_string = "?????";
     endcase
   end
   always @(*) begin
     case(decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND)
-      `Input2Kind_binary_sequential_RS : decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND_string = "RS   ";
-      `Input2Kind_binary_sequential_IMM_I : decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND_string = "IMM_I";
+      Input2Kind_RS : decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND_string = "RS   ";
+      Input2Kind_IMM_I : decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND_string = "IMM_I";
       default : decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND_string = "?????";
     endcase
   end
   always @(*) begin
     case(decode_to_execute_FPU_OPCODE)
-      `FpuOpcode_binary_sequential_LOAD : decode_to_execute_FPU_OPCODE_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : decode_to_execute_FPU_OPCODE_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : decode_to_execute_FPU_OPCODE_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : decode_to_execute_FPU_OPCODE_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : decode_to_execute_FPU_OPCODE_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : decode_to_execute_FPU_OPCODE_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : decode_to_execute_FPU_OPCODE_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : decode_to_execute_FPU_OPCODE_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : decode_to_execute_FPU_OPCODE_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : decode_to_execute_FPU_OPCODE_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : decode_to_execute_FPU_OPCODE_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : decode_to_execute_FPU_OPCODE_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : decode_to_execute_FPU_OPCODE_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : decode_to_execute_FPU_OPCODE_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : decode_to_execute_FPU_OPCODE_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : decode_to_execute_FPU_OPCODE_string = "FCVT_X_X";
+      FpuOpcode_LOAD : decode_to_execute_FPU_OPCODE_string = "LOAD    ";
+      FpuOpcode_STORE : decode_to_execute_FPU_OPCODE_string = "STORE   ";
+      FpuOpcode_MUL : decode_to_execute_FPU_OPCODE_string = "MUL     ";
+      FpuOpcode_ADD : decode_to_execute_FPU_OPCODE_string = "ADD     ";
+      FpuOpcode_FMA : decode_to_execute_FPU_OPCODE_string = "FMA     ";
+      FpuOpcode_I2F : decode_to_execute_FPU_OPCODE_string = "I2F     ";
+      FpuOpcode_F2I : decode_to_execute_FPU_OPCODE_string = "F2I     ";
+      FpuOpcode_CMP : decode_to_execute_FPU_OPCODE_string = "CMP     ";
+      FpuOpcode_DIV : decode_to_execute_FPU_OPCODE_string = "DIV     ";
+      FpuOpcode_SQRT : decode_to_execute_FPU_OPCODE_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : decode_to_execute_FPU_OPCODE_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : decode_to_execute_FPU_OPCODE_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : decode_to_execute_FPU_OPCODE_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : decode_to_execute_FPU_OPCODE_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : decode_to_execute_FPU_OPCODE_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : decode_to_execute_FPU_OPCODE_string = "FCVT_X_X";
       default : decode_to_execute_FPU_OPCODE_string = "????????";
     endcase
   end
   always @(*) begin
     case(execute_to_memory_FPU_OPCODE)
-      `FpuOpcode_binary_sequential_LOAD : execute_to_memory_FPU_OPCODE_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : execute_to_memory_FPU_OPCODE_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : execute_to_memory_FPU_OPCODE_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : execute_to_memory_FPU_OPCODE_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : execute_to_memory_FPU_OPCODE_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : execute_to_memory_FPU_OPCODE_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : execute_to_memory_FPU_OPCODE_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : execute_to_memory_FPU_OPCODE_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : execute_to_memory_FPU_OPCODE_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : execute_to_memory_FPU_OPCODE_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : execute_to_memory_FPU_OPCODE_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : execute_to_memory_FPU_OPCODE_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : execute_to_memory_FPU_OPCODE_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : execute_to_memory_FPU_OPCODE_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : execute_to_memory_FPU_OPCODE_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : execute_to_memory_FPU_OPCODE_string = "FCVT_X_X";
+      FpuOpcode_LOAD : execute_to_memory_FPU_OPCODE_string = "LOAD    ";
+      FpuOpcode_STORE : execute_to_memory_FPU_OPCODE_string = "STORE   ";
+      FpuOpcode_MUL : execute_to_memory_FPU_OPCODE_string = "MUL     ";
+      FpuOpcode_ADD : execute_to_memory_FPU_OPCODE_string = "ADD     ";
+      FpuOpcode_FMA : execute_to_memory_FPU_OPCODE_string = "FMA     ";
+      FpuOpcode_I2F : execute_to_memory_FPU_OPCODE_string = "I2F     ";
+      FpuOpcode_F2I : execute_to_memory_FPU_OPCODE_string = "F2I     ";
+      FpuOpcode_CMP : execute_to_memory_FPU_OPCODE_string = "CMP     ";
+      FpuOpcode_DIV : execute_to_memory_FPU_OPCODE_string = "DIV     ";
+      FpuOpcode_SQRT : execute_to_memory_FPU_OPCODE_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : execute_to_memory_FPU_OPCODE_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : execute_to_memory_FPU_OPCODE_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : execute_to_memory_FPU_OPCODE_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : execute_to_memory_FPU_OPCODE_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : execute_to_memory_FPU_OPCODE_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : execute_to_memory_FPU_OPCODE_string = "FCVT_X_X";
       default : execute_to_memory_FPU_OPCODE_string = "????????";
     endcase
   end
   always @(*) begin
     case(memory_to_writeBack_FPU_OPCODE)
-      `FpuOpcode_binary_sequential_LOAD : memory_to_writeBack_FPU_OPCODE_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : memory_to_writeBack_FPU_OPCODE_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : memory_to_writeBack_FPU_OPCODE_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : memory_to_writeBack_FPU_OPCODE_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : memory_to_writeBack_FPU_OPCODE_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : memory_to_writeBack_FPU_OPCODE_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : memory_to_writeBack_FPU_OPCODE_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : memory_to_writeBack_FPU_OPCODE_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : memory_to_writeBack_FPU_OPCODE_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : memory_to_writeBack_FPU_OPCODE_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : memory_to_writeBack_FPU_OPCODE_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : memory_to_writeBack_FPU_OPCODE_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : memory_to_writeBack_FPU_OPCODE_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : memory_to_writeBack_FPU_OPCODE_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : memory_to_writeBack_FPU_OPCODE_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : memory_to_writeBack_FPU_OPCODE_string = "FCVT_X_X";
+      FpuOpcode_LOAD : memory_to_writeBack_FPU_OPCODE_string = "LOAD    ";
+      FpuOpcode_STORE : memory_to_writeBack_FPU_OPCODE_string = "STORE   ";
+      FpuOpcode_MUL : memory_to_writeBack_FPU_OPCODE_string = "MUL     ";
+      FpuOpcode_ADD : memory_to_writeBack_FPU_OPCODE_string = "ADD     ";
+      FpuOpcode_FMA : memory_to_writeBack_FPU_OPCODE_string = "FMA     ";
+      FpuOpcode_I2F : memory_to_writeBack_FPU_OPCODE_string = "I2F     ";
+      FpuOpcode_F2I : memory_to_writeBack_FPU_OPCODE_string = "F2I     ";
+      FpuOpcode_CMP : memory_to_writeBack_FPU_OPCODE_string = "CMP     ";
+      FpuOpcode_DIV : memory_to_writeBack_FPU_OPCODE_string = "DIV     ";
+      FpuOpcode_SQRT : memory_to_writeBack_FPU_OPCODE_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : memory_to_writeBack_FPU_OPCODE_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : memory_to_writeBack_FPU_OPCODE_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : memory_to_writeBack_FPU_OPCODE_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : memory_to_writeBack_FPU_OPCODE_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : memory_to_writeBack_FPU_OPCODE_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : memory_to_writeBack_FPU_OPCODE_string = "FCVT_X_X";
       default : memory_to_writeBack_FPU_OPCODE_string = "????????";
     endcase
   end
@@ -3731,7 +3686,7 @@ module VexRiscv (
   assign execute_MEMORY_STORE_DATA_RF = _zz_execute_MEMORY_STORE_DATA_RF;
   assign memory_FPU_COMMIT_LOAD = execute_to_memory_FPU_COMMIT_LOAD;
   assign execute_FPU_COMMIT_LOAD = decode_to_execute_FPU_COMMIT_LOAD;
-  assign decode_FPU_COMMIT_LOAD = (decode_FPU_OPCODE == `FpuOpcode_binary_sequential_LOAD);
+  assign decode_FPU_COMMIT_LOAD = (decode_FPU_OPCODE == FpuOpcode_LOAD);
   assign memory_FPU_FORKED = execute_to_memory_FPU_FORKED;
   assign execute_FPU_FORKED = decode_to_execute_FPU_FORKED;
   assign decode_FPU_FORKED = (decode_FpuPlugin_forked || FpuPlugin_port_cmd_fire_2);
@@ -3775,6 +3730,8 @@ module VexRiscv (
   assign _zz_decode_to_execute_ALU_BITWISE_CTRL = _zz_decode_to_execute_ALU_BITWISE_CTRL_1;
   assign decode_SRC_LESS_UNSIGNED = _zz_decode_FPU_RSP[17];
   assign decode_MEMORY_MANAGMENT = _zz_decode_FPU_RSP[16];
+  assign execute_HAS_SIDE_EFFECT = decode_to_execute_HAS_SIDE_EFFECT;
+  assign decode_HAS_SIDE_EFFECT = _zz_decode_FPU_RSP[14];
   assign memory_MEMORY_WR = execute_to_memory_MEMORY_WR;
   assign decode_MEMORY_WR = _zz_decode_FPU_RSP[13];
   assign execute_BYPASSABLE_MEMORY_STAGE = decode_to_execute_BYPASSABLE_MEMORY_STAGE;
@@ -3849,6 +3806,8 @@ module VexRiscv (
   assign memory_CfuPlugin_CFU_IN_FLIGHT = execute_to_memory_CfuPlugin_CFU_IN_FLIGHT;
   assign execute_CfuPlugin_CFU_INPUT_2_KIND = _zz_execute_CfuPlugin_CFU_INPUT_2_KIND;
   assign execute_CfuPlugin_CFU_ENABLE = decode_to_execute_CfuPlugin_CFU_ENABLE;
+  assign writeBack_HAS_SIDE_EFFECT = memory_to_writeBack_HAS_SIDE_EFFECT;
+  assign memory_HAS_SIDE_EFFECT = execute_to_memory_HAS_SIDE_EFFECT;
   assign execute_IS_RS1_SIGNED = decode_to_execute_IS_RS1_SIGNED;
   assign execute_IS_DIV = decode_to_execute_IS_DIV;
   assign execute_IS_RS2_SIGNED = decode_to_execute_IS_RS2_SIGNED;
@@ -3869,14 +3828,13 @@ module VexRiscv (
   assign execute_BRANCH_DO = ((execute_PREDICTION_HAD_BRANCHED2 != execute_BRANCH_COND_RESULT) || execute_BranchPlugin_missAlignedTarget);
   assign execute_PC = decode_to_execute_PC;
   assign execute_PREDICTION_HAD_BRANCHED2 = decode_to_execute_PREDICTION_HAD_BRANCHED2;
-  assign execute_RS1 = decode_to_execute_RS1;
   assign execute_BRANCH_COND_RESULT = _zz_execute_BRANCH_COND_RESULT_1;
   assign execute_BRANCH_CTRL = _zz_execute_BRANCH_CTRL;
   assign decode_RS2_USE = _zz_decode_FPU_RSP[15];
   assign decode_RS1_USE = _zz_decode_FPU_RSP[5];
   always @(*) begin
     _zz_decode_RS2 = execute_REGFILE_WRITE_DATA;
-    if(when_CsrPlugin_l1176) begin
+    if(when_CsrPlugin_l1189) begin
       _zz_decode_RS2 = CsrPlugin_csrMapping_readDataSignal;
     end
   end
@@ -3952,10 +3910,10 @@ module VexRiscv (
     _zz_decode_RS2_1 = memory_REGFILE_WRITE_DATA;
     if(memory_arbitration_isValid) begin
       case(memory_SHIFT_CTRL)
-        `ShiftCtrlEnum_binary_sequential_SLL_1 : begin
+        ShiftCtrlEnum_SLL_1 : begin
           _zz_decode_RS2_1 = _zz_decode_RS2_3;
         end
-        `ShiftCtrlEnum_binary_sequential_SRL_1, `ShiftCtrlEnum_binary_sequential_SRA_1 : begin
+        ShiftCtrlEnum_SRL_1, ShiftCtrlEnum_SRA_1 : begin
           _zz_decode_RS2_1 = memory_SHIFT_RIGHT;
         end
         default : begin
@@ -3966,7 +3924,7 @@ module VexRiscv (
       _zz_decode_RS2_1 = memory_DivPlugin_div_result;
     end
     if(memory_CfuPlugin_CFU_IN_FLIGHT) begin
-      _zz_decode_RS2_1 = CfuPlugin_bus_rsp_rsp_payload_outputs_0;
+      _zz_decode_RS2_1 = memory_CfuPlugin_rsp_payload_outputs_0;
     end
   end
 
@@ -4004,10 +3962,10 @@ module VexRiscv (
     end
   end
 
-  assign decode_LEGAL_INSTRUCTION = ({((decode_INSTRUCTION & 32'h0000005f) == 32'h00000017),{((decode_INSTRUCTION & 32'h0000007f) == 32'h0000006f),{((decode_INSTRUCTION & 32'h0000007f) == 32'h0000000b),{((decode_INSTRUCTION & _zz_decode_LEGAL_INSTRUCTION) == 32'h00000043),{(_zz_decode_LEGAL_INSTRUCTION_1 == _zz_decode_LEGAL_INSTRUCTION_2),{_zz_decode_LEGAL_INSTRUCTION_3,{_zz_decode_LEGAL_INSTRUCTION_4,_zz_decode_LEGAL_INSTRUCTION_5}}}}}}} != 31'h0);
+  assign decode_LEGAL_INSTRUCTION = (|{((decode_INSTRUCTION & 32'h0000005f) == 32'h00000017),{((decode_INSTRUCTION & 32'h0000007f) == 32'h0000006f),{((decode_INSTRUCTION & 32'h0000007f) == 32'h0000000b),{((decode_INSTRUCTION & _zz_decode_LEGAL_INSTRUCTION) == 32'h00000043),{(_zz_decode_LEGAL_INSTRUCTION_1 == _zz_decode_LEGAL_INSTRUCTION_2),{_zz_decode_LEGAL_INSTRUCTION_3,{_zz_decode_LEGAL_INSTRUCTION_4,_zz_decode_LEGAL_INSTRUCTION_5}}}}}}});
   always @(*) begin
     _zz_decode_RS2_2 = writeBack_REGFILE_WRITE_DATA;
-    if(when_DBusCachedPlugin_l484) begin
+    if(when_DBusCachedPlugin_l492) begin
       _zz_decode_RS2_2 = writeBack_DBusCachedPlugin_rspFormated;
     end
     if(when_MulPlugin_l147) begin
@@ -4034,6 +3992,7 @@ module VexRiscv (
   assign memory_REGFILE_WRITE_DATA = execute_to_memory_REGFILE_WRITE_DATA;
   assign memory_MEMORY_ENABLE = execute_to_memory_MEMORY_ENABLE;
   assign execute_MEMORY_FORCE_CONSTISTENCY = decode_to_execute_MEMORY_FORCE_CONSTISTENCY;
+  assign execute_RS1 = decode_to_execute_RS1;
   assign execute_MEMORY_MANAGMENT = decode_to_execute_MEMORY_MANAGMENT;
   assign execute_RS2 = decode_to_execute_RS2;
   assign execute_MEMORY_WR = decode_to_execute_MEMORY_WR;
@@ -4091,7 +4050,7 @@ module VexRiscv (
   assign writeBack_INSTRUCTION = memory_to_writeBack_INSTRUCTION;
   always @(*) begin
     decode_arbitration_haltItself = 1'b0;
-    if(when_DBusCachedPlugin_l303) begin
+    if(when_DBusCachedPlugin_l308) begin
       decode_arbitration_haltItself = 1'b1;
     end
     if(when_FpuPlugin_l238) begin
@@ -4110,7 +4069,7 @@ module VexRiscv (
     if(CsrPlugin_pipelineLiberator_active) begin
       decode_arbitration_haltByOther = 1'b1;
     end
-    if(when_CsrPlugin_l1116) begin
+    if(when_CsrPlugin_l1129) begin
       decode_arbitration_haltByOther = 1'b1;
     end
   end
@@ -4138,27 +4097,30 @@ module VexRiscv (
 
   always @(*) begin
     execute_arbitration_haltItself = 1'b0;
-    if(when_DBusCachedPlugin_l343) begin
+    if(when_DBusCachedPlugin_l350) begin
       execute_arbitration_haltItself = 1'b1;
     end
-    if(when_CsrPlugin_l1108) begin
-      if(when_CsrPlugin_l1110) begin
+    if(when_CsrPlugin_l1121) begin
+      if(when_CsrPlugin_l1123) begin
         execute_arbitration_haltItself = 1'b1;
       end
     end
-    if(when_CsrPlugin_l1180) begin
+    if(when_CsrPlugin_l1193) begin
       if(execute_CsrPlugin_blockedBySideEffects) begin
         execute_arbitration_haltItself = 1'b1;
       end
     end
-    if(when_CfuPlugin_l175) begin
+    if(when_CfuPlugin_l194) begin
+      execute_arbitration_haltItself = 1'b1;
+    end
+    if(when_CfuPlugin_l201) begin
       execute_arbitration_haltItself = 1'b1;
     end
   end
 
   always @(*) begin
     execute_arbitration_haltByOther = 1'b0;
-    if(when_DBusCachedPlugin_l359) begin
+    if(when_DBusCachedPlugin_l366) begin
       execute_arbitration_haltByOther = 1'b1;
     end
     if(when_FpuPlugin_l214) begin
@@ -4195,7 +4157,7 @@ module VexRiscv (
       end
     end
     if(memory_CfuPlugin_CFU_IN_FLIGHT) begin
-      if(when_CfuPlugin_l208) begin
+      if(when_CfuPlugin_l237) begin
         memory_arbitration_haltItself = 1'b1;
       end
     end
@@ -4213,7 +4175,7 @@ module VexRiscv (
   assign memory_arbitration_flushNext = 1'b0;
   always @(*) begin
     writeBack_arbitration_haltItself = 1'b0;
-    if(when_DBusCachedPlugin_l458) begin
+    if(when_DBusCachedPlugin_l466) begin
       writeBack_arbitration_haltItself = 1'b1;
     end
   end
@@ -4255,10 +4217,10 @@ module VexRiscv (
     if(DBusCachedPlugin_exceptionBus_valid) begin
       writeBack_arbitration_flushNext = 1'b1;
     end
-    if(when_CsrPlugin_l1019) begin
+    if(when_CsrPlugin_l1032) begin
       writeBack_arbitration_flushNext = 1'b1;
     end
-    if(when_CsrPlugin_l1064) begin
+    if(when_CsrPlugin_l1077) begin
       writeBack_arbitration_flushNext = 1'b1;
     end
   end
@@ -4269,29 +4231,31 @@ module VexRiscv (
   assign lastStageIsFiring = writeBack_arbitration_isFiring;
   always @(*) begin
     IBusCachedPlugin_fetcherHalt = 1'b0;
-    if(when_CsrPlugin_l922) begin
+    if(when_CsrPlugin_l935) begin
       IBusCachedPlugin_fetcherHalt = 1'b1;
     end
-    if(when_CsrPlugin_l1019) begin
+    if(when_CsrPlugin_l1032) begin
       IBusCachedPlugin_fetcherHalt = 1'b1;
     end
-    if(when_CsrPlugin_l1064) begin
+    if(when_CsrPlugin_l1077) begin
       IBusCachedPlugin_fetcherHalt = 1'b1;
     end
   end
 
+  assign IBusCachedPlugin_forceNoDecodeCond = 1'b0;
   always @(*) begin
     IBusCachedPlugin_incomingInstruction = 1'b0;
-    if(when_Fetcher_l240) begin
+    if(when_Fetcher_l243) begin
       IBusCachedPlugin_incomingInstruction = 1'b1;
     end
   end
 
+  assign BranchPlugin_inDebugNoFetchFlag = 1'b0;
   assign CsrPlugin_csrMapping_allowCsrSignal = 1'b0;
   assign CsrPlugin_csrMapping_readDataSignal = CsrPlugin_csrMapping_readDataInit;
   always @(*) begin
     CsrPlugin_inWfi = 1'b0;
-    if(when_CsrPlugin_l1108) begin
+    if(when_CsrPlugin_l1121) begin
       CsrPlugin_inWfi = 1'b1;
     end
   end
@@ -4305,21 +4269,21 @@ module VexRiscv (
 
   always @(*) begin
     CsrPlugin_jumpInterface_valid = 1'b0;
-    if(when_CsrPlugin_l1019) begin
+    if(when_CsrPlugin_l1032) begin
       CsrPlugin_jumpInterface_valid = 1'b1;
     end
-    if(when_CsrPlugin_l1064) begin
+    if(when_CsrPlugin_l1077) begin
       CsrPlugin_jumpInterface_valid = 1'b1;
     end
   end
 
   always @(*) begin
     CsrPlugin_jumpInterface_payload = 32'bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx;
-    if(when_CsrPlugin_l1019) begin
+    if(when_CsrPlugin_l1032) begin
       CsrPlugin_jumpInterface_payload = {CsrPlugin_xtvec_base,2'b00};
     end
-    if(when_CsrPlugin_l1064) begin
-      case(switch_CsrPlugin_l1068)
+    if(when_CsrPlugin_l1077) begin
+      case(switch_CsrPlugin_l1081)
         2'b11 : begin
           CsrPlugin_jumpInterface_payload = CsrPlugin_mepc;
         end
@@ -4360,9 +4324,9 @@ module VexRiscv (
     end
   end
 
-  assign when_Fetcher_l131 = (IBusCachedPlugin_fetchPc_correction || IBusCachedPlugin_fetchPc_pcRegPropagate);
+  assign when_Fetcher_l134 = (IBusCachedPlugin_fetchPc_correction || IBusCachedPlugin_fetchPc_pcRegPropagate);
   assign IBusCachedPlugin_fetchPc_output_fire_1 = (IBusCachedPlugin_fetchPc_output_valid && IBusCachedPlugin_fetchPc_output_ready);
-  assign when_Fetcher_l131_1 = ((! IBusCachedPlugin_fetchPc_output_valid) && IBusCachedPlugin_fetchPc_output_ready);
+  assign when_Fetcher_l134_1 = ((! IBusCachedPlugin_fetchPc_output_valid) && IBusCachedPlugin_fetchPc_output_ready);
   always @(*) begin
     IBusCachedPlugin_fetchPc_pc = (IBusCachedPlugin_fetchPc_pcReg + _zz_IBusCachedPlugin_fetchPc_pc);
     if(IBusCachedPlugin_fetchPc_redo_valid) begin
@@ -4385,7 +4349,7 @@ module VexRiscv (
     end
   end
 
-  assign when_Fetcher_l158 = (IBusCachedPlugin_fetchPc_booted && ((IBusCachedPlugin_fetchPc_output_ready || IBusCachedPlugin_fetchPc_correction) || IBusCachedPlugin_fetchPc_pcRegPropagate));
+  assign when_Fetcher_l161 = (IBusCachedPlugin_fetchPc_booted && ((IBusCachedPlugin_fetchPc_output_ready || IBusCachedPlugin_fetchPc_correction) || IBusCachedPlugin_fetchPc_pcRegPropagate));
   assign IBusCachedPlugin_fetchPc_output_valid = ((! IBusCachedPlugin_fetcherHalt) && IBusCachedPlugin_fetchPc_booted);
   assign IBusCachedPlugin_fetchPc_output_payload = IBusCachedPlugin_fetchPc_pc;
   always @(*) begin
@@ -4447,24 +4411,30 @@ module VexRiscv (
   assign IBusCachedPlugin_iBusRsp_stages_2_input_payload = IBusCachedPlugin_iBusRsp_stages_1_output_m2sPipe_payload;
   always @(*) begin
     IBusCachedPlugin_iBusRsp_readyForError = 1'b1;
-    if(when_Fetcher_l320) begin
+    if(when_Fetcher_l323) begin
       IBusCachedPlugin_iBusRsp_readyForError = 1'b0;
     end
   end
 
-  assign when_Fetcher_l240 = (IBusCachedPlugin_iBusRsp_stages_1_input_valid || IBusCachedPlugin_iBusRsp_stages_2_input_valid);
-  assign when_Fetcher_l320 = (! IBusCachedPlugin_pcValids_0);
-  assign when_Fetcher_l329 = (! (! IBusCachedPlugin_iBusRsp_stages_1_input_ready));
-  assign when_Fetcher_l329_1 = (! (! IBusCachedPlugin_iBusRsp_stages_2_input_ready));
-  assign when_Fetcher_l329_2 = (! execute_arbitration_isStuck);
-  assign when_Fetcher_l329_3 = (! memory_arbitration_isStuck);
-  assign when_Fetcher_l329_4 = (! writeBack_arbitration_isStuck);
+  assign when_Fetcher_l243 = (IBusCachedPlugin_iBusRsp_stages_1_input_valid || IBusCachedPlugin_iBusRsp_stages_2_input_valid);
+  assign when_Fetcher_l323 = (! IBusCachedPlugin_pcValids_0);
+  assign when_Fetcher_l332 = (! (! IBusCachedPlugin_iBusRsp_stages_1_input_ready));
+  assign when_Fetcher_l332_1 = (! (! IBusCachedPlugin_iBusRsp_stages_2_input_ready));
+  assign when_Fetcher_l332_2 = (! execute_arbitration_isStuck);
+  assign when_Fetcher_l332_3 = (! memory_arbitration_isStuck);
+  assign when_Fetcher_l332_4 = (! writeBack_arbitration_isStuck);
   assign IBusCachedPlugin_pcValids_0 = IBusCachedPlugin_injector_nextPcCalc_valids_1;
   assign IBusCachedPlugin_pcValids_1 = IBusCachedPlugin_injector_nextPcCalc_valids_2;
   assign IBusCachedPlugin_pcValids_2 = IBusCachedPlugin_injector_nextPcCalc_valids_3;
   assign IBusCachedPlugin_pcValids_3 = IBusCachedPlugin_injector_nextPcCalc_valids_4;
   assign IBusCachedPlugin_iBusRsp_output_ready = (! decode_arbitration_isStuck);
-  assign decode_arbitration_isValid = IBusCachedPlugin_iBusRsp_output_valid;
+  always @(*) begin
+    decode_arbitration_isValid = IBusCachedPlugin_iBusRsp_output_valid;
+    if(IBusCachedPlugin_forceNoDecodeCond) begin
+      decode_arbitration_isValid = 1'b0;
+    end
+  end
+
   assign _zz_IBusCachedPlugin_decodePrediction_cmd_hadBranch = _zz__zz_IBusCachedPlugin_decodePrediction_cmd_hadBranch[11];
   always @(*) begin
     _zz_IBusCachedPlugin_decodePrediction_cmd_hadBranch_1[18] = _zz_IBusCachedPlugin_decodePrediction_cmd_hadBranch;
@@ -4489,7 +4459,7 @@ module VexRiscv (
   end
 
   always @(*) begin
-    IBusCachedPlugin_decodePrediction_cmd_hadBranch = ((decode_BRANCH_CTRL == `BranchCtrlEnum_binary_sequential_JAL) || ((decode_BRANCH_CTRL == `BranchCtrlEnum_binary_sequential_B) && _zz_IBusCachedPlugin_decodePrediction_cmd_hadBranch_2[31]));
+    IBusCachedPlugin_decodePrediction_cmd_hadBranch = ((decode_BRANCH_CTRL == BranchCtrlEnum_JAL) || ((decode_BRANCH_CTRL == BranchCtrlEnum_B) && _zz_IBusCachedPlugin_decodePrediction_cmd_hadBranch_2[31]));
     if(_zz_6) begin
       IBusCachedPlugin_decodePrediction_cmd_hadBranch = 1'b0;
     end
@@ -4535,7 +4505,7 @@ module VexRiscv (
 
   always @(*) begin
     case(decode_BRANCH_CTRL)
-      `BranchCtrlEnum_binary_sequential_JAL : begin
+      BranchCtrlEnum_JAL : begin
         _zz_6 = _zz__zz_6[1];
       end
       default : begin
@@ -4583,7 +4553,7 @@ module VexRiscv (
     _zz_IBusCachedPlugin_predictionJumpInterface_payload_3[0] = _zz_IBusCachedPlugin_predictionJumpInterface_payload_2;
   end
 
-  assign IBusCachedPlugin_predictionJumpInterface_payload = (decode_PC + ((decode_BRANCH_CTRL == `BranchCtrlEnum_binary_sequential_JAL) ? {{_zz_IBusCachedPlugin_predictionJumpInterface_payload_1,{{{_zz_IBusCachedPlugin_predictionJumpInterface_payload_4,decode_INSTRUCTION[19 : 12]},decode_INSTRUCTION[20]},decode_INSTRUCTION[30 : 21]}},1'b0} : {{_zz_IBusCachedPlugin_predictionJumpInterface_payload_3,{{{_zz_IBusCachedPlugin_predictionJumpInterface_payload_5,_zz_IBusCachedPlugin_predictionJumpInterface_payload_6},decode_INSTRUCTION[30 : 25]},decode_INSTRUCTION[11 : 8]}},1'b0}));
+  assign IBusCachedPlugin_predictionJumpInterface_payload = (decode_PC + ((decode_BRANCH_CTRL == BranchCtrlEnum_JAL) ? {{_zz_IBusCachedPlugin_predictionJumpInterface_payload_1,{{{_zz_IBusCachedPlugin_predictionJumpInterface_payload_4,decode_INSTRUCTION[19 : 12]},decode_INSTRUCTION[20]},decode_INSTRUCTION[30 : 21]}},1'b0} : {{_zz_IBusCachedPlugin_predictionJumpInterface_payload_3,{{{_zz_IBusCachedPlugin_predictionJumpInterface_payload_5,_zz_IBusCachedPlugin_predictionJumpInterface_payload_6},decode_INSTRUCTION[30 : 25]},decode_INSTRUCTION[11 : 8]}},1'b0}));
   assign iBus_cmd_valid = IBusCachedPlugin_cache_io_mem_cmd_valid;
   always @(*) begin
     iBus_cmd_payload_address = IBusCachedPlugin_cache_io_mem_cmd_payload_address;
@@ -4664,12 +4634,12 @@ module VexRiscv (
   assign dataCache_1_io_mem_cmd_s2mPipe_payload_last = (dataCache_1_io_mem_cmd_rValid ? dataCache_1_io_mem_cmd_rData_last : dataCache_1_io_mem_cmd_payload_last);
   always @(*) begin
     dataCache_1_io_mem_cmd_s2mPipe_ready = dataCache_1_io_mem_cmd_s2mPipe_m2sPipe_ready;
-    if(when_Stream_l342) begin
+    if(when_Stream_l368) begin
       dataCache_1_io_mem_cmd_s2mPipe_ready = 1'b1;
     end
   end
 
-  assign when_Stream_l342 = (! dataCache_1_io_mem_cmd_s2mPipe_m2sPipe_valid);
+  assign when_Stream_l368 = (! dataCache_1_io_mem_cmd_s2mPipe_m2sPipe_valid);
   assign dataCache_1_io_mem_cmd_s2mPipe_m2sPipe_valid = dataCache_1_io_mem_cmd_s2mPipe_rValid;
   assign dataCache_1_io_mem_cmd_s2mPipe_m2sPipe_payload_wr = dataCache_1_io_mem_cmd_s2mPipe_rData_wr;
   assign dataCache_1_io_mem_cmd_s2mPipe_m2sPipe_payload_uncached = dataCache_1_io_mem_cmd_s2mPipe_rData_uncached;
@@ -4687,7 +4657,7 @@ module VexRiscv (
   assign dBus_cmd_payload_mask = dataCache_1_io_mem_cmd_s2mPipe_m2sPipe_payload_mask;
   assign dBus_cmd_payload_size = dataCache_1_io_mem_cmd_s2mPipe_m2sPipe_payload_size;
   assign dBus_cmd_payload_last = dataCache_1_io_mem_cmd_s2mPipe_m2sPipe_payload_last;
-  assign when_DBusCachedPlugin_l303 = ((DBusCachedPlugin_mmuBus_busy && decode_arbitration_isValid) && decode_MEMORY_ENABLE);
+  assign when_DBusCachedPlugin_l308 = ((DBusCachedPlugin_mmuBus_busy && decode_arbitration_isValid) && decode_MEMORY_ENABLE);
   assign execute_DBusCachedPlugin_size = execute_INSTRUCTION[13 : 12];
   assign dataCache_1_io_cpu_execute_isValid = (execute_arbitration_isValid && execute_MEMORY_ENABLE);
   assign dataCache_1_io_cpu_execute_address = execute_SRC_ADD;
@@ -4706,9 +4676,11 @@ module VexRiscv (
   end
 
   assign dataCache_1_io_cpu_flush_valid = (execute_arbitration_isValid && execute_MEMORY_MANAGMENT);
+  assign dataCache_1_io_cpu_flush_payload_singleLine = (execute_INSTRUCTION[19 : 15] != 5'h0);
+  assign dataCache_1_io_cpu_flush_payload_lineId = _zz_io_cpu_flush_payload_lineId[6:0];
   assign dataCache_1_io_cpu_flush_isStall = (dataCache_1_io_cpu_flush_valid && (! dataCache_1_io_cpu_flush_ready));
-  assign when_DBusCachedPlugin_l343 = (dataCache_1_io_cpu_flush_isStall || dataCache_1_io_cpu_execute_haltIt);
-  assign when_DBusCachedPlugin_l359 = (dataCache_1_io_cpu_execute_refilling && execute_arbitration_isValid);
+  assign when_DBusCachedPlugin_l350 = (dataCache_1_io_cpu_flush_isStall || dataCache_1_io_cpu_execute_haltIt);
+  assign when_DBusCachedPlugin_l366 = (dataCache_1_io_cpu_execute_refilling && execute_arbitration_isValid);
   assign dataCache_1_io_cpu_memory_isValid = (memory_arbitration_isValid && memory_MEMORY_ENABLE);
   assign dataCache_1_io_cpu_memory_address = memory_REGFILE_WRITE_DATA;
   assign DBusCachedPlugin_mmuBus_cmd_0_isValid = dataCache_1_io_cpu_memory_isValid;
@@ -4718,12 +4690,12 @@ module VexRiscv (
   assign DBusCachedPlugin_mmuBus_end = ((! memory_arbitration_isStuck) || memory_arbitration_removeIt);
   always @(*) begin
     dataCache_1_io_cpu_memory_mmuRsp_isIoAccess = DBusCachedPlugin_mmuBus_rsp_isIoAccess;
-    if(when_DBusCachedPlugin_l386) begin
+    if(when_DBusCachedPlugin_l393) begin
       dataCache_1_io_cpu_memory_mmuRsp_isIoAccess = 1'b1;
     end
   end
 
-  assign when_DBusCachedPlugin_l386 = (1'b0 && (! dataCache_1_io_cpu_memory_isWrite));
+  assign when_DBusCachedPlugin_l393 = (1'b0 && (! dataCache_1_io_cpu_memory_isWrite));
   always @(*) begin
     dataCache_1_io_cpu_writeBack_isValid = (writeBack_arbitration_isValid && writeBack_MEMORY_ENABLE);
     if(writeBack_arbitration_haltByOther) begin
@@ -4742,7 +4714,7 @@ module VexRiscv (
 
   always @(*) begin
     DBusCachedPlugin_redoBranch_valid = 1'b0;
-    if(when_DBusCachedPlugin_l438) begin
+    if(when_DBusCachedPlugin_l446) begin
       if(dataCache_1_io_cpu_redo) begin
         DBusCachedPlugin_redoBranch_valid = 1'b1;
       end
@@ -4752,7 +4724,7 @@ module VexRiscv (
   assign DBusCachedPlugin_redoBranch_payload = writeBack_PC;
   always @(*) begin
     DBusCachedPlugin_exceptionBus_valid = 1'b0;
-    if(when_DBusCachedPlugin_l438) begin
+    if(when_DBusCachedPlugin_l446) begin
       if(dataCache_1_io_cpu_writeBack_accessError) begin
         DBusCachedPlugin_exceptionBus_valid = 1'b1;
       end
@@ -4771,7 +4743,7 @@ module VexRiscv (
   assign DBusCachedPlugin_exceptionBus_payload_badAddr = writeBack_REGFILE_WRITE_DATA;
   always @(*) begin
     DBusCachedPlugin_exceptionBus_payload_code = 4'bxxxx;
-    if(when_DBusCachedPlugin_l438) begin
+    if(when_DBusCachedPlugin_l446) begin
       if(dataCache_1_io_cpu_writeBack_accessError) begin
         DBusCachedPlugin_exceptionBus_payload_code = {1'd0, _zz_DBusCachedPlugin_exceptionBus_payload_code};
       end
@@ -4784,8 +4756,8 @@ module VexRiscv (
     end
   end
 
-  assign when_DBusCachedPlugin_l438 = (writeBack_arbitration_isValid && writeBack_MEMORY_ENABLE);
-  assign when_DBusCachedPlugin_l458 = (dataCache_1_io_cpu_writeBack_isValid && dataCache_1_io_cpu_writeBack_haltIt);
+  assign when_DBusCachedPlugin_l446 = (writeBack_arbitration_isValid && writeBack_MEMORY_ENABLE);
+  assign when_DBusCachedPlugin_l466 = (dataCache_1_io_cpu_writeBack_isValid && dataCache_1_io_cpu_writeBack_haltIt);
   assign writeBack_DBusCachedPlugin_rspSplits_0 = dataCache_1_io_cpu_writeBack_data[7 : 0];
   assign writeBack_DBusCachedPlugin_rspSplits_1 = dataCache_1_io_cpu_writeBack_data[15 : 8];
   assign writeBack_DBusCachedPlugin_rspSplits_2 = dataCache_1_io_cpu_writeBack_data[23 : 16];
@@ -4798,7 +4770,7 @@ module VexRiscv (
   end
 
   assign writeBack_DBusCachedPlugin_rspRf = writeBack_DBusCachedPlugin_rspShifted[31 : 0];
-  assign switch_Misc_l200 = writeBack_INSTRUCTION[13 : 12];
+  assign switch_Misc_l210 = writeBack_INSTRUCTION[13 : 12];
   assign _zz_writeBack_DBusCachedPlugin_rspFormated = (writeBack_DBusCachedPlugin_rspRf[7] && (! writeBack_INSTRUCTION[14]));
   always @(*) begin
     _zz_writeBack_DBusCachedPlugin_rspFormated_1[31] = _zz_writeBack_DBusCachedPlugin_rspFormated;
@@ -4850,7 +4822,7 @@ module VexRiscv (
   end
 
   always @(*) begin
-    case(switch_Misc_l200)
+    case(switch_Misc_l210)
       2'b00 : begin
         writeBack_DBusCachedPlugin_rspFormated = _zz_writeBack_DBusCachedPlugin_rspFormated_1;
       end
@@ -4863,7 +4835,7 @@ module VexRiscv (
     endcase
   end
 
-  assign when_DBusCachedPlugin_l484 = (writeBack_arbitration_isValid && writeBack_MEMORY_ENABLE);
+  assign when_DBusCachedPlugin_l492 = (writeBack_arbitration_isValid && writeBack_MEMORY_ENABLE);
   assign IBusCachedPlugin_mmuBus_rsp_physicalAddress = IBusCachedPlugin_mmuBus_cmd_0_virtualAddress;
   assign IBusCachedPlugin_mmuBus_rsp_allowRead = 1'b1;
   assign IBusCachedPlugin_mmuBus_rsp_allowWrite = 1'b1;
@@ -4891,11 +4863,10 @@ module VexRiscv (
   assign _zz_decode_FPU_RSP_7 = ((decode_INSTRUCTION & 32'h00000028) == 32'h00000028);
   assign _zz_decode_FPU_RSP_8 = ((decode_INSTRUCTION & 32'h00000004) == 32'h00000004);
   assign _zz_decode_FPU_RSP_9 = ((decode_INSTRUCTION & 32'h00000020) == 32'h00000020);
-  assign _zz_decode_FPU_RSP_10 = ((decode_INSTRUCTION & 32'h0000005c) == 32'h00000004);
-  assign _zz_decode_FPU_RSP_11 = ((decode_INSTRUCTION & 32'h0000004c) == 32'h00000008);
-  assign _zz_decode_FPU_RSP_12 = ((decode_INSTRUCTION & 32'h10003070) == 32'h00000070);
-  assign _zz_decode_FPU_RSP_13 = ((decode_INSTRUCTION & 32'h00001000) == 32'h0);
-  assign _zz_decode_FPU_RSP = {({_zz_decode_FPU_RSP_8,(_zz__zz_decode_FPU_RSP == _zz__zz_decode_FPU_RSP_1)} != 2'b00),{({_zz_decode_FPU_RSP_3,{_zz__zz_decode_FPU_RSP_2,_zz__zz_decode_FPU_RSP_4}} != 4'b0000),{1'b0,{(_zz__zz_decode_FPU_RSP_9 != _zz__zz_decode_FPU_RSP_16),{_zz__zz_decode_FPU_RSP_17,{_zz__zz_decode_FPU_RSP_22,_zz__zz_decode_FPU_RSP_35}}}}}};
+  assign _zz_decode_FPU_RSP_10 = ((decode_INSTRUCTION & 32'h0000004c) == 32'h00000008);
+  assign _zz_decode_FPU_RSP_11 = ((decode_INSTRUCTION & 32'h10003070) == 32'h00000070);
+  assign _zz_decode_FPU_RSP_12 = ((decode_INSTRUCTION & 32'h00001000) == 32'h0);
+  assign _zz_decode_FPU_RSP = {(|{_zz_decode_FPU_RSP_8,(_zz__zz_decode_FPU_RSP == _zz__zz_decode_FPU_RSP_1)}),{(|{_zz_decode_FPU_RSP_3,{_zz__zz_decode_FPU_RSP_2,_zz__zz_decode_FPU_RSP_4}}),{1'b0,{(|_zz__zz_decode_FPU_RSP_9),{_zz__zz_decode_FPU_RSP_16,{_zz__zz_decode_FPU_RSP_21,_zz__zz_decode_FPU_RSP_34}}}}}};
   assign _zz_decode_SRC1_CTRL_2 = _zz_decode_FPU_RSP[2 : 1];
   assign _zz_decode_SRC1_CTRL_1 = _zz_decode_SRC1_CTRL_2;
   assign _zz_decode_ALU_CTRL_2 = _zz_decode_FPU_RSP[7 : 6];
@@ -4945,10 +4916,10 @@ module VexRiscv (
 
   always @(*) begin
     case(execute_ALU_BITWISE_CTRL)
-      `AluBitwiseCtrlEnum_binary_sequential_AND_1 : begin
+      AluBitwiseCtrlEnum_AND_1 : begin
         execute_IntAluPlugin_bitwise = (execute_SRC1 & execute_SRC2);
       end
-      `AluBitwiseCtrlEnum_binary_sequential_OR_1 : begin
+      AluBitwiseCtrlEnum_OR_1 : begin
         execute_IntAluPlugin_bitwise = (execute_SRC1 | execute_SRC2);
       end
       default : begin
@@ -4959,10 +4930,10 @@ module VexRiscv (
 
   always @(*) begin
     case(execute_ALU_CTRL)
-      `AluCtrlEnum_binary_sequential_BITWISE : begin
+      AluCtrlEnum_BITWISE : begin
         _zz_execute_REGFILE_WRITE_DATA = execute_IntAluPlugin_bitwise;
       end
-      `AluCtrlEnum_binary_sequential_SLT_SLTU : begin
+      AluCtrlEnum_SLT_SLTU : begin
         _zz_execute_REGFILE_WRITE_DATA = {31'd0, _zz__zz_execute_REGFILE_WRITE_DATA};
       end
       default : begin
@@ -4973,13 +4944,13 @@ module VexRiscv (
 
   always @(*) begin
     case(execute_SRC1_CTRL)
-      `Src1CtrlEnum_binary_sequential_RS : begin
+      Src1CtrlEnum_RS : begin
         _zz_execute_SRC1_1 = _zz_execute_SRC1;
       end
-      `Src1CtrlEnum_binary_sequential_PC_INCREMENT : begin
+      Src1CtrlEnum_PC_INCREMENT : begin
         _zz_execute_SRC1_1 = {29'd0, _zz__zz_execute_SRC1_1};
       end
-      `Src1CtrlEnum_binary_sequential_IMU : begin
+      Src1CtrlEnum_IMU : begin
         _zz_execute_SRC1_1 = {execute_INSTRUCTION[31 : 12],12'h0};
       end
       default : begin
@@ -5038,13 +5009,13 @@ module VexRiscv (
 
   always @(*) begin
     case(execute_SRC2_CTRL)
-      `Src2CtrlEnum_binary_sequential_RS : begin
+      Src2CtrlEnum_RS : begin
         _zz_execute_SRC2_5 = execute_RS2;
       end
-      `Src2CtrlEnum_binary_sequential_IMI : begin
+      Src2CtrlEnum_IMI : begin
         _zz_execute_SRC2_5 = {_zz_execute_SRC2_2,execute_INSTRUCTION[31 : 20]};
       end
-      `Src2CtrlEnum_binary_sequential_IMS : begin
+      Src2CtrlEnum_IMS : begin
         _zz_execute_SRC2_5 = {_zz_execute_SRC2_4,{execute_INSTRUCTION[31 : 25],execute_INSTRUCTION[11 : 7]}};
       end
       default : begin
@@ -5097,7 +5068,7 @@ module VexRiscv (
     _zz_execute_FullBarrelShifterPlugin_reversed[31] = execute_SRC1[0];
   end
 
-  assign execute_FullBarrelShifterPlugin_reversed = ((execute_SHIFT_CTRL == `ShiftCtrlEnum_binary_sequential_SLL_1) ? _zz_execute_FullBarrelShifterPlugin_reversed : execute_SRC1);
+  assign execute_FullBarrelShifterPlugin_reversed = ((execute_SHIFT_CTRL == ShiftCtrlEnum_SLL_1) ? _zz_execute_FullBarrelShifterPlugin_reversed : execute_SRC1);
   always @(*) begin
     _zz_decode_RS2_3[0] = memory_SHIFT_RIGHT[31];
     _zz_decode_RS2_3[1] = memory_SHIFT_RIGHT[30];
@@ -5214,9 +5185,9 @@ module VexRiscv (
   assign when_HazardSimplePlugin_l108 = (! decode_RS2_USE);
   assign when_HazardSimplePlugin_l113 = (decode_arbitration_isValid && (HazardSimplePlugin_src0Hazard || HazardSimplePlugin_src1Hazard));
   assign execute_BranchPlugin_eq = (execute_SRC1 == execute_SRC2);
-  assign switch_Misc_l200_1 = execute_INSTRUCTION[14 : 12];
+  assign switch_Misc_l210_1 = execute_INSTRUCTION[14 : 12];
   always @(*) begin
-    casez(switch_Misc_l200_1)
+    casez(switch_Misc_l210_1)
       3'b000 : begin
         _zz_execute_BRANCH_COND_RESULT = execute_BranchPlugin_eq;
       end
@@ -5234,13 +5205,13 @@ module VexRiscv (
 
   always @(*) begin
     case(execute_BRANCH_CTRL)
-      `BranchCtrlEnum_binary_sequential_INC : begin
+      BranchCtrlEnum_INC : begin
         _zz_execute_BRANCH_COND_RESULT_1 = 1'b0;
       end
-      `BranchCtrlEnum_binary_sequential_JAL : begin
+      BranchCtrlEnum_JAL : begin
         _zz_execute_BRANCH_COND_RESULT_1 = 1'b1;
       end
-      `BranchCtrlEnum_binary_sequential_JALR : begin
+      BranchCtrlEnum_JALR : begin
         _zz_execute_BRANCH_COND_RESULT_1 = 1'b1;
       end
       default : begin
@@ -5313,10 +5284,10 @@ module VexRiscv (
 
   always @(*) begin
     case(execute_BRANCH_CTRL)
-      `BranchCtrlEnum_binary_sequential_JALR : begin
+      BranchCtrlEnum_JALR : begin
         _zz_execute_BranchPlugin_missAlignedTarget_6 = (_zz__zz_execute_BranchPlugin_missAlignedTarget_6[1] ^ execute_RS1[1]);
       end
-      `BranchCtrlEnum_binary_sequential_JAL : begin
+      BranchCtrlEnum_JAL : begin
         _zz_execute_BranchPlugin_missAlignedTarget_6 = _zz__zz_execute_BranchPlugin_missAlignedTarget_6_1[1];
       end
       default : begin
@@ -5328,7 +5299,7 @@ module VexRiscv (
   assign execute_BranchPlugin_missAlignedTarget = (execute_BRANCH_COND_RESULT && _zz_execute_BranchPlugin_missAlignedTarget_6);
   always @(*) begin
     case(execute_BRANCH_CTRL)
-      `BranchCtrlEnum_binary_sequential_JALR : begin
+      BranchCtrlEnum_JALR : begin
         execute_BranchPlugin_branch_src1 = execute_RS1;
       end
       default : begin
@@ -5363,11 +5334,11 @@ module VexRiscv (
 
   always @(*) begin
     case(execute_BRANCH_CTRL)
-      `BranchCtrlEnum_binary_sequential_JALR : begin
+      BranchCtrlEnum_JALR : begin
         execute_BranchPlugin_branch_src2 = {_zz_execute_BranchPlugin_branch_src2_1,execute_INSTRUCTION[31 : 20]};
       end
       default : begin
-        execute_BranchPlugin_branch_src2 = ((execute_BRANCH_CTRL == `BranchCtrlEnum_binary_sequential_JAL) ? {{_zz_execute_BranchPlugin_branch_src2_3,{{{_zz_execute_BranchPlugin_branch_src2_6,execute_INSTRUCTION[19 : 12]},execute_INSTRUCTION[20]},execute_INSTRUCTION[30 : 21]}},1'b0} : {{_zz_execute_BranchPlugin_branch_src2_5,{{{_zz_execute_BranchPlugin_branch_src2_7,_zz_execute_BranchPlugin_branch_src2_8},execute_INSTRUCTION[30 : 25]},execute_INSTRUCTION[11 : 8]}},1'b0});
+        execute_BranchPlugin_branch_src2 = ((execute_BRANCH_CTRL == BranchCtrlEnum_JAL) ? {{_zz_execute_BranchPlugin_branch_src2_3,{{{_zz_execute_BranchPlugin_branch_src2_6,execute_INSTRUCTION[19 : 12]},execute_INSTRUCTION[20]},execute_INSTRUCTION[30 : 21]}},1'b0} : {{_zz_execute_BranchPlugin_branch_src2_5,{{{_zz_execute_BranchPlugin_branch_src2_7,_zz_execute_BranchPlugin_branch_src2_8},execute_INSTRUCTION[30 : 25]},execute_INSTRUCTION[11 : 8]}},1'b0});
         if(execute_PREDICTION_HAD_BRANCHED2) begin
           execute_BranchPlugin_branch_src2 = {29'd0, _zz_execute_BranchPlugin_branch_src2_9};
         end
@@ -5418,14 +5389,14 @@ module VexRiscv (
   assign BranchPlugin_jumpInterface_payload = execute_BRANCH_CALC;
   always @(*) begin
     BranchPlugin_branchExceptionPort_valid = (execute_arbitration_isValid && (execute_BRANCH_DO && execute_BRANCH_CALC[1]));
-    if(when_BranchPlugin_l296) begin
+    if(when_BranchPlugin_l302) begin
       BranchPlugin_branchExceptionPort_valid = 1'b0;
     end
   end
 
   assign BranchPlugin_branchExceptionPort_payload_code = 4'b0000;
   assign BranchPlugin_branchExceptionPort_payload_badAddr = execute_BRANCH_CALC;
-  assign when_BranchPlugin_l296 = 1'b0;
+  assign when_BranchPlugin_l302 = 1'b0;
   assign IBusCachedPlugin_decodePrediction_rsp_wasWrong = BranchPlugin_jumpInterface_valid;
   always @(*) begin
     CsrPlugin_privilege = 2'b11;
@@ -5434,9 +5405,9 @@ module VexRiscv (
     end
   end
 
-  assign _zz_when_CsrPlugin_l952 = (CsrPlugin_mip_MTIP && CsrPlugin_mie_MTIE);
-  assign _zz_when_CsrPlugin_l952_1 = (CsrPlugin_mip_MSIP && CsrPlugin_mie_MSIE);
-  assign _zz_when_CsrPlugin_l952_2 = (CsrPlugin_mip_MEIP && CsrPlugin_mie_MEIE);
+  assign _zz_when_CsrPlugin_l965 = (CsrPlugin_mip_MTIP && CsrPlugin_mie_MTIE);
+  assign _zz_when_CsrPlugin_l965_1 = (CsrPlugin_mip_MSIP && CsrPlugin_mie_MSIE);
+  assign _zz_when_CsrPlugin_l965_2 = (CsrPlugin_mip_MEIP && CsrPlugin_mie_MEIE);
   assign CsrPlugin_exceptionPortCtrl_exceptionTargetPrivilegeUncapped = 2'b11;
   assign CsrPlugin_exceptionPortCtrl_exceptionTargetPrivilege = ((CsrPlugin_privilege < CsrPlugin_exceptionPortCtrl_exceptionTargetPrivilegeUncapped) ? CsrPlugin_exceptionPortCtrl_exceptionTargetPrivilegeUncapped : CsrPlugin_privilege);
   assign _zz_CsrPlugin_exceptionPortCtrl_exceptionContext_code = {decodeExceptionPort_valid,IBusCachedPlugin_decodeExceptionPort_valid};
@@ -5480,28 +5451,28 @@ module VexRiscv (
     end
   end
 
-  assign when_CsrPlugin_l909 = (! decode_arbitration_isStuck);
-  assign when_CsrPlugin_l909_1 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l909_2 = (! memory_arbitration_isStuck);
-  assign when_CsrPlugin_l909_3 = (! writeBack_arbitration_isStuck);
-  assign when_CsrPlugin_l922 = ({CsrPlugin_exceptionPortCtrl_exceptionValids_writeBack,{CsrPlugin_exceptionPortCtrl_exceptionValids_memory,{CsrPlugin_exceptionPortCtrl_exceptionValids_execute,CsrPlugin_exceptionPortCtrl_exceptionValids_decode}}} != 4'b0000);
+  assign when_CsrPlugin_l922 = (! decode_arbitration_isStuck);
+  assign when_CsrPlugin_l922_1 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l922_2 = (! memory_arbitration_isStuck);
+  assign when_CsrPlugin_l922_3 = (! writeBack_arbitration_isStuck);
+  assign when_CsrPlugin_l935 = ({CsrPlugin_exceptionPortCtrl_exceptionValids_writeBack,{CsrPlugin_exceptionPortCtrl_exceptionValids_memory,{CsrPlugin_exceptionPortCtrl_exceptionValids_execute,CsrPlugin_exceptionPortCtrl_exceptionValids_decode}}} != 4'b0000);
   assign CsrPlugin_exceptionPendings_0 = CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_decode;
   assign CsrPlugin_exceptionPendings_1 = CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_execute;
   assign CsrPlugin_exceptionPendings_2 = CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_memory;
   assign CsrPlugin_exceptionPendings_3 = CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_writeBack;
-  assign when_CsrPlugin_l946 = (CsrPlugin_mstatus_MIE || (CsrPlugin_privilege < 2'b11));
-  assign when_CsrPlugin_l952 = ((_zz_when_CsrPlugin_l952 && 1'b1) && (! 1'b0));
-  assign when_CsrPlugin_l952_1 = ((_zz_when_CsrPlugin_l952_1 && 1'b1) && (! 1'b0));
-  assign when_CsrPlugin_l952_2 = ((_zz_when_CsrPlugin_l952_2 && 1'b1) && (! 1'b0));
+  assign when_CsrPlugin_l959 = (CsrPlugin_mstatus_MIE || (CsrPlugin_privilege < 2'b11));
+  assign when_CsrPlugin_l965 = ((_zz_when_CsrPlugin_l965 && 1'b1) && (! 1'b0));
+  assign when_CsrPlugin_l965_1 = ((_zz_when_CsrPlugin_l965_1 && 1'b1) && (! 1'b0));
+  assign when_CsrPlugin_l965_2 = ((_zz_when_CsrPlugin_l965_2 && 1'b1) && (! 1'b0));
   assign CsrPlugin_exception = (CsrPlugin_exceptionPortCtrl_exceptionValids_writeBack && CsrPlugin_allowException);
   assign CsrPlugin_pipelineLiberator_active = ((CsrPlugin_interrupt_valid && CsrPlugin_allowInterrupts) && decode_arbitration_isValid);
-  assign when_CsrPlugin_l980 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l980_1 = (! memory_arbitration_isStuck);
-  assign when_CsrPlugin_l980_2 = (! writeBack_arbitration_isStuck);
-  assign when_CsrPlugin_l985 = ((! CsrPlugin_pipelineLiberator_active) || decode_arbitration_removeIt);
+  assign when_CsrPlugin_l993 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l993_1 = (! memory_arbitration_isStuck);
+  assign when_CsrPlugin_l993_2 = (! writeBack_arbitration_isStuck);
+  assign when_CsrPlugin_l998 = ((! CsrPlugin_pipelineLiberator_active) || decode_arbitration_removeIt);
   always @(*) begin
     CsrPlugin_pipelineLiberator_done = CsrPlugin_pipelineLiberator_pcValids_2;
-    if(when_CsrPlugin_l991) begin
+    if(when_CsrPlugin_l1004) begin
       CsrPlugin_pipelineLiberator_done = 1'b0;
     end
     if(CsrPlugin_hadException) begin
@@ -5509,7 +5480,7 @@ module VexRiscv (
     end
   end
 
-  assign when_CsrPlugin_l991 = ({CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_writeBack,{CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_memory,CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_execute}} != 3'b000);
+  assign when_CsrPlugin_l1004 = ({CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_writeBack,{CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_memory,CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_execute}} != 3'b000);
   assign CsrPlugin_interruptJump = ((CsrPlugin_interrupt_valid && CsrPlugin_pipelineLiberator_done) && CsrPlugin_allowInterrupts);
   always @(*) begin
     CsrPlugin_targetPrivilege = CsrPlugin_interrupt_targetPrivilege;
@@ -5547,14 +5518,14 @@ module VexRiscv (
     endcase
   end
 
-  assign when_CsrPlugin_l1019 = (CsrPlugin_hadException || CsrPlugin_interruptJump);
-  assign when_CsrPlugin_l1064 = (writeBack_arbitration_isValid && (writeBack_ENV_CTRL == `EnvCtrlEnum_binary_sequential_XRET));
-  assign switch_CsrPlugin_l1068 = writeBack_INSTRUCTION[29 : 28];
+  assign when_CsrPlugin_l1032 = (CsrPlugin_hadException || CsrPlugin_interruptJump);
+  assign when_CsrPlugin_l1077 = (writeBack_arbitration_isValid && (writeBack_ENV_CTRL == EnvCtrlEnum_XRET));
+  assign switch_CsrPlugin_l1081 = writeBack_INSTRUCTION[29 : 28];
   assign contextSwitching = CsrPlugin_jumpInterface_valid;
-  assign when_CsrPlugin_l1108 = (execute_arbitration_isValid && (execute_ENV_CTRL == `EnvCtrlEnum_binary_sequential_WFI));
-  assign when_CsrPlugin_l1110 = (! execute_CsrPlugin_wfiWake);
-  assign when_CsrPlugin_l1116 = ({(writeBack_arbitration_isValid && (writeBack_ENV_CTRL == `EnvCtrlEnum_binary_sequential_XRET)),{(memory_arbitration_isValid && (memory_ENV_CTRL == `EnvCtrlEnum_binary_sequential_XRET)),(execute_arbitration_isValid && (execute_ENV_CTRL == `EnvCtrlEnum_binary_sequential_XRET))}} != 3'b000);
-  assign execute_CsrPlugin_blockedBySideEffects = (({writeBack_arbitration_isValid,memory_arbitration_isValid} != 2'b00) || 1'b0);
+  assign when_CsrPlugin_l1121 = (execute_arbitration_isValid && (execute_ENV_CTRL == EnvCtrlEnum_WFI));
+  assign when_CsrPlugin_l1123 = (! execute_CsrPlugin_wfiWake);
+  assign when_CsrPlugin_l1129 = (|{(writeBack_arbitration_isValid && (writeBack_ENV_CTRL == EnvCtrlEnum_XRET)),{(memory_arbitration_isValid && (memory_ENV_CTRL == EnvCtrlEnum_XRET)),(execute_arbitration_isValid && (execute_ENV_CTRL == EnvCtrlEnum_XRET))}});
+  assign execute_CsrPlugin_blockedBySideEffects = ((|{writeBack_arbitration_isValid,memory_arbitration_isValid}) || 1'b0);
   always @(*) begin
     execute_CsrPlugin_illegalAccess = 1'b1;
     if(execute_CsrPlugin_csr_3264) begin
@@ -5664,18 +5635,18 @@ module VexRiscv (
     if(CsrPlugin_csrMapping_allowCsrSignal) begin
       execute_CsrPlugin_illegalAccess = 1'b0;
     end
-    if(when_CsrPlugin_l1297) begin
+    if(when_CsrPlugin_l1310) begin
       execute_CsrPlugin_illegalAccess = 1'b1;
     end
-    if(when_CsrPlugin_l1302) begin
+    if(when_CsrPlugin_l1315) begin
       execute_CsrPlugin_illegalAccess = 1'b0;
     end
   end
 
   always @(*) begin
     execute_CsrPlugin_illegalInstruction = 1'b0;
-    if(when_CsrPlugin_l1136) begin
-      if(when_CsrPlugin_l1137) begin
+    if(when_CsrPlugin_l1149) begin
+      if(when_CsrPlugin_l1150) begin
         execute_CsrPlugin_illegalInstruction = 1'b1;
       end
     end
@@ -5683,20 +5654,20 @@ module VexRiscv (
 
   always @(*) begin
     CsrPlugin_selfException_valid = 1'b0;
-    if(when_CsrPlugin_l1129) begin
+    if(when_CsrPlugin_l1142) begin
       CsrPlugin_selfException_valid = 1'b1;
     end
-    if(when_CsrPlugin_l1144) begin
+    if(when_CsrPlugin_l1157) begin
       CsrPlugin_selfException_valid = 1'b1;
     end
   end
 
   always @(*) begin
     CsrPlugin_selfException_payload_code = 4'bxxxx;
-    if(when_CsrPlugin_l1129) begin
+    if(when_CsrPlugin_l1142) begin
       CsrPlugin_selfException_payload_code = 4'b0010;
     end
-    if(when_CsrPlugin_l1144) begin
+    if(when_CsrPlugin_l1157) begin
       case(CsrPlugin_privilege)
         2'b00 : begin
           CsrPlugin_selfException_payload_code = 4'b1000;
@@ -5709,20 +5680,20 @@ module VexRiscv (
   end
 
   assign CsrPlugin_selfException_payload_badAddr = execute_INSTRUCTION;
-  assign when_CsrPlugin_l1129 = (execute_CsrPlugin_illegalAccess || execute_CsrPlugin_illegalInstruction);
-  assign when_CsrPlugin_l1136 = (execute_arbitration_isValid && (execute_ENV_CTRL == `EnvCtrlEnum_binary_sequential_XRET));
-  assign when_CsrPlugin_l1137 = (CsrPlugin_privilege < execute_INSTRUCTION[29 : 28]);
-  assign when_CsrPlugin_l1144 = (execute_arbitration_isValid && (execute_ENV_CTRL == `EnvCtrlEnum_binary_sequential_ECALL));
+  assign when_CsrPlugin_l1142 = (execute_CsrPlugin_illegalAccess || execute_CsrPlugin_illegalInstruction);
+  assign when_CsrPlugin_l1149 = (execute_arbitration_isValid && (execute_ENV_CTRL == EnvCtrlEnum_XRET));
+  assign when_CsrPlugin_l1150 = (CsrPlugin_privilege < execute_INSTRUCTION[29 : 28]);
+  assign when_CsrPlugin_l1157 = (execute_arbitration_isValid && (execute_ENV_CTRL == EnvCtrlEnum_ECALL));
   always @(*) begin
     execute_CsrPlugin_writeInstruction = ((execute_arbitration_isValid && execute_IS_CSR) && execute_CSR_WRITE_OPCODE);
-    if(when_CsrPlugin_l1297) begin
+    if(when_CsrPlugin_l1310) begin
       execute_CsrPlugin_writeInstruction = 1'b0;
     end
   end
 
   always @(*) begin
     execute_CsrPlugin_readInstruction = ((execute_arbitration_isValid && execute_IS_CSR) && execute_CSR_READ_OPCODE);
-    if(when_CsrPlugin_l1297) begin
+    if(when_CsrPlugin_l1310) begin
       execute_CsrPlugin_readInstruction = 1'b0;
     end
   end
@@ -5731,9 +5702,9 @@ module VexRiscv (
   assign execute_CsrPlugin_readEnable = (execute_CsrPlugin_readInstruction && (! execute_arbitration_isStuck));
   assign CsrPlugin_csrMapping_hazardFree = (! execute_CsrPlugin_blockedBySideEffects);
   assign execute_CsrPlugin_readToWriteData = CsrPlugin_csrMapping_readDataSignal;
-  assign switch_Misc_l200_2 = execute_INSTRUCTION[13];
+  assign switch_Misc_l210_2 = execute_INSTRUCTION[13];
   always @(*) begin
-    case(switch_Misc_l200_2)
+    case(switch_Misc_l210_2)
       1'b0 : begin
         _zz_CsrPlugin_csrMapping_writeDataSignal = execute_SRC1;
       end
@@ -5744,8 +5715,8 @@ module VexRiscv (
   end
 
   assign CsrPlugin_csrMapping_writeDataSignal = _zz_CsrPlugin_csrMapping_writeDataSignal;
-  assign when_CsrPlugin_l1176 = (execute_arbitration_isValid && execute_IS_CSR);
-  assign when_CsrPlugin_l1180 = (execute_arbitration_isValid && (execute_IS_CSR || 1'b0));
+  assign when_CsrPlugin_l1189 = (execute_arbitration_isValid && execute_IS_CSR);
+  assign when_CsrPlugin_l1193 = (execute_arbitration_isValid && (execute_IS_CSR || 1'b0));
   assign execute_CsrPlugin_csrAddress = execute_INSTRUCTION[31 : 20];
   assign execute_MulPlugin_a = execute_RS1;
   assign execute_MulPlugin_b = execute_RS2;
@@ -5838,12 +5809,15 @@ module VexRiscv (
   end
 
   assign _zz_CsrPlugin_csrMapping_readDataInit_1 = (_zz_CsrPlugin_csrMapping_readDataInit & externalInterruptArray_regNext);
-  assign externalInterrupt = (_zz_CsrPlugin_csrMapping_readDataInit_1 != 32'h0);
-  assign execute_CfuPlugin_schedule = (execute_arbitration_isValid && execute_CfuPlugin_CFU_ENABLE);
+  assign externalInterrupt = (|_zz_CsrPlugin_csrMapping_readDataInit_1);
+  assign execute_CfuPlugin_hazard = ({(writeBack_arbitration_isValid && writeBack_HAS_SIDE_EFFECT),(memory_arbitration_isValid && memory_HAS_SIDE_EFFECT)} != 2'b00);
+  assign execute_CfuPlugin_scheduleWish = (execute_arbitration_isValid && execute_CfuPlugin_CFU_ENABLE);
+  assign execute_CfuPlugin_schedule = (execute_CfuPlugin_scheduleWish && (! execute_CfuPlugin_hazard));
+  assign when_CfuPlugin_l194 = (execute_CfuPlugin_scheduleWish && execute_CfuPlugin_hazard);
   assign CfuPlugin_bus_cmd_fire = (CfuPlugin_bus_cmd_valid && CfuPlugin_bus_cmd_ready);
-  assign when_CfuPlugin_l171 = (! execute_arbitration_isStuckByOthers);
+  assign when_CfuPlugin_l197 = (! execute_arbitration_isStuck);
   assign CfuPlugin_bus_cmd_valid = ((execute_CfuPlugin_schedule || execute_CfuPlugin_hold) && (! execute_CfuPlugin_fired));
-  assign when_CfuPlugin_l175 = (CfuPlugin_bus_cmd_valid && (! CfuPlugin_bus_cmd_ready));
+  assign when_CfuPlugin_l201 = (CfuPlugin_bus_cmd_valid && (! CfuPlugin_bus_cmd_ready));
   assign execute_CfuPlugin_functionsIds_0 = _zz_execute_CfuPlugin_functionsIds_0;
   assign CfuPlugin_bus_cmd_payload_function_id = execute_CfuPlugin_functionsIds_0;
   assign CfuPlugin_bus_cmd_payload_inputs_0 = execute_RS1;
@@ -5877,7 +5851,7 @@ module VexRiscv (
 
   always @(*) begin
     case(execute_CfuPlugin_CFU_INPUT_2_KIND)
-      `Input2Kind_binary_sequential_RS : begin
+      Input2Kind_RS : begin
         _zz_CfuPlugin_bus_cmd_payload_inputs_1_2 = execute_RS2;
       end
       default : begin
@@ -5888,16 +5862,16 @@ module VexRiscv (
 
   assign CfuPlugin_bus_cmd_payload_inputs_1 = _zz_CfuPlugin_bus_cmd_payload_inputs_1_2;
   assign CfuPlugin_bus_rsp_ready = (! CfuPlugin_bus_rsp_rValid);
-  assign CfuPlugin_bus_rsp_rsp_valid = (CfuPlugin_bus_rsp_valid || CfuPlugin_bus_rsp_rValid);
-  assign CfuPlugin_bus_rsp_rsp_payload_outputs_0 = (CfuPlugin_bus_rsp_rValid ? CfuPlugin_bus_rsp_rData_outputs_0 : CfuPlugin_bus_rsp_payload_outputs_0);
+  assign memory_CfuPlugin_rsp_valid = (CfuPlugin_bus_rsp_valid || CfuPlugin_bus_rsp_rValid);
+  assign memory_CfuPlugin_rsp_payload_outputs_0 = (CfuPlugin_bus_rsp_rValid ? CfuPlugin_bus_rsp_rData_outputs_0 : CfuPlugin_bus_rsp_payload_outputs_0);
   always @(*) begin
-    CfuPlugin_bus_rsp_rsp_ready = 1'b0;
+    memory_CfuPlugin_rsp_ready = 1'b0;
     if(memory_CfuPlugin_CFU_IN_FLIGHT) begin
-      CfuPlugin_bus_rsp_rsp_ready = (! memory_arbitration_isStuckByOthers);
+      memory_CfuPlugin_rsp_ready = (! memory_arbitration_isStuckByOthers);
     end
   end
 
-  assign when_CfuPlugin_l208 = (! CfuPlugin_bus_rsp_rsp_valid);
+  assign when_CfuPlugin_l237 = (! memory_CfuPlugin_rsp_valid);
   assign FpuPlugin_port_cmd_ready = FpuPlugin_fpu_io_port_0_cmd_ready;
   assign FpuPlugin_port_commit_ready = FpuPlugin_fpu_io_port_0_commit_ready;
   assign FpuPlugin_port_rsp_valid = FpuPlugin_fpu_io_port_0_rsp_valid;
@@ -5922,7 +5896,7 @@ module VexRiscv (
   assign FpuPlugin_csrActive = (execute_arbitration_isValid && execute_IS_CSR);
   assign when_FpuPlugin_l214 = (FpuPlugin_csrActive && FpuPlugin_hasPending);
   assign FpuPlugin_sd = (FpuPlugin_fs == 2'b11);
-  assign when_FpuPlugin_l219 = ((writeBack_arbitration_isFiring && writeBack_FPU_ENABLE) && (writeBack_FPU_OPCODE != `FpuOpcode_binary_sequential_STORE));
+  assign when_FpuPlugin_l219 = ((writeBack_arbitration_isFiring && writeBack_FPU_ENABLE) && (writeBack_FPU_OPCODE != FpuOpcode_STORE));
   assign FpuPlugin_port_cmd_fire_1 = (FpuPlugin_port_cmd_valid && FpuPlugin_port_cmd_ready);
   assign when_FpuPlugin_l234 = (! decode_arbitration_isStuck);
   assign decode_FpuPlugin_hazard = (FpuPlugin_pendings[5] || FpuPlugin_csrActive);
@@ -5937,7 +5911,7 @@ module VexRiscv (
   assign FpuPlugin_port_cmd_payload_rs2 = decode_INSTRUCTION[24 : 20];
   assign FpuPlugin_port_cmd_payload_rs3 = decode_INSTRUCTION[31 : 27];
   assign FpuPlugin_port_cmd_payload_rd = decode_INSTRUCTION[11 : 7];
-  assign FpuPlugin_port_cmd_payload_format = `FpuFormat_binary_sequential_FLOAT;
+  assign FpuPlugin_port_cmd_payload_format = FpuFormat_FLOAT;
   assign _zz_FpuPlugin_port_cmd_payload_roundMode_1 = decode_FpuPlugin_roundMode;
   assign _zz_FpuPlugin_port_cmd_payload_roundMode = _zz_FpuPlugin_port_cmd_payload_roundMode_1;
   assign FpuPlugin_port_cmd_payload_roundMode = _zz_FpuPlugin_port_cmd_payload_roundMode;
@@ -6015,91 +5989,94 @@ module VexRiscv (
   assign when_Pipeline_l124_24 = (! memory_arbitration_isStuck);
   assign when_Pipeline_l124_25 = (! writeBack_arbitration_isStuck);
   assign when_Pipeline_l124_26 = (! execute_arbitration_isStuck);
-  assign when_Pipeline_l124_27 = (! execute_arbitration_isStuck);
+  assign when_Pipeline_l124_27 = (! memory_arbitration_isStuck);
+  assign when_Pipeline_l124_28 = (! writeBack_arbitration_isStuck);
+  assign when_Pipeline_l124_29 = (! execute_arbitration_isStuck);
+  assign when_Pipeline_l124_30 = (! execute_arbitration_isStuck);
   assign _zz_decode_to_execute_ALU_BITWISE_CTRL_1 = decode_ALU_BITWISE_CTRL;
   assign _zz_decode_ALU_BITWISE_CTRL = _zz_decode_ALU_BITWISE_CTRL_1;
-  assign when_Pipeline_l124_28 = (! execute_arbitration_isStuck);
+  assign when_Pipeline_l124_31 = (! execute_arbitration_isStuck);
   assign _zz_execute_ALU_BITWISE_CTRL = decode_to_execute_ALU_BITWISE_CTRL;
   assign _zz_decode_to_execute_SHIFT_CTRL_1 = decode_SHIFT_CTRL;
   assign _zz_execute_to_memory_SHIFT_CTRL_1 = execute_SHIFT_CTRL;
   assign _zz_decode_SHIFT_CTRL = _zz_decode_SHIFT_CTRL_1;
-  assign when_Pipeline_l124_29 = (! execute_arbitration_isStuck);
+  assign when_Pipeline_l124_32 = (! execute_arbitration_isStuck);
   assign _zz_execute_SHIFT_CTRL = decode_to_execute_SHIFT_CTRL;
-  assign when_Pipeline_l124_30 = (! memory_arbitration_isStuck);
+  assign when_Pipeline_l124_33 = (! memory_arbitration_isStuck);
   assign _zz_memory_SHIFT_CTRL = execute_to_memory_SHIFT_CTRL;
   assign _zz_decode_to_execute_BRANCH_CTRL_1 = decode_BRANCH_CTRL;
   assign _zz_decode_BRANCH_CTRL_1 = _zz_decode_BRANCH_CTRL;
-  assign when_Pipeline_l124_31 = (! execute_arbitration_isStuck);
+  assign when_Pipeline_l124_34 = (! execute_arbitration_isStuck);
   assign _zz_execute_BRANCH_CTRL = decode_to_execute_BRANCH_CTRL;
-  assign when_Pipeline_l124_32 = (! execute_arbitration_isStuck);
+  assign when_Pipeline_l124_35 = (! execute_arbitration_isStuck);
   assign _zz_decode_to_execute_ENV_CTRL_1 = decode_ENV_CTRL;
   assign _zz_execute_to_memory_ENV_CTRL_1 = execute_ENV_CTRL;
   assign _zz_memory_to_writeBack_ENV_CTRL_1 = memory_ENV_CTRL;
   assign _zz_decode_ENV_CTRL = _zz_decode_ENV_CTRL_1;
-  assign when_Pipeline_l124_33 = (! execute_arbitration_isStuck);
-  assign _zz_execute_ENV_CTRL = decode_to_execute_ENV_CTRL;
-  assign when_Pipeline_l124_34 = (! memory_arbitration_isStuck);
-  assign _zz_memory_ENV_CTRL = execute_to_memory_ENV_CTRL;
-  assign when_Pipeline_l124_35 = (! writeBack_arbitration_isStuck);
-  assign _zz_writeBack_ENV_CTRL = memory_to_writeBack_ENV_CTRL;
   assign when_Pipeline_l124_36 = (! execute_arbitration_isStuck);
+  assign _zz_execute_ENV_CTRL = decode_to_execute_ENV_CTRL;
   assign when_Pipeline_l124_37 = (! memory_arbitration_isStuck);
+  assign _zz_memory_ENV_CTRL = execute_to_memory_ENV_CTRL;
   assign when_Pipeline_l124_38 = (! writeBack_arbitration_isStuck);
+  assign _zz_writeBack_ENV_CTRL = memory_to_writeBack_ENV_CTRL;
   assign when_Pipeline_l124_39 = (! execute_arbitration_isStuck);
   assign when_Pipeline_l124_40 = (! memory_arbitration_isStuck);
-  assign when_Pipeline_l124_41 = (! execute_arbitration_isStuck);
+  assign when_Pipeline_l124_41 = (! writeBack_arbitration_isStuck);
   assign when_Pipeline_l124_42 = (! execute_arbitration_isStuck);
-  assign when_Pipeline_l124_43 = (! execute_arbitration_isStuck);
+  assign when_Pipeline_l124_43 = (! memory_arbitration_isStuck);
+  assign when_Pipeline_l124_44 = (! execute_arbitration_isStuck);
+  assign when_Pipeline_l124_45 = (! execute_arbitration_isStuck);
+  assign when_Pipeline_l124_46 = (! execute_arbitration_isStuck);
   assign _zz_decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND_1 = decode_CfuPlugin_CFU_INPUT_2_KIND;
   assign _zz_decode_CfuPlugin_CFU_INPUT_2_KIND = _zz_decode_CfuPlugin_CFU_INPUT_2_KIND_1;
-  assign when_Pipeline_l124_44 = (! execute_arbitration_isStuck);
+  assign when_Pipeline_l124_47 = (! execute_arbitration_isStuck);
   assign _zz_execute_CfuPlugin_CFU_INPUT_2_KIND = decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND;
-  assign when_Pipeline_l124_45 = (! execute_arbitration_isStuck);
-  assign when_Pipeline_l124_46 = (! memory_arbitration_isStuck);
-  assign when_Pipeline_l124_47 = (! writeBack_arbitration_isStuck);
   assign when_Pipeline_l124_48 = (! execute_arbitration_isStuck);
   assign when_Pipeline_l124_49 = (! memory_arbitration_isStuck);
   assign when_Pipeline_l124_50 = (! writeBack_arbitration_isStuck);
   assign when_Pipeline_l124_51 = (! execute_arbitration_isStuck);
   assign when_Pipeline_l124_52 = (! memory_arbitration_isStuck);
   assign when_Pipeline_l124_53 = (! writeBack_arbitration_isStuck);
+  assign when_Pipeline_l124_54 = (! execute_arbitration_isStuck);
+  assign when_Pipeline_l124_55 = (! memory_arbitration_isStuck);
+  assign when_Pipeline_l124_56 = (! writeBack_arbitration_isStuck);
   assign _zz_decode_to_execute_FPU_OPCODE_1 = decode_FPU_OPCODE;
   assign _zz_execute_to_memory_FPU_OPCODE_1 = execute_FPU_OPCODE;
   assign _zz_memory_to_writeBack_FPU_OPCODE_1 = memory_FPU_OPCODE;
   assign _zz_decode_FPU_OPCODE = _zz_decode_FPU_OPCODE_1;
-  assign when_Pipeline_l124_54 = (! execute_arbitration_isStuck);
-  assign _zz_execute_FPU_OPCODE = decode_to_execute_FPU_OPCODE;
-  assign when_Pipeline_l124_55 = (! memory_arbitration_isStuck);
-  assign _zz_memory_FPU_OPCODE = execute_to_memory_FPU_OPCODE;
-  assign when_Pipeline_l124_56 = (! writeBack_arbitration_isStuck);
-  assign _zz_writeBack_FPU_OPCODE = memory_to_writeBack_FPU_OPCODE;
   assign when_Pipeline_l124_57 = (! execute_arbitration_isStuck);
+  assign _zz_execute_FPU_OPCODE = decode_to_execute_FPU_OPCODE;
   assign when_Pipeline_l124_58 = (! memory_arbitration_isStuck);
+  assign _zz_memory_FPU_OPCODE = execute_to_memory_FPU_OPCODE;
   assign when_Pipeline_l124_59 = (! writeBack_arbitration_isStuck);
+  assign _zz_writeBack_FPU_OPCODE = memory_to_writeBack_FPU_OPCODE;
   assign when_Pipeline_l124_60 = (! execute_arbitration_isStuck);
-  assign when_Pipeline_l124_61 = (! execute_arbitration_isStuck);
-  assign when_Pipeline_l124_62 = (! execute_arbitration_isStuck);
+  assign when_Pipeline_l124_61 = (! memory_arbitration_isStuck);
+  assign when_Pipeline_l124_62 = (! writeBack_arbitration_isStuck);
   assign when_Pipeline_l124_63 = (! execute_arbitration_isStuck);
   assign when_Pipeline_l124_64 = (! execute_arbitration_isStuck);
   assign when_Pipeline_l124_65 = (! execute_arbitration_isStuck);
-  assign when_Pipeline_l124_66 = (! memory_arbitration_isStuck);
-  assign when_Pipeline_l124_67 = (! writeBack_arbitration_isStuck);
+  assign when_Pipeline_l124_66 = (! execute_arbitration_isStuck);
+  assign when_Pipeline_l124_67 = (! execute_arbitration_isStuck);
   assign when_Pipeline_l124_68 = (! execute_arbitration_isStuck);
   assign when_Pipeline_l124_69 = (! memory_arbitration_isStuck);
   assign when_Pipeline_l124_70 = (! writeBack_arbitration_isStuck);
-  assign when_Pipeline_l124_71 = (! memory_arbitration_isStuck);
-  assign when_Pipeline_l124_72 = (! writeBack_arbitration_isStuck);
-  assign when_Pipeline_l124_73 = (! memory_arbitration_isStuck);
-  assign when_Pipeline_l124_74 = (! writeBack_arbitration_isStuck);
-  assign when_Pipeline_l124_75 = (! memory_arbitration_isStuck);
+  assign when_Pipeline_l124_71 = (! execute_arbitration_isStuck);
+  assign when_Pipeline_l124_72 = (! memory_arbitration_isStuck);
+  assign when_Pipeline_l124_73 = (! writeBack_arbitration_isStuck);
+  assign when_Pipeline_l124_74 = (! memory_arbitration_isStuck);
+  assign when_Pipeline_l124_75 = (! writeBack_arbitration_isStuck);
   assign when_Pipeline_l124_76 = (! memory_arbitration_isStuck);
-  assign when_Pipeline_l124_77 = (! memory_arbitration_isStuck);
+  assign when_Pipeline_l124_77 = (! writeBack_arbitration_isStuck);
   assign when_Pipeline_l124_78 = (! memory_arbitration_isStuck);
   assign when_Pipeline_l124_79 = (! memory_arbitration_isStuck);
-  assign when_Pipeline_l124_80 = (! writeBack_arbitration_isStuck);
+  assign when_Pipeline_l124_80 = (! memory_arbitration_isStuck);
   assign when_Pipeline_l124_81 = (! memory_arbitration_isStuck);
-  assign when_Pipeline_l124_82 = (! writeBack_arbitration_isStuck);
+  assign when_Pipeline_l124_82 = (! memory_arbitration_isStuck);
   assign when_Pipeline_l124_83 = (! writeBack_arbitration_isStuck);
+  assign when_Pipeline_l124_84 = (! memory_arbitration_isStuck);
+  assign when_Pipeline_l124_85 = (! writeBack_arbitration_isStuck);
+  assign when_Pipeline_l124_86 = (! writeBack_arbitration_isStuck);
   assign decode_arbitration_isFlushed = (({writeBack_arbitration_flushNext,{memory_arbitration_flushNext,execute_arbitration_flushNext}} != 3'b000) || ({writeBack_arbitration_flushIt,{memory_arbitration_flushIt,{execute_arbitration_flushIt,decode_arbitration_flushIt}}} != 4'b0000));
   assign execute_arbitration_isFlushed = (({writeBack_arbitration_flushNext,memory_arbitration_flushNext} != 2'b00) || ({writeBack_arbitration_flushIt,{memory_arbitration_flushIt,execute_arbitration_flushIt}} != 3'b000));
   assign memory_arbitration_isFlushed = ((writeBack_arbitration_flushNext != 1'b0) || ({writeBack_arbitration_flushIt,memory_arbitration_flushIt} != 2'b00));
@@ -6126,34 +6103,34 @@ module VexRiscv (
   assign when_Pipeline_l154_1 = ((! execute_arbitration_isStuck) && (! execute_arbitration_removeIt));
   assign when_Pipeline_l151_2 = ((! writeBack_arbitration_isStuck) || writeBack_arbitration_removeIt);
   assign when_Pipeline_l154_2 = ((! memory_arbitration_isStuck) && (! memory_arbitration_removeIt));
-  assign when_CsrPlugin_l1264 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_1 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_2 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_3 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_4 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_5 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_6 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_7 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_8 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_9 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_10 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_11 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_12 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_13 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_14 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_15 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_16 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_17 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_18 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_19 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_20 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_21 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_22 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_23 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_24 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_25 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_26 = (! execute_arbitration_isStuck);
-  assign when_CsrPlugin_l1264_27 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_1 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_2 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_3 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_4 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_5 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_6 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_7 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_8 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_9 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_10 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_11 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_12 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_13 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_14 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_15 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_16 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_17 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_18 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_19 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_20 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_21 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_22 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_23 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_24 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_25 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_26 = (! execute_arbitration_isStuck);
+  assign when_CsrPlugin_l1277_27 = (! execute_arbitration_isStuck);
   always @(*) begin
     _zz_CsrPlugin_csrMapping_readDataInit_2 = 32'h0;
     if(execute_CsrPlugin_csr_3264) begin
@@ -6191,12 +6168,13 @@ module VexRiscv (
     end
   end
 
+  assign switch_CsrPlugin_l723 = CsrPlugin_csrMapping_writeDataSignal[12 : 11];
   always @(*) begin
     _zz_CsrPlugin_csrMapping_readDataInit_7 = 32'h0;
     if(execute_CsrPlugin_csr_768) begin
-      _zz_CsrPlugin_csrMapping_readDataInit_7[12 : 11] = CsrPlugin_mstatus_MPP;
       _zz_CsrPlugin_csrMapping_readDataInit_7[7 : 7] = CsrPlugin_mstatus_MPIE;
       _zz_CsrPlugin_csrMapping_readDataInit_7[3 : 3] = CsrPlugin_mstatus_MIE;
+      _zz_CsrPlugin_csrMapping_readDataInit_7[12 : 11] = CsrPlugin_mstatus_MPP;
       _zz_CsrPlugin_csrMapping_readDataInit_7[14 : 13] = FpuPlugin_fs;
       _zz_CsrPlugin_csrMapping_readDataInit_7[31 : 31] = FpuPlugin_sd;
     end
@@ -6360,8 +6338,8 @@ module VexRiscv (
   end
 
   assign CsrPlugin_csrMapping_readDataInit = (((((_zz_CsrPlugin_csrMapping_readDataInit_2 | _zz_CsrPlugin_csrMapping_readDataInit_3) | (_zz_CsrPlugin_csrMapping_readDataInit_4 | _zz_CsrPlugin_csrMapping_readDataInit_5)) | ((_zz_CsrPlugin_csrMapping_readDataInit_29 | _zz_CsrPlugin_csrMapping_readDataInit_6) | (_zz_CsrPlugin_csrMapping_readDataInit_7 | _zz_CsrPlugin_csrMapping_readDataInit_8))) | (((_zz_CsrPlugin_csrMapping_readDataInit_9 | _zz_CsrPlugin_csrMapping_readDataInit_10) | (_zz_CsrPlugin_csrMapping_readDataInit_11 | _zz_CsrPlugin_csrMapping_readDataInit_12)) | ((_zz_CsrPlugin_csrMapping_readDataInit_13 | _zz_CsrPlugin_csrMapping_readDataInit_14) | (_zz_CsrPlugin_csrMapping_readDataInit_15 | _zz_CsrPlugin_csrMapping_readDataInit_16)))) | ((((_zz_CsrPlugin_csrMapping_readDataInit_17 | _zz_CsrPlugin_csrMapping_readDataInit_18) | (_zz_CsrPlugin_csrMapping_readDataInit_19 | _zz_CsrPlugin_csrMapping_readDataInit_20)) | ((_zz_CsrPlugin_csrMapping_readDataInit_21 | _zz_CsrPlugin_csrMapping_readDataInit_22) | (_zz_CsrPlugin_csrMapping_readDataInit_23 | _zz_CsrPlugin_csrMapping_readDataInit_24))) | ((_zz_CsrPlugin_csrMapping_readDataInit_25 | _zz_CsrPlugin_csrMapping_readDataInit_26) | (_zz_CsrPlugin_csrMapping_readDataInit_27 | _zz_CsrPlugin_csrMapping_readDataInit_28))));
-  assign when_CsrPlugin_l1297 = (CsrPlugin_privilege < execute_CsrPlugin_csrAddress[9 : 8]);
-  assign when_CsrPlugin_l1302 = ((! execute_arbitration_isValid) || (! execute_IS_CSR));
+  assign when_CsrPlugin_l1310 = (CsrPlugin_privilege < execute_CsrPlugin_csrAddress[9 : 8]);
+  assign when_CsrPlugin_l1315 = ((! execute_arbitration_isValid) || (! execute_IS_CSR));
   assign iBusWishbone_ADR = {_zz_iBusWishbone_ADR_1,_zz_iBusWishbone_ADR};
   assign iBusWishbone_CTI = ((_zz_iBusWishbone_ADR == 3'b111) ? 3'b111 : 3'b010);
   assign iBusWishbone_BTE = 2'b00;
@@ -6417,11 +6395,9 @@ module VexRiscv (
       IBusCachedPlugin_injector_nextPcCalc_valids_2 <= 1'b0;
       IBusCachedPlugin_injector_nextPcCalc_valids_3 <= 1'b0;
       IBusCachedPlugin_injector_nextPcCalc_valids_4 <= 1'b0;
-      IBusCachedPlugin_rspCounter <= _zz_IBusCachedPlugin_rspCounter;
       IBusCachedPlugin_rspCounter <= 32'h0;
       dataCache_1_io_mem_cmd_rValid <= 1'b0;
       dataCache_1_io_mem_cmd_s2mPipe_rValid <= 1'b0;
-      DBusCachedPlugin_rspCounter <= _zz_DBusCachedPlugin_rspCounter;
       DBusCachedPlugin_rspCounter <= 32'h0;
       _zz_7 <= 1'b1;
       HazardSimplePlugin_writeBackBuffer_valid <= 1'b0;
@@ -6433,6 +6409,8 @@ module VexRiscv (
       CsrPlugin_mie_MEIE <= 1'b0;
       CsrPlugin_mie_MTIE <= 1'b0;
       CsrPlugin_mie_MSIE <= 1'b0;
+      CsrPlugin_mcycle <= 64'h0;
+      CsrPlugin_minstret <= 64'h0;
       CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_decode <= 1'b0;
       CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_execute <= 1'b0;
       CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_memory <= 1'b0;
@@ -6478,16 +6456,16 @@ module VexRiscv (
         IBusCachedPlugin_fetchPc_correctionReg <= 1'b0;
       end
       IBusCachedPlugin_fetchPc_booted <= 1'b1;
-      if(when_Fetcher_l131) begin
+      if(when_Fetcher_l134) begin
         IBusCachedPlugin_fetchPc_inc <= 1'b0;
       end
       if(IBusCachedPlugin_fetchPc_output_fire_1) begin
         IBusCachedPlugin_fetchPc_inc <= 1'b1;
       end
-      if(when_Fetcher_l131_1) begin
+      if(when_Fetcher_l134_1) begin
         IBusCachedPlugin_fetchPc_inc <= 1'b0;
       end
-      if(when_Fetcher_l158) begin
+      if(when_Fetcher_l161) begin
         IBusCachedPlugin_fetchPc_pcReg <= IBusCachedPlugin_fetchPc_pc;
       end
       if(IBusCachedPlugin_iBusRsp_flush) begin
@@ -6505,13 +6483,13 @@ module VexRiscv (
       if(IBusCachedPlugin_fetchPc_flushed) begin
         IBusCachedPlugin_injector_nextPcCalc_valids_0 <= 1'b0;
       end
-      if(when_Fetcher_l329) begin
+      if(when_Fetcher_l332) begin
         IBusCachedPlugin_injector_nextPcCalc_valids_0 <= 1'b1;
       end
       if(IBusCachedPlugin_fetchPc_flushed) begin
         IBusCachedPlugin_injector_nextPcCalc_valids_1 <= 1'b0;
       end
-      if(when_Fetcher_l329_1) begin
+      if(when_Fetcher_l332_1) begin
         IBusCachedPlugin_injector_nextPcCalc_valids_1 <= IBusCachedPlugin_injector_nextPcCalc_valids_0;
       end
       if(IBusCachedPlugin_fetchPc_flushed) begin
@@ -6520,7 +6498,7 @@ module VexRiscv (
       if(IBusCachedPlugin_fetchPc_flushed) begin
         IBusCachedPlugin_injector_nextPcCalc_valids_2 <= 1'b0;
       end
-      if(when_Fetcher_l329_2) begin
+      if(when_Fetcher_l332_2) begin
         IBusCachedPlugin_injector_nextPcCalc_valids_2 <= IBusCachedPlugin_injector_nextPcCalc_valids_1;
       end
       if(IBusCachedPlugin_fetchPc_flushed) begin
@@ -6529,7 +6507,7 @@ module VexRiscv (
       if(IBusCachedPlugin_fetchPc_flushed) begin
         IBusCachedPlugin_injector_nextPcCalc_valids_3 <= 1'b0;
       end
-      if(when_Fetcher_l329_3) begin
+      if(when_Fetcher_l332_3) begin
         IBusCachedPlugin_injector_nextPcCalc_valids_3 <= IBusCachedPlugin_injector_nextPcCalc_valids_2;
       end
       if(IBusCachedPlugin_fetchPc_flushed) begin
@@ -6538,7 +6516,7 @@ module VexRiscv (
       if(IBusCachedPlugin_fetchPc_flushed) begin
         IBusCachedPlugin_injector_nextPcCalc_valids_4 <= 1'b0;
       end
-      if(when_Fetcher_l329_4) begin
+      if(when_Fetcher_l332_4) begin
         IBusCachedPlugin_injector_nextPcCalc_valids_4 <= IBusCachedPlugin_injector_nextPcCalc_valids_3;
       end
       if(IBusCachedPlugin_fetchPc_flushed) begin
@@ -6561,51 +6539,55 @@ module VexRiscv (
       end
       _zz_7 <= 1'b0;
       HazardSimplePlugin_writeBackBuffer_valid <= HazardSimplePlugin_writeBackWrites_valid;
-      if(when_CsrPlugin_l909) begin
+      CsrPlugin_mcycle <= (CsrPlugin_mcycle + 64'h0000000000000001);
+      if(writeBack_arbitration_isFiring) begin
+        CsrPlugin_minstret <= (CsrPlugin_minstret + 64'h0000000000000001);
+      end
+      if(when_CsrPlugin_l922) begin
         CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_decode <= 1'b0;
       end else begin
         CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_decode <= CsrPlugin_exceptionPortCtrl_exceptionValids_decode;
       end
-      if(when_CsrPlugin_l909_1) begin
+      if(when_CsrPlugin_l922_1) begin
         CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_execute <= (CsrPlugin_exceptionPortCtrl_exceptionValids_decode && (! decode_arbitration_isStuck));
       end else begin
         CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_execute <= CsrPlugin_exceptionPortCtrl_exceptionValids_execute;
       end
-      if(when_CsrPlugin_l909_2) begin
+      if(when_CsrPlugin_l922_2) begin
         CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_memory <= (CsrPlugin_exceptionPortCtrl_exceptionValids_execute && (! execute_arbitration_isStuck));
       end else begin
         CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_memory <= CsrPlugin_exceptionPortCtrl_exceptionValids_memory;
       end
-      if(when_CsrPlugin_l909_3) begin
+      if(when_CsrPlugin_l922_3) begin
         CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_writeBack <= (CsrPlugin_exceptionPortCtrl_exceptionValids_memory && (! memory_arbitration_isStuck));
       end else begin
         CsrPlugin_exceptionPortCtrl_exceptionValidsRegs_writeBack <= 1'b0;
       end
       CsrPlugin_interrupt_valid <= 1'b0;
-      if(when_CsrPlugin_l946) begin
-        if(when_CsrPlugin_l952) begin
+      if(when_CsrPlugin_l959) begin
+        if(when_CsrPlugin_l965) begin
           CsrPlugin_interrupt_valid <= 1'b1;
         end
-        if(when_CsrPlugin_l952_1) begin
+        if(when_CsrPlugin_l965_1) begin
           CsrPlugin_interrupt_valid <= 1'b1;
         end
-        if(when_CsrPlugin_l952_2) begin
+        if(when_CsrPlugin_l965_2) begin
           CsrPlugin_interrupt_valid <= 1'b1;
         end
       end
-      CsrPlugin_lastStageWasWfi <= (writeBack_arbitration_isFiring && (writeBack_ENV_CTRL == `EnvCtrlEnum_binary_sequential_WFI));
+      CsrPlugin_lastStageWasWfi <= (writeBack_arbitration_isFiring && (writeBack_ENV_CTRL == EnvCtrlEnum_WFI));
       if(CsrPlugin_pipelineLiberator_active) begin
-        if(when_CsrPlugin_l980) begin
+        if(when_CsrPlugin_l993) begin
           CsrPlugin_pipelineLiberator_pcValids_0 <= 1'b1;
         end
-        if(when_CsrPlugin_l980_1) begin
+        if(when_CsrPlugin_l993_1) begin
           CsrPlugin_pipelineLiberator_pcValids_1 <= CsrPlugin_pipelineLiberator_pcValids_0;
         end
-        if(when_CsrPlugin_l980_2) begin
+        if(when_CsrPlugin_l993_2) begin
           CsrPlugin_pipelineLiberator_pcValids_2 <= CsrPlugin_pipelineLiberator_pcValids_1;
         end
       end
-      if(when_CsrPlugin_l985) begin
+      if(when_CsrPlugin_l998) begin
         CsrPlugin_pipelineLiberator_pcValids_0 <= 1'b0;
         CsrPlugin_pipelineLiberator_pcValids_1 <= 1'b0;
         CsrPlugin_pipelineLiberator_pcValids_2 <= 1'b0;
@@ -6614,7 +6596,7 @@ module VexRiscv (
         CsrPlugin_interrupt_valid <= 1'b0;
       end
       CsrPlugin_hadException <= CsrPlugin_exception;
-      if(when_CsrPlugin_l1019) begin
+      if(when_CsrPlugin_l1032) begin
         case(CsrPlugin_targetPrivilege)
           2'b11 : begin
             CsrPlugin_mstatus_MIE <= 1'b0;
@@ -6625,8 +6607,8 @@ module VexRiscv (
           end
         endcase
       end
-      if(when_CsrPlugin_l1064) begin
-        case(switch_CsrPlugin_l1068)
+      if(when_CsrPlugin_l1077) begin
+        case(switch_CsrPlugin_l1081)
           2'b11 : begin
             CsrPlugin_mstatus_MPP <= 2'b00;
             CsrPlugin_mstatus_MIE <= CsrPlugin_mstatus_MPIE;
@@ -6636,7 +6618,7 @@ module VexRiscv (
           end
         endcase
       end
-      execute_CsrPlugin_wfiWake <= (({_zz_when_CsrPlugin_l952_2,{_zz_when_CsrPlugin_l952_1,_zz_when_CsrPlugin_l952}} != 3'b000) || CsrPlugin_thirdPartyWake);
+      execute_CsrPlugin_wfiWake <= (({_zz_when_CsrPlugin_l965_2,{_zz_when_CsrPlugin_l965_1,_zz_when_CsrPlugin_l965}} != 3'b000) || CsrPlugin_thirdPartyWake);
       memory_DivPlugin_div_counter_value <= memory_DivPlugin_div_counter_valueNext;
       if(execute_CfuPlugin_schedule) begin
         execute_CfuPlugin_hold <= 1'b1;
@@ -6647,13 +6629,13 @@ module VexRiscv (
       if(CfuPlugin_bus_cmd_fire) begin
         execute_CfuPlugin_fired <= 1'b1;
       end
-      if(when_CfuPlugin_l171) begin
+      if(when_CfuPlugin_l197) begin
         execute_CfuPlugin_fired <= 1'b0;
       end
       if(CfuPlugin_bus_rsp_valid) begin
         CfuPlugin_bus_rsp_rValid <= 1'b1;
       end
-      if(CfuPlugin_bus_rsp_rsp_ready) begin
+      if(memory_CfuPlugin_rsp_ready) begin
         CfuPlugin_bus_rsp_rValid <= 1'b0;
       end
       FpuPlugin_pendings <= (_zz_FpuPlugin_pendings - _zz_FpuPlugin_pendings_6);
@@ -6699,16 +6681,16 @@ module VexRiscv (
       if(writeBack_FpuPlugin_commit_s2mPipe_ready) begin
         writeBack_FpuPlugin_commit_rValid <= 1'b0;
       end
-      if(when_Pipeline_l124_65) begin
+      if(when_Pipeline_l124_68) begin
         decode_to_execute_FPU_FORKED <= _zz_decode_to_execute_FPU_FORKED;
       end
-      if(when_Pipeline_l124_66) begin
+      if(when_Pipeline_l124_69) begin
         execute_to_memory_FPU_FORKED <= _zz_execute_to_memory_FPU_FORKED;
       end
-      if(when_Pipeline_l124_67) begin
+      if(when_Pipeline_l124_70) begin
         memory_to_writeBack_FPU_FORKED <= _zz_memory_to_writeBack_FPU_FORKED;
       end
-      if(when_Pipeline_l124_81) begin
+      if(when_Pipeline_l124_84) begin
         execute_to_memory_CfuPlugin_CFU_IN_FLIGHT <= _zz_execute_to_memory_CfuPlugin_CFU_IN_FLIGHT;
       end
       if(when_Pipeline_l151) begin
@@ -6737,9 +6719,15 @@ module VexRiscv (
       end
       if(execute_CsrPlugin_csr_768) begin
         if(execute_CsrPlugin_writeEnable) begin
-          CsrPlugin_mstatus_MPP <= CsrPlugin_csrMapping_writeDataSignal[12 : 11];
           CsrPlugin_mstatus_MPIE <= CsrPlugin_csrMapping_writeDataSignal[7];
           CsrPlugin_mstatus_MIE <= CsrPlugin_csrMapping_writeDataSignal[3];
+          case(switch_CsrPlugin_l723)
+            2'b11 : begin
+              CsrPlugin_mstatus_MPP <= 2'b11;
+            end
+            default : begin
+            end
+          endcase
           FpuPlugin_fs <= CsrPlugin_csrMapping_writeDataSignal[14 : 13];
         end
       end
@@ -6748,6 +6736,26 @@ module VexRiscv (
           CsrPlugin_mie_MEIE <= CsrPlugin_csrMapping_writeDataSignal[11];
           CsrPlugin_mie_MTIE <= CsrPlugin_csrMapping_writeDataSignal[7];
           CsrPlugin_mie_MSIE <= CsrPlugin_csrMapping_writeDataSignal[3];
+        end
+      end
+      if(execute_CsrPlugin_csr_2816) begin
+        if(execute_CsrPlugin_writeEnable) begin
+          CsrPlugin_mcycle[31 : 0] <= CsrPlugin_csrMapping_writeDataSignal[31 : 0];
+        end
+      end
+      if(execute_CsrPlugin_csr_2944) begin
+        if(execute_CsrPlugin_writeEnable) begin
+          CsrPlugin_mcycle[63 : 32] <= CsrPlugin_csrMapping_writeDataSignal[31 : 0];
+        end
+      end
+      if(execute_CsrPlugin_csr_2818) begin
+        if(execute_CsrPlugin_writeEnable) begin
+          CsrPlugin_minstret[31 : 0] <= CsrPlugin_csrMapping_writeDataSignal[31 : 0];
+        end
+      end
+      if(execute_CsrPlugin_csr_2946) begin
+        if(execute_CsrPlugin_writeEnable) begin
+          CsrPlugin_minstret[63 : 32] <= CsrPlugin_csrMapping_writeDataSignal[31 : 0];
         end
       end
       if(execute_CsrPlugin_csr_3008) begin
@@ -6833,10 +6841,6 @@ module VexRiscv (
     CsrPlugin_mip_MEIP <= externalInterrupt;
     CsrPlugin_mip_MTIP <= timerInterrupt;
     CsrPlugin_mip_MSIP <= softwareInterrupt;
-    CsrPlugin_mcycle <= (CsrPlugin_mcycle + 64'h0000000000000001);
-    if(writeBack_arbitration_isFiring) begin
-      CsrPlugin_minstret <= (CsrPlugin_minstret + 64'h0000000000000001);
-    end
     if(_zz_when) begin
       CsrPlugin_exceptionPortCtrl_exceptionContext_code <= (_zz_CsrPlugin_exceptionPortCtrl_exceptionContext_code_1 ? IBusCachedPlugin_decodeExceptionPort_payload_code : decodeExceptionPort_payload_code);
       CsrPlugin_exceptionPortCtrl_exceptionContext_badAddr <= (_zz_CsrPlugin_exceptionPortCtrl_exceptionContext_code_1 ? IBusCachedPlugin_decodeExceptionPort_payload_badAddr : decodeExceptionPort_payload_badAddr);
@@ -6849,21 +6853,21 @@ module VexRiscv (
       CsrPlugin_exceptionPortCtrl_exceptionContext_code <= DBusCachedPlugin_exceptionBus_payload_code;
       CsrPlugin_exceptionPortCtrl_exceptionContext_badAddr <= DBusCachedPlugin_exceptionBus_payload_badAddr;
     end
-    if(when_CsrPlugin_l946) begin
-      if(when_CsrPlugin_l952) begin
+    if(when_CsrPlugin_l959) begin
+      if(when_CsrPlugin_l965) begin
         CsrPlugin_interrupt_code <= 4'b0111;
         CsrPlugin_interrupt_targetPrivilege <= 2'b11;
       end
-      if(when_CsrPlugin_l952_1) begin
+      if(when_CsrPlugin_l965_1) begin
         CsrPlugin_interrupt_code <= 4'b0011;
         CsrPlugin_interrupt_targetPrivilege <= 2'b11;
       end
-      if(when_CsrPlugin_l952_2) begin
+      if(when_CsrPlugin_l965_2) begin
         CsrPlugin_interrupt_code <= 4'b1011;
         CsrPlugin_interrupt_targetPrivilege <= 2'b11;
       end
     end
-    if(when_CsrPlugin_l1019) begin
+    if(when_CsrPlugin_l1032) begin
       case(CsrPlugin_targetPrivilege)
         2'b11 : begin
           CsrPlugin_mcause_interrupt <= (! CsrPlugin_hadException);
@@ -6987,249 +6991,258 @@ module VexRiscv (
       memory_to_writeBack_MEMORY_WR <= memory_MEMORY_WR;
     end
     if(when_Pipeline_l124_26) begin
-      decode_to_execute_MEMORY_MANAGMENT <= decode_MEMORY_MANAGMENT;
+      decode_to_execute_HAS_SIDE_EFFECT <= decode_HAS_SIDE_EFFECT;
     end
     if(when_Pipeline_l124_27) begin
-      decode_to_execute_SRC_LESS_UNSIGNED <= decode_SRC_LESS_UNSIGNED;
+      execute_to_memory_HAS_SIDE_EFFECT <= execute_HAS_SIDE_EFFECT;
     end
     if(when_Pipeline_l124_28) begin
-      decode_to_execute_ALU_BITWISE_CTRL <= _zz_decode_to_execute_ALU_BITWISE_CTRL;
+      memory_to_writeBack_HAS_SIDE_EFFECT <= memory_HAS_SIDE_EFFECT;
     end
     if(when_Pipeline_l124_29) begin
-      decode_to_execute_SHIFT_CTRL <= _zz_decode_to_execute_SHIFT_CTRL;
+      decode_to_execute_MEMORY_MANAGMENT <= decode_MEMORY_MANAGMENT;
     end
     if(when_Pipeline_l124_30) begin
-      execute_to_memory_SHIFT_CTRL <= _zz_execute_to_memory_SHIFT_CTRL;
+      decode_to_execute_SRC_LESS_UNSIGNED <= decode_SRC_LESS_UNSIGNED;
     end
     if(when_Pipeline_l124_31) begin
-      decode_to_execute_BRANCH_CTRL <= _zz_decode_to_execute_BRANCH_CTRL;
+      decode_to_execute_ALU_BITWISE_CTRL <= _zz_decode_to_execute_ALU_BITWISE_CTRL;
     end
     if(when_Pipeline_l124_32) begin
-      decode_to_execute_IS_CSR <= decode_IS_CSR;
+      decode_to_execute_SHIFT_CTRL <= _zz_decode_to_execute_SHIFT_CTRL;
     end
     if(when_Pipeline_l124_33) begin
-      decode_to_execute_ENV_CTRL <= _zz_decode_to_execute_ENV_CTRL;
+      execute_to_memory_SHIFT_CTRL <= _zz_execute_to_memory_SHIFT_CTRL;
     end
     if(when_Pipeline_l124_34) begin
-      execute_to_memory_ENV_CTRL <= _zz_execute_to_memory_ENV_CTRL;
+      decode_to_execute_BRANCH_CTRL <= _zz_decode_to_execute_BRANCH_CTRL;
     end
     if(when_Pipeline_l124_35) begin
-      memory_to_writeBack_ENV_CTRL <= _zz_memory_to_writeBack_ENV_CTRL;
+      decode_to_execute_IS_CSR <= decode_IS_CSR;
     end
     if(when_Pipeline_l124_36) begin
-      decode_to_execute_IS_MUL <= decode_IS_MUL;
+      decode_to_execute_ENV_CTRL <= _zz_decode_to_execute_ENV_CTRL;
     end
     if(when_Pipeline_l124_37) begin
-      execute_to_memory_IS_MUL <= execute_IS_MUL;
+      execute_to_memory_ENV_CTRL <= _zz_execute_to_memory_ENV_CTRL;
     end
     if(when_Pipeline_l124_38) begin
-      memory_to_writeBack_IS_MUL <= memory_IS_MUL;
+      memory_to_writeBack_ENV_CTRL <= _zz_memory_to_writeBack_ENV_CTRL;
     end
     if(when_Pipeline_l124_39) begin
-      decode_to_execute_IS_DIV <= decode_IS_DIV;
+      decode_to_execute_IS_MUL <= decode_IS_MUL;
     end
     if(when_Pipeline_l124_40) begin
-      execute_to_memory_IS_DIV <= execute_IS_DIV;
+      execute_to_memory_IS_MUL <= execute_IS_MUL;
     end
     if(when_Pipeline_l124_41) begin
-      decode_to_execute_IS_RS1_SIGNED <= decode_IS_RS1_SIGNED;
+      memory_to_writeBack_IS_MUL <= memory_IS_MUL;
     end
     if(when_Pipeline_l124_42) begin
-      decode_to_execute_IS_RS2_SIGNED <= decode_IS_RS2_SIGNED;
+      decode_to_execute_IS_DIV <= decode_IS_DIV;
     end
     if(when_Pipeline_l124_43) begin
-      decode_to_execute_CfuPlugin_CFU_ENABLE <= decode_CfuPlugin_CFU_ENABLE;
+      execute_to_memory_IS_DIV <= execute_IS_DIV;
     end
     if(when_Pipeline_l124_44) begin
-      decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND <= _zz_decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND;
+      decode_to_execute_IS_RS1_SIGNED <= decode_IS_RS1_SIGNED;
     end
     if(when_Pipeline_l124_45) begin
-      decode_to_execute_FPU_ENABLE <= decode_FPU_ENABLE;
+      decode_to_execute_IS_RS2_SIGNED <= decode_IS_RS2_SIGNED;
     end
     if(when_Pipeline_l124_46) begin
-      execute_to_memory_FPU_ENABLE <= execute_FPU_ENABLE;
+      decode_to_execute_CfuPlugin_CFU_ENABLE <= decode_CfuPlugin_CFU_ENABLE;
     end
     if(when_Pipeline_l124_47) begin
-      memory_to_writeBack_FPU_ENABLE <= memory_FPU_ENABLE;
+      decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND <= _zz_decode_to_execute_CfuPlugin_CFU_INPUT_2_KIND;
     end
     if(when_Pipeline_l124_48) begin
-      decode_to_execute_FPU_COMMIT <= decode_FPU_COMMIT;
+      decode_to_execute_FPU_ENABLE <= decode_FPU_ENABLE;
     end
     if(when_Pipeline_l124_49) begin
-      execute_to_memory_FPU_COMMIT <= execute_FPU_COMMIT;
+      execute_to_memory_FPU_ENABLE <= execute_FPU_ENABLE;
     end
     if(when_Pipeline_l124_50) begin
-      memory_to_writeBack_FPU_COMMIT <= memory_FPU_COMMIT;
+      memory_to_writeBack_FPU_ENABLE <= memory_FPU_ENABLE;
     end
     if(when_Pipeline_l124_51) begin
-      decode_to_execute_FPU_RSP <= decode_FPU_RSP;
+      decode_to_execute_FPU_COMMIT <= decode_FPU_COMMIT;
     end
     if(when_Pipeline_l124_52) begin
-      execute_to_memory_FPU_RSP <= execute_FPU_RSP;
+      execute_to_memory_FPU_COMMIT <= execute_FPU_COMMIT;
     end
     if(when_Pipeline_l124_53) begin
-      memory_to_writeBack_FPU_RSP <= memory_FPU_RSP;
+      memory_to_writeBack_FPU_COMMIT <= memory_FPU_COMMIT;
     end
     if(when_Pipeline_l124_54) begin
-      decode_to_execute_FPU_OPCODE <= _zz_decode_to_execute_FPU_OPCODE;
+      decode_to_execute_FPU_RSP <= decode_FPU_RSP;
     end
     if(when_Pipeline_l124_55) begin
-      execute_to_memory_FPU_OPCODE <= _zz_execute_to_memory_FPU_OPCODE;
+      execute_to_memory_FPU_RSP <= execute_FPU_RSP;
     end
     if(when_Pipeline_l124_56) begin
-      memory_to_writeBack_FPU_OPCODE <= _zz_memory_to_writeBack_FPU_OPCODE;
+      memory_to_writeBack_FPU_RSP <= memory_FPU_RSP;
     end
     if(when_Pipeline_l124_57) begin
-      decode_to_execute_RS1 <= decode_RS1;
+      decode_to_execute_FPU_OPCODE <= _zz_decode_to_execute_FPU_OPCODE;
     end
     if(when_Pipeline_l124_58) begin
-      execute_to_memory_RS1 <= _zz_execute_SRC1;
+      execute_to_memory_FPU_OPCODE <= _zz_execute_to_memory_FPU_OPCODE;
     end
     if(when_Pipeline_l124_59) begin
-      memory_to_writeBack_RS1 <= memory_RS1;
+      memory_to_writeBack_FPU_OPCODE <= _zz_memory_to_writeBack_FPU_OPCODE;
     end
     if(when_Pipeline_l124_60) begin
-      decode_to_execute_RS2 <= decode_RS2;
+      decode_to_execute_RS1 <= decode_RS1;
     end
     if(when_Pipeline_l124_61) begin
-      decode_to_execute_SRC2_FORCE_ZERO <= decode_SRC2_FORCE_ZERO;
+      execute_to_memory_RS1 <= _zz_execute_SRC1;
     end
     if(when_Pipeline_l124_62) begin
-      decode_to_execute_PREDICTION_HAD_BRANCHED2 <= decode_PREDICTION_HAD_BRANCHED2;
+      memory_to_writeBack_RS1 <= memory_RS1;
     end
     if(when_Pipeline_l124_63) begin
-      decode_to_execute_CSR_WRITE_OPCODE <= decode_CSR_WRITE_OPCODE;
+      decode_to_execute_RS2 <= decode_RS2;
     end
     if(when_Pipeline_l124_64) begin
+      decode_to_execute_SRC2_FORCE_ZERO <= decode_SRC2_FORCE_ZERO;
+    end
+    if(when_Pipeline_l124_65) begin
+      decode_to_execute_PREDICTION_HAD_BRANCHED2 <= decode_PREDICTION_HAD_BRANCHED2;
+    end
+    if(when_Pipeline_l124_66) begin
+      decode_to_execute_CSR_WRITE_OPCODE <= decode_CSR_WRITE_OPCODE;
+    end
+    if(when_Pipeline_l124_67) begin
       decode_to_execute_CSR_READ_OPCODE <= decode_CSR_READ_OPCODE;
     end
-    if(when_Pipeline_l124_68) begin
+    if(when_Pipeline_l124_71) begin
       decode_to_execute_FPU_COMMIT_LOAD <= decode_FPU_COMMIT_LOAD;
     end
-    if(when_Pipeline_l124_69) begin
+    if(when_Pipeline_l124_72) begin
       execute_to_memory_FPU_COMMIT_LOAD <= execute_FPU_COMMIT_LOAD;
     end
-    if(when_Pipeline_l124_70) begin
+    if(when_Pipeline_l124_73) begin
       memory_to_writeBack_FPU_COMMIT_LOAD <= memory_FPU_COMMIT_LOAD;
     end
-    if(when_Pipeline_l124_71) begin
+    if(when_Pipeline_l124_74) begin
       execute_to_memory_MEMORY_STORE_DATA_RF <= execute_MEMORY_STORE_DATA_RF;
     end
-    if(when_Pipeline_l124_72) begin
+    if(when_Pipeline_l124_75) begin
       memory_to_writeBack_MEMORY_STORE_DATA_RF <= memory_MEMORY_STORE_DATA_RF;
     end
-    if(when_Pipeline_l124_73) begin
+    if(when_Pipeline_l124_76) begin
       execute_to_memory_REGFILE_WRITE_DATA <= _zz_decode_RS2;
     end
-    if(when_Pipeline_l124_74) begin
+    if(when_Pipeline_l124_77) begin
       memory_to_writeBack_REGFILE_WRITE_DATA <= _zz_decode_RS2_1;
     end
-    if(when_Pipeline_l124_75) begin
+    if(when_Pipeline_l124_78) begin
       execute_to_memory_SHIFT_RIGHT <= execute_SHIFT_RIGHT;
     end
-    if(when_Pipeline_l124_76) begin
+    if(when_Pipeline_l124_79) begin
       execute_to_memory_MUL_LL <= execute_MUL_LL;
     end
-    if(when_Pipeline_l124_77) begin
+    if(when_Pipeline_l124_80) begin
       execute_to_memory_MUL_LH <= execute_MUL_LH;
     end
-    if(when_Pipeline_l124_78) begin
+    if(when_Pipeline_l124_81) begin
       execute_to_memory_MUL_HL <= execute_MUL_HL;
     end
-    if(when_Pipeline_l124_79) begin
+    if(when_Pipeline_l124_82) begin
       execute_to_memory_MUL_HH <= execute_MUL_HH;
     end
-    if(when_Pipeline_l124_80) begin
+    if(when_Pipeline_l124_83) begin
       memory_to_writeBack_MUL_HH <= memory_MUL_HH;
     end
-    if(when_Pipeline_l124_82) begin
+    if(when_Pipeline_l124_85) begin
       memory_to_writeBack_CfuPlugin_CFU_IN_FLIGHT <= _zz_memory_to_writeBack_CfuPlugin_CFU_IN_FLIGHT;
     end
-    if(when_Pipeline_l124_83) begin
+    if(when_Pipeline_l124_86) begin
       memory_to_writeBack_MUL_LOW <= memory_MUL_LOW;
     end
-    if(when_CsrPlugin_l1264) begin
+    if(when_CsrPlugin_l1277) begin
       execute_CsrPlugin_csr_3264 <= (decode_INSTRUCTION[31 : 20] == 12'hcc0);
     end
-    if(when_CsrPlugin_l1264_1) begin
+    if(when_CsrPlugin_l1277_1) begin
       execute_CsrPlugin_csr_3857 <= (decode_INSTRUCTION[31 : 20] == 12'hf11);
     end
-    if(when_CsrPlugin_l1264_2) begin
+    if(when_CsrPlugin_l1277_2) begin
       execute_CsrPlugin_csr_3858 <= (decode_INSTRUCTION[31 : 20] == 12'hf12);
     end
-    if(when_CsrPlugin_l1264_3) begin
+    if(when_CsrPlugin_l1277_3) begin
       execute_CsrPlugin_csr_3859 <= (decode_INSTRUCTION[31 : 20] == 12'hf13);
     end
-    if(when_CsrPlugin_l1264_4) begin
+    if(when_CsrPlugin_l1277_4) begin
       execute_CsrPlugin_csr_3860 <= (decode_INSTRUCTION[31 : 20] == 12'hf14);
     end
-    if(when_CsrPlugin_l1264_5) begin
+    if(when_CsrPlugin_l1277_5) begin
       execute_CsrPlugin_csr_769 <= (decode_INSTRUCTION[31 : 20] == 12'h301);
     end
-    if(when_CsrPlugin_l1264_6) begin
+    if(when_CsrPlugin_l1277_6) begin
       execute_CsrPlugin_csr_768 <= (decode_INSTRUCTION[31 : 20] == 12'h300);
     end
-    if(when_CsrPlugin_l1264_7) begin
+    if(when_CsrPlugin_l1277_7) begin
       execute_CsrPlugin_csr_836 <= (decode_INSTRUCTION[31 : 20] == 12'h344);
     end
-    if(when_CsrPlugin_l1264_8) begin
+    if(when_CsrPlugin_l1277_8) begin
       execute_CsrPlugin_csr_772 <= (decode_INSTRUCTION[31 : 20] == 12'h304);
     end
-    if(when_CsrPlugin_l1264_9) begin
+    if(when_CsrPlugin_l1277_9) begin
       execute_CsrPlugin_csr_773 <= (decode_INSTRUCTION[31 : 20] == 12'h305);
     end
-    if(when_CsrPlugin_l1264_10) begin
+    if(when_CsrPlugin_l1277_10) begin
       execute_CsrPlugin_csr_833 <= (decode_INSTRUCTION[31 : 20] == 12'h341);
     end
-    if(when_CsrPlugin_l1264_11) begin
+    if(when_CsrPlugin_l1277_11) begin
       execute_CsrPlugin_csr_832 <= (decode_INSTRUCTION[31 : 20] == 12'h340);
     end
-    if(when_CsrPlugin_l1264_12) begin
+    if(when_CsrPlugin_l1277_12) begin
       execute_CsrPlugin_csr_834 <= (decode_INSTRUCTION[31 : 20] == 12'h342);
     end
-    if(when_CsrPlugin_l1264_13) begin
+    if(when_CsrPlugin_l1277_13) begin
       execute_CsrPlugin_csr_835 <= (decode_INSTRUCTION[31 : 20] == 12'h343);
     end
-    if(when_CsrPlugin_l1264_14) begin
+    if(when_CsrPlugin_l1277_14) begin
       execute_CsrPlugin_csr_2816 <= (decode_INSTRUCTION[31 : 20] == 12'hb00);
     end
-    if(when_CsrPlugin_l1264_15) begin
+    if(when_CsrPlugin_l1277_15) begin
       execute_CsrPlugin_csr_2944 <= (decode_INSTRUCTION[31 : 20] == 12'hb80);
     end
-    if(when_CsrPlugin_l1264_16) begin
+    if(when_CsrPlugin_l1277_16) begin
       execute_CsrPlugin_csr_2818 <= (decode_INSTRUCTION[31 : 20] == 12'hb02);
     end
-    if(when_CsrPlugin_l1264_17) begin
+    if(when_CsrPlugin_l1277_17) begin
       execute_CsrPlugin_csr_2946 <= (decode_INSTRUCTION[31 : 20] == 12'hb82);
     end
-    if(when_CsrPlugin_l1264_18) begin
+    if(when_CsrPlugin_l1277_18) begin
       execute_CsrPlugin_csr_3072 <= (decode_INSTRUCTION[31 : 20] == 12'hc00);
     end
-    if(when_CsrPlugin_l1264_19) begin
+    if(when_CsrPlugin_l1277_19) begin
       execute_CsrPlugin_csr_3200 <= (decode_INSTRUCTION[31 : 20] == 12'hc80);
     end
-    if(when_CsrPlugin_l1264_20) begin
+    if(when_CsrPlugin_l1277_20) begin
       execute_CsrPlugin_csr_3074 <= (decode_INSTRUCTION[31 : 20] == 12'hc02);
     end
-    if(when_CsrPlugin_l1264_21) begin
+    if(when_CsrPlugin_l1277_21) begin
       execute_CsrPlugin_csr_3202 <= (decode_INSTRUCTION[31 : 20] == 12'hc82);
     end
-    if(when_CsrPlugin_l1264_22) begin
+    if(when_CsrPlugin_l1277_22) begin
       execute_CsrPlugin_csr_3008 <= (decode_INSTRUCTION[31 : 20] == 12'hbc0);
     end
-    if(when_CsrPlugin_l1264_23) begin
+    if(when_CsrPlugin_l1277_23) begin
       execute_CsrPlugin_csr_4032 <= (decode_INSTRUCTION[31 : 20] == 12'hfc0);
     end
-    if(when_CsrPlugin_l1264_24) begin
+    if(when_CsrPlugin_l1277_24) begin
       execute_CsrPlugin_csr_3 <= (decode_INSTRUCTION[31 : 20] == 12'h003);
     end
-    if(when_CsrPlugin_l1264_25) begin
+    if(when_CsrPlugin_l1277_25) begin
       execute_CsrPlugin_csr_2 <= (decode_INSTRUCTION[31 : 20] == 12'h002);
     end
-    if(when_CsrPlugin_l1264_26) begin
+    if(when_CsrPlugin_l1277_26) begin
       execute_CsrPlugin_csr_1 <= (decode_INSTRUCTION[31 : 20] == 12'h001);
     end
-    if(when_CsrPlugin_l1264_27) begin
+    if(when_CsrPlugin_l1277_27) begin
       execute_CsrPlugin_csr_256 <= (decode_INSTRUCTION[31 : 20] == 12'h100);
     end
     if(execute_CsrPlugin_csr_836) begin
@@ -7264,26 +7277,6 @@ module VexRiscv (
         CsrPlugin_mtval <= CsrPlugin_csrMapping_writeDataSignal[31 : 0];
       end
     end
-    if(execute_CsrPlugin_csr_2816) begin
-      if(execute_CsrPlugin_writeEnable) begin
-        CsrPlugin_mcycle[31 : 0] <= CsrPlugin_csrMapping_writeDataSignal[31 : 0];
-      end
-    end
-    if(execute_CsrPlugin_csr_2944) begin
-      if(execute_CsrPlugin_writeEnable) begin
-        CsrPlugin_mcycle[63 : 32] <= CsrPlugin_csrMapping_writeDataSignal[31 : 0];
-      end
-    end
-    if(execute_CsrPlugin_csr_2818) begin
-      if(execute_CsrPlugin_writeEnable) begin
-        CsrPlugin_minstret[31 : 0] <= CsrPlugin_csrMapping_writeDataSignal[31 : 0];
-      end
-    end
-    if(execute_CsrPlugin_csr_2946) begin
-      if(execute_CsrPlugin_writeEnable) begin
-        CsrPlugin_minstret[63 : 32] <= CsrPlugin_csrMapping_writeDataSignal[31 : 0];
-      end
-    end
     iBusWishbone_DAT_MISO_regNext <= iBusWishbone_DAT_MISO;
     dBusWishbone_DAT_MISO_regNext <= dBusWishbone_DAT_MISO;
   end
@@ -7294,17 +7287,17 @@ endmodule
 module FpuCore (
   input               io_port_0_cmd_valid,
   output              io_port_0_cmd_ready,
-  input      `FpuOpcode_binary_sequential_type io_port_0_cmd_payload_opcode,
+  input      [3:0]    io_port_0_cmd_payload_opcode,
   input      [1:0]    io_port_0_cmd_payload_arg,
   input      [4:0]    io_port_0_cmd_payload_rs1,
   input      [4:0]    io_port_0_cmd_payload_rs2,
   input      [4:0]    io_port_0_cmd_payload_rs3,
   input      [4:0]    io_port_0_cmd_payload_rd,
-  input      `FpuFormat_binary_sequential_type io_port_0_cmd_payload_format,
-  input      `FpuRoundMode_opt_type io_port_0_cmd_payload_roundMode,
+  input      [0:0]    io_port_0_cmd_payload_format,
+  input      [2:0]    io_port_0_cmd_payload_roundMode,
   input               io_port_0_commit_valid,
   output              io_port_0_commit_ready,
-  input      `FpuOpcode_binary_sequential_type io_port_0_commit_payload_opcode,
+  input      [3:0]    io_port_0_commit_payload_opcode,
   input      [4:0]    io_port_0_commit_payload_rd,
   input               io_port_0_commit_payload_write,
   input      [31:0]   io_port_0_commit_payload_value,
@@ -7323,6 +7316,30 @@ module FpuCore (
   input               clk,
   input               reset
 );
+  localparam FpuOpcode_LOAD = 4'd0;
+  localparam FpuOpcode_STORE = 4'd1;
+  localparam FpuOpcode_MUL = 4'd2;
+  localparam FpuOpcode_ADD = 4'd3;
+  localparam FpuOpcode_FMA = 4'd4;
+  localparam FpuOpcode_I2F = 4'd5;
+  localparam FpuOpcode_F2I = 4'd6;
+  localparam FpuOpcode_CMP = 4'd7;
+  localparam FpuOpcode_DIV = 4'd8;
+  localparam FpuOpcode_SQRT = 4'd9;
+  localparam FpuOpcode_MIN_MAX = 4'd10;
+  localparam FpuOpcode_SGNJ = 4'd11;
+  localparam FpuOpcode_FMV_X_W = 4'd12;
+  localparam FpuOpcode_FMV_W_X = 4'd13;
+  localparam FpuOpcode_FCLASS = 4'd14;
+  localparam FpuOpcode_FCVT_X_X = 4'd15;
+  localparam FpuFormat_FLOAT = 1'd0;
+  localparam FpuFormat_DOUBLE = 1'd1;
+  localparam FpuRoundMode_RNE = 3'd0;
+  localparam FpuRoundMode_RTZ = 3'd1;
+  localparam FpuRoundMode_RDN = 3'd2;
+  localparam FpuRoundMode_RUP = 3'd3;
+  localparam FpuRoundMode_RMM = 3'd4;
+
   wire                streamFork_1_io_outputs_1_ready;
   wire                div_divider_io_input_valid;
   wire       [23:0]   div_divider_io_input_payload_a;
@@ -7344,25 +7361,25 @@ module FpuCore (
   wire       [0:0]    _zz_rf_scoreboards_0_writes_port1;
   wire                streamFork_1_io_input_ready;
   wire                streamFork_1_io_outputs_0_valid;
-  wire       `FpuOpcode_binary_sequential_type streamFork_1_io_outputs_0_payload_opcode;
+  wire       [3:0]    streamFork_1_io_outputs_0_payload_opcode;
   wire       [4:0]    streamFork_1_io_outputs_0_payload_rd;
   wire                streamFork_1_io_outputs_0_payload_write;
   wire       [31:0]   streamFork_1_io_outputs_0_payload_value;
   wire                streamFork_1_io_outputs_1_valid;
-  wire       `FpuOpcode_binary_sequential_type streamFork_1_io_outputs_1_payload_opcode;
+  wire       [3:0]    streamFork_1_io_outputs_1_payload_opcode;
   wire       [4:0]    streamFork_1_io_outputs_1_payload_rd;
   wire                streamFork_1_io_outputs_1_payload_write;
   wire       [31:0]   streamFork_1_io_outputs_1_payload_value;
   wire                cmdArbiter_arbiter_io_inputs_0_ready;
   wire                cmdArbiter_arbiter_io_output_valid;
-  wire       `FpuOpcode_binary_sequential_type cmdArbiter_arbiter_io_output_payload_opcode;
+  wire       [3:0]    cmdArbiter_arbiter_io_output_payload_opcode;
   wire       [1:0]    cmdArbiter_arbiter_io_output_payload_arg;
   wire       [4:0]    cmdArbiter_arbiter_io_output_payload_rs1;
   wire       [4:0]    cmdArbiter_arbiter_io_output_payload_rs2;
   wire       [4:0]    cmdArbiter_arbiter_io_output_payload_rs3;
   wire       [4:0]    cmdArbiter_arbiter_io_output_payload_rd;
-  wire       `FpuFormat_binary_sequential_type cmdArbiter_arbiter_io_output_payload_format;
-  wire       `FpuRoundMode_opt_type cmdArbiter_arbiter_io_output_payload_roundMode;
+  wire       [0:0]    cmdArbiter_arbiter_io_output_payload_format;
+  wire       [2:0]    cmdArbiter_arbiter_io_output_payload_roundMode;
   wire       [0:0]    cmdArbiter_arbiter_io_chosenOH;
   wire                div_divider_io_input_ready;
   wire                div_divider_io_output_valid;
@@ -7385,7 +7402,7 @@ module FpuCore (
   wire                streamArbiter_2_io_output_payload_value_sign;
   wire                streamArbiter_2_io_output_payload_value_special;
   wire                streamArbiter_2_io_output_payload_scrap;
-  wire       `FpuRoundMode_opt_type streamArbiter_2_io_output_payload_roundMode;
+  wire       [2:0]    streamArbiter_2_io_output_payload_roundMode;
   wire                streamArbiter_2_io_output_payload_NV;
   wire                streamArbiter_2_io_output_payload_DZ;
   wire       [2:0]    streamArbiter_2_io_chosen;
@@ -7423,7 +7440,7 @@ module FpuCore (
   wire       [3:0]    _zz_commitLogic_0_short_counter_3;
   wire       [0:0]    _zz_commitLogic_0_short_counter_4;
   wire       [0:0]    _zz_rf_scoreboards_0_writes_port;
-  wire       `FpuOpcode_binary_sequential_type _zz_decode_shortPipHit;
+  wire       [3:0]    _zz_decode_shortPipHit;
   wire                _zz_decode_shortPipHit_1;
   wire       [0:0]    _zz_decode_shortPipHit_2;
   wire       [0:0]    _zz_decode_shortPipHit_3;
@@ -7578,28 +7595,28 @@ module FpuCore (
   reg                 rf_scoreboards_0_hitWrite_payload_data;
   wire                commitFork_load_0_valid;
   reg                 commitFork_load_0_ready;
-  wire       `FpuOpcode_binary_sequential_type commitFork_load_0_payload_opcode;
+  wire       [3:0]    commitFork_load_0_payload_opcode;
   wire       [4:0]    commitFork_load_0_payload_rd;
   wire                commitFork_load_0_payload_write;
   wire       [31:0]   commitFork_load_0_payload_value;
   wire                commitFork_commit_0_valid;
   wire                commitFork_commit_0_ready;
-  wire       `FpuOpcode_binary_sequential_type commitFork_commit_0_payload_opcode;
+  wire       [3:0]    commitFork_commit_0_payload_opcode;
   wire       [4:0]    commitFork_commit_0_payload_rd;
   wire                commitFork_commit_0_payload_write;
   wire       [31:0]   commitFork_commit_0_payload_value;
   wire                streamFork_1_io_outputs_1_s2mPipe_valid;
   wire                streamFork_1_io_outputs_1_s2mPipe_ready;
-  wire       `FpuOpcode_binary_sequential_type streamFork_1_io_outputs_1_s2mPipe_payload_opcode;
+  wire       [3:0]    streamFork_1_io_outputs_1_s2mPipe_payload_opcode;
   wire       [4:0]    streamFork_1_io_outputs_1_s2mPipe_payload_rd;
   wire                streamFork_1_io_outputs_1_s2mPipe_payload_write;
   wire       [31:0]   streamFork_1_io_outputs_1_s2mPipe_payload_value;
   reg                 streamFork_1_io_outputs_1_rValid;
-  reg        `FpuOpcode_binary_sequential_type streamFork_1_io_outputs_1_rData_opcode;
+  reg        [3:0]    streamFork_1_io_outputs_1_rData_opcode;
   reg        [4:0]    streamFork_1_io_outputs_1_rData_rd;
   reg                 streamFork_1_io_outputs_1_rData_write;
   reg        [31:0]   streamFork_1_io_outputs_1_rData_value;
-  wire       `FpuOpcode_binary_sequential_type _zz_payload_opcode;
+  wire       [3:0]    _zz_payload_opcode;
   reg        [3:0]    commitLogic_0_pending_counter;
   wire                commitLogic_0_pending_full;
   wire                commitLogic_0_pending_notEmpty;
@@ -7631,9 +7648,9 @@ module FpuCore (
   reg                 commitLogic_0_short_inc;
   reg                 commitLogic_0_short_dec;
   wire                _zz_commitFork_commit_0_ready;
-  wire       `FpuOpcode_binary_sequential_type _zz_commitLogic_0_input_payload_opcode;
+  wire       [3:0]    _zz_commitLogic_0_input_payload_opcode;
   wire                commitLogic_0_input_valid;
-  wire       `FpuOpcode_binary_sequential_type commitLogic_0_input_payload_opcode;
+  wire       [3:0]    commitLogic_0_input_payload_opcode;
   wire       [4:0]    commitLogic_0_input_payload_rd;
   wire                commitLogic_0_input_payload_write;
   wire       [31:0]   commitLogic_0_input_payload_value;
@@ -7642,28 +7659,28 @@ module FpuCore (
   wire                when_FpuCore_l210;
   wire                when_FpuCore_l211;
   wire                when_FpuCore_l212;
-  wire                io_port_0_cmd_input_valid;
-  wire                io_port_0_cmd_input_ready;
-  wire       `FpuOpcode_binary_sequential_type io_port_0_cmd_input_payload_opcode;
-  wire       [1:0]    io_port_0_cmd_input_payload_arg;
-  wire       [4:0]    io_port_0_cmd_input_payload_rs1;
-  wire       [4:0]    io_port_0_cmd_input_payload_rs2;
-  wire       [4:0]    io_port_0_cmd_input_payload_rs3;
-  wire       [4:0]    io_port_0_cmd_input_payload_rd;
-  wire       `FpuFormat_binary_sequential_type io_port_0_cmd_input_payload_format;
-  wire       `FpuRoundMode_opt_type io_port_0_cmd_input_payload_roundMode;
+  wire                scheduler_0_input_valid;
+  wire                scheduler_0_input_ready;
+  wire       [3:0]    scheduler_0_input_payload_opcode;
+  wire       [1:0]    scheduler_0_input_payload_arg;
+  wire       [4:0]    scheduler_0_input_payload_rs1;
+  wire       [4:0]    scheduler_0_input_payload_rs2;
+  wire       [4:0]    scheduler_0_input_payload_rs3;
+  wire       [4:0]    scheduler_0_input_payload_rd;
+  wire       [0:0]    scheduler_0_input_payload_format;
+  wire       [2:0]    scheduler_0_input_payload_roundMode;
   reg                 io_port_0_cmd_rValid;
-  reg        `FpuOpcode_binary_sequential_type io_port_0_cmd_rData_opcode;
+  reg        [3:0]    io_port_0_cmd_rData_opcode;
   reg        [1:0]    io_port_0_cmd_rData_arg;
   reg        [4:0]    io_port_0_cmd_rData_rs1;
   reg        [4:0]    io_port_0_cmd_rData_rs2;
   reg        [4:0]    io_port_0_cmd_rData_rs3;
   reg        [4:0]    io_port_0_cmd_rData_rd;
-  reg        `FpuFormat_binary_sequential_type io_port_0_cmd_rData_format;
-  reg        `FpuRoundMode_opt_type io_port_0_cmd_rData_roundMode;
-  wire       `FpuOpcode_binary_sequential_type _zz_io_port_0_cmd_input_payload_opcode;
-  wire       `FpuFormat_binary_sequential_type _zz_io_port_0_cmd_input_payload_format;
-  wire       `FpuRoundMode_opt_type _zz_io_port_0_cmd_input_payload_roundMode;
+  reg        [0:0]    io_port_0_cmd_rData_format;
+  reg        [2:0]    io_port_0_cmd_rData_roundMode;
+  wire       [3:0]    _zz_scheduler_0_input_payload_opcode;
+  wire       [0:0]    _zz_scheduler_0_input_payload_format;
+  wire       [2:0]    _zz_scheduler_0_input_payload_roundMode;
   reg                 scheduler_0_useRs1;
   reg                 scheduler_0_useRs2;
   reg                 scheduler_0_useRs3;
@@ -7685,63 +7702,63 @@ module FpuCore (
   wire                scheduler_0_hits_2;
   wire                scheduler_0_hits_3;
   wire                scheduler_0_hazard;
-  wire                _zz_io_port_0_cmd_input_ready;
+  wire                _zz_scheduler_0_input_ready;
   wire                scheduler_0_output_valid;
   wire                scheduler_0_output_ready;
-  wire       `FpuOpcode_binary_sequential_type scheduler_0_output_payload_opcode;
+  wire       [3:0]    scheduler_0_output_payload_opcode;
   wire       [1:0]    scheduler_0_output_payload_arg;
   reg        [4:0]    scheduler_0_output_payload_rs1;
   wire       [4:0]    scheduler_0_output_payload_rs2;
   wire       [4:0]    scheduler_0_output_payload_rs3;
   wire       [4:0]    scheduler_0_output_payload_rd;
-  wire       `FpuFormat_binary_sequential_type scheduler_0_output_payload_format;
-  wire       `FpuRoundMode_opt_type scheduler_0_output_payload_roundMode;
+  wire       [0:0]    scheduler_0_output_payload_format;
+  wire       [2:0]    scheduler_0_output_payload_roundMode;
   wire                when_FpuCore_l258;
   wire                when_FpuCore_l261;
   wire                scheduler_0_output_fire;
   wire                when_FpuCore_l265;
-  wire       `FpuOpcode_binary_sequential_type _zz_io_inputs_0_payload_opcode;
-  wire       `FpuFormat_binary_sequential_type _zz_io_inputs_0_payload_format;
-  wire       `FpuRoundMode_opt_type _zz_io_inputs_0_payload_roundMode;
+  wire       [3:0]    _zz_io_inputs_0_payload_opcode;
+  wire       [0:0]    _zz_io_inputs_0_payload_format;
+  wire       [2:0]    _zz_io_inputs_0_payload_roundMode;
   wire                cmdArbiter_output_valid;
   wire                cmdArbiter_output_ready;
-  wire       `FpuOpcode_binary_sequential_type cmdArbiter_output_payload_opcode;
+  wire       [3:0]    cmdArbiter_output_payload_opcode;
   wire       [4:0]    cmdArbiter_output_payload_rs1;
   wire       [4:0]    cmdArbiter_output_payload_rs2;
   wire       [4:0]    cmdArbiter_output_payload_rs3;
   wire       [4:0]    cmdArbiter_output_payload_rd;
   wire       [1:0]    cmdArbiter_output_payload_arg;
-  wire       `FpuRoundMode_opt_type cmdArbiter_output_payload_roundMode;
+  wire       [2:0]    cmdArbiter_output_payload_roundMode;
   wire                read_s0_valid;
   reg                 read_s0_ready;
-  wire       `FpuOpcode_binary_sequential_type read_s0_payload_opcode;
+  wire       [3:0]    read_s0_payload_opcode;
   wire       [4:0]    read_s0_payload_rs1;
   wire       [4:0]    read_s0_payload_rs2;
   wire       [4:0]    read_s0_payload_rs3;
   wire       [4:0]    read_s0_payload_rd;
   wire       [1:0]    read_s0_payload_arg;
-  wire       `FpuRoundMode_opt_type read_s0_payload_roundMode;
-  wire                read_s0_s1_valid;
-  wire                read_s0_s1_ready;
-  wire       `FpuOpcode_binary_sequential_type read_s0_s1_payload_opcode;
-  wire       [4:0]    read_s0_s1_payload_rs1;
-  wire       [4:0]    read_s0_s1_payload_rs2;
-  wire       [4:0]    read_s0_s1_payload_rs3;
-  wire       [4:0]    read_s0_s1_payload_rd;
-  wire       [1:0]    read_s0_s1_payload_arg;
-  wire       `FpuRoundMode_opt_type read_s0_s1_payload_roundMode;
+  wire       [2:0]    read_s0_payload_roundMode;
+  wire                read_s1_valid;
+  wire                read_s1_ready;
+  wire       [3:0]    read_s1_payload_opcode;
+  wire       [4:0]    read_s1_payload_rs1;
+  wire       [4:0]    read_s1_payload_rs2;
+  wire       [4:0]    read_s1_payload_rs3;
+  wire       [4:0]    read_s1_payload_rd;
+  wire       [1:0]    read_s1_payload_arg;
+  wire       [2:0]    read_s1_payload_roundMode;
   reg                 read_s0_rValid;
-  reg        `FpuOpcode_binary_sequential_type read_s0_rData_opcode;
+  reg        [3:0]    read_s0_rData_opcode;
   reg        [4:0]    read_s0_rData_rs1;
   reg        [4:0]    read_s0_rData_rs2;
   reg        [4:0]    read_s0_rData_rs3;
   reg        [4:0]    read_s0_rData_rd;
   reg        [1:0]    read_s0_rData_arg;
-  reg        `FpuRoundMode_opt_type read_s0_rData_roundMode;
-  wire                when_Stream_l342;
+  reg        [2:0]    read_s0_rData_roundMode;
+  wire                when_Stream_l368;
   wire                read_output_valid;
   wire                read_output_ready;
-  wire       `FpuOpcode_binary_sequential_type read_output_payload_opcode;
+  wire       [3:0]    read_output_payload_opcode;
   wire       [22:0]   read_output_payload_rs1_mantissa;
   wire       [8:0]    read_output_payload_rs1_exponent;
   wire                read_output_payload_rs1_sign;
@@ -7756,7 +7773,7 @@ module FpuCore (
   wire                read_output_payload_rs3_special;
   wire       [4:0]    read_output_payload_rd;
   wire       [1:0]    read_output_payload_arg;
-  wire       `FpuRoundMode_opt_type read_output_payload_roundMode;
+  wire       [2:0]    read_output_payload_roundMode;
   wire       [4:0]    _zz_read_rs_0_value_mantissa;
   wire                read_output_isStall;
   wire                _zz_read_rs_0_value_mantissa_1;
@@ -7783,7 +7800,7 @@ module FpuCore (
   wire       [33:0]   _zz_read_rs_2_value_mantissa_2;
   wire                decode_input_valid;
   reg                 decode_input_ready;
-  wire       `FpuOpcode_binary_sequential_type decode_input_payload_opcode;
+  wire       [3:0]    decode_input_payload_opcode;
   wire       [22:0]   decode_input_payload_rs1_mantissa;
   wire       [8:0]    decode_input_payload_rs1_exponent;
   wire                decode_input_payload_rs1_sign;
@@ -7798,19 +7815,19 @@ module FpuCore (
   wire                decode_input_payload_rs3_special;
   wire       [4:0]    decode_input_payload_rd;
   wire       [1:0]    decode_input_payload_arg;
-  wire       `FpuRoundMode_opt_type decode_input_payload_roundMode;
+  wire       [2:0]    decode_input_payload_roundMode;
   wire                decode_loadHit;
   wire                decode_load_valid;
   wire                decode_load_ready;
   wire       [4:0]    decode_load_payload_rd;
   wire                decode_load_payload_i2f;
   wire       [1:0]    decode_load_payload_arg;
-  wire       `FpuRoundMode_opt_type decode_load_payload_roundMode;
+  wire       [2:0]    decode_load_payload_roundMode;
   wire                when_FpuCore_l329;
   wire                decode_shortPipHit;
   wire                decode_shortPip_valid;
   reg                 decode_shortPip_ready;
-  wire       `FpuOpcode_binary_sequential_type decode_shortPip_payload_opcode;
+  wire       [3:0]    decode_shortPip_payload_opcode;
   wire       [22:0]   decode_shortPip_payload_rs1_mantissa;
   wire       [8:0]    decode_shortPip_payload_rs1_exponent;
   wire                decode_shortPip_payload_rs1_sign;
@@ -7822,7 +7839,7 @@ module FpuCore (
   wire       [4:0]    decode_shortPip_payload_rd;
   wire       [31:0]   decode_shortPip_payload_value;
   wire       [1:0]    decode_shortPip_payload_arg;
-  wire       `FpuRoundMode_opt_type decode_shortPip_payload_roundMode;
+  wire       [2:0]    decode_shortPip_payload_roundMode;
   wire                when_FpuCore_l335;
   wire                decode_divSqrtHit;
   wire                decode_divSqrt_valid;
@@ -7837,7 +7854,7 @@ module FpuCore (
   wire                decode_divSqrt_payload_rs2_special;
   wire       [4:0]    decode_divSqrt_payload_rd;
   wire                decode_divSqrt_payload_div;
-  wire       `FpuRoundMode_opt_type decode_divSqrt_payload_roundMode;
+  wire       [2:0]    decode_divSqrt_payload_roundMode;
   wire                decode_divHit;
   wire                decode_div_valid;
   wire                decode_div_ready;
@@ -7850,7 +7867,7 @@ module FpuCore (
   wire                decode_div_payload_rs2_sign;
   wire                decode_div_payload_rs2_special;
   wire       [4:0]    decode_div_payload_rd;
-  wire       `FpuRoundMode_opt_type decode_div_payload_roundMode;
+  wire       [2:0]    decode_div_payload_roundMode;
   wire                when_FpuCore_l351;
   wire                decode_sqrtHit;
   wire                decode_sqrt_valid;
@@ -7860,7 +7877,7 @@ module FpuCore (
   wire                decode_sqrt_payload_rs1_sign;
   wire                decode_sqrt_payload_rs1_special;
   wire       [4:0]    decode_sqrt_payload_rd;
-  wire       `FpuRoundMode_opt_type decode_sqrt_payload_roundMode;
+  wire       [2:0]    decode_sqrt_payload_roundMode;
   wire                when_FpuCore_l359;
   wire                decode_fmaHit;
   wire                decode_mulHit;
@@ -7883,7 +7900,7 @@ module FpuCore (
   reg                 decode_mul_payload_divSqrt;
   reg                 decode_mul_payload_msb1;
   reg                 decode_mul_payload_msb2;
-  reg        `FpuRoundMode_opt_type decode_mul_payload_roundMode;
+  reg        [2:0]    decode_mul_payload_roundMode;
   wire                decode_divSqrtToMul_valid;
   wire                decode_divSqrtToMul_ready;
   wire       [22:0]   decode_divSqrtToMul_payload_rs1_mantissa;
@@ -7903,7 +7920,7 @@ module FpuCore (
   wire                decode_divSqrtToMul_payload_divSqrt;
   wire                decode_divSqrtToMul_payload_msb1;
   wire                decode_divSqrtToMul_payload_msb2;
-  wire       `FpuRoundMode_opt_type decode_divSqrtToMul_payload_roundMode;
+  wire       [2:0]    decode_divSqrtToMul_payload_roundMode;
   wire                when_FpuCore_l375;
   wire                when_FpuCore_l380;
   wire                decode_addHit;
@@ -7918,7 +7935,7 @@ module FpuCore (
   reg                 decode_add_payload_rs2_sign;
   reg                 decode_add_payload_rs2_special;
   reg        [4:0]    decode_add_payload_rd;
-  reg        `FpuRoundMode_opt_type decode_add_payload_roundMode;
+  reg        [2:0]    decode_add_payload_roundMode;
   reg                 decode_add_payload_needCommit;
   wire                decode_mulToAdd_valid;
   wire                decode_mulToAdd_ready;
@@ -7931,7 +7948,7 @@ module FpuCore (
   wire                decode_mulToAdd_payload_rs2_sign;
   wire                decode_mulToAdd_payload_rs2_special;
   wire       [4:0]    decode_mulToAdd_payload_rd;
-  wire       `FpuRoundMode_opt_type decode_mulToAdd_payload_roundMode;
+  wire       [2:0]    decode_mulToAdd_payload_roundMode;
   wire                decode_mulToAdd_payload_needCommit;
   wire                when_FpuCore_l399;
   wire                when_FpuCore_l404;
@@ -7940,67 +7957,67 @@ module FpuCore (
   wire       [4:0]    decode_load_s2mPipe_payload_rd;
   wire                decode_load_s2mPipe_payload_i2f;
   wire       [1:0]    decode_load_s2mPipe_payload_arg;
-  wire       `FpuRoundMode_opt_type decode_load_s2mPipe_payload_roundMode;
+  wire       [2:0]    decode_load_s2mPipe_payload_roundMode;
   reg                 decode_load_rValid;
   reg        [4:0]    decode_load_rData_rd;
   reg                 decode_load_rData_i2f;
   reg        [1:0]    decode_load_rData_arg;
-  reg        `FpuRoundMode_opt_type decode_load_rData_roundMode;
-  wire       `FpuRoundMode_opt_type _zz_decode_load_s2mPipe_payload_roundMode;
+  reg        [2:0]    decode_load_rData_roundMode;
+  wire       [2:0]    _zz_decode_load_s2mPipe_payload_roundMode;
   wire                decode_load_s2mPipe_m2sPipe_valid;
   reg                 decode_load_s2mPipe_m2sPipe_ready;
   wire       [4:0]    decode_load_s2mPipe_m2sPipe_payload_rd;
   wire                decode_load_s2mPipe_m2sPipe_payload_i2f;
   wire       [1:0]    decode_load_s2mPipe_m2sPipe_payload_arg;
-  wire       `FpuRoundMode_opt_type decode_load_s2mPipe_m2sPipe_payload_roundMode;
+  wire       [2:0]    decode_load_s2mPipe_m2sPipe_payload_roundMode;
   reg                 decode_load_s2mPipe_rValid;
   reg        [4:0]    decode_load_s2mPipe_rData_rd;
   reg                 decode_load_s2mPipe_rData_i2f;
   reg        [1:0]    decode_load_s2mPipe_rData_arg;
-  reg        `FpuRoundMode_opt_type decode_load_s2mPipe_rData_roundMode;
-  wire                when_Stream_l342_1;
-  wire                decode_load_s2mPipe_m2sPipe_input_valid;
-  wire                decode_load_s2mPipe_m2sPipe_input_ready;
-  wire       [4:0]    decode_load_s2mPipe_m2sPipe_input_payload_rd;
-  wire                decode_load_s2mPipe_m2sPipe_input_payload_i2f;
-  wire       [1:0]    decode_load_s2mPipe_m2sPipe_input_payload_arg;
-  wire       `FpuRoundMode_opt_type decode_load_s2mPipe_m2sPipe_input_payload_roundMode;
+  reg        [2:0]    decode_load_s2mPipe_rData_roundMode;
+  wire                when_Stream_l368_1;
+  wire                load_s0_input_valid;
+  wire                load_s0_input_ready;
+  wire       [4:0]    load_s0_input_payload_rd;
+  wire                load_s0_input_payload_i2f;
+  wire       [1:0]    load_s0_input_payload_arg;
+  wire       [2:0]    load_s0_input_payload_roundMode;
   reg                 decode_load_s2mPipe_m2sPipe_rValid;
   reg        [4:0]    decode_load_s2mPipe_m2sPipe_rData_rd;
   reg                 decode_load_s2mPipe_m2sPipe_rData_i2f;
   reg        [1:0]    decode_load_s2mPipe_m2sPipe_rData_arg;
-  reg        `FpuRoundMode_opt_type decode_load_s2mPipe_m2sPipe_rData_roundMode;
-  wire                when_Stream_l342_2;
-  wire                when_Stream_l408;
+  reg        [2:0]    decode_load_s2mPipe_m2sPipe_rData_roundMode;
+  wire                when_Stream_l368_2;
+  wire                when_Stream_l438;
   reg                 load_s0_filtred_0_valid;
   reg                 load_s0_filtred_0_ready;
-  wire       `FpuOpcode_binary_sequential_type load_s0_filtred_0_payload_opcode;
+  wire       [3:0]    load_s0_filtred_0_payload_opcode;
   wire       [4:0]    load_s0_filtred_0_payload_rd;
   wire                load_s0_filtred_0_payload_write;
   wire       [31:0]   load_s0_filtred_0_payload_value;
   wire                load_s0_hazard;
-  wire                _zz_decode_load_s2mPipe_m2sPipe_input_ready;
+  wire                _zz_load_s0_input_ready;
   wire                load_s0_output_valid;
   reg                 load_s0_output_ready;
   wire       [4:0]    load_s0_output_payload_rd;
   wire       [31:0]   load_s0_output_payload_value;
   wire                load_s0_output_payload_i2f;
   wire       [1:0]    load_s0_output_payload_arg;
-  wire       `FpuRoundMode_opt_type load_s0_output_payload_roundMode;
-  wire                load_s0_output_input_valid;
-  wire                load_s0_output_input_ready;
-  wire       [4:0]    load_s0_output_input_payload_rd;
-  wire       [31:0]   load_s0_output_input_payload_value;
-  wire                load_s0_output_input_payload_i2f;
-  wire       [1:0]    load_s0_output_input_payload_arg;
-  wire       `FpuRoundMode_opt_type load_s0_output_input_payload_roundMode;
+  wire       [2:0]    load_s0_output_payload_roundMode;
+  wire                load_s1_input_valid;
+  wire                load_s1_input_ready;
+  wire       [4:0]    load_s1_input_payload_rd;
+  wire       [31:0]   load_s1_input_payload_value;
+  wire                load_s1_input_payload_i2f;
+  wire       [1:0]    load_s1_input_payload_arg;
+  wire       [2:0]    load_s1_input_payload_roundMode;
   reg                 load_s0_output_rValid;
   reg        [4:0]    load_s0_output_rData_rd;
   reg        [31:0]   load_s0_output_rData_value;
   reg                 load_s0_output_rData_i2f;
   reg        [1:0]    load_s0_output_rData_arg;
-  reg        `FpuRoundMode_opt_type load_s0_output_rData_roundMode;
-  wire                when_Stream_l342_3;
+  reg        [2:0]    load_s0_output_rData_roundMode;
+  wire                when_Stream_l368_3;
   reg                 load_s1_busy;
   wire       [22:0]   load_s1_f32_mantissa;
   wire       [7:0]    load_s1_f32_exponent;
@@ -8065,7 +8082,7 @@ module FpuCore (
   wire                _zz_load_s1_fsm_shift_by_31;
   wire                _zz_load_s1_fsm_shift_by_32;
   reg        [8:0]    load_s1_fsm_expOffset;
-  wire                load_s0_output_input_isStall;
+  wire                load_s1_input_isStall;
   wire                when_FpuCore_l551;
   wire       [23:0]   load_s1_i2fHigh;
   wire       [7:0]    load_s1_i2fLow;
@@ -8074,7 +8091,7 @@ module FpuCore (
   reg        [8:0]    load_s1_recoded_exponent;
   wire                load_s1_recoded_sign;
   reg                 load_s1_recoded_special;
-  wire                _zz_load_s0_output_input_ready;
+  wire                _zz_load_s1_input_ready;
   wire                load_s1_output_valid;
   reg                 load_s1_output_ready;
   wire       [4:0]    load_s1_output_payload_rd;
@@ -8083,27 +8100,27 @@ module FpuCore (
   reg                 load_s1_output_payload_value_sign;
   reg                 load_s1_output_payload_value_special;
   reg                 load_s1_output_payload_scrap;
-  wire       `FpuRoundMode_opt_type load_s1_output_payload_roundMode;
+  wire       [2:0]    load_s1_output_payload_roundMode;
   wire                load_s1_output_payload_NV;
   wire                load_s1_output_payload_DZ;
   wire                when_FpuCore_l594;
-  wire                decode_shortPip_input_valid;
-  wire                decode_shortPip_input_ready;
-  wire       `FpuOpcode_binary_sequential_type decode_shortPip_input_payload_opcode;
-  wire       [22:0]   decode_shortPip_input_payload_rs1_mantissa;
-  wire       [8:0]    decode_shortPip_input_payload_rs1_exponent;
-  wire                decode_shortPip_input_payload_rs1_sign;
-  wire                decode_shortPip_input_payload_rs1_special;
-  wire       [22:0]   decode_shortPip_input_payload_rs2_mantissa;
-  wire       [8:0]    decode_shortPip_input_payload_rs2_exponent;
-  wire                decode_shortPip_input_payload_rs2_sign;
-  wire                decode_shortPip_input_payload_rs2_special;
-  wire       [4:0]    decode_shortPip_input_payload_rd;
-  wire       [31:0]   decode_shortPip_input_payload_value;
-  wire       [1:0]    decode_shortPip_input_payload_arg;
-  wire       `FpuRoundMode_opt_type decode_shortPip_input_payload_roundMode;
+  wire                shortPip_input_valid;
+  wire                shortPip_input_ready;
+  wire       [3:0]    shortPip_input_payload_opcode;
+  wire       [22:0]   shortPip_input_payload_rs1_mantissa;
+  wire       [8:0]    shortPip_input_payload_rs1_exponent;
+  wire                shortPip_input_payload_rs1_sign;
+  wire                shortPip_input_payload_rs1_special;
+  wire       [22:0]   shortPip_input_payload_rs2_mantissa;
+  wire       [8:0]    shortPip_input_payload_rs2_exponent;
+  wire                shortPip_input_payload_rs2_sign;
+  wire                shortPip_input_payload_rs2_special;
+  wire       [4:0]    shortPip_input_payload_rd;
+  wire       [31:0]   shortPip_input_payload_value;
+  wire       [1:0]    shortPip_input_payload_arg;
+  wire       [2:0]    shortPip_input_payload_roundMode;
   reg                 decode_shortPip_rValid;
-  reg        `FpuOpcode_binary_sequential_type decode_shortPip_rData_opcode;
+  reg        [3:0]    decode_shortPip_rData_opcode;
   reg        [22:0]   decode_shortPip_rData_rs1_mantissa;
   reg        [8:0]    decode_shortPip_rData_rs1_exponent;
   reg                 decode_shortPip_rData_rs1_sign;
@@ -8115,8 +8132,8 @@ module FpuCore (
   reg        [4:0]    decode_shortPip_rData_rd;
   reg        [31:0]   decode_shortPip_rData_value;
   reg        [1:0]    decode_shortPip_rData_arg;
-  reg        `FpuRoundMode_opt_type decode_shortPip_rData_roundMode;
-  wire                when_Stream_l342_4;
+  reg        [2:0]    decode_shortPip_rData_roundMode;
+  wire                when_Stream_l368_4;
   wire                shortPip_toFpuRf;
   wire                shortPip_rfOutput_valid;
   wire                shortPip_rfOutput_ready;
@@ -8126,10 +8143,10 @@ module FpuCore (
   reg                 shortPip_rfOutput_payload_value_sign;
   reg                 shortPip_rfOutput_payload_value_special;
   wire                shortPip_rfOutput_payload_scrap;
-  wire       `FpuRoundMode_opt_type shortPip_rfOutput_payload_roundMode;
+  wire       [2:0]    shortPip_rfOutput_payload_roundMode;
   wire                shortPip_rfOutput_payload_NV;
   wire                shortPip_rfOutput_payload_DZ;
-  wire                decode_shortPip_input_fire;
+  wire                shortPip_input_fire;
   wire                when_FpuCore_l221;
   wire                shortPip_isCommited;
   wire                _zz_shortPip_rfOutput_ready;
@@ -8141,7 +8158,7 @@ module FpuCore (
   wire                shortPip_output_payload_value_sign;
   wire                shortPip_output_payload_value_special;
   wire                shortPip_output_payload_scrap;
-  wire       `FpuRoundMode_opt_type shortPip_output_payload_roundMode;
+  wire       [2:0]    shortPip_output_payload_roundMode;
   wire                shortPip_output_payload_NV;
   wire                shortPip_output_payload_DZ;
   reg        [31:0]   shortPip_result;
@@ -8174,7 +8191,7 @@ module FpuCore (
   wire                when_FpuCore_l658;
   wire       [8:0]    _zz_shortPip_fsm_shift_by;
   wire       [5:0]    _zz_shortPip_fsm_shift_by_1;
-  wire                decode_shortPip_input_isStall;
+  wire                shortPip_input_isStall;
   wire                when_FpuCore_l672;
   reg                 shortPip_mantissaForced;
   reg                 shortPip_exponentForced;
@@ -8202,7 +8219,7 @@ module FpuCore (
   wire                when_FpuCore_l782;
   wire                when_FpuCore_l783;
   wire                when_FpuCore_l784;
-  wire       [1:0]    switch_Misc_l200;
+  wire       [1:0]    switch_Misc_l210;
   reg                 shortPip_rs1Smaller;
   wire                shortPip_minMaxSelectRs2;
   wire                shortPip_minMaxSelectNanQuiet;
@@ -8239,27 +8256,27 @@ module FpuCore (
   reg        [31:0]   shortPip_rspStreams_0_rData_value;
   reg                 shortPip_rspStreams_0_rData_NV;
   reg                 shortPip_rspStreams_0_rData_NX;
-  wire                when_Stream_l342_5;
-  wire                decode_mul_input_valid;
-  wire                decode_mul_input_ready;
-  wire       [22:0]   decode_mul_input_payload_rs1_mantissa;
-  wire       [8:0]    decode_mul_input_payload_rs1_exponent;
-  wire                decode_mul_input_payload_rs1_sign;
-  wire                decode_mul_input_payload_rs1_special;
-  wire       [22:0]   decode_mul_input_payload_rs2_mantissa;
-  wire       [8:0]    decode_mul_input_payload_rs2_exponent;
-  wire                decode_mul_input_payload_rs2_sign;
-  wire                decode_mul_input_payload_rs2_special;
-  wire       [22:0]   decode_mul_input_payload_rs3_mantissa;
-  wire       [8:0]    decode_mul_input_payload_rs3_exponent;
-  wire                decode_mul_input_payload_rs3_sign;
-  wire                decode_mul_input_payload_rs3_special;
-  wire       [4:0]    decode_mul_input_payload_rd;
-  wire                decode_mul_input_payload_add;
-  wire                decode_mul_input_payload_divSqrt;
-  wire                decode_mul_input_payload_msb1;
-  wire                decode_mul_input_payload_msb2;
-  wire       `FpuRoundMode_opt_type decode_mul_input_payload_roundMode;
+  wire                when_Stream_l368_5;
+  wire                mul_preMul_input_valid;
+  wire                mul_preMul_input_ready;
+  wire       [22:0]   mul_preMul_input_payload_rs1_mantissa;
+  wire       [8:0]    mul_preMul_input_payload_rs1_exponent;
+  wire                mul_preMul_input_payload_rs1_sign;
+  wire                mul_preMul_input_payload_rs1_special;
+  wire       [22:0]   mul_preMul_input_payload_rs2_mantissa;
+  wire       [8:0]    mul_preMul_input_payload_rs2_exponent;
+  wire                mul_preMul_input_payload_rs2_sign;
+  wire                mul_preMul_input_payload_rs2_special;
+  wire       [22:0]   mul_preMul_input_payload_rs3_mantissa;
+  wire       [8:0]    mul_preMul_input_payload_rs3_exponent;
+  wire                mul_preMul_input_payload_rs3_sign;
+  wire                mul_preMul_input_payload_rs3_special;
+  wire       [4:0]    mul_preMul_input_payload_rd;
+  wire                mul_preMul_input_payload_add;
+  wire                mul_preMul_input_payload_divSqrt;
+  wire                mul_preMul_input_payload_msb1;
+  wire                mul_preMul_input_payload_msb2;
+  wire       [2:0]    mul_preMul_input_payload_roundMode;
   reg                 decode_mul_rValid;
   reg        [22:0]   decode_mul_rData_rs1_mantissa;
   reg        [8:0]    decode_mul_rData_rs1_exponent;
@@ -8278,8 +8295,8 @@ module FpuCore (
   reg                 decode_mul_rData_divSqrt;
   reg                 decode_mul_rData_msb1;
   reg                 decode_mul_rData_msb2;
-  reg        `FpuRoundMode_opt_type decode_mul_rData_roundMode;
-  wire                when_Stream_l342_6;
+  reg        [2:0]    decode_mul_rData_roundMode;
+  wire                when_Stream_l368_6;
   wire                mul_preMul_output_valid;
   reg                 mul_preMul_output_ready;
   wire       [22:0]   mul_preMul_output_payload_rs1_mantissa;
@@ -8299,29 +8316,29 @@ module FpuCore (
   wire                mul_preMul_output_payload_divSqrt;
   wire                mul_preMul_output_payload_msb1;
   wire                mul_preMul_output_payload_msb2;
-  wire       `FpuRoundMode_opt_type mul_preMul_output_payload_roundMode;
+  wire       [2:0]    mul_preMul_output_payload_roundMode;
   wire       [9:0]    mul_preMul_output_payload_exp;
-  wire                mul_preMul_output_input_valid;
-  wire                mul_preMul_output_input_ready;
-  wire       [22:0]   mul_preMul_output_input_payload_rs1_mantissa;
-  wire       [8:0]    mul_preMul_output_input_payload_rs1_exponent;
-  wire                mul_preMul_output_input_payload_rs1_sign;
-  wire                mul_preMul_output_input_payload_rs1_special;
-  wire       [22:0]   mul_preMul_output_input_payload_rs2_mantissa;
-  wire       [8:0]    mul_preMul_output_input_payload_rs2_exponent;
-  wire                mul_preMul_output_input_payload_rs2_sign;
-  wire                mul_preMul_output_input_payload_rs2_special;
-  wire       [22:0]   mul_preMul_output_input_payload_rs3_mantissa;
-  wire       [8:0]    mul_preMul_output_input_payload_rs3_exponent;
-  wire                mul_preMul_output_input_payload_rs3_sign;
-  wire                mul_preMul_output_input_payload_rs3_special;
-  wire       [4:0]    mul_preMul_output_input_payload_rd;
-  wire                mul_preMul_output_input_payload_add;
-  wire                mul_preMul_output_input_payload_divSqrt;
-  wire                mul_preMul_output_input_payload_msb1;
-  wire                mul_preMul_output_input_payload_msb2;
-  wire       `FpuRoundMode_opt_type mul_preMul_output_input_payload_roundMode;
-  wire       [9:0]    mul_preMul_output_input_payload_exp;
+  wire                mul_mul_input_valid;
+  wire                mul_mul_input_ready;
+  wire       [22:0]   mul_mul_input_payload_rs1_mantissa;
+  wire       [8:0]    mul_mul_input_payload_rs1_exponent;
+  wire                mul_mul_input_payload_rs1_sign;
+  wire                mul_mul_input_payload_rs1_special;
+  wire       [22:0]   mul_mul_input_payload_rs2_mantissa;
+  wire       [8:0]    mul_mul_input_payload_rs2_exponent;
+  wire                mul_mul_input_payload_rs2_sign;
+  wire                mul_mul_input_payload_rs2_special;
+  wire       [22:0]   mul_mul_input_payload_rs3_mantissa;
+  wire       [8:0]    mul_mul_input_payload_rs3_exponent;
+  wire                mul_mul_input_payload_rs3_sign;
+  wire                mul_mul_input_payload_rs3_special;
+  wire       [4:0]    mul_mul_input_payload_rd;
+  wire                mul_mul_input_payload_add;
+  wire                mul_mul_input_payload_divSqrt;
+  wire                mul_mul_input_payload_msb1;
+  wire                mul_mul_input_payload_msb2;
+  wire       [2:0]    mul_mul_input_payload_roundMode;
+  wire       [9:0]    mul_mul_input_payload_exp;
   reg                 mul_preMul_output_rValid;
   reg        [22:0]   mul_preMul_output_rData_rs1_mantissa;
   reg        [8:0]    mul_preMul_output_rData_rs1_exponent;
@@ -8340,9 +8357,9 @@ module FpuCore (
   reg                 mul_preMul_output_rData_divSqrt;
   reg                 mul_preMul_output_rData_msb1;
   reg                 mul_preMul_output_rData_msb2;
-  reg        `FpuRoundMode_opt_type mul_preMul_output_rData_roundMode;
+  reg        [2:0]    mul_preMul_output_rData_roundMode;
   reg        [9:0]    mul_preMul_output_rData_exp;
-  wire                when_Stream_l342_7;
+  wire                when_Stream_l368_7;
   wire                mul_mul_output_valid;
   reg                 mul_mul_output_ready;
   wire       [22:0]   mul_mul_output_payload_rs1_mantissa;
@@ -8362,7 +8379,7 @@ module FpuCore (
   wire                mul_mul_output_payload_divSqrt;
   wire                mul_mul_output_payload_msb1;
   wire                mul_mul_output_payload_msb2;
-  wire       `FpuRoundMode_opt_type mul_mul_output_payload_roundMode;
+  wire       [2:0]    mul_mul_output_payload_roundMode;
   wire       [9:0]    mul_mul_output_payload_exp;
   wire       [35:0]   mul_mul_output_payload_muls_0;
   wire       [23:0]   mul_mul_output_payload_muls_1;
@@ -8370,31 +8387,31 @@ module FpuCore (
   wire       [11:0]   mul_mul_output_payload_muls_3;
   wire       [23:0]   mul_mul_mulA;
   wire       [23:0]   mul_mul_mulB;
-  wire                mul_mul_output_input_valid;
-  wire                mul_mul_output_input_ready;
-  wire       [22:0]   mul_mul_output_input_payload_rs1_mantissa;
-  wire       [8:0]    mul_mul_output_input_payload_rs1_exponent;
-  wire                mul_mul_output_input_payload_rs1_sign;
-  wire                mul_mul_output_input_payload_rs1_special;
-  wire       [22:0]   mul_mul_output_input_payload_rs2_mantissa;
-  wire       [8:0]    mul_mul_output_input_payload_rs2_exponent;
-  wire                mul_mul_output_input_payload_rs2_sign;
-  wire                mul_mul_output_input_payload_rs2_special;
-  wire       [22:0]   mul_mul_output_input_payload_rs3_mantissa;
-  wire       [8:0]    mul_mul_output_input_payload_rs3_exponent;
-  wire                mul_mul_output_input_payload_rs3_sign;
-  wire                mul_mul_output_input_payload_rs3_special;
-  wire       [4:0]    mul_mul_output_input_payload_rd;
-  wire                mul_mul_output_input_payload_add;
-  wire                mul_mul_output_input_payload_divSqrt;
-  wire                mul_mul_output_input_payload_msb1;
-  wire                mul_mul_output_input_payload_msb2;
-  wire       `FpuRoundMode_opt_type mul_mul_output_input_payload_roundMode;
-  wire       [9:0]    mul_mul_output_input_payload_exp;
-  wire       [35:0]   mul_mul_output_input_payload_muls_0;
-  wire       [23:0]   mul_mul_output_input_payload_muls_1;
-  wire       [23:0]   mul_mul_output_input_payload_muls_2;
-  wire       [11:0]   mul_mul_output_input_payload_muls_3;
+  wire                mul_sum1_input_valid;
+  wire                mul_sum1_input_ready;
+  wire       [22:0]   mul_sum1_input_payload_rs1_mantissa;
+  wire       [8:0]    mul_sum1_input_payload_rs1_exponent;
+  wire                mul_sum1_input_payload_rs1_sign;
+  wire                mul_sum1_input_payload_rs1_special;
+  wire       [22:0]   mul_sum1_input_payload_rs2_mantissa;
+  wire       [8:0]    mul_sum1_input_payload_rs2_exponent;
+  wire                mul_sum1_input_payload_rs2_sign;
+  wire                mul_sum1_input_payload_rs2_special;
+  wire       [22:0]   mul_sum1_input_payload_rs3_mantissa;
+  wire       [8:0]    mul_sum1_input_payload_rs3_exponent;
+  wire                mul_sum1_input_payload_rs3_sign;
+  wire                mul_sum1_input_payload_rs3_special;
+  wire       [4:0]    mul_sum1_input_payload_rd;
+  wire                mul_sum1_input_payload_add;
+  wire                mul_sum1_input_payload_divSqrt;
+  wire                mul_sum1_input_payload_msb1;
+  wire                mul_sum1_input_payload_msb2;
+  wire       [2:0]    mul_sum1_input_payload_roundMode;
+  wire       [9:0]    mul_sum1_input_payload_exp;
+  wire       [35:0]   mul_sum1_input_payload_muls_0;
+  wire       [23:0]   mul_sum1_input_payload_muls_1;
+  wire       [23:0]   mul_sum1_input_payload_muls_2;
+  wire       [11:0]   mul_sum1_input_payload_muls_3;
   reg                 mul_mul_output_rValid;
   reg        [22:0]   mul_mul_output_rData_rs1_mantissa;
   reg        [8:0]    mul_mul_output_rData_rs1_exponent;
@@ -8413,13 +8430,13 @@ module FpuCore (
   reg                 mul_mul_output_rData_divSqrt;
   reg                 mul_mul_output_rData_msb1;
   reg                 mul_mul_output_rData_msb2;
-  reg        `FpuRoundMode_opt_type mul_mul_output_rData_roundMode;
+  reg        [2:0]    mul_mul_output_rData_roundMode;
   reg        [9:0]    mul_mul_output_rData_exp;
   reg        [35:0]   mul_mul_output_rData_muls_0;
   reg        [23:0]   mul_mul_output_rData_muls_1;
   reg        [23:0]   mul_mul_output_rData_muls_2;
   reg        [11:0]   mul_mul_output_rData_muls_3;
-  wire                when_Stream_l342_8;
+  wire                when_Stream_l368_8;
   wire       [47:0]   mul_sum1_sum;
   wire                mul_sum1_output_valid;
   reg                 mul_sum1_output_ready;
@@ -8440,35 +8457,35 @@ module FpuCore (
   wire                mul_sum1_output_payload_divSqrt;
   wire                mul_sum1_output_payload_msb1;
   wire                mul_sum1_output_payload_msb2;
-  wire       `FpuRoundMode_opt_type mul_sum1_output_payload_roundMode;
+  wire       [2:0]    mul_sum1_output_payload_roundMode;
   wire       [9:0]    mul_sum1_output_payload_exp;
   wire       [23:0]   mul_sum1_output_payload_muls2_0;
   wire       [11:0]   mul_sum1_output_payload_muls2_1;
   wire       [47:0]   mul_sum1_output_payload_mulC2;
-  wire                mul_sum1_output_input_valid;
-  wire                mul_sum1_output_input_ready;
-  wire       [22:0]   mul_sum1_output_input_payload_rs1_mantissa;
-  wire       [8:0]    mul_sum1_output_input_payload_rs1_exponent;
-  wire                mul_sum1_output_input_payload_rs1_sign;
-  wire                mul_sum1_output_input_payload_rs1_special;
-  wire       [22:0]   mul_sum1_output_input_payload_rs2_mantissa;
-  wire       [8:0]    mul_sum1_output_input_payload_rs2_exponent;
-  wire                mul_sum1_output_input_payload_rs2_sign;
-  wire                mul_sum1_output_input_payload_rs2_special;
-  wire       [22:0]   mul_sum1_output_input_payload_rs3_mantissa;
-  wire       [8:0]    mul_sum1_output_input_payload_rs3_exponent;
-  wire                mul_sum1_output_input_payload_rs3_sign;
-  wire                mul_sum1_output_input_payload_rs3_special;
-  wire       [4:0]    mul_sum1_output_input_payload_rd;
-  wire                mul_sum1_output_input_payload_add;
-  wire                mul_sum1_output_input_payload_divSqrt;
-  wire                mul_sum1_output_input_payload_msb1;
-  wire                mul_sum1_output_input_payload_msb2;
-  wire       `FpuRoundMode_opt_type mul_sum1_output_input_payload_roundMode;
-  wire       [9:0]    mul_sum1_output_input_payload_exp;
-  wire       [23:0]   mul_sum1_output_input_payload_muls2_0;
-  wire       [11:0]   mul_sum1_output_input_payload_muls2_1;
-  wire       [47:0]   mul_sum1_output_input_payload_mulC2;
+  wire                mul_sum2_input_valid;
+  wire                mul_sum2_input_ready;
+  wire       [22:0]   mul_sum2_input_payload_rs1_mantissa;
+  wire       [8:0]    mul_sum2_input_payload_rs1_exponent;
+  wire                mul_sum2_input_payload_rs1_sign;
+  wire                mul_sum2_input_payload_rs1_special;
+  wire       [22:0]   mul_sum2_input_payload_rs2_mantissa;
+  wire       [8:0]    mul_sum2_input_payload_rs2_exponent;
+  wire                mul_sum2_input_payload_rs2_sign;
+  wire                mul_sum2_input_payload_rs2_special;
+  wire       [22:0]   mul_sum2_input_payload_rs3_mantissa;
+  wire       [8:0]    mul_sum2_input_payload_rs3_exponent;
+  wire                mul_sum2_input_payload_rs3_sign;
+  wire                mul_sum2_input_payload_rs3_special;
+  wire       [4:0]    mul_sum2_input_payload_rd;
+  wire                mul_sum2_input_payload_add;
+  wire                mul_sum2_input_payload_divSqrt;
+  wire                mul_sum2_input_payload_msb1;
+  wire                mul_sum2_input_payload_msb2;
+  wire       [2:0]    mul_sum2_input_payload_roundMode;
+  wire       [9:0]    mul_sum2_input_payload_exp;
+  wire       [23:0]   mul_sum2_input_payload_muls2_0;
+  wire       [11:0]   mul_sum2_input_payload_muls2_1;
+  wire       [47:0]   mul_sum2_input_payload_mulC2;
   reg                 mul_sum1_output_rValid;
   reg        [22:0]   mul_sum1_output_rData_rs1_mantissa;
   reg        [8:0]    mul_sum1_output_rData_rs1_exponent;
@@ -8487,17 +8504,17 @@ module FpuCore (
   reg                 mul_sum1_output_rData_divSqrt;
   reg                 mul_sum1_output_rData_msb1;
   reg                 mul_sum1_output_rData_msb2;
-  reg        `FpuRoundMode_opt_type mul_sum1_output_rData_roundMode;
+  reg        [2:0]    mul_sum1_output_rData_roundMode;
   reg        [9:0]    mul_sum1_output_rData_exp;
   reg        [23:0]   mul_sum1_output_rData_muls2_0;
   reg        [11:0]   mul_sum1_output_rData_muls2_1;
   reg        [47:0]   mul_sum1_output_rData_mulC2;
-  wire                when_Stream_l342_9;
+  wire                when_Stream_l368_9;
   wire       [47:0]   mul_sum2_sum;
-  wire                mul_sum1_output_input_fire;
+  wire                mul_sum2_input_fire;
   wire                when_FpuCore_l221_1;
   wire                mul_sum2_isCommited;
-  wire                _zz_mul_sum1_output_input_ready;
+  wire                _zz_mul_sum2_input_ready;
   wire                mul_sum2_output_valid;
   reg                 mul_sum2_output_ready;
   wire       [22:0]   mul_sum2_output_payload_rs1_mantissa;
@@ -8517,31 +8534,31 @@ module FpuCore (
   wire                mul_sum2_output_payload_divSqrt;
   wire                mul_sum2_output_payload_msb1;
   wire                mul_sum2_output_payload_msb2;
-  wire       `FpuRoundMode_opt_type mul_sum2_output_payload_roundMode;
+  wire       [2:0]    mul_sum2_output_payload_roundMode;
   wire       [9:0]    mul_sum2_output_payload_exp;
   wire       [47:0]   mul_sum2_output_payload_mulC;
-  wire                mul_sum2_output_input_valid;
-  wire                mul_sum2_output_input_ready;
-  wire       [22:0]   mul_sum2_output_input_payload_rs1_mantissa;
-  wire       [8:0]    mul_sum2_output_input_payload_rs1_exponent;
-  wire                mul_sum2_output_input_payload_rs1_sign;
-  wire                mul_sum2_output_input_payload_rs1_special;
-  wire       [22:0]   mul_sum2_output_input_payload_rs2_mantissa;
-  wire       [8:0]    mul_sum2_output_input_payload_rs2_exponent;
-  wire                mul_sum2_output_input_payload_rs2_sign;
-  wire                mul_sum2_output_input_payload_rs2_special;
-  wire       [22:0]   mul_sum2_output_input_payload_rs3_mantissa;
-  wire       [8:0]    mul_sum2_output_input_payload_rs3_exponent;
-  wire                mul_sum2_output_input_payload_rs3_sign;
-  wire                mul_sum2_output_input_payload_rs3_special;
-  wire       [4:0]    mul_sum2_output_input_payload_rd;
-  wire                mul_sum2_output_input_payload_add;
-  wire                mul_sum2_output_input_payload_divSqrt;
-  wire                mul_sum2_output_input_payload_msb1;
-  wire                mul_sum2_output_input_payload_msb2;
-  wire       `FpuRoundMode_opt_type mul_sum2_output_input_payload_roundMode;
-  wire       [9:0]    mul_sum2_output_input_payload_exp;
-  wire       [47:0]   mul_sum2_output_input_payload_mulC;
+  wire                mul_norm_input_valid;
+  wire                mul_norm_input_ready;
+  wire       [22:0]   mul_norm_input_payload_rs1_mantissa;
+  wire       [8:0]    mul_norm_input_payload_rs1_exponent;
+  wire                mul_norm_input_payload_rs1_sign;
+  wire                mul_norm_input_payload_rs1_special;
+  wire       [22:0]   mul_norm_input_payload_rs2_mantissa;
+  wire       [8:0]    mul_norm_input_payload_rs2_exponent;
+  wire                mul_norm_input_payload_rs2_sign;
+  wire                mul_norm_input_payload_rs2_special;
+  wire       [22:0]   mul_norm_input_payload_rs3_mantissa;
+  wire       [8:0]    mul_norm_input_payload_rs3_exponent;
+  wire                mul_norm_input_payload_rs3_sign;
+  wire                mul_norm_input_payload_rs3_special;
+  wire       [4:0]    mul_norm_input_payload_rd;
+  wire                mul_norm_input_payload_add;
+  wire                mul_norm_input_payload_divSqrt;
+  wire                mul_norm_input_payload_msb1;
+  wire                mul_norm_input_payload_msb2;
+  wire       [2:0]    mul_norm_input_payload_roundMode;
+  wire       [9:0]    mul_norm_input_payload_exp;
+  wire       [47:0]   mul_norm_input_payload_mulC;
   reg                 mul_sum2_output_rValid;
   reg        [22:0]   mul_sum2_output_rData_rs1_mantissa;
   reg        [8:0]    mul_sum2_output_rData_rs1_exponent;
@@ -8560,10 +8577,10 @@ module FpuCore (
   reg                 mul_sum2_output_rData_divSqrt;
   reg                 mul_sum2_output_rData_msb1;
   reg                 mul_sum2_output_rData_msb2;
-  reg        `FpuRoundMode_opt_type mul_sum2_output_rData_roundMode;
+  reg        [2:0]    mul_sum2_output_rData_roundMode;
   reg        [9:0]    mul_sum2_output_rData_exp;
   reg        [47:0]   mul_sum2_output_rData_mulC;
-  wire                when_Stream_l342_10;
+  wire                when_Stream_l368_10;
   wire       [25:0]   mul_norm_mulHigh;
   wire       [21:0]   mul_norm_mulLow;
   reg                 mul_norm_scrap;
@@ -8595,7 +8612,7 @@ module FpuCore (
   wire                mul_result_output_payload_value_sign;
   wire                mul_result_output_payload_value_special;
   wire                mul_result_output_payload_scrap;
-  wire       `FpuRoundMode_opt_type mul_result_output_payload_roundMode;
+  wire       [2:0]    mul_result_output_payload_roundMode;
   wire                mul_result_output_payload_NV;
   wire                mul_result_output_payload_DZ;
   wire                mul_result_mulToAdd_valid;
@@ -8609,7 +8626,7 @@ module FpuCore (
   wire                mul_result_mulToAdd_payload_rs2_sign;
   wire                mul_result_mulToAdd_payload_rs2_special;
   wire       [4:0]    mul_result_mulToAdd_payload_rd;
-  wire       `FpuRoundMode_opt_type mul_result_mulToAdd_payload_roundMode;
+  wire       [2:0]    mul_result_mulToAdd_payload_roundMode;
   wire                mul_result_mulToAdd_payload_needCommit;
   wire                mul_result_mulToAdd_m2sPipe_valid;
   wire                mul_result_mulToAdd_m2sPipe_ready;
@@ -8622,7 +8639,7 @@ module FpuCore (
   wire                mul_result_mulToAdd_m2sPipe_payload_rs2_sign;
   wire                mul_result_mulToAdd_m2sPipe_payload_rs2_special;
   wire       [4:0]    mul_result_mulToAdd_m2sPipe_payload_rd;
-  wire       `FpuRoundMode_opt_type mul_result_mulToAdd_m2sPipe_payload_roundMode;
+  wire       [2:0]    mul_result_mulToAdd_m2sPipe_payload_roundMode;
   wire                mul_result_mulToAdd_m2sPipe_payload_needCommit;
   reg                 mul_result_mulToAdd_rValid;
   reg        [24:0]   mul_result_mulToAdd_rData_rs1_mantissa;
@@ -8634,23 +8651,23 @@ module FpuCore (
   reg                 mul_result_mulToAdd_rData_rs2_sign;
   reg                 mul_result_mulToAdd_rData_rs2_special;
   reg        [4:0]    mul_result_mulToAdd_rData_rd;
-  reg        `FpuRoundMode_opt_type mul_result_mulToAdd_rData_roundMode;
+  reg        [2:0]    mul_result_mulToAdd_rData_roundMode;
   reg                 mul_result_mulToAdd_rData_needCommit;
-  wire                when_Stream_l342_11;
-  wire                decode_div_input_valid;
-  wire                decode_div_input_ready;
-  wire       [22:0]   decode_div_input_payload_rs1_mantissa;
-  wire       [8:0]    decode_div_input_payload_rs1_exponent;
-  wire                decode_div_input_payload_rs1_sign;
-  wire                decode_div_input_payload_rs1_special;
-  wire       [22:0]   decode_div_input_payload_rs2_mantissa;
-  wire       [8:0]    decode_div_input_payload_rs2_exponent;
-  wire                decode_div_input_payload_rs2_sign;
-  wire                decode_div_input_payload_rs2_special;
-  wire       [4:0]    decode_div_input_payload_rd;
-  wire       `FpuRoundMode_opt_type decode_div_input_payload_roundMode;
+  wire                when_Stream_l368_11;
+  wire                div_input_valid;
+  wire                div_input_ready;
+  wire       [22:0]   div_input_payload_rs1_mantissa;
+  wire       [8:0]    div_input_payload_rs1_exponent;
+  wire                div_input_payload_rs1_sign;
+  wire                div_input_payload_rs1_special;
+  wire       [22:0]   div_input_payload_rs2_mantissa;
+  wire       [8:0]    div_input_payload_rs2_exponent;
+  wire                div_input_payload_rs2_sign;
+  wire                div_input_payload_rs2_special;
+  wire       [4:0]    div_input_payload_rd;
+  wire       [2:0]    div_input_payload_roundMode;
   reg                 decode_div_rValid;
-  wire                decode_div_input_fire;
+  wire                div_input_fire;
   reg        [22:0]   decode_div_rData_rs1_mantissa;
   reg        [8:0]    decode_div_rData_rs1_exponent;
   reg                 decode_div_rData_rs1_sign;
@@ -8660,12 +8677,12 @@ module FpuCore (
   reg                 decode_div_rData_rs2_sign;
   reg                 decode_div_rData_rs2_special;
   reg        [4:0]    decode_div_rData_rd;
-  reg        `FpuRoundMode_opt_type decode_div_rData_roundMode;
+  reg        [2:0]    decode_div_rData_roundMode;
   reg                 div_haltIt;
-  wire                decode_div_input_fire_1;
+  wire                div_input_fire_1;
   wire                when_FpuCore_l221_2;
   reg                 div_isCommited;
-  wire                _zz_decode_div_input_ready;
+  wire                _zz_div_input_ready;
   wire                div_output_valid;
   wire                div_output_ready;
   wire       [4:0]    div_output_payload_rd;
@@ -8674,7 +8691,7 @@ module FpuCore (
   wire                div_output_payload_value_sign;
   reg                 div_output_payload_value_special;
   wire                div_output_payload_scrap;
-  wire       `FpuRoundMode_opt_type div_output_payload_roundMode;
+  wire       [2:0]    div_output_payload_roundMode;
   reg                 div_output_payload_NV;
   wire                div_output_payload_DZ;
   wire       [25:0]   div_dividerResult;
@@ -8696,27 +8713,27 @@ module FpuCore (
   wire                div_forceZero;
   wire                when_FpuCore_l1089;
   wire                when_FpuCore_l1093;
-  wire                decode_sqrt_input_valid;
-  wire                decode_sqrt_input_ready;
-  wire       [22:0]   decode_sqrt_input_payload_rs1_mantissa;
-  wire       [8:0]    decode_sqrt_input_payload_rs1_exponent;
-  wire                decode_sqrt_input_payload_rs1_sign;
-  wire                decode_sqrt_input_payload_rs1_special;
-  wire       [4:0]    decode_sqrt_input_payload_rd;
-  wire       `FpuRoundMode_opt_type decode_sqrt_input_payload_roundMode;
+  wire                sqrt_input_valid;
+  wire                sqrt_input_ready;
+  wire       [22:0]   sqrt_input_payload_rs1_mantissa;
+  wire       [8:0]    sqrt_input_payload_rs1_exponent;
+  wire                sqrt_input_payload_rs1_sign;
+  wire                sqrt_input_payload_rs1_special;
+  wire       [4:0]    sqrt_input_payload_rd;
+  wire       [2:0]    sqrt_input_payload_roundMode;
   reg                 decode_sqrt_rValid;
-  wire                decode_sqrt_input_fire;
+  wire                sqrt_input_fire;
   reg        [22:0]   decode_sqrt_rData_rs1_mantissa;
   reg        [8:0]    decode_sqrt_rData_rs1_exponent;
   reg                 decode_sqrt_rData_rs1_sign;
   reg                 decode_sqrt_rData_rs1_special;
   reg        [4:0]    decode_sqrt_rData_rd;
-  reg        `FpuRoundMode_opt_type decode_sqrt_rData_roundMode;
+  reg        [2:0]    decode_sqrt_rData_roundMode;
   reg                 sqrt_haltIt;
-  wire                decode_sqrt_input_fire_1;
+  wire                sqrt_input_fire_1;
   wire                when_FpuCore_l221_3;
   reg                 sqrt_isCommited;
-  wire                _zz_decode_sqrt_input_ready;
+  wire                _zz_sqrt_input_ready;
   wire                sqrt_output_valid;
   wire                sqrt_output_ready;
   wire       [4:0]    sqrt_output_payload_rd;
@@ -8725,7 +8742,7 @@ module FpuCore (
   wire                sqrt_output_payload_value_sign;
   reg                 sqrt_output_payload_value_special;
   wire                sqrt_output_payload_scrap;
-  wire       `FpuRoundMode_opt_type sqrt_output_payload_roundMode;
+  wire       [2:0]    sqrt_output_payload_roundMode;
   reg                 sqrt_output_payload_NV;
   wire                sqrt_output_payload_DZ;
   wire                sqrt_needShift;
@@ -8749,7 +8766,7 @@ module FpuCore (
   wire                add_preShifter_input_payload_rs2_sign;
   wire                add_preShifter_input_payload_rs2_special;
   wire       [4:0]    add_preShifter_input_payload_rd;
-  wire       `FpuRoundMode_opt_type add_preShifter_input_payload_roundMode;
+  wire       [2:0]    add_preShifter_input_payload_roundMode;
   wire                add_preShifter_input_payload_needCommit;
   wire                add_preShifter_output_valid;
   reg                 add_preShifter_output_ready;
@@ -8762,7 +8779,7 @@ module FpuCore (
   wire                add_preShifter_output_payload_rs2_sign;
   wire                add_preShifter_output_payload_rs2_special;
   wire       [4:0]    add_preShifter_output_payload_rd;
-  wire       `FpuRoundMode_opt_type add_preShifter_output_payload_roundMode;
+  wire       [2:0]    add_preShifter_output_payload_roundMode;
   wire                add_preShifter_output_payload_needCommit;
   wire                add_preShifter_output_payload_absRs1Bigger;
   wire                add_preShifter_output_payload_rs1ExponentBigger;
@@ -8771,21 +8788,21 @@ module FpuCore (
   wire                add_preShifter_rs1ExponentEqual;
   wire                add_preShifter_rs1MantissaBigger;
   wire                add_preShifter_absRs1Bigger;
-  wire                add_preShifter_output_input_valid;
-  wire                add_preShifter_output_input_ready;
-  wire       [24:0]   add_preShifter_output_input_payload_rs1_mantissa;
-  wire       [8:0]    add_preShifter_output_input_payload_rs1_exponent;
-  wire                add_preShifter_output_input_payload_rs1_sign;
-  wire                add_preShifter_output_input_payload_rs1_special;
-  wire       [24:0]   add_preShifter_output_input_payload_rs2_mantissa;
-  wire       [8:0]    add_preShifter_output_input_payload_rs2_exponent;
-  wire                add_preShifter_output_input_payload_rs2_sign;
-  wire                add_preShifter_output_input_payload_rs2_special;
-  wire       [4:0]    add_preShifter_output_input_payload_rd;
-  wire       `FpuRoundMode_opt_type add_preShifter_output_input_payload_roundMode;
-  wire                add_preShifter_output_input_payload_needCommit;
-  wire                add_preShifter_output_input_payload_absRs1Bigger;
-  wire                add_preShifter_output_input_payload_rs1ExponentBigger;
+  wire                add_shifter_input_valid;
+  wire                add_shifter_input_ready;
+  wire       [24:0]   add_shifter_input_payload_rs1_mantissa;
+  wire       [8:0]    add_shifter_input_payload_rs1_exponent;
+  wire                add_shifter_input_payload_rs1_sign;
+  wire                add_shifter_input_payload_rs1_special;
+  wire       [24:0]   add_shifter_input_payload_rs2_mantissa;
+  wire       [8:0]    add_shifter_input_payload_rs2_exponent;
+  wire                add_shifter_input_payload_rs2_sign;
+  wire                add_shifter_input_payload_rs2_special;
+  wire       [4:0]    add_shifter_input_payload_rd;
+  wire       [2:0]    add_shifter_input_payload_roundMode;
+  wire                add_shifter_input_payload_needCommit;
+  wire                add_shifter_input_payload_absRs1Bigger;
+  wire                add_shifter_input_payload_rs1ExponentBigger;
   reg                 add_preShifter_output_rValid;
   reg        [24:0]   add_preShifter_output_rData_rs1_mantissa;
   reg        [8:0]    add_preShifter_output_rData_rs1_exponent;
@@ -8796,11 +8813,11 @@ module FpuCore (
   reg                 add_preShifter_output_rData_rs2_sign;
   reg                 add_preShifter_output_rData_rs2_special;
   reg        [4:0]    add_preShifter_output_rData_rd;
-  reg        `FpuRoundMode_opt_type add_preShifter_output_rData_roundMode;
+  reg        [2:0]    add_preShifter_output_rData_roundMode;
   reg                 add_preShifter_output_rData_needCommit;
   reg                 add_preShifter_output_rData_absRs1Bigger;
   reg                 add_preShifter_output_rData_rs1ExponentBigger;
-  wire                when_Stream_l342_12;
+  wire                when_Stream_l368_12;
   wire                add_shifter_output_valid;
   reg                 add_shifter_output_ready;
   wire       [24:0]   add_shifter_output_payload_rs1_mantissa;
@@ -8812,7 +8829,7 @@ module FpuCore (
   wire                add_shifter_output_payload_rs2_sign;
   wire                add_shifter_output_payload_rs2_special;
   wire       [4:0]    add_shifter_output_payload_rd;
-  wire       `FpuRoundMode_opt_type add_shifter_output_payload_roundMode;
+  wire       [2:0]    add_shifter_output_payload_roundMode;
   wire                add_shifter_output_payload_needCommit;
   wire                add_shifter_output_payload_xSign;
   wire                add_shifter_output_payload_ySign;
@@ -8837,26 +8854,26 @@ module FpuCore (
   wire                when_FpuCore_l1419_3;
   wire                when_FpuCore_l1419_4;
   wire                when_FpuCore_l1424;
-  wire                add_shifter_output_input_valid;
-  wire                add_shifter_output_input_ready;
-  wire       [24:0]   add_shifter_output_input_payload_rs1_mantissa;
-  wire       [8:0]    add_shifter_output_input_payload_rs1_exponent;
-  wire                add_shifter_output_input_payload_rs1_sign;
-  wire                add_shifter_output_input_payload_rs1_special;
-  wire       [24:0]   add_shifter_output_input_payload_rs2_mantissa;
-  wire       [8:0]    add_shifter_output_input_payload_rs2_exponent;
-  wire                add_shifter_output_input_payload_rs2_sign;
-  wire                add_shifter_output_input_payload_rs2_special;
-  wire       [4:0]    add_shifter_output_input_payload_rd;
-  wire       `FpuRoundMode_opt_type add_shifter_output_input_payload_roundMode;
-  wire                add_shifter_output_input_payload_needCommit;
-  wire                add_shifter_output_input_payload_xSign;
-  wire                add_shifter_output_input_payload_ySign;
-  wire       [25:0]   add_shifter_output_input_payload_xMantissa;
-  wire       [25:0]   add_shifter_output_input_payload_yMantissa;
-  wire       [8:0]    add_shifter_output_input_payload_xyExponent;
-  wire                add_shifter_output_input_payload_xySign;
-  wire                add_shifter_output_input_payload_roundingScrap;
+  wire                add_math_input_valid;
+  wire                add_math_input_ready;
+  wire       [24:0]   add_math_input_payload_rs1_mantissa;
+  wire       [8:0]    add_math_input_payload_rs1_exponent;
+  wire                add_math_input_payload_rs1_sign;
+  wire                add_math_input_payload_rs1_special;
+  wire       [24:0]   add_math_input_payload_rs2_mantissa;
+  wire       [8:0]    add_math_input_payload_rs2_exponent;
+  wire                add_math_input_payload_rs2_sign;
+  wire                add_math_input_payload_rs2_special;
+  wire       [4:0]    add_math_input_payload_rd;
+  wire       [2:0]    add_math_input_payload_roundMode;
+  wire                add_math_input_payload_needCommit;
+  wire                add_math_input_payload_xSign;
+  wire                add_math_input_payload_ySign;
+  wire       [25:0]   add_math_input_payload_xMantissa;
+  wire       [25:0]   add_math_input_payload_yMantissa;
+  wire       [8:0]    add_math_input_payload_xyExponent;
+  wire                add_math_input_payload_xySign;
+  wire                add_math_input_payload_roundingScrap;
   reg                 add_shifter_output_rValid;
   reg        [24:0]   add_shifter_output_rData_rs1_mantissa;
   reg        [8:0]    add_shifter_output_rData_rs1_exponent;
@@ -8867,7 +8884,7 @@ module FpuCore (
   reg                 add_shifter_output_rData_rs2_sign;
   reg                 add_shifter_output_rData_rs2_special;
   reg        [4:0]    add_shifter_output_rData_rd;
-  reg        `FpuRoundMode_opt_type add_shifter_output_rData_roundMode;
+  reg        [2:0]    add_shifter_output_rData_roundMode;
   reg                 add_shifter_output_rData_needCommit;
   reg                 add_shifter_output_rData_xSign;
   reg                 add_shifter_output_rData_ySign;
@@ -8876,7 +8893,7 @@ module FpuCore (
   reg        [8:0]    add_shifter_output_rData_xyExponent;
   reg                 add_shifter_output_rData_xySign;
   reg                 add_shifter_output_rData_roundingScrap;
-  wire                when_Stream_l342_13;
+  wire                when_Stream_l368_13;
   wire                add_math_output_valid;
   reg                 add_math_output_ready;
   wire       [24:0]   add_math_output_payload_rs1_mantissa;
@@ -8888,7 +8905,7 @@ module FpuCore (
   wire                add_math_output_payload_rs2_sign;
   wire                add_math_output_payload_rs2_special;
   wire       [4:0]    add_math_output_payload_rd;
-  wire       `FpuRoundMode_opt_type add_math_output_payload_roundMode;
+  wire       [2:0]    add_math_output_payload_roundMode;
   wire                add_math_output_payload_needCommit;
   wire                add_math_output_payload_xSign;
   wire                add_math_output_payload_ySign;
@@ -8900,27 +8917,27 @@ module FpuCore (
   wire       [26:0]   add_math_output_payload_xyMantissa;
   wire       [26:0]   add_math_xSigned;
   wire       [26:0]   add_math_ySigned;
-  wire                add_math_output_input_valid;
-  wire                add_math_output_input_ready;
-  wire       [24:0]   add_math_output_input_payload_rs1_mantissa;
-  wire       [8:0]    add_math_output_input_payload_rs1_exponent;
-  wire                add_math_output_input_payload_rs1_sign;
-  wire                add_math_output_input_payload_rs1_special;
-  wire       [24:0]   add_math_output_input_payload_rs2_mantissa;
-  wire       [8:0]    add_math_output_input_payload_rs2_exponent;
-  wire                add_math_output_input_payload_rs2_sign;
-  wire                add_math_output_input_payload_rs2_special;
-  wire       [4:0]    add_math_output_input_payload_rd;
-  wire       `FpuRoundMode_opt_type add_math_output_input_payload_roundMode;
-  wire                add_math_output_input_payload_needCommit;
-  wire                add_math_output_input_payload_xSign;
-  wire                add_math_output_input_payload_ySign;
-  wire       [25:0]   add_math_output_input_payload_xMantissa;
-  wire       [25:0]   add_math_output_input_payload_yMantissa;
-  wire       [8:0]    add_math_output_input_payload_xyExponent;
-  wire                add_math_output_input_payload_xySign;
-  wire                add_math_output_input_payload_roundingScrap;
-  wire       [26:0]   add_math_output_input_payload_xyMantissa;
+  wire                add_oh_input_valid;
+  wire                add_oh_input_ready;
+  wire       [24:0]   add_oh_input_payload_rs1_mantissa;
+  wire       [8:0]    add_oh_input_payload_rs1_exponent;
+  wire                add_oh_input_payload_rs1_sign;
+  wire                add_oh_input_payload_rs1_special;
+  wire       [24:0]   add_oh_input_payload_rs2_mantissa;
+  wire       [8:0]    add_oh_input_payload_rs2_exponent;
+  wire                add_oh_input_payload_rs2_sign;
+  wire                add_oh_input_payload_rs2_special;
+  wire       [4:0]    add_oh_input_payload_rd;
+  wire       [2:0]    add_oh_input_payload_roundMode;
+  wire                add_oh_input_payload_needCommit;
+  wire                add_oh_input_payload_xSign;
+  wire                add_oh_input_payload_ySign;
+  wire       [25:0]   add_oh_input_payload_xMantissa;
+  wire       [25:0]   add_oh_input_payload_yMantissa;
+  wire       [8:0]    add_oh_input_payload_xyExponent;
+  wire                add_oh_input_payload_xySign;
+  wire                add_oh_input_payload_roundingScrap;
+  wire       [26:0]   add_oh_input_payload_xyMantissa;
   reg                 add_math_output_rValid;
   reg        [24:0]   add_math_output_rData_rs1_mantissa;
   reg        [8:0]    add_math_output_rData_rs1_exponent;
@@ -8931,7 +8948,7 @@ module FpuCore (
   reg                 add_math_output_rData_rs2_sign;
   reg                 add_math_output_rData_rs2_special;
   reg        [4:0]    add_math_output_rData_rd;
-  reg        `FpuRoundMode_opt_type add_math_output_rData_roundMode;
+  reg        [2:0]    add_math_output_rData_roundMode;
   reg                 add_math_output_rData_needCommit;
   reg                 add_math_output_rData_xSign;
   reg                 add_math_output_rData_ySign;
@@ -8941,11 +8958,11 @@ module FpuCore (
   reg                 add_math_output_rData_xySign;
   reg                 add_math_output_rData_roundingScrap;
   reg        [26:0]   add_math_output_rData_xyMantissa;
-  wire                when_Stream_l342_14;
-  wire                add_math_output_input_fire;
+  wire                when_Stream_l368_14;
+  wire                add_oh_input_fire;
   wire                when_FpuCore_l221_4;
   wire                add_oh_isCommited;
-  wire                _zz_add_math_output_input_ready;
+  wire                _zz_add_oh_input_ready;
   wire                add_oh_output_valid;
   reg                 add_oh_output_ready;
   wire       [24:0]   add_oh_output_payload_rs1_mantissa;
@@ -8957,7 +8974,7 @@ module FpuCore (
   wire                add_oh_output_payload_rs2_sign;
   wire                add_oh_output_payload_rs2_special;
   wire       [4:0]    add_oh_output_payload_rd;
-  wire       `FpuRoundMode_opt_type add_oh_output_payload_roundMode;
+  wire       [2:0]    add_oh_output_payload_roundMode;
   wire                add_oh_output_payload_needCommit;
   wire                add_oh_output_payload_xSign;
   wire                add_oh_output_payload_ySign;
@@ -8997,28 +9014,28 @@ module FpuCore (
   wire                _zz_add_oh_shift_26;
   wire                _zz_add_oh_shift_27;
   wire       [4:0]    add_oh_shift;
-  wire                add_oh_output_input_valid;
-  wire                add_oh_output_input_ready;
-  wire       [24:0]   add_oh_output_input_payload_rs1_mantissa;
-  wire       [8:0]    add_oh_output_input_payload_rs1_exponent;
-  wire                add_oh_output_input_payload_rs1_sign;
-  wire                add_oh_output_input_payload_rs1_special;
-  wire       [24:0]   add_oh_output_input_payload_rs2_mantissa;
-  wire       [8:0]    add_oh_output_input_payload_rs2_exponent;
-  wire                add_oh_output_input_payload_rs2_sign;
-  wire                add_oh_output_input_payload_rs2_special;
-  wire       [4:0]    add_oh_output_input_payload_rd;
-  wire       `FpuRoundMode_opt_type add_oh_output_input_payload_roundMode;
-  wire                add_oh_output_input_payload_needCommit;
-  wire                add_oh_output_input_payload_xSign;
-  wire                add_oh_output_input_payload_ySign;
-  wire       [25:0]   add_oh_output_input_payload_xMantissa;
-  wire       [25:0]   add_oh_output_input_payload_yMantissa;
-  wire       [8:0]    add_oh_output_input_payload_xyExponent;
-  wire                add_oh_output_input_payload_xySign;
-  wire                add_oh_output_input_payload_roundingScrap;
-  wire       [26:0]   add_oh_output_input_payload_xyMantissa;
-  wire       [4:0]    add_oh_output_input_payload_shift;
+  wire                add_norm_input_valid;
+  wire                add_norm_input_ready;
+  wire       [24:0]   add_norm_input_payload_rs1_mantissa;
+  wire       [8:0]    add_norm_input_payload_rs1_exponent;
+  wire                add_norm_input_payload_rs1_sign;
+  wire                add_norm_input_payload_rs1_special;
+  wire       [24:0]   add_norm_input_payload_rs2_mantissa;
+  wire       [8:0]    add_norm_input_payload_rs2_exponent;
+  wire                add_norm_input_payload_rs2_sign;
+  wire                add_norm_input_payload_rs2_special;
+  wire       [4:0]    add_norm_input_payload_rd;
+  wire       [2:0]    add_norm_input_payload_roundMode;
+  wire                add_norm_input_payload_needCommit;
+  wire                add_norm_input_payload_xSign;
+  wire                add_norm_input_payload_ySign;
+  wire       [25:0]   add_norm_input_payload_xMantissa;
+  wire       [25:0]   add_norm_input_payload_yMantissa;
+  wire       [8:0]    add_norm_input_payload_xyExponent;
+  wire                add_norm_input_payload_xySign;
+  wire                add_norm_input_payload_roundingScrap;
+  wire       [26:0]   add_norm_input_payload_xyMantissa;
+  wire       [4:0]    add_norm_input_payload_shift;
   reg                 add_oh_output_rValid;
   reg        [24:0]   add_oh_output_rData_rs1_mantissa;
   reg        [8:0]    add_oh_output_rData_rs1_exponent;
@@ -9029,7 +9046,7 @@ module FpuCore (
   reg                 add_oh_output_rData_rs2_sign;
   reg                 add_oh_output_rData_rs2_special;
   reg        [4:0]    add_oh_output_rData_rd;
-  reg        `FpuRoundMode_opt_type add_oh_output_rData_roundMode;
+  reg        [2:0]    add_oh_output_rData_roundMode;
   reg                 add_oh_output_rData_needCommit;
   reg                 add_oh_output_rData_xSign;
   reg                 add_oh_output_rData_ySign;
@@ -9040,7 +9057,7 @@ module FpuCore (
   reg                 add_oh_output_rData_roundingScrap;
   reg        [26:0]   add_oh_output_rData_xyMantissa;
   reg        [4:0]    add_oh_output_rData_shift;
-  wire                when_Stream_l342_15;
+  wire                when_Stream_l368_15;
   wire                add_norm_output_valid;
   wire                add_norm_output_ready;
   wire       [24:0]   add_norm_output_payload_rs1_mantissa;
@@ -9052,7 +9069,7 @@ module FpuCore (
   wire                add_norm_output_payload_rs2_sign;
   wire                add_norm_output_payload_rs2_special;
   wire       [4:0]    add_norm_output_payload_rd;
-  wire       `FpuRoundMode_opt_type add_norm_output_payload_roundMode;
+  wire       [2:0]    add_norm_output_payload_roundMode;
   wire                add_norm_output_payload_needCommit;
   wire       [26:0]   add_norm_output_payload_mantissa;
   wire       [9:0]    add_norm_output_payload_exponent;
@@ -9074,7 +9091,7 @@ module FpuCore (
   wire                add_result_input_payload_rs2_sign;
   wire                add_result_input_payload_rs2_special;
   wire       [4:0]    add_result_input_payload_rd;
-  wire       `FpuRoundMode_opt_type add_result_input_payload_roundMode;
+  wire       [2:0]    add_result_input_payload_roundMode;
   wire                add_result_input_payload_needCommit;
   wire       [26:0]   add_result_input_payload_mantissa;
   wire       [9:0]    add_result_input_payload_exponent;
@@ -9093,7 +9110,7 @@ module FpuCore (
   reg                 add_result_output_payload_value_sign;
   reg                 add_result_output_payload_value_special;
   wire                add_result_output_payload_scrap;
-  wire       `FpuRoundMode_opt_type add_result_output_payload_roundMode;
+  wire       [2:0]    add_result_output_payload_roundMode;
   wire                add_result_output_payload_NV;
   wire                add_result_output_payload_DZ;
   wire                when_FpuCore_l1513;
@@ -9106,7 +9123,7 @@ module FpuCore (
   wire                load_s1_output_m2sPipe_payload_value_sign;
   wire                load_s1_output_m2sPipe_payload_value_special;
   wire                load_s1_output_m2sPipe_payload_scrap;
-  wire       `FpuRoundMode_opt_type load_s1_output_m2sPipe_payload_roundMode;
+  wire       [2:0]    load_s1_output_m2sPipe_payload_roundMode;
   wire                load_s1_output_m2sPipe_payload_NV;
   wire                load_s1_output_m2sPipe_payload_DZ;
   reg                 load_s1_output_rValid;
@@ -9116,10 +9133,10 @@ module FpuCore (
   reg                 load_s1_output_rData_value_sign;
   reg                 load_s1_output_rData_value_special;
   reg                 load_s1_output_rData_scrap;
-  reg        `FpuRoundMode_opt_type load_s1_output_rData_roundMode;
+  reg        [2:0]    load_s1_output_rData_roundMode;
   reg                 load_s1_output_rData_NV;
   reg                 load_s1_output_rData_DZ;
-  wire                when_Stream_l342_16;
+  wire                when_Stream_l368_16;
   wire                shortPip_output_m2sPipe_valid;
   wire                shortPip_output_m2sPipe_ready;
   wire       [4:0]    shortPip_output_m2sPipe_payload_rd;
@@ -9128,7 +9145,7 @@ module FpuCore (
   wire                shortPip_output_m2sPipe_payload_value_sign;
   wire                shortPip_output_m2sPipe_payload_value_special;
   wire                shortPip_output_m2sPipe_payload_scrap;
-  wire       `FpuRoundMode_opt_type shortPip_output_m2sPipe_payload_roundMode;
+  wire       [2:0]    shortPip_output_m2sPipe_payload_roundMode;
   wire                shortPip_output_m2sPipe_payload_NV;
   wire                shortPip_output_m2sPipe_payload_DZ;
   reg                 shortPip_output_rValid;
@@ -9138,10 +9155,10 @@ module FpuCore (
   reg                 shortPip_output_rData_value_sign;
   reg                 shortPip_output_rData_value_special;
   reg                 shortPip_output_rData_scrap;
-  reg        `FpuRoundMode_opt_type shortPip_output_rData_roundMode;
+  reg        [2:0]    shortPip_output_rData_roundMode;
   reg                 shortPip_output_rData_NV;
   reg                 shortPip_output_rData_DZ;
-  wire                when_Stream_l342_17;
+  wire                when_Stream_l368_17;
   wire                merge_arbitrated_valid;
   wire       [4:0]    merge_arbitrated_payload_rd;
   wire       [23:0]   merge_arbitrated_payload_value_mantissa;
@@ -9149,7 +9166,7 @@ module FpuCore (
   wire                merge_arbitrated_payload_value_sign;
   wire                merge_arbitrated_payload_value_special;
   wire                merge_arbitrated_payload_scrap;
-  wire       `FpuRoundMode_opt_type merge_arbitrated_payload_roundMode;
+  wire       [2:0]    merge_arbitrated_payload_roundMode;
   wire                merge_arbitrated_payload_NV;
   wire                merge_arbitrated_payload_DZ;
   reg                 roundFront_input_valid;
@@ -9159,7 +9176,7 @@ module FpuCore (
   reg                 roundFront_input_payload_value_sign;
   reg                 roundFront_input_payload_value_special;
   reg                 roundFront_input_payload_scrap;
-  reg        `FpuRoundMode_opt_type roundFront_input_payload_roundMode;
+  reg        [2:0]    roundFront_input_payload_roundMode;
   reg                 roundFront_input_payload_NV;
   reg                 roundFront_input_payload_DZ;
   wire                roundFront_output_valid;
@@ -9169,7 +9186,7 @@ module FpuCore (
   wire                roundFront_output_payload_value_sign;
   wire                roundFront_output_payload_value_special;
   wire                roundFront_output_payload_scrap;
-  wire       `FpuRoundMode_opt_type roundFront_output_payload_roundMode;
+  wire       [2:0]    roundFront_output_payload_roundMode;
   wire                roundFront_output_payload_NV;
   wire                roundFront_output_payload_DZ;
   wire                roundFront_output_payload_mantissaIncrement;
@@ -9191,7 +9208,7 @@ module FpuCore (
   reg                 roundBack_input_payload_value_sign;
   reg                 roundBack_input_payload_value_special;
   reg                 roundBack_input_payload_scrap;
-  reg        `FpuRoundMode_opt_type roundBack_input_payload_roundMode;
+  reg        [2:0]    roundBack_input_payload_roundMode;
   reg                 roundBack_input_payload_NV;
   reg                 roundBack_input_payload_DZ;
   reg                 roundBack_input_payload_mantissaIncrement;
@@ -9270,15 +9287,15 @@ module FpuCore (
   reg [63:0] _zz_payload_opcode_string;
   reg [63:0] _zz_commitLogic_0_input_payload_opcode_string;
   reg [63:0] commitLogic_0_input_payload_opcode_string;
-  reg [63:0] io_port_0_cmd_input_payload_opcode_string;
-  reg [47:0] io_port_0_cmd_input_payload_format_string;
-  reg [23:0] io_port_0_cmd_input_payload_roundMode_string;
+  reg [63:0] scheduler_0_input_payload_opcode_string;
+  reg [47:0] scheduler_0_input_payload_format_string;
+  reg [23:0] scheduler_0_input_payload_roundMode_string;
   reg [63:0] io_port_0_cmd_rData_opcode_string;
   reg [47:0] io_port_0_cmd_rData_format_string;
   reg [23:0] io_port_0_cmd_rData_roundMode_string;
-  reg [63:0] _zz_io_port_0_cmd_input_payload_opcode_string;
-  reg [47:0] _zz_io_port_0_cmd_input_payload_format_string;
-  reg [23:0] _zz_io_port_0_cmd_input_payload_roundMode_string;
+  reg [63:0] _zz_scheduler_0_input_payload_opcode_string;
+  reg [47:0] _zz_scheduler_0_input_payload_format_string;
+  reg [23:0] _zz_scheduler_0_input_payload_roundMode_string;
   reg [63:0] scheduler_0_output_payload_opcode_string;
   reg [47:0] scheduler_0_output_payload_format_string;
   reg [23:0] scheduler_0_output_payload_roundMode_string;
@@ -9289,8 +9306,8 @@ module FpuCore (
   reg [23:0] cmdArbiter_output_payload_roundMode_string;
   reg [63:0] read_s0_payload_opcode_string;
   reg [23:0] read_s0_payload_roundMode_string;
-  reg [63:0] read_s0_s1_payload_opcode_string;
-  reg [23:0] read_s0_s1_payload_roundMode_string;
+  reg [63:0] read_s1_payload_opcode_string;
+  reg [23:0] read_s1_payload_roundMode_string;
   reg [63:0] read_s0_rData_opcode_string;
   reg [23:0] read_s0_rData_roundMode_string;
   reg [63:0] read_output_payload_opcode_string;
@@ -9312,55 +9329,55 @@ module FpuCore (
   reg [23:0] _zz_decode_load_s2mPipe_payload_roundMode_string;
   reg [23:0] decode_load_s2mPipe_m2sPipe_payload_roundMode_string;
   reg [23:0] decode_load_s2mPipe_rData_roundMode_string;
-  reg [23:0] decode_load_s2mPipe_m2sPipe_input_payload_roundMode_string;
+  reg [23:0] load_s0_input_payload_roundMode_string;
   reg [23:0] decode_load_s2mPipe_m2sPipe_rData_roundMode_string;
   reg [63:0] load_s0_filtred_0_payload_opcode_string;
   reg [23:0] load_s0_output_payload_roundMode_string;
-  reg [23:0] load_s0_output_input_payload_roundMode_string;
+  reg [23:0] load_s1_input_payload_roundMode_string;
   reg [23:0] load_s0_output_rData_roundMode_string;
   reg [23:0] load_s1_output_payload_roundMode_string;
-  reg [63:0] decode_shortPip_input_payload_opcode_string;
-  reg [23:0] decode_shortPip_input_payload_roundMode_string;
+  reg [63:0] shortPip_input_payload_opcode_string;
+  reg [23:0] shortPip_input_payload_roundMode_string;
   reg [63:0] decode_shortPip_rData_opcode_string;
   reg [23:0] decode_shortPip_rData_roundMode_string;
   reg [23:0] shortPip_rfOutput_payload_roundMode_string;
   reg [23:0] shortPip_output_payload_roundMode_string;
-  reg [23:0] decode_mul_input_payload_roundMode_string;
+  reg [23:0] mul_preMul_input_payload_roundMode_string;
   reg [23:0] decode_mul_rData_roundMode_string;
   reg [23:0] mul_preMul_output_payload_roundMode_string;
-  reg [23:0] mul_preMul_output_input_payload_roundMode_string;
+  reg [23:0] mul_mul_input_payload_roundMode_string;
   reg [23:0] mul_preMul_output_rData_roundMode_string;
   reg [23:0] mul_mul_output_payload_roundMode_string;
-  reg [23:0] mul_mul_output_input_payload_roundMode_string;
+  reg [23:0] mul_sum1_input_payload_roundMode_string;
   reg [23:0] mul_mul_output_rData_roundMode_string;
   reg [23:0] mul_sum1_output_payload_roundMode_string;
-  reg [23:0] mul_sum1_output_input_payload_roundMode_string;
+  reg [23:0] mul_sum2_input_payload_roundMode_string;
   reg [23:0] mul_sum1_output_rData_roundMode_string;
   reg [23:0] mul_sum2_output_payload_roundMode_string;
-  reg [23:0] mul_sum2_output_input_payload_roundMode_string;
+  reg [23:0] mul_norm_input_payload_roundMode_string;
   reg [23:0] mul_sum2_output_rData_roundMode_string;
   reg [23:0] mul_result_output_payload_roundMode_string;
   reg [23:0] mul_result_mulToAdd_payload_roundMode_string;
   reg [23:0] mul_result_mulToAdd_m2sPipe_payload_roundMode_string;
   reg [23:0] mul_result_mulToAdd_rData_roundMode_string;
-  reg [23:0] decode_div_input_payload_roundMode_string;
+  reg [23:0] div_input_payload_roundMode_string;
   reg [23:0] decode_div_rData_roundMode_string;
   reg [23:0] div_output_payload_roundMode_string;
-  reg [23:0] decode_sqrt_input_payload_roundMode_string;
+  reg [23:0] sqrt_input_payload_roundMode_string;
   reg [23:0] decode_sqrt_rData_roundMode_string;
   reg [23:0] sqrt_output_payload_roundMode_string;
   reg [23:0] add_preShifter_input_payload_roundMode_string;
   reg [23:0] add_preShifter_output_payload_roundMode_string;
-  reg [23:0] add_preShifter_output_input_payload_roundMode_string;
+  reg [23:0] add_shifter_input_payload_roundMode_string;
   reg [23:0] add_preShifter_output_rData_roundMode_string;
   reg [23:0] add_shifter_output_payload_roundMode_string;
-  reg [23:0] add_shifter_output_input_payload_roundMode_string;
+  reg [23:0] add_math_input_payload_roundMode_string;
   reg [23:0] add_shifter_output_rData_roundMode_string;
   reg [23:0] add_math_output_payload_roundMode_string;
-  reg [23:0] add_math_output_input_payload_roundMode_string;
+  reg [23:0] add_oh_input_payload_roundMode_string;
   reg [23:0] add_math_output_rData_roundMode_string;
   reg [23:0] add_oh_output_payload_roundMode_string;
-  reg [23:0] add_oh_output_input_payload_roundMode_string;
+  reg [23:0] add_norm_input_payload_roundMode_string;
   reg [23:0] add_oh_output_rData_roundMode_string;
   reg [23:0] add_norm_output_payload_roundMode_string;
   reg [23:0] add_result_input_payload_roundMode_string;
@@ -9375,7 +9392,7 @@ module FpuCore (
   reg [23:0] roundBack_input_payload_roundMode_string;
   `endif
 
-  (* ram_style = "block" *) reg [33:0] rf_ram [0:31];
+  (* no_rw_check , ram_style = "block" *) reg [33:0] rf_ram [0:31];
   (* ram_style = "distributed" *) reg [0:0] rf_scoreboards_0_target [0:31];
   (* ram_style = "distributed" *) reg [0:0] rf_scoreboards_0_hit [0:31];
   (* ram_style = "distributed" *) reg [0:0] rf_scoreboards_0_writes [0:31];
@@ -9426,7 +9443,7 @@ module FpuCore (
   assign _zz_load_s1_recoded_exponent_1 = ({1'b0,load_s1_passThroughFloat_exponent} - {1'b0,load_s1_fsm_expOffset});
   assign _zz_load_s1_recoded_exponent_2 = {1'd0, load_s1_recodedExpOffset};
   assign _zz_load_s1_output_payload_value_exponent = {4'd0, load_s1_fsm_shift_by};
-  assign _zz_shortPip_f32_exp = (decode_shortPip_input_payload_rs1_exponent - 9'h080);
+  assign _zz_shortPip_f32_exp = (shortPip_input_payload_rs1_exponent - 9'h080);
   assign _zz_shortPip_expInSubnormalRange = {1'd0, shortPip_expSubnormalThreshold};
   assign _zz_shortPip_fsm_shift_input_1 = (shortPip_fsm_shift_input >>> 6'h20);
   assign _zz_shortPip_fsm_shift_input_2 = (shortPip_fsm_shift_input_1 >>> 5'h10);
@@ -9437,17 +9454,17 @@ module FpuCore (
   assign _zz_shortPip_fsm_shift_by_2 = (((_zz_shortPip_fsm_shift_by < _zz_shortPip_fsm_shift_by_3) ? _zz_shortPip_fsm_shift_by : _zz_shortPip_fsm_shift_by_4) + 9'h0);
   assign _zz_shortPip_fsm_shift_by_3 = {3'd0, _zz_shortPip_fsm_shift_by_1};
   assign _zz_shortPip_fsm_shift_by_4 = {3'd0, _zz_shortPip_fsm_shift_by_1};
-  assign _zz_shortPip_fsm_shift_by_5 = (_zz_shortPip_fsm_shift_by_6 - decode_shortPip_input_payload_rs1_exponent);
+  assign _zz_shortPip_fsm_shift_by_5 = (_zz_shortPip_fsm_shift_by_6 - shortPip_input_payload_rs1_exponent);
   assign _zz_shortPip_fsm_shift_by_6 = {1'd0, shortPip_fsm_formatShiftOffset};
   assign _zz_shortPip_f2i_result_1 = (shortPip_f2i_resign ^ shortPip_f2i_increment);
   assign _zz_shortPip_f2i_result = {31'd0, _zz_shortPip_f2i_result_1};
-  assign _zz_mul_sum1_sum = {12'd0, mul_mul_output_input_payload_muls_0};
-  assign _zz_mul_sum1_sum_2 = ({18'd0,mul_mul_output_input_payload_muls_1} <<< 18);
+  assign _zz_mul_sum1_sum = {12'd0, mul_sum1_input_payload_muls_0};
+  assign _zz_mul_sum1_sum_2 = ({18'd0,mul_sum1_input_payload_muls_1} <<< 18);
   assign _zz_mul_sum1_sum_1 = {6'd0, _zz_mul_sum1_sum_2};
   assign _zz_mul_sum2_sum = (_zz_mul_sum2_sum_1 + _zz_mul_sum2_sum_3);
-  assign _zz_mul_sum2_sum_2 = ({18'd0,mul_sum1_output_input_payload_muls2_0} <<< 18);
+  assign _zz_mul_sum2_sum_2 = ({18'd0,mul_sum2_input_payload_muls2_0} <<< 18);
   assign _zz_mul_sum2_sum_1 = {6'd0, _zz_mul_sum2_sum_2};
-  assign _zz_mul_sum2_sum_4 = ({36'd0,mul_sum1_output_input_payload_muls2_1} <<< 36);
+  assign _zz_mul_sum2_sum_4 = ({36'd0,mul_sum2_input_payload_muls2_1} <<< 36);
   assign _zz_mul_sum2_sum_3 = _zz_mul_sum2_sum_4;
   assign _zz_mul_norm_exp_1 = mul_norm_needShift;
   assign _zz_mul_norm_exp = {9'd0, _zz_mul_norm_exp_1};
@@ -9455,15 +9472,15 @@ module FpuCore (
   assign _zz_mul_norm_output_exponent = (mul_norm_exp - 10'h0ff);
   assign _zz_div_exponent = (_zz_div_exponent_1 - _zz_div_exponent_3);
   assign _zz_div_exponent_1 = (_zz_div_exponent_2 + 11'h4ff);
-  assign _zz_div_exponent_2 = {2'd0, decode_div_input_payload_rs1_exponent};
-  assign _zz_div_exponent_3 = {2'd0, decode_div_input_payload_rs2_exponent};
+  assign _zz_div_exponent_2 = {2'd0, div_input_payload_rs1_exponent};
+  assign _zz_div_exponent_3 = {2'd0, div_input_payload_rs2_exponent};
   assign _zz_div_exponent_5 = div_needShift;
   assign _zz_div_exponent_4 = {10'd0, _zz_div_exponent_5};
   assign _zz_sqrt_exponent = (_zz_sqrt_exponent_1 + {1'b0,_zz_sqrt_exponent_3});
   assign _zz_sqrt_exponent_2 = {1'b0,7'h7f};
   assign _zz_sqrt_exponent_1 = {1'd0, _zz_sqrt_exponent_2};
-  assign _zz_sqrt_exponent_3 = (decode_sqrt_input_payload_rs1_exponent >>> 1);
-  assign _zz_sqrt_exponent_5 = decode_sqrt_input_payload_rs1_exponent[0];
+  assign _zz_sqrt_exponent_3 = (sqrt_input_payload_rs1_exponent >>> 1);
+  assign _zz_sqrt_exponent_5 = sqrt_input_payload_rs1_exponent[0];
   assign _zz_sqrt_exponent_4 = {8'd0, _zz_sqrt_exponent_5};
   assign _zz_add_shifter_shiftBy_1 = (_zz_add_shifter_shiftBy[9] ? _zz_add_shifter_shiftBy_2 : _zz_add_shifter_shiftBy);
   assign _zz_add_shifter_shiftBy_2 = (~ _zz_add_shifter_shiftBy);
@@ -9474,19 +9491,19 @@ module FpuCore (
   assign _zz_add_shifter_yMantissa_3 = (add_shifter_yMantissa_2 >>> 3'b100);
   assign _zz_add_shifter_yMantissa_4 = (add_shifter_yMantissa_3 >>> 2'b10);
   assign _zz_add_shifter_yMantissa_5 = (add_shifter_yMantissa_4 >>> 1'b1);
-  assign _zz_add_math_xSigned = ({add_shifter_output_input_payload_xSign,(add_shifter_output_input_payload_xSign ? (~ add_shifter_output_input_payload_xMantissa) : add_shifter_output_input_payload_xMantissa)} + _zz_add_math_xSigned_1);
-  assign _zz_add_math_xSigned_2 = add_shifter_output_input_payload_xSign;
+  assign _zz_add_math_xSigned = ({add_math_input_payload_xSign,(add_math_input_payload_xSign ? (~ add_math_input_payload_xMantissa) : add_math_input_payload_xMantissa)} + _zz_add_math_xSigned_1);
+  assign _zz_add_math_xSigned_2 = add_math_input_payload_xSign;
   assign _zz_add_math_xSigned_1 = {26'd0, _zz_add_math_xSigned_2};
-  assign _zz_add_math_ySigned = ({add_shifter_output_input_payload_ySign,(add_shifter_output_input_payload_ySign ? (~ add_shifter_output_input_payload_yMantissa) : add_shifter_output_input_payload_yMantissa)} + _zz_add_math_ySigned_1);
-  assign _zz_add_math_ySigned_2 = (add_shifter_output_input_payload_ySign && (! add_shifter_output_input_payload_roundingScrap));
+  assign _zz_add_math_ySigned = ({add_math_input_payload_ySign,(add_math_input_payload_ySign ? (~ add_math_input_payload_yMantissa) : add_math_input_payload_yMantissa)} + _zz_add_math_ySigned_1);
+  assign _zz_add_math_ySigned_2 = (add_math_input_payload_ySign && (! add_math_input_payload_roundingScrap));
   assign _zz_add_math_ySigned_1 = {26'd0, _zz_add_math_ySigned_2};
   assign _zz_add_math_output_payload_xyMantissa = _zz_add_math_output_payload_xyMantissa_1;
   assign _zz_add_math_output_payload_xyMantissa_1 = ($signed(_zz_add_math_output_payload_xyMantissa_2) + $signed(_zz_add_math_output_payload_xyMantissa_3));
   assign _zz_add_math_output_payload_xyMantissa_2 = {add_math_xSigned[26],add_math_xSigned};
   assign _zz_add_math_output_payload_xyMantissa_3 = {add_math_ySigned[26],add_math_ySigned};
   assign _zz__zz_add_oh_shift_1_1 = (_zz_add_oh_shift - 27'h0000001);
-  assign _zz_add_norm_output_payload_exponent = ({1'b0,add_oh_output_input_payload_xyExponent} - _zz_add_norm_output_payload_exponent_1);
-  assign _zz_add_norm_output_payload_exponent_2 = {1'b0,add_oh_output_input_payload_shift};
+  assign _zz_add_norm_output_payload_exponent = ({1'b0,add_norm_input_payload_xyExponent} - _zz_add_norm_output_payload_exponent_1);
+  assign _zz_add_norm_output_payload_exponent_2 = {1'b0,add_norm_input_payload_shift};
   assign _zz_add_norm_output_payload_exponent_1 = {4'd0, _zz_add_norm_output_payload_exponent_2};
   assign _zz_add_result_output_payload_value_mantissa = (add_result_input_payload_mantissa >>> 2);
   assign _zz_roundFront_expDif_1 = {1'b0,roundFront_expBase};
@@ -9509,10 +9526,10 @@ module FpuCore (
   assign _zz_rf_scoreboards_0_target_port = rf_scoreboards_0_targetWrite_payload_data;
   assign _zz_rf_scoreboards_0_hit_port = rf_scoreboards_0_hitWrite_payload_data;
   assign _zz_rf_scoreboards_0_writes_port = commitLogic_0_input_payload_write;
-  assign _zz_decode_shortPipHit = `FpuOpcode_binary_sequential_MIN_MAX;
-  assign _zz_decode_shortPipHit_1 = (decode_input_payload_opcode == `FpuOpcode_binary_sequential_CMP);
-  assign _zz_decode_shortPipHit_2 = (decode_input_payload_opcode == `FpuOpcode_binary_sequential_F2I);
-  assign _zz_decode_shortPipHit_3 = (decode_input_payload_opcode == `FpuOpcode_binary_sequential_STORE);
+  assign _zz_decode_shortPipHit = FpuOpcode_MIN_MAX;
+  assign _zz_decode_shortPipHit_1 = (decode_input_payload_opcode == FpuOpcode_CMP);
+  assign _zz_decode_shortPipHit_2 = (decode_input_payload_opcode == FpuOpcode_F2I);
+  assign _zz_decode_shortPipHit_3 = (decode_input_payload_opcode == FpuOpcode_STORE);
   assign _zz__zz_load_s1_fsm_shift_by = load_s1_fsm_ohInput[9];
   assign _zz__zz_load_s1_fsm_shift_by_1 = load_s1_fsm_ohInput[10];
   assign _zz__zz_load_s1_fsm_shift_by_2 = {load_s1_fsm_ohInput[11],{load_s1_fsm_ohInput[12],{load_s1_fsm_ohInput[13],{load_s1_fsm_ohInput[14],{load_s1_fsm_ohInput[15],{load_s1_fsm_ohInput[16],{load_s1_fsm_ohInput[17],{load_s1_fsm_ohInput[18],{load_s1_fsm_ohInput[19],{_zz__zz_load_s1_fsm_shift_by_3,{_zz__zz_load_s1_fsm_shift_by_4,_zz__zz_load_s1_fsm_shift_by_5}}}}}}}}}}};
@@ -9567,20 +9584,20 @@ module FpuCore (
     end
   end
 
-  assign _zz_rf_scoreboards_0_target_port1 = rf_scoreboards_0_target[io_port_0_cmd_input_payload_rs1];
-  assign _zz_rf_scoreboards_0_target_port2 = rf_scoreboards_0_target[io_port_0_cmd_input_payload_rs2];
-  assign _zz_rf_scoreboards_0_target_port3 = rf_scoreboards_0_target[io_port_0_cmd_input_payload_rs3];
-  assign _zz_rf_scoreboards_0_target_port4 = rf_scoreboards_0_target[io_port_0_cmd_input_payload_rd];
+  assign _zz_rf_scoreboards_0_target_port1 = rf_scoreboards_0_target[scheduler_0_input_payload_rs1];
+  assign _zz_rf_scoreboards_0_target_port2 = rf_scoreboards_0_target[scheduler_0_input_payload_rs2];
+  assign _zz_rf_scoreboards_0_target_port3 = rf_scoreboards_0_target[scheduler_0_input_payload_rs3];
+  assign _zz_rf_scoreboards_0_target_port4 = rf_scoreboards_0_target[scheduler_0_input_payload_rd];
   always @(posedge clk) begin
     if(_zz_3) begin
       rf_scoreboards_0_hit[rf_scoreboards_0_hitWrite_payload_address] <= _zz_rf_scoreboards_0_hit_port;
     end
   end
 
-  assign _zz_rf_scoreboards_0_hit_port1 = rf_scoreboards_0_hit[io_port_0_cmd_input_payload_rs1];
-  assign _zz_rf_scoreboards_0_hit_port2 = rf_scoreboards_0_hit[io_port_0_cmd_input_payload_rs2];
-  assign _zz_rf_scoreboards_0_hit_port3 = rf_scoreboards_0_hit[io_port_0_cmd_input_payload_rs3];
-  assign _zz_rf_scoreboards_0_hit_port4 = rf_scoreboards_0_hit[io_port_0_cmd_input_payload_rd];
+  assign _zz_rf_scoreboards_0_hit_port1 = rf_scoreboards_0_hit[scheduler_0_input_payload_rs1];
+  assign _zz_rf_scoreboards_0_hit_port2 = rf_scoreboards_0_hit[scheduler_0_input_payload_rs2];
+  assign _zz_rf_scoreboards_0_hit_port3 = rf_scoreboards_0_hit[scheduler_0_input_payload_rs3];
+  assign _zz_rf_scoreboards_0_hit_port4 = rf_scoreboards_0_hit[scheduler_0_input_payload_rd];
   assign _zz_rf_scoreboards_0_hit_port5 = rf_scoreboards_0_hit[writeback_input_payload_rd];
   always @(posedge clk) begin
     if(_zz_2) begin
@@ -9590,1540 +9607,1540 @@ module FpuCore (
 
   assign _zz_rf_scoreboards_0_writes_port1 = rf_scoreboards_0_writes[roundBack_input_payload_rd];
   StreamFork streamFork_1 (
-    .io_input_valid                 (io_port_0_commit_valid                    ), //i
-    .io_input_ready                 (streamFork_1_io_input_ready               ), //o
-    .io_input_payload_opcode        (io_port_0_commit_payload_opcode           ), //i
-    .io_input_payload_rd            (io_port_0_commit_payload_rd               ), //i
-    .io_input_payload_write         (io_port_0_commit_payload_write            ), //i
-    .io_input_payload_value         (io_port_0_commit_payload_value            ), //i
-    .io_outputs_0_valid             (streamFork_1_io_outputs_0_valid           ), //o
-    .io_outputs_0_ready             (commitFork_load_0_ready                   ), //i
-    .io_outputs_0_payload_opcode    (streamFork_1_io_outputs_0_payload_opcode  ), //o
-    .io_outputs_0_payload_rd        (streamFork_1_io_outputs_0_payload_rd      ), //o
-    .io_outputs_0_payload_write     (streamFork_1_io_outputs_0_payload_write   ), //o
-    .io_outputs_0_payload_value     (streamFork_1_io_outputs_0_payload_value   ), //o
-    .io_outputs_1_valid             (streamFork_1_io_outputs_1_valid           ), //o
-    .io_outputs_1_ready             (streamFork_1_io_outputs_1_ready           ), //i
-    .io_outputs_1_payload_opcode    (streamFork_1_io_outputs_1_payload_opcode  ), //o
-    .io_outputs_1_payload_rd        (streamFork_1_io_outputs_1_payload_rd      ), //o
-    .io_outputs_1_payload_write     (streamFork_1_io_outputs_1_payload_write   ), //o
-    .io_outputs_1_payload_value     (streamFork_1_io_outputs_1_payload_value   )  //o
+    .io_input_valid              (io_port_0_commit_valid                       ), //i
+    .io_input_ready              (streamFork_1_io_input_ready                  ), //o
+    .io_input_payload_opcode     (io_port_0_commit_payload_opcode[3:0]         ), //i
+    .io_input_payload_rd         (io_port_0_commit_payload_rd[4:0]             ), //i
+    .io_input_payload_write      (io_port_0_commit_payload_write               ), //i
+    .io_input_payload_value      (io_port_0_commit_payload_value[31:0]         ), //i
+    .io_outputs_0_valid          (streamFork_1_io_outputs_0_valid              ), //o
+    .io_outputs_0_ready          (commitFork_load_0_ready                      ), //i
+    .io_outputs_0_payload_opcode (streamFork_1_io_outputs_0_payload_opcode[3:0]), //o
+    .io_outputs_0_payload_rd     (streamFork_1_io_outputs_0_payload_rd[4:0]    ), //o
+    .io_outputs_0_payload_write  (streamFork_1_io_outputs_0_payload_write      ), //o
+    .io_outputs_0_payload_value  (streamFork_1_io_outputs_0_payload_value[31:0]), //o
+    .io_outputs_1_valid          (streamFork_1_io_outputs_1_valid              ), //o
+    .io_outputs_1_ready          (streamFork_1_io_outputs_1_ready              ), //i
+    .io_outputs_1_payload_opcode (streamFork_1_io_outputs_1_payload_opcode[3:0]), //o
+    .io_outputs_1_payload_rd     (streamFork_1_io_outputs_1_payload_rd[4:0]    ), //o
+    .io_outputs_1_payload_write  (streamFork_1_io_outputs_1_payload_write      ), //o
+    .io_outputs_1_payload_value  (streamFork_1_io_outputs_1_payload_value[31:0])  //o
   );
   StreamArbiter cmdArbiter_arbiter (
-    .io_inputs_0_valid                (scheduler_0_output_valid                        ), //i
-    .io_inputs_0_ready                (cmdArbiter_arbiter_io_inputs_0_ready            ), //o
-    .io_inputs_0_payload_opcode       (_zz_io_inputs_0_payload_opcode                  ), //i
-    .io_inputs_0_payload_arg          (scheduler_0_output_payload_arg                  ), //i
-    .io_inputs_0_payload_rs1          (scheduler_0_output_payload_rs1                  ), //i
-    .io_inputs_0_payload_rs2          (scheduler_0_output_payload_rs2                  ), //i
-    .io_inputs_0_payload_rs3          (scheduler_0_output_payload_rs3                  ), //i
-    .io_inputs_0_payload_rd           (scheduler_0_output_payload_rd                   ), //i
-    .io_inputs_0_payload_format       (_zz_io_inputs_0_payload_format                  ), //i
-    .io_inputs_0_payload_roundMode    (_zz_io_inputs_0_payload_roundMode               ), //i
-    .io_output_valid                  (cmdArbiter_arbiter_io_output_valid              ), //o
-    .io_output_ready                  (cmdArbiter_output_ready                         ), //i
-    .io_output_payload_opcode         (cmdArbiter_arbiter_io_output_payload_opcode     ), //o
-    .io_output_payload_arg            (cmdArbiter_arbiter_io_output_payload_arg        ), //o
-    .io_output_payload_rs1            (cmdArbiter_arbiter_io_output_payload_rs1        ), //o
-    .io_output_payload_rs2            (cmdArbiter_arbiter_io_output_payload_rs2        ), //o
-    .io_output_payload_rs3            (cmdArbiter_arbiter_io_output_payload_rs3        ), //o
-    .io_output_payload_rd             (cmdArbiter_arbiter_io_output_payload_rd         ), //o
-    .io_output_payload_format         (cmdArbiter_arbiter_io_output_payload_format     ), //o
-    .io_output_payload_roundMode      (cmdArbiter_arbiter_io_output_payload_roundMode  ), //o
-    .io_chosenOH                      (cmdArbiter_arbiter_io_chosenOH                  ), //o
-    .clk                              (clk                                             ), //i
-    .reset                            (reset                                           )  //i
+    .io_inputs_0_valid             (scheduler_0_output_valid                           ), //i
+    .io_inputs_0_ready             (cmdArbiter_arbiter_io_inputs_0_ready               ), //o
+    .io_inputs_0_payload_opcode    (_zz_io_inputs_0_payload_opcode[3:0]                ), //i
+    .io_inputs_0_payload_arg       (scheduler_0_output_payload_arg[1:0]                ), //i
+    .io_inputs_0_payload_rs1       (scheduler_0_output_payload_rs1[4:0]                ), //i
+    .io_inputs_0_payload_rs2       (scheduler_0_output_payload_rs2[4:0]                ), //i
+    .io_inputs_0_payload_rs3       (scheduler_0_output_payload_rs3[4:0]                ), //i
+    .io_inputs_0_payload_rd        (scheduler_0_output_payload_rd[4:0]                 ), //i
+    .io_inputs_0_payload_format    (_zz_io_inputs_0_payload_format                     ), //i
+    .io_inputs_0_payload_roundMode (_zz_io_inputs_0_payload_roundMode[2:0]             ), //i
+    .io_output_valid               (cmdArbiter_arbiter_io_output_valid                 ), //o
+    .io_output_ready               (cmdArbiter_output_ready                            ), //i
+    .io_output_payload_opcode      (cmdArbiter_arbiter_io_output_payload_opcode[3:0]   ), //o
+    .io_output_payload_arg         (cmdArbiter_arbiter_io_output_payload_arg[1:0]      ), //o
+    .io_output_payload_rs1         (cmdArbiter_arbiter_io_output_payload_rs1[4:0]      ), //o
+    .io_output_payload_rs2         (cmdArbiter_arbiter_io_output_payload_rs2[4:0]      ), //o
+    .io_output_payload_rs3         (cmdArbiter_arbiter_io_output_payload_rs3[4:0]      ), //o
+    .io_output_payload_rd          (cmdArbiter_arbiter_io_output_payload_rd[4:0]       ), //o
+    .io_output_payload_format      (cmdArbiter_arbiter_io_output_payload_format        ), //o
+    .io_output_payload_roundMode   (cmdArbiter_arbiter_io_output_payload_roundMode[2:0]), //o
+    .io_chosenOH                   (cmdArbiter_arbiter_io_chosenOH                     ), //o
+    .clk                           (clk                                                ), //i
+    .reset                         (reset                                              )  //i
   );
   FpuDiv div_divider (
-    .io_input_valid              (div_divider_io_input_valid            ), //i
-    .io_input_ready              (div_divider_io_input_ready            ), //o
-    .io_input_payload_a          (div_divider_io_input_payload_a        ), //i
-    .io_input_payload_b          (div_divider_io_input_payload_b        ), //i
-    .io_output_valid             (div_divider_io_output_valid           ), //o
-    .io_output_ready             (decode_div_input_ready                ), //i
-    .io_output_payload_result    (div_divider_io_output_payload_result  ), //o
-    .io_output_payload_remain    (div_divider_io_output_payload_remain  ), //o
-    .clk                         (clk                                   ), //i
-    .reset                       (reset                                 )  //i
+    .io_input_valid           (div_divider_io_input_valid                ), //i
+    .io_input_ready           (div_divider_io_input_ready                ), //o
+    .io_input_payload_a       (div_divider_io_input_payload_a[23:0]      ), //i
+    .io_input_payload_b       (div_divider_io_input_payload_b[23:0]      ), //i
+    .io_output_valid          (div_divider_io_output_valid               ), //o
+    .io_output_ready          (div_input_ready                           ), //i
+    .io_output_payload_result (div_divider_io_output_payload_result[26:0]), //o
+    .io_output_payload_remain (div_divider_io_output_payload_remain[24:0]), //o
+    .clk                      (clk                                       ), //i
+    .reset                    (reset                                     )  //i
   );
   FpuSqrt sqrt_sqrt (
-    .io_input_valid              (sqrt_sqrt_io_input_valid            ), //i
-    .io_input_ready              (sqrt_sqrt_io_input_ready            ), //o
-    .io_input_payload_a          (sqrt_sqrt_io_input_payload_a        ), //i
-    .io_output_valid             (sqrt_sqrt_io_output_valid           ), //o
-    .io_output_ready             (decode_sqrt_input_ready             ), //i
-    .io_output_payload_result    (sqrt_sqrt_io_output_payload_result  ), //o
-    .io_output_payload_remain    (sqrt_sqrt_io_output_payload_remain  ), //o
-    .clk                         (clk                                 ), //i
-    .reset                       (reset                               )  //i
+    .io_input_valid           (sqrt_sqrt_io_input_valid                ), //i
+    .io_input_ready           (sqrt_sqrt_io_input_ready                ), //o
+    .io_input_payload_a       (sqrt_sqrt_io_input_payload_a[24:0]      ), //i
+    .io_output_valid          (sqrt_sqrt_io_output_valid               ), //o
+    .io_output_ready          (sqrt_input_ready                        ), //i
+    .io_output_payload_result (sqrt_sqrt_io_output_payload_result[23:0]), //o
+    .io_output_payload_remain (sqrt_sqrt_io_output_payload_remain[27:0]), //o
+    .clk                      (clk                                     ), //i
+    .reset                    (reset                                   )  //i
   );
   StreamArbiter_1 streamArbiter_2 (
-    .io_inputs_0_valid                     (load_s1_output_m2sPipe_valid                      ), //i
-    .io_inputs_0_ready                     (streamArbiter_2_io_inputs_0_ready                 ), //o
-    .io_inputs_0_payload_rd                (load_s1_output_m2sPipe_payload_rd                 ), //i
-    .io_inputs_0_payload_value_mantissa    (load_s1_output_m2sPipe_payload_value_mantissa     ), //i
-    .io_inputs_0_payload_value_exponent    (load_s1_output_m2sPipe_payload_value_exponent     ), //i
-    .io_inputs_0_payload_value_sign        (load_s1_output_m2sPipe_payload_value_sign         ), //i
-    .io_inputs_0_payload_value_special     (load_s1_output_m2sPipe_payload_value_special      ), //i
-    .io_inputs_0_payload_scrap             (load_s1_output_m2sPipe_payload_scrap              ), //i
-    .io_inputs_0_payload_roundMode         (load_s1_output_m2sPipe_payload_roundMode          ), //i
-    .io_inputs_0_payload_NV                (load_s1_output_m2sPipe_payload_NV                 ), //i
-    .io_inputs_0_payload_DZ                (load_s1_output_m2sPipe_payload_DZ                 ), //i
-    .io_inputs_1_valid                     (sqrt_output_valid                                 ), //i
-    .io_inputs_1_ready                     (streamArbiter_2_io_inputs_1_ready                 ), //o
-    .io_inputs_1_payload_rd                (sqrt_output_payload_rd                            ), //i
-    .io_inputs_1_payload_value_mantissa    (sqrt_output_payload_value_mantissa                ), //i
-    .io_inputs_1_payload_value_exponent    (sqrt_output_payload_value_exponent                ), //i
-    .io_inputs_1_payload_value_sign        (sqrt_output_payload_value_sign                    ), //i
-    .io_inputs_1_payload_value_special     (sqrt_output_payload_value_special                 ), //i
-    .io_inputs_1_payload_scrap             (sqrt_output_payload_scrap                         ), //i
-    .io_inputs_1_payload_roundMode         (sqrt_output_payload_roundMode                     ), //i
-    .io_inputs_1_payload_NV                (sqrt_output_payload_NV                            ), //i
-    .io_inputs_1_payload_DZ                (sqrt_output_payload_DZ                            ), //i
-    .io_inputs_2_valid                     (div_output_valid                                  ), //i
-    .io_inputs_2_ready                     (streamArbiter_2_io_inputs_2_ready                 ), //o
-    .io_inputs_2_payload_rd                (div_output_payload_rd                             ), //i
-    .io_inputs_2_payload_value_mantissa    (div_output_payload_value_mantissa                 ), //i
-    .io_inputs_2_payload_value_exponent    (div_output_payload_value_exponent                 ), //i
-    .io_inputs_2_payload_value_sign        (div_output_payload_value_sign                     ), //i
-    .io_inputs_2_payload_value_special     (div_output_payload_value_special                  ), //i
-    .io_inputs_2_payload_scrap             (div_output_payload_scrap                          ), //i
-    .io_inputs_2_payload_roundMode         (div_output_payload_roundMode                      ), //i
-    .io_inputs_2_payload_NV                (div_output_payload_NV                             ), //i
-    .io_inputs_2_payload_DZ                (div_output_payload_DZ                             ), //i
-    .io_inputs_3_valid                     (add_result_output_valid                           ), //i
-    .io_inputs_3_ready                     (streamArbiter_2_io_inputs_3_ready                 ), //o
-    .io_inputs_3_payload_rd                (add_result_output_payload_rd                      ), //i
-    .io_inputs_3_payload_value_mantissa    (add_result_output_payload_value_mantissa          ), //i
-    .io_inputs_3_payload_value_exponent    (add_result_output_payload_value_exponent          ), //i
-    .io_inputs_3_payload_value_sign        (add_result_output_payload_value_sign              ), //i
-    .io_inputs_3_payload_value_special     (add_result_output_payload_value_special           ), //i
-    .io_inputs_3_payload_scrap             (add_result_output_payload_scrap                   ), //i
-    .io_inputs_3_payload_roundMode         (add_result_output_payload_roundMode               ), //i
-    .io_inputs_3_payload_NV                (add_result_output_payload_NV                      ), //i
-    .io_inputs_3_payload_DZ                (add_result_output_payload_DZ                      ), //i
-    .io_inputs_4_valid                     (mul_result_output_valid                           ), //i
-    .io_inputs_4_ready                     (streamArbiter_2_io_inputs_4_ready                 ), //o
-    .io_inputs_4_payload_rd                (mul_result_output_payload_rd                      ), //i
-    .io_inputs_4_payload_value_mantissa    (mul_result_output_payload_value_mantissa          ), //i
-    .io_inputs_4_payload_value_exponent    (mul_result_output_payload_value_exponent          ), //i
-    .io_inputs_4_payload_value_sign        (mul_result_output_payload_value_sign              ), //i
-    .io_inputs_4_payload_value_special     (mul_result_output_payload_value_special           ), //i
-    .io_inputs_4_payload_scrap             (mul_result_output_payload_scrap                   ), //i
-    .io_inputs_4_payload_roundMode         (mul_result_output_payload_roundMode               ), //i
-    .io_inputs_4_payload_NV                (mul_result_output_payload_NV                      ), //i
-    .io_inputs_4_payload_DZ                (mul_result_output_payload_DZ                      ), //i
-    .io_inputs_5_valid                     (shortPip_output_m2sPipe_valid                     ), //i
-    .io_inputs_5_ready                     (streamArbiter_2_io_inputs_5_ready                 ), //o
-    .io_inputs_5_payload_rd                (shortPip_output_m2sPipe_payload_rd                ), //i
-    .io_inputs_5_payload_value_mantissa    (shortPip_output_m2sPipe_payload_value_mantissa    ), //i
-    .io_inputs_5_payload_value_exponent    (shortPip_output_m2sPipe_payload_value_exponent    ), //i
-    .io_inputs_5_payload_value_sign        (shortPip_output_m2sPipe_payload_value_sign        ), //i
-    .io_inputs_5_payload_value_special     (shortPip_output_m2sPipe_payload_value_special     ), //i
-    .io_inputs_5_payload_scrap             (shortPip_output_m2sPipe_payload_scrap             ), //i
-    .io_inputs_5_payload_roundMode         (shortPip_output_m2sPipe_payload_roundMode         ), //i
-    .io_inputs_5_payload_NV                (shortPip_output_m2sPipe_payload_NV                ), //i
-    .io_inputs_5_payload_DZ                (shortPip_output_m2sPipe_payload_DZ                ), //i
-    .io_output_valid                       (streamArbiter_2_io_output_valid                   ), //o
-    .io_output_ready                       (1'b1                                              ), //i
-    .io_output_payload_rd                  (streamArbiter_2_io_output_payload_rd              ), //o
-    .io_output_payload_value_mantissa      (streamArbiter_2_io_output_payload_value_mantissa  ), //o
-    .io_output_payload_value_exponent      (streamArbiter_2_io_output_payload_value_exponent  ), //o
-    .io_output_payload_value_sign          (streamArbiter_2_io_output_payload_value_sign      ), //o
-    .io_output_payload_value_special       (streamArbiter_2_io_output_payload_value_special   ), //o
-    .io_output_payload_scrap               (streamArbiter_2_io_output_payload_scrap           ), //o
-    .io_output_payload_roundMode           (streamArbiter_2_io_output_payload_roundMode       ), //o
-    .io_output_payload_NV                  (streamArbiter_2_io_output_payload_NV              ), //o
-    .io_output_payload_DZ                  (streamArbiter_2_io_output_payload_DZ              ), //o
-    .io_chosen                             (streamArbiter_2_io_chosen                         ), //o
-    .io_chosenOH                           (streamArbiter_2_io_chosenOH                       ), //o
-    .clk                                   (clk                                               ), //i
-    .reset                                 (reset                                             )  //i
+    .io_inputs_0_valid                  (load_s1_output_m2sPipe_valid                          ), //i
+    .io_inputs_0_ready                  (streamArbiter_2_io_inputs_0_ready                     ), //o
+    .io_inputs_0_payload_rd             (load_s1_output_m2sPipe_payload_rd[4:0]                ), //i
+    .io_inputs_0_payload_value_mantissa (load_s1_output_m2sPipe_payload_value_mantissa[23:0]   ), //i
+    .io_inputs_0_payload_value_exponent (load_s1_output_m2sPipe_payload_value_exponent[8:0]    ), //i
+    .io_inputs_0_payload_value_sign     (load_s1_output_m2sPipe_payload_value_sign             ), //i
+    .io_inputs_0_payload_value_special  (load_s1_output_m2sPipe_payload_value_special          ), //i
+    .io_inputs_0_payload_scrap          (load_s1_output_m2sPipe_payload_scrap                  ), //i
+    .io_inputs_0_payload_roundMode      (load_s1_output_m2sPipe_payload_roundMode[2:0]         ), //i
+    .io_inputs_0_payload_NV             (load_s1_output_m2sPipe_payload_NV                     ), //i
+    .io_inputs_0_payload_DZ             (load_s1_output_m2sPipe_payload_DZ                     ), //i
+    .io_inputs_1_valid                  (sqrt_output_valid                                     ), //i
+    .io_inputs_1_ready                  (streamArbiter_2_io_inputs_1_ready                     ), //o
+    .io_inputs_1_payload_rd             (sqrt_output_payload_rd[4:0]                           ), //i
+    .io_inputs_1_payload_value_mantissa (sqrt_output_payload_value_mantissa[23:0]              ), //i
+    .io_inputs_1_payload_value_exponent (sqrt_output_payload_value_exponent[8:0]               ), //i
+    .io_inputs_1_payload_value_sign     (sqrt_output_payload_value_sign                        ), //i
+    .io_inputs_1_payload_value_special  (sqrt_output_payload_value_special                     ), //i
+    .io_inputs_1_payload_scrap          (sqrt_output_payload_scrap                             ), //i
+    .io_inputs_1_payload_roundMode      (sqrt_output_payload_roundMode[2:0]                    ), //i
+    .io_inputs_1_payload_NV             (sqrt_output_payload_NV                                ), //i
+    .io_inputs_1_payload_DZ             (sqrt_output_payload_DZ                                ), //i
+    .io_inputs_2_valid                  (div_output_valid                                      ), //i
+    .io_inputs_2_ready                  (streamArbiter_2_io_inputs_2_ready                     ), //o
+    .io_inputs_2_payload_rd             (div_output_payload_rd[4:0]                            ), //i
+    .io_inputs_2_payload_value_mantissa (div_output_payload_value_mantissa[23:0]               ), //i
+    .io_inputs_2_payload_value_exponent (div_output_payload_value_exponent[8:0]                ), //i
+    .io_inputs_2_payload_value_sign     (div_output_payload_value_sign                         ), //i
+    .io_inputs_2_payload_value_special  (div_output_payload_value_special                      ), //i
+    .io_inputs_2_payload_scrap          (div_output_payload_scrap                              ), //i
+    .io_inputs_2_payload_roundMode      (div_output_payload_roundMode[2:0]                     ), //i
+    .io_inputs_2_payload_NV             (div_output_payload_NV                                 ), //i
+    .io_inputs_2_payload_DZ             (div_output_payload_DZ                                 ), //i
+    .io_inputs_3_valid                  (add_result_output_valid                               ), //i
+    .io_inputs_3_ready                  (streamArbiter_2_io_inputs_3_ready                     ), //o
+    .io_inputs_3_payload_rd             (add_result_output_payload_rd[4:0]                     ), //i
+    .io_inputs_3_payload_value_mantissa (add_result_output_payload_value_mantissa[23:0]        ), //i
+    .io_inputs_3_payload_value_exponent (add_result_output_payload_value_exponent[8:0]         ), //i
+    .io_inputs_3_payload_value_sign     (add_result_output_payload_value_sign                  ), //i
+    .io_inputs_3_payload_value_special  (add_result_output_payload_value_special               ), //i
+    .io_inputs_3_payload_scrap          (add_result_output_payload_scrap                       ), //i
+    .io_inputs_3_payload_roundMode      (add_result_output_payload_roundMode[2:0]              ), //i
+    .io_inputs_3_payload_NV             (add_result_output_payload_NV                          ), //i
+    .io_inputs_3_payload_DZ             (add_result_output_payload_DZ                          ), //i
+    .io_inputs_4_valid                  (mul_result_output_valid                               ), //i
+    .io_inputs_4_ready                  (streamArbiter_2_io_inputs_4_ready                     ), //o
+    .io_inputs_4_payload_rd             (mul_result_output_payload_rd[4:0]                     ), //i
+    .io_inputs_4_payload_value_mantissa (mul_result_output_payload_value_mantissa[23:0]        ), //i
+    .io_inputs_4_payload_value_exponent (mul_result_output_payload_value_exponent[8:0]         ), //i
+    .io_inputs_4_payload_value_sign     (mul_result_output_payload_value_sign                  ), //i
+    .io_inputs_4_payload_value_special  (mul_result_output_payload_value_special               ), //i
+    .io_inputs_4_payload_scrap          (mul_result_output_payload_scrap                       ), //i
+    .io_inputs_4_payload_roundMode      (mul_result_output_payload_roundMode[2:0]              ), //i
+    .io_inputs_4_payload_NV             (mul_result_output_payload_NV                          ), //i
+    .io_inputs_4_payload_DZ             (mul_result_output_payload_DZ                          ), //i
+    .io_inputs_5_valid                  (shortPip_output_m2sPipe_valid                         ), //i
+    .io_inputs_5_ready                  (streamArbiter_2_io_inputs_5_ready                     ), //o
+    .io_inputs_5_payload_rd             (shortPip_output_m2sPipe_payload_rd[4:0]               ), //i
+    .io_inputs_5_payload_value_mantissa (shortPip_output_m2sPipe_payload_value_mantissa[23:0]  ), //i
+    .io_inputs_5_payload_value_exponent (shortPip_output_m2sPipe_payload_value_exponent[8:0]   ), //i
+    .io_inputs_5_payload_value_sign     (shortPip_output_m2sPipe_payload_value_sign            ), //i
+    .io_inputs_5_payload_value_special  (shortPip_output_m2sPipe_payload_value_special         ), //i
+    .io_inputs_5_payload_scrap          (shortPip_output_m2sPipe_payload_scrap                 ), //i
+    .io_inputs_5_payload_roundMode      (shortPip_output_m2sPipe_payload_roundMode[2:0]        ), //i
+    .io_inputs_5_payload_NV             (shortPip_output_m2sPipe_payload_NV                    ), //i
+    .io_inputs_5_payload_DZ             (shortPip_output_m2sPipe_payload_DZ                    ), //i
+    .io_output_valid                    (streamArbiter_2_io_output_valid                       ), //o
+    .io_output_ready                    (1'b1                                                  ), //i
+    .io_output_payload_rd               (streamArbiter_2_io_output_payload_rd[4:0]             ), //o
+    .io_output_payload_value_mantissa   (streamArbiter_2_io_output_payload_value_mantissa[23:0]), //o
+    .io_output_payload_value_exponent   (streamArbiter_2_io_output_payload_value_exponent[8:0] ), //o
+    .io_output_payload_value_sign       (streamArbiter_2_io_output_payload_value_sign          ), //o
+    .io_output_payload_value_special    (streamArbiter_2_io_output_payload_value_special       ), //o
+    .io_output_payload_scrap            (streamArbiter_2_io_output_payload_scrap               ), //o
+    .io_output_payload_roundMode        (streamArbiter_2_io_output_payload_roundMode[2:0]      ), //o
+    .io_output_payload_NV               (streamArbiter_2_io_output_payload_NV                  ), //o
+    .io_output_payload_DZ               (streamArbiter_2_io_output_payload_DZ                  ), //o
+    .io_chosen                          (streamArbiter_2_io_chosen[2:0]                        ), //o
+    .io_chosenOH                        (streamArbiter_2_io_chosenOH[5:0]                      ), //o
+    .clk                                (clk                                                   ), //i
+    .reset                              (reset                                                 )  //i
   );
   `ifndef SYNTHESIS
   always @(*) begin
     case(io_port_0_cmd_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : io_port_0_cmd_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : io_port_0_cmd_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : io_port_0_cmd_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : io_port_0_cmd_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : io_port_0_cmd_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : io_port_0_cmd_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : io_port_0_cmd_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : io_port_0_cmd_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : io_port_0_cmd_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : io_port_0_cmd_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : io_port_0_cmd_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : io_port_0_cmd_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : io_port_0_cmd_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : io_port_0_cmd_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : io_port_0_cmd_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : io_port_0_cmd_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : io_port_0_cmd_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : io_port_0_cmd_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : io_port_0_cmd_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : io_port_0_cmd_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : io_port_0_cmd_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : io_port_0_cmd_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : io_port_0_cmd_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : io_port_0_cmd_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : io_port_0_cmd_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : io_port_0_cmd_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : io_port_0_cmd_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : io_port_0_cmd_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : io_port_0_cmd_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : io_port_0_cmd_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : io_port_0_cmd_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : io_port_0_cmd_payload_opcode_string = "FCVT_X_X";
       default : io_port_0_cmd_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(io_port_0_cmd_payload_format)
-      `FpuFormat_binary_sequential_FLOAT : io_port_0_cmd_payload_format_string = "FLOAT ";
-      `FpuFormat_binary_sequential_DOUBLE : io_port_0_cmd_payload_format_string = "DOUBLE";
+      FpuFormat_FLOAT : io_port_0_cmd_payload_format_string = "FLOAT ";
+      FpuFormat_DOUBLE : io_port_0_cmd_payload_format_string = "DOUBLE";
       default : io_port_0_cmd_payload_format_string = "??????";
     endcase
   end
   always @(*) begin
     case(io_port_0_cmd_payload_roundMode)
-      `FpuRoundMode_opt_RNE : io_port_0_cmd_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : io_port_0_cmd_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : io_port_0_cmd_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : io_port_0_cmd_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : io_port_0_cmd_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : io_port_0_cmd_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : io_port_0_cmd_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : io_port_0_cmd_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : io_port_0_cmd_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : io_port_0_cmd_payload_roundMode_string = "RMM";
       default : io_port_0_cmd_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(io_port_0_commit_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : io_port_0_commit_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : io_port_0_commit_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : io_port_0_commit_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : io_port_0_commit_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : io_port_0_commit_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : io_port_0_commit_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : io_port_0_commit_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : io_port_0_commit_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : io_port_0_commit_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : io_port_0_commit_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : io_port_0_commit_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : io_port_0_commit_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : io_port_0_commit_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : io_port_0_commit_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : io_port_0_commit_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : io_port_0_commit_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : io_port_0_commit_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : io_port_0_commit_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : io_port_0_commit_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : io_port_0_commit_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : io_port_0_commit_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : io_port_0_commit_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : io_port_0_commit_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : io_port_0_commit_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : io_port_0_commit_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : io_port_0_commit_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : io_port_0_commit_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : io_port_0_commit_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : io_port_0_commit_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : io_port_0_commit_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : io_port_0_commit_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : io_port_0_commit_payload_opcode_string = "FCVT_X_X";
       default : io_port_0_commit_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(commitFork_load_0_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : commitFork_load_0_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : commitFork_load_0_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : commitFork_load_0_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : commitFork_load_0_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : commitFork_load_0_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : commitFork_load_0_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : commitFork_load_0_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : commitFork_load_0_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : commitFork_load_0_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : commitFork_load_0_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : commitFork_load_0_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : commitFork_load_0_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : commitFork_load_0_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : commitFork_load_0_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : commitFork_load_0_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : commitFork_load_0_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : commitFork_load_0_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : commitFork_load_0_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : commitFork_load_0_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : commitFork_load_0_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : commitFork_load_0_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : commitFork_load_0_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : commitFork_load_0_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : commitFork_load_0_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : commitFork_load_0_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : commitFork_load_0_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : commitFork_load_0_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : commitFork_load_0_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : commitFork_load_0_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : commitFork_load_0_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : commitFork_load_0_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : commitFork_load_0_payload_opcode_string = "FCVT_X_X";
       default : commitFork_load_0_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(commitFork_commit_0_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : commitFork_commit_0_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : commitFork_commit_0_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : commitFork_commit_0_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : commitFork_commit_0_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : commitFork_commit_0_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : commitFork_commit_0_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : commitFork_commit_0_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : commitFork_commit_0_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : commitFork_commit_0_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : commitFork_commit_0_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : commitFork_commit_0_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : commitFork_commit_0_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : commitFork_commit_0_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : commitFork_commit_0_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : commitFork_commit_0_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : commitFork_commit_0_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : commitFork_commit_0_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : commitFork_commit_0_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : commitFork_commit_0_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : commitFork_commit_0_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : commitFork_commit_0_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : commitFork_commit_0_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : commitFork_commit_0_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : commitFork_commit_0_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : commitFork_commit_0_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : commitFork_commit_0_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : commitFork_commit_0_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : commitFork_commit_0_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : commitFork_commit_0_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : commitFork_commit_0_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : commitFork_commit_0_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : commitFork_commit_0_payload_opcode_string = "FCVT_X_X";
       default : commitFork_commit_0_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(streamFork_1_io_outputs_1_s2mPipe_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "FCVT_X_X";
       default : streamFork_1_io_outputs_1_s2mPipe_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(streamFork_1_io_outputs_1_rData_opcode)
-      `FpuOpcode_binary_sequential_LOAD : streamFork_1_io_outputs_1_rData_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : streamFork_1_io_outputs_1_rData_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : streamFork_1_io_outputs_1_rData_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : streamFork_1_io_outputs_1_rData_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : streamFork_1_io_outputs_1_rData_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : streamFork_1_io_outputs_1_rData_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : streamFork_1_io_outputs_1_rData_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : streamFork_1_io_outputs_1_rData_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : streamFork_1_io_outputs_1_rData_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : streamFork_1_io_outputs_1_rData_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : streamFork_1_io_outputs_1_rData_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : streamFork_1_io_outputs_1_rData_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : streamFork_1_io_outputs_1_rData_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : streamFork_1_io_outputs_1_rData_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : streamFork_1_io_outputs_1_rData_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : streamFork_1_io_outputs_1_rData_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : streamFork_1_io_outputs_1_rData_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : streamFork_1_io_outputs_1_rData_opcode_string = "STORE   ";
+      FpuOpcode_MUL : streamFork_1_io_outputs_1_rData_opcode_string = "MUL     ";
+      FpuOpcode_ADD : streamFork_1_io_outputs_1_rData_opcode_string = "ADD     ";
+      FpuOpcode_FMA : streamFork_1_io_outputs_1_rData_opcode_string = "FMA     ";
+      FpuOpcode_I2F : streamFork_1_io_outputs_1_rData_opcode_string = "I2F     ";
+      FpuOpcode_F2I : streamFork_1_io_outputs_1_rData_opcode_string = "F2I     ";
+      FpuOpcode_CMP : streamFork_1_io_outputs_1_rData_opcode_string = "CMP     ";
+      FpuOpcode_DIV : streamFork_1_io_outputs_1_rData_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : streamFork_1_io_outputs_1_rData_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : streamFork_1_io_outputs_1_rData_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : streamFork_1_io_outputs_1_rData_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : streamFork_1_io_outputs_1_rData_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : streamFork_1_io_outputs_1_rData_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : streamFork_1_io_outputs_1_rData_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : streamFork_1_io_outputs_1_rData_opcode_string = "FCVT_X_X";
       default : streamFork_1_io_outputs_1_rData_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : _zz_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : _zz_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : _zz_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : _zz_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : _zz_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : _zz_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : _zz_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : _zz_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : _zz_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : _zz_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : _zz_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : _zz_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : _zz_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : _zz_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : _zz_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : _zz_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : _zz_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : _zz_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : _zz_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : _zz_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : _zz_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : _zz_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : _zz_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : _zz_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : _zz_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : _zz_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : _zz_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : _zz_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : _zz_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : _zz_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : _zz_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : _zz_payload_opcode_string = "FCVT_X_X";
       default : _zz_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_commitLogic_0_input_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : _zz_commitLogic_0_input_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : _zz_commitLogic_0_input_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : _zz_commitLogic_0_input_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : _zz_commitLogic_0_input_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : _zz_commitLogic_0_input_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : _zz_commitLogic_0_input_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : _zz_commitLogic_0_input_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : _zz_commitLogic_0_input_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : _zz_commitLogic_0_input_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : _zz_commitLogic_0_input_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : _zz_commitLogic_0_input_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : _zz_commitLogic_0_input_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : _zz_commitLogic_0_input_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : _zz_commitLogic_0_input_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : _zz_commitLogic_0_input_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : _zz_commitLogic_0_input_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : _zz_commitLogic_0_input_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : _zz_commitLogic_0_input_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : _zz_commitLogic_0_input_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : _zz_commitLogic_0_input_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : _zz_commitLogic_0_input_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : _zz_commitLogic_0_input_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : _zz_commitLogic_0_input_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : _zz_commitLogic_0_input_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : _zz_commitLogic_0_input_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : _zz_commitLogic_0_input_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : _zz_commitLogic_0_input_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : _zz_commitLogic_0_input_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : _zz_commitLogic_0_input_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : _zz_commitLogic_0_input_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : _zz_commitLogic_0_input_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : _zz_commitLogic_0_input_payload_opcode_string = "FCVT_X_X";
       default : _zz_commitLogic_0_input_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(commitLogic_0_input_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : commitLogic_0_input_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : commitLogic_0_input_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : commitLogic_0_input_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : commitLogic_0_input_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : commitLogic_0_input_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : commitLogic_0_input_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : commitLogic_0_input_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : commitLogic_0_input_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : commitLogic_0_input_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : commitLogic_0_input_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : commitLogic_0_input_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : commitLogic_0_input_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : commitLogic_0_input_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : commitLogic_0_input_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : commitLogic_0_input_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : commitLogic_0_input_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : commitLogic_0_input_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : commitLogic_0_input_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : commitLogic_0_input_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : commitLogic_0_input_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : commitLogic_0_input_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : commitLogic_0_input_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : commitLogic_0_input_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : commitLogic_0_input_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : commitLogic_0_input_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : commitLogic_0_input_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : commitLogic_0_input_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : commitLogic_0_input_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : commitLogic_0_input_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : commitLogic_0_input_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : commitLogic_0_input_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : commitLogic_0_input_payload_opcode_string = "FCVT_X_X";
       default : commitLogic_0_input_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
-    case(io_port_0_cmd_input_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : io_port_0_cmd_input_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : io_port_0_cmd_input_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : io_port_0_cmd_input_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : io_port_0_cmd_input_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : io_port_0_cmd_input_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : io_port_0_cmd_input_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : io_port_0_cmd_input_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : io_port_0_cmd_input_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : io_port_0_cmd_input_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : io_port_0_cmd_input_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : io_port_0_cmd_input_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : io_port_0_cmd_input_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : io_port_0_cmd_input_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : io_port_0_cmd_input_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : io_port_0_cmd_input_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : io_port_0_cmd_input_payload_opcode_string = "FCVT_X_X";
-      default : io_port_0_cmd_input_payload_opcode_string = "????????";
+    case(scheduler_0_input_payload_opcode)
+      FpuOpcode_LOAD : scheduler_0_input_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : scheduler_0_input_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : scheduler_0_input_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : scheduler_0_input_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : scheduler_0_input_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : scheduler_0_input_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : scheduler_0_input_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : scheduler_0_input_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : scheduler_0_input_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : scheduler_0_input_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : scheduler_0_input_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : scheduler_0_input_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : scheduler_0_input_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : scheduler_0_input_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : scheduler_0_input_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : scheduler_0_input_payload_opcode_string = "FCVT_X_X";
+      default : scheduler_0_input_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
-    case(io_port_0_cmd_input_payload_format)
-      `FpuFormat_binary_sequential_FLOAT : io_port_0_cmd_input_payload_format_string = "FLOAT ";
-      `FpuFormat_binary_sequential_DOUBLE : io_port_0_cmd_input_payload_format_string = "DOUBLE";
-      default : io_port_0_cmd_input_payload_format_string = "??????";
+    case(scheduler_0_input_payload_format)
+      FpuFormat_FLOAT : scheduler_0_input_payload_format_string = "FLOAT ";
+      FpuFormat_DOUBLE : scheduler_0_input_payload_format_string = "DOUBLE";
+      default : scheduler_0_input_payload_format_string = "??????";
     endcase
   end
   always @(*) begin
-    case(io_port_0_cmd_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : io_port_0_cmd_input_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : io_port_0_cmd_input_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : io_port_0_cmd_input_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : io_port_0_cmd_input_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : io_port_0_cmd_input_payload_roundMode_string = "RMM";
-      default : io_port_0_cmd_input_payload_roundMode_string = "???";
+    case(scheduler_0_input_payload_roundMode)
+      FpuRoundMode_RNE : scheduler_0_input_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : scheduler_0_input_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : scheduler_0_input_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : scheduler_0_input_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : scheduler_0_input_payload_roundMode_string = "RMM";
+      default : scheduler_0_input_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(io_port_0_cmd_rData_opcode)
-      `FpuOpcode_binary_sequential_LOAD : io_port_0_cmd_rData_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : io_port_0_cmd_rData_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : io_port_0_cmd_rData_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : io_port_0_cmd_rData_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : io_port_0_cmd_rData_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : io_port_0_cmd_rData_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : io_port_0_cmd_rData_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : io_port_0_cmd_rData_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : io_port_0_cmd_rData_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : io_port_0_cmd_rData_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : io_port_0_cmd_rData_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : io_port_0_cmd_rData_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : io_port_0_cmd_rData_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : io_port_0_cmd_rData_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : io_port_0_cmd_rData_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : io_port_0_cmd_rData_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : io_port_0_cmd_rData_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : io_port_0_cmd_rData_opcode_string = "STORE   ";
+      FpuOpcode_MUL : io_port_0_cmd_rData_opcode_string = "MUL     ";
+      FpuOpcode_ADD : io_port_0_cmd_rData_opcode_string = "ADD     ";
+      FpuOpcode_FMA : io_port_0_cmd_rData_opcode_string = "FMA     ";
+      FpuOpcode_I2F : io_port_0_cmd_rData_opcode_string = "I2F     ";
+      FpuOpcode_F2I : io_port_0_cmd_rData_opcode_string = "F2I     ";
+      FpuOpcode_CMP : io_port_0_cmd_rData_opcode_string = "CMP     ";
+      FpuOpcode_DIV : io_port_0_cmd_rData_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : io_port_0_cmd_rData_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : io_port_0_cmd_rData_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : io_port_0_cmd_rData_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : io_port_0_cmd_rData_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : io_port_0_cmd_rData_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : io_port_0_cmd_rData_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : io_port_0_cmd_rData_opcode_string = "FCVT_X_X";
       default : io_port_0_cmd_rData_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(io_port_0_cmd_rData_format)
-      `FpuFormat_binary_sequential_FLOAT : io_port_0_cmd_rData_format_string = "FLOAT ";
-      `FpuFormat_binary_sequential_DOUBLE : io_port_0_cmd_rData_format_string = "DOUBLE";
+      FpuFormat_FLOAT : io_port_0_cmd_rData_format_string = "FLOAT ";
+      FpuFormat_DOUBLE : io_port_0_cmd_rData_format_string = "DOUBLE";
       default : io_port_0_cmd_rData_format_string = "??????";
     endcase
   end
   always @(*) begin
     case(io_port_0_cmd_rData_roundMode)
-      `FpuRoundMode_opt_RNE : io_port_0_cmd_rData_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : io_port_0_cmd_rData_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : io_port_0_cmd_rData_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : io_port_0_cmd_rData_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : io_port_0_cmd_rData_roundMode_string = "RMM";
+      FpuRoundMode_RNE : io_port_0_cmd_rData_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : io_port_0_cmd_rData_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : io_port_0_cmd_rData_roundMode_string = "RDN";
+      FpuRoundMode_RUP : io_port_0_cmd_rData_roundMode_string = "RUP";
+      FpuRoundMode_RMM : io_port_0_cmd_rData_roundMode_string = "RMM";
       default : io_port_0_cmd_rData_roundMode_string = "???";
     endcase
   end
   always @(*) begin
-    case(_zz_io_port_0_cmd_input_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : _zz_io_port_0_cmd_input_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : _zz_io_port_0_cmd_input_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : _zz_io_port_0_cmd_input_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : _zz_io_port_0_cmd_input_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : _zz_io_port_0_cmd_input_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : _zz_io_port_0_cmd_input_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : _zz_io_port_0_cmd_input_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : _zz_io_port_0_cmd_input_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : _zz_io_port_0_cmd_input_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : _zz_io_port_0_cmd_input_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : _zz_io_port_0_cmd_input_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : _zz_io_port_0_cmd_input_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : _zz_io_port_0_cmd_input_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : _zz_io_port_0_cmd_input_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : _zz_io_port_0_cmd_input_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : _zz_io_port_0_cmd_input_payload_opcode_string = "FCVT_X_X";
-      default : _zz_io_port_0_cmd_input_payload_opcode_string = "????????";
+    case(_zz_scheduler_0_input_payload_opcode)
+      FpuOpcode_LOAD : _zz_scheduler_0_input_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : _zz_scheduler_0_input_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : _zz_scheduler_0_input_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : _zz_scheduler_0_input_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : _zz_scheduler_0_input_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : _zz_scheduler_0_input_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : _zz_scheduler_0_input_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : _zz_scheduler_0_input_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : _zz_scheduler_0_input_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : _zz_scheduler_0_input_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : _zz_scheduler_0_input_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : _zz_scheduler_0_input_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : _zz_scheduler_0_input_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : _zz_scheduler_0_input_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : _zz_scheduler_0_input_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : _zz_scheduler_0_input_payload_opcode_string = "FCVT_X_X";
+      default : _zz_scheduler_0_input_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
-    case(_zz_io_port_0_cmd_input_payload_format)
-      `FpuFormat_binary_sequential_FLOAT : _zz_io_port_0_cmd_input_payload_format_string = "FLOAT ";
-      `FpuFormat_binary_sequential_DOUBLE : _zz_io_port_0_cmd_input_payload_format_string = "DOUBLE";
-      default : _zz_io_port_0_cmd_input_payload_format_string = "??????";
+    case(_zz_scheduler_0_input_payload_format)
+      FpuFormat_FLOAT : _zz_scheduler_0_input_payload_format_string = "FLOAT ";
+      FpuFormat_DOUBLE : _zz_scheduler_0_input_payload_format_string = "DOUBLE";
+      default : _zz_scheduler_0_input_payload_format_string = "??????";
     endcase
   end
   always @(*) begin
-    case(_zz_io_port_0_cmd_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : _zz_io_port_0_cmd_input_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : _zz_io_port_0_cmd_input_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : _zz_io_port_0_cmd_input_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : _zz_io_port_0_cmd_input_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : _zz_io_port_0_cmd_input_payload_roundMode_string = "RMM";
-      default : _zz_io_port_0_cmd_input_payload_roundMode_string = "???";
+    case(_zz_scheduler_0_input_payload_roundMode)
+      FpuRoundMode_RNE : _zz_scheduler_0_input_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : _zz_scheduler_0_input_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : _zz_scheduler_0_input_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : _zz_scheduler_0_input_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : _zz_scheduler_0_input_payload_roundMode_string = "RMM";
+      default : _zz_scheduler_0_input_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(scheduler_0_output_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : scheduler_0_output_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : scheduler_0_output_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : scheduler_0_output_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : scheduler_0_output_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : scheduler_0_output_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : scheduler_0_output_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : scheduler_0_output_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : scheduler_0_output_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : scheduler_0_output_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : scheduler_0_output_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : scheduler_0_output_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : scheduler_0_output_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : scheduler_0_output_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : scheduler_0_output_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : scheduler_0_output_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : scheduler_0_output_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : scheduler_0_output_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : scheduler_0_output_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : scheduler_0_output_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : scheduler_0_output_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : scheduler_0_output_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : scheduler_0_output_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : scheduler_0_output_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : scheduler_0_output_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : scheduler_0_output_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : scheduler_0_output_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : scheduler_0_output_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : scheduler_0_output_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : scheduler_0_output_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : scheduler_0_output_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : scheduler_0_output_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : scheduler_0_output_payload_opcode_string = "FCVT_X_X";
       default : scheduler_0_output_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(scheduler_0_output_payload_format)
-      `FpuFormat_binary_sequential_FLOAT : scheduler_0_output_payload_format_string = "FLOAT ";
-      `FpuFormat_binary_sequential_DOUBLE : scheduler_0_output_payload_format_string = "DOUBLE";
+      FpuFormat_FLOAT : scheduler_0_output_payload_format_string = "FLOAT ";
+      FpuFormat_DOUBLE : scheduler_0_output_payload_format_string = "DOUBLE";
       default : scheduler_0_output_payload_format_string = "??????";
     endcase
   end
   always @(*) begin
     case(scheduler_0_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : scheduler_0_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : scheduler_0_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : scheduler_0_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : scheduler_0_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : scheduler_0_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : scheduler_0_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : scheduler_0_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : scheduler_0_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : scheduler_0_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : scheduler_0_output_payload_roundMode_string = "RMM";
       default : scheduler_0_output_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(_zz_io_inputs_0_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : _zz_io_inputs_0_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : _zz_io_inputs_0_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : _zz_io_inputs_0_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : _zz_io_inputs_0_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : _zz_io_inputs_0_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : _zz_io_inputs_0_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : _zz_io_inputs_0_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : _zz_io_inputs_0_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : _zz_io_inputs_0_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : _zz_io_inputs_0_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : _zz_io_inputs_0_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : _zz_io_inputs_0_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : _zz_io_inputs_0_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : _zz_io_inputs_0_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : _zz_io_inputs_0_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : _zz_io_inputs_0_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : _zz_io_inputs_0_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : _zz_io_inputs_0_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : _zz_io_inputs_0_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : _zz_io_inputs_0_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : _zz_io_inputs_0_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : _zz_io_inputs_0_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : _zz_io_inputs_0_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : _zz_io_inputs_0_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : _zz_io_inputs_0_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : _zz_io_inputs_0_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : _zz_io_inputs_0_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : _zz_io_inputs_0_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : _zz_io_inputs_0_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : _zz_io_inputs_0_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : _zz_io_inputs_0_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : _zz_io_inputs_0_payload_opcode_string = "FCVT_X_X";
       default : _zz_io_inputs_0_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_io_inputs_0_payload_format)
-      `FpuFormat_binary_sequential_FLOAT : _zz_io_inputs_0_payload_format_string = "FLOAT ";
-      `FpuFormat_binary_sequential_DOUBLE : _zz_io_inputs_0_payload_format_string = "DOUBLE";
+      FpuFormat_FLOAT : _zz_io_inputs_0_payload_format_string = "FLOAT ";
+      FpuFormat_DOUBLE : _zz_io_inputs_0_payload_format_string = "DOUBLE";
       default : _zz_io_inputs_0_payload_format_string = "??????";
     endcase
   end
   always @(*) begin
     case(_zz_io_inputs_0_payload_roundMode)
-      `FpuRoundMode_opt_RNE : _zz_io_inputs_0_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : _zz_io_inputs_0_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : _zz_io_inputs_0_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : _zz_io_inputs_0_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : _zz_io_inputs_0_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : _zz_io_inputs_0_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : _zz_io_inputs_0_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : _zz_io_inputs_0_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : _zz_io_inputs_0_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : _zz_io_inputs_0_payload_roundMode_string = "RMM";
       default : _zz_io_inputs_0_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(cmdArbiter_output_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : cmdArbiter_output_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : cmdArbiter_output_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : cmdArbiter_output_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : cmdArbiter_output_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : cmdArbiter_output_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : cmdArbiter_output_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : cmdArbiter_output_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : cmdArbiter_output_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : cmdArbiter_output_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : cmdArbiter_output_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : cmdArbiter_output_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : cmdArbiter_output_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : cmdArbiter_output_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : cmdArbiter_output_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : cmdArbiter_output_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : cmdArbiter_output_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : cmdArbiter_output_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : cmdArbiter_output_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : cmdArbiter_output_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : cmdArbiter_output_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : cmdArbiter_output_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : cmdArbiter_output_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : cmdArbiter_output_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : cmdArbiter_output_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : cmdArbiter_output_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : cmdArbiter_output_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : cmdArbiter_output_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : cmdArbiter_output_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : cmdArbiter_output_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : cmdArbiter_output_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : cmdArbiter_output_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : cmdArbiter_output_payload_opcode_string = "FCVT_X_X";
       default : cmdArbiter_output_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(cmdArbiter_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : cmdArbiter_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : cmdArbiter_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : cmdArbiter_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : cmdArbiter_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : cmdArbiter_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : cmdArbiter_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : cmdArbiter_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : cmdArbiter_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : cmdArbiter_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : cmdArbiter_output_payload_roundMode_string = "RMM";
       default : cmdArbiter_output_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(read_s0_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : read_s0_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : read_s0_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : read_s0_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : read_s0_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : read_s0_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : read_s0_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : read_s0_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : read_s0_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : read_s0_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : read_s0_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : read_s0_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : read_s0_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : read_s0_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : read_s0_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : read_s0_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : read_s0_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : read_s0_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : read_s0_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : read_s0_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : read_s0_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : read_s0_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : read_s0_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : read_s0_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : read_s0_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : read_s0_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : read_s0_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : read_s0_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : read_s0_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : read_s0_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : read_s0_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : read_s0_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : read_s0_payload_opcode_string = "FCVT_X_X";
       default : read_s0_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(read_s0_payload_roundMode)
-      `FpuRoundMode_opt_RNE : read_s0_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : read_s0_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : read_s0_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : read_s0_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : read_s0_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : read_s0_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : read_s0_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : read_s0_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : read_s0_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : read_s0_payload_roundMode_string = "RMM";
       default : read_s0_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
-    case(read_s0_s1_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : read_s0_s1_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : read_s0_s1_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : read_s0_s1_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : read_s0_s1_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : read_s0_s1_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : read_s0_s1_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : read_s0_s1_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : read_s0_s1_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : read_s0_s1_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : read_s0_s1_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : read_s0_s1_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : read_s0_s1_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : read_s0_s1_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : read_s0_s1_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : read_s0_s1_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : read_s0_s1_payload_opcode_string = "FCVT_X_X";
-      default : read_s0_s1_payload_opcode_string = "????????";
+    case(read_s1_payload_opcode)
+      FpuOpcode_LOAD : read_s1_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : read_s1_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : read_s1_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : read_s1_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : read_s1_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : read_s1_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : read_s1_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : read_s1_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : read_s1_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : read_s1_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : read_s1_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : read_s1_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : read_s1_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : read_s1_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : read_s1_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : read_s1_payload_opcode_string = "FCVT_X_X";
+      default : read_s1_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
-    case(read_s0_s1_payload_roundMode)
-      `FpuRoundMode_opt_RNE : read_s0_s1_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : read_s0_s1_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : read_s0_s1_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : read_s0_s1_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : read_s0_s1_payload_roundMode_string = "RMM";
-      default : read_s0_s1_payload_roundMode_string = "???";
+    case(read_s1_payload_roundMode)
+      FpuRoundMode_RNE : read_s1_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : read_s1_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : read_s1_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : read_s1_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : read_s1_payload_roundMode_string = "RMM";
+      default : read_s1_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(read_s0_rData_opcode)
-      `FpuOpcode_binary_sequential_LOAD : read_s0_rData_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : read_s0_rData_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : read_s0_rData_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : read_s0_rData_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : read_s0_rData_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : read_s0_rData_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : read_s0_rData_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : read_s0_rData_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : read_s0_rData_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : read_s0_rData_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : read_s0_rData_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : read_s0_rData_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : read_s0_rData_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : read_s0_rData_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : read_s0_rData_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : read_s0_rData_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : read_s0_rData_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : read_s0_rData_opcode_string = "STORE   ";
+      FpuOpcode_MUL : read_s0_rData_opcode_string = "MUL     ";
+      FpuOpcode_ADD : read_s0_rData_opcode_string = "ADD     ";
+      FpuOpcode_FMA : read_s0_rData_opcode_string = "FMA     ";
+      FpuOpcode_I2F : read_s0_rData_opcode_string = "I2F     ";
+      FpuOpcode_F2I : read_s0_rData_opcode_string = "F2I     ";
+      FpuOpcode_CMP : read_s0_rData_opcode_string = "CMP     ";
+      FpuOpcode_DIV : read_s0_rData_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : read_s0_rData_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : read_s0_rData_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : read_s0_rData_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : read_s0_rData_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : read_s0_rData_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : read_s0_rData_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : read_s0_rData_opcode_string = "FCVT_X_X";
       default : read_s0_rData_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(read_s0_rData_roundMode)
-      `FpuRoundMode_opt_RNE : read_s0_rData_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : read_s0_rData_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : read_s0_rData_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : read_s0_rData_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : read_s0_rData_roundMode_string = "RMM";
+      FpuRoundMode_RNE : read_s0_rData_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : read_s0_rData_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : read_s0_rData_roundMode_string = "RDN";
+      FpuRoundMode_RUP : read_s0_rData_roundMode_string = "RUP";
+      FpuRoundMode_RMM : read_s0_rData_roundMode_string = "RMM";
       default : read_s0_rData_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(read_output_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : read_output_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : read_output_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : read_output_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : read_output_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : read_output_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : read_output_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : read_output_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : read_output_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : read_output_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : read_output_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : read_output_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : read_output_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : read_output_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : read_output_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : read_output_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : read_output_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : read_output_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : read_output_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : read_output_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : read_output_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : read_output_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : read_output_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : read_output_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : read_output_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : read_output_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : read_output_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : read_output_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : read_output_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : read_output_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : read_output_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : read_output_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : read_output_payload_opcode_string = "FCVT_X_X";
       default : read_output_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(read_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : read_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : read_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : read_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : read_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : read_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : read_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : read_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : read_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : read_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : read_output_payload_roundMode_string = "RMM";
       default : read_output_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(decode_input_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : decode_input_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : decode_input_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : decode_input_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : decode_input_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : decode_input_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : decode_input_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : decode_input_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : decode_input_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : decode_input_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : decode_input_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : decode_input_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : decode_input_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : decode_input_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : decode_input_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : decode_input_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : decode_input_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : decode_input_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : decode_input_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : decode_input_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : decode_input_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : decode_input_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : decode_input_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : decode_input_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : decode_input_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : decode_input_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : decode_input_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : decode_input_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : decode_input_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : decode_input_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : decode_input_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : decode_input_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : decode_input_payload_opcode_string = "FCVT_X_X";
       default : decode_input_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(decode_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : decode_input_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_input_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_input_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_input_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_input_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : decode_input_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : decode_input_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : decode_input_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : decode_input_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : decode_input_payload_roundMode_string = "RMM";
       default : decode_input_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(decode_load_payload_roundMode)
-      `FpuRoundMode_opt_RNE : decode_load_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_load_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_load_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_load_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_load_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : decode_load_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : decode_load_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : decode_load_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : decode_load_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : decode_load_payload_roundMode_string = "RMM";
       default : decode_load_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(decode_shortPip_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : decode_shortPip_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : decode_shortPip_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : decode_shortPip_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : decode_shortPip_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : decode_shortPip_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : decode_shortPip_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : decode_shortPip_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : decode_shortPip_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : decode_shortPip_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : decode_shortPip_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : decode_shortPip_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : decode_shortPip_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : decode_shortPip_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : decode_shortPip_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : decode_shortPip_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : decode_shortPip_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : decode_shortPip_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : decode_shortPip_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : decode_shortPip_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : decode_shortPip_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : decode_shortPip_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : decode_shortPip_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : decode_shortPip_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : decode_shortPip_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : decode_shortPip_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : decode_shortPip_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : decode_shortPip_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : decode_shortPip_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : decode_shortPip_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : decode_shortPip_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : decode_shortPip_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : decode_shortPip_payload_opcode_string = "FCVT_X_X";
       default : decode_shortPip_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(decode_shortPip_payload_roundMode)
-      `FpuRoundMode_opt_RNE : decode_shortPip_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_shortPip_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_shortPip_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_shortPip_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_shortPip_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : decode_shortPip_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : decode_shortPip_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : decode_shortPip_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : decode_shortPip_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : decode_shortPip_payload_roundMode_string = "RMM";
       default : decode_shortPip_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(decode_divSqrt_payload_roundMode)
-      `FpuRoundMode_opt_RNE : decode_divSqrt_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_divSqrt_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_divSqrt_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_divSqrt_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_divSqrt_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : decode_divSqrt_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : decode_divSqrt_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : decode_divSqrt_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : decode_divSqrt_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : decode_divSqrt_payload_roundMode_string = "RMM";
       default : decode_divSqrt_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(decode_div_payload_roundMode)
-      `FpuRoundMode_opt_RNE : decode_div_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_div_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_div_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_div_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_div_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : decode_div_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : decode_div_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : decode_div_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : decode_div_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : decode_div_payload_roundMode_string = "RMM";
       default : decode_div_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(decode_sqrt_payload_roundMode)
-      `FpuRoundMode_opt_RNE : decode_sqrt_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_sqrt_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_sqrt_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_sqrt_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_sqrt_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : decode_sqrt_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : decode_sqrt_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : decode_sqrt_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : decode_sqrt_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : decode_sqrt_payload_roundMode_string = "RMM";
       default : decode_sqrt_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(decode_mul_payload_roundMode)
-      `FpuRoundMode_opt_RNE : decode_mul_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_mul_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_mul_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_mul_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_mul_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : decode_mul_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : decode_mul_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : decode_mul_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : decode_mul_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : decode_mul_payload_roundMode_string = "RMM";
       default : decode_mul_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(decode_divSqrtToMul_payload_roundMode)
-      `FpuRoundMode_opt_RNE : decode_divSqrtToMul_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_divSqrtToMul_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_divSqrtToMul_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_divSqrtToMul_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_divSqrtToMul_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : decode_divSqrtToMul_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : decode_divSqrtToMul_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : decode_divSqrtToMul_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : decode_divSqrtToMul_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : decode_divSqrtToMul_payload_roundMode_string = "RMM";
       default : decode_divSqrtToMul_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(decode_add_payload_roundMode)
-      `FpuRoundMode_opt_RNE : decode_add_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_add_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_add_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_add_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_add_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : decode_add_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : decode_add_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : decode_add_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : decode_add_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : decode_add_payload_roundMode_string = "RMM";
       default : decode_add_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(decode_mulToAdd_payload_roundMode)
-      `FpuRoundMode_opt_RNE : decode_mulToAdd_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_mulToAdd_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_mulToAdd_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_mulToAdd_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_mulToAdd_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : decode_mulToAdd_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : decode_mulToAdd_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : decode_mulToAdd_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : decode_mulToAdd_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : decode_mulToAdd_payload_roundMode_string = "RMM";
       default : decode_mulToAdd_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(decode_load_s2mPipe_payload_roundMode)
-      `FpuRoundMode_opt_RNE : decode_load_s2mPipe_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_load_s2mPipe_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_load_s2mPipe_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_load_s2mPipe_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_load_s2mPipe_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : decode_load_s2mPipe_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : decode_load_s2mPipe_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : decode_load_s2mPipe_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : decode_load_s2mPipe_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : decode_load_s2mPipe_payload_roundMode_string = "RMM";
       default : decode_load_s2mPipe_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(decode_load_rData_roundMode)
-      `FpuRoundMode_opt_RNE : decode_load_rData_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_load_rData_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_load_rData_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_load_rData_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_load_rData_roundMode_string = "RMM";
+      FpuRoundMode_RNE : decode_load_rData_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : decode_load_rData_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : decode_load_rData_roundMode_string = "RDN";
+      FpuRoundMode_RUP : decode_load_rData_roundMode_string = "RUP";
+      FpuRoundMode_RMM : decode_load_rData_roundMode_string = "RMM";
       default : decode_load_rData_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(_zz_decode_load_s2mPipe_payload_roundMode)
-      `FpuRoundMode_opt_RNE : _zz_decode_load_s2mPipe_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : _zz_decode_load_s2mPipe_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : _zz_decode_load_s2mPipe_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : _zz_decode_load_s2mPipe_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : _zz_decode_load_s2mPipe_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : _zz_decode_load_s2mPipe_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : _zz_decode_load_s2mPipe_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : _zz_decode_load_s2mPipe_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : _zz_decode_load_s2mPipe_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : _zz_decode_load_s2mPipe_payload_roundMode_string = "RMM";
       default : _zz_decode_load_s2mPipe_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(decode_load_s2mPipe_m2sPipe_payload_roundMode)
-      `FpuRoundMode_opt_RNE : decode_load_s2mPipe_m2sPipe_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_load_s2mPipe_m2sPipe_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_load_s2mPipe_m2sPipe_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_load_s2mPipe_m2sPipe_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_load_s2mPipe_m2sPipe_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : decode_load_s2mPipe_m2sPipe_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : decode_load_s2mPipe_m2sPipe_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : decode_load_s2mPipe_m2sPipe_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : decode_load_s2mPipe_m2sPipe_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : decode_load_s2mPipe_m2sPipe_payload_roundMode_string = "RMM";
       default : decode_load_s2mPipe_m2sPipe_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(decode_load_s2mPipe_rData_roundMode)
-      `FpuRoundMode_opt_RNE : decode_load_s2mPipe_rData_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_load_s2mPipe_rData_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_load_s2mPipe_rData_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_load_s2mPipe_rData_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_load_s2mPipe_rData_roundMode_string = "RMM";
+      FpuRoundMode_RNE : decode_load_s2mPipe_rData_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : decode_load_s2mPipe_rData_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : decode_load_s2mPipe_rData_roundMode_string = "RDN";
+      FpuRoundMode_RUP : decode_load_s2mPipe_rData_roundMode_string = "RUP";
+      FpuRoundMode_RMM : decode_load_s2mPipe_rData_roundMode_string = "RMM";
       default : decode_load_s2mPipe_rData_roundMode_string = "???";
     endcase
   end
   always @(*) begin
-    case(decode_load_s2mPipe_m2sPipe_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : decode_load_s2mPipe_m2sPipe_input_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_load_s2mPipe_m2sPipe_input_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_load_s2mPipe_m2sPipe_input_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_load_s2mPipe_m2sPipe_input_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_load_s2mPipe_m2sPipe_input_payload_roundMode_string = "RMM";
-      default : decode_load_s2mPipe_m2sPipe_input_payload_roundMode_string = "???";
+    case(load_s0_input_payload_roundMode)
+      FpuRoundMode_RNE : load_s0_input_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : load_s0_input_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : load_s0_input_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : load_s0_input_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : load_s0_input_payload_roundMode_string = "RMM";
+      default : load_s0_input_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(decode_load_s2mPipe_m2sPipe_rData_roundMode)
-      `FpuRoundMode_opt_RNE : decode_load_s2mPipe_m2sPipe_rData_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_load_s2mPipe_m2sPipe_rData_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_load_s2mPipe_m2sPipe_rData_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_load_s2mPipe_m2sPipe_rData_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_load_s2mPipe_m2sPipe_rData_roundMode_string = "RMM";
+      FpuRoundMode_RNE : decode_load_s2mPipe_m2sPipe_rData_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : decode_load_s2mPipe_m2sPipe_rData_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : decode_load_s2mPipe_m2sPipe_rData_roundMode_string = "RDN";
+      FpuRoundMode_RUP : decode_load_s2mPipe_m2sPipe_rData_roundMode_string = "RUP";
+      FpuRoundMode_RMM : decode_load_s2mPipe_m2sPipe_rData_roundMode_string = "RMM";
       default : decode_load_s2mPipe_m2sPipe_rData_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(load_s0_filtred_0_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : load_s0_filtred_0_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : load_s0_filtred_0_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : load_s0_filtred_0_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : load_s0_filtred_0_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : load_s0_filtred_0_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : load_s0_filtred_0_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : load_s0_filtred_0_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : load_s0_filtred_0_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : load_s0_filtred_0_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : load_s0_filtred_0_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : load_s0_filtred_0_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : load_s0_filtred_0_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : load_s0_filtred_0_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : load_s0_filtred_0_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : load_s0_filtred_0_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : load_s0_filtred_0_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : load_s0_filtred_0_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : load_s0_filtred_0_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : load_s0_filtred_0_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : load_s0_filtred_0_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : load_s0_filtred_0_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : load_s0_filtred_0_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : load_s0_filtred_0_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : load_s0_filtred_0_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : load_s0_filtred_0_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : load_s0_filtred_0_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : load_s0_filtred_0_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : load_s0_filtred_0_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : load_s0_filtred_0_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : load_s0_filtred_0_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : load_s0_filtred_0_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : load_s0_filtred_0_payload_opcode_string = "FCVT_X_X";
       default : load_s0_filtred_0_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(load_s0_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : load_s0_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : load_s0_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : load_s0_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : load_s0_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : load_s0_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : load_s0_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : load_s0_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : load_s0_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : load_s0_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : load_s0_output_payload_roundMode_string = "RMM";
       default : load_s0_output_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
-    case(load_s0_output_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : load_s0_output_input_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : load_s0_output_input_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : load_s0_output_input_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : load_s0_output_input_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : load_s0_output_input_payload_roundMode_string = "RMM";
-      default : load_s0_output_input_payload_roundMode_string = "???";
+    case(load_s1_input_payload_roundMode)
+      FpuRoundMode_RNE : load_s1_input_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : load_s1_input_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : load_s1_input_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : load_s1_input_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : load_s1_input_payload_roundMode_string = "RMM";
+      default : load_s1_input_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(load_s0_output_rData_roundMode)
-      `FpuRoundMode_opt_RNE : load_s0_output_rData_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : load_s0_output_rData_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : load_s0_output_rData_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : load_s0_output_rData_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : load_s0_output_rData_roundMode_string = "RMM";
+      FpuRoundMode_RNE : load_s0_output_rData_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : load_s0_output_rData_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : load_s0_output_rData_roundMode_string = "RDN";
+      FpuRoundMode_RUP : load_s0_output_rData_roundMode_string = "RUP";
+      FpuRoundMode_RMM : load_s0_output_rData_roundMode_string = "RMM";
       default : load_s0_output_rData_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(load_s1_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : load_s1_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : load_s1_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : load_s1_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : load_s1_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : load_s1_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : load_s1_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : load_s1_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : load_s1_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : load_s1_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : load_s1_output_payload_roundMode_string = "RMM";
       default : load_s1_output_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
-    case(decode_shortPip_input_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : decode_shortPip_input_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : decode_shortPip_input_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : decode_shortPip_input_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : decode_shortPip_input_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : decode_shortPip_input_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : decode_shortPip_input_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : decode_shortPip_input_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : decode_shortPip_input_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : decode_shortPip_input_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : decode_shortPip_input_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : decode_shortPip_input_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : decode_shortPip_input_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : decode_shortPip_input_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : decode_shortPip_input_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : decode_shortPip_input_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : decode_shortPip_input_payload_opcode_string = "FCVT_X_X";
-      default : decode_shortPip_input_payload_opcode_string = "????????";
+    case(shortPip_input_payload_opcode)
+      FpuOpcode_LOAD : shortPip_input_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : shortPip_input_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : shortPip_input_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : shortPip_input_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : shortPip_input_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : shortPip_input_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : shortPip_input_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : shortPip_input_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : shortPip_input_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : shortPip_input_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : shortPip_input_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : shortPip_input_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : shortPip_input_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : shortPip_input_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : shortPip_input_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : shortPip_input_payload_opcode_string = "FCVT_X_X";
+      default : shortPip_input_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
-    case(decode_shortPip_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : decode_shortPip_input_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_shortPip_input_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_shortPip_input_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_shortPip_input_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_shortPip_input_payload_roundMode_string = "RMM";
-      default : decode_shortPip_input_payload_roundMode_string = "???";
+    case(shortPip_input_payload_roundMode)
+      FpuRoundMode_RNE : shortPip_input_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : shortPip_input_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : shortPip_input_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : shortPip_input_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : shortPip_input_payload_roundMode_string = "RMM";
+      default : shortPip_input_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(decode_shortPip_rData_opcode)
-      `FpuOpcode_binary_sequential_LOAD : decode_shortPip_rData_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : decode_shortPip_rData_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : decode_shortPip_rData_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : decode_shortPip_rData_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : decode_shortPip_rData_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : decode_shortPip_rData_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : decode_shortPip_rData_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : decode_shortPip_rData_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : decode_shortPip_rData_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : decode_shortPip_rData_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : decode_shortPip_rData_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : decode_shortPip_rData_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : decode_shortPip_rData_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : decode_shortPip_rData_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : decode_shortPip_rData_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : decode_shortPip_rData_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : decode_shortPip_rData_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : decode_shortPip_rData_opcode_string = "STORE   ";
+      FpuOpcode_MUL : decode_shortPip_rData_opcode_string = "MUL     ";
+      FpuOpcode_ADD : decode_shortPip_rData_opcode_string = "ADD     ";
+      FpuOpcode_FMA : decode_shortPip_rData_opcode_string = "FMA     ";
+      FpuOpcode_I2F : decode_shortPip_rData_opcode_string = "I2F     ";
+      FpuOpcode_F2I : decode_shortPip_rData_opcode_string = "F2I     ";
+      FpuOpcode_CMP : decode_shortPip_rData_opcode_string = "CMP     ";
+      FpuOpcode_DIV : decode_shortPip_rData_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : decode_shortPip_rData_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : decode_shortPip_rData_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : decode_shortPip_rData_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : decode_shortPip_rData_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : decode_shortPip_rData_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : decode_shortPip_rData_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : decode_shortPip_rData_opcode_string = "FCVT_X_X";
       default : decode_shortPip_rData_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(decode_shortPip_rData_roundMode)
-      `FpuRoundMode_opt_RNE : decode_shortPip_rData_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_shortPip_rData_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_shortPip_rData_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_shortPip_rData_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_shortPip_rData_roundMode_string = "RMM";
+      FpuRoundMode_RNE : decode_shortPip_rData_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : decode_shortPip_rData_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : decode_shortPip_rData_roundMode_string = "RDN";
+      FpuRoundMode_RUP : decode_shortPip_rData_roundMode_string = "RUP";
+      FpuRoundMode_RMM : decode_shortPip_rData_roundMode_string = "RMM";
       default : decode_shortPip_rData_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(shortPip_rfOutput_payload_roundMode)
-      `FpuRoundMode_opt_RNE : shortPip_rfOutput_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : shortPip_rfOutput_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : shortPip_rfOutput_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : shortPip_rfOutput_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : shortPip_rfOutput_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : shortPip_rfOutput_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : shortPip_rfOutput_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : shortPip_rfOutput_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : shortPip_rfOutput_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : shortPip_rfOutput_payload_roundMode_string = "RMM";
       default : shortPip_rfOutput_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(shortPip_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : shortPip_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : shortPip_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : shortPip_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : shortPip_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : shortPip_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : shortPip_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : shortPip_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : shortPip_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : shortPip_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : shortPip_output_payload_roundMode_string = "RMM";
       default : shortPip_output_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
-    case(decode_mul_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : decode_mul_input_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_mul_input_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_mul_input_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_mul_input_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_mul_input_payload_roundMode_string = "RMM";
-      default : decode_mul_input_payload_roundMode_string = "???";
+    case(mul_preMul_input_payload_roundMode)
+      FpuRoundMode_RNE : mul_preMul_input_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : mul_preMul_input_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : mul_preMul_input_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : mul_preMul_input_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : mul_preMul_input_payload_roundMode_string = "RMM";
+      default : mul_preMul_input_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(decode_mul_rData_roundMode)
-      `FpuRoundMode_opt_RNE : decode_mul_rData_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_mul_rData_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_mul_rData_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_mul_rData_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_mul_rData_roundMode_string = "RMM";
+      FpuRoundMode_RNE : decode_mul_rData_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : decode_mul_rData_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : decode_mul_rData_roundMode_string = "RDN";
+      FpuRoundMode_RUP : decode_mul_rData_roundMode_string = "RUP";
+      FpuRoundMode_RMM : decode_mul_rData_roundMode_string = "RMM";
       default : decode_mul_rData_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(mul_preMul_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : mul_preMul_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : mul_preMul_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : mul_preMul_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : mul_preMul_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : mul_preMul_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : mul_preMul_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : mul_preMul_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : mul_preMul_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : mul_preMul_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : mul_preMul_output_payload_roundMode_string = "RMM";
       default : mul_preMul_output_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
-    case(mul_preMul_output_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : mul_preMul_output_input_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : mul_preMul_output_input_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : mul_preMul_output_input_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : mul_preMul_output_input_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : mul_preMul_output_input_payload_roundMode_string = "RMM";
-      default : mul_preMul_output_input_payload_roundMode_string = "???";
+    case(mul_mul_input_payload_roundMode)
+      FpuRoundMode_RNE : mul_mul_input_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : mul_mul_input_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : mul_mul_input_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : mul_mul_input_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : mul_mul_input_payload_roundMode_string = "RMM";
+      default : mul_mul_input_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(mul_preMul_output_rData_roundMode)
-      `FpuRoundMode_opt_RNE : mul_preMul_output_rData_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : mul_preMul_output_rData_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : mul_preMul_output_rData_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : mul_preMul_output_rData_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : mul_preMul_output_rData_roundMode_string = "RMM";
+      FpuRoundMode_RNE : mul_preMul_output_rData_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : mul_preMul_output_rData_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : mul_preMul_output_rData_roundMode_string = "RDN";
+      FpuRoundMode_RUP : mul_preMul_output_rData_roundMode_string = "RUP";
+      FpuRoundMode_RMM : mul_preMul_output_rData_roundMode_string = "RMM";
       default : mul_preMul_output_rData_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(mul_mul_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : mul_mul_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : mul_mul_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : mul_mul_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : mul_mul_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : mul_mul_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : mul_mul_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : mul_mul_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : mul_mul_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : mul_mul_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : mul_mul_output_payload_roundMode_string = "RMM";
       default : mul_mul_output_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
-    case(mul_mul_output_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : mul_mul_output_input_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : mul_mul_output_input_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : mul_mul_output_input_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : mul_mul_output_input_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : mul_mul_output_input_payload_roundMode_string = "RMM";
-      default : mul_mul_output_input_payload_roundMode_string = "???";
+    case(mul_sum1_input_payload_roundMode)
+      FpuRoundMode_RNE : mul_sum1_input_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : mul_sum1_input_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : mul_sum1_input_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : mul_sum1_input_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : mul_sum1_input_payload_roundMode_string = "RMM";
+      default : mul_sum1_input_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(mul_mul_output_rData_roundMode)
-      `FpuRoundMode_opt_RNE : mul_mul_output_rData_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : mul_mul_output_rData_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : mul_mul_output_rData_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : mul_mul_output_rData_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : mul_mul_output_rData_roundMode_string = "RMM";
+      FpuRoundMode_RNE : mul_mul_output_rData_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : mul_mul_output_rData_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : mul_mul_output_rData_roundMode_string = "RDN";
+      FpuRoundMode_RUP : mul_mul_output_rData_roundMode_string = "RUP";
+      FpuRoundMode_RMM : mul_mul_output_rData_roundMode_string = "RMM";
       default : mul_mul_output_rData_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(mul_sum1_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : mul_sum1_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : mul_sum1_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : mul_sum1_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : mul_sum1_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : mul_sum1_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : mul_sum1_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : mul_sum1_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : mul_sum1_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : mul_sum1_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : mul_sum1_output_payload_roundMode_string = "RMM";
       default : mul_sum1_output_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
-    case(mul_sum1_output_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : mul_sum1_output_input_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : mul_sum1_output_input_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : mul_sum1_output_input_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : mul_sum1_output_input_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : mul_sum1_output_input_payload_roundMode_string = "RMM";
-      default : mul_sum1_output_input_payload_roundMode_string = "???";
+    case(mul_sum2_input_payload_roundMode)
+      FpuRoundMode_RNE : mul_sum2_input_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : mul_sum2_input_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : mul_sum2_input_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : mul_sum2_input_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : mul_sum2_input_payload_roundMode_string = "RMM";
+      default : mul_sum2_input_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(mul_sum1_output_rData_roundMode)
-      `FpuRoundMode_opt_RNE : mul_sum1_output_rData_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : mul_sum1_output_rData_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : mul_sum1_output_rData_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : mul_sum1_output_rData_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : mul_sum1_output_rData_roundMode_string = "RMM";
+      FpuRoundMode_RNE : mul_sum1_output_rData_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : mul_sum1_output_rData_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : mul_sum1_output_rData_roundMode_string = "RDN";
+      FpuRoundMode_RUP : mul_sum1_output_rData_roundMode_string = "RUP";
+      FpuRoundMode_RMM : mul_sum1_output_rData_roundMode_string = "RMM";
       default : mul_sum1_output_rData_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(mul_sum2_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : mul_sum2_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : mul_sum2_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : mul_sum2_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : mul_sum2_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : mul_sum2_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : mul_sum2_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : mul_sum2_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : mul_sum2_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : mul_sum2_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : mul_sum2_output_payload_roundMode_string = "RMM";
       default : mul_sum2_output_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
-    case(mul_sum2_output_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : mul_sum2_output_input_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : mul_sum2_output_input_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : mul_sum2_output_input_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : mul_sum2_output_input_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : mul_sum2_output_input_payload_roundMode_string = "RMM";
-      default : mul_sum2_output_input_payload_roundMode_string = "???";
+    case(mul_norm_input_payload_roundMode)
+      FpuRoundMode_RNE : mul_norm_input_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : mul_norm_input_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : mul_norm_input_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : mul_norm_input_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : mul_norm_input_payload_roundMode_string = "RMM";
+      default : mul_norm_input_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(mul_sum2_output_rData_roundMode)
-      `FpuRoundMode_opt_RNE : mul_sum2_output_rData_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : mul_sum2_output_rData_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : mul_sum2_output_rData_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : mul_sum2_output_rData_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : mul_sum2_output_rData_roundMode_string = "RMM";
+      FpuRoundMode_RNE : mul_sum2_output_rData_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : mul_sum2_output_rData_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : mul_sum2_output_rData_roundMode_string = "RDN";
+      FpuRoundMode_RUP : mul_sum2_output_rData_roundMode_string = "RUP";
+      FpuRoundMode_RMM : mul_sum2_output_rData_roundMode_string = "RMM";
       default : mul_sum2_output_rData_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(mul_result_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : mul_result_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : mul_result_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : mul_result_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : mul_result_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : mul_result_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : mul_result_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : mul_result_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : mul_result_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : mul_result_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : mul_result_output_payload_roundMode_string = "RMM";
       default : mul_result_output_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(mul_result_mulToAdd_payload_roundMode)
-      `FpuRoundMode_opt_RNE : mul_result_mulToAdd_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : mul_result_mulToAdd_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : mul_result_mulToAdd_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : mul_result_mulToAdd_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : mul_result_mulToAdd_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : mul_result_mulToAdd_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : mul_result_mulToAdd_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : mul_result_mulToAdd_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : mul_result_mulToAdd_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : mul_result_mulToAdd_payload_roundMode_string = "RMM";
       default : mul_result_mulToAdd_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(mul_result_mulToAdd_m2sPipe_payload_roundMode)
-      `FpuRoundMode_opt_RNE : mul_result_mulToAdd_m2sPipe_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : mul_result_mulToAdd_m2sPipe_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : mul_result_mulToAdd_m2sPipe_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : mul_result_mulToAdd_m2sPipe_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : mul_result_mulToAdd_m2sPipe_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : mul_result_mulToAdd_m2sPipe_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : mul_result_mulToAdd_m2sPipe_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : mul_result_mulToAdd_m2sPipe_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : mul_result_mulToAdd_m2sPipe_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : mul_result_mulToAdd_m2sPipe_payload_roundMode_string = "RMM";
       default : mul_result_mulToAdd_m2sPipe_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(mul_result_mulToAdd_rData_roundMode)
-      `FpuRoundMode_opt_RNE : mul_result_mulToAdd_rData_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : mul_result_mulToAdd_rData_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : mul_result_mulToAdd_rData_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : mul_result_mulToAdd_rData_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : mul_result_mulToAdd_rData_roundMode_string = "RMM";
+      FpuRoundMode_RNE : mul_result_mulToAdd_rData_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : mul_result_mulToAdd_rData_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : mul_result_mulToAdd_rData_roundMode_string = "RDN";
+      FpuRoundMode_RUP : mul_result_mulToAdd_rData_roundMode_string = "RUP";
+      FpuRoundMode_RMM : mul_result_mulToAdd_rData_roundMode_string = "RMM";
       default : mul_result_mulToAdd_rData_roundMode_string = "???";
     endcase
   end
   always @(*) begin
-    case(decode_div_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : decode_div_input_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_div_input_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_div_input_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_div_input_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_div_input_payload_roundMode_string = "RMM";
-      default : decode_div_input_payload_roundMode_string = "???";
+    case(div_input_payload_roundMode)
+      FpuRoundMode_RNE : div_input_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : div_input_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : div_input_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : div_input_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : div_input_payload_roundMode_string = "RMM";
+      default : div_input_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(decode_div_rData_roundMode)
-      `FpuRoundMode_opt_RNE : decode_div_rData_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_div_rData_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_div_rData_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_div_rData_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_div_rData_roundMode_string = "RMM";
+      FpuRoundMode_RNE : decode_div_rData_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : decode_div_rData_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : decode_div_rData_roundMode_string = "RDN";
+      FpuRoundMode_RUP : decode_div_rData_roundMode_string = "RUP";
+      FpuRoundMode_RMM : decode_div_rData_roundMode_string = "RMM";
       default : decode_div_rData_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(div_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : div_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : div_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : div_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : div_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : div_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : div_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : div_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : div_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : div_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : div_output_payload_roundMode_string = "RMM";
       default : div_output_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
-    case(decode_sqrt_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : decode_sqrt_input_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_sqrt_input_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_sqrt_input_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_sqrt_input_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_sqrt_input_payload_roundMode_string = "RMM";
-      default : decode_sqrt_input_payload_roundMode_string = "???";
+    case(sqrt_input_payload_roundMode)
+      FpuRoundMode_RNE : sqrt_input_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : sqrt_input_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : sqrt_input_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : sqrt_input_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : sqrt_input_payload_roundMode_string = "RMM";
+      default : sqrt_input_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(decode_sqrt_rData_roundMode)
-      `FpuRoundMode_opt_RNE : decode_sqrt_rData_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : decode_sqrt_rData_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : decode_sqrt_rData_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : decode_sqrt_rData_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : decode_sqrt_rData_roundMode_string = "RMM";
+      FpuRoundMode_RNE : decode_sqrt_rData_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : decode_sqrt_rData_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : decode_sqrt_rData_roundMode_string = "RDN";
+      FpuRoundMode_RUP : decode_sqrt_rData_roundMode_string = "RUP";
+      FpuRoundMode_RMM : decode_sqrt_rData_roundMode_string = "RMM";
       default : decode_sqrt_rData_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(sqrt_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : sqrt_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : sqrt_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : sqrt_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : sqrt_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : sqrt_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : sqrt_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : sqrt_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : sqrt_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : sqrt_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : sqrt_output_payload_roundMode_string = "RMM";
       default : sqrt_output_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(add_preShifter_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : add_preShifter_input_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : add_preShifter_input_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : add_preShifter_input_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : add_preShifter_input_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : add_preShifter_input_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : add_preShifter_input_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : add_preShifter_input_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : add_preShifter_input_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : add_preShifter_input_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : add_preShifter_input_payload_roundMode_string = "RMM";
       default : add_preShifter_input_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(add_preShifter_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : add_preShifter_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : add_preShifter_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : add_preShifter_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : add_preShifter_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : add_preShifter_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : add_preShifter_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : add_preShifter_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : add_preShifter_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : add_preShifter_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : add_preShifter_output_payload_roundMode_string = "RMM";
       default : add_preShifter_output_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
-    case(add_preShifter_output_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : add_preShifter_output_input_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : add_preShifter_output_input_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : add_preShifter_output_input_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : add_preShifter_output_input_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : add_preShifter_output_input_payload_roundMode_string = "RMM";
-      default : add_preShifter_output_input_payload_roundMode_string = "???";
+    case(add_shifter_input_payload_roundMode)
+      FpuRoundMode_RNE : add_shifter_input_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : add_shifter_input_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : add_shifter_input_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : add_shifter_input_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : add_shifter_input_payload_roundMode_string = "RMM";
+      default : add_shifter_input_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(add_preShifter_output_rData_roundMode)
-      `FpuRoundMode_opt_RNE : add_preShifter_output_rData_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : add_preShifter_output_rData_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : add_preShifter_output_rData_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : add_preShifter_output_rData_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : add_preShifter_output_rData_roundMode_string = "RMM";
+      FpuRoundMode_RNE : add_preShifter_output_rData_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : add_preShifter_output_rData_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : add_preShifter_output_rData_roundMode_string = "RDN";
+      FpuRoundMode_RUP : add_preShifter_output_rData_roundMode_string = "RUP";
+      FpuRoundMode_RMM : add_preShifter_output_rData_roundMode_string = "RMM";
       default : add_preShifter_output_rData_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(add_shifter_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : add_shifter_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : add_shifter_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : add_shifter_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : add_shifter_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : add_shifter_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : add_shifter_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : add_shifter_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : add_shifter_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : add_shifter_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : add_shifter_output_payload_roundMode_string = "RMM";
       default : add_shifter_output_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
-    case(add_shifter_output_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : add_shifter_output_input_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : add_shifter_output_input_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : add_shifter_output_input_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : add_shifter_output_input_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : add_shifter_output_input_payload_roundMode_string = "RMM";
-      default : add_shifter_output_input_payload_roundMode_string = "???";
+    case(add_math_input_payload_roundMode)
+      FpuRoundMode_RNE : add_math_input_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : add_math_input_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : add_math_input_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : add_math_input_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : add_math_input_payload_roundMode_string = "RMM";
+      default : add_math_input_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(add_shifter_output_rData_roundMode)
-      `FpuRoundMode_opt_RNE : add_shifter_output_rData_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : add_shifter_output_rData_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : add_shifter_output_rData_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : add_shifter_output_rData_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : add_shifter_output_rData_roundMode_string = "RMM";
+      FpuRoundMode_RNE : add_shifter_output_rData_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : add_shifter_output_rData_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : add_shifter_output_rData_roundMode_string = "RDN";
+      FpuRoundMode_RUP : add_shifter_output_rData_roundMode_string = "RUP";
+      FpuRoundMode_RMM : add_shifter_output_rData_roundMode_string = "RMM";
       default : add_shifter_output_rData_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(add_math_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : add_math_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : add_math_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : add_math_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : add_math_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : add_math_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : add_math_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : add_math_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : add_math_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : add_math_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : add_math_output_payload_roundMode_string = "RMM";
       default : add_math_output_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
-    case(add_math_output_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : add_math_output_input_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : add_math_output_input_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : add_math_output_input_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : add_math_output_input_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : add_math_output_input_payload_roundMode_string = "RMM";
-      default : add_math_output_input_payload_roundMode_string = "???";
+    case(add_oh_input_payload_roundMode)
+      FpuRoundMode_RNE : add_oh_input_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : add_oh_input_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : add_oh_input_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : add_oh_input_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : add_oh_input_payload_roundMode_string = "RMM";
+      default : add_oh_input_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(add_math_output_rData_roundMode)
-      `FpuRoundMode_opt_RNE : add_math_output_rData_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : add_math_output_rData_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : add_math_output_rData_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : add_math_output_rData_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : add_math_output_rData_roundMode_string = "RMM";
+      FpuRoundMode_RNE : add_math_output_rData_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : add_math_output_rData_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : add_math_output_rData_roundMode_string = "RDN";
+      FpuRoundMode_RUP : add_math_output_rData_roundMode_string = "RUP";
+      FpuRoundMode_RMM : add_math_output_rData_roundMode_string = "RMM";
       default : add_math_output_rData_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(add_oh_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : add_oh_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : add_oh_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : add_oh_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : add_oh_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : add_oh_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : add_oh_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : add_oh_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : add_oh_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : add_oh_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : add_oh_output_payload_roundMode_string = "RMM";
       default : add_oh_output_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
-    case(add_oh_output_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : add_oh_output_input_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : add_oh_output_input_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : add_oh_output_input_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : add_oh_output_input_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : add_oh_output_input_payload_roundMode_string = "RMM";
-      default : add_oh_output_input_payload_roundMode_string = "???";
+    case(add_norm_input_payload_roundMode)
+      FpuRoundMode_RNE : add_norm_input_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : add_norm_input_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : add_norm_input_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : add_norm_input_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : add_norm_input_payload_roundMode_string = "RMM";
+      default : add_norm_input_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(add_oh_output_rData_roundMode)
-      `FpuRoundMode_opt_RNE : add_oh_output_rData_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : add_oh_output_rData_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : add_oh_output_rData_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : add_oh_output_rData_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : add_oh_output_rData_roundMode_string = "RMM";
+      FpuRoundMode_RNE : add_oh_output_rData_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : add_oh_output_rData_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : add_oh_output_rData_roundMode_string = "RDN";
+      FpuRoundMode_RUP : add_oh_output_rData_roundMode_string = "RUP";
+      FpuRoundMode_RMM : add_oh_output_rData_roundMode_string = "RMM";
       default : add_oh_output_rData_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(add_norm_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : add_norm_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : add_norm_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : add_norm_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : add_norm_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : add_norm_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : add_norm_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : add_norm_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : add_norm_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : add_norm_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : add_norm_output_payload_roundMode_string = "RMM";
       default : add_norm_output_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(add_result_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : add_result_input_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : add_result_input_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : add_result_input_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : add_result_input_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : add_result_input_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : add_result_input_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : add_result_input_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : add_result_input_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : add_result_input_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : add_result_input_payload_roundMode_string = "RMM";
       default : add_result_input_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(add_result_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : add_result_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : add_result_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : add_result_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : add_result_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : add_result_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : add_result_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : add_result_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : add_result_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : add_result_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : add_result_output_payload_roundMode_string = "RMM";
       default : add_result_output_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(load_s1_output_m2sPipe_payload_roundMode)
-      `FpuRoundMode_opt_RNE : load_s1_output_m2sPipe_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : load_s1_output_m2sPipe_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : load_s1_output_m2sPipe_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : load_s1_output_m2sPipe_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : load_s1_output_m2sPipe_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : load_s1_output_m2sPipe_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : load_s1_output_m2sPipe_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : load_s1_output_m2sPipe_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : load_s1_output_m2sPipe_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : load_s1_output_m2sPipe_payload_roundMode_string = "RMM";
       default : load_s1_output_m2sPipe_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(load_s1_output_rData_roundMode)
-      `FpuRoundMode_opt_RNE : load_s1_output_rData_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : load_s1_output_rData_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : load_s1_output_rData_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : load_s1_output_rData_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : load_s1_output_rData_roundMode_string = "RMM";
+      FpuRoundMode_RNE : load_s1_output_rData_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : load_s1_output_rData_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : load_s1_output_rData_roundMode_string = "RDN";
+      FpuRoundMode_RUP : load_s1_output_rData_roundMode_string = "RUP";
+      FpuRoundMode_RMM : load_s1_output_rData_roundMode_string = "RMM";
       default : load_s1_output_rData_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(shortPip_output_m2sPipe_payload_roundMode)
-      `FpuRoundMode_opt_RNE : shortPip_output_m2sPipe_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : shortPip_output_m2sPipe_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : shortPip_output_m2sPipe_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : shortPip_output_m2sPipe_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : shortPip_output_m2sPipe_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : shortPip_output_m2sPipe_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : shortPip_output_m2sPipe_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : shortPip_output_m2sPipe_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : shortPip_output_m2sPipe_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : shortPip_output_m2sPipe_payload_roundMode_string = "RMM";
       default : shortPip_output_m2sPipe_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(shortPip_output_rData_roundMode)
-      `FpuRoundMode_opt_RNE : shortPip_output_rData_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : shortPip_output_rData_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : shortPip_output_rData_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : shortPip_output_rData_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : shortPip_output_rData_roundMode_string = "RMM";
+      FpuRoundMode_RNE : shortPip_output_rData_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : shortPip_output_rData_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : shortPip_output_rData_roundMode_string = "RDN";
+      FpuRoundMode_RUP : shortPip_output_rData_roundMode_string = "RUP";
+      FpuRoundMode_RMM : shortPip_output_rData_roundMode_string = "RMM";
       default : shortPip_output_rData_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(merge_arbitrated_payload_roundMode)
-      `FpuRoundMode_opt_RNE : merge_arbitrated_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : merge_arbitrated_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : merge_arbitrated_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : merge_arbitrated_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : merge_arbitrated_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : merge_arbitrated_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : merge_arbitrated_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : merge_arbitrated_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : merge_arbitrated_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : merge_arbitrated_payload_roundMode_string = "RMM";
       default : merge_arbitrated_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(roundFront_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : roundFront_input_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : roundFront_input_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : roundFront_input_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : roundFront_input_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : roundFront_input_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : roundFront_input_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : roundFront_input_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : roundFront_input_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : roundFront_input_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : roundFront_input_payload_roundMode_string = "RMM";
       default : roundFront_input_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(roundFront_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : roundFront_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : roundFront_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : roundFront_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : roundFront_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : roundFront_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : roundFront_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : roundFront_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : roundFront_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : roundFront_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : roundFront_output_payload_roundMode_string = "RMM";
       default : roundFront_output_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(roundBack_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : roundBack_input_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : roundBack_input_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : roundBack_input_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : roundBack_input_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : roundBack_input_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : roundBack_input_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : roundBack_input_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : roundBack_input_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : roundBack_input_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : roundBack_input_payload_roundMode_string = "RMM";
       default : roundBack_input_payload_roundMode_string = "???";
     endcase
   end
@@ -11252,7 +11269,7 @@ module FpuCore (
   always @(*) begin
     rf_scoreboards_0_targetWrite_payload_address = rf_init_counter[4:0];
     if(when_FpuCore_l261) begin
-      rf_scoreboards_0_targetWrite_payload_address = io_port_0_cmd_input_payload_rd;
+      rf_scoreboards_0_targetWrite_payload_address = scheduler_0_input_payload_rd;
     end
   end
 
@@ -11305,8 +11322,8 @@ module FpuCore (
   assign commitFork_commit_0_payload_rd = streamFork_1_io_outputs_1_s2mPipe_payload_rd;
   assign commitFork_commit_0_payload_write = streamFork_1_io_outputs_1_s2mPipe_payload_write;
   assign commitFork_commit_0_payload_value = streamFork_1_io_outputs_1_s2mPipe_payload_value;
-  assign commitLogic_0_pending_full = (commitLogic_0_pending_counter == 4'b1111);
-  assign commitLogic_0_pending_notEmpty = (commitLogic_0_pending_counter != 4'b0000);
+  assign commitLogic_0_pending_full = (&commitLogic_0_pending_counter);
+  assign commitLogic_0_pending_notEmpty = (|commitLogic_0_pending_counter);
   always @(*) begin
     commitLogic_0_pending_inc = 1'b0;
     if(when_FpuCore_l265) begin
@@ -11321,8 +11338,8 @@ module FpuCore (
     end
   end
 
-  assign commitLogic_0_add_full = (commitLogic_0_add_counter == 4'b1111);
-  assign commitLogic_0_add_notEmpty = (commitLogic_0_add_counter != 4'b0000);
+  assign commitLogic_0_add_full = (&commitLogic_0_add_counter);
+  assign commitLogic_0_add_notEmpty = (|commitLogic_0_add_counter);
   always @(*) begin
     commitLogic_0_add_inc = 1'b0;
     if(commitLogic_0_input_valid) begin
@@ -11339,8 +11356,8 @@ module FpuCore (
     end
   end
 
-  assign commitLogic_0_mul_full = (commitLogic_0_mul_counter == 4'b1111);
-  assign commitLogic_0_mul_notEmpty = (commitLogic_0_mul_counter != 4'b0000);
+  assign commitLogic_0_mul_full = (&commitLogic_0_mul_counter);
+  assign commitLogic_0_mul_notEmpty = (|commitLogic_0_mul_counter);
   always @(*) begin
     commitLogic_0_mul_inc = 1'b0;
     if(commitLogic_0_input_valid) begin
@@ -11357,8 +11374,8 @@ module FpuCore (
     end
   end
 
-  assign commitLogic_0_div_full = (commitLogic_0_div_counter == 4'b1111);
-  assign commitLogic_0_div_notEmpty = (commitLogic_0_div_counter != 4'b0000);
+  assign commitLogic_0_div_full = (&commitLogic_0_div_counter);
+  assign commitLogic_0_div_notEmpty = (|commitLogic_0_div_counter);
   always @(*) begin
     commitLogic_0_div_inc = 1'b0;
     if(commitLogic_0_input_valid) begin
@@ -11375,8 +11392,8 @@ module FpuCore (
     end
   end
 
-  assign commitLogic_0_sqrt_full = (commitLogic_0_sqrt_counter == 4'b1111);
-  assign commitLogic_0_sqrt_notEmpty = (commitLogic_0_sqrt_counter != 4'b0000);
+  assign commitLogic_0_sqrt_full = (&commitLogic_0_sqrt_counter);
+  assign commitLogic_0_sqrt_notEmpty = (|commitLogic_0_sqrt_counter);
   always @(*) begin
     commitLogic_0_sqrt_inc = 1'b0;
     if(commitLogic_0_input_valid) begin
@@ -11393,8 +11410,8 @@ module FpuCore (
     end
   end
 
-  assign commitLogic_0_short_full = (commitLogic_0_short_counter == 4'b1111);
-  assign commitLogic_0_short_notEmpty = (commitLogic_0_short_counter != 4'b0000);
+  assign commitLogic_0_short_full = (&commitLogic_0_short_counter);
+  assign commitLogic_0_short_notEmpty = (|commitLogic_0_short_counter);
   always @(*) begin
     commitLogic_0_short_inc = 1'b0;
     if(commitLogic_0_input_valid) begin
@@ -11419,66 +11436,66 @@ module FpuCore (
   assign commitLogic_0_input_payload_rd = commitFork_commit_0_payload_rd;
   assign commitLogic_0_input_payload_write = commitFork_commit_0_payload_write;
   assign commitLogic_0_input_payload_value = commitFork_commit_0_payload_value;
-  assign when_FpuCore_l208 = ((commitLogic_0_input_payload_opcode == `FpuOpcode_binary_sequential_ADD) != 1'b0);
-  assign when_FpuCore_l209 = ({(commitLogic_0_input_payload_opcode == `FpuOpcode_binary_sequential_FMA),(commitLogic_0_input_payload_opcode == `FpuOpcode_binary_sequential_MUL)} != 2'b00);
-  assign when_FpuCore_l210 = ((commitLogic_0_input_payload_opcode == `FpuOpcode_binary_sequential_DIV) != 1'b0);
-  assign when_FpuCore_l211 = ((commitLogic_0_input_payload_opcode == `FpuOpcode_binary_sequential_SQRT) != 1'b0);
-  assign when_FpuCore_l212 = ({(commitLogic_0_input_payload_opcode == `FpuOpcode_binary_sequential_FCVT_X_X),{(commitLogic_0_input_payload_opcode == `FpuOpcode_binary_sequential_MIN_MAX),(commitLogic_0_input_payload_opcode == `FpuOpcode_binary_sequential_SGNJ)}} != 3'b000);
+  assign when_FpuCore_l208 = ((commitLogic_0_input_payload_opcode == FpuOpcode_ADD) != 1'b0);
+  assign when_FpuCore_l209 = ({(commitLogic_0_input_payload_opcode == FpuOpcode_FMA),(commitLogic_0_input_payload_opcode == FpuOpcode_MUL)} != 2'b00);
+  assign when_FpuCore_l210 = ((commitLogic_0_input_payload_opcode == FpuOpcode_DIV) != 1'b0);
+  assign when_FpuCore_l211 = ((commitLogic_0_input_payload_opcode == FpuOpcode_SQRT) != 1'b0);
+  assign when_FpuCore_l212 = ({(commitLogic_0_input_payload_opcode == FpuOpcode_FCVT_X_X),{(commitLogic_0_input_payload_opcode == FpuOpcode_MIN_MAX),(commitLogic_0_input_payload_opcode == FpuOpcode_SGNJ)}} != 3'b000);
   assign io_port_0_cmd_ready = (! io_port_0_cmd_rValid);
-  assign io_port_0_cmd_input_valid = (io_port_0_cmd_valid || io_port_0_cmd_rValid);
-  assign _zz_io_port_0_cmd_input_payload_opcode = (io_port_0_cmd_rValid ? io_port_0_cmd_rData_opcode : io_port_0_cmd_payload_opcode);
-  assign _zz_io_port_0_cmd_input_payload_format = (io_port_0_cmd_rValid ? io_port_0_cmd_rData_format : io_port_0_cmd_payload_format);
-  assign _zz_io_port_0_cmd_input_payload_roundMode = (io_port_0_cmd_rValid ? io_port_0_cmd_rData_roundMode : io_port_0_cmd_payload_roundMode);
-  assign io_port_0_cmd_input_payload_opcode = _zz_io_port_0_cmd_input_payload_opcode;
-  assign io_port_0_cmd_input_payload_arg = (io_port_0_cmd_rValid ? io_port_0_cmd_rData_arg : io_port_0_cmd_payload_arg);
-  assign io_port_0_cmd_input_payload_rs1 = (io_port_0_cmd_rValid ? io_port_0_cmd_rData_rs1 : io_port_0_cmd_payload_rs1);
-  assign io_port_0_cmd_input_payload_rs2 = (io_port_0_cmd_rValid ? io_port_0_cmd_rData_rs2 : io_port_0_cmd_payload_rs2);
-  assign io_port_0_cmd_input_payload_rs3 = (io_port_0_cmd_rValid ? io_port_0_cmd_rData_rs3 : io_port_0_cmd_payload_rs3);
-  assign io_port_0_cmd_input_payload_rd = (io_port_0_cmd_rValid ? io_port_0_cmd_rData_rd : io_port_0_cmd_payload_rd);
-  assign io_port_0_cmd_input_payload_format = _zz_io_port_0_cmd_input_payload_format;
-  assign io_port_0_cmd_input_payload_roundMode = _zz_io_port_0_cmd_input_payload_roundMode;
+  assign scheduler_0_input_valid = (io_port_0_cmd_valid || io_port_0_cmd_rValid);
+  assign _zz_scheduler_0_input_payload_opcode = (io_port_0_cmd_rValid ? io_port_0_cmd_rData_opcode : io_port_0_cmd_payload_opcode);
+  assign _zz_scheduler_0_input_payload_format = (io_port_0_cmd_rValid ? io_port_0_cmd_rData_format : io_port_0_cmd_payload_format);
+  assign _zz_scheduler_0_input_payload_roundMode = (io_port_0_cmd_rValid ? io_port_0_cmd_rData_roundMode : io_port_0_cmd_payload_roundMode);
+  assign scheduler_0_input_payload_opcode = _zz_scheduler_0_input_payload_opcode;
+  assign scheduler_0_input_payload_arg = (io_port_0_cmd_rValid ? io_port_0_cmd_rData_arg : io_port_0_cmd_payload_arg);
+  assign scheduler_0_input_payload_rs1 = (io_port_0_cmd_rValid ? io_port_0_cmd_rData_rs1 : io_port_0_cmd_payload_rs1);
+  assign scheduler_0_input_payload_rs2 = (io_port_0_cmd_rValid ? io_port_0_cmd_rData_rs2 : io_port_0_cmd_payload_rs2);
+  assign scheduler_0_input_payload_rs3 = (io_port_0_cmd_rValid ? io_port_0_cmd_rData_rs3 : io_port_0_cmd_payload_rs3);
+  assign scheduler_0_input_payload_rd = (io_port_0_cmd_rValid ? io_port_0_cmd_rData_rd : io_port_0_cmd_payload_rd);
+  assign scheduler_0_input_payload_format = _zz_scheduler_0_input_payload_format;
+  assign scheduler_0_input_payload_roundMode = _zz_scheduler_0_input_payload_roundMode;
   always @(*) begin
     scheduler_0_useRs1 = 1'b0;
-    case(io_port_0_cmd_input_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : begin
+    case(scheduler_0_input_payload_opcode)
+      FpuOpcode_LOAD : begin
       end
-      `FpuOpcode_binary_sequential_STORE : begin
+      FpuOpcode_STORE : begin
       end
-      `FpuOpcode_binary_sequential_ADD : begin
+      FpuOpcode_ADD : begin
         scheduler_0_useRs1 = 1'b1;
       end
-      `FpuOpcode_binary_sequential_MUL : begin
+      FpuOpcode_MUL : begin
         scheduler_0_useRs1 = 1'b1;
       end
-      `FpuOpcode_binary_sequential_DIV : begin
+      FpuOpcode_DIV : begin
         scheduler_0_useRs1 = 1'b1;
       end
-      `FpuOpcode_binary_sequential_SQRT : begin
+      FpuOpcode_SQRT : begin
         scheduler_0_useRs1 = 1'b1;
       end
-      `FpuOpcode_binary_sequential_FMA : begin
+      FpuOpcode_FMA : begin
         scheduler_0_useRs1 = 1'b1;
       end
-      `FpuOpcode_binary_sequential_I2F : begin
+      FpuOpcode_I2F : begin
       end
-      `FpuOpcode_binary_sequential_F2I : begin
+      FpuOpcode_F2I : begin
         scheduler_0_useRs1 = 1'b1;
       end
-      `FpuOpcode_binary_sequential_MIN_MAX : begin
+      FpuOpcode_MIN_MAX : begin
         scheduler_0_useRs1 = 1'b1;
       end
-      `FpuOpcode_binary_sequential_CMP : begin
+      FpuOpcode_CMP : begin
         scheduler_0_useRs1 = 1'b1;
       end
-      `FpuOpcode_binary_sequential_SGNJ : begin
+      FpuOpcode_SGNJ : begin
         scheduler_0_useRs1 = 1'b1;
       end
-      `FpuOpcode_binary_sequential_FMV_X_W : begin
+      FpuOpcode_FMV_X_W : begin
         scheduler_0_useRs1 = 1'b1;
       end
-      `FpuOpcode_binary_sequential_FMV_W_X : begin
+      FpuOpcode_FMV_W_X : begin
       end
-      `FpuOpcode_binary_sequential_FCLASS : begin
+      FpuOpcode_FCLASS : begin
         scheduler_0_useRs1 = 1'b1;
       end
       default : begin
@@ -11489,44 +11506,44 @@ module FpuCore (
 
   always @(*) begin
     scheduler_0_useRs2 = 1'b0;
-    case(io_port_0_cmd_input_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : begin
+    case(scheduler_0_input_payload_opcode)
+      FpuOpcode_LOAD : begin
       end
-      `FpuOpcode_binary_sequential_STORE : begin
+      FpuOpcode_STORE : begin
         scheduler_0_useRs2 = 1'b1;
       end
-      `FpuOpcode_binary_sequential_ADD : begin
+      FpuOpcode_ADD : begin
         scheduler_0_useRs2 = 1'b1;
       end
-      `FpuOpcode_binary_sequential_MUL : begin
+      FpuOpcode_MUL : begin
         scheduler_0_useRs2 = 1'b1;
       end
-      `FpuOpcode_binary_sequential_DIV : begin
+      FpuOpcode_DIV : begin
         scheduler_0_useRs2 = 1'b1;
       end
-      `FpuOpcode_binary_sequential_SQRT : begin
+      FpuOpcode_SQRT : begin
       end
-      `FpuOpcode_binary_sequential_FMA : begin
+      FpuOpcode_FMA : begin
         scheduler_0_useRs2 = 1'b1;
       end
-      `FpuOpcode_binary_sequential_I2F : begin
+      FpuOpcode_I2F : begin
       end
-      `FpuOpcode_binary_sequential_F2I : begin
+      FpuOpcode_F2I : begin
       end
-      `FpuOpcode_binary_sequential_MIN_MAX : begin
+      FpuOpcode_MIN_MAX : begin
         scheduler_0_useRs2 = 1'b1;
       end
-      `FpuOpcode_binary_sequential_CMP : begin
+      FpuOpcode_CMP : begin
         scheduler_0_useRs2 = 1'b1;
       end
-      `FpuOpcode_binary_sequential_SGNJ : begin
+      FpuOpcode_SGNJ : begin
         scheduler_0_useRs2 = 1'b1;
       end
-      `FpuOpcode_binary_sequential_FMV_X_W : begin
+      FpuOpcode_FMV_X_W : begin
       end
-      `FpuOpcode_binary_sequential_FMV_W_X : begin
+      FpuOpcode_FMV_W_X : begin
       end
-      `FpuOpcode_binary_sequential_FCLASS : begin
+      FpuOpcode_FCLASS : begin
       end
       default : begin
       end
@@ -11535,37 +11552,37 @@ module FpuCore (
 
   always @(*) begin
     scheduler_0_useRs3 = 1'b0;
-    case(io_port_0_cmd_input_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : begin
+    case(scheduler_0_input_payload_opcode)
+      FpuOpcode_LOAD : begin
       end
-      `FpuOpcode_binary_sequential_STORE : begin
+      FpuOpcode_STORE : begin
       end
-      `FpuOpcode_binary_sequential_ADD : begin
+      FpuOpcode_ADD : begin
       end
-      `FpuOpcode_binary_sequential_MUL : begin
+      FpuOpcode_MUL : begin
       end
-      `FpuOpcode_binary_sequential_DIV : begin
+      FpuOpcode_DIV : begin
       end
-      `FpuOpcode_binary_sequential_SQRT : begin
+      FpuOpcode_SQRT : begin
       end
-      `FpuOpcode_binary_sequential_FMA : begin
+      FpuOpcode_FMA : begin
         scheduler_0_useRs3 = 1'b1;
       end
-      `FpuOpcode_binary_sequential_I2F : begin
+      FpuOpcode_I2F : begin
       end
-      `FpuOpcode_binary_sequential_F2I : begin
+      FpuOpcode_F2I : begin
       end
-      `FpuOpcode_binary_sequential_MIN_MAX : begin
+      FpuOpcode_MIN_MAX : begin
       end
-      `FpuOpcode_binary_sequential_CMP : begin
+      FpuOpcode_CMP : begin
       end
-      `FpuOpcode_binary_sequential_SGNJ : begin
+      FpuOpcode_SGNJ : begin
       end
-      `FpuOpcode_binary_sequential_FMV_X_W : begin
+      FpuOpcode_FMV_X_W : begin
       end
-      `FpuOpcode_binary_sequential_FMV_W_X : begin
+      FpuOpcode_FMV_W_X : begin
       end
-      `FpuOpcode_binary_sequential_FCLASS : begin
+      FpuOpcode_FCLASS : begin
       end
       default : begin
       end
@@ -11574,46 +11591,46 @@ module FpuCore (
 
   always @(*) begin
     scheduler_0_useRd = 1'b0;
-    case(io_port_0_cmd_input_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : begin
+    case(scheduler_0_input_payload_opcode)
+      FpuOpcode_LOAD : begin
         scheduler_0_useRd = 1'b1;
       end
-      `FpuOpcode_binary_sequential_STORE : begin
+      FpuOpcode_STORE : begin
       end
-      `FpuOpcode_binary_sequential_ADD : begin
+      FpuOpcode_ADD : begin
         scheduler_0_useRd = 1'b1;
       end
-      `FpuOpcode_binary_sequential_MUL : begin
+      FpuOpcode_MUL : begin
         scheduler_0_useRd = 1'b1;
       end
-      `FpuOpcode_binary_sequential_DIV : begin
+      FpuOpcode_DIV : begin
         scheduler_0_useRd = 1'b1;
       end
-      `FpuOpcode_binary_sequential_SQRT : begin
+      FpuOpcode_SQRT : begin
         scheduler_0_useRd = 1'b1;
       end
-      `FpuOpcode_binary_sequential_FMA : begin
+      FpuOpcode_FMA : begin
         scheduler_0_useRd = 1'b1;
       end
-      `FpuOpcode_binary_sequential_I2F : begin
+      FpuOpcode_I2F : begin
         scheduler_0_useRd = 1'b1;
       end
-      `FpuOpcode_binary_sequential_F2I : begin
+      FpuOpcode_F2I : begin
       end
-      `FpuOpcode_binary_sequential_MIN_MAX : begin
+      FpuOpcode_MIN_MAX : begin
         scheduler_0_useRd = 1'b1;
       end
-      `FpuOpcode_binary_sequential_CMP : begin
+      FpuOpcode_CMP : begin
       end
-      `FpuOpcode_binary_sequential_SGNJ : begin
+      FpuOpcode_SGNJ : begin
         scheduler_0_useRd = 1'b1;
       end
-      `FpuOpcode_binary_sequential_FMV_X_W : begin
+      FpuOpcode_FMV_X_W : begin
       end
-      `FpuOpcode_binary_sequential_FMV_W_X : begin
+      FpuOpcode_FMV_W_X : begin
         scheduler_0_useRd = 1'b1;
       end
-      `FpuOpcode_binary_sequential_FCLASS : begin
+      FpuOpcode_FCLASS : begin
       end
       default : begin
         scheduler_0_useRd = 1'b1;
@@ -11638,25 +11655,25 @@ module FpuCore (
   assign scheduler_0_hits_2 = (scheduler_0_useRs3 && scheduler_0_rfBusy_2);
   assign scheduler_0_hits_3 = (scheduler_0_useRd && scheduler_0_rfBusy_3);
   assign scheduler_0_hazard = ((({scheduler_0_hits_3,{scheduler_0_hits_2,{scheduler_0_hits_1,scheduler_0_hits_0}}} != 4'b0000) || (! rf_init_done)) || commitLogic_0_pending_full);
-  assign _zz_io_port_0_cmd_input_ready = (! scheduler_0_hazard);
-  assign scheduler_0_output_valid = (io_port_0_cmd_input_valid && _zz_io_port_0_cmd_input_ready);
-  assign io_port_0_cmd_input_ready = (scheduler_0_output_ready && _zz_io_port_0_cmd_input_ready);
-  assign scheduler_0_output_payload_opcode = io_port_0_cmd_input_payload_opcode;
-  assign scheduler_0_output_payload_arg = io_port_0_cmd_input_payload_arg;
+  assign _zz_scheduler_0_input_ready = (! scheduler_0_hazard);
+  assign scheduler_0_output_valid = (scheduler_0_input_valid && _zz_scheduler_0_input_ready);
+  assign scheduler_0_input_ready = (scheduler_0_output_ready && _zz_scheduler_0_input_ready);
+  assign scheduler_0_output_payload_opcode = scheduler_0_input_payload_opcode;
+  assign scheduler_0_output_payload_arg = scheduler_0_input_payload_arg;
   always @(*) begin
-    scheduler_0_output_payload_rs1 = io_port_0_cmd_input_payload_rs1;
+    scheduler_0_output_payload_rs1 = scheduler_0_input_payload_rs1;
     if(when_FpuCore_l258) begin
-      scheduler_0_output_payload_rs1 = io_port_0_cmd_input_payload_rs2;
+      scheduler_0_output_payload_rs1 = scheduler_0_input_payload_rs2;
     end
   end
 
-  assign scheduler_0_output_payload_rs2 = io_port_0_cmd_input_payload_rs2;
-  assign scheduler_0_output_payload_rs3 = io_port_0_cmd_input_payload_rs3;
-  assign scheduler_0_output_payload_rd = io_port_0_cmd_input_payload_rd;
-  assign scheduler_0_output_payload_format = io_port_0_cmd_input_payload_format;
-  assign scheduler_0_output_payload_roundMode = io_port_0_cmd_input_payload_roundMode;
-  assign when_FpuCore_l258 = (io_port_0_cmd_input_payload_opcode == `FpuOpcode_binary_sequential_STORE);
-  assign when_FpuCore_l261 = (io_port_0_cmd_input_valid && rf_init_done);
+  assign scheduler_0_output_payload_rs2 = scheduler_0_input_payload_rs2;
+  assign scheduler_0_output_payload_rs3 = scheduler_0_input_payload_rs3;
+  assign scheduler_0_output_payload_rd = scheduler_0_input_payload_rd;
+  assign scheduler_0_output_payload_format = scheduler_0_input_payload_format;
+  assign scheduler_0_output_payload_roundMode = scheduler_0_input_payload_roundMode;
+  assign when_FpuCore_l258 = (scheduler_0_input_payload_opcode == FpuOpcode_STORE);
+  assign when_FpuCore_l261 = (scheduler_0_input_valid && rf_init_done);
   assign scheduler_0_output_fire = (scheduler_0_output_valid && scheduler_0_output_ready);
   assign when_FpuCore_l265 = (scheduler_0_output_fire && scheduler_0_useRd);
   assign scheduler_0_output_ready = cmdArbiter_arbiter_io_inputs_0_ready;
@@ -11681,23 +11698,23 @@ module FpuCore (
   assign read_s0_payload_arg = cmdArbiter_output_payload_arg;
   assign read_s0_payload_roundMode = cmdArbiter_output_payload_roundMode;
   always @(*) begin
-    read_s0_ready = read_s0_s1_ready;
-    if(when_Stream_l342) begin
+    read_s0_ready = read_s1_ready;
+    if(when_Stream_l368) begin
       read_s0_ready = 1'b1;
     end
   end
 
-  assign when_Stream_l342 = (! read_s0_s1_valid);
-  assign read_s0_s1_valid = read_s0_rValid;
-  assign read_s0_s1_payload_opcode = read_s0_rData_opcode;
-  assign read_s0_s1_payload_rs1 = read_s0_rData_rs1;
-  assign read_s0_s1_payload_rs2 = read_s0_rData_rs2;
-  assign read_s0_s1_payload_rs3 = read_s0_rData_rs3;
-  assign read_s0_s1_payload_rd = read_s0_rData_rd;
-  assign read_s0_s1_payload_arg = read_s0_rData_arg;
-  assign read_s0_s1_payload_roundMode = read_s0_rData_roundMode;
-  assign read_output_valid = read_s0_s1_valid;
-  assign read_s0_s1_ready = read_output_ready;
+  assign when_Stream_l368 = (! read_s1_valid);
+  assign read_s1_valid = read_s0_rValid;
+  assign read_s1_payload_opcode = read_s0_rData_opcode;
+  assign read_s1_payload_rs1 = read_s0_rData_rs1;
+  assign read_s1_payload_rs2 = read_s0_rData_rs2;
+  assign read_s1_payload_rs3 = read_s0_rData_rs3;
+  assign read_s1_payload_rd = read_s0_rData_rd;
+  assign read_s1_payload_arg = read_s0_rData_arg;
+  assign read_s1_payload_roundMode = read_s0_rData_roundMode;
+  assign read_output_valid = read_s1_valid;
+  assign read_s1_ready = read_output_ready;
   assign _zz_read_rs_0_value_mantissa = read_s0_payload_rs1;
   assign read_output_isStall = (read_output_valid && (! read_output_ready));
   assign _zz_read_rs_0_value_mantissa_1 = (! read_output_isStall);
@@ -11722,10 +11739,10 @@ module FpuCore (
   assign read_rs_2_value_exponent = _zz_read_rs_2_value_mantissa_2[31 : 23];
   assign read_rs_2_value_sign = _zz_read_rs_2_value_mantissa_2[32];
   assign read_rs_2_value_special = _zz_read_rs_2_value_mantissa_2[33];
-  assign read_output_payload_opcode = read_s0_s1_payload_opcode;
-  assign read_output_payload_arg = read_s0_s1_payload_arg;
-  assign read_output_payload_roundMode = read_s0_s1_payload_roundMode;
-  assign read_output_payload_rd = read_s0_s1_payload_rd;
+  assign read_output_payload_opcode = read_s1_payload_opcode;
+  assign read_output_payload_arg = read_s1_payload_arg;
+  assign read_output_payload_roundMode = read_s1_payload_roundMode;
+  assign read_output_payload_rd = read_s1_payload_rd;
   assign read_output_payload_rs1_mantissa = read_rs_0_value_mantissa;
   assign read_output_payload_rs1_exponent = read_rs_0_value_exponent;
   assign read_output_payload_rs1_sign = read_rs_0_value_sign;
@@ -11778,14 +11795,14 @@ module FpuCore (
     end
   end
 
-  assign decode_loadHit = ({(decode_input_payload_opcode == `FpuOpcode_binary_sequential_I2F),{(decode_input_payload_opcode == `FpuOpcode_binary_sequential_FMV_W_X),(decode_input_payload_opcode == `FpuOpcode_binary_sequential_LOAD)}} != 3'b000);
+  assign decode_loadHit = ({(decode_input_payload_opcode == FpuOpcode_I2F),{(decode_input_payload_opcode == FpuOpcode_FMV_W_X),(decode_input_payload_opcode == FpuOpcode_LOAD)}} != 3'b000);
   assign decode_load_valid = (decode_input_valid && decode_loadHit);
   assign when_FpuCore_l329 = (decode_loadHit && decode_load_ready);
   assign decode_load_payload_rd = decode_input_payload_rd;
   assign decode_load_payload_arg = decode_input_payload_arg;
   assign decode_load_payload_roundMode = decode_input_payload_roundMode;
-  assign decode_load_payload_i2f = (decode_input_payload_opcode == `FpuOpcode_binary_sequential_I2F);
-  assign decode_shortPipHit = ({(decode_input_payload_opcode == `FpuOpcode_binary_sequential_FCVT_X_X),{(decode_input_payload_opcode == `FpuOpcode_binary_sequential_FCLASS),{(decode_input_payload_opcode == `FpuOpcode_binary_sequential_FMV_X_W),{(decode_input_payload_opcode == `FpuOpcode_binary_sequential_SGNJ),{(decode_input_payload_opcode == _zz_decode_shortPipHit),{_zz_decode_shortPipHit_1,{_zz_decode_shortPipHit_2,_zz_decode_shortPipHit_3}}}}}}} != 8'h0);
+  assign decode_load_payload_i2f = (decode_input_payload_opcode == FpuOpcode_I2F);
+  assign decode_shortPipHit = ({(decode_input_payload_opcode == FpuOpcode_FCVT_X_X),{(decode_input_payload_opcode == FpuOpcode_FCLASS),{(decode_input_payload_opcode == FpuOpcode_FMV_X_W),{(decode_input_payload_opcode == FpuOpcode_SGNJ),{(decode_input_payload_opcode == _zz_decode_shortPipHit),{_zz_decode_shortPipHit_1,{_zz_decode_shortPipHit_2,_zz_decode_shortPipHit_3}}}}}}} != 8'h0);
   assign when_FpuCore_l335 = (decode_shortPipHit && decode_shortPip_ready);
   assign decode_shortPip_valid = (decode_input_valid && decode_shortPipHit);
   assign decode_shortPip_payload_opcode = decode_input_payload_opcode;
@@ -11800,8 +11817,8 @@ module FpuCore (
   assign decode_shortPip_payload_rd = decode_input_payload_rd;
   assign decode_shortPip_payload_arg = decode_input_payload_arg;
   assign decode_shortPip_payload_roundMode = decode_input_payload_roundMode;
-  assign decode_divSqrtHit = ((decode_input_payload_opcode == `FpuOpcode_binary_sequential_DIV) || (decode_input_payload_opcode == `FpuOpcode_binary_sequential_SQRT));
-  assign decode_divHit = (decode_input_payload_opcode == `FpuOpcode_binary_sequential_DIV);
+  assign decode_divSqrtHit = ((decode_input_payload_opcode == FpuOpcode_DIV) || (decode_input_payload_opcode == FpuOpcode_SQRT));
+  assign decode_divHit = (decode_input_payload_opcode == FpuOpcode_DIV);
   assign when_FpuCore_l351 = (decode_divHit && decode_div_ready);
   assign decode_div_valid = (decode_input_valid && decode_divHit);
   assign decode_div_payload_rs1_mantissa = decode_input_payload_rs1_mantissa;
@@ -11814,7 +11831,7 @@ module FpuCore (
   assign decode_div_payload_rs2_special = decode_input_payload_rs2_special;
   assign decode_div_payload_rd = decode_input_payload_rd;
   assign decode_div_payload_roundMode = decode_input_payload_roundMode;
-  assign decode_sqrtHit = (decode_input_payload_opcode == `FpuOpcode_binary_sequential_SQRT);
+  assign decode_sqrtHit = (decode_input_payload_opcode == FpuOpcode_SQRT);
   assign when_FpuCore_l359 = (decode_sqrtHit && decode_sqrt_ready);
   assign decode_sqrt_valid = (decode_input_valid && decode_sqrtHit);
   assign decode_sqrt_payload_rs1_mantissa = decode_input_payload_rs1_mantissa;
@@ -11823,8 +11840,8 @@ module FpuCore (
   assign decode_sqrt_payload_rs1_special = decode_input_payload_rs1_special;
   assign decode_sqrt_payload_rd = decode_input_payload_rd;
   assign decode_sqrt_payload_roundMode = decode_input_payload_roundMode;
-  assign decode_fmaHit = (decode_input_payload_opcode == `FpuOpcode_binary_sequential_FMA);
-  assign decode_mulHit = ((decode_input_payload_opcode == `FpuOpcode_binary_sequential_MUL) || decode_fmaHit);
+  assign decode_fmaHit = (decode_input_payload_opcode == FpuOpcode_FMA);
+  assign decode_mulHit = ((decode_input_payload_opcode == FpuOpcode_MUL) || decode_fmaHit);
   assign decode_divSqrtToMul_valid = 1'b0;
   assign decode_divSqrtToMul_payload_rs1_mantissa = 23'bxxxxxxxxxxxxxxxxxxxxxxx;
   assign decode_divSqrtToMul_payload_rs1_exponent = 9'bxxxxxxxxx;
@@ -11976,7 +11993,7 @@ module FpuCore (
   end
 
   assign when_FpuCore_l380 = (! decode_divSqrtToMul_valid);
-  assign decode_addHit = (decode_input_payload_opcode == `FpuOpcode_binary_sequential_ADD);
+  assign decode_addHit = (decode_input_payload_opcode == FpuOpcode_ADD);
   assign when_FpuCore_l399 = ((decode_addHit && decode_add_ready) && (! decode_mulToAdd_valid));
   assign decode_add_valid = ((decode_input_valid && decode_addHit) || decode_mulToAdd_valid);
   assign decode_mulToAdd_ready = decode_add_ready;
@@ -12067,41 +12084,41 @@ module FpuCore (
   assign decode_load_s2mPipe_payload_roundMode = _zz_decode_load_s2mPipe_payload_roundMode;
   always @(*) begin
     decode_load_s2mPipe_ready = decode_load_s2mPipe_m2sPipe_ready;
-    if(when_Stream_l342_1) begin
+    if(when_Stream_l368_1) begin
       decode_load_s2mPipe_ready = 1'b1;
     end
   end
 
-  assign when_Stream_l342_1 = (! decode_load_s2mPipe_m2sPipe_valid);
+  assign when_Stream_l368_1 = (! decode_load_s2mPipe_m2sPipe_valid);
   assign decode_load_s2mPipe_m2sPipe_valid = decode_load_s2mPipe_rValid;
   assign decode_load_s2mPipe_m2sPipe_payload_rd = decode_load_s2mPipe_rData_rd;
   assign decode_load_s2mPipe_m2sPipe_payload_i2f = decode_load_s2mPipe_rData_i2f;
   assign decode_load_s2mPipe_m2sPipe_payload_arg = decode_load_s2mPipe_rData_arg;
   assign decode_load_s2mPipe_m2sPipe_payload_roundMode = decode_load_s2mPipe_rData_roundMode;
   always @(*) begin
-    decode_load_s2mPipe_m2sPipe_ready = decode_load_s2mPipe_m2sPipe_input_ready;
-    if(when_Stream_l342_2) begin
+    decode_load_s2mPipe_m2sPipe_ready = load_s0_input_ready;
+    if(when_Stream_l368_2) begin
       decode_load_s2mPipe_m2sPipe_ready = 1'b1;
     end
   end
 
-  assign when_Stream_l342_2 = (! decode_load_s2mPipe_m2sPipe_input_valid);
-  assign decode_load_s2mPipe_m2sPipe_input_valid = decode_load_s2mPipe_m2sPipe_rValid;
-  assign decode_load_s2mPipe_m2sPipe_input_payload_rd = decode_load_s2mPipe_m2sPipe_rData_rd;
-  assign decode_load_s2mPipe_m2sPipe_input_payload_i2f = decode_load_s2mPipe_m2sPipe_rData_i2f;
-  assign decode_load_s2mPipe_m2sPipe_input_payload_arg = decode_load_s2mPipe_m2sPipe_rData_arg;
-  assign decode_load_s2mPipe_m2sPipe_input_payload_roundMode = decode_load_s2mPipe_m2sPipe_rData_roundMode;
-  assign when_Stream_l408 = (! ({(commitFork_load_0_payload_opcode == `FpuOpcode_binary_sequential_I2F),{(commitFork_load_0_payload_opcode == `FpuOpcode_binary_sequential_FMV_W_X),(commitFork_load_0_payload_opcode == `FpuOpcode_binary_sequential_LOAD)}} != 3'b000));
+  assign when_Stream_l368_2 = (! load_s0_input_valid);
+  assign load_s0_input_valid = decode_load_s2mPipe_m2sPipe_rValid;
+  assign load_s0_input_payload_rd = decode_load_s2mPipe_m2sPipe_rData_rd;
+  assign load_s0_input_payload_i2f = decode_load_s2mPipe_m2sPipe_rData_i2f;
+  assign load_s0_input_payload_arg = decode_load_s2mPipe_m2sPipe_rData_arg;
+  assign load_s0_input_payload_roundMode = decode_load_s2mPipe_m2sPipe_rData_roundMode;
+  assign when_Stream_l438 = (! ({(commitFork_load_0_payload_opcode == FpuOpcode_I2F),{(commitFork_load_0_payload_opcode == FpuOpcode_FMV_W_X),(commitFork_load_0_payload_opcode == FpuOpcode_LOAD)}} != 3'b000));
   always @(*) begin
     load_s0_filtred_0_valid = commitFork_load_0_valid;
-    if(when_Stream_l408) begin
+    if(when_Stream_l438) begin
       load_s0_filtred_0_valid = 1'b0;
     end
   end
 
   always @(*) begin
     commitFork_load_0_ready = load_s0_filtred_0_ready;
-    if(when_Stream_l408) begin
+    if(when_Stream_l438) begin
       commitFork_load_0_ready = 1'b1;
     end
   end
@@ -12111,35 +12128,35 @@ module FpuCore (
   assign load_s0_filtred_0_payload_write = commitFork_load_0_payload_write;
   assign load_s0_filtred_0_payload_value = commitFork_load_0_payload_value;
   assign load_s0_hazard = (! load_s0_filtred_0_valid);
-  assign _zz_decode_load_s2mPipe_m2sPipe_input_ready = (! load_s0_hazard);
-  assign decode_load_s2mPipe_m2sPipe_input_ready = (load_s0_output_ready && _zz_decode_load_s2mPipe_m2sPipe_input_ready);
-  assign load_s0_output_valid = (decode_load_s2mPipe_m2sPipe_input_valid && _zz_decode_load_s2mPipe_m2sPipe_input_ready);
+  assign _zz_load_s0_input_ready = (! load_s0_hazard);
+  assign load_s0_input_ready = (load_s0_output_ready && _zz_load_s0_input_ready);
+  assign load_s0_output_valid = (load_s0_input_valid && _zz_load_s0_input_ready);
   always @(*) begin
     load_s0_filtred_0_ready = 1'b0;
     if(_zz_when[0]) begin
-      load_s0_filtred_0_ready = (decode_load_s2mPipe_m2sPipe_input_valid && load_s0_output_ready);
+      load_s0_filtred_0_ready = (load_s0_input_valid && load_s0_output_ready);
     end
   end
 
-  assign load_s0_output_payload_rd = decode_load_s2mPipe_m2sPipe_input_payload_rd;
+  assign load_s0_output_payload_rd = load_s0_input_payload_rd;
   assign load_s0_output_payload_value = load_s0_filtred_0_payload_value;
-  assign load_s0_output_payload_i2f = decode_load_s2mPipe_m2sPipe_input_payload_i2f;
-  assign load_s0_output_payload_arg = decode_load_s2mPipe_m2sPipe_input_payload_arg;
-  assign load_s0_output_payload_roundMode = decode_load_s2mPipe_m2sPipe_input_payload_roundMode;
+  assign load_s0_output_payload_i2f = load_s0_input_payload_i2f;
+  assign load_s0_output_payload_arg = load_s0_input_payload_arg;
+  assign load_s0_output_payload_roundMode = load_s0_input_payload_roundMode;
   always @(*) begin
-    load_s0_output_ready = load_s0_output_input_ready;
-    if(when_Stream_l342_3) begin
+    load_s0_output_ready = load_s1_input_ready;
+    if(when_Stream_l368_3) begin
       load_s0_output_ready = 1'b1;
     end
   end
 
-  assign when_Stream_l342_3 = (! load_s0_output_input_valid);
-  assign load_s0_output_input_valid = load_s0_output_rValid;
-  assign load_s0_output_input_payload_rd = load_s0_output_rData_rd;
-  assign load_s0_output_input_payload_value = load_s0_output_rData_value;
-  assign load_s0_output_input_payload_i2f = load_s0_output_rData_i2f;
-  assign load_s0_output_input_payload_arg = load_s0_output_rData_arg;
-  assign load_s0_output_input_payload_roundMode = load_s0_output_rData_roundMode;
+  assign when_Stream_l368_3 = (! load_s1_input_valid);
+  assign load_s1_input_valid = load_s0_output_rValid;
+  assign load_s1_input_payload_rd = load_s0_output_rData_rd;
+  assign load_s1_input_payload_value = load_s0_output_rData_value;
+  assign load_s1_input_payload_i2f = load_s0_output_rData_i2f;
+  assign load_s1_input_payload_arg = load_s0_output_rData_arg;
+  assign load_s1_input_payload_roundMode = load_s0_output_rData_roundMode;
   always @(*) begin
     load_s1_busy = 1'b0;
     if(when_FpuCore_l529) begin
@@ -12147,9 +12164,9 @@ module FpuCore (
     end
   end
 
-  assign load_s1_f32_mantissa = load_s0_output_input_payload_value[22 : 0];
-  assign load_s1_f32_exponent = load_s0_output_input_payload_value[30 : 23];
-  assign load_s1_f32_sign = load_s0_output_input_payload_value[31];
+  assign load_s1_f32_mantissa = load_s1_input_payload_value[22 : 0];
+  assign load_s1_f32_exponent = load_s1_input_payload_value[30 : 23];
+  assign load_s1_f32_sign = load_s1_input_payload_value[31];
   assign load_s1_passThroughFloat_special = 1'b0;
   assign load_s1_passThroughFloat_sign = load_s1_f32_sign;
   assign load_s1_passThroughFloat_exponent = {1'd0, load_s1_f32_exponent};
@@ -12157,7 +12174,7 @@ module FpuCore (
   assign load_s1_recodedExpOffset = 9'h080;
   assign load_s1_manZero = (load_s1_passThroughFloat_mantissa == 23'h0);
   assign load_s1_expZero = (load_s1_passThroughFloat_exponent == 9'h0);
-  assign load_s1_expOne = (load_s1_passThroughFloat_exponent[7 : 0] == 8'hff);
+  assign load_s1_expOne = (&load_s1_passThroughFloat_exponent[7 : 0]);
   assign load_s1_isZero = (load_s1_expZero && load_s1_manZero);
   assign load_s1_isSubnormal = (load_s1_expZero && (! load_s1_manZero));
   assign load_s1_isInfinity = (load_s1_expOne && load_s1_manZero);
@@ -12165,22 +12182,22 @@ module FpuCore (
   always @(*) begin
     load_s1_fsm_ohInput = 32'bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx;
     if(when_FpuCore_l508) begin
-      load_s1_fsm_ohInput = ({9'd0,load_s0_output_input_payload_value[22 : 0]} <<< 9);
+      load_s1_fsm_ohInput = ({9'd0,load_s1_input_payload_value[22 : 0]} <<< 9);
     end else begin
-      load_s1_fsm_ohInput[31 : 0] = load_s0_output_input_payload_value[31 : 0];
+      load_s1_fsm_ohInput[31 : 0] = load_s1_input_payload_value[31 : 0];
     end
   end
 
-  assign when_FpuCore_l508 = (! load_s0_output_input_payload_i2f);
+  assign when_FpuCore_l508 = (! load_s1_input_payload_i2f);
   always @(*) begin
     load_s1_fsm_shift_input = 32'bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx;
     load_s1_fsm_shift_input = (load_s1_fsm_ohInput <<< 1);
   end
 
   assign when_FpuCore_l525 = (! load_s1_fsm_done);
-  assign when_FpuCore_l529 = ((load_s0_output_input_valid && (load_s0_output_input_payload_i2f || load_s1_isSubnormal)) && (! load_s1_fsm_done));
-  assign when_FpuCore_l532 = (((load_s0_output_input_payload_i2f && (! load_s1_fsm_patched)) && load_s0_output_input_payload_value[31]) && load_s0_output_input_payload_arg[0]);
-  assign _zz_load_s0_output_rData_value = load_s0_output_input_payload_value;
+  assign when_FpuCore_l529 = ((load_s1_input_valid && (load_s1_input_payload_i2f || load_s1_isSubnormal)) && (! load_s1_fsm_done));
+  assign when_FpuCore_l532 = (((load_s1_input_payload_i2f && (! load_s1_fsm_patched)) && load_s1_input_payload_value[31]) && load_s1_input_payload_arg[0]);
+  assign _zz_load_s0_output_rData_value = load_s1_input_payload_value;
   assign _zz_load_s0_output_rData_value_1 = 1'b1;
   assign _zz_load_s1_fsm_shift_by = {load_s1_fsm_ohInput[0],{load_s1_fsm_ohInput[1],{load_s1_fsm_ohInput[2],{load_s1_fsm_ohInput[3],{load_s1_fsm_ohInput[4],{load_s1_fsm_ohInput[5],{load_s1_fsm_ohInput[6],{load_s1_fsm_ohInput[7],{load_s1_fsm_ohInput[8],{_zz__zz_load_s1_fsm_shift_by,{_zz__zz_load_s1_fsm_shift_by_1,_zz__zz_load_s1_fsm_shift_by_2}}}}}}}}}}};
   assign _zz_load_s1_fsm_shift_by_1 = (_zz_load_s1_fsm_shift_by & (~ _zz__zz_load_s1_fsm_shift_by_1_1));
@@ -12222,8 +12239,8 @@ module FpuCore (
     end
   end
 
-  assign load_s0_output_input_isStall = (load_s0_output_input_valid && (! load_s0_output_input_ready));
-  assign when_FpuCore_l551 = (! load_s0_output_input_isStall);
+  assign load_s1_input_isStall = (load_s1_input_valid && (! load_s1_input_ready));
+  assign when_FpuCore_l551 = (! load_s1_input_isStall);
   assign load_s1_i2fHigh = load_s1_fsm_shift_output[31 : 8];
   assign load_s1_i2fLow = load_s1_fsm_shift_output[7 : 0];
   assign load_s1_scrap = (load_s1_i2fLow != 8'h0);
@@ -12256,21 +12273,21 @@ module FpuCore (
     end
   end
 
-  assign _zz_load_s0_output_input_ready = (! load_s1_busy);
-  assign load_s0_output_input_ready = (load_s1_output_ready && _zz_load_s0_output_input_ready);
-  assign load_s1_output_valid = (load_s0_output_input_valid && _zz_load_s0_output_input_ready);
-  assign load_s1_output_payload_roundMode = load_s0_output_input_payload_roundMode;
-  assign load_s1_output_payload_rd = load_s0_output_input_payload_rd;
+  assign _zz_load_s1_input_ready = (! load_s1_busy);
+  assign load_s1_input_ready = (load_s1_output_ready && _zz_load_s1_input_ready);
+  assign load_s1_output_valid = (load_s1_input_valid && _zz_load_s1_input_ready);
+  assign load_s1_output_payload_roundMode = load_s1_input_payload_roundMode;
+  assign load_s1_output_payload_rd = load_s1_input_payload_rd;
   always @(*) begin
     load_s1_output_payload_value_sign = load_s1_recoded_sign;
-    if(load_s0_output_input_payload_i2f) begin
+    if(load_s1_input_payload_i2f) begin
       load_s1_output_payload_value_sign = load_s1_fsm_patched;
     end
   end
 
   always @(*) begin
     load_s1_output_payload_value_exponent = load_s1_recoded_exponent;
-    if(load_s0_output_input_payload_i2f) begin
+    if(load_s1_input_payload_i2f) begin
       load_s1_output_payload_value_exponent = (9'h11e - _zz_load_s1_output_payload_value_exponent);
       if(load_s1_fsm_i2fZero) begin
         load_s1_output_payload_value_exponent[1 : 0] = 2'b00;
@@ -12287,7 +12304,7 @@ module FpuCore (
 
   always @(*) begin
     load_s1_output_payload_value_special = load_s1_recoded_special;
-    if(load_s0_output_input_payload_i2f) begin
+    if(load_s1_input_payload_i2f) begin
       load_s1_output_payload_value_special = 1'b0;
       if(load_s1_fsm_i2fZero) begin
         load_s1_output_payload_value_special = 1'b1;
@@ -12297,39 +12314,39 @@ module FpuCore (
 
   always @(*) begin
     load_s1_output_payload_scrap = 1'b0;
-    if(load_s0_output_input_payload_i2f) begin
+    if(load_s1_input_payload_i2f) begin
       load_s1_output_payload_scrap = load_s1_scrap;
     end
   end
 
   assign load_s1_output_payload_NV = 1'b0;
   assign load_s1_output_payload_DZ = 1'b0;
-  assign when_FpuCore_l594 = (load_s0_output_input_payload_i2f || load_s1_isSubnormal);
+  assign when_FpuCore_l594 = (load_s1_input_payload_i2f || load_s1_isSubnormal);
   always @(*) begin
-    decode_shortPip_ready = decode_shortPip_input_ready;
-    if(when_Stream_l342_4) begin
+    decode_shortPip_ready = shortPip_input_ready;
+    if(when_Stream_l368_4) begin
       decode_shortPip_ready = 1'b1;
     end
   end
 
-  assign when_Stream_l342_4 = (! decode_shortPip_input_valid);
-  assign decode_shortPip_input_valid = decode_shortPip_rValid;
-  assign decode_shortPip_input_payload_opcode = decode_shortPip_rData_opcode;
-  assign decode_shortPip_input_payload_rs1_mantissa = decode_shortPip_rData_rs1_mantissa;
-  assign decode_shortPip_input_payload_rs1_exponent = decode_shortPip_rData_rs1_exponent;
-  assign decode_shortPip_input_payload_rs1_sign = decode_shortPip_rData_rs1_sign;
-  assign decode_shortPip_input_payload_rs1_special = decode_shortPip_rData_rs1_special;
-  assign decode_shortPip_input_payload_rs2_mantissa = decode_shortPip_rData_rs2_mantissa;
-  assign decode_shortPip_input_payload_rs2_exponent = decode_shortPip_rData_rs2_exponent;
-  assign decode_shortPip_input_payload_rs2_sign = decode_shortPip_rData_rs2_sign;
-  assign decode_shortPip_input_payload_rs2_special = decode_shortPip_rData_rs2_special;
-  assign decode_shortPip_input_payload_rd = decode_shortPip_rData_rd;
-  assign decode_shortPip_input_payload_value = decode_shortPip_rData_value;
-  assign decode_shortPip_input_payload_arg = decode_shortPip_rData_arg;
-  assign decode_shortPip_input_payload_roundMode = decode_shortPip_rData_roundMode;
-  assign shortPip_toFpuRf = ({(decode_shortPip_input_payload_opcode == `FpuOpcode_binary_sequential_FCVT_X_X),{(decode_shortPip_input_payload_opcode == `FpuOpcode_binary_sequential_SGNJ),(decode_shortPip_input_payload_opcode == `FpuOpcode_binary_sequential_MIN_MAX)}} != 3'b000);
-  assign decode_shortPip_input_fire = (decode_shortPip_input_valid && decode_shortPip_input_ready);
-  assign when_FpuCore_l221 = ((decode_shortPip_input_fire && shortPip_toFpuRf) && 1'b1);
+  assign when_Stream_l368_4 = (! shortPip_input_valid);
+  assign shortPip_input_valid = decode_shortPip_rValid;
+  assign shortPip_input_payload_opcode = decode_shortPip_rData_opcode;
+  assign shortPip_input_payload_rs1_mantissa = decode_shortPip_rData_rs1_mantissa;
+  assign shortPip_input_payload_rs1_exponent = decode_shortPip_rData_rs1_exponent;
+  assign shortPip_input_payload_rs1_sign = decode_shortPip_rData_rs1_sign;
+  assign shortPip_input_payload_rs1_special = decode_shortPip_rData_rs1_special;
+  assign shortPip_input_payload_rs2_mantissa = decode_shortPip_rData_rs2_mantissa;
+  assign shortPip_input_payload_rs2_exponent = decode_shortPip_rData_rs2_exponent;
+  assign shortPip_input_payload_rs2_sign = decode_shortPip_rData_rs2_sign;
+  assign shortPip_input_payload_rs2_special = decode_shortPip_rData_rs2_special;
+  assign shortPip_input_payload_rd = decode_shortPip_rData_rd;
+  assign shortPip_input_payload_value = decode_shortPip_rData_value;
+  assign shortPip_input_payload_arg = decode_shortPip_rData_arg;
+  assign shortPip_input_payload_roundMode = decode_shortPip_rData_roundMode;
+  assign shortPip_toFpuRf = ({(shortPip_input_payload_opcode == FpuOpcode_FCVT_X_X),{(shortPip_input_payload_opcode == FpuOpcode_SGNJ),(shortPip_input_payload_opcode == FpuOpcode_MIN_MAX)}} != 3'b000);
+  assign shortPip_input_fire = (shortPip_input_valid && shortPip_input_ready);
+  assign when_FpuCore_l221 = ((shortPip_input_fire && shortPip_toFpuRf) && 1'b1);
   assign shortPip_isCommited = commitLogic_0_short_notEmpty;
   assign _zz_shortPip_rfOutput_ready = (! (! shortPip_isCommited));
   assign shortPip_output_valid = (shortPip_rfOutput_valid && _zz_shortPip_rfOutput_ready);
@@ -12345,20 +12362,20 @@ module FpuCore (
   assign shortPip_output_payload_DZ = shortPip_rfOutput_payload_DZ;
   always @(*) begin
     shortPip_result = 32'bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx;
-    case(decode_shortPip_input_payload_opcode)
-      `FpuOpcode_binary_sequential_STORE : begin
+    case(shortPip_input_payload_opcode)
+      FpuOpcode_STORE : begin
         shortPip_result = shortPip_recodedResult;
       end
-      `FpuOpcode_binary_sequential_FMV_X_W : begin
+      FpuOpcode_FMV_X_W : begin
         shortPip_result = shortPip_recodedResult;
       end
-      `FpuOpcode_binary_sequential_F2I : begin
+      FpuOpcode_F2I : begin
         shortPip_result[31 : 0] = shortPip_f2i_result;
       end
-      `FpuOpcode_binary_sequential_CMP : begin
+      FpuOpcode_CMP : begin
         shortPip_result[31 : 0] = {31'd0, shortPip_cmpResult};
       end
-      `FpuOpcode_binary_sequential_FCLASS : begin
+      FpuOpcode_FCLASS : begin
         shortPip_result[31 : 0] = shortPip_fclassResult;
       end
       default : begin
@@ -12374,9 +12391,9 @@ module FpuCore (
   end
 
   assign shortPip_f32_exp = _zz_shortPip_f32_exp[7:0];
-  assign shortPip_f32_man = decode_shortPip_input_payload_rs1_mantissa[22 : 0];
+  assign shortPip_f32_man = shortPip_input_payload_rs1_mantissa[22 : 0];
   always @(*) begin
-    shortPip_recodedResult = {{decode_shortPip_input_payload_rs1_sign,shortPip_f32_exp},shortPip_f32_man};
+    shortPip_recodedResult = {{shortPip_input_payload_rs1_sign,shortPip_f32_exp},shortPip_f32_man};
     if(shortPip_isSubnormal) begin
       shortPip_recodedResult[22 : 0] = shortPip_fsm_shift_output[22 : 0];
     end
@@ -12393,16 +12410,16 @@ module FpuCore (
   end
 
   assign shortPip_expSubnormalThreshold = 8'h80;
-  assign shortPip_expInSubnormalRange = (decode_shortPip_input_payload_rs1_exponent <= _zz_shortPip_expInSubnormalRange);
-  assign shortPip_isSubnormal = ((! decode_shortPip_input_payload_rs1_special) && shortPip_expInSubnormalRange);
-  assign shortPip_isNormal = ((! decode_shortPip_input_payload_rs1_special) && (! shortPip_expInSubnormalRange));
-  assign shortPip_fsm_f2iShift = (decode_shortPip_input_payload_rs1_exponent - 9'h0ff);
-  assign shortPip_fsm_isF2i = (decode_shortPip_input_payload_opcode == `FpuOpcode_binary_sequential_F2I);
-  assign shortPip_fsm_needRecoding = (({(decode_shortPip_input_payload_opcode == `FpuOpcode_binary_sequential_STORE),(decode_shortPip_input_payload_opcode == `FpuOpcode_binary_sequential_FMV_X_W)} != 2'b00) && shortPip_isSubnormal);
-  assign shortPip_fsm_isZero = (decode_shortPip_input_payload_rs1_special && (decode_shortPip_input_payload_rs1_exponent[1 : 0] == 2'b00));
+  assign shortPip_expInSubnormalRange = (shortPip_input_payload_rs1_exponent <= _zz_shortPip_expInSubnormalRange);
+  assign shortPip_isSubnormal = ((! shortPip_input_payload_rs1_special) && shortPip_expInSubnormalRange);
+  assign shortPip_isNormal = ((! shortPip_input_payload_rs1_special) && (! shortPip_expInSubnormalRange));
+  assign shortPip_fsm_f2iShift = (shortPip_input_payload_rs1_exponent - 9'h0ff);
+  assign shortPip_fsm_isF2i = (shortPip_input_payload_opcode == FpuOpcode_F2I);
+  assign shortPip_fsm_needRecoding = (({(shortPip_input_payload_opcode == FpuOpcode_STORE),(shortPip_input_payload_opcode == FpuOpcode_FMV_X_W)} != 2'b00) && shortPip_isSubnormal);
+  assign shortPip_fsm_isZero = (shortPip_input_payload_rs1_special && (shortPip_input_payload_rs1_exponent[1 : 0] == 2'b00));
   always @(*) begin
     shortPip_fsm_shift_input = 33'bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx;
-    shortPip_fsm_shift_input = ({9'd0,{(! shortPip_fsm_isZero),decode_shortPip_input_payload_rs1_mantissa}} <<< 9);
+    shortPip_fsm_shift_input = ({9'd0,{(! shortPip_fsm_isZero),shortPip_input_payload_rs1_mantissa}} <<< 9);
   end
 
   assign when_FpuCore_l646 = (shortPip_fsm_shift_by[5] && (shortPip_fsm_shift_input[31 : 0] != 32'h0));
@@ -12413,14 +12430,14 @@ module FpuCore (
   assign when_FpuCore_l646_5 = (shortPip_fsm_shift_by[0] && (shortPip_fsm_shift_input_5[0 : 0] != 1'b0));
   assign when_FpuCore_l652 = (! shortPip_fsm_done);
   assign shortPip_fsm_formatShiftOffset = 8'h8a;
-  assign when_FpuCore_l658 = ((decode_shortPip_input_valid && (shortPip_fsm_needRecoding || shortPip_fsm_isF2i)) && (! shortPip_fsm_done));
-  assign _zz_shortPip_fsm_shift_by = (9'h11e - decode_shortPip_input_payload_rs1_exponent);
+  assign when_FpuCore_l658 = ((shortPip_input_valid && (shortPip_fsm_needRecoding || shortPip_fsm_isF2i)) && (! shortPip_fsm_done));
+  assign _zz_shortPip_fsm_shift_by = (9'h11e - shortPip_input_payload_rs1_exponent);
   assign _zz_shortPip_fsm_shift_by_1 = 6'h21;
-  assign decode_shortPip_input_isStall = (decode_shortPip_input_valid && (! decode_shortPip_input_ready));
-  assign when_FpuCore_l672 = (! decode_shortPip_input_isStall);
+  assign shortPip_input_isStall = (shortPip_input_valid && (! shortPip_input_ready));
+  assign when_FpuCore_l672 = (! shortPip_input_isStall);
   always @(*) begin
     shortPip_mantissaForced = 1'b0;
-    if(decode_shortPip_input_payload_rs1_special) begin
+    if(shortPip_input_payload_rs1_special) begin
       case(switch_FpuCore_l686)
         2'b00 : begin
           shortPip_mantissaForced = 1'b1;
@@ -12441,7 +12458,7 @@ module FpuCore (
 
   always @(*) begin
     shortPip_exponentForced = 1'b0;
-    if(decode_shortPip_input_payload_rs1_special) begin
+    if(shortPip_input_payload_rs1_special) begin
       case(switch_FpuCore_l686)
         2'b00 : begin
           shortPip_exponentForced = 1'b1;
@@ -12463,7 +12480,7 @@ module FpuCore (
 
   always @(*) begin
     shortPip_mantissaForcedValue = 1'bx;
-    if(decode_shortPip_input_payload_rs1_special) begin
+    if(shortPip_input_payload_rs1_special) begin
       case(switch_FpuCore_l686)
         2'b00 : begin
           shortPip_mantissaForcedValue = 1'b0;
@@ -12484,7 +12501,7 @@ module FpuCore (
 
   always @(*) begin
     shortPip_exponentForcedValue = 1'bx;
-    if(decode_shortPip_input_payload_rs1_special) begin
+    if(shortPip_input_payload_rs1_special) begin
       case(switch_FpuCore_l686)
         2'b00 : begin
           shortPip_exponentForcedValue = 1'b0;
@@ -12506,7 +12523,7 @@ module FpuCore (
 
   always @(*) begin
     shortPip_cononicalForced = 1'b0;
-    if(decode_shortPip_input_payload_rs1_special) begin
+    if(shortPip_input_payload_rs1_special) begin
       case(switch_FpuCore_l686)
         2'b10 : begin
           if(when_FpuCore_l702) begin
@@ -12519,13 +12536,13 @@ module FpuCore (
     end
   end
 
-  assign switch_FpuCore_l686 = decode_shortPip_input_payload_rs1_exponent[1 : 0];
-  assign when_FpuCore_l702 = decode_shortPip_input_payload_rs1_exponent[2];
+  assign switch_FpuCore_l686 = shortPip_input_payload_rs1_exponent[1 : 0];
+  assign when_FpuCore_l702 = shortPip_input_payload_rs1_exponent[2];
   always @(*) begin
     shortPip_rspNv = 1'b0;
     if(!shortPip_f2i_isZero) begin
       if(when_FpuCore_l767) begin
-        shortPip_rspNv = (((decode_shortPip_input_valid && (decode_shortPip_input_payload_opcode == `FpuOpcode_binary_sequential_F2I)) && shortPip_fsm_done) && (! shortPip_f2i_isZero));
+        shortPip_rspNv = (((shortPip_input_valid && (shortPip_input_payload_opcode == FpuOpcode_F2I)) && shortPip_fsm_done) && (! shortPip_f2i_isZero));
       end
     end
     if(shortPip_NV) begin
@@ -12537,27 +12554,27 @@ module FpuCore (
     shortPip_rspNx = 1'b0;
     if(!shortPip_f2i_isZero) begin
       if(!when_FpuCore_l767) begin
-        shortPip_rspNx = (((decode_shortPip_input_valid && (decode_shortPip_input_payload_opcode == `FpuOpcode_binary_sequential_F2I)) && shortPip_fsm_done) && (shortPip_f2i_round != 2'b00));
+        shortPip_rspNx = (((shortPip_input_valid && (shortPip_input_payload_opcode == FpuOpcode_F2I)) && shortPip_fsm_done) && (shortPip_f2i_round != 2'b00));
       end
     end
   end
 
   assign shortPip_f2i_unsigned = (shortPip_fsm_shift_output[32 : 0] >>> 1);
-  assign shortPip_f2i_resign = (decode_shortPip_input_payload_arg[0] && decode_shortPip_input_payload_rs1_sign);
+  assign shortPip_f2i_resign = (shortPip_input_payload_arg[0] && shortPip_input_payload_rs1_sign);
   assign shortPip_f2i_round = {shortPip_fsm_shift_output[0],shortPip_fsm_shift_scrap};
   always @(*) begin
-    case(decode_shortPip_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : begin
+    case(shortPip_input_payload_roundMode)
+      FpuRoundMode_RNE : begin
         shortPip_f2i_increment = (shortPip_f2i_round[1] && (shortPip_f2i_round[0] || shortPip_f2i_unsigned[0]));
       end
-      `FpuRoundMode_opt_RTZ : begin
+      FpuRoundMode_RTZ : begin
         shortPip_f2i_increment = 1'b0;
       end
-      `FpuRoundMode_opt_RDN : begin
-        shortPip_f2i_increment = ((shortPip_f2i_round != 2'b00) && decode_shortPip_input_payload_rs1_sign);
+      FpuRoundMode_RDN : begin
+        shortPip_f2i_increment = ((shortPip_f2i_round != 2'b00) && shortPip_input_payload_rs1_sign);
       end
-      `FpuRoundMode_opt_RUP : begin
-        shortPip_f2i_increment = ((shortPip_f2i_round != 2'b00) && (! decode_shortPip_input_payload_rs1_sign));
+      FpuRoundMode_RUP : begin
+        shortPip_f2i_increment = ((shortPip_f2i_round != 2'b00) && (! shortPip_input_payload_rs1_sign));
       end
       default : begin
         shortPip_f2i_increment = shortPip_f2i_round[1];
@@ -12572,25 +12589,25 @@ module FpuCore (
     end else begin
       if(when_FpuCore_l767) begin
         shortPip_f2i_result = (shortPip_f2i_overflow ? 32'hffffffff : 32'h0);
-        shortPip_f2i_result[31] = (decode_shortPip_input_payload_arg[0] ^ shortPip_f2i_overflow);
+        shortPip_f2i_result[31] = (shortPip_input_payload_arg[0] ^ shortPip_f2i_overflow);
       end
     end
   end
 
-  assign shortPip_f2i_overflow = (((((decode_shortPip_input_payload_arg[0] ? 9'h11d : 9'h11e) < decode_shortPip_input_payload_rs1_exponent) || (decode_shortPip_input_payload_rs1_special && (decode_shortPip_input_payload_rs1_exponent[1 : 0] == 2'b01))) && (! decode_shortPip_input_payload_rs1_sign)) || (decode_shortPip_input_payload_rs1_special && (decode_shortPip_input_payload_rs1_exponent[1 : 0] == 2'b10)));
-  assign shortPip_f2i_underflow = (((((9'h11e < decode_shortPip_input_payload_rs1_exponent) || ((decode_shortPip_input_payload_arg[0] && shortPip_f2i_unsigned[31]) && ((shortPip_f2i_unsigned[30 : 0] != 31'h0) || shortPip_f2i_increment))) || ((! decode_shortPip_input_payload_arg[0]) && ((shortPip_f2i_unsigned != 32'h0) || shortPip_f2i_increment))) || (decode_shortPip_input_payload_rs1_special && (decode_shortPip_input_payload_rs1_exponent[1 : 0] == 2'b01))) && decode_shortPip_input_payload_rs1_sign);
-  assign shortPip_f2i_isZero = (decode_shortPip_input_payload_rs1_special && (decode_shortPip_input_payload_rs1_exponent[1 : 0] == 2'b00));
+  assign shortPip_f2i_overflow = (((((shortPip_input_payload_arg[0] ? 9'h11d : 9'h11e) < shortPip_input_payload_rs1_exponent) || (shortPip_input_payload_rs1_special && (shortPip_input_payload_rs1_exponent[1 : 0] == 2'b01))) && (! shortPip_input_payload_rs1_sign)) || (shortPip_input_payload_rs1_special && (shortPip_input_payload_rs1_exponent[1 : 0] == 2'b10)));
+  assign shortPip_f2i_underflow = (((((9'h11e < shortPip_input_payload_rs1_exponent) || ((shortPip_input_payload_arg[0] && shortPip_f2i_unsigned[31]) && ((shortPip_f2i_unsigned[30 : 0] != 31'h0) || shortPip_f2i_increment))) || ((! shortPip_input_payload_arg[0]) && ((shortPip_f2i_unsigned != 32'h0) || shortPip_f2i_increment))) || (shortPip_input_payload_rs1_special && (shortPip_input_payload_rs1_exponent[1 : 0] == 2'b01))) && shortPip_input_payload_rs1_sign);
+  assign shortPip_f2i_isZero = (shortPip_input_payload_rs1_special && (shortPip_input_payload_rs1_exponent[1 : 0] == 2'b00));
   assign when_FpuCore_l767 = (shortPip_f2i_underflow || shortPip_f2i_overflow);
-  assign shortPip_bothZero = ((decode_shortPip_input_payload_rs1_special && (decode_shortPip_input_payload_rs1_exponent[1 : 0] == 2'b00)) && (decode_shortPip_input_payload_rs2_special && (decode_shortPip_input_payload_rs2_exponent[1 : 0] == 2'b00)));
+  assign shortPip_bothZero = ((shortPip_input_payload_rs1_special && (shortPip_input_payload_rs1_exponent[1 : 0] == 2'b00)) && (shortPip_input_payload_rs2_special && (shortPip_input_payload_rs2_exponent[1 : 0] == 2'b00)));
   always @(*) begin
-    shortPip_rs1Equal = ((((decode_shortPip_input_payload_rs1_mantissa == decode_shortPip_input_payload_rs2_mantissa) && (decode_shortPip_input_payload_rs1_exponent == decode_shortPip_input_payload_rs2_exponent)) && (decode_shortPip_input_payload_rs1_sign == decode_shortPip_input_payload_rs2_sign)) && (decode_shortPip_input_payload_rs1_special == decode_shortPip_input_payload_rs2_special));
+    shortPip_rs1Equal = ((((shortPip_input_payload_rs1_mantissa == shortPip_input_payload_rs2_mantissa) && (shortPip_input_payload_rs1_exponent == shortPip_input_payload_rs2_exponent)) && (shortPip_input_payload_rs1_sign == shortPip_input_payload_rs2_sign)) && (shortPip_input_payload_rs1_special == shortPip_input_payload_rs2_special));
     if(when_FpuCore_l784) begin
       shortPip_rs1Equal = 1'b1;
     end
   end
 
   always @(*) begin
-    shortPip_rs1AbsSmaller = ({decode_shortPip_input_payload_rs1_exponent,decode_shortPip_input_payload_rs1_mantissa} < {decode_shortPip_input_payload_rs2_exponent,decode_shortPip_input_payload_rs2_mantissa});
+    shortPip_rs1AbsSmaller = ({shortPip_input_payload_rs1_exponent,shortPip_input_payload_rs1_mantissa} < {shortPip_input_payload_rs2_exponent,shortPip_input_payload_rs2_mantissa});
     if(when_FpuCore_l780) begin
       shortPip_rs1AbsSmaller = 1'b1;
     end
@@ -12605,14 +12622,14 @@ module FpuCore (
     end
   end
 
-  assign when_FpuCore_l780 = (decode_shortPip_input_payload_rs2_special && (decode_shortPip_input_payload_rs2_exponent[1 : 0] == 2'b01));
-  assign when_FpuCore_l781 = (decode_shortPip_input_payload_rs1_special && (decode_shortPip_input_payload_rs1_exponent[1 : 0] == 2'b00));
-  assign when_FpuCore_l782 = (decode_shortPip_input_payload_rs2_special && (decode_shortPip_input_payload_rs2_exponent[1 : 0] == 2'b00));
-  assign when_FpuCore_l783 = (decode_shortPip_input_payload_rs1_special && (decode_shortPip_input_payload_rs1_exponent[1 : 0] == 2'b01));
-  assign when_FpuCore_l784 = (((decode_shortPip_input_payload_rs1_sign == decode_shortPip_input_payload_rs2_sign) && (decode_shortPip_input_payload_rs1_special && (decode_shortPip_input_payload_rs1_exponent[1 : 0] == 2'b01))) && (decode_shortPip_input_payload_rs2_special && (decode_shortPip_input_payload_rs2_exponent[1 : 0] == 2'b01)));
-  assign switch_Misc_l200 = {decode_shortPip_input_payload_rs1_sign,decode_shortPip_input_payload_rs2_sign};
+  assign when_FpuCore_l780 = (shortPip_input_payload_rs2_special && (shortPip_input_payload_rs2_exponent[1 : 0] == 2'b01));
+  assign when_FpuCore_l781 = (shortPip_input_payload_rs1_special && (shortPip_input_payload_rs1_exponent[1 : 0] == 2'b00));
+  assign when_FpuCore_l782 = (shortPip_input_payload_rs2_special && (shortPip_input_payload_rs2_exponent[1 : 0] == 2'b00));
+  assign when_FpuCore_l783 = (shortPip_input_payload_rs1_special && (shortPip_input_payload_rs1_exponent[1 : 0] == 2'b01));
+  assign when_FpuCore_l784 = (((shortPip_input_payload_rs1_sign == shortPip_input_payload_rs2_sign) && (shortPip_input_payload_rs1_special && (shortPip_input_payload_rs1_exponent[1 : 0] == 2'b01))) && (shortPip_input_payload_rs2_special && (shortPip_input_payload_rs2_exponent[1 : 0] == 2'b01)));
+  assign switch_Misc_l210 = {shortPip_input_payload_rs1_sign,shortPip_input_payload_rs2_sign};
   always @(*) begin
-    case(switch_Misc_l200)
+    case(switch_Misc_l210)
       2'b00 : begin
         shortPip_rs1Smaller = shortPip_rs1AbsSmaller;
       end
@@ -12628,51 +12645,51 @@ module FpuCore (
     endcase
   end
 
-  assign shortPip_minMaxSelectRs2 = (! (((shortPip_rs1Smaller ^ decode_shortPip_input_payload_arg[0]) && (! (decode_shortPip_input_payload_rs1_special && (decode_shortPip_input_payload_rs1_exponent[1 : 0] == 2'b10)))) || (decode_shortPip_input_payload_rs2_special && (decode_shortPip_input_payload_rs2_exponent[1 : 0] == 2'b10))));
-  assign shortPip_minMaxSelectNanQuiet = ((decode_shortPip_input_payload_rs1_special && (decode_shortPip_input_payload_rs1_exponent[1 : 0] == 2'b10)) && (decode_shortPip_input_payload_rs2_special && (decode_shortPip_input_payload_rs2_exponent[1 : 0] == 2'b10)));
+  assign shortPip_minMaxSelectRs2 = (! (((shortPip_rs1Smaller ^ shortPip_input_payload_arg[0]) && (! (shortPip_input_payload_rs1_special && (shortPip_input_payload_rs1_exponent[1 : 0] == 2'b10)))) || (shortPip_input_payload_rs2_special && (shortPip_input_payload_rs2_exponent[1 : 0] == 2'b10))));
+  assign shortPip_minMaxSelectNanQuiet = ((shortPip_input_payload_rs1_special && (shortPip_input_payload_rs1_exponent[1 : 0] == 2'b10)) && (shortPip_input_payload_rs2_special && (shortPip_input_payload_rs2_exponent[1 : 0] == 2'b10)));
   always @(*) begin
-    shortPip_cmpResult = (((shortPip_rs1Smaller && (! shortPip_bothZero)) && (! decode_shortPip_input_payload_arg[1])) || ((shortPip_rs1Equal || shortPip_bothZero) && (! decode_shortPip_input_payload_arg[0])));
+    shortPip_cmpResult = (((shortPip_rs1Smaller && (! shortPip_bothZero)) && (! shortPip_input_payload_arg[1])) || ((shortPip_rs1Equal || shortPip_bothZero) && (! shortPip_input_payload_arg[0])));
     if(when_FpuCore_l796) begin
       shortPip_cmpResult = 1'b0;
     end
   end
 
-  assign when_FpuCore_l796 = ((decode_shortPip_input_payload_rs1_special && (decode_shortPip_input_payload_rs1_exponent[1 : 0] == 2'b10)) || (decode_shortPip_input_payload_rs2_special && (decode_shortPip_input_payload_rs2_exponent[1 : 0] == 2'b10)));
-  assign shortPip_sgnjRs1Sign = decode_shortPip_input_payload_rs1_sign;
-  assign shortPip_sgnjRs2Sign = decode_shortPip_input_payload_rs2_sign;
-  assign shortPip_sgnjResult = (((shortPip_sgnjRs1Sign && decode_shortPip_input_payload_arg[1]) ^ shortPip_sgnjRs2Sign) ^ decode_shortPip_input_payload_arg[0]);
+  assign when_FpuCore_l796 = ((shortPip_input_payload_rs1_special && (shortPip_input_payload_rs1_exponent[1 : 0] == 2'b10)) || (shortPip_input_payload_rs2_special && (shortPip_input_payload_rs2_exponent[1 : 0] == 2'b10)));
+  assign shortPip_sgnjRs1Sign = shortPip_input_payload_rs1_sign;
+  assign shortPip_sgnjRs2Sign = shortPip_input_payload_rs2_sign;
+  assign shortPip_sgnjResult = (((shortPip_sgnjRs1Sign && shortPip_input_payload_arg[1]) ^ shortPip_sgnjRs2Sign) ^ shortPip_input_payload_arg[0]);
   always @(*) begin
     shortPip_fclassResult = 32'h0;
-    shortPip_fclassResult[0] = (decode_shortPip_input_payload_rs1_sign && shortPip_decoded_isInfinity);
-    shortPip_fclassResult[1] = (decode_shortPip_input_payload_rs1_sign && shortPip_isNormal);
-    shortPip_fclassResult[2] = (decode_shortPip_input_payload_rs1_sign && shortPip_isSubnormal);
-    shortPip_fclassResult[3] = (decode_shortPip_input_payload_rs1_sign && shortPip_decoded_isZero);
-    shortPip_fclassResult[4] = ((! decode_shortPip_input_payload_rs1_sign) && shortPip_decoded_isZero);
-    shortPip_fclassResult[5] = ((! decode_shortPip_input_payload_rs1_sign) && shortPip_isSubnormal);
-    shortPip_fclassResult[6] = ((! decode_shortPip_input_payload_rs1_sign) && shortPip_isNormal);
-    shortPip_fclassResult[7] = ((! decode_shortPip_input_payload_rs1_sign) && shortPip_decoded_isInfinity);
+    shortPip_fclassResult[0] = (shortPip_input_payload_rs1_sign && shortPip_decoded_isInfinity);
+    shortPip_fclassResult[1] = (shortPip_input_payload_rs1_sign && shortPip_isNormal);
+    shortPip_fclassResult[2] = (shortPip_input_payload_rs1_sign && shortPip_isSubnormal);
+    shortPip_fclassResult[3] = (shortPip_input_payload_rs1_sign && shortPip_decoded_isZero);
+    shortPip_fclassResult[4] = ((! shortPip_input_payload_rs1_sign) && shortPip_decoded_isZero);
+    shortPip_fclassResult[5] = ((! shortPip_input_payload_rs1_sign) && shortPip_isSubnormal);
+    shortPip_fclassResult[6] = ((! shortPip_input_payload_rs1_sign) && shortPip_isNormal);
+    shortPip_fclassResult[7] = ((! shortPip_input_payload_rs1_sign) && shortPip_decoded_isInfinity);
     shortPip_fclassResult[8] = (shortPip_decoded_isNan && (! shortPip_decoded_isQuiet));
     shortPip_fclassResult[9] = (shortPip_decoded_isNan && shortPip_decoded_isQuiet);
   end
 
-  assign shortPip_decoded_isZero = (decode_shortPip_input_payload_rs1_special && (decode_shortPip_input_payload_rs1_exponent[1 : 0] == 2'b00));
-  assign shortPip_decoded_isNormal = (! decode_shortPip_input_payload_rs1_special);
-  assign shortPip_decoded_isInfinity = (decode_shortPip_input_payload_rs1_special && (decode_shortPip_input_payload_rs1_exponent[1 : 0] == 2'b01));
-  assign shortPip_decoded_isNan = (decode_shortPip_input_payload_rs1_special && (decode_shortPip_input_payload_rs1_exponent[1 : 0] == 2'b10));
-  assign shortPip_decoded_isQuiet = decode_shortPip_input_payload_rs1_mantissa[22];
-  assign shortPip_rfOutput_valid = ((decode_shortPip_input_valid && shortPip_toFpuRf) && (! shortPip_halt));
-  assign shortPip_rfOutput_payload_rd = decode_shortPip_input_payload_rd;
-  assign shortPip_rfOutput_payload_roundMode = decode_shortPip_input_payload_roundMode;
+  assign shortPip_decoded_isZero = (shortPip_input_payload_rs1_special && (shortPip_input_payload_rs1_exponent[1 : 0] == 2'b00));
+  assign shortPip_decoded_isNormal = (! shortPip_input_payload_rs1_special);
+  assign shortPip_decoded_isInfinity = (shortPip_input_payload_rs1_special && (shortPip_input_payload_rs1_exponent[1 : 0] == 2'b01));
+  assign shortPip_decoded_isNan = (shortPip_input_payload_rs1_special && (shortPip_input_payload_rs1_exponent[1 : 0] == 2'b10));
+  assign shortPip_decoded_isQuiet = shortPip_input_payload_rs1_mantissa[22];
+  assign shortPip_rfOutput_valid = ((shortPip_input_valid && shortPip_toFpuRf) && (! shortPip_halt));
+  assign shortPip_rfOutput_payload_rd = shortPip_input_payload_rd;
+  assign shortPip_rfOutput_payload_roundMode = shortPip_input_payload_roundMode;
   assign shortPip_rfOutput_payload_scrap = 1'b0;
   always @(*) begin
-    shortPip_rfOutput_payload_value_sign = decode_shortPip_input_payload_rs1_sign;
-    case(decode_shortPip_input_payload_opcode)
-      `FpuOpcode_binary_sequential_MIN_MAX : begin
+    shortPip_rfOutput_payload_value_sign = shortPip_input_payload_rs1_sign;
+    case(shortPip_input_payload_opcode)
+      FpuOpcode_MIN_MAX : begin
         if(shortPip_minMaxSelectRs2) begin
-          shortPip_rfOutput_payload_value_sign = decode_shortPip_input_payload_rs2_sign;
+          shortPip_rfOutput_payload_value_sign = shortPip_input_payload_rs2_sign;
         end
       end
-      `FpuOpcode_binary_sequential_SGNJ : begin
+      FpuOpcode_SGNJ : begin
         if(when_FpuCore_l850) begin
           shortPip_rfOutput_payload_value_sign = shortPip_sgnjResult;
         end
@@ -12683,11 +12700,11 @@ module FpuCore (
   end
 
   always @(*) begin
-    shortPip_rfOutput_payload_value_exponent = decode_shortPip_input_payload_rs1_exponent;
-    case(decode_shortPip_input_payload_opcode)
-      `FpuOpcode_binary_sequential_MIN_MAX : begin
+    shortPip_rfOutput_payload_value_exponent = shortPip_input_payload_rs1_exponent;
+    case(shortPip_input_payload_opcode)
+      FpuOpcode_MIN_MAX : begin
         if(shortPip_minMaxSelectRs2) begin
-          shortPip_rfOutput_payload_value_exponent = decode_shortPip_input_payload_rs2_exponent;
+          shortPip_rfOutput_payload_value_exponent = shortPip_input_payload_rs2_exponent;
         end
         if(shortPip_minMaxSelectNanQuiet) begin
           shortPip_rfOutput_payload_value_exponent[1 : 0] = 2'b10;
@@ -12700,11 +12717,11 @@ module FpuCore (
   end
 
   always @(*) begin
-    shortPip_rfOutput_payload_value_mantissa = {decode_shortPip_input_payload_rs1_mantissa,1'b0};
-    case(decode_shortPip_input_payload_opcode)
-      `FpuOpcode_binary_sequential_MIN_MAX : begin
+    shortPip_rfOutput_payload_value_mantissa = {shortPip_input_payload_rs1_mantissa,1'b0};
+    case(shortPip_input_payload_opcode)
+      FpuOpcode_MIN_MAX : begin
         if(shortPip_minMaxSelectRs2) begin
-          shortPip_rfOutput_payload_value_mantissa = {decode_shortPip_input_payload_rs2_mantissa,1'b0};
+          shortPip_rfOutput_payload_value_mantissa = {shortPip_input_payload_rs2_mantissa,1'b0};
         end
         if(shortPip_minMaxSelectNanQuiet) begin
           shortPip_rfOutput_payload_value_mantissa[23] = 1'b1;
@@ -12716,11 +12733,11 @@ module FpuCore (
   end
 
   always @(*) begin
-    shortPip_rfOutput_payload_value_special = decode_shortPip_input_payload_rs1_special;
-    case(decode_shortPip_input_payload_opcode)
-      `FpuOpcode_binary_sequential_MIN_MAX : begin
+    shortPip_rfOutput_payload_value_special = shortPip_input_payload_rs1_special;
+    case(shortPip_input_payload_opcode)
+      FpuOpcode_MIN_MAX : begin
         if(shortPip_minMaxSelectRs2) begin
-          shortPip_rfOutput_payload_value_special = decode_shortPip_input_payload_rs2_special;
+          shortPip_rfOutput_payload_value_special = shortPip_input_payload_rs2_special;
         end
         if(shortPip_minMaxSelectNanQuiet) begin
           shortPip_rfOutput_payload_value_special = 1'b1;
@@ -12731,26 +12748,26 @@ module FpuCore (
     endcase
   end
 
-  assign when_FpuCore_l850 = (! (decode_shortPip_input_payload_rs1_special && (decode_shortPip_input_payload_rs1_exponent[1 : 0] == 2'b10)));
-  assign shortPip_signalQuiet = ((decode_shortPip_input_payload_opcode == `FpuOpcode_binary_sequential_CMP) && (decode_shortPip_input_payload_arg != 2'b10));
-  assign shortPip_rs1Nan = (decode_shortPip_input_payload_rs1_special && (decode_shortPip_input_payload_rs1_exponent[1 : 0] == 2'b10));
-  assign shortPip_rs2Nan = (decode_shortPip_input_payload_rs2_special && (decode_shortPip_input_payload_rs2_exponent[1 : 0] == 2'b10));
-  assign shortPip_rs1NanNv = ((decode_shortPip_input_payload_rs1_special && (decode_shortPip_input_payload_rs1_exponent[1 : 0] == 2'b10)) && ((! decode_shortPip_input_payload_rs1_mantissa[22]) || shortPip_signalQuiet));
-  assign shortPip_rs2NanNv = ((decode_shortPip_input_payload_rs2_special && (decode_shortPip_input_payload_rs2_exponent[1 : 0] == 2'b10)) && ((! decode_shortPip_input_payload_rs2_mantissa[22]) || shortPip_signalQuiet));
-  assign shortPip_NV = ((({(decode_shortPip_input_payload_opcode == `FpuOpcode_binary_sequential_FCVT_X_X),{(decode_shortPip_input_payload_opcode == `FpuOpcode_binary_sequential_MIN_MAX),(decode_shortPip_input_payload_opcode == `FpuOpcode_binary_sequential_CMP)}} != 3'b000) && shortPip_rs1NanNv) || (({(decode_shortPip_input_payload_opcode == `FpuOpcode_binary_sequential_MIN_MAX),(decode_shortPip_input_payload_opcode == `FpuOpcode_binary_sequential_CMP)} != 2'b00) && shortPip_rs2NanNv));
-  assign decode_shortPip_input_ready = ((! shortPip_halt) && (shortPip_toFpuRf ? shortPip_rfOutput_ready : shortPip_rspStreams_0_ready));
-  assign shortPip_rspStreams_0_valid = (((decode_shortPip_input_valid && 1'b1) && (! shortPip_toFpuRf)) && (! shortPip_halt));
+  assign when_FpuCore_l850 = (! (shortPip_input_payload_rs1_special && (shortPip_input_payload_rs1_exponent[1 : 0] == 2'b10)));
+  assign shortPip_signalQuiet = ((shortPip_input_payload_opcode == FpuOpcode_CMP) && (shortPip_input_payload_arg != 2'b10));
+  assign shortPip_rs1Nan = (shortPip_input_payload_rs1_special && (shortPip_input_payload_rs1_exponent[1 : 0] == 2'b10));
+  assign shortPip_rs2Nan = (shortPip_input_payload_rs2_special && (shortPip_input_payload_rs2_exponent[1 : 0] == 2'b10));
+  assign shortPip_rs1NanNv = ((shortPip_input_payload_rs1_special && (shortPip_input_payload_rs1_exponent[1 : 0] == 2'b10)) && ((! shortPip_input_payload_rs1_mantissa[22]) || shortPip_signalQuiet));
+  assign shortPip_rs2NanNv = ((shortPip_input_payload_rs2_special && (shortPip_input_payload_rs2_exponent[1 : 0] == 2'b10)) && ((! shortPip_input_payload_rs2_mantissa[22]) || shortPip_signalQuiet));
+  assign shortPip_NV = ((({(shortPip_input_payload_opcode == FpuOpcode_FCVT_X_X),{(shortPip_input_payload_opcode == FpuOpcode_MIN_MAX),(shortPip_input_payload_opcode == FpuOpcode_CMP)}} != 3'b000) && shortPip_rs1NanNv) || (({(shortPip_input_payload_opcode == FpuOpcode_MIN_MAX),(shortPip_input_payload_opcode == FpuOpcode_CMP)} != 2'b00) && shortPip_rs2NanNv));
+  assign shortPip_input_ready = ((! shortPip_halt) && (shortPip_toFpuRf ? shortPip_rfOutput_ready : shortPip_rspStreams_0_ready));
+  assign shortPip_rspStreams_0_valid = (((shortPip_input_valid && 1'b1) && (! shortPip_toFpuRf)) && (! shortPip_halt));
   assign shortPip_rspStreams_0_payload_value = shortPip_result;
   assign shortPip_rspStreams_0_payload_NV = shortPip_rspNv;
   assign shortPip_rspStreams_0_payload_NX = shortPip_rspNx;
   always @(*) begin
     shortPip_rspStreams_0_ready = shortPip_rspStreams_0_m2sPipe_ready;
-    if(when_Stream_l342_5) begin
+    if(when_Stream_l368_5) begin
       shortPip_rspStreams_0_ready = 1'b1;
     end
   end
 
-  assign when_Stream_l342_5 = (! shortPip_rspStreams_0_m2sPipe_valid);
+  assign when_Stream_l368_5 = (! shortPip_rspStreams_0_m2sPipe_valid);
   assign shortPip_rspStreams_0_m2sPipe_valid = shortPip_rspStreams_0_rValid;
   assign shortPip_rspStreams_0_m2sPipe_payload_value = shortPip_rspStreams_0_rData_value;
   assign shortPip_rspStreams_0_m2sPipe_payload_NV = shortPip_rspStreams_0_rData_NV;
@@ -12763,254 +12780,254 @@ module FpuCore (
   assign shortPip_rfOutput_payload_NV = shortPip_NV;
   assign shortPip_rfOutput_payload_DZ = 1'b0;
   always @(*) begin
-    decode_mul_ready = decode_mul_input_ready;
-    if(when_Stream_l342_6) begin
+    decode_mul_ready = mul_preMul_input_ready;
+    if(when_Stream_l368_6) begin
       decode_mul_ready = 1'b1;
     end
   end
 
-  assign when_Stream_l342_6 = (! decode_mul_input_valid);
-  assign decode_mul_input_valid = decode_mul_rValid;
-  assign decode_mul_input_payload_rs1_mantissa = decode_mul_rData_rs1_mantissa;
-  assign decode_mul_input_payload_rs1_exponent = decode_mul_rData_rs1_exponent;
-  assign decode_mul_input_payload_rs1_sign = decode_mul_rData_rs1_sign;
-  assign decode_mul_input_payload_rs1_special = decode_mul_rData_rs1_special;
-  assign decode_mul_input_payload_rs2_mantissa = decode_mul_rData_rs2_mantissa;
-  assign decode_mul_input_payload_rs2_exponent = decode_mul_rData_rs2_exponent;
-  assign decode_mul_input_payload_rs2_sign = decode_mul_rData_rs2_sign;
-  assign decode_mul_input_payload_rs2_special = decode_mul_rData_rs2_special;
-  assign decode_mul_input_payload_rs3_mantissa = decode_mul_rData_rs3_mantissa;
-  assign decode_mul_input_payload_rs3_exponent = decode_mul_rData_rs3_exponent;
-  assign decode_mul_input_payload_rs3_sign = decode_mul_rData_rs3_sign;
-  assign decode_mul_input_payload_rs3_special = decode_mul_rData_rs3_special;
-  assign decode_mul_input_payload_rd = decode_mul_rData_rd;
-  assign decode_mul_input_payload_add = decode_mul_rData_add;
-  assign decode_mul_input_payload_divSqrt = decode_mul_rData_divSqrt;
-  assign decode_mul_input_payload_msb1 = decode_mul_rData_msb1;
-  assign decode_mul_input_payload_msb2 = decode_mul_rData_msb2;
-  assign decode_mul_input_payload_roundMode = decode_mul_rData_roundMode;
-  assign mul_preMul_output_valid = decode_mul_input_valid;
-  assign decode_mul_input_ready = mul_preMul_output_ready;
-  assign mul_preMul_output_payload_rs1_mantissa = decode_mul_input_payload_rs1_mantissa;
-  assign mul_preMul_output_payload_rs1_exponent = decode_mul_input_payload_rs1_exponent;
-  assign mul_preMul_output_payload_rs1_sign = decode_mul_input_payload_rs1_sign;
-  assign mul_preMul_output_payload_rs1_special = decode_mul_input_payload_rs1_special;
-  assign mul_preMul_output_payload_rs2_mantissa = decode_mul_input_payload_rs2_mantissa;
-  assign mul_preMul_output_payload_rs2_exponent = decode_mul_input_payload_rs2_exponent;
-  assign mul_preMul_output_payload_rs2_sign = decode_mul_input_payload_rs2_sign;
-  assign mul_preMul_output_payload_rs2_special = decode_mul_input_payload_rs2_special;
-  assign mul_preMul_output_payload_rs3_mantissa = decode_mul_input_payload_rs3_mantissa;
-  assign mul_preMul_output_payload_rs3_exponent = decode_mul_input_payload_rs3_exponent;
-  assign mul_preMul_output_payload_rs3_sign = decode_mul_input_payload_rs3_sign;
-  assign mul_preMul_output_payload_rs3_special = decode_mul_input_payload_rs3_special;
-  assign mul_preMul_output_payload_rd = decode_mul_input_payload_rd;
-  assign mul_preMul_output_payload_add = decode_mul_input_payload_add;
-  assign mul_preMul_output_payload_divSqrt = decode_mul_input_payload_divSqrt;
-  assign mul_preMul_output_payload_msb1 = decode_mul_input_payload_msb1;
-  assign mul_preMul_output_payload_msb2 = decode_mul_input_payload_msb2;
-  assign mul_preMul_output_payload_roundMode = decode_mul_input_payload_roundMode;
-  assign mul_preMul_output_payload_exp = ({1'b0,decode_mul_input_payload_rs1_exponent} + {1'b0,decode_mul_input_payload_rs2_exponent});
+  assign when_Stream_l368_6 = (! mul_preMul_input_valid);
+  assign mul_preMul_input_valid = decode_mul_rValid;
+  assign mul_preMul_input_payload_rs1_mantissa = decode_mul_rData_rs1_mantissa;
+  assign mul_preMul_input_payload_rs1_exponent = decode_mul_rData_rs1_exponent;
+  assign mul_preMul_input_payload_rs1_sign = decode_mul_rData_rs1_sign;
+  assign mul_preMul_input_payload_rs1_special = decode_mul_rData_rs1_special;
+  assign mul_preMul_input_payload_rs2_mantissa = decode_mul_rData_rs2_mantissa;
+  assign mul_preMul_input_payload_rs2_exponent = decode_mul_rData_rs2_exponent;
+  assign mul_preMul_input_payload_rs2_sign = decode_mul_rData_rs2_sign;
+  assign mul_preMul_input_payload_rs2_special = decode_mul_rData_rs2_special;
+  assign mul_preMul_input_payload_rs3_mantissa = decode_mul_rData_rs3_mantissa;
+  assign mul_preMul_input_payload_rs3_exponent = decode_mul_rData_rs3_exponent;
+  assign mul_preMul_input_payload_rs3_sign = decode_mul_rData_rs3_sign;
+  assign mul_preMul_input_payload_rs3_special = decode_mul_rData_rs3_special;
+  assign mul_preMul_input_payload_rd = decode_mul_rData_rd;
+  assign mul_preMul_input_payload_add = decode_mul_rData_add;
+  assign mul_preMul_input_payload_divSqrt = decode_mul_rData_divSqrt;
+  assign mul_preMul_input_payload_msb1 = decode_mul_rData_msb1;
+  assign mul_preMul_input_payload_msb2 = decode_mul_rData_msb2;
+  assign mul_preMul_input_payload_roundMode = decode_mul_rData_roundMode;
+  assign mul_preMul_output_valid = mul_preMul_input_valid;
+  assign mul_preMul_input_ready = mul_preMul_output_ready;
+  assign mul_preMul_output_payload_rs1_mantissa = mul_preMul_input_payload_rs1_mantissa;
+  assign mul_preMul_output_payload_rs1_exponent = mul_preMul_input_payload_rs1_exponent;
+  assign mul_preMul_output_payload_rs1_sign = mul_preMul_input_payload_rs1_sign;
+  assign mul_preMul_output_payload_rs1_special = mul_preMul_input_payload_rs1_special;
+  assign mul_preMul_output_payload_rs2_mantissa = mul_preMul_input_payload_rs2_mantissa;
+  assign mul_preMul_output_payload_rs2_exponent = mul_preMul_input_payload_rs2_exponent;
+  assign mul_preMul_output_payload_rs2_sign = mul_preMul_input_payload_rs2_sign;
+  assign mul_preMul_output_payload_rs2_special = mul_preMul_input_payload_rs2_special;
+  assign mul_preMul_output_payload_rs3_mantissa = mul_preMul_input_payload_rs3_mantissa;
+  assign mul_preMul_output_payload_rs3_exponent = mul_preMul_input_payload_rs3_exponent;
+  assign mul_preMul_output_payload_rs3_sign = mul_preMul_input_payload_rs3_sign;
+  assign mul_preMul_output_payload_rs3_special = mul_preMul_input_payload_rs3_special;
+  assign mul_preMul_output_payload_rd = mul_preMul_input_payload_rd;
+  assign mul_preMul_output_payload_add = mul_preMul_input_payload_add;
+  assign mul_preMul_output_payload_divSqrt = mul_preMul_input_payload_divSqrt;
+  assign mul_preMul_output_payload_msb1 = mul_preMul_input_payload_msb1;
+  assign mul_preMul_output_payload_msb2 = mul_preMul_input_payload_msb2;
+  assign mul_preMul_output_payload_roundMode = mul_preMul_input_payload_roundMode;
+  assign mul_preMul_output_payload_exp = ({1'b0,mul_preMul_input_payload_rs1_exponent} + {1'b0,mul_preMul_input_payload_rs2_exponent});
   always @(*) begin
-    mul_preMul_output_ready = mul_preMul_output_input_ready;
-    if(when_Stream_l342_7) begin
+    mul_preMul_output_ready = mul_mul_input_ready;
+    if(when_Stream_l368_7) begin
       mul_preMul_output_ready = 1'b1;
     end
   end
 
-  assign when_Stream_l342_7 = (! mul_preMul_output_input_valid);
-  assign mul_preMul_output_input_valid = mul_preMul_output_rValid;
-  assign mul_preMul_output_input_payload_rs1_mantissa = mul_preMul_output_rData_rs1_mantissa;
-  assign mul_preMul_output_input_payload_rs1_exponent = mul_preMul_output_rData_rs1_exponent;
-  assign mul_preMul_output_input_payload_rs1_sign = mul_preMul_output_rData_rs1_sign;
-  assign mul_preMul_output_input_payload_rs1_special = mul_preMul_output_rData_rs1_special;
-  assign mul_preMul_output_input_payload_rs2_mantissa = mul_preMul_output_rData_rs2_mantissa;
-  assign mul_preMul_output_input_payload_rs2_exponent = mul_preMul_output_rData_rs2_exponent;
-  assign mul_preMul_output_input_payload_rs2_sign = mul_preMul_output_rData_rs2_sign;
-  assign mul_preMul_output_input_payload_rs2_special = mul_preMul_output_rData_rs2_special;
-  assign mul_preMul_output_input_payload_rs3_mantissa = mul_preMul_output_rData_rs3_mantissa;
-  assign mul_preMul_output_input_payload_rs3_exponent = mul_preMul_output_rData_rs3_exponent;
-  assign mul_preMul_output_input_payload_rs3_sign = mul_preMul_output_rData_rs3_sign;
-  assign mul_preMul_output_input_payload_rs3_special = mul_preMul_output_rData_rs3_special;
-  assign mul_preMul_output_input_payload_rd = mul_preMul_output_rData_rd;
-  assign mul_preMul_output_input_payload_add = mul_preMul_output_rData_add;
-  assign mul_preMul_output_input_payload_divSqrt = mul_preMul_output_rData_divSqrt;
-  assign mul_preMul_output_input_payload_msb1 = mul_preMul_output_rData_msb1;
-  assign mul_preMul_output_input_payload_msb2 = mul_preMul_output_rData_msb2;
-  assign mul_preMul_output_input_payload_roundMode = mul_preMul_output_rData_roundMode;
-  assign mul_preMul_output_input_payload_exp = mul_preMul_output_rData_exp;
-  assign mul_mul_output_valid = mul_preMul_output_input_valid;
-  assign mul_preMul_output_input_ready = mul_mul_output_ready;
-  assign mul_mul_mulA = {mul_preMul_output_input_payload_msb1,mul_preMul_output_input_payload_rs1_mantissa};
-  assign mul_mul_mulB = {mul_preMul_output_input_payload_msb2,mul_preMul_output_input_payload_rs2_mantissa};
-  assign mul_mul_output_payload_rs1_mantissa = mul_preMul_output_input_payload_rs1_mantissa;
-  assign mul_mul_output_payload_rs1_exponent = mul_preMul_output_input_payload_rs1_exponent;
-  assign mul_mul_output_payload_rs1_sign = mul_preMul_output_input_payload_rs1_sign;
-  assign mul_mul_output_payload_rs1_special = mul_preMul_output_input_payload_rs1_special;
-  assign mul_mul_output_payload_rs2_mantissa = mul_preMul_output_input_payload_rs2_mantissa;
-  assign mul_mul_output_payload_rs2_exponent = mul_preMul_output_input_payload_rs2_exponent;
-  assign mul_mul_output_payload_rs2_sign = mul_preMul_output_input_payload_rs2_sign;
-  assign mul_mul_output_payload_rs2_special = mul_preMul_output_input_payload_rs2_special;
-  assign mul_mul_output_payload_rs3_mantissa = mul_preMul_output_input_payload_rs3_mantissa;
-  assign mul_mul_output_payload_rs3_exponent = mul_preMul_output_input_payload_rs3_exponent;
-  assign mul_mul_output_payload_rs3_sign = mul_preMul_output_input_payload_rs3_sign;
-  assign mul_mul_output_payload_rs3_special = mul_preMul_output_input_payload_rs3_special;
-  assign mul_mul_output_payload_rd = mul_preMul_output_input_payload_rd;
-  assign mul_mul_output_payload_add = mul_preMul_output_input_payload_add;
-  assign mul_mul_output_payload_divSqrt = mul_preMul_output_input_payload_divSqrt;
-  assign mul_mul_output_payload_msb1 = mul_preMul_output_input_payload_msb1;
-  assign mul_mul_output_payload_msb2 = mul_preMul_output_input_payload_msb2;
-  assign mul_mul_output_payload_roundMode = mul_preMul_output_input_payload_roundMode;
-  assign mul_mul_output_payload_exp = mul_preMul_output_input_payload_exp;
+  assign when_Stream_l368_7 = (! mul_mul_input_valid);
+  assign mul_mul_input_valid = mul_preMul_output_rValid;
+  assign mul_mul_input_payload_rs1_mantissa = mul_preMul_output_rData_rs1_mantissa;
+  assign mul_mul_input_payload_rs1_exponent = mul_preMul_output_rData_rs1_exponent;
+  assign mul_mul_input_payload_rs1_sign = mul_preMul_output_rData_rs1_sign;
+  assign mul_mul_input_payload_rs1_special = mul_preMul_output_rData_rs1_special;
+  assign mul_mul_input_payload_rs2_mantissa = mul_preMul_output_rData_rs2_mantissa;
+  assign mul_mul_input_payload_rs2_exponent = mul_preMul_output_rData_rs2_exponent;
+  assign mul_mul_input_payload_rs2_sign = mul_preMul_output_rData_rs2_sign;
+  assign mul_mul_input_payload_rs2_special = mul_preMul_output_rData_rs2_special;
+  assign mul_mul_input_payload_rs3_mantissa = mul_preMul_output_rData_rs3_mantissa;
+  assign mul_mul_input_payload_rs3_exponent = mul_preMul_output_rData_rs3_exponent;
+  assign mul_mul_input_payload_rs3_sign = mul_preMul_output_rData_rs3_sign;
+  assign mul_mul_input_payload_rs3_special = mul_preMul_output_rData_rs3_special;
+  assign mul_mul_input_payload_rd = mul_preMul_output_rData_rd;
+  assign mul_mul_input_payload_add = mul_preMul_output_rData_add;
+  assign mul_mul_input_payload_divSqrt = mul_preMul_output_rData_divSqrt;
+  assign mul_mul_input_payload_msb1 = mul_preMul_output_rData_msb1;
+  assign mul_mul_input_payload_msb2 = mul_preMul_output_rData_msb2;
+  assign mul_mul_input_payload_roundMode = mul_preMul_output_rData_roundMode;
+  assign mul_mul_input_payload_exp = mul_preMul_output_rData_exp;
+  assign mul_mul_output_valid = mul_mul_input_valid;
+  assign mul_mul_input_ready = mul_mul_output_ready;
+  assign mul_mul_mulA = {mul_mul_input_payload_msb1,mul_mul_input_payload_rs1_mantissa};
+  assign mul_mul_mulB = {mul_mul_input_payload_msb2,mul_mul_input_payload_rs2_mantissa};
+  assign mul_mul_output_payload_rs1_mantissa = mul_mul_input_payload_rs1_mantissa;
+  assign mul_mul_output_payload_rs1_exponent = mul_mul_input_payload_rs1_exponent;
+  assign mul_mul_output_payload_rs1_sign = mul_mul_input_payload_rs1_sign;
+  assign mul_mul_output_payload_rs1_special = mul_mul_input_payload_rs1_special;
+  assign mul_mul_output_payload_rs2_mantissa = mul_mul_input_payload_rs2_mantissa;
+  assign mul_mul_output_payload_rs2_exponent = mul_mul_input_payload_rs2_exponent;
+  assign mul_mul_output_payload_rs2_sign = mul_mul_input_payload_rs2_sign;
+  assign mul_mul_output_payload_rs2_special = mul_mul_input_payload_rs2_special;
+  assign mul_mul_output_payload_rs3_mantissa = mul_mul_input_payload_rs3_mantissa;
+  assign mul_mul_output_payload_rs3_exponent = mul_mul_input_payload_rs3_exponent;
+  assign mul_mul_output_payload_rs3_sign = mul_mul_input_payload_rs3_sign;
+  assign mul_mul_output_payload_rs3_special = mul_mul_input_payload_rs3_special;
+  assign mul_mul_output_payload_rd = mul_mul_input_payload_rd;
+  assign mul_mul_output_payload_add = mul_mul_input_payload_add;
+  assign mul_mul_output_payload_divSqrt = mul_mul_input_payload_divSqrt;
+  assign mul_mul_output_payload_msb1 = mul_mul_input_payload_msb1;
+  assign mul_mul_output_payload_msb2 = mul_mul_input_payload_msb2;
+  assign mul_mul_output_payload_roundMode = mul_mul_input_payload_roundMode;
+  assign mul_mul_output_payload_exp = mul_mul_input_payload_exp;
   assign mul_mul_output_payload_muls_0 = (mul_mul_mulA[17 : 0] * mul_mul_mulB[17 : 0]);
   assign mul_mul_output_payload_muls_1 = (mul_mul_mulA[17 : 0] * mul_mul_mulB[23 : 18]);
   assign mul_mul_output_payload_muls_2 = (mul_mul_mulA[23 : 18] * mul_mul_mulB[17 : 0]);
   assign mul_mul_output_payload_muls_3 = (mul_mul_mulA[23 : 18] * mul_mul_mulB[23 : 18]);
   always @(*) begin
-    mul_mul_output_ready = mul_mul_output_input_ready;
-    if(when_Stream_l342_8) begin
+    mul_mul_output_ready = mul_sum1_input_ready;
+    if(when_Stream_l368_8) begin
       mul_mul_output_ready = 1'b1;
     end
   end
 
-  assign when_Stream_l342_8 = (! mul_mul_output_input_valid);
-  assign mul_mul_output_input_valid = mul_mul_output_rValid;
-  assign mul_mul_output_input_payload_rs1_mantissa = mul_mul_output_rData_rs1_mantissa;
-  assign mul_mul_output_input_payload_rs1_exponent = mul_mul_output_rData_rs1_exponent;
-  assign mul_mul_output_input_payload_rs1_sign = mul_mul_output_rData_rs1_sign;
-  assign mul_mul_output_input_payload_rs1_special = mul_mul_output_rData_rs1_special;
-  assign mul_mul_output_input_payload_rs2_mantissa = mul_mul_output_rData_rs2_mantissa;
-  assign mul_mul_output_input_payload_rs2_exponent = mul_mul_output_rData_rs2_exponent;
-  assign mul_mul_output_input_payload_rs2_sign = mul_mul_output_rData_rs2_sign;
-  assign mul_mul_output_input_payload_rs2_special = mul_mul_output_rData_rs2_special;
-  assign mul_mul_output_input_payload_rs3_mantissa = mul_mul_output_rData_rs3_mantissa;
-  assign mul_mul_output_input_payload_rs3_exponent = mul_mul_output_rData_rs3_exponent;
-  assign mul_mul_output_input_payload_rs3_sign = mul_mul_output_rData_rs3_sign;
-  assign mul_mul_output_input_payload_rs3_special = mul_mul_output_rData_rs3_special;
-  assign mul_mul_output_input_payload_rd = mul_mul_output_rData_rd;
-  assign mul_mul_output_input_payload_add = mul_mul_output_rData_add;
-  assign mul_mul_output_input_payload_divSqrt = mul_mul_output_rData_divSqrt;
-  assign mul_mul_output_input_payload_msb1 = mul_mul_output_rData_msb1;
-  assign mul_mul_output_input_payload_msb2 = mul_mul_output_rData_msb2;
-  assign mul_mul_output_input_payload_roundMode = mul_mul_output_rData_roundMode;
-  assign mul_mul_output_input_payload_exp = mul_mul_output_rData_exp;
-  assign mul_mul_output_input_payload_muls_0 = mul_mul_output_rData_muls_0;
-  assign mul_mul_output_input_payload_muls_1 = mul_mul_output_rData_muls_1;
-  assign mul_mul_output_input_payload_muls_2 = mul_mul_output_rData_muls_2;
-  assign mul_mul_output_input_payload_muls_3 = mul_mul_output_rData_muls_3;
+  assign when_Stream_l368_8 = (! mul_sum1_input_valid);
+  assign mul_sum1_input_valid = mul_mul_output_rValid;
+  assign mul_sum1_input_payload_rs1_mantissa = mul_mul_output_rData_rs1_mantissa;
+  assign mul_sum1_input_payload_rs1_exponent = mul_mul_output_rData_rs1_exponent;
+  assign mul_sum1_input_payload_rs1_sign = mul_mul_output_rData_rs1_sign;
+  assign mul_sum1_input_payload_rs1_special = mul_mul_output_rData_rs1_special;
+  assign mul_sum1_input_payload_rs2_mantissa = mul_mul_output_rData_rs2_mantissa;
+  assign mul_sum1_input_payload_rs2_exponent = mul_mul_output_rData_rs2_exponent;
+  assign mul_sum1_input_payload_rs2_sign = mul_mul_output_rData_rs2_sign;
+  assign mul_sum1_input_payload_rs2_special = mul_mul_output_rData_rs2_special;
+  assign mul_sum1_input_payload_rs3_mantissa = mul_mul_output_rData_rs3_mantissa;
+  assign mul_sum1_input_payload_rs3_exponent = mul_mul_output_rData_rs3_exponent;
+  assign mul_sum1_input_payload_rs3_sign = mul_mul_output_rData_rs3_sign;
+  assign mul_sum1_input_payload_rs3_special = mul_mul_output_rData_rs3_special;
+  assign mul_sum1_input_payload_rd = mul_mul_output_rData_rd;
+  assign mul_sum1_input_payload_add = mul_mul_output_rData_add;
+  assign mul_sum1_input_payload_divSqrt = mul_mul_output_rData_divSqrt;
+  assign mul_sum1_input_payload_msb1 = mul_mul_output_rData_msb1;
+  assign mul_sum1_input_payload_msb2 = mul_mul_output_rData_msb2;
+  assign mul_sum1_input_payload_roundMode = mul_mul_output_rData_roundMode;
+  assign mul_sum1_input_payload_exp = mul_mul_output_rData_exp;
+  assign mul_sum1_input_payload_muls_0 = mul_mul_output_rData_muls_0;
+  assign mul_sum1_input_payload_muls_1 = mul_mul_output_rData_muls_1;
+  assign mul_sum1_input_payload_muls_2 = mul_mul_output_rData_muls_2;
+  assign mul_sum1_input_payload_muls_3 = mul_mul_output_rData_muls_3;
   assign mul_sum1_sum = (_zz_mul_sum1_sum + _zz_mul_sum1_sum_1);
-  assign mul_sum1_output_valid = mul_mul_output_input_valid;
-  assign mul_mul_output_input_ready = mul_sum1_output_ready;
-  assign mul_sum1_output_payload_rs1_mantissa = mul_mul_output_input_payload_rs1_mantissa;
-  assign mul_sum1_output_payload_rs1_exponent = mul_mul_output_input_payload_rs1_exponent;
-  assign mul_sum1_output_payload_rs1_sign = mul_mul_output_input_payload_rs1_sign;
-  assign mul_sum1_output_payload_rs1_special = mul_mul_output_input_payload_rs1_special;
-  assign mul_sum1_output_payload_rs2_mantissa = mul_mul_output_input_payload_rs2_mantissa;
-  assign mul_sum1_output_payload_rs2_exponent = mul_mul_output_input_payload_rs2_exponent;
-  assign mul_sum1_output_payload_rs2_sign = mul_mul_output_input_payload_rs2_sign;
-  assign mul_sum1_output_payload_rs2_special = mul_mul_output_input_payload_rs2_special;
-  assign mul_sum1_output_payload_rs3_mantissa = mul_mul_output_input_payload_rs3_mantissa;
-  assign mul_sum1_output_payload_rs3_exponent = mul_mul_output_input_payload_rs3_exponent;
-  assign mul_sum1_output_payload_rs3_sign = mul_mul_output_input_payload_rs3_sign;
-  assign mul_sum1_output_payload_rs3_special = mul_mul_output_input_payload_rs3_special;
-  assign mul_sum1_output_payload_rd = mul_mul_output_input_payload_rd;
-  assign mul_sum1_output_payload_add = mul_mul_output_input_payload_add;
-  assign mul_sum1_output_payload_divSqrt = mul_mul_output_input_payload_divSqrt;
-  assign mul_sum1_output_payload_msb1 = mul_mul_output_input_payload_msb1;
-  assign mul_sum1_output_payload_msb2 = mul_mul_output_input_payload_msb2;
-  assign mul_sum1_output_payload_roundMode = mul_mul_output_input_payload_roundMode;
-  assign mul_sum1_output_payload_exp = mul_mul_output_input_payload_exp;
+  assign mul_sum1_output_valid = mul_sum1_input_valid;
+  assign mul_sum1_input_ready = mul_sum1_output_ready;
+  assign mul_sum1_output_payload_rs1_mantissa = mul_sum1_input_payload_rs1_mantissa;
+  assign mul_sum1_output_payload_rs1_exponent = mul_sum1_input_payload_rs1_exponent;
+  assign mul_sum1_output_payload_rs1_sign = mul_sum1_input_payload_rs1_sign;
+  assign mul_sum1_output_payload_rs1_special = mul_sum1_input_payload_rs1_special;
+  assign mul_sum1_output_payload_rs2_mantissa = mul_sum1_input_payload_rs2_mantissa;
+  assign mul_sum1_output_payload_rs2_exponent = mul_sum1_input_payload_rs2_exponent;
+  assign mul_sum1_output_payload_rs2_sign = mul_sum1_input_payload_rs2_sign;
+  assign mul_sum1_output_payload_rs2_special = mul_sum1_input_payload_rs2_special;
+  assign mul_sum1_output_payload_rs3_mantissa = mul_sum1_input_payload_rs3_mantissa;
+  assign mul_sum1_output_payload_rs3_exponent = mul_sum1_input_payload_rs3_exponent;
+  assign mul_sum1_output_payload_rs3_sign = mul_sum1_input_payload_rs3_sign;
+  assign mul_sum1_output_payload_rs3_special = mul_sum1_input_payload_rs3_special;
+  assign mul_sum1_output_payload_rd = mul_sum1_input_payload_rd;
+  assign mul_sum1_output_payload_add = mul_sum1_input_payload_add;
+  assign mul_sum1_output_payload_divSqrt = mul_sum1_input_payload_divSqrt;
+  assign mul_sum1_output_payload_msb1 = mul_sum1_input_payload_msb1;
+  assign mul_sum1_output_payload_msb2 = mul_sum1_input_payload_msb2;
+  assign mul_sum1_output_payload_roundMode = mul_sum1_input_payload_roundMode;
+  assign mul_sum1_output_payload_exp = mul_sum1_input_payload_exp;
   assign mul_sum1_output_payload_mulC2 = mul_sum1_sum;
-  assign mul_sum1_output_payload_muls2_0 = mul_mul_output_input_payload_muls_2;
-  assign mul_sum1_output_payload_muls2_1 = mul_mul_output_input_payload_muls_3;
+  assign mul_sum1_output_payload_muls2_0 = mul_sum1_input_payload_muls_2;
+  assign mul_sum1_output_payload_muls2_1 = mul_sum1_input_payload_muls_3;
   always @(*) begin
-    mul_sum1_output_ready = mul_sum1_output_input_ready;
-    if(when_Stream_l342_9) begin
+    mul_sum1_output_ready = mul_sum2_input_ready;
+    if(when_Stream_l368_9) begin
       mul_sum1_output_ready = 1'b1;
     end
   end
 
-  assign when_Stream_l342_9 = (! mul_sum1_output_input_valid);
-  assign mul_sum1_output_input_valid = mul_sum1_output_rValid;
-  assign mul_sum1_output_input_payload_rs1_mantissa = mul_sum1_output_rData_rs1_mantissa;
-  assign mul_sum1_output_input_payload_rs1_exponent = mul_sum1_output_rData_rs1_exponent;
-  assign mul_sum1_output_input_payload_rs1_sign = mul_sum1_output_rData_rs1_sign;
-  assign mul_sum1_output_input_payload_rs1_special = mul_sum1_output_rData_rs1_special;
-  assign mul_sum1_output_input_payload_rs2_mantissa = mul_sum1_output_rData_rs2_mantissa;
-  assign mul_sum1_output_input_payload_rs2_exponent = mul_sum1_output_rData_rs2_exponent;
-  assign mul_sum1_output_input_payload_rs2_sign = mul_sum1_output_rData_rs2_sign;
-  assign mul_sum1_output_input_payload_rs2_special = mul_sum1_output_rData_rs2_special;
-  assign mul_sum1_output_input_payload_rs3_mantissa = mul_sum1_output_rData_rs3_mantissa;
-  assign mul_sum1_output_input_payload_rs3_exponent = mul_sum1_output_rData_rs3_exponent;
-  assign mul_sum1_output_input_payload_rs3_sign = mul_sum1_output_rData_rs3_sign;
-  assign mul_sum1_output_input_payload_rs3_special = mul_sum1_output_rData_rs3_special;
-  assign mul_sum1_output_input_payload_rd = mul_sum1_output_rData_rd;
-  assign mul_sum1_output_input_payload_add = mul_sum1_output_rData_add;
-  assign mul_sum1_output_input_payload_divSqrt = mul_sum1_output_rData_divSqrt;
-  assign mul_sum1_output_input_payload_msb1 = mul_sum1_output_rData_msb1;
-  assign mul_sum1_output_input_payload_msb2 = mul_sum1_output_rData_msb2;
-  assign mul_sum1_output_input_payload_roundMode = mul_sum1_output_rData_roundMode;
-  assign mul_sum1_output_input_payload_exp = mul_sum1_output_rData_exp;
-  assign mul_sum1_output_input_payload_muls2_0 = mul_sum1_output_rData_muls2_0;
-  assign mul_sum1_output_input_payload_muls2_1 = mul_sum1_output_rData_muls2_1;
-  assign mul_sum1_output_input_payload_mulC2 = mul_sum1_output_rData_mulC2;
-  assign mul_sum2_sum = (mul_sum1_output_input_payload_mulC2 + _zz_mul_sum2_sum);
-  assign mul_sum1_output_input_fire = (mul_sum1_output_input_valid && mul_sum1_output_input_ready);
-  assign when_FpuCore_l221_1 = (mul_sum1_output_input_fire && 1'b1);
+  assign when_Stream_l368_9 = (! mul_sum2_input_valid);
+  assign mul_sum2_input_valid = mul_sum1_output_rValid;
+  assign mul_sum2_input_payload_rs1_mantissa = mul_sum1_output_rData_rs1_mantissa;
+  assign mul_sum2_input_payload_rs1_exponent = mul_sum1_output_rData_rs1_exponent;
+  assign mul_sum2_input_payload_rs1_sign = mul_sum1_output_rData_rs1_sign;
+  assign mul_sum2_input_payload_rs1_special = mul_sum1_output_rData_rs1_special;
+  assign mul_sum2_input_payload_rs2_mantissa = mul_sum1_output_rData_rs2_mantissa;
+  assign mul_sum2_input_payload_rs2_exponent = mul_sum1_output_rData_rs2_exponent;
+  assign mul_sum2_input_payload_rs2_sign = mul_sum1_output_rData_rs2_sign;
+  assign mul_sum2_input_payload_rs2_special = mul_sum1_output_rData_rs2_special;
+  assign mul_sum2_input_payload_rs3_mantissa = mul_sum1_output_rData_rs3_mantissa;
+  assign mul_sum2_input_payload_rs3_exponent = mul_sum1_output_rData_rs3_exponent;
+  assign mul_sum2_input_payload_rs3_sign = mul_sum1_output_rData_rs3_sign;
+  assign mul_sum2_input_payload_rs3_special = mul_sum1_output_rData_rs3_special;
+  assign mul_sum2_input_payload_rd = mul_sum1_output_rData_rd;
+  assign mul_sum2_input_payload_add = mul_sum1_output_rData_add;
+  assign mul_sum2_input_payload_divSqrt = mul_sum1_output_rData_divSqrt;
+  assign mul_sum2_input_payload_msb1 = mul_sum1_output_rData_msb1;
+  assign mul_sum2_input_payload_msb2 = mul_sum1_output_rData_msb2;
+  assign mul_sum2_input_payload_roundMode = mul_sum1_output_rData_roundMode;
+  assign mul_sum2_input_payload_exp = mul_sum1_output_rData_exp;
+  assign mul_sum2_input_payload_muls2_0 = mul_sum1_output_rData_muls2_0;
+  assign mul_sum2_input_payload_muls2_1 = mul_sum1_output_rData_muls2_1;
+  assign mul_sum2_input_payload_mulC2 = mul_sum1_output_rData_mulC2;
+  assign mul_sum2_sum = (mul_sum2_input_payload_mulC2 + _zz_mul_sum2_sum);
+  assign mul_sum2_input_fire = (mul_sum2_input_valid && mul_sum2_input_ready);
+  assign when_FpuCore_l221_1 = (mul_sum2_input_fire && 1'b1);
   assign mul_sum2_isCommited = commitLogic_0_mul_notEmpty;
-  assign _zz_mul_sum1_output_input_ready = (! (! mul_sum2_isCommited));
-  assign mul_sum1_output_input_ready = (mul_sum2_output_ready && _zz_mul_sum1_output_input_ready);
-  assign mul_sum2_output_valid = (mul_sum1_output_input_valid && _zz_mul_sum1_output_input_ready);
-  assign mul_sum2_output_payload_rs1_mantissa = mul_sum1_output_input_payload_rs1_mantissa;
-  assign mul_sum2_output_payload_rs1_exponent = mul_sum1_output_input_payload_rs1_exponent;
-  assign mul_sum2_output_payload_rs1_sign = mul_sum1_output_input_payload_rs1_sign;
-  assign mul_sum2_output_payload_rs1_special = mul_sum1_output_input_payload_rs1_special;
-  assign mul_sum2_output_payload_rs2_mantissa = mul_sum1_output_input_payload_rs2_mantissa;
-  assign mul_sum2_output_payload_rs2_exponent = mul_sum1_output_input_payload_rs2_exponent;
-  assign mul_sum2_output_payload_rs2_sign = mul_sum1_output_input_payload_rs2_sign;
-  assign mul_sum2_output_payload_rs2_special = mul_sum1_output_input_payload_rs2_special;
-  assign mul_sum2_output_payload_rs3_mantissa = mul_sum1_output_input_payload_rs3_mantissa;
-  assign mul_sum2_output_payload_rs3_exponent = mul_sum1_output_input_payload_rs3_exponent;
-  assign mul_sum2_output_payload_rs3_sign = mul_sum1_output_input_payload_rs3_sign;
-  assign mul_sum2_output_payload_rs3_special = mul_sum1_output_input_payload_rs3_special;
-  assign mul_sum2_output_payload_rd = mul_sum1_output_input_payload_rd;
-  assign mul_sum2_output_payload_add = mul_sum1_output_input_payload_add;
-  assign mul_sum2_output_payload_divSqrt = mul_sum1_output_input_payload_divSqrt;
-  assign mul_sum2_output_payload_msb1 = mul_sum1_output_input_payload_msb1;
-  assign mul_sum2_output_payload_msb2 = mul_sum1_output_input_payload_msb2;
-  assign mul_sum2_output_payload_roundMode = mul_sum1_output_input_payload_roundMode;
-  assign mul_sum2_output_payload_exp = mul_sum1_output_input_payload_exp;
+  assign _zz_mul_sum2_input_ready = (! (! mul_sum2_isCommited));
+  assign mul_sum2_input_ready = (mul_sum2_output_ready && _zz_mul_sum2_input_ready);
+  assign mul_sum2_output_valid = (mul_sum2_input_valid && _zz_mul_sum2_input_ready);
+  assign mul_sum2_output_payload_rs1_mantissa = mul_sum2_input_payload_rs1_mantissa;
+  assign mul_sum2_output_payload_rs1_exponent = mul_sum2_input_payload_rs1_exponent;
+  assign mul_sum2_output_payload_rs1_sign = mul_sum2_input_payload_rs1_sign;
+  assign mul_sum2_output_payload_rs1_special = mul_sum2_input_payload_rs1_special;
+  assign mul_sum2_output_payload_rs2_mantissa = mul_sum2_input_payload_rs2_mantissa;
+  assign mul_sum2_output_payload_rs2_exponent = mul_sum2_input_payload_rs2_exponent;
+  assign mul_sum2_output_payload_rs2_sign = mul_sum2_input_payload_rs2_sign;
+  assign mul_sum2_output_payload_rs2_special = mul_sum2_input_payload_rs2_special;
+  assign mul_sum2_output_payload_rs3_mantissa = mul_sum2_input_payload_rs3_mantissa;
+  assign mul_sum2_output_payload_rs3_exponent = mul_sum2_input_payload_rs3_exponent;
+  assign mul_sum2_output_payload_rs3_sign = mul_sum2_input_payload_rs3_sign;
+  assign mul_sum2_output_payload_rs3_special = mul_sum2_input_payload_rs3_special;
+  assign mul_sum2_output_payload_rd = mul_sum2_input_payload_rd;
+  assign mul_sum2_output_payload_add = mul_sum2_input_payload_add;
+  assign mul_sum2_output_payload_divSqrt = mul_sum2_input_payload_divSqrt;
+  assign mul_sum2_output_payload_msb1 = mul_sum2_input_payload_msb1;
+  assign mul_sum2_output_payload_msb2 = mul_sum2_input_payload_msb2;
+  assign mul_sum2_output_payload_roundMode = mul_sum2_input_payload_roundMode;
+  assign mul_sum2_output_payload_exp = mul_sum2_input_payload_exp;
   assign mul_sum2_output_payload_mulC = mul_sum2_sum;
   always @(*) begin
-    mul_sum2_output_ready = mul_sum2_output_input_ready;
-    if(when_Stream_l342_10) begin
+    mul_sum2_output_ready = mul_norm_input_ready;
+    if(when_Stream_l368_10) begin
       mul_sum2_output_ready = 1'b1;
     end
   end
 
-  assign when_Stream_l342_10 = (! mul_sum2_output_input_valid);
-  assign mul_sum2_output_input_valid = mul_sum2_output_rValid;
-  assign mul_sum2_output_input_payload_rs1_mantissa = mul_sum2_output_rData_rs1_mantissa;
-  assign mul_sum2_output_input_payload_rs1_exponent = mul_sum2_output_rData_rs1_exponent;
-  assign mul_sum2_output_input_payload_rs1_sign = mul_sum2_output_rData_rs1_sign;
-  assign mul_sum2_output_input_payload_rs1_special = mul_sum2_output_rData_rs1_special;
-  assign mul_sum2_output_input_payload_rs2_mantissa = mul_sum2_output_rData_rs2_mantissa;
-  assign mul_sum2_output_input_payload_rs2_exponent = mul_sum2_output_rData_rs2_exponent;
-  assign mul_sum2_output_input_payload_rs2_sign = mul_sum2_output_rData_rs2_sign;
-  assign mul_sum2_output_input_payload_rs2_special = mul_sum2_output_rData_rs2_special;
-  assign mul_sum2_output_input_payload_rs3_mantissa = mul_sum2_output_rData_rs3_mantissa;
-  assign mul_sum2_output_input_payload_rs3_exponent = mul_sum2_output_rData_rs3_exponent;
-  assign mul_sum2_output_input_payload_rs3_sign = mul_sum2_output_rData_rs3_sign;
-  assign mul_sum2_output_input_payload_rs3_special = mul_sum2_output_rData_rs3_special;
-  assign mul_sum2_output_input_payload_rd = mul_sum2_output_rData_rd;
-  assign mul_sum2_output_input_payload_add = mul_sum2_output_rData_add;
-  assign mul_sum2_output_input_payload_divSqrt = mul_sum2_output_rData_divSqrt;
-  assign mul_sum2_output_input_payload_msb1 = mul_sum2_output_rData_msb1;
-  assign mul_sum2_output_input_payload_msb2 = mul_sum2_output_rData_msb2;
-  assign mul_sum2_output_input_payload_roundMode = mul_sum2_output_rData_roundMode;
-  assign mul_sum2_output_input_payload_exp = mul_sum2_output_rData_exp;
-  assign mul_sum2_output_input_payload_mulC = mul_sum2_output_rData_mulC;
-  assign mul_norm_mulHigh = mul_sum2_output_input_payload_mulC[47 : 22];
-  assign mul_norm_mulLow = mul_sum2_output_input_payload_mulC[21 : 0];
+  assign when_Stream_l368_10 = (! mul_norm_input_valid);
+  assign mul_norm_input_valid = mul_sum2_output_rValid;
+  assign mul_norm_input_payload_rs1_mantissa = mul_sum2_output_rData_rs1_mantissa;
+  assign mul_norm_input_payload_rs1_exponent = mul_sum2_output_rData_rs1_exponent;
+  assign mul_norm_input_payload_rs1_sign = mul_sum2_output_rData_rs1_sign;
+  assign mul_norm_input_payload_rs1_special = mul_sum2_output_rData_rs1_special;
+  assign mul_norm_input_payload_rs2_mantissa = mul_sum2_output_rData_rs2_mantissa;
+  assign mul_norm_input_payload_rs2_exponent = mul_sum2_output_rData_rs2_exponent;
+  assign mul_norm_input_payload_rs2_sign = mul_sum2_output_rData_rs2_sign;
+  assign mul_norm_input_payload_rs2_special = mul_sum2_output_rData_rs2_special;
+  assign mul_norm_input_payload_rs3_mantissa = mul_sum2_output_rData_rs3_mantissa;
+  assign mul_norm_input_payload_rs3_exponent = mul_sum2_output_rData_rs3_exponent;
+  assign mul_norm_input_payload_rs3_sign = mul_sum2_output_rData_rs3_sign;
+  assign mul_norm_input_payload_rs3_special = mul_sum2_output_rData_rs3_special;
+  assign mul_norm_input_payload_rd = mul_sum2_output_rData_rd;
+  assign mul_norm_input_payload_add = mul_sum2_output_rData_add;
+  assign mul_norm_input_payload_divSqrt = mul_sum2_output_rData_divSqrt;
+  assign mul_norm_input_payload_msb1 = mul_sum2_output_rData_msb1;
+  assign mul_norm_input_payload_msb2 = mul_sum2_output_rData_msb2;
+  assign mul_norm_input_payload_roundMode = mul_sum2_output_rData_roundMode;
+  assign mul_norm_input_payload_exp = mul_sum2_output_rData_exp;
+  assign mul_norm_input_payload_mulC = mul_sum2_output_rData_mulC;
+  assign mul_norm_mulHigh = mul_norm_input_payload_mulC[47 : 22];
+  assign mul_norm_mulLow = mul_norm_input_payload_mulC[21 : 0];
   always @(*) begin
     mul_norm_scrap = (mul_norm_mulLow != 22'h0);
     if(when_FpuCore_l967) begin
@@ -13019,17 +13036,17 @@ module FpuCore (
   end
 
   assign mul_norm_needShift = mul_norm_mulHigh[25];
-  assign mul_norm_exp = (mul_sum2_output_input_payload_exp + _zz_mul_norm_exp);
+  assign mul_norm_exp = (mul_norm_input_payload_exp + _zz_mul_norm_exp);
   assign mul_norm_man = (mul_norm_needShift ? mul_norm_mulHigh[24 : 1] : mul_norm_mulHigh[23 : 0]);
   assign when_FpuCore_l967 = (mul_norm_needShift && mul_norm_mulHigh[0]);
-  assign mul_norm_forceZero = ((mul_sum2_output_input_payload_rs1_special && (mul_sum2_output_input_payload_rs1_exponent[1 : 0] == 2'b00)) || (mul_sum2_output_input_payload_rs2_special && (mul_sum2_output_input_payload_rs2_exponent[1 : 0] == 2'b00)));
+  assign mul_norm_forceZero = ((mul_norm_input_payload_rs1_special && (mul_norm_input_payload_rs1_exponent[1 : 0] == 2'b00)) || (mul_norm_input_payload_rs2_special && (mul_norm_input_payload_rs2_exponent[1 : 0] == 2'b00)));
   assign mul_norm_underflowThreshold = 9'h167;
   assign mul_norm_underflowExp = 7'h67;
   assign mul_norm_forceUnderflow = (mul_norm_exp < _zz_mul_norm_forceUnderflow);
-  assign mul_norm_forceOverflow = ((mul_sum2_output_input_payload_rs1_special && (mul_sum2_output_input_payload_rs1_exponent[1 : 0] == 2'b01)) || (mul_sum2_output_input_payload_rs2_special && (mul_sum2_output_input_payload_rs2_exponent[1 : 0] == 2'b01)));
-  assign mul_norm_infinitynan = (((mul_sum2_output_input_payload_rs1_special && (mul_sum2_output_input_payload_rs1_exponent[1 : 0] == 2'b01)) || (mul_sum2_output_input_payload_rs2_special && (mul_sum2_output_input_payload_rs2_exponent[1 : 0] == 2'b01))) && ((mul_sum2_output_input_payload_rs1_special && (mul_sum2_output_input_payload_rs1_exponent[1 : 0] == 2'b00)) || (mul_sum2_output_input_payload_rs2_special && (mul_sum2_output_input_payload_rs2_exponent[1 : 0] == 2'b00))));
-  assign mul_norm_forceNan = (((mul_sum2_output_input_payload_rs1_special && (mul_sum2_output_input_payload_rs1_exponent[1 : 0] == 2'b10)) || (mul_sum2_output_input_payload_rs2_special && (mul_sum2_output_input_payload_rs2_exponent[1 : 0] == 2'b10))) || mul_norm_infinitynan);
-  assign mul_norm_output_sign = (mul_sum2_output_input_payload_rs1_sign ^ mul_sum2_output_input_payload_rs2_sign);
+  assign mul_norm_forceOverflow = ((mul_norm_input_payload_rs1_special && (mul_norm_input_payload_rs1_exponent[1 : 0] == 2'b01)) || (mul_norm_input_payload_rs2_special && (mul_norm_input_payload_rs2_exponent[1 : 0] == 2'b01)));
+  assign mul_norm_infinitynan = (((mul_norm_input_payload_rs1_special && (mul_norm_input_payload_rs1_exponent[1 : 0] == 2'b01)) || (mul_norm_input_payload_rs2_special && (mul_norm_input_payload_rs2_exponent[1 : 0] == 2'b01))) && ((mul_norm_input_payload_rs1_special && (mul_norm_input_payload_rs1_exponent[1 : 0] == 2'b00)) || (mul_norm_input_payload_rs2_special && (mul_norm_input_payload_rs2_exponent[1 : 0] == 2'b00))));
+  assign mul_norm_forceNan = (((mul_norm_input_payload_rs1_special && (mul_norm_input_payload_rs1_exponent[1 : 0] == 2'b10)) || (mul_norm_input_payload_rs2_special && (mul_norm_input_payload_rs2_exponent[1 : 0] == 2'b10))) || mul_norm_infinitynan);
+  assign mul_norm_output_sign = (mul_norm_input_payload_rs1_sign ^ mul_norm_input_payload_rs2_sign);
   always @(*) begin
     mul_norm_output_exponent = _zz_mul_norm_output_exponent[8:0];
     if(when_FpuCore_l983) begin
@@ -13085,12 +13102,12 @@ module FpuCore (
   end
 
   assign when_FpuCore_l983 = (3'b101 <= mul_norm_exp[9 : 7]);
-  assign when_FpuCore_l987 = ((mul_norm_infinitynan || ((mul_sum2_output_input_payload_rs1_special && (mul_sum2_output_input_payload_rs1_exponent[1 : 0] == 2'b10)) && (! mul_sum2_output_input_payload_rs1_mantissa[22]))) || ((mul_sum2_output_input_payload_rs2_special && (mul_sum2_output_input_payload_rs2_exponent[1 : 0] == 2'b10)) && (! mul_sum2_output_input_payload_rs2_mantissa[22])));
-  assign mul_result_notMul_output_valid = (mul_sum2_output_input_valid && mul_sum2_output_input_payload_divSqrt);
-  assign mul_result_notMul_output_payload = mul_sum2_output_input_payload_mulC[46 : 23];
-  assign mul_result_output_valid = ((mul_sum2_output_input_valid && (! mul_sum2_output_input_payload_add)) && (! mul_sum2_output_input_payload_divSqrt));
-  assign mul_result_output_payload_rd = mul_sum2_output_input_payload_rd;
-  assign mul_result_output_payload_roundMode = mul_sum2_output_input_payload_roundMode;
+  assign when_FpuCore_l987 = ((mul_norm_infinitynan || ((mul_norm_input_payload_rs1_special && (mul_norm_input_payload_rs1_exponent[1 : 0] == 2'b10)) && (! mul_norm_input_payload_rs1_mantissa[22]))) || ((mul_norm_input_payload_rs2_special && (mul_norm_input_payload_rs2_exponent[1 : 0] == 2'b10)) && (! mul_norm_input_payload_rs2_mantissa[22])));
+  assign mul_result_notMul_output_valid = (mul_norm_input_valid && mul_norm_input_payload_divSqrt);
+  assign mul_result_notMul_output_payload = mul_norm_input_payload_mulC[46 : 23];
+  assign mul_result_output_valid = ((mul_norm_input_valid && (! mul_norm_input_payload_add)) && (! mul_norm_input_payload_divSqrt));
+  assign mul_result_output_payload_rd = mul_norm_input_payload_rd;
+  assign mul_result_output_payload_roundMode = mul_norm_input_payload_roundMode;
   assign mul_result_output_payload_scrap = mul_norm_scrap;
   assign mul_result_output_payload_value_mantissa = mul_norm_output_mantissa;
   assign mul_result_output_payload_value_exponent = mul_norm_output_exponent;
@@ -13100,12 +13117,12 @@ module FpuCore (
   assign mul_result_output_payload_DZ = 1'b0;
   always @(*) begin
     mul_result_mulToAdd_ready = mul_result_mulToAdd_m2sPipe_ready;
-    if(when_Stream_l342_11) begin
+    if(when_Stream_l368_11) begin
       mul_result_mulToAdd_ready = 1'b1;
     end
   end
 
-  assign when_Stream_l342_11 = (! mul_result_mulToAdd_m2sPipe_valid);
+  assign when_Stream_l368_11 = (! mul_result_mulToAdd_m2sPipe_valid);
   assign mul_result_mulToAdd_m2sPipe_valid = mul_result_mulToAdd_rValid;
   assign mul_result_mulToAdd_m2sPipe_payload_rs1_mantissa = mul_result_mulToAdd_rData_rs1_mantissa;
   assign mul_result_mulToAdd_m2sPipe_payload_rs1_exponent = mul_result_mulToAdd_rData_rs1_exponent;
@@ -13131,7 +13148,7 @@ module FpuCore (
   assign decode_mulToAdd_payload_rd = mul_result_mulToAdd_m2sPipe_payload_rd;
   assign decode_mulToAdd_payload_roundMode = mul_result_mulToAdd_m2sPipe_payload_roundMode;
   assign decode_mulToAdd_payload_needCommit = mul_result_mulToAdd_m2sPipe_payload_needCommit;
-  assign mul_result_mulToAdd_valid = (mul_sum2_output_input_valid && mul_sum2_output_input_payload_add);
+  assign mul_result_mulToAdd_valid = (mul_norm_input_valid && mul_norm_input_payload_add);
   always @(*) begin
     mul_result_mulToAdd_payload_rs1_mantissa = {mul_norm_output_mantissa,mul_norm_scrap};
     if(mul_norm_NV) begin
@@ -13142,27 +13159,27 @@ module FpuCore (
   assign mul_result_mulToAdd_payload_rs1_exponent = mul_norm_output_exponent;
   assign mul_result_mulToAdd_payload_rs1_sign = mul_norm_output_sign;
   assign mul_result_mulToAdd_payload_rs1_special = mul_norm_output_special;
-  assign mul_result_mulToAdd_payload_rs2_exponent = mul_sum2_output_input_payload_rs3_exponent;
-  assign mul_result_mulToAdd_payload_rs2_sign = mul_sum2_output_input_payload_rs3_sign;
-  assign mul_result_mulToAdd_payload_rs2_special = mul_sum2_output_input_payload_rs3_special;
-  assign mul_result_mulToAdd_payload_rs2_mantissa = ({2'd0,mul_sum2_output_input_payload_rs3_mantissa} <<< 2);
-  assign mul_result_mulToAdd_payload_rd = mul_sum2_output_input_payload_rd;
-  assign mul_result_mulToAdd_payload_roundMode = mul_sum2_output_input_payload_roundMode;
+  assign mul_result_mulToAdd_payload_rs2_exponent = mul_norm_input_payload_rs3_exponent;
+  assign mul_result_mulToAdd_payload_rs2_sign = mul_norm_input_payload_rs3_sign;
+  assign mul_result_mulToAdd_payload_rs2_special = mul_norm_input_payload_rs3_special;
+  assign mul_result_mulToAdd_payload_rs2_mantissa = ({2'd0,mul_norm_input_payload_rs3_mantissa} <<< 2);
+  assign mul_result_mulToAdd_payload_rd = mul_norm_input_payload_rd;
+  assign mul_result_mulToAdd_payload_roundMode = mul_norm_input_payload_roundMode;
   assign mul_result_mulToAdd_payload_needCommit = 1'b0;
-  assign mul_sum2_output_input_ready = ((mul_sum2_output_input_payload_add ? mul_result_mulToAdd_ready : mul_result_output_ready) || mul_sum2_output_input_payload_divSqrt);
-  assign decode_div_input_fire = (decode_div_input_valid && decode_div_input_ready);
+  assign mul_norm_input_ready = ((mul_norm_input_payload_add ? mul_result_mulToAdd_ready : mul_result_output_ready) || mul_norm_input_payload_divSqrt);
+  assign div_input_fire = (div_input_valid && div_input_ready);
   assign decode_div_ready = (! decode_div_rValid);
-  assign decode_div_input_valid = decode_div_rValid;
-  assign decode_div_input_payload_rs1_mantissa = decode_div_rData_rs1_mantissa;
-  assign decode_div_input_payload_rs1_exponent = decode_div_rData_rs1_exponent;
-  assign decode_div_input_payload_rs1_sign = decode_div_rData_rs1_sign;
-  assign decode_div_input_payload_rs1_special = decode_div_rData_rs1_special;
-  assign decode_div_input_payload_rs2_mantissa = decode_div_rData_rs2_mantissa;
-  assign decode_div_input_payload_rs2_exponent = decode_div_rData_rs2_exponent;
-  assign decode_div_input_payload_rs2_sign = decode_div_rData_rs2_sign;
-  assign decode_div_input_payload_rs2_special = decode_div_rData_rs2_special;
-  assign decode_div_input_payload_rd = decode_div_rData_rd;
-  assign decode_div_input_payload_roundMode = decode_div_rData_roundMode;
+  assign div_input_valid = decode_div_rValid;
+  assign div_input_payload_rs1_mantissa = decode_div_rData_rs1_mantissa;
+  assign div_input_payload_rs1_exponent = decode_div_rData_rs1_exponent;
+  assign div_input_payload_rs1_sign = decode_div_rData_rs1_sign;
+  assign div_input_payload_rs1_special = decode_div_rData_rs1_special;
+  assign div_input_payload_rs2_mantissa = decode_div_rData_rs2_mantissa;
+  assign div_input_payload_rs2_exponent = decode_div_rData_rs2_exponent;
+  assign div_input_payload_rs2_sign = decode_div_rData_rs2_sign;
+  assign div_input_payload_rs2_special = decode_div_rData_rs2_special;
+  assign div_input_payload_rd = decode_div_rData_rd;
+  assign div_input_payload_roundMode = decode_div_rData_roundMode;
   always @(*) begin
     div_haltIt = 1'b1;
     if(div_divider_io_output_valid) begin
@@ -13170,20 +13187,20 @@ module FpuCore (
     end
   end
 
-  assign decode_div_input_fire_1 = (decode_div_input_valid && decode_div_input_ready);
-  assign when_FpuCore_l221_2 = (decode_div_input_fire_1 && 1'b1);
-  assign _zz_decode_div_input_ready = (! (div_haltIt || (! div_isCommited)));
-  assign decode_div_input_ready = (div_output_ready && _zz_decode_div_input_ready);
-  assign div_output_valid = (decode_div_input_valid && _zz_decode_div_input_ready);
-  assign div_divider_io_input_payload_a = ({1'd0,decode_div_input_payload_rs1_mantissa} <<< 1);
-  assign div_divider_io_input_payload_b = ({1'd0,decode_div_input_payload_rs2_mantissa} <<< 1);
+  assign div_input_fire_1 = (div_input_valid && div_input_ready);
+  assign when_FpuCore_l221_2 = (div_input_fire_1 && 1'b1);
+  assign _zz_div_input_ready = (! (div_haltIt || (! div_isCommited)));
+  assign div_input_ready = (div_output_ready && _zz_div_input_ready);
+  assign div_output_valid = (div_input_valid && _zz_div_input_ready);
+  assign div_divider_io_input_payload_a = ({1'd0,div_input_payload_rs1_mantissa} <<< 1);
+  assign div_divider_io_input_payload_b = ({1'd0,div_input_payload_rs2_mantissa} <<< 1);
   assign div_dividerResult = (div_divider_io_output_payload_result >>> 1);
   assign div_dividerScrap = ((div_divider_io_output_payload_remain != 25'h0) || (div_divider_io_output_payload_result[0 : 0] != 1'b0));
   assign div_divider_io_input_fire = (div_divider_io_input_valid && div_divider_io_input_ready);
   assign when_FpuCore_l1056 = (! div_haltIt);
-  assign div_divider_io_input_valid = (decode_div_input_valid && (! div_cmdSent));
-  assign div_output_payload_rd = decode_div_input_payload_rd;
-  assign div_output_payload_roundMode = decode_div_input_payload_roundMode;
+  assign div_divider_io_input_valid = (div_input_valid && (! div_cmdSent));
+  assign div_output_payload_rd = div_input_payload_rd;
+  assign div_output_payload_roundMode = div_input_payload_roundMode;
   assign div_needShift = (! div_dividerResult[25]);
   assign div_mantissa = (div_needShift ? div_dividerResult[23 : 0] : div_dividerResult[24 : 1]);
   assign div_scrap = (div_dividerScrap || ((! div_needShift) && div_dividerResult[0]));
@@ -13203,7 +13220,7 @@ module FpuCore (
     end
   end
 
-  assign div_output_payload_value_sign = (decode_div_input_payload_rs1_sign ^ decode_div_input_payload_rs2_sign);
+  assign div_output_payload_value_sign = (div_input_payload_rs1_sign ^ div_input_payload_rs2_sign);
   always @(*) begin
     div_output_payload_value_exponent = div_exponent[8:0];
     if(when_FpuCore_l1072) begin
@@ -13242,10 +13259,10 @@ module FpuCore (
   assign div_underflowThreshold = 11'h468;
   assign div_underflowExp = 11'h467;
   assign div_forceUnderflow = (div_exponent < div_underflowThreshold);
-  assign div_forceOverflow = ((decode_div_input_payload_rs1_special && (decode_div_input_payload_rs1_exponent[1 : 0] == 2'b01)) || (decode_div_input_payload_rs2_special && (decode_div_input_payload_rs2_exponent[1 : 0] == 2'b00)));
-  assign div_infinitynan = (((decode_div_input_payload_rs1_special && (decode_div_input_payload_rs1_exponent[1 : 0] == 2'b00)) && (decode_div_input_payload_rs2_special && (decode_div_input_payload_rs2_exponent[1 : 0] == 2'b00))) || ((decode_div_input_payload_rs1_special && (decode_div_input_payload_rs1_exponent[1 : 0] == 2'b01)) && (decode_div_input_payload_rs2_special && (decode_div_input_payload_rs2_exponent[1 : 0] == 2'b01))));
-  assign div_forceNan = (((decode_div_input_payload_rs1_special && (decode_div_input_payload_rs1_exponent[1 : 0] == 2'b10)) || (decode_div_input_payload_rs2_special && (decode_div_input_payload_rs2_exponent[1 : 0] == 2'b10))) || div_infinitynan);
-  assign div_forceZero = ((decode_div_input_payload_rs1_special && (decode_div_input_payload_rs1_exponent[1 : 0] == 2'b00)) || (decode_div_input_payload_rs2_special && (decode_div_input_payload_rs2_exponent[1 : 0] == 2'b01)));
+  assign div_forceOverflow = ((div_input_payload_rs1_special && (div_input_payload_rs1_exponent[1 : 0] == 2'b01)) || (div_input_payload_rs2_special && (div_input_payload_rs2_exponent[1 : 0] == 2'b00)));
+  assign div_infinitynan = (((div_input_payload_rs1_special && (div_input_payload_rs1_exponent[1 : 0] == 2'b00)) && (div_input_payload_rs2_special && (div_input_payload_rs2_exponent[1 : 0] == 2'b00))) || ((div_input_payload_rs1_special && (div_input_payload_rs1_exponent[1 : 0] == 2'b01)) && (div_input_payload_rs2_special && (div_input_payload_rs2_exponent[1 : 0] == 2'b01))));
+  assign div_forceNan = (((div_input_payload_rs1_special && (div_input_payload_rs1_exponent[1 : 0] == 2'b10)) || (div_input_payload_rs2_special && (div_input_payload_rs2_exponent[1 : 0] == 2'b10))) || div_infinitynan);
+  assign div_forceZero = ((div_input_payload_rs1_special && (div_input_payload_rs1_exponent[1 : 0] == 2'b00)) || (div_input_payload_rs2_special && (div_input_payload_rs2_exponent[1 : 0] == 2'b01)));
   always @(*) begin
     div_output_payload_NV = 1'b0;
     if(div_forceNan) begin
@@ -13255,18 +13272,18 @@ module FpuCore (
     end
   end
 
-  assign div_output_payload_DZ = (((! div_forceNan) && (! (decode_div_input_payload_rs1_special && (decode_div_input_payload_rs1_exponent[1 : 0] == 2'b01)))) && (decode_div_input_payload_rs2_special && (decode_div_input_payload_rs2_exponent[1 : 0] == 2'b00)));
+  assign div_output_payload_DZ = (((! div_forceNan) && (! (div_input_payload_rs1_special && (div_input_payload_rs1_exponent[1 : 0] == 2'b01)))) && (div_input_payload_rs2_special && (div_input_payload_rs2_exponent[1 : 0] == 2'b00)));
   assign when_FpuCore_l1089 = (div_exponent[10 : 8] == 3'b111);
-  assign when_FpuCore_l1093 = ((div_infinitynan || ((decode_div_input_payload_rs1_special && (decode_div_input_payload_rs1_exponent[1 : 0] == 2'b10)) && (! decode_div_input_payload_rs1_mantissa[22]))) || ((decode_div_input_payload_rs2_special && (decode_div_input_payload_rs2_exponent[1 : 0] == 2'b10)) && (! decode_div_input_payload_rs2_mantissa[22])));
-  assign decode_sqrt_input_fire = (decode_sqrt_input_valid && decode_sqrt_input_ready);
+  assign when_FpuCore_l1093 = ((div_infinitynan || ((div_input_payload_rs1_special && (div_input_payload_rs1_exponent[1 : 0] == 2'b10)) && (! div_input_payload_rs1_mantissa[22]))) || ((div_input_payload_rs2_special && (div_input_payload_rs2_exponent[1 : 0] == 2'b10)) && (! div_input_payload_rs2_mantissa[22])));
+  assign sqrt_input_fire = (sqrt_input_valid && sqrt_input_ready);
   assign decode_sqrt_ready = (! decode_sqrt_rValid);
-  assign decode_sqrt_input_valid = decode_sqrt_rValid;
-  assign decode_sqrt_input_payload_rs1_mantissa = decode_sqrt_rData_rs1_mantissa;
-  assign decode_sqrt_input_payload_rs1_exponent = decode_sqrt_rData_rs1_exponent;
-  assign decode_sqrt_input_payload_rs1_sign = decode_sqrt_rData_rs1_sign;
-  assign decode_sqrt_input_payload_rs1_special = decode_sqrt_rData_rs1_special;
-  assign decode_sqrt_input_payload_rd = decode_sqrt_rData_rd;
-  assign decode_sqrt_input_payload_roundMode = decode_sqrt_rData_roundMode;
+  assign sqrt_input_valid = decode_sqrt_rValid;
+  assign sqrt_input_payload_rs1_mantissa = decode_sqrt_rData_rs1_mantissa;
+  assign sqrt_input_payload_rs1_exponent = decode_sqrt_rData_rs1_exponent;
+  assign sqrt_input_payload_rs1_sign = decode_sqrt_rData_rs1_sign;
+  assign sqrt_input_payload_rs1_special = decode_sqrt_rData_rs1_special;
+  assign sqrt_input_payload_rd = decode_sqrt_rData_rd;
+  assign sqrt_input_payload_roundMode = decode_sqrt_rData_roundMode;
   always @(*) begin
     sqrt_haltIt = 1'b1;
     if(sqrt_sqrt_io_output_valid) begin
@@ -13274,18 +13291,18 @@ module FpuCore (
     end
   end
 
-  assign decode_sqrt_input_fire_1 = (decode_sqrt_input_valid && decode_sqrt_input_ready);
-  assign when_FpuCore_l221_3 = (decode_sqrt_input_fire_1 && 1'b1);
-  assign _zz_decode_sqrt_input_ready = (! (sqrt_haltIt || (! sqrt_isCommited)));
-  assign decode_sqrt_input_ready = (sqrt_output_ready && _zz_decode_sqrt_input_ready);
-  assign sqrt_output_valid = (decode_sqrt_input_valid && _zz_decode_sqrt_input_ready);
-  assign sqrt_needShift = (! decode_sqrt_input_payload_rs1_exponent[0]);
-  assign sqrt_sqrt_io_input_payload_a = (sqrt_needShift ? {{1'b1,decode_sqrt_input_payload_rs1_mantissa},1'b0} : {2'b01,decode_sqrt_input_payload_rs1_mantissa});
+  assign sqrt_input_fire_1 = (sqrt_input_valid && sqrt_input_ready);
+  assign when_FpuCore_l221_3 = (sqrt_input_fire_1 && 1'b1);
+  assign _zz_sqrt_input_ready = (! (sqrt_haltIt || (! sqrt_isCommited)));
+  assign sqrt_input_ready = (sqrt_output_ready && _zz_sqrt_input_ready);
+  assign sqrt_output_valid = (sqrt_input_valid && _zz_sqrt_input_ready);
+  assign sqrt_needShift = (! sqrt_input_payload_rs1_exponent[0]);
+  assign sqrt_sqrt_io_input_payload_a = (sqrt_needShift ? {{1'b1,sqrt_input_payload_rs1_mantissa},1'b0} : {2'b01,sqrt_input_payload_rs1_mantissa});
   assign sqrt_sqrt_io_input_fire = (sqrt_sqrt_io_input_valid && sqrt_sqrt_io_input_ready);
   assign when_FpuCore_l1118 = (! sqrt_haltIt);
-  assign sqrt_sqrt_io_input_valid = (decode_sqrt_input_valid && (! sqrt_cmdSent));
-  assign sqrt_output_payload_rd = decode_sqrt_input_payload_rd;
-  assign sqrt_output_payload_roundMode = decode_sqrt_input_payload_roundMode;
+  assign sqrt_sqrt_io_input_valid = (sqrt_input_valid && (! sqrt_cmdSent));
+  assign sqrt_output_payload_rd = sqrt_input_payload_rd;
+  assign sqrt_output_payload_roundMode = sqrt_input_payload_roundMode;
   assign sqrt_scrap = (sqrt_sqrt_io_output_payload_remain != 28'h0);
   always @(*) begin
     sqrt_output_payload_value_special = 1'b0;
@@ -13303,7 +13320,7 @@ module FpuCore (
     end
   end
 
-  assign sqrt_output_payload_value_sign = decode_sqrt_input_payload_rs1_sign;
+  assign sqrt_output_payload_value_sign = sqrt_input_payload_rs1_sign;
   always @(*) begin
     sqrt_output_payload_value_exponent = sqrt_exponent;
     if(when_FpuCore_l1137) begin
@@ -13339,15 +13356,15 @@ module FpuCore (
       sqrt_output_payload_NV = 1'b1;
     end
     if(when_FpuCore_l1144) begin
-      sqrt_output_payload_NV = (! decode_sqrt_input_payload_rs1_mantissa[22]);
+      sqrt_output_payload_NV = (! sqrt_input_payload_rs1_mantissa[22]);
     end
   end
 
   assign sqrt_output_payload_DZ = 1'b0;
-  assign sqrt_negative = (((! (decode_sqrt_input_payload_rs1_special && (decode_sqrt_input_payload_rs1_exponent[1 : 0] == 2'b10))) && (! (decode_sqrt_input_payload_rs1_special && (decode_sqrt_input_payload_rs1_exponent[1 : 0] == 2'b00)))) && decode_sqrt_input_payload_rs1_sign);
-  assign when_FpuCore_l1137 = (decode_sqrt_input_payload_rs1_special && (decode_sqrt_input_payload_rs1_exponent[1 : 0] == 2'b01));
-  assign when_FpuCore_l1144 = (decode_sqrt_input_payload_rs1_special && (decode_sqrt_input_payload_rs1_exponent[1 : 0] == 2'b10));
-  assign when_FpuCore_l1148 = (decode_sqrt_input_payload_rs1_special && (decode_sqrt_input_payload_rs1_exponent[1 : 0] == 2'b00));
+  assign sqrt_negative = (((! (sqrt_input_payload_rs1_special && (sqrt_input_payload_rs1_exponent[1 : 0] == 2'b10))) && (! (sqrt_input_payload_rs1_special && (sqrt_input_payload_rs1_exponent[1 : 0] == 2'b00)))) && sqrt_input_payload_rs1_sign);
+  assign when_FpuCore_l1137 = (sqrt_input_payload_rs1_special && (sqrt_input_payload_rs1_exponent[1 : 0] == 2'b01));
+  assign when_FpuCore_l1144 = (sqrt_input_payload_rs1_special && (sqrt_input_payload_rs1_exponent[1 : 0] == 2'b10));
+  assign when_FpuCore_l1148 = (sqrt_input_payload_rs1_special && (sqrt_input_payload_rs1_exponent[1 : 0] == 2'b00));
   assign add_preShifter_input_valid = decode_add_valid;
   assign decode_add_ready = add_preShifter_input_ready;
   assign add_preShifter_input_payload_rs1_mantissa = decode_add_payload_rs1_mantissa;
@@ -13382,50 +13399,50 @@ module FpuCore (
   assign add_preShifter_output_payload_absRs1Bigger = add_preShifter_absRs1Bigger;
   assign add_preShifter_output_payload_rs1ExponentBigger = add_preShifter_rs1ExponentBigger;
   always @(*) begin
-    add_preShifter_output_ready = add_preShifter_output_input_ready;
-    if(when_Stream_l342_12) begin
+    add_preShifter_output_ready = add_shifter_input_ready;
+    if(when_Stream_l368_12) begin
       add_preShifter_output_ready = 1'b1;
     end
   end
 
-  assign when_Stream_l342_12 = (! add_preShifter_output_input_valid);
-  assign add_preShifter_output_input_valid = add_preShifter_output_rValid;
-  assign add_preShifter_output_input_payload_rs1_mantissa = add_preShifter_output_rData_rs1_mantissa;
-  assign add_preShifter_output_input_payload_rs1_exponent = add_preShifter_output_rData_rs1_exponent;
-  assign add_preShifter_output_input_payload_rs1_sign = add_preShifter_output_rData_rs1_sign;
-  assign add_preShifter_output_input_payload_rs1_special = add_preShifter_output_rData_rs1_special;
-  assign add_preShifter_output_input_payload_rs2_mantissa = add_preShifter_output_rData_rs2_mantissa;
-  assign add_preShifter_output_input_payload_rs2_exponent = add_preShifter_output_rData_rs2_exponent;
-  assign add_preShifter_output_input_payload_rs2_sign = add_preShifter_output_rData_rs2_sign;
-  assign add_preShifter_output_input_payload_rs2_special = add_preShifter_output_rData_rs2_special;
-  assign add_preShifter_output_input_payload_rd = add_preShifter_output_rData_rd;
-  assign add_preShifter_output_input_payload_roundMode = add_preShifter_output_rData_roundMode;
-  assign add_preShifter_output_input_payload_needCommit = add_preShifter_output_rData_needCommit;
-  assign add_preShifter_output_input_payload_absRs1Bigger = add_preShifter_output_rData_absRs1Bigger;
-  assign add_preShifter_output_input_payload_rs1ExponentBigger = add_preShifter_output_rData_rs1ExponentBigger;
-  assign add_shifter_output_valid = add_preShifter_output_input_valid;
-  assign add_preShifter_output_input_ready = add_shifter_output_ready;
-  assign add_shifter_output_payload_rs1_mantissa = add_preShifter_output_input_payload_rs1_mantissa;
-  assign add_shifter_output_payload_rs1_exponent = add_preShifter_output_input_payload_rs1_exponent;
-  assign add_shifter_output_payload_rs1_sign = add_preShifter_output_input_payload_rs1_sign;
-  assign add_shifter_output_payload_rs1_special = add_preShifter_output_input_payload_rs1_special;
-  assign add_shifter_output_payload_rs2_mantissa = add_preShifter_output_input_payload_rs2_mantissa;
-  assign add_shifter_output_payload_rs2_exponent = add_preShifter_output_input_payload_rs2_exponent;
-  assign add_shifter_output_payload_rs2_sign = add_preShifter_output_input_payload_rs2_sign;
-  assign add_shifter_output_payload_rs2_special = add_preShifter_output_input_payload_rs2_special;
-  assign add_shifter_output_payload_rd = add_preShifter_output_input_payload_rd;
-  assign add_shifter_output_payload_roundMode = add_preShifter_output_input_payload_roundMode;
-  assign add_shifter_output_payload_needCommit = add_preShifter_output_input_payload_needCommit;
-  assign add_shifter_exp21 = ({1'b0,add_preShifter_output_input_payload_rs2_exponent} - {1'b0,add_preShifter_output_input_payload_rs1_exponent});
+  assign when_Stream_l368_12 = (! add_shifter_input_valid);
+  assign add_shifter_input_valid = add_preShifter_output_rValid;
+  assign add_shifter_input_payload_rs1_mantissa = add_preShifter_output_rData_rs1_mantissa;
+  assign add_shifter_input_payload_rs1_exponent = add_preShifter_output_rData_rs1_exponent;
+  assign add_shifter_input_payload_rs1_sign = add_preShifter_output_rData_rs1_sign;
+  assign add_shifter_input_payload_rs1_special = add_preShifter_output_rData_rs1_special;
+  assign add_shifter_input_payload_rs2_mantissa = add_preShifter_output_rData_rs2_mantissa;
+  assign add_shifter_input_payload_rs2_exponent = add_preShifter_output_rData_rs2_exponent;
+  assign add_shifter_input_payload_rs2_sign = add_preShifter_output_rData_rs2_sign;
+  assign add_shifter_input_payload_rs2_special = add_preShifter_output_rData_rs2_special;
+  assign add_shifter_input_payload_rd = add_preShifter_output_rData_rd;
+  assign add_shifter_input_payload_roundMode = add_preShifter_output_rData_roundMode;
+  assign add_shifter_input_payload_needCommit = add_preShifter_output_rData_needCommit;
+  assign add_shifter_input_payload_absRs1Bigger = add_preShifter_output_rData_absRs1Bigger;
+  assign add_shifter_input_payload_rs1ExponentBigger = add_preShifter_output_rData_rs1ExponentBigger;
+  assign add_shifter_output_valid = add_shifter_input_valid;
+  assign add_shifter_input_ready = add_shifter_output_ready;
+  assign add_shifter_output_payload_rs1_mantissa = add_shifter_input_payload_rs1_mantissa;
+  assign add_shifter_output_payload_rs1_exponent = add_shifter_input_payload_rs1_exponent;
+  assign add_shifter_output_payload_rs1_sign = add_shifter_input_payload_rs1_sign;
+  assign add_shifter_output_payload_rs1_special = add_shifter_input_payload_rs1_special;
+  assign add_shifter_output_payload_rs2_mantissa = add_shifter_input_payload_rs2_mantissa;
+  assign add_shifter_output_payload_rs2_exponent = add_shifter_input_payload_rs2_exponent;
+  assign add_shifter_output_payload_rs2_sign = add_shifter_input_payload_rs2_sign;
+  assign add_shifter_output_payload_rs2_special = add_shifter_input_payload_rs2_special;
+  assign add_shifter_output_payload_rd = add_shifter_input_payload_rd;
+  assign add_shifter_output_payload_roundMode = add_shifter_input_payload_roundMode;
+  assign add_shifter_output_payload_needCommit = add_shifter_input_payload_needCommit;
+  assign add_shifter_exp21 = ({1'b0,add_shifter_input_payload_rs2_exponent} - {1'b0,add_shifter_input_payload_rs1_exponent});
   assign _zz_add_shifter_shiftBy = add_shifter_exp21;
   assign add_shifter_shiftBy = (_zz_add_shifter_shiftBy_1 + _zz_add_shifter_shiftBy_3);
   assign add_shifter_shiftOverflow = (10'h01a <= add_shifter_shiftBy);
-  assign add_shifter_passThrough = ((add_shifter_shiftOverflow || (add_preShifter_output_input_payload_rs1_special && (add_preShifter_output_input_payload_rs1_exponent[1 : 0] == 2'b00))) || (add_preShifter_output_input_payload_rs2_special && (add_preShifter_output_input_payload_rs2_exponent[1 : 0] == 2'b00)));
-  assign add_shifter_xySign = (add_preShifter_output_input_payload_absRs1Bigger ? add_preShifter_output_input_payload_rs1_sign : add_preShifter_output_input_payload_rs2_sign);
-  assign add_shifter_output_payload_xSign = (add_shifter_xySign ^ (add_preShifter_output_input_payload_rs1ExponentBigger ? add_preShifter_output_input_payload_rs1_sign : add_preShifter_output_input_payload_rs2_sign));
-  assign add_shifter_output_payload_ySign = (add_shifter_xySign ^ (add_preShifter_output_input_payload_rs1ExponentBigger ? add_preShifter_output_input_payload_rs2_sign : add_preShifter_output_input_payload_rs1_sign));
-  assign add_shifter_xMantissa = {1'b1,(add_preShifter_output_input_payload_rs1ExponentBigger ? add_preShifter_output_input_payload_rs1_mantissa : add_preShifter_output_input_payload_rs2_mantissa)};
-  assign add_shifter_yMantissaUnshifted = {1'b1,(add_preShifter_output_input_payload_rs1ExponentBigger ? add_preShifter_output_input_payload_rs2_mantissa : add_preShifter_output_input_payload_rs1_mantissa)};
+  assign add_shifter_passThrough = ((add_shifter_shiftOverflow || (add_shifter_input_payload_rs1_special && (add_shifter_input_payload_rs1_exponent[1 : 0] == 2'b00))) || (add_shifter_input_payload_rs2_special && (add_shifter_input_payload_rs2_exponent[1 : 0] == 2'b00)));
+  assign add_shifter_xySign = (add_shifter_input_payload_absRs1Bigger ? add_shifter_input_payload_rs1_sign : add_shifter_input_payload_rs2_sign);
+  assign add_shifter_output_payload_xSign = (add_shifter_xySign ^ (add_shifter_input_payload_rs1ExponentBigger ? add_shifter_input_payload_rs1_sign : add_shifter_input_payload_rs2_sign));
+  assign add_shifter_output_payload_ySign = (add_shifter_xySign ^ (add_shifter_input_payload_rs1ExponentBigger ? add_shifter_input_payload_rs2_sign : add_shifter_input_payload_rs1_sign));
+  assign add_shifter_xMantissa = {1'b1,(add_shifter_input_payload_rs1ExponentBigger ? add_shifter_input_payload_rs1_mantissa : add_shifter_input_payload_rs2_mantissa)};
+  assign add_shifter_yMantissaUnshifted = {1'b1,(add_shifter_input_payload_rs1ExponentBigger ? add_shifter_input_payload_rs2_mantissa : add_shifter_input_payload_rs1_mantissa)};
   assign add_shifter_yMantissa = add_shifter_yMantissaUnshifted;
   always @(*) begin
     add_shifter_roundingScrap = 1'b0;
@@ -13457,115 +13474,115 @@ module FpuCore (
   assign when_FpuCore_l1419_2 = (add_shifter_shiftBy[2] && (add_shifter_yMantissa_2[3 : 0] != 4'b0000));
   assign when_FpuCore_l1419_3 = (add_shifter_shiftBy[1] && (add_shifter_yMantissa_3[1 : 0] != 2'b00));
   assign when_FpuCore_l1419_4 = (add_shifter_shiftBy[0] && (add_shifter_yMantissa_4[0 : 0] != 1'b0));
-  assign when_FpuCore_l1424 = (add_preShifter_output_input_payload_rs1_special || add_preShifter_output_input_payload_rs2_special);
-  assign add_shifter_output_payload_xyExponent = (add_preShifter_output_input_payload_rs1ExponentBigger ? add_preShifter_output_input_payload_rs1_exponent : add_preShifter_output_input_payload_rs2_exponent);
+  assign when_FpuCore_l1424 = (add_shifter_input_payload_rs1_special || add_shifter_input_payload_rs2_special);
+  assign add_shifter_output_payload_xyExponent = (add_shifter_input_payload_rs1ExponentBigger ? add_shifter_input_payload_rs1_exponent : add_shifter_input_payload_rs2_exponent);
   assign add_shifter_output_payload_xMantissa = add_shifter_xMantissa;
   assign add_shifter_output_payload_yMantissa = add_shifter_yMantissa_5;
   assign add_shifter_output_payload_xySign = add_shifter_xySign;
   assign add_shifter_output_payload_roundingScrap = add_shifter_roundingScrap;
   always @(*) begin
-    add_shifter_output_ready = add_shifter_output_input_ready;
-    if(when_Stream_l342_13) begin
+    add_shifter_output_ready = add_math_input_ready;
+    if(when_Stream_l368_13) begin
       add_shifter_output_ready = 1'b1;
     end
   end
 
-  assign when_Stream_l342_13 = (! add_shifter_output_input_valid);
-  assign add_shifter_output_input_valid = add_shifter_output_rValid;
-  assign add_shifter_output_input_payload_rs1_mantissa = add_shifter_output_rData_rs1_mantissa;
-  assign add_shifter_output_input_payload_rs1_exponent = add_shifter_output_rData_rs1_exponent;
-  assign add_shifter_output_input_payload_rs1_sign = add_shifter_output_rData_rs1_sign;
-  assign add_shifter_output_input_payload_rs1_special = add_shifter_output_rData_rs1_special;
-  assign add_shifter_output_input_payload_rs2_mantissa = add_shifter_output_rData_rs2_mantissa;
-  assign add_shifter_output_input_payload_rs2_exponent = add_shifter_output_rData_rs2_exponent;
-  assign add_shifter_output_input_payload_rs2_sign = add_shifter_output_rData_rs2_sign;
-  assign add_shifter_output_input_payload_rs2_special = add_shifter_output_rData_rs2_special;
-  assign add_shifter_output_input_payload_rd = add_shifter_output_rData_rd;
-  assign add_shifter_output_input_payload_roundMode = add_shifter_output_rData_roundMode;
-  assign add_shifter_output_input_payload_needCommit = add_shifter_output_rData_needCommit;
-  assign add_shifter_output_input_payload_xSign = add_shifter_output_rData_xSign;
-  assign add_shifter_output_input_payload_ySign = add_shifter_output_rData_ySign;
-  assign add_shifter_output_input_payload_xMantissa = add_shifter_output_rData_xMantissa;
-  assign add_shifter_output_input_payload_yMantissa = add_shifter_output_rData_yMantissa;
-  assign add_shifter_output_input_payload_xyExponent = add_shifter_output_rData_xyExponent;
-  assign add_shifter_output_input_payload_xySign = add_shifter_output_rData_xySign;
-  assign add_shifter_output_input_payload_roundingScrap = add_shifter_output_rData_roundingScrap;
-  assign add_math_output_valid = add_shifter_output_input_valid;
-  assign add_shifter_output_input_ready = add_math_output_ready;
-  assign add_math_output_payload_rs1_mantissa = add_shifter_output_input_payload_rs1_mantissa;
-  assign add_math_output_payload_rs1_exponent = add_shifter_output_input_payload_rs1_exponent;
-  assign add_math_output_payload_rs1_sign = add_shifter_output_input_payload_rs1_sign;
-  assign add_math_output_payload_rs1_special = add_shifter_output_input_payload_rs1_special;
-  assign add_math_output_payload_rs2_mantissa = add_shifter_output_input_payload_rs2_mantissa;
-  assign add_math_output_payload_rs2_exponent = add_shifter_output_input_payload_rs2_exponent;
-  assign add_math_output_payload_rs2_sign = add_shifter_output_input_payload_rs2_sign;
-  assign add_math_output_payload_rs2_special = add_shifter_output_input_payload_rs2_special;
-  assign add_math_output_payload_rd = add_shifter_output_input_payload_rd;
-  assign add_math_output_payload_roundMode = add_shifter_output_input_payload_roundMode;
-  assign add_math_output_payload_needCommit = add_shifter_output_input_payload_needCommit;
-  assign add_math_output_payload_xSign = add_shifter_output_input_payload_xSign;
-  assign add_math_output_payload_ySign = add_shifter_output_input_payload_ySign;
-  assign add_math_output_payload_xMantissa = add_shifter_output_input_payload_xMantissa;
-  assign add_math_output_payload_yMantissa = add_shifter_output_input_payload_yMantissa;
-  assign add_math_output_payload_xyExponent = add_shifter_output_input_payload_xyExponent;
-  assign add_math_output_payload_xySign = add_shifter_output_input_payload_xySign;
-  assign add_math_output_payload_roundingScrap = add_shifter_output_input_payload_roundingScrap;
+  assign when_Stream_l368_13 = (! add_math_input_valid);
+  assign add_math_input_valid = add_shifter_output_rValid;
+  assign add_math_input_payload_rs1_mantissa = add_shifter_output_rData_rs1_mantissa;
+  assign add_math_input_payload_rs1_exponent = add_shifter_output_rData_rs1_exponent;
+  assign add_math_input_payload_rs1_sign = add_shifter_output_rData_rs1_sign;
+  assign add_math_input_payload_rs1_special = add_shifter_output_rData_rs1_special;
+  assign add_math_input_payload_rs2_mantissa = add_shifter_output_rData_rs2_mantissa;
+  assign add_math_input_payload_rs2_exponent = add_shifter_output_rData_rs2_exponent;
+  assign add_math_input_payload_rs2_sign = add_shifter_output_rData_rs2_sign;
+  assign add_math_input_payload_rs2_special = add_shifter_output_rData_rs2_special;
+  assign add_math_input_payload_rd = add_shifter_output_rData_rd;
+  assign add_math_input_payload_roundMode = add_shifter_output_rData_roundMode;
+  assign add_math_input_payload_needCommit = add_shifter_output_rData_needCommit;
+  assign add_math_input_payload_xSign = add_shifter_output_rData_xSign;
+  assign add_math_input_payload_ySign = add_shifter_output_rData_ySign;
+  assign add_math_input_payload_xMantissa = add_shifter_output_rData_xMantissa;
+  assign add_math_input_payload_yMantissa = add_shifter_output_rData_yMantissa;
+  assign add_math_input_payload_xyExponent = add_shifter_output_rData_xyExponent;
+  assign add_math_input_payload_xySign = add_shifter_output_rData_xySign;
+  assign add_math_input_payload_roundingScrap = add_shifter_output_rData_roundingScrap;
+  assign add_math_output_valid = add_math_input_valid;
+  assign add_math_input_ready = add_math_output_ready;
+  assign add_math_output_payload_rs1_mantissa = add_math_input_payload_rs1_mantissa;
+  assign add_math_output_payload_rs1_exponent = add_math_input_payload_rs1_exponent;
+  assign add_math_output_payload_rs1_sign = add_math_input_payload_rs1_sign;
+  assign add_math_output_payload_rs1_special = add_math_input_payload_rs1_special;
+  assign add_math_output_payload_rs2_mantissa = add_math_input_payload_rs2_mantissa;
+  assign add_math_output_payload_rs2_exponent = add_math_input_payload_rs2_exponent;
+  assign add_math_output_payload_rs2_sign = add_math_input_payload_rs2_sign;
+  assign add_math_output_payload_rs2_special = add_math_input_payload_rs2_special;
+  assign add_math_output_payload_rd = add_math_input_payload_rd;
+  assign add_math_output_payload_roundMode = add_math_input_payload_roundMode;
+  assign add_math_output_payload_needCommit = add_math_input_payload_needCommit;
+  assign add_math_output_payload_xSign = add_math_input_payload_xSign;
+  assign add_math_output_payload_ySign = add_math_input_payload_ySign;
+  assign add_math_output_payload_xMantissa = add_math_input_payload_xMantissa;
+  assign add_math_output_payload_yMantissa = add_math_input_payload_yMantissa;
+  assign add_math_output_payload_xyExponent = add_math_input_payload_xyExponent;
+  assign add_math_output_payload_xySign = add_math_input_payload_xySign;
+  assign add_math_output_payload_roundingScrap = add_math_input_payload_roundingScrap;
   assign add_math_xSigned = _zz_add_math_xSigned;
   assign add_math_ySigned = _zz_add_math_ySigned;
   assign add_math_output_payload_xyMantissa = _zz_add_math_output_payload_xyMantissa[26 : 0];
   always @(*) begin
-    add_math_output_ready = add_math_output_input_ready;
-    if(when_Stream_l342_14) begin
+    add_math_output_ready = add_oh_input_ready;
+    if(when_Stream_l368_14) begin
       add_math_output_ready = 1'b1;
     end
   end
 
-  assign when_Stream_l342_14 = (! add_math_output_input_valid);
-  assign add_math_output_input_valid = add_math_output_rValid;
-  assign add_math_output_input_payload_rs1_mantissa = add_math_output_rData_rs1_mantissa;
-  assign add_math_output_input_payload_rs1_exponent = add_math_output_rData_rs1_exponent;
-  assign add_math_output_input_payload_rs1_sign = add_math_output_rData_rs1_sign;
-  assign add_math_output_input_payload_rs1_special = add_math_output_rData_rs1_special;
-  assign add_math_output_input_payload_rs2_mantissa = add_math_output_rData_rs2_mantissa;
-  assign add_math_output_input_payload_rs2_exponent = add_math_output_rData_rs2_exponent;
-  assign add_math_output_input_payload_rs2_sign = add_math_output_rData_rs2_sign;
-  assign add_math_output_input_payload_rs2_special = add_math_output_rData_rs2_special;
-  assign add_math_output_input_payload_rd = add_math_output_rData_rd;
-  assign add_math_output_input_payload_roundMode = add_math_output_rData_roundMode;
-  assign add_math_output_input_payload_needCommit = add_math_output_rData_needCommit;
-  assign add_math_output_input_payload_xSign = add_math_output_rData_xSign;
-  assign add_math_output_input_payload_ySign = add_math_output_rData_ySign;
-  assign add_math_output_input_payload_xMantissa = add_math_output_rData_xMantissa;
-  assign add_math_output_input_payload_yMantissa = add_math_output_rData_yMantissa;
-  assign add_math_output_input_payload_xyExponent = add_math_output_rData_xyExponent;
-  assign add_math_output_input_payload_xySign = add_math_output_rData_xySign;
-  assign add_math_output_input_payload_roundingScrap = add_math_output_rData_roundingScrap;
-  assign add_math_output_input_payload_xyMantissa = add_math_output_rData_xyMantissa;
-  assign add_math_output_input_fire = (add_math_output_input_valid && add_math_output_input_ready);
-  assign when_FpuCore_l221_4 = ((add_math_output_input_fire && add_math_output_input_payload_needCommit) && 1'b1);
+  assign when_Stream_l368_14 = (! add_oh_input_valid);
+  assign add_oh_input_valid = add_math_output_rValid;
+  assign add_oh_input_payload_rs1_mantissa = add_math_output_rData_rs1_mantissa;
+  assign add_oh_input_payload_rs1_exponent = add_math_output_rData_rs1_exponent;
+  assign add_oh_input_payload_rs1_sign = add_math_output_rData_rs1_sign;
+  assign add_oh_input_payload_rs1_special = add_math_output_rData_rs1_special;
+  assign add_oh_input_payload_rs2_mantissa = add_math_output_rData_rs2_mantissa;
+  assign add_oh_input_payload_rs2_exponent = add_math_output_rData_rs2_exponent;
+  assign add_oh_input_payload_rs2_sign = add_math_output_rData_rs2_sign;
+  assign add_oh_input_payload_rs2_special = add_math_output_rData_rs2_special;
+  assign add_oh_input_payload_rd = add_math_output_rData_rd;
+  assign add_oh_input_payload_roundMode = add_math_output_rData_roundMode;
+  assign add_oh_input_payload_needCommit = add_math_output_rData_needCommit;
+  assign add_oh_input_payload_xSign = add_math_output_rData_xSign;
+  assign add_oh_input_payload_ySign = add_math_output_rData_ySign;
+  assign add_oh_input_payload_xMantissa = add_math_output_rData_xMantissa;
+  assign add_oh_input_payload_yMantissa = add_math_output_rData_yMantissa;
+  assign add_oh_input_payload_xyExponent = add_math_output_rData_xyExponent;
+  assign add_oh_input_payload_xySign = add_math_output_rData_xySign;
+  assign add_oh_input_payload_roundingScrap = add_math_output_rData_roundingScrap;
+  assign add_oh_input_payload_xyMantissa = add_math_output_rData_xyMantissa;
+  assign add_oh_input_fire = (add_oh_input_valid && add_oh_input_ready);
+  assign when_FpuCore_l221_4 = ((add_oh_input_fire && add_oh_input_payload_needCommit) && 1'b1);
   assign add_oh_isCommited = commitLogic_0_add_notEmpty;
-  assign _zz_add_math_output_input_ready = (! (add_math_output_input_payload_needCommit && (! add_oh_isCommited)));
-  assign add_math_output_input_ready = (add_oh_output_ready && _zz_add_math_output_input_ready);
-  assign add_oh_output_valid = (add_math_output_input_valid && _zz_add_math_output_input_ready);
-  assign add_oh_output_payload_rs1_mantissa = add_math_output_input_payload_rs1_mantissa;
-  assign add_oh_output_payload_rs1_exponent = add_math_output_input_payload_rs1_exponent;
-  assign add_oh_output_payload_rs1_sign = add_math_output_input_payload_rs1_sign;
-  assign add_oh_output_payload_rs1_special = add_math_output_input_payload_rs1_special;
-  assign add_oh_output_payload_rs2_mantissa = add_math_output_input_payload_rs2_mantissa;
-  assign add_oh_output_payload_rs2_exponent = add_math_output_input_payload_rs2_exponent;
-  assign add_oh_output_payload_rs2_sign = add_math_output_input_payload_rs2_sign;
-  assign add_oh_output_payload_rs2_special = add_math_output_input_payload_rs2_special;
-  assign add_oh_output_payload_rd = add_math_output_input_payload_rd;
-  assign add_oh_output_payload_roundMode = add_math_output_input_payload_roundMode;
-  assign add_oh_output_payload_needCommit = add_math_output_input_payload_needCommit;
-  assign add_oh_output_payload_xSign = add_math_output_input_payload_xSign;
-  assign add_oh_output_payload_ySign = add_math_output_input_payload_ySign;
-  assign add_oh_output_payload_xMantissa = add_math_output_input_payload_xMantissa;
-  assign add_oh_output_payload_yMantissa = add_math_output_input_payload_yMantissa;
-  assign add_oh_output_payload_xyExponent = add_math_output_input_payload_xyExponent;
-  assign add_oh_output_payload_xySign = add_math_output_input_payload_xySign;
-  assign add_oh_output_payload_roundingScrap = add_math_output_input_payload_roundingScrap;
-  assign add_oh_output_payload_xyMantissa = add_math_output_input_payload_xyMantissa;
+  assign _zz_add_oh_input_ready = (! (add_oh_input_payload_needCommit && (! add_oh_isCommited)));
+  assign add_oh_input_ready = (add_oh_output_ready && _zz_add_oh_input_ready);
+  assign add_oh_output_valid = (add_oh_input_valid && _zz_add_oh_input_ready);
+  assign add_oh_output_payload_rs1_mantissa = add_oh_input_payload_rs1_mantissa;
+  assign add_oh_output_payload_rs1_exponent = add_oh_input_payload_rs1_exponent;
+  assign add_oh_output_payload_rs1_sign = add_oh_input_payload_rs1_sign;
+  assign add_oh_output_payload_rs1_special = add_oh_input_payload_rs1_special;
+  assign add_oh_output_payload_rs2_mantissa = add_oh_input_payload_rs2_mantissa;
+  assign add_oh_output_payload_rs2_exponent = add_oh_input_payload_rs2_exponent;
+  assign add_oh_output_payload_rs2_sign = add_oh_input_payload_rs2_sign;
+  assign add_oh_output_payload_rs2_special = add_oh_input_payload_rs2_special;
+  assign add_oh_output_payload_rd = add_oh_input_payload_rd;
+  assign add_oh_output_payload_roundMode = add_oh_input_payload_roundMode;
+  assign add_oh_output_payload_needCommit = add_oh_input_payload_needCommit;
+  assign add_oh_output_payload_xSign = add_oh_input_payload_xSign;
+  assign add_oh_output_payload_ySign = add_oh_input_payload_ySign;
+  assign add_oh_output_payload_xMantissa = add_oh_input_payload_xMantissa;
+  assign add_oh_output_payload_yMantissa = add_oh_input_payload_yMantissa;
+  assign add_oh_output_payload_xyExponent = add_oh_input_payload_xyExponent;
+  assign add_oh_output_payload_xySign = add_oh_input_payload_xySign;
+  assign add_oh_output_payload_roundingScrap = add_oh_input_payload_roundingScrap;
+  assign add_oh_output_payload_xyMantissa = add_oh_input_payload_xyMantissa;
   assign _zz_add_oh_shift = {add_oh_output_payload_xyMantissa[0],{add_oh_output_payload_xyMantissa[1],{add_oh_output_payload_xyMantissa[2],{add_oh_output_payload_xyMantissa[3],{add_oh_output_payload_xyMantissa[4],{add_oh_output_payload_xyMantissa[5],{add_oh_output_payload_xyMantissa[6],{add_oh_output_payload_xyMantissa[7],{add_oh_output_payload_xyMantissa[8],{_zz__zz_add_oh_shift,{_zz__zz_add_oh_shift_1,_zz__zz_add_oh_shift_2}}}}}}}}}}};
   assign _zz_add_oh_shift_1 = (_zz_add_oh_shift & (~ _zz__zz_add_oh_shift_1_1));
   assign _zz_add_oh_shift_2 = _zz_add_oh_shift_1[3];
@@ -13597,56 +13614,56 @@ module FpuCore (
   assign add_oh_shift = {_zz_add_oh_shift_27,{_zz_add_oh_shift_26,{_zz_add_oh_shift_25,{_zz_add_oh_shift_24,_zz_add_oh_shift_23}}}};
   assign add_oh_output_payload_shift = add_oh_shift;
   always @(*) begin
-    add_oh_output_ready = add_oh_output_input_ready;
-    if(when_Stream_l342_15) begin
+    add_oh_output_ready = add_norm_input_ready;
+    if(when_Stream_l368_15) begin
       add_oh_output_ready = 1'b1;
     end
   end
 
-  assign when_Stream_l342_15 = (! add_oh_output_input_valid);
-  assign add_oh_output_input_valid = add_oh_output_rValid;
-  assign add_oh_output_input_payload_rs1_mantissa = add_oh_output_rData_rs1_mantissa;
-  assign add_oh_output_input_payload_rs1_exponent = add_oh_output_rData_rs1_exponent;
-  assign add_oh_output_input_payload_rs1_sign = add_oh_output_rData_rs1_sign;
-  assign add_oh_output_input_payload_rs1_special = add_oh_output_rData_rs1_special;
-  assign add_oh_output_input_payload_rs2_mantissa = add_oh_output_rData_rs2_mantissa;
-  assign add_oh_output_input_payload_rs2_exponent = add_oh_output_rData_rs2_exponent;
-  assign add_oh_output_input_payload_rs2_sign = add_oh_output_rData_rs2_sign;
-  assign add_oh_output_input_payload_rs2_special = add_oh_output_rData_rs2_special;
-  assign add_oh_output_input_payload_rd = add_oh_output_rData_rd;
-  assign add_oh_output_input_payload_roundMode = add_oh_output_rData_roundMode;
-  assign add_oh_output_input_payload_needCommit = add_oh_output_rData_needCommit;
-  assign add_oh_output_input_payload_xSign = add_oh_output_rData_xSign;
-  assign add_oh_output_input_payload_ySign = add_oh_output_rData_ySign;
-  assign add_oh_output_input_payload_xMantissa = add_oh_output_rData_xMantissa;
-  assign add_oh_output_input_payload_yMantissa = add_oh_output_rData_yMantissa;
-  assign add_oh_output_input_payload_xyExponent = add_oh_output_rData_xyExponent;
-  assign add_oh_output_input_payload_xySign = add_oh_output_rData_xySign;
-  assign add_oh_output_input_payload_roundingScrap = add_oh_output_rData_roundingScrap;
-  assign add_oh_output_input_payload_xyMantissa = add_oh_output_rData_xyMantissa;
-  assign add_oh_output_input_payload_shift = add_oh_output_rData_shift;
-  assign add_norm_output_valid = add_oh_output_input_valid;
-  assign add_oh_output_input_ready = add_norm_output_ready;
-  assign add_norm_output_payload_rs1_mantissa = add_oh_output_input_payload_rs1_mantissa;
-  assign add_norm_output_payload_rs1_exponent = add_oh_output_input_payload_rs1_exponent;
-  assign add_norm_output_payload_rs1_sign = add_oh_output_input_payload_rs1_sign;
-  assign add_norm_output_payload_rs1_special = add_oh_output_input_payload_rs1_special;
-  assign add_norm_output_payload_rs2_mantissa = add_oh_output_input_payload_rs2_mantissa;
-  assign add_norm_output_payload_rs2_exponent = add_oh_output_input_payload_rs2_exponent;
-  assign add_norm_output_payload_rs2_sign = add_oh_output_input_payload_rs2_sign;
-  assign add_norm_output_payload_rs2_special = add_oh_output_input_payload_rs2_special;
-  assign add_norm_output_payload_rd = add_oh_output_input_payload_rd;
-  assign add_norm_output_payload_roundMode = add_oh_output_input_payload_roundMode;
-  assign add_norm_output_payload_needCommit = add_oh_output_input_payload_needCommit;
-  assign add_norm_output_payload_xySign = add_oh_output_input_payload_xySign;
-  assign add_norm_output_payload_roundingScrap = add_oh_output_input_payload_roundingScrap;
-  assign add_norm_output_payload_mantissa = (add_oh_output_input_payload_xyMantissa <<< add_oh_output_input_payload_shift);
+  assign when_Stream_l368_15 = (! add_norm_input_valid);
+  assign add_norm_input_valid = add_oh_output_rValid;
+  assign add_norm_input_payload_rs1_mantissa = add_oh_output_rData_rs1_mantissa;
+  assign add_norm_input_payload_rs1_exponent = add_oh_output_rData_rs1_exponent;
+  assign add_norm_input_payload_rs1_sign = add_oh_output_rData_rs1_sign;
+  assign add_norm_input_payload_rs1_special = add_oh_output_rData_rs1_special;
+  assign add_norm_input_payload_rs2_mantissa = add_oh_output_rData_rs2_mantissa;
+  assign add_norm_input_payload_rs2_exponent = add_oh_output_rData_rs2_exponent;
+  assign add_norm_input_payload_rs2_sign = add_oh_output_rData_rs2_sign;
+  assign add_norm_input_payload_rs2_special = add_oh_output_rData_rs2_special;
+  assign add_norm_input_payload_rd = add_oh_output_rData_rd;
+  assign add_norm_input_payload_roundMode = add_oh_output_rData_roundMode;
+  assign add_norm_input_payload_needCommit = add_oh_output_rData_needCommit;
+  assign add_norm_input_payload_xSign = add_oh_output_rData_xSign;
+  assign add_norm_input_payload_ySign = add_oh_output_rData_ySign;
+  assign add_norm_input_payload_xMantissa = add_oh_output_rData_xMantissa;
+  assign add_norm_input_payload_yMantissa = add_oh_output_rData_yMantissa;
+  assign add_norm_input_payload_xyExponent = add_oh_output_rData_xyExponent;
+  assign add_norm_input_payload_xySign = add_oh_output_rData_xySign;
+  assign add_norm_input_payload_roundingScrap = add_oh_output_rData_roundingScrap;
+  assign add_norm_input_payload_xyMantissa = add_oh_output_rData_xyMantissa;
+  assign add_norm_input_payload_shift = add_oh_output_rData_shift;
+  assign add_norm_output_valid = add_norm_input_valid;
+  assign add_norm_input_ready = add_norm_output_ready;
+  assign add_norm_output_payload_rs1_mantissa = add_norm_input_payload_rs1_mantissa;
+  assign add_norm_output_payload_rs1_exponent = add_norm_input_payload_rs1_exponent;
+  assign add_norm_output_payload_rs1_sign = add_norm_input_payload_rs1_sign;
+  assign add_norm_output_payload_rs1_special = add_norm_input_payload_rs1_special;
+  assign add_norm_output_payload_rs2_mantissa = add_norm_input_payload_rs2_mantissa;
+  assign add_norm_output_payload_rs2_exponent = add_norm_input_payload_rs2_exponent;
+  assign add_norm_output_payload_rs2_sign = add_norm_input_payload_rs2_sign;
+  assign add_norm_output_payload_rs2_special = add_norm_input_payload_rs2_special;
+  assign add_norm_output_payload_rd = add_norm_input_payload_rd;
+  assign add_norm_output_payload_roundMode = add_norm_input_payload_roundMode;
+  assign add_norm_output_payload_needCommit = add_norm_input_payload_needCommit;
+  assign add_norm_output_payload_xySign = add_norm_input_payload_xySign;
+  assign add_norm_output_payload_roundingScrap = add_norm_input_payload_roundingScrap;
+  assign add_norm_output_payload_mantissa = (add_norm_input_payload_xyMantissa <<< add_norm_input_payload_shift);
   assign add_norm_output_payload_exponent = (_zz_add_norm_output_payload_exponent + 10'h001);
-  assign add_norm_output_payload_forceInfinity = ((add_oh_output_input_payload_rs1_special && (add_oh_output_input_payload_rs1_exponent[1 : 0] == 2'b01)) || (add_oh_output_input_payload_rs2_special && (add_oh_output_input_payload_rs2_exponent[1 : 0] == 2'b01)));
-  assign add_norm_output_payload_forceZero = ((add_oh_output_input_payload_xyMantissa == 27'h0) || ((add_oh_output_input_payload_rs1_special && (add_oh_output_input_payload_rs1_exponent[1 : 0] == 2'b00)) && (add_oh_output_input_payload_rs2_special && (add_oh_output_input_payload_rs2_exponent[1 : 0] == 2'b00))));
-  assign add_norm_output_payload_infinityNan = (((add_oh_output_input_payload_rs1_special && (add_oh_output_input_payload_rs1_exponent[1 : 0] == 2'b01)) && (add_oh_output_input_payload_rs2_special && (add_oh_output_input_payload_rs2_exponent[1 : 0] == 2'b01))) && (add_oh_output_input_payload_rs1_sign ^ add_oh_output_input_payload_rs2_sign));
-  assign add_norm_output_payload_forceNan = (((add_oh_output_input_payload_rs1_special && (add_oh_output_input_payload_rs1_exponent[1 : 0] == 2'b10)) || (add_oh_output_input_payload_rs2_special && (add_oh_output_input_payload_rs2_exponent[1 : 0] == 2'b10))) || add_norm_output_payload_infinityNan);
-  assign add_norm_output_payload_xyMantissaZero = (add_oh_output_input_payload_xyMantissa == 27'h0);
+  assign add_norm_output_payload_forceInfinity = ((add_norm_input_payload_rs1_special && (add_norm_input_payload_rs1_exponent[1 : 0] == 2'b01)) || (add_norm_input_payload_rs2_special && (add_norm_input_payload_rs2_exponent[1 : 0] == 2'b01)));
+  assign add_norm_output_payload_forceZero = ((add_norm_input_payload_xyMantissa == 27'h0) || ((add_norm_input_payload_rs1_special && (add_norm_input_payload_rs1_exponent[1 : 0] == 2'b00)) && (add_norm_input_payload_rs2_special && (add_norm_input_payload_rs2_exponent[1 : 0] == 2'b00))));
+  assign add_norm_output_payload_infinityNan = (((add_norm_input_payload_rs1_special && (add_norm_input_payload_rs1_exponent[1 : 0] == 2'b01)) && (add_norm_input_payload_rs2_special && (add_norm_input_payload_rs2_exponent[1 : 0] == 2'b01))) && (add_norm_input_payload_rs1_sign ^ add_norm_input_payload_rs2_sign));
+  assign add_norm_output_payload_forceNan = (((add_norm_input_payload_rs1_special && (add_norm_input_payload_rs1_exponent[1 : 0] == 2'b10)) || (add_norm_input_payload_rs2_special && (add_norm_input_payload_rs2_exponent[1 : 0] == 2'b10))) || add_norm_output_payload_infinityNan);
+  assign add_norm_output_payload_xyMantissaZero = (add_norm_input_payload_xyMantissa == 27'h0);
   assign add_result_input_valid = add_norm_output_valid;
   assign add_norm_output_ready = add_result_input_ready;
   assign add_result_input_payload_rs1_mantissa = add_norm_output_payload_rs1_mantissa;
@@ -13731,15 +13748,15 @@ module FpuCore (
   assign add_result_output_payload_NV = ((add_result_input_payload_infinityNan || ((add_result_input_payload_rs1_special && (add_result_input_payload_rs1_exponent[1 : 0] == 2'b10)) && (! add_result_input_payload_rs1_mantissa[24]))) || ((add_result_input_payload_rs2_special && (add_result_input_payload_rs2_exponent[1 : 0] == 2'b10)) && (! add_result_input_payload_rs2_mantissa[24])));
   assign add_result_output_payload_DZ = 1'b0;
   assign when_FpuCore_l1513 = (add_result_input_payload_xyMantissaZero || ((add_result_input_payload_rs1_special && (add_result_input_payload_rs1_exponent[1 : 0] == 2'b00)) && (add_result_input_payload_rs2_special && (add_result_input_payload_rs2_exponent[1 : 0] == 2'b00))));
-  assign when_FpuCore_l1516 = ((add_result_input_payload_rs1_sign || add_result_input_payload_rs2_sign) && (add_result_input_payload_roundMode == `FpuRoundMode_opt_RDN));
+  assign when_FpuCore_l1516 = ((add_result_input_payload_rs1_sign || add_result_input_payload_rs2_sign) && (add_result_input_payload_roundMode == FpuRoundMode_RDN));
   always @(*) begin
     load_s1_output_ready = load_s1_output_m2sPipe_ready;
-    if(when_Stream_l342_16) begin
+    if(when_Stream_l368_16) begin
       load_s1_output_ready = 1'b1;
     end
   end
 
-  assign when_Stream_l342_16 = (! load_s1_output_m2sPipe_valid);
+  assign when_Stream_l368_16 = (! load_s1_output_m2sPipe_valid);
   assign load_s1_output_m2sPipe_valid = load_s1_output_rValid;
   assign load_s1_output_m2sPipe_payload_rd = load_s1_output_rData_rd;
   assign load_s1_output_m2sPipe_payload_value_mantissa = load_s1_output_rData_value_mantissa;
@@ -13752,12 +13769,12 @@ module FpuCore (
   assign load_s1_output_m2sPipe_payload_DZ = load_s1_output_rData_DZ;
   always @(*) begin
     shortPip_output_ready = shortPip_output_m2sPipe_ready;
-    if(when_Stream_l342_17) begin
+    if(when_Stream_l368_17) begin
       shortPip_output_ready = 1'b1;
     end
   end
 
-  assign when_Stream_l342_17 = (! shortPip_output_m2sPipe_valid);
+  assign when_Stream_l368_17 = (! shortPip_output_m2sPipe_valid);
   assign shortPip_output_m2sPipe_valid = shortPip_output_rValid;
   assign shortPip_output_m2sPipe_payload_rd = shortPip_output_rData_rd;
   assign shortPip_output_m2sPipe_payload_value_mantissa = shortPip_output_rData_value_mantissa;
@@ -13803,16 +13820,16 @@ module FpuCore (
   assign roundFront_roundAdjusted = {_zz_roundFront_roundAdjusted[roundFront_discardCount],((roundFront_manAggregate & roundFront_exactMask) != 25'h0)};
   always @(*) begin
     case(roundFront_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : begin
+      FpuRoundMode_RNE : begin
         _zz_roundFront_mantissaIncrement = (roundFront_roundAdjusted[1] && (roundFront_roundAdjusted[0] || _zz__zz_roundFront_mantissaIncrement[roundFront_discardCount]));
       end
-      `FpuRoundMode_opt_RTZ : begin
+      FpuRoundMode_RTZ : begin
         _zz_roundFront_mantissaIncrement = 1'b0;
       end
-      `FpuRoundMode_opt_RDN : begin
+      FpuRoundMode_RDN : begin
         _zz_roundFront_mantissaIncrement = ((roundFront_roundAdjusted != 2'b00) && roundFront_input_payload_value_sign);
       end
-      `FpuRoundMode_opt_RUP : begin
+      FpuRoundMode_RUP : begin
         _zz_roundFront_mantissaIncrement = ((roundFront_roundAdjusted != 2'b00) && (! roundFront_input_payload_value_sign));
       end
       default : begin
@@ -13917,16 +13934,16 @@ module FpuCore (
   assign roundBack_ofThreshold = 9'h17e;
   always @(*) begin
     case(roundBack_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : begin
+      FpuRoundMode_RNE : begin
         roundBack_threshold = 3'b110;
       end
-      `FpuRoundMode_opt_RTZ : begin
+      FpuRoundMode_RTZ : begin
         roundBack_threshold = 3'b110;
       end
-      `FpuRoundMode_opt_RDN : begin
+      FpuRoundMode_RDN : begin
         roundBack_threshold = (roundBack_input_payload_value_sign ? 3'b101 : 3'b111);
       end
-      `FpuRoundMode_opt_RUP : begin
+      FpuRoundMode_RUP : begin
         roundBack_threshold = (roundBack_input_payload_value_sign ? 3'b111 : 3'b101);
       end
       default : begin
@@ -13941,16 +13958,16 @@ module FpuCore (
   assign when_FpuCore_l1611 = ((! roundBack_math_special) && (roundBack_ofThreshold < roundBack_math_exponent));
   always @(*) begin
     case(roundBack_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : begin
+      FpuRoundMode_RNE : begin
         when_FpuCore_l1621 = 1'b0;
       end
-      `FpuRoundMode_opt_RTZ : begin
+      FpuRoundMode_RTZ : begin
         when_FpuCore_l1621 = 1'b1;
       end
-      `FpuRoundMode_opt_RDN : begin
+      FpuRoundMode_RDN : begin
         when_FpuCore_l1621 = (! roundBack_math_sign);
       end
-      `FpuRoundMode_opt_RUP : begin
+      FpuRoundMode_RUP : begin
         when_FpuCore_l1621 = roundBack_math_sign;
       end
       default : begin
@@ -13962,16 +13979,16 @@ module FpuCore (
   assign when_FpuCore_l1630 = ((! roundBack_math_special) && (roundBack_math_exponent < _zz_when_FpuCore_l1630));
   always @(*) begin
     case(roundBack_input_payload_roundMode)
-      `FpuRoundMode_opt_RNE : begin
+      FpuRoundMode_RNE : begin
         when_FpuCore_l1640 = 1'b0;
       end
-      `FpuRoundMode_opt_RTZ : begin
+      FpuRoundMode_RTZ : begin
         when_FpuCore_l1640 = 1'b0;
       end
-      `FpuRoundMode_opt_RDN : begin
+      FpuRoundMode_RDN : begin
         when_FpuCore_l1640 = roundBack_math_sign;
       end
-      `FpuRoundMode_opt_RUP : begin
+      FpuRoundMode_RUP : begin
         when_FpuCore_l1640 = (! roundBack_math_sign);
       end
       default : begin
@@ -14064,7 +14081,7 @@ module FpuCore (
       if(io_port_0_cmd_valid) begin
         io_port_0_cmd_rValid <= 1'b1;
       end
-      if(io_port_0_cmd_input_ready) begin
+      if(scheduler_0_input_ready) begin
         io_port_0_cmd_rValid <= 1'b0;
       end
       if(read_s0_ready) begin
@@ -14112,7 +14129,7 @@ module FpuCore (
       if(decode_div_valid) begin
         decode_div_rValid <= 1'b1;
       end
-      if(decode_div_input_fire) begin
+      if(div_input_fire) begin
         decode_div_rValid <= 1'b0;
       end
       if(div_divider_io_input_fire) begin
@@ -14124,7 +14141,7 @@ module FpuCore (
       if(decode_sqrt_valid) begin
         decode_sqrt_rValid <= 1'b1;
       end
-      if(decode_sqrt_input_fire) begin
+      if(sqrt_input_fire) begin
         decode_sqrt_rValid <= 1'b0;
       end
       if(sqrt_sqrt_io_input_fire) begin
@@ -14157,20 +14174,20 @@ module FpuCore (
       if(writeback_port_valid) begin
         `ifndef SYNTHESIS
           `ifdef FORMAL
-            assert((! ((writeback_port_payload_data_value_exponent == 9'h0) && (! writeback_port_payload_data_value_special))));
+            assert((! ((writeback_port_payload_data_value_exponent == 9'h0) && (! writeback_port_payload_data_value_special)))); // FpuCore.scala:L1705
           `else
             if(!(! ((writeback_port_payload_data_value_exponent == 9'h0) && (! writeback_port_payload_data_value_special)))) begin
-              $display("FAILURE Special violation");
+              $display("FAILURE Special violation"); // FpuCore.scala:L1705
               $finish;
             end
           `endif
         `endif
         `ifndef SYNTHESIS
           `ifdef FORMAL
-            assert((! ((writeback_port_payload_data_value_exponent == 9'h1ff) && (! writeback_port_payload_data_value_special))));
+            assert((! ((writeback_port_payload_data_value_exponent == 9'h1ff) && (! writeback_port_payload_data_value_special)))); // FpuCore.scala:L1706
           `else
             if(!(! ((writeback_port_payload_data_value_exponent == 9'h1ff) && (! writeback_port_payload_data_value_special)))) begin
-              $display("FAILURE Special violation");
+              $display("FAILURE Special violation"); // FpuCore.scala:L1706
               $finish;
             end
           `endif
@@ -14241,7 +14258,7 @@ module FpuCore (
         end else begin
           load_s1_fsm_shift_by <= {_zz_load_s1_fsm_shift_by_32,{_zz_load_s1_fsm_shift_by_31,{_zz_load_s1_fsm_shift_by_30,{_zz_load_s1_fsm_shift_by_29,_zz_load_s1_fsm_shift_by_28}}}};
           load_s1_fsm_boot <= 1'b0;
-          load_s1_fsm_i2fZero <= (load_s0_output_input_payload_value[31 : 0] == 32'h0);
+          load_s1_fsm_i2fZero <= (load_s1_input_payload_value[31 : 0] == 32'h0);
         end
       end else begin
         load_s1_fsm_done <= 1'b1;
@@ -14620,6 +14637,7 @@ module DataCache (
   input               io_cpu_memory_mmuRsp_bypassTranslation,
   input               io_cpu_writeBack_isValid,
   input               io_cpu_writeBack_isStuck,
+  input               io_cpu_writeBack_isFiring,
   input               io_cpu_writeBack_isUser,
   output reg          io_cpu_writeBack_haltIt,
   output              io_cpu_writeBack_isWrite,
@@ -14643,6 +14661,8 @@ module DataCache (
   output reg          io_cpu_redo,
   input               io_cpu_flush_valid,
   output              io_cpu_flush_ready,
+  input               io_cpu_flush_payload_singleLine,
+  input      [6:0]    io_cpu_flush_payload_lineId,
   output reg          io_mem_cmd_valid,
   input               io_mem_cmd_ready,
   output reg          io_mem_cmd_payload_wr,
@@ -14659,6 +14679,7 @@ module DataCache (
   input               clk,
   input               reset
 );
+
   reg        [21:0]   _zz_ways_0_tags_port0;
   reg        [31:0]   _zz_ways_0_data_port0;
   wire       [21:0]   _zz_ways_0_tags_port;
@@ -14700,40 +14721,40 @@ module DataCache (
   wire                _zz_ways_0_dataReadRspMem;
   wire       [31:0]   ways_0_dataReadRspMem;
   wire       [31:0]   ways_0_dataReadRsp;
-  wire                when_DataCache_l634;
-  wire                when_DataCache_l637;
-  wire                when_DataCache_l656;
+  wire                when_DataCache_l642;
+  wire                when_DataCache_l645;
+  wire                when_DataCache_l664;
   wire                rspSync;
   wire                rspLast;
   reg                 memCmdSent;
   wire                io_mem_cmd_fire;
-  wire                when_DataCache_l678;
+  wire                when_DataCache_l686;
   reg        [3:0]    _zz_stage0_mask;
   wire       [3:0]    stage0_mask;
   wire       [0:0]    stage0_dataColisions;
   wire       [0:0]    stage0_wayInvalidate;
   wire                stage0_isAmo;
-  wire                when_DataCache_l763;
+  wire                when_DataCache_l771;
   reg                 stageA_request_wr;
   reg        [1:0]    stageA_request_size;
   reg                 stageA_request_totalyConsistent;
-  wire                when_DataCache_l763_1;
+  wire                when_DataCache_l771_1;
   reg        [3:0]    stageA_mask;
   wire                stageA_isAmo;
   wire                stageA_isLrsc;
   wire       [0:0]    stageA_wayHits;
-  wire                when_DataCache_l763_2;
+  wire                when_DataCache_l771_2;
   reg        [0:0]    stageA_wayInvalidate;
-  wire                when_DataCache_l763_3;
+  wire                when_DataCache_l771_3;
   reg        [0:0]    stage0_dataColisions_regNextWhen;
   wire       [0:0]    _zz_stageA_dataColisions;
   wire       [0:0]    stageA_dataColisions;
-  wire                when_DataCache_l814;
+  wire                when_DataCache_l822;
   reg                 stageB_request_wr;
   reg        [1:0]    stageB_request_size;
   reg                 stageB_request_totalyConsistent;
   reg                 stageB_mmuRspFreeze;
-  wire                when_DataCache_l816;
+  wire                when_DataCache_l824;
   reg        [31:0]   stageB_mmuRsp_physicalAddress;
   reg                 stageB_mmuRsp_isIoAccess;
   reg                 stageB_mmuRsp_isPaging;
@@ -14743,33 +14764,33 @@ module DataCache (
   reg                 stageB_mmuRsp_exception;
   reg                 stageB_mmuRsp_refilling;
   reg                 stageB_mmuRsp_bypassTranslation;
-  wire                when_DataCache_l813;
+  wire                when_DataCache_l821;
   reg                 stageB_tagsReadRsp_0_valid;
   reg                 stageB_tagsReadRsp_0_error;
   reg        [19:0]   stageB_tagsReadRsp_0_address;
-  wire                when_DataCache_l813_1;
+  wire                when_DataCache_l821_1;
   reg        [31:0]   stageB_dataReadRsp_0;
-  wire                when_DataCache_l812;
+  wire                when_DataCache_l820;
   reg        [0:0]    stageB_wayInvalidate;
   wire                stageB_consistancyHazard;
-  wire                when_DataCache_l812_1;
+  wire                when_DataCache_l820_1;
   reg        [0:0]    stageB_dataColisions;
-  wire                when_DataCache_l812_2;
+  wire                when_DataCache_l820_2;
   reg                 stageB_unaligned;
-  wire                when_DataCache_l812_3;
+  wire                when_DataCache_l820_3;
   reg        [0:0]    stageB_waysHitsBeforeInvalidate;
   wire       [0:0]    stageB_waysHits;
   wire                stageB_waysHit;
   wire       [31:0]   stageB_dataMux;
-  wire                when_DataCache_l812_4;
+  wire                when_DataCache_l820_4;
   reg        [3:0]    stageB_mask;
   reg                 stageB_loaderValid;
   wire       [31:0]   stageB_ioMemRspMuxed;
   reg                 stageB_flusher_waitDone;
   wire                stageB_flusher_hold;
   reg        [7:0]    stageB_flusher_counter;
-  wire                when_DataCache_l842;
-  wire                when_DataCache_l848;
+  wire                when_DataCache_l850;
+  wire                when_DataCache_l856;
   reg                 stageB_flusher_start;
   wire                stageB_isAmo;
   wire                stageB_isAmoCached;
@@ -14777,18 +14798,18 @@ module DataCache (
   wire                stageB_isExternalAmo;
   wire       [31:0]   stageB_requestDataBypass;
   reg                 stageB_cpuWriteToCache;
-  wire                when_DataCache_l911;
+  wire                when_DataCache_l926;
   wire                stageB_badPermissions;
   wire                stageB_loadStoreFault;
   wire                stageB_bypassCache;
-  wire                when_DataCache_l980;
-  wire                when_DataCache_l989;
-  wire                when_DataCache_l994;
-  wire                when_DataCache_l1005;
-  wire                when_DataCache_l1017;
-  wire                when_DataCache_l976;
-  wire                when_DataCache_l1051;
-  wire                when_DataCache_l1060;
+  wire                when_DataCache_l995;
+  wire                when_DataCache_l1004;
+  wire                when_DataCache_l1009;
+  wire                when_DataCache_l1020;
+  wire                when_DataCache_l1032;
+  wire                when_DataCache_l991;
+  wire                when_DataCache_l1066;
+  wire                when_DataCache_l1075;
   reg                 loader_valid;
   reg                 loader_counter_willIncrement;
   wire                loader_counter_willClear;
@@ -14800,17 +14821,17 @@ module DataCache (
   reg                 loader_error;
   wire                loader_kill;
   reg                 loader_killReg;
-  wire                when_DataCache_l1075;
+  wire                when_DataCache_l1090;
   wire                loader_done;
-  wire                when_DataCache_l1103;
+  wire                when_DataCache_l1118;
   reg                 loader_valid_regNext;
-  wire                when_DataCache_l1107;
-  wire                when_DataCache_l1110;
-  (* ram_style = "block" *) reg [21:0] ways_0_tags [0:127];
-  (* ram_style = "block" *) reg [7:0] ways_0_data_symbol0 [0:1023];
-  (* ram_style = "block" *) reg [7:0] ways_0_data_symbol1 [0:1023];
-  (* ram_style = "block" *) reg [7:0] ways_0_data_symbol2 [0:1023];
-  (* ram_style = "block" *) reg [7:0] ways_0_data_symbol3 [0:1023];
+  wire                when_DataCache_l1122;
+  wire                when_DataCache_l1125;
+  (* no_rw_check , ram_style = "block" *) reg [21:0] ways_0_tags [0:127];
+  (* no_rw_check , ram_style = "block" *) reg [7:0] ways_0_data_symbol0 [0:1023];
+  (* no_rw_check , ram_style = "block" *) reg [7:0] ways_0_data_symbol1 [0:1023];
+  (* no_rw_check , ram_style = "block" *) reg [7:0] ways_0_data_symbol2 [0:1023];
+  (* no_rw_check , ram_style = "block" *) reg [7:0] ways_0_data_symbol3 [0:1023];
   reg [7:0] _zz_ways_0_datasymbol_read;
   reg [7:0] _zz_ways_0_datasymbol_read_1;
   reg [7:0] _zz_ways_0_datasymbol_read_2;
@@ -14864,14 +14885,14 @@ module DataCache (
 
   always @(*) begin
     _zz_1 = 1'b0;
-    if(when_DataCache_l637) begin
+    if(when_DataCache_l645) begin
       _zz_1 = 1'b1;
     end
   end
 
   always @(*) begin
     _zz_2 = 1'b0;
-    if(when_DataCache_l634) begin
+    if(when_DataCache_l642) begin
       _zz_2 = 1'b1;
     end
   end
@@ -14885,42 +14906,42 @@ module DataCache (
   assign _zz_ways_0_dataReadRspMem = (dataReadCmd_valid && (! io_cpu_memory_isStuck));
   assign ways_0_dataReadRspMem = _zz_ways_0_data_port0;
   assign ways_0_dataReadRsp = ways_0_dataReadRspMem[31 : 0];
-  assign when_DataCache_l634 = (tagsWriteCmd_valid && tagsWriteCmd_payload_way[0]);
-  assign when_DataCache_l637 = (dataWriteCmd_valid && dataWriteCmd_payload_way[0]);
+  assign when_DataCache_l642 = (tagsWriteCmd_valid && tagsWriteCmd_payload_way[0]);
+  assign when_DataCache_l645 = (dataWriteCmd_valid && dataWriteCmd_payload_way[0]);
   always @(*) begin
     tagsReadCmd_valid = 1'b0;
-    if(when_DataCache_l656) begin
+    if(when_DataCache_l664) begin
       tagsReadCmd_valid = 1'b1;
     end
   end
 
   always @(*) begin
     tagsReadCmd_payload = 7'bxxxxxxx;
-    if(when_DataCache_l656) begin
+    if(when_DataCache_l664) begin
       tagsReadCmd_payload = io_cpu_execute_address[11 : 5];
     end
   end
 
   always @(*) begin
     dataReadCmd_valid = 1'b0;
-    if(when_DataCache_l656) begin
+    if(when_DataCache_l664) begin
       dataReadCmd_valid = 1'b1;
     end
   end
 
   always @(*) begin
     dataReadCmd_payload = 10'bxxxxxxxxxx;
-    if(when_DataCache_l656) begin
+    if(when_DataCache_l664) begin
       dataReadCmd_payload = io_cpu_execute_address[11 : 2];
     end
   end
 
   always @(*) begin
     tagsWriteCmd_valid = 1'b0;
-    if(when_DataCache_l842) begin
+    if(when_DataCache_l850) begin
       tagsWriteCmd_valid = 1'b1;
     end
-    if(when_DataCache_l1051) begin
+    if(when_DataCache_l1066) begin
       tagsWriteCmd_valid = 1'b0;
     end
     if(loader_done) begin
@@ -14930,7 +14951,7 @@ module DataCache (
 
   always @(*) begin
     tagsWriteCmd_payload_way = 1'bx;
-    if(when_DataCache_l842) begin
+    if(when_DataCache_l850) begin
       tagsWriteCmd_payload_way = 1'b1;
     end
     if(loader_done) begin
@@ -14940,7 +14961,7 @@ module DataCache (
 
   always @(*) begin
     tagsWriteCmd_payload_address = 7'bxxxxxxx;
-    if(when_DataCache_l842) begin
+    if(when_DataCache_l850) begin
       tagsWriteCmd_payload_address = stageB_flusher_counter[6:0];
     end
     if(loader_done) begin
@@ -14950,7 +14971,7 @@ module DataCache (
 
   always @(*) begin
     tagsWriteCmd_payload_data_valid = 1'bx;
-    if(when_DataCache_l842) begin
+    if(when_DataCache_l850) begin
       tagsWriteCmd_payload_data_valid = 1'b0;
     end
     if(loader_done) begin
@@ -14975,14 +14996,14 @@ module DataCache (
   always @(*) begin
     dataWriteCmd_valid = 1'b0;
     if(stageB_cpuWriteToCache) begin
-      if(when_DataCache_l911) begin
+      if(when_DataCache_l926) begin
         dataWriteCmd_valid = 1'b1;
       end
     end
-    if(when_DataCache_l1051) begin
+    if(when_DataCache_l1066) begin
       dataWriteCmd_valid = 1'b0;
     end
-    if(when_DataCache_l1075) begin
+    if(when_DataCache_l1090) begin
       dataWriteCmd_valid = 1'b1;
     end
   end
@@ -14992,7 +15013,7 @@ module DataCache (
     if(stageB_cpuWriteToCache) begin
       dataWriteCmd_payload_way = stageB_waysHits;
     end
-    if(when_DataCache_l1075) begin
+    if(when_DataCache_l1090) begin
       dataWriteCmd_payload_way = loader_waysAllocator;
     end
   end
@@ -15002,7 +15023,7 @@ module DataCache (
     if(stageB_cpuWriteToCache) begin
       dataWriteCmd_payload_address = stageB_mmuRsp_physicalAddress[11 : 2];
     end
-    if(when_DataCache_l1075) begin
+    if(when_DataCache_l1090) begin
       dataWriteCmd_payload_address = {stageB_mmuRsp_physicalAddress[11 : 5],loader_counter_value};
     end
   end
@@ -15012,7 +15033,7 @@ module DataCache (
     if(stageB_cpuWriteToCache) begin
       dataWriteCmd_payload_data[31 : 0] = stageB_requestDataBypass;
     end
-    if(when_DataCache_l1075) begin
+    if(when_DataCache_l1090) begin
       dataWriteCmd_payload_data = io_mem_rsp_payload_data;
     end
   end
@@ -15025,15 +15046,15 @@ module DataCache (
         dataWriteCmd_payload_mask[3 : 0] = stageB_mask;
       end
     end
-    if(when_DataCache_l1075) begin
+    if(when_DataCache_l1090) begin
       dataWriteCmd_payload_mask = 4'b1111;
     end
   end
 
-  assign when_DataCache_l656 = (io_cpu_execute_isValid && (! io_cpu_memory_isStuck));
+  assign when_DataCache_l664 = (io_cpu_execute_isValid && (! io_cpu_memory_isStuck));
   always @(*) begin
     io_cpu_execute_haltIt = 1'b0;
-    if(when_DataCache_l842) begin
+    if(when_DataCache_l850) begin
       io_cpu_execute_haltIt = 1'b1;
     end
   end
@@ -15041,7 +15062,7 @@ module DataCache (
   assign rspSync = 1'b1;
   assign rspLast = 1'b1;
   assign io_mem_cmd_fire = (io_mem_cmd_valid && io_mem_cmd_ready);
-  assign when_DataCache_l678 = (! io_cpu_writeBack_isStuck);
+  assign when_DataCache_l686 = (! io_cpu_writeBack_isStuck);
   always @(*) begin
     _zz_stage0_mask = 4'bxxxx;
     case(io_cpu_execute_args_size)
@@ -15063,42 +15084,42 @@ module DataCache (
   assign stage0_dataColisions[0] = (((dataWriteCmd_valid && dataWriteCmd_payload_way[0]) && (dataWriteCmd_payload_address == _zz_stage0_dataColisions)) && ((stage0_mask & dataWriteCmd_payload_mask[3 : 0]) != 4'b0000));
   assign stage0_wayInvalidate = 1'b0;
   assign stage0_isAmo = 1'b0;
-  assign when_DataCache_l763 = (! io_cpu_memory_isStuck);
-  assign when_DataCache_l763_1 = (! io_cpu_memory_isStuck);
+  assign when_DataCache_l771 = (! io_cpu_memory_isStuck);
+  assign when_DataCache_l771_1 = (! io_cpu_memory_isStuck);
   assign io_cpu_memory_isWrite = stageA_request_wr;
   assign stageA_isAmo = 1'b0;
   assign stageA_isLrsc = 1'b0;
   assign stageA_wayHits = ((io_cpu_memory_mmuRsp_physicalAddress[31 : 12] == ways_0_tagsReadRsp_address) && ways_0_tagsReadRsp_valid);
-  assign when_DataCache_l763_2 = (! io_cpu_memory_isStuck);
-  assign when_DataCache_l763_3 = (! io_cpu_memory_isStuck);
+  assign when_DataCache_l771_2 = (! io_cpu_memory_isStuck);
+  assign when_DataCache_l771_3 = (! io_cpu_memory_isStuck);
   assign _zz_stageA_dataColisions[0] = (((dataWriteCmd_valid && dataWriteCmd_payload_way[0]) && (dataWriteCmd_payload_address == _zz__zz_stageA_dataColisions)) && ((stageA_mask & dataWriteCmd_payload_mask[3 : 0]) != 4'b0000));
   assign stageA_dataColisions = (stage0_dataColisions_regNextWhen | _zz_stageA_dataColisions);
-  assign when_DataCache_l814 = (! io_cpu_writeBack_isStuck);
+  assign when_DataCache_l822 = (! io_cpu_writeBack_isStuck);
   always @(*) begin
     stageB_mmuRspFreeze = 1'b0;
-    if(when_DataCache_l1110) begin
+    if(when_DataCache_l1125) begin
       stageB_mmuRspFreeze = 1'b1;
     end
   end
 
-  assign when_DataCache_l816 = ((! io_cpu_writeBack_isStuck) && (! stageB_mmuRspFreeze));
-  assign when_DataCache_l813 = (! io_cpu_writeBack_isStuck);
-  assign when_DataCache_l813_1 = (! io_cpu_writeBack_isStuck);
-  assign when_DataCache_l812 = (! io_cpu_writeBack_isStuck);
+  assign when_DataCache_l824 = ((! io_cpu_writeBack_isStuck) && (! stageB_mmuRspFreeze));
+  assign when_DataCache_l821 = (! io_cpu_writeBack_isStuck);
+  assign when_DataCache_l821_1 = (! io_cpu_writeBack_isStuck);
+  assign when_DataCache_l820 = (! io_cpu_writeBack_isStuck);
   assign stageB_consistancyHazard = 1'b0;
-  assign when_DataCache_l812_1 = (! io_cpu_writeBack_isStuck);
-  assign when_DataCache_l812_2 = (! io_cpu_writeBack_isStuck);
-  assign when_DataCache_l812_3 = (! io_cpu_writeBack_isStuck);
+  assign when_DataCache_l820_1 = (! io_cpu_writeBack_isStuck);
+  assign when_DataCache_l820_2 = (! io_cpu_writeBack_isStuck);
+  assign when_DataCache_l820_3 = (! io_cpu_writeBack_isStuck);
   assign stageB_waysHits = (stageB_waysHitsBeforeInvalidate & (~ stageB_wayInvalidate));
-  assign stageB_waysHit = (stageB_waysHits != 1'b0);
+  assign stageB_waysHit = (|stageB_waysHits);
   assign stageB_dataMux = stageB_dataReadRsp_0;
-  assign when_DataCache_l812_4 = (! io_cpu_writeBack_isStuck);
+  assign when_DataCache_l820_4 = (! io_cpu_writeBack_isStuck);
   always @(*) begin
     stageB_loaderValid = 1'b0;
     if(io_cpu_writeBack_isValid) begin
       if(!stageB_isExternalAmo) begin
-        if(!when_DataCache_l976) begin
-          if(!when_DataCache_l989) begin
+        if(!when_DataCache_l991) begin
+          if(!when_DataCache_l1004) begin
             if(io_mem_cmd_ready) begin
               stageB_loaderValid = 1'b1;
             end
@@ -15106,7 +15127,7 @@ module DataCache (
         end
       end
     end
-    if(when_DataCache_l1051) begin
+    if(when_DataCache_l1066) begin
       stageB_loaderValid = 1'b0;
     end
   end
@@ -15116,27 +15137,27 @@ module DataCache (
     io_cpu_writeBack_haltIt = 1'b1;
     if(io_cpu_writeBack_isValid) begin
       if(!stageB_isExternalAmo) begin
-        if(when_DataCache_l976) begin
-          if(when_DataCache_l980) begin
+        if(when_DataCache_l991) begin
+          if(when_DataCache_l995) begin
             io_cpu_writeBack_haltIt = 1'b0;
           end
         end else begin
-          if(when_DataCache_l989) begin
-            if(when_DataCache_l994) begin
+          if(when_DataCache_l1004) begin
+            if(when_DataCache_l1009) begin
               io_cpu_writeBack_haltIt = 1'b0;
             end
           end
         end
       end
     end
-    if(when_DataCache_l1051) begin
+    if(when_DataCache_l1066) begin
       io_cpu_writeBack_haltIt = 1'b0;
     end
   end
 
   assign stageB_flusher_hold = 1'b0;
-  assign when_DataCache_l842 = (! stageB_flusher_counter[7]);
-  assign when_DataCache_l848 = (! stageB_flusher_hold);
+  assign when_DataCache_l850 = (! stageB_flusher_counter[7]);
+  assign when_DataCache_l856 = (! stageB_flusher_hold);
   assign io_cpu_flush_ready = (stageB_flusher_waitDone && stageB_flusher_counter[7]);
   assign stageB_isAmo = 1'b0;
   assign stageB_isAmoCached = 1'b0;
@@ -15147,8 +15168,8 @@ module DataCache (
     stageB_cpuWriteToCache = 1'b0;
     if(io_cpu_writeBack_isValid) begin
       if(!stageB_isExternalAmo) begin
-        if(!when_DataCache_l976) begin
-          if(when_DataCache_l989) begin
+        if(!when_DataCache_l991) begin
+          if(when_DataCache_l1004) begin
             stageB_cpuWriteToCache = 1'b1;
           end
         end
@@ -15156,26 +15177,26 @@ module DataCache (
     end
   end
 
-  assign when_DataCache_l911 = (stageB_request_wr && stageB_waysHit);
+  assign when_DataCache_l926 = (stageB_request_wr && stageB_waysHit);
   assign stageB_badPermissions = (((! stageB_mmuRsp_allowWrite) && stageB_request_wr) || ((! stageB_mmuRsp_allowRead) && ((! stageB_request_wr) || stageB_isAmo)));
   assign stageB_loadStoreFault = (io_cpu_writeBack_isValid && (stageB_mmuRsp_exception || stageB_badPermissions));
   always @(*) begin
     io_cpu_redo = 1'b0;
     if(io_cpu_writeBack_isValid) begin
       if(!stageB_isExternalAmo) begin
-        if(!when_DataCache_l976) begin
-          if(when_DataCache_l989) begin
-            if(when_DataCache_l1005) begin
+        if(!when_DataCache_l991) begin
+          if(when_DataCache_l1004) begin
+            if(when_DataCache_l1020) begin
               io_cpu_redo = 1'b1;
             end
           end
         end
       end
     end
-    if(when_DataCache_l1060) begin
+    if(when_DataCache_l1075) begin
       io_cpu_redo = 1'b1;
     end
-    if(when_DataCache_l1107) begin
+    if(when_DataCache_l1122) begin
       io_cpu_redo = 1'b1;
     end
   end
@@ -15196,22 +15217,22 @@ module DataCache (
     io_mem_cmd_valid = 1'b0;
     if(io_cpu_writeBack_isValid) begin
       if(!stageB_isExternalAmo) begin
-        if(when_DataCache_l976) begin
+        if(when_DataCache_l991) begin
           io_mem_cmd_valid = (! memCmdSent);
         end else begin
-          if(when_DataCache_l989) begin
+          if(when_DataCache_l1004) begin
             if(stageB_request_wr) begin
               io_mem_cmd_valid = 1'b1;
             end
           end else begin
-            if(when_DataCache_l1017) begin
+            if(when_DataCache_l1032) begin
               io_mem_cmd_valid = 1'b1;
             end
           end
         end
       end
     end
-    if(when_DataCache_l1051) begin
+    if(when_DataCache_l1066) begin
       io_mem_cmd_valid = 1'b0;
     end
   end
@@ -15220,8 +15241,8 @@ module DataCache (
     io_mem_cmd_payload_address = stageB_mmuRsp_physicalAddress;
     if(io_cpu_writeBack_isValid) begin
       if(!stageB_isExternalAmo) begin
-        if(!when_DataCache_l976) begin
-          if(!when_DataCache_l989) begin
+        if(!when_DataCache_l991) begin
+          if(!when_DataCache_l1004) begin
             io_mem_cmd_payload_address[4 : 0] = 5'h0;
           end
         end
@@ -15234,8 +15255,8 @@ module DataCache (
     io_mem_cmd_payload_wr = stageB_request_wr;
     if(io_cpu_writeBack_isValid) begin
       if(!stageB_isExternalAmo) begin
-        if(!when_DataCache_l976) begin
-          if(!when_DataCache_l989) begin
+        if(!when_DataCache_l991) begin
+          if(!when_DataCache_l1004) begin
             io_mem_cmd_payload_wr = 1'b0;
           end
         end
@@ -15250,8 +15271,8 @@ module DataCache (
     io_mem_cmd_payload_size = {1'd0, stageB_request_size};
     if(io_cpu_writeBack_isValid) begin
       if(!stageB_isExternalAmo) begin
-        if(!when_DataCache_l976) begin
-          if(!when_DataCache_l989) begin
+        if(!when_DataCache_l991) begin
+          if(!when_DataCache_l1004) begin
             io_mem_cmd_payload_size = 3'b101;
           end
         end
@@ -15261,12 +15282,12 @@ module DataCache (
 
   assign stageB_bypassCache = ((stageB_mmuRsp_isIoAccess || stageB_isExternalLsrc) || stageB_isExternalAmo);
   assign io_cpu_writeBack_keepMemRspData = 1'b0;
-  assign when_DataCache_l980 = ((! stageB_request_wr) ? (io_mem_rsp_valid && rspSync) : io_mem_cmd_ready);
-  assign when_DataCache_l989 = (stageB_waysHit || (stageB_request_wr && (! stageB_isAmoCached)));
-  assign when_DataCache_l994 = ((! stageB_request_wr) || io_mem_cmd_ready);
-  assign when_DataCache_l1005 = (((! stageB_request_wr) || stageB_isAmoCached) && ((stageB_dataColisions & stageB_waysHits) != 1'b0));
-  assign when_DataCache_l1017 = (! memCmdSent);
-  assign when_DataCache_l976 = (stageB_mmuRsp_isIoAccess || stageB_isExternalLsrc);
+  assign when_DataCache_l995 = ((! stageB_request_wr) ? (io_mem_rsp_valid && rspSync) : io_mem_cmd_ready);
+  assign when_DataCache_l1004 = (stageB_waysHit || (stageB_request_wr && (! stageB_isAmoCached)));
+  assign when_DataCache_l1009 = ((! stageB_request_wr) || io_mem_cmd_ready);
+  assign when_DataCache_l1020 = (((! stageB_request_wr) || stageB_isAmoCached) && ((stageB_dataColisions & stageB_waysHits) != 1'b0));
+  assign when_DataCache_l1032 = (! memCmdSent);
+  assign when_DataCache_l991 = (stageB_mmuRsp_isIoAccess || stageB_isExternalLsrc);
   always @(*) begin
     if(stageB_bypassCache) begin
       io_cpu_writeBack_data = stageB_ioMemRspMuxed;
@@ -15275,11 +15296,11 @@ module DataCache (
     end
   end
 
-  assign when_DataCache_l1051 = ((((stageB_consistancyHazard || stageB_mmuRsp_refilling) || io_cpu_writeBack_accessError) || io_cpu_writeBack_mmuException) || io_cpu_writeBack_unalignedAccess);
-  assign when_DataCache_l1060 = (io_cpu_writeBack_isValid && (stageB_mmuRsp_refilling || stageB_consistancyHazard));
+  assign when_DataCache_l1066 = ((((stageB_consistancyHazard || stageB_mmuRsp_refilling) || io_cpu_writeBack_accessError) || io_cpu_writeBack_mmuException) || io_cpu_writeBack_unalignedAccess);
+  assign when_DataCache_l1075 = (io_cpu_writeBack_isValid && (stageB_mmuRsp_refilling || stageB_consistancyHazard));
   always @(*) begin
     loader_counter_willIncrement = 1'b0;
-    if(when_DataCache_l1075) begin
+    if(when_DataCache_l1090) begin
       loader_counter_willIncrement = 1'b1;
     end
   end
@@ -15295,12 +15316,12 @@ module DataCache (
   end
 
   assign loader_kill = 1'b0;
-  assign when_DataCache_l1075 = ((loader_valid && io_mem_rsp_valid) && rspLast);
+  assign when_DataCache_l1090 = ((loader_valid && io_mem_rsp_valid) && rspLast);
   assign loader_done = loader_counter_willOverflow;
-  assign when_DataCache_l1103 = (! loader_valid);
-  assign when_DataCache_l1107 = (loader_valid && (! loader_valid_regNext));
+  assign when_DataCache_l1118 = (! loader_valid);
+  assign when_DataCache_l1122 = (loader_valid && (! loader_valid_regNext));
   assign io_cpu_execute_refilling = loader_valid;
-  assign when_DataCache_l1110 = (stageB_loaderValid || loader_valid);
+  assign when_DataCache_l1125 = (stageB_loaderValid || loader_valid);
   always @(posedge clk) begin
     tagsWriteLastCmd_valid <= tagsWriteCmd_valid;
     tagsWriteLastCmd_payload_way <= tagsWriteCmd_payload_way;
@@ -15308,26 +15329,26 @@ module DataCache (
     tagsWriteLastCmd_payload_data_valid <= tagsWriteCmd_payload_data_valid;
     tagsWriteLastCmd_payload_data_error <= tagsWriteCmd_payload_data_error;
     tagsWriteLastCmd_payload_data_address <= tagsWriteCmd_payload_data_address;
-    if(when_DataCache_l763) begin
+    if(when_DataCache_l771) begin
       stageA_request_wr <= io_cpu_execute_args_wr;
       stageA_request_size <= io_cpu_execute_args_size;
       stageA_request_totalyConsistent <= io_cpu_execute_args_totalyConsistent;
     end
-    if(when_DataCache_l763_1) begin
+    if(when_DataCache_l771_1) begin
       stageA_mask <= stage0_mask;
     end
-    if(when_DataCache_l763_2) begin
+    if(when_DataCache_l771_2) begin
       stageA_wayInvalidate <= stage0_wayInvalidate;
     end
-    if(when_DataCache_l763_3) begin
+    if(when_DataCache_l771_3) begin
       stage0_dataColisions_regNextWhen <= stage0_dataColisions;
     end
-    if(when_DataCache_l814) begin
+    if(when_DataCache_l822) begin
       stageB_request_wr <= stageA_request_wr;
       stageB_request_size <= stageA_request_size;
       stageB_request_totalyConsistent <= stageA_request_totalyConsistent;
     end
-    if(when_DataCache_l816) begin
+    if(when_DataCache_l824) begin
       stageB_mmuRsp_physicalAddress <= io_cpu_memory_mmuRsp_physicalAddress;
       stageB_mmuRsp_isIoAccess <= io_cpu_memory_mmuRsp_isIoAccess;
       stageB_mmuRsp_isPaging <= io_cpu_memory_mmuRsp_isPaging;
@@ -15338,27 +15359,27 @@ module DataCache (
       stageB_mmuRsp_refilling <= io_cpu_memory_mmuRsp_refilling;
       stageB_mmuRsp_bypassTranslation <= io_cpu_memory_mmuRsp_bypassTranslation;
     end
-    if(when_DataCache_l813) begin
+    if(when_DataCache_l821) begin
       stageB_tagsReadRsp_0_valid <= ways_0_tagsReadRsp_valid;
       stageB_tagsReadRsp_0_error <= ways_0_tagsReadRsp_error;
       stageB_tagsReadRsp_0_address <= ways_0_tagsReadRsp_address;
     end
-    if(when_DataCache_l813_1) begin
+    if(when_DataCache_l821_1) begin
       stageB_dataReadRsp_0 <= ways_0_dataReadRsp;
     end
-    if(when_DataCache_l812) begin
+    if(when_DataCache_l820) begin
       stageB_wayInvalidate <= stageA_wayInvalidate;
     end
-    if(when_DataCache_l812_1) begin
+    if(when_DataCache_l820_1) begin
       stageB_dataColisions <= stageA_dataColisions;
     end
-    if(when_DataCache_l812_2) begin
+    if(when_DataCache_l820_2) begin
       stageB_unaligned <= ({((stageA_request_size == 2'b10) && (io_cpu_memory_address[1 : 0] != 2'b00)),((stageA_request_size == 2'b01) && (io_cpu_memory_address[0 : 0] != 1'b0))} != 2'b00);
     end
-    if(when_DataCache_l812_3) begin
+    if(when_DataCache_l820_3) begin
       stageB_waysHitsBeforeInvalidate <= stageA_wayHits;
     end
-    if(when_DataCache_l812_4) begin
+    if(when_DataCache_l820_4) begin
       stageB_mask <= stageA_mask;
     end
     loader_valid_regNext <= loader_valid;
@@ -15379,28 +15400,34 @@ module DataCache (
       if(io_mem_cmd_fire) begin
         memCmdSent <= 1'b1;
       end
-      if(when_DataCache_l678) begin
+      if(when_DataCache_l686) begin
         memCmdSent <= 1'b0;
       end
       if(io_cpu_flush_ready) begin
         stageB_flusher_waitDone <= 1'b0;
       end
-      if(when_DataCache_l842) begin
-        if(when_DataCache_l848) begin
+      if(when_DataCache_l850) begin
+        if(when_DataCache_l856) begin
           stageB_flusher_counter <= (stageB_flusher_counter + 8'h01);
+          if(io_cpu_flush_payload_singleLine) begin
+            stageB_flusher_counter[7] <= 1'b1;
+          end
         end
       end
       stageB_flusher_start <= (((((((! stageB_flusher_waitDone) && (! stageB_flusher_start)) && io_cpu_flush_valid) && (! io_cpu_execute_isValid)) && (! io_cpu_memory_isValid)) && (! io_cpu_writeBack_isValid)) && (! io_cpu_redo));
       if(stageB_flusher_start) begin
         stageB_flusher_waitDone <= 1'b1;
         stageB_flusher_counter <= 8'h0;
+        if(io_cpu_flush_payload_singleLine) begin
+          stageB_flusher_counter <= {1'b0,io_cpu_flush_payload_lineId};
+        end
       end
       `ifndef SYNTHESIS
         `ifdef FORMAL
-          assert((! ((io_cpu_writeBack_isValid && (! io_cpu_writeBack_haltIt)) && io_cpu_writeBack_isStuck)));
+          assert((! ((io_cpu_writeBack_isValid && (! io_cpu_writeBack_haltIt)) && io_cpu_writeBack_isStuck))); // DataCache.scala:L1077
         `else
           if(!(! ((io_cpu_writeBack_isValid && (! io_cpu_writeBack_haltIt)) && io_cpu_writeBack_isStuck))) begin
-            $display("ERROR writeBack stuck by another plugin is not allowed");
+            $display("ERROR writeBack stuck by another plugin is not allowed"); // DataCache.scala:L1077
           end
         `endif
       `endif
@@ -15411,7 +15438,7 @@ module DataCache (
       if(loader_kill) begin
         loader_killReg <= 1'b1;
       end
-      if(when_DataCache_l1075) begin
+      if(when_DataCache_l1090) begin
         loader_error <= (loader_error || io_mem_rsp_payload_error);
       end
       if(loader_done) begin
@@ -15419,7 +15446,7 @@ module DataCache (
         loader_error <= 1'b0;
         loader_killReg <= 1'b0;
       end
-      if(when_DataCache_l1103) begin
+      if(when_DataCache_l1118) begin
         loader_waysAllocator <= _zz_loader_waysAllocator[0:0];
       end
     end
@@ -15470,6 +15497,7 @@ module InstructionCache (
   input               clk,
   input               reset
 );
+
   reg        [31:0]   _zz_banks_0_port1;
   reg        [22:0]   _zz_ways_0_tags_port1;
   wire       [22:0]   _zz_ways_0_tags_port;
@@ -15487,7 +15515,7 @@ module InstructionCache (
   wire                when_InstructionCache_l351;
   reg                 lineLoader_cmdSent;
   wire                io_mem_cmd_fire;
-  wire                when_Utils_l357;
+  wire                when_Utils_l515;
   reg                 lineLoader_wayToAllocate_willIncrement;
   wire                lineLoader_wayToAllocate_willClear;
   wire                lineLoader_wayToAllocate_willOverflowIfInc;
@@ -15533,8 +15561,8 @@ module InstructionCache (
   reg                 decodeStage_hit_valid;
   wire                when_InstructionCache_l459_2;
   reg                 decodeStage_hit_error;
-  (* ram_style = "block" *) reg [31:0] banks_0 [0:511];
-  (* ram_style = "block" *) reg [22:0] ways_0_tags [0:63];
+  (* no_rw_check , ram_style = "block" *) reg [31:0] banks_0 [0:511];
+  (* no_rw_check , ram_style = "block" *) reg [22:0] ways_0_tags [0:63];
 
   assign _zz_ways_0_tags_port = {lineLoader_write_tag_0_payload_data_address,{lineLoader_write_tag_0_payload_data_error,lineLoader_write_tag_0_payload_data_valid}};
   always @(posedge clk) begin
@@ -15604,10 +15632,10 @@ module InstructionCache (
   assign io_mem_cmd_valid = (lineLoader_valid && (! lineLoader_cmdSent));
   assign io_mem_cmd_payload_address = {lineLoader_address[31 : 5],5'h0};
   assign io_mem_cmd_payload_size = 3'b101;
-  assign when_Utils_l357 = (! lineLoader_valid);
+  assign when_Utils_l515 = (! lineLoader_valid);
   always @(*) begin
     lineLoader_wayToAllocate_willIncrement = 1'b0;
-    if(when_Utils_l357) begin
+    if(when_Utils_l515) begin
       lineLoader_wayToAllocate_willIncrement = 1'b1;
     end
   end
@@ -15635,7 +15663,7 @@ module InstructionCache (
   assign fetchStage_read_waysValues_0_tag_error = _zz_fetchStage_read_waysValues_0_tag_valid_2[1];
   assign fetchStage_read_waysValues_0_tag_address = _zz_fetchStage_read_waysValues_0_tag_valid_2[22 : 2];
   assign fetchStage_hit_hits_0 = (fetchStage_read_waysValues_0_tag_valid && (fetchStage_read_waysValues_0_tag_address == io_cpu_fetch_mmuRsp_physicalAddress[31 : 11]));
-  assign fetchStage_hit_valid = (fetchStage_hit_hits_0 != 1'b0);
+  assign fetchStage_hit_valid = (|fetchStage_hit_hits_0);
   assign fetchStage_hit_error = fetchStage_read_waysValues_0_tag_error;
   assign fetchStage_hit_data = fetchStage_read_banksValue_0_data;
   assign fetchStage_hit_word = fetchStage_hit_data;
@@ -15734,7 +15762,7 @@ module StreamArbiter_1 (
   input               io_inputs_0_payload_value_sign,
   input               io_inputs_0_payload_value_special,
   input               io_inputs_0_payload_scrap,
-  input      `FpuRoundMode_opt_type io_inputs_0_payload_roundMode,
+  input      [2:0]    io_inputs_0_payload_roundMode,
   input               io_inputs_0_payload_NV,
   input               io_inputs_0_payload_DZ,
   input               io_inputs_1_valid,
@@ -15745,7 +15773,7 @@ module StreamArbiter_1 (
   input               io_inputs_1_payload_value_sign,
   input               io_inputs_1_payload_value_special,
   input               io_inputs_1_payload_scrap,
-  input      `FpuRoundMode_opt_type io_inputs_1_payload_roundMode,
+  input      [2:0]    io_inputs_1_payload_roundMode,
   input               io_inputs_1_payload_NV,
   input               io_inputs_1_payload_DZ,
   input               io_inputs_2_valid,
@@ -15756,7 +15784,7 @@ module StreamArbiter_1 (
   input               io_inputs_2_payload_value_sign,
   input               io_inputs_2_payload_value_special,
   input               io_inputs_2_payload_scrap,
-  input      `FpuRoundMode_opt_type io_inputs_2_payload_roundMode,
+  input      [2:0]    io_inputs_2_payload_roundMode,
   input               io_inputs_2_payload_NV,
   input               io_inputs_2_payload_DZ,
   input               io_inputs_3_valid,
@@ -15767,7 +15795,7 @@ module StreamArbiter_1 (
   input               io_inputs_3_payload_value_sign,
   input               io_inputs_3_payload_value_special,
   input               io_inputs_3_payload_scrap,
-  input      `FpuRoundMode_opt_type io_inputs_3_payload_roundMode,
+  input      [2:0]    io_inputs_3_payload_roundMode,
   input               io_inputs_3_payload_NV,
   input               io_inputs_3_payload_DZ,
   input               io_inputs_4_valid,
@@ -15778,7 +15806,7 @@ module StreamArbiter_1 (
   input               io_inputs_4_payload_value_sign,
   input               io_inputs_4_payload_value_special,
   input               io_inputs_4_payload_scrap,
-  input      `FpuRoundMode_opt_type io_inputs_4_payload_roundMode,
+  input      [2:0]    io_inputs_4_payload_roundMode,
   input               io_inputs_4_payload_NV,
   input               io_inputs_4_payload_DZ,
   input               io_inputs_5_valid,
@@ -15789,7 +15817,7 @@ module StreamArbiter_1 (
   input               io_inputs_5_payload_value_sign,
   input               io_inputs_5_payload_value_special,
   input               io_inputs_5_payload_scrap,
-  input      `FpuRoundMode_opt_type io_inputs_5_payload_roundMode,
+  input      [2:0]    io_inputs_5_payload_roundMode,
   input               io_inputs_5_payload_NV,
   input               io_inputs_5_payload_DZ,
   output              io_output_valid,
@@ -15800,7 +15828,7 @@ module StreamArbiter_1 (
   output              io_output_payload_value_sign,
   output              io_output_payload_value_special,
   output              io_output_payload_scrap,
-  output     `FpuRoundMode_opt_type io_output_payload_roundMode,
+  output     [2:0]    io_output_payload_roundMode,
   output              io_output_payload_NV,
   output              io_output_payload_DZ,
   output     [2:0]    io_chosen,
@@ -15808,8 +15836,14 @@ module StreamArbiter_1 (
   input               clk,
   input               reset
 );
+  localparam FpuRoundMode_RNE = 3'd0;
+  localparam FpuRoundMode_RTZ = 3'd1;
+  localparam FpuRoundMode_RDN = 3'd2;
+  localparam FpuRoundMode_RUP = 3'd3;
+  localparam FpuRoundMode_RMM = 3'd4;
+
   wire       [5:0]    _zz__zz_maskProposal_1_1;
-  reg        `FpuRoundMode_opt_type _zz__zz_io_output_payload_roundMode;
+  reg        [2:0]    _zz__zz_io_output_payload_roundMode;
   reg        [4:0]    _zz_io_output_payload_rd_4;
   reg        [23:0]   _zz_io_output_payload_value_mantissa;
   reg        [8:0]    _zz_io_output_payload_value_exponent;
@@ -15843,7 +15877,7 @@ module StreamArbiter_1 (
   wire                _zz_io_output_payload_rd_1;
   wire                _zz_io_output_payload_rd_2;
   wire       [2:0]    _zz_io_output_payload_rd_3;
-  wire       `FpuRoundMode_opt_type _zz_io_output_payload_roundMode;
+  wire       [2:0]    _zz_io_output_payload_roundMode;
   wire                _zz_io_chosen;
   wire                _zz_io_chosen_1;
   wire                _zz_io_chosen_2;
@@ -15936,81 +15970,81 @@ module StreamArbiter_1 (
   `ifndef SYNTHESIS
   always @(*) begin
     case(io_inputs_0_payload_roundMode)
-      `FpuRoundMode_opt_RNE : io_inputs_0_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : io_inputs_0_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : io_inputs_0_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : io_inputs_0_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : io_inputs_0_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : io_inputs_0_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : io_inputs_0_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : io_inputs_0_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : io_inputs_0_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : io_inputs_0_payload_roundMode_string = "RMM";
       default : io_inputs_0_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(io_inputs_1_payload_roundMode)
-      `FpuRoundMode_opt_RNE : io_inputs_1_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : io_inputs_1_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : io_inputs_1_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : io_inputs_1_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : io_inputs_1_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : io_inputs_1_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : io_inputs_1_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : io_inputs_1_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : io_inputs_1_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : io_inputs_1_payload_roundMode_string = "RMM";
       default : io_inputs_1_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(io_inputs_2_payload_roundMode)
-      `FpuRoundMode_opt_RNE : io_inputs_2_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : io_inputs_2_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : io_inputs_2_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : io_inputs_2_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : io_inputs_2_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : io_inputs_2_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : io_inputs_2_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : io_inputs_2_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : io_inputs_2_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : io_inputs_2_payload_roundMode_string = "RMM";
       default : io_inputs_2_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(io_inputs_3_payload_roundMode)
-      `FpuRoundMode_opt_RNE : io_inputs_3_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : io_inputs_3_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : io_inputs_3_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : io_inputs_3_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : io_inputs_3_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : io_inputs_3_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : io_inputs_3_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : io_inputs_3_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : io_inputs_3_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : io_inputs_3_payload_roundMode_string = "RMM";
       default : io_inputs_3_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(io_inputs_4_payload_roundMode)
-      `FpuRoundMode_opt_RNE : io_inputs_4_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : io_inputs_4_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : io_inputs_4_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : io_inputs_4_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : io_inputs_4_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : io_inputs_4_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : io_inputs_4_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : io_inputs_4_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : io_inputs_4_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : io_inputs_4_payload_roundMode_string = "RMM";
       default : io_inputs_4_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(io_inputs_5_payload_roundMode)
-      `FpuRoundMode_opt_RNE : io_inputs_5_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : io_inputs_5_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : io_inputs_5_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : io_inputs_5_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : io_inputs_5_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : io_inputs_5_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : io_inputs_5_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : io_inputs_5_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : io_inputs_5_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : io_inputs_5_payload_roundMode_string = "RMM";
       default : io_inputs_5_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(io_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : io_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : io_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : io_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : io_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : io_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : io_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : io_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : io_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : io_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : io_output_payload_roundMode_string = "RMM";
       default : io_output_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(_zz_io_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : _zz_io_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : _zz_io_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : _zz_io_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : _zz_io_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : _zz_io_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : _zz_io_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : _zz_io_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : _zz_io_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : _zz_io_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : _zz_io_output_payload_roundMode_string = "RMM";
       default : _zz_io_output_payload_roundMode_string = "???";
     endcase
   end
@@ -16084,6 +16118,7 @@ module FpuSqrt (
   input               clk,
   input               reset
 );
+
   wire       [27:0]   _zz_t;
   wire       [25:0]   _zz_t_1;
   wire       [24:0]   _zz_q;
@@ -16179,6 +16214,7 @@ module FpuDiv (
   input               clk,
   input               reset
 );
+
   wire       [24:0]   _zz_shifter_1;
   wire       [24:0]   _zz_div1;
   wire       [26:0]   _zz_div3;
@@ -16288,28 +16324,52 @@ endmodule
 module StreamArbiter (
   input               io_inputs_0_valid,
   output              io_inputs_0_ready,
-  input      `FpuOpcode_binary_sequential_type io_inputs_0_payload_opcode,
+  input      [3:0]    io_inputs_0_payload_opcode,
   input      [1:0]    io_inputs_0_payload_arg,
   input      [4:0]    io_inputs_0_payload_rs1,
   input      [4:0]    io_inputs_0_payload_rs2,
   input      [4:0]    io_inputs_0_payload_rs3,
   input      [4:0]    io_inputs_0_payload_rd,
-  input      `FpuFormat_binary_sequential_type io_inputs_0_payload_format,
-  input      `FpuRoundMode_opt_type io_inputs_0_payload_roundMode,
+  input      [0:0]    io_inputs_0_payload_format,
+  input      [2:0]    io_inputs_0_payload_roundMode,
   output              io_output_valid,
   input               io_output_ready,
-  output     `FpuOpcode_binary_sequential_type io_output_payload_opcode,
+  output     [3:0]    io_output_payload_opcode,
   output     [1:0]    io_output_payload_arg,
   output     [4:0]    io_output_payload_rs1,
   output     [4:0]    io_output_payload_rs2,
   output     [4:0]    io_output_payload_rs3,
   output     [4:0]    io_output_payload_rd,
-  output     `FpuFormat_binary_sequential_type io_output_payload_format,
-  output     `FpuRoundMode_opt_type io_output_payload_roundMode,
+  output     [0:0]    io_output_payload_format,
+  output     [2:0]    io_output_payload_roundMode,
   output     [0:0]    io_chosenOH,
   input               clk,
   input               reset
 );
+  localparam FpuOpcode_LOAD = 4'd0;
+  localparam FpuOpcode_STORE = 4'd1;
+  localparam FpuOpcode_MUL = 4'd2;
+  localparam FpuOpcode_ADD = 4'd3;
+  localparam FpuOpcode_FMA = 4'd4;
+  localparam FpuOpcode_I2F = 4'd5;
+  localparam FpuOpcode_F2I = 4'd6;
+  localparam FpuOpcode_CMP = 4'd7;
+  localparam FpuOpcode_DIV = 4'd8;
+  localparam FpuOpcode_SQRT = 4'd9;
+  localparam FpuOpcode_MIN_MAX = 4'd10;
+  localparam FpuOpcode_SGNJ = 4'd11;
+  localparam FpuOpcode_FMV_X_W = 4'd12;
+  localparam FpuOpcode_FMV_W_X = 4'd13;
+  localparam FpuOpcode_FCLASS = 4'd14;
+  localparam FpuOpcode_FCVT_X_X = 4'd15;
+  localparam FpuFormat_FLOAT = 1'd0;
+  localparam FpuFormat_DOUBLE = 1'd1;
+  localparam FpuRoundMode_RNE = 3'd0;
+  localparam FpuRoundMode_RTZ = 3'd1;
+  localparam FpuRoundMode_RDN = 3'd2;
+  localparam FpuRoundMode_RUP = 3'd3;
+  localparam FpuRoundMode_RMM = 3'd4;
+
   wire       [1:0]    _zz__zz_maskProposal_0_2;
   wire       [1:0]    _zz__zz_maskProposal_0_2_1;
   wire       [0:0]    _zz__zz_maskProposal_0_2_2;
@@ -16321,9 +16381,9 @@ module StreamArbiter (
   wire       [0:0]    _zz_maskProposal_0;
   wire       [1:0]    _zz_maskProposal_0_1;
   wire       [1:0]    _zz_maskProposal_0_2;
-  wire       `FpuOpcode_binary_sequential_type _zz_io_output_payload_opcode;
-  wire       `FpuFormat_binary_sequential_type _zz_io_output_payload_format;
-  wire       `FpuRoundMode_opt_type _zz_io_output_payload_roundMode;
+  wire       [3:0]    _zz_io_output_payload_opcode;
+  wire       [0:0]    _zz_io_output_payload_format;
+  wire       [2:0]    _zz_io_output_payload_roundMode;
   `ifndef SYNTHESIS
   reg [63:0] io_inputs_0_payload_opcode_string;
   reg [47:0] io_inputs_0_payload_format_string;
@@ -16344,115 +16404,115 @@ module StreamArbiter (
   `ifndef SYNTHESIS
   always @(*) begin
     case(io_inputs_0_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : io_inputs_0_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : io_inputs_0_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : io_inputs_0_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : io_inputs_0_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : io_inputs_0_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : io_inputs_0_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : io_inputs_0_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : io_inputs_0_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : io_inputs_0_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : io_inputs_0_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : io_inputs_0_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : io_inputs_0_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : io_inputs_0_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : io_inputs_0_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : io_inputs_0_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : io_inputs_0_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : io_inputs_0_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : io_inputs_0_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : io_inputs_0_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : io_inputs_0_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : io_inputs_0_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : io_inputs_0_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : io_inputs_0_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : io_inputs_0_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : io_inputs_0_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : io_inputs_0_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : io_inputs_0_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : io_inputs_0_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : io_inputs_0_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : io_inputs_0_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : io_inputs_0_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : io_inputs_0_payload_opcode_string = "FCVT_X_X";
       default : io_inputs_0_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(io_inputs_0_payload_format)
-      `FpuFormat_binary_sequential_FLOAT : io_inputs_0_payload_format_string = "FLOAT ";
-      `FpuFormat_binary_sequential_DOUBLE : io_inputs_0_payload_format_string = "DOUBLE";
+      FpuFormat_FLOAT : io_inputs_0_payload_format_string = "FLOAT ";
+      FpuFormat_DOUBLE : io_inputs_0_payload_format_string = "DOUBLE";
       default : io_inputs_0_payload_format_string = "??????";
     endcase
   end
   always @(*) begin
     case(io_inputs_0_payload_roundMode)
-      `FpuRoundMode_opt_RNE : io_inputs_0_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : io_inputs_0_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : io_inputs_0_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : io_inputs_0_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : io_inputs_0_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : io_inputs_0_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : io_inputs_0_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : io_inputs_0_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : io_inputs_0_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : io_inputs_0_payload_roundMode_string = "RMM";
       default : io_inputs_0_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(io_output_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : io_output_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : io_output_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : io_output_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : io_output_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : io_output_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : io_output_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : io_output_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : io_output_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : io_output_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : io_output_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : io_output_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : io_output_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : io_output_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : io_output_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : io_output_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : io_output_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : io_output_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : io_output_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : io_output_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : io_output_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : io_output_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : io_output_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : io_output_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : io_output_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : io_output_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : io_output_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : io_output_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : io_output_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : io_output_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : io_output_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : io_output_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : io_output_payload_opcode_string = "FCVT_X_X";
       default : io_output_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(io_output_payload_format)
-      `FpuFormat_binary_sequential_FLOAT : io_output_payload_format_string = "FLOAT ";
-      `FpuFormat_binary_sequential_DOUBLE : io_output_payload_format_string = "DOUBLE";
+      FpuFormat_FLOAT : io_output_payload_format_string = "FLOAT ";
+      FpuFormat_DOUBLE : io_output_payload_format_string = "DOUBLE";
       default : io_output_payload_format_string = "??????";
     endcase
   end
   always @(*) begin
     case(io_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : io_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : io_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : io_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : io_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : io_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : io_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : io_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : io_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : io_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : io_output_payload_roundMode_string = "RMM";
       default : io_output_payload_roundMode_string = "???";
     endcase
   end
   always @(*) begin
     case(_zz_io_output_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : _zz_io_output_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : _zz_io_output_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : _zz_io_output_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : _zz_io_output_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : _zz_io_output_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : _zz_io_output_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : _zz_io_output_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : _zz_io_output_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : _zz_io_output_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : _zz_io_output_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : _zz_io_output_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : _zz_io_output_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : _zz_io_output_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : _zz_io_output_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : _zz_io_output_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : _zz_io_output_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : _zz_io_output_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : _zz_io_output_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : _zz_io_output_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : _zz_io_output_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : _zz_io_output_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : _zz_io_output_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : _zz_io_output_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : _zz_io_output_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : _zz_io_output_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : _zz_io_output_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : _zz_io_output_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : _zz_io_output_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : _zz_io_output_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : _zz_io_output_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : _zz_io_output_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : _zz_io_output_payload_opcode_string = "FCVT_X_X";
       default : _zz_io_output_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(_zz_io_output_payload_format)
-      `FpuFormat_binary_sequential_FLOAT : _zz_io_output_payload_format_string = "FLOAT ";
-      `FpuFormat_binary_sequential_DOUBLE : _zz_io_output_payload_format_string = "DOUBLE";
+      FpuFormat_FLOAT : _zz_io_output_payload_format_string = "FLOAT ";
+      FpuFormat_DOUBLE : _zz_io_output_payload_format_string = "DOUBLE";
       default : _zz_io_output_payload_format_string = "??????";
     endcase
   end
   always @(*) begin
     case(_zz_io_output_payload_roundMode)
-      `FpuRoundMode_opt_RNE : _zz_io_output_payload_roundMode_string = "RNE";
-      `FpuRoundMode_opt_RTZ : _zz_io_output_payload_roundMode_string = "RTZ";
-      `FpuRoundMode_opt_RDN : _zz_io_output_payload_roundMode_string = "RDN";
-      `FpuRoundMode_opt_RUP : _zz_io_output_payload_roundMode_string = "RUP";
-      `FpuRoundMode_opt_RMM : _zz_io_output_payload_roundMode_string = "RMM";
+      FpuRoundMode_RNE : _zz_io_output_payload_roundMode_string = "RNE";
+      FpuRoundMode_RTZ : _zz_io_output_payload_roundMode_string = "RTZ";
+      FpuRoundMode_RDN : _zz_io_output_payload_roundMode_string = "RDN";
+      FpuRoundMode_RUP : _zz_io_output_payload_roundMode_string = "RUP";
+      FpuRoundMode_RMM : _zz_io_output_payload_roundMode_string = "RMM";
       default : _zz_io_output_payload_roundMode_string = "???";
     endcase
   end
@@ -16494,23 +16554,40 @@ endmodule
 module StreamFork (
   input               io_input_valid,
   output              io_input_ready,
-  input      `FpuOpcode_binary_sequential_type io_input_payload_opcode,
+  input      [3:0]    io_input_payload_opcode,
   input      [4:0]    io_input_payload_rd,
   input               io_input_payload_write,
   input      [31:0]   io_input_payload_value,
   output              io_outputs_0_valid,
   input               io_outputs_0_ready,
-  output     `FpuOpcode_binary_sequential_type io_outputs_0_payload_opcode,
+  output     [3:0]    io_outputs_0_payload_opcode,
   output     [4:0]    io_outputs_0_payload_rd,
   output              io_outputs_0_payload_write,
   output     [31:0]   io_outputs_0_payload_value,
   output              io_outputs_1_valid,
   input               io_outputs_1_ready,
-  output     `FpuOpcode_binary_sequential_type io_outputs_1_payload_opcode,
+  output     [3:0]    io_outputs_1_payload_opcode,
   output     [4:0]    io_outputs_1_payload_rd,
   output              io_outputs_1_payload_write,
   output     [31:0]   io_outputs_1_payload_value
 );
+  localparam FpuOpcode_LOAD = 4'd0;
+  localparam FpuOpcode_STORE = 4'd1;
+  localparam FpuOpcode_MUL = 4'd2;
+  localparam FpuOpcode_ADD = 4'd3;
+  localparam FpuOpcode_FMA = 4'd4;
+  localparam FpuOpcode_I2F = 4'd5;
+  localparam FpuOpcode_F2I = 4'd6;
+  localparam FpuOpcode_CMP = 4'd7;
+  localparam FpuOpcode_DIV = 4'd8;
+  localparam FpuOpcode_SQRT = 4'd9;
+  localparam FpuOpcode_MIN_MAX = 4'd10;
+  localparam FpuOpcode_SGNJ = 4'd11;
+  localparam FpuOpcode_FMV_X_W = 4'd12;
+  localparam FpuOpcode_FMV_W_X = 4'd13;
+  localparam FpuOpcode_FCLASS = 4'd14;
+  localparam FpuOpcode_FCVT_X_X = 4'd15;
+
   `ifndef SYNTHESIS
   reg [63:0] io_input_payload_opcode_string;
   reg [63:0] io_outputs_0_payload_opcode_string;
@@ -16521,64 +16598,64 @@ module StreamFork (
   `ifndef SYNTHESIS
   always @(*) begin
     case(io_input_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : io_input_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : io_input_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : io_input_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : io_input_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : io_input_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : io_input_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : io_input_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : io_input_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : io_input_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : io_input_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : io_input_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : io_input_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : io_input_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : io_input_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : io_input_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : io_input_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : io_input_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : io_input_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : io_input_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : io_input_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : io_input_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : io_input_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : io_input_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : io_input_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : io_input_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : io_input_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : io_input_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : io_input_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : io_input_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : io_input_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : io_input_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : io_input_payload_opcode_string = "FCVT_X_X";
       default : io_input_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(io_outputs_0_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : io_outputs_0_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : io_outputs_0_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : io_outputs_0_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : io_outputs_0_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : io_outputs_0_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : io_outputs_0_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : io_outputs_0_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : io_outputs_0_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : io_outputs_0_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : io_outputs_0_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : io_outputs_0_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : io_outputs_0_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : io_outputs_0_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : io_outputs_0_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : io_outputs_0_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : io_outputs_0_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : io_outputs_0_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : io_outputs_0_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : io_outputs_0_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : io_outputs_0_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : io_outputs_0_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : io_outputs_0_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : io_outputs_0_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : io_outputs_0_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : io_outputs_0_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : io_outputs_0_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : io_outputs_0_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : io_outputs_0_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : io_outputs_0_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : io_outputs_0_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : io_outputs_0_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : io_outputs_0_payload_opcode_string = "FCVT_X_X";
       default : io_outputs_0_payload_opcode_string = "????????";
     endcase
   end
   always @(*) begin
     case(io_outputs_1_payload_opcode)
-      `FpuOpcode_binary_sequential_LOAD : io_outputs_1_payload_opcode_string = "LOAD    ";
-      `FpuOpcode_binary_sequential_STORE : io_outputs_1_payload_opcode_string = "STORE   ";
-      `FpuOpcode_binary_sequential_MUL : io_outputs_1_payload_opcode_string = "MUL     ";
-      `FpuOpcode_binary_sequential_ADD : io_outputs_1_payload_opcode_string = "ADD     ";
-      `FpuOpcode_binary_sequential_FMA : io_outputs_1_payload_opcode_string = "FMA     ";
-      `FpuOpcode_binary_sequential_I2F : io_outputs_1_payload_opcode_string = "I2F     ";
-      `FpuOpcode_binary_sequential_F2I : io_outputs_1_payload_opcode_string = "F2I     ";
-      `FpuOpcode_binary_sequential_CMP : io_outputs_1_payload_opcode_string = "CMP     ";
-      `FpuOpcode_binary_sequential_DIV : io_outputs_1_payload_opcode_string = "DIV     ";
-      `FpuOpcode_binary_sequential_SQRT : io_outputs_1_payload_opcode_string = "SQRT    ";
-      `FpuOpcode_binary_sequential_MIN_MAX : io_outputs_1_payload_opcode_string = "MIN_MAX ";
-      `FpuOpcode_binary_sequential_SGNJ : io_outputs_1_payload_opcode_string = "SGNJ    ";
-      `FpuOpcode_binary_sequential_FMV_X_W : io_outputs_1_payload_opcode_string = "FMV_X_W ";
-      `FpuOpcode_binary_sequential_FMV_W_X : io_outputs_1_payload_opcode_string = "FMV_W_X ";
-      `FpuOpcode_binary_sequential_FCLASS : io_outputs_1_payload_opcode_string = "FCLASS  ";
-      `FpuOpcode_binary_sequential_FCVT_X_X : io_outputs_1_payload_opcode_string = "FCVT_X_X";
+      FpuOpcode_LOAD : io_outputs_1_payload_opcode_string = "LOAD    ";
+      FpuOpcode_STORE : io_outputs_1_payload_opcode_string = "STORE   ";
+      FpuOpcode_MUL : io_outputs_1_payload_opcode_string = "MUL     ";
+      FpuOpcode_ADD : io_outputs_1_payload_opcode_string = "ADD     ";
+      FpuOpcode_FMA : io_outputs_1_payload_opcode_string = "FMA     ";
+      FpuOpcode_I2F : io_outputs_1_payload_opcode_string = "I2F     ";
+      FpuOpcode_F2I : io_outputs_1_payload_opcode_string = "F2I     ";
+      FpuOpcode_CMP : io_outputs_1_payload_opcode_string = "CMP     ";
+      FpuOpcode_DIV : io_outputs_1_payload_opcode_string = "DIV     ";
+      FpuOpcode_SQRT : io_outputs_1_payload_opcode_string = "SQRT    ";
+      FpuOpcode_MIN_MAX : io_outputs_1_payload_opcode_string = "MIN_MAX ";
+      FpuOpcode_SGNJ : io_outputs_1_payload_opcode_string = "SGNJ    ";
+      FpuOpcode_FMV_X_W : io_outputs_1_payload_opcode_string = "FMV_X_W ";
+      FpuOpcode_FMV_W_X : io_outputs_1_payload_opcode_string = "FMV_W_X ";
+      FpuOpcode_FCLASS : io_outputs_1_payload_opcode_string = "FCLASS  ";
+      FpuOpcode_FCVT_X_X : io_outputs_1_payload_opcode_string = "FCVT_X_X";
       default : io_outputs_1_payload_opcode_string = "????????";
     endcase
   end

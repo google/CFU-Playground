@@ -1,6 +1,6 @@
 SRC := ${shell find . -type f -name \*.scala}
 
-VERILOGS := VexRiscv_Custom.v VexRiscv_CustomCfu.v VexRiscv_PerfCfu.v VexRiscv_PerfCfuDebug.v VexRiscv_SlimCfu.v VexRiscv_SlimCfuDebug.v VexRiscv_SlimPerfCfu.v VexRiscv_SlimPerfCfuDebug.v VexRiscv_Fomu.v VexRiscv_FomuCfu.v VexRiscv_SlimoptCfu.v
+VERILOGS := VexRiscv_Custom.v VexRiscv_CustomCfu.v VexRiscv_PerfCfu.v VexRiscv_PerfCfuDebug.v VexRiscv_SlimCfu.v VexRiscv_SlimCfuDebug.v VexRiscv_SlimPerfCfu.v VexRiscv_SlimPerfCfuDebug.v VexRiscv_Fomu.v VexRiscv_FomuCfu.v VexRiscv_SlimoptCfu.v VexRiscv_HpsCfu.v VexRiscv_HpsdeltaCfu.v VexRiscv_Fpu.v VexRiscv_FpuCfu.v VexRiscv_MinCfu.v VexRiscv_dbpl8Cfu.v
 YAMLS    := $(VERILOGS:.v=.yaml)
 
 
