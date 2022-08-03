@@ -71,17 +71,22 @@ fi
 if [ ${#missing[@]} -gt 0 ]; then
     echo "Missing packages: ${missing[@]}" >&2
     if which apt >/dev/null; then
+        if which sudo >/dev/null; then
+            _sudo='sudo'
+        fi
+
         if [ $in_ci -gt 0 ]; then
-            sudo apt update
-            sudo apt install -y "${missing[@]}"
+            $_sudo apt update
+            $_sudo apt install -y "${missing[@]}"
         else
             echo -n "Install [y]/n? " >&2
             answer=$(read)
             if [ "$answer" == "y" -o -z "$answer" ]; then
-                sudo apt update
-                sudo apt install "${missing[@]}"
+                $_sudo apt update
+                $_sudo apt install "${missing[@]}"
             fi
         fi
+        unset _sudo
     else
         exit 1
     fi
