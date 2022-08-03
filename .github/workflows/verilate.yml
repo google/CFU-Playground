@@ -1,0 +1,24 @@
+name: verilate_ci
+on: 
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+      - 'LICENSE'
+      - 'CONTRIBUTING.md'
+      - 'CODE_OF_CONDUCT.md'
+      - 'AUTHORS'
+  workflow_dispatch:
+  schedule:
+    - cron: "03 12 * * *"
+jobs:
+  sim-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      - run: bash scripts/setup -ci
+      - run: make env
+      - run: pwd && source env/conda/bin/activate cfu-common && source environment && cd proj/proj_template_v && make PLATFORM=sim RUN_MENU_ITEMS="5" run
