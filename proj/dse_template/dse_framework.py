@@ -31,6 +31,8 @@ def make_variant_string(csrPluginConfig="mcycle", bypass=True, cfu=False, dCache
         if param_name == "cfu":
             if val is True or val == "True":
                 variant = variant + "+cfu"
+                # Copy optimized kernel invoking CFU to src dir
+                subprocess.run(['cp', '-r', './tensorflow', './src/.'])
         else:
             variant = variant + "+" + param_name + ":" + str(val).lower()
     
@@ -97,6 +99,10 @@ def run_config(variant, target):
         except UnicodeDecodeError:
             run_succeeds = False
         cells  = get_resource_util(target)
+        
+    # Remove any copied tf source overlay for next run
+    if os.path.exists("./src/tensorflow"):
+        subprocess.run(['rm', '-rf', './src/tensorflow'])
 
     return (cycles, cells)
 
