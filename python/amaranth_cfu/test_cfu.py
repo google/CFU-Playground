@@ -196,7 +196,7 @@ class _CfuTest(TestBase):
                     f"\nHEX: op{func}(0x{i0:08X}, 0x{i1:08X}) expected: {expected_output:08X} got: {actual_output:08X}" +
                     f"\nDEC: op{func}(0x{i0}, 0x{i1}) expected: {expected_output} got: {actual_output}")
                 yield
-        self.run_sim(process, True)
+        self.run_sim(process)
 
     def test_cfu_cycles(self):
         """A lower-level test that verifies inputs and outputs on a per-cycle

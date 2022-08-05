@@ -93,7 +93,7 @@ class SimpleElaboratable(Elaboratable):
         return self.m
 
 
-class _DummySyncModule(SimpleElaboratable):
+class _PlaceholderSyncModule(SimpleElaboratable):
     """A module that does something arbirarty with synchronous logic
 
     This is used by TestBase to stop Amaranth from complaining if our DUT doesn't
@@ -118,7 +118,7 @@ class TestBase(unittest.TestCase):
         self.m = Module()
         self.dut = self.create_dut()
         self.m.submodules['dut'] = self.dut
-        self.m.submodules['dummy'] = _DummySyncModule()
+        self.m.submodules['placeholder'] = _PlaceholderSyncModule()
         self.sim = Simulator(self.m)
 
     def create_dut(self):
