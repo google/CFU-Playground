@@ -90,4 +90,4 @@ class SequentialMemoryReaderTest(TestBase):
                 if data is not None:
                     self.assertEqual((yield self.dut.data), data, f"cycle={n}")
                 yield
-        self.run_sim(process, True)
+        self.run_sim(process)
