@@ -15,12 +15,13 @@
 """Tests for hps_cfu.py"""
 
 
-from amaranth_cfu import CfuTestBase, InstructionTestBase, pack_vals
 from amaranth.sim import Passive
 
 from .constants import Constants
 from .conv2d_data import fetch_data
 from .hps_cfu import PoolInstruction, HpsCfu
+from ..util import pack_vals
+from ..cfu import CfuTestBase, InstructionTestBase
 from functools import reduce
 
 

@@ -16,9 +16,8 @@ from amaranth import unsigned
 from amaranth.hdl.rec import Layout
 from amaranth.sim.core import Settle
 
-from amaranth_cfu.util import TestBase
-
 from .flow import FlowRestrictor
+from ..util import TestBase
 
 
 class FlowRestrictorTest(TestBase):

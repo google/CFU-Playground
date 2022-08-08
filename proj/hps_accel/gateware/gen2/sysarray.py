@@ -15,9 +15,9 @@
 """Gateware for the accelerator."""
 
 from amaranth import Signal, signed, unsigned
-from amaranth_cfu import SimpleElaboratable
 from .constants import Constants
 from .macc import get_macc_block_class
+from ..util import SimpleElaboratable
 
 
 class SystolicArray(SimpleElaboratable):

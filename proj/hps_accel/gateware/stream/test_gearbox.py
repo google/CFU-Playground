@@ -16,10 +16,8 @@
 from amaranth import unsigned
 from amaranth.sim.core import Delay
 
-
-from amaranth_cfu.util import TestBase
-
 from .gearbox import ByteToWord
+from ..util import TestBase
 
 
 class ByteToWordTest(TestBase):

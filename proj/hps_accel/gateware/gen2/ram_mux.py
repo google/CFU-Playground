@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from amaranth import Signal
-from amaranth_cfu.util import SimpleElaboratable
+from ..util import SimpleElaboratable
 
 
 class RamMux(SimpleElaboratable):

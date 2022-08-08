@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from amaranth_cfu.util import SimpleElaboratable
 from amaranth import Value, Module, Signal, Mux
 from amaranth.hdl.ast import Cat
 from amaranth.hdl.rec import Layout
 
 from .stream import Endpoint
+from ..util import SimpleElaboratable
 
 
 class Buffer(SimpleElaboratable):

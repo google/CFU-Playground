@@ -18,9 +18,9 @@
 import random
 
 from amaranth.sim import Delay
-from amaranth_cfu import TestBase
 
 from .mem import LoopingAddressGenerator, LoopingCounter, SinglePortMemory
+from ..util import TestBase
 
 
 class SinglePortMemoryTest(TestBase):

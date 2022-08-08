@@ -19,8 +19,7 @@ from amaranth.hdl.rec import Layout, Record
 from amaranth.sim.core import Delay
 
 from .stream import Endpoint, connect
-
-from amaranth_cfu.util import SimpleElaboratable, TestBase
+from ..util import SimpleElaboratable, TestBase
 
 
 TEST_PAYLOAD_LAYOUT = Layout([

@@ -16,11 +16,11 @@
 """Gateware for filter storage."""
 
 from amaranth import Mux, Signal, unsigned
-from amaranth_cfu import SequentialMemoryReader, SimpleElaboratable
 
 from ..stream import Endpoint
 from .constants import Constants
 from .mem import SinglePortMemory
+from ..util import SequentialMemoryReader, SimpleElaboratable
 from .utils import unsigned_upto
 
 

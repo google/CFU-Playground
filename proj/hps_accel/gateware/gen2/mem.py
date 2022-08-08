@@ -16,9 +16,9 @@
 """Simple memory wrapper"""
 
 from amaranth import Memory, Mux, Signal, unsigned
-from amaranth_cfu.util import SimpleElaboratable
 
 from ..stream import Endpoint
+from ..util import SimpleElaboratable
 from .utils import unsigned_upto
 
 

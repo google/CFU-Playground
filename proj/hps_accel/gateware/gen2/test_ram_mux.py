@@ -18,10 +18,10 @@ import itertools
 
 from amaranth import unsigned
 from amaranth.sim import Passive
-from amaranth_cfu import TestBase
 
 from .conv2d_data import fetch_data
 from .ram_mux import RamMux
+from ..util import TestBase
 
 
 class RamMuxTest(TestBase):

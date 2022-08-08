@@ -20,9 +20,8 @@ import random
 from amaranth import Cat, Const, Module, signed
 from amaranth.sim import Passive, Delay
 
-from amaranth_cfu import TestBase
-
 from .sysarray import SystolicArray
+from ..util import TestBase
 
 
 def randlist(n, r):
