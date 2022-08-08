@@ -21,11 +21,10 @@ import random
 from amaranth import Module, signed, unsigned
 from amaranth.sim import Passive
 
-from amaranth_cfu import pack_vals, TestBase
-
 from .accelerator import AcceleratorCore
 from .constants import Constants
 from .conv2d_data import fetch_data
+from ..util import pack_vals, TestBase
 
 
 def group(list_, size):

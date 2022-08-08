@@ -24,9 +24,9 @@ from amaranth import (
     Signal,
     signed,
     unsigned)
-from amaranth_cfu.util import SimpleElaboratable
 
 from ..stream import connect, Endpoint
+from ..util import SimpleElaboratable
 from .constants import Constants
 from .filter import FilterStore, FILTER_WRITE_COMMAND
 from .mem import SinglePortMemory

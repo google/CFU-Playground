@@ -16,7 +16,7 @@
 """Tests for uitls.py"""
 
 from amaranth import Signal, Module
-from amaranth_cfu import TestBase
+from ..util import TestBase
 from .utils import delay
 import random
 

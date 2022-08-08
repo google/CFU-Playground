@@ -20,12 +20,11 @@ import random
 from amaranth import Module, unsigned
 from amaranth.sim import Passive, Delay
 
-from amaranth_cfu import pack_vals, TestBase
-
 from .post_process import (
     SaturatingRoundingDoubleHighMul, RoundingDivideByPowerOfTwo,
     SaturateActivationPipeline, PostProcessPipeline, ParamWriter, ReadingProducer,
     AccumulatorReader, StreamLimiter, OutputWordAssembler)
+from ..util import pack_vals, TestBase
 
 
 # Test cases generated from original C implementation

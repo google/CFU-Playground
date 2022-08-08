@@ -17,10 +17,8 @@ from amaranth import unsigned
 from amaranth.hdl.rec import Layout
 from amaranth.sim.core import Delay, Settle
 
-
-from amaranth_cfu.util import TestBase
-
 from .buffer import Buffer, ConcatenatingBuffer
+from ..util import TestBase
 
 
 class TestBuffer(TestBase):

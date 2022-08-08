@@ -13,9 +13,9 @@
 # limitations under the License.
 
 from amaranth import Cat, Mux, Record, Signal, signed, unsigned
-from amaranth_cfu import Cfu, InstructionBase
 
 from .accelerator import AcceleratorCore, ACCELERATOR_CONFIGURATION_LAYOUT
+from ..cfu import Cfu, InstructionBase
 from .constants import Constants
 from .filter import FILTER_WRITE_COMMAND
 from .post_process import POST_PROCESS_PARAMS

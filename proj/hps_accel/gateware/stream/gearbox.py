@@ -16,9 +16,9 @@
 
 from amaranth import signed, unsigned, Cat, Signal, Module
 from amaranth.hdl.dsl import FSM
-from amaranth_cfu import SimpleElaboratable
 
 from .stream import Endpoint
+from ..util import SimpleElaboratable
 
 
 class ByteToWord(SimpleElaboratable):

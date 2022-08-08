@@ -27,9 +27,9 @@ Data is read through the RamMux, allowing two words to be read on every cycle.
 """
 
 from amaranth import Cat, Mux, Signal
-from amaranth_cfu.util import SimpleElaboratable
 
 from .ram_mux import RamMux
+from ..util import SimpleElaboratable
 from .utils import unsigned_upto
 
 

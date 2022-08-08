@@ -17,9 +17,9 @@
 from amaranth import signed, unsigned, Cat, Signal, Module
 from amaranth.lib.fifo import SyncFIFOBuffered
 from amaranth.hdl.dsl import FSM
-from amaranth_cfu import SimpleElaboratable
 
 from .stream import PayloadDefinition, Endpoint
+from ..util import SimpleElaboratable
 
 
 class StreamFifo(SimpleElaboratable):

@@ -15,8 +15,6 @@
 """Tests for mode0_input.py"""
 
 from amaranth import Memory
-from amaranth_cfu import TestBase
-from amaranth_cfu.util import pack_vals
 
 from .conv2d_data import fetch_data
 from .mode0_input import (
@@ -25,6 +23,8 @@ from .mode0_input import (
     ValueAddressGenerator,
     ValueReader)
 from .ram_mux import RamMux
+from ..util import TestBase
+from ..util import pack_vals
 
 
 class EvenPixelAddressGeneratorTest(TestBase):

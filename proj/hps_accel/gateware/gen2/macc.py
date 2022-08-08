@@ -17,8 +17,8 @@
 
 
 from amaranth import Mux, Signal, unsigned, Const, Instance, ClockSignal, ResetSignal, Cat
-from amaranth_cfu.util import tree_sum, SimpleElaboratable
 
+from ..util import tree_sum, SimpleElaboratable
 from .utils import delay
 
 

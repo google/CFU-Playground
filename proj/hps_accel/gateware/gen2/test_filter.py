@@ -14,10 +14,8 @@
 
 """Tests for filter.py"""
 
-
-from amaranth_cfu import TestBase
-
 from .filter import FilterStore
+from ..util import TestBase
 
 
 class FilterStoreTest(TestBase):

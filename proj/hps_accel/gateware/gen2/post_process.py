@@ -14,7 +14,6 @@
 
 """Post processing of accumulated values into 8 bit outputs."""
 
-from amaranth_cfu import SimpleElaboratable
 from amaranth import (
     signed, unsigned, Array, Cat, Module, Mux, Record, Signal, ResetInserter
 )
@@ -24,6 +23,7 @@ from .mem import LoopingAddressGenerator
 from .utils import unsigned_upto
 from ..stream import connect, Endpoint, BinaryPipelineActor
 from ..stream.fifo import StreamFifo
+from ..util import SimpleElaboratable
 
 SRDHM_INPUT_LAYOUT = [
     ('a', signed(32)),

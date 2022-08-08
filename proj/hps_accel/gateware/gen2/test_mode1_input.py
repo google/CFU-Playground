@@ -18,7 +18,6 @@ import itertools
 
 from amaranth import Memory, unsigned
 from amaranth.sim import Passive, Delay, Settle
-from amaranth_cfu import TestBase
 
 from .conv2d_data import fetch_data
 from .mode1_input import (
@@ -27,6 +26,7 @@ from .mode1_input import (
     PixelAddressRepeater,
     ValueAddressGenerator)
 from .ram_mux import RamMux
+from ..util import TestBase
 
 
 class PixelAddressGeneratorTest(TestBase):

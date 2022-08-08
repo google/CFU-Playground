@@ -21,9 +21,8 @@ import random
 from amaranth import unsigned, signed
 from amaranth.sim import Delay
 
-from amaranth_cfu import TestBase
-
 from .macc import StandardMaccBlock
+from ..util import TestBase
 
 
 class MaccBlockTest(TestBase):

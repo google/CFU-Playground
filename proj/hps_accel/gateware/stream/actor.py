@@ -14,9 +14,9 @@
 # limitations under the License.
 
 from amaranth import Cat, Signal, Module
-from amaranth_cfu import SimpleElaboratable
 
 from .stream import PayloadDefinition, Endpoint
+from ..util import SimpleElaboratable
 
 
 class BinaryActor(SimpleElaboratable):

@@ -69,8 +69,8 @@ addresses for all the data for a given output pixel from that start address.
 """
 
 from amaranth import Array, Mux, Signal, unsigned
-from amaranth_cfu.util import SimpleElaboratable
 
+from ..util import SimpleElaboratable
 from .utils import unsigned_upto
 
 
