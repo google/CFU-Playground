@@ -16,8 +16,7 @@
 # This variable lists symbols to define to the C preprocessor
 export DEFINES :=
 
-# Define which generation gateware to use = gen1 or gen2
-#GATEWARE_GEN ?= 1
+# Define which generation gateware to use. Only gen2 exists now.
 GATEWARE_GEN := 2
 DEFINES += GATEWARE_GEN=$(GATEWARE_GEN)
 
