@@ -20,13 +20,11 @@ import sys
 from amaranth import *
 from amaranth.back import verilog
 
-from gateware.gen1.hps_cfu import make_cfu as gen1_make_cfu
 from gateware.gen2.hps_cfu import make_cfu as gen2_make_cfu
 
 VERILOG_FILENAME = "cfu.v"
 
 make_cfu_fns = {
-    'gen1': gen1_make_cfu,
     'gen2': gen2_make_cfu,
 }
 

@@ -22,7 +22,6 @@ limitations under the License.
 #include "playground_util/murmurhash.h"
 #include "playground_util/print_params.h"
 #include "tensorflow/lite/kernels/internal/common.h"
-#include "tensorflow/lite/kernels/internal/reference/integer_ops/conv_accel_gen_1.h"
 #include "tensorflow/lite/kernels/internal/reference/integer_ops/conv_accel_gen_2.h"
 
 namespace tflite {
