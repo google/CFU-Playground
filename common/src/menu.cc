@@ -23,8 +23,9 @@
 #include "playground_util/console.h"
 
 // Sim_sequence is string of chars to be passed to menu while running in simulation
-char sim_sequence[] = "11gxxQ";
-char* sim_ptr = sim_sequence;
+#ifdef DSE_SIMULATION
+char* sim_ptr = (char*)MENU_CHAR_SEQUENCE;
+#endif
 
 namespace {
 
@@ -45,10 +46,16 @@ void menu_print(struct Menu* menu) {
 // Get the menu selection
 struct MenuItem* menu_get_selection(struct Menu* menu) {
   char c = '\0';
+#ifdef DSE_SIMULATION
   if (*sim_ptr == '\0') return NULL;
   else {
     c = *(sim_ptr++);
   }
+#else 
+  do {
+    c = readchar();
+  } while (c == '\n' || c == '\r');
+#endif
   putchar(c);
   for (struct MenuItem* p = menu->items; p->selection; p++) {
     if (c == p->selection) {
@@ -78,8 +85,10 @@ extern "C" void menu_run(struct Menu* menu) {
         puts("---");
       }
     }
+#ifdef DSE_SIMULATION
     else {
         exit_now = true;
     }
+#endif
   }
 }
