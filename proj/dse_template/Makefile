@@ -39,4 +39,8 @@ DEFINES += INCLUDE_MODEL_PDTI8
 # Uncomment to include all TFLM examples (pdti8, micro_speech, magic_wand)
 #DEFINES += INCLUDE_ALL_TFLM_EXAMPLES
 
+# Uncomment to program menu sequence as you wish to run workload w/o interacting with menu 
+DEFINES += DSE_SIMULATION
+DEFINES += MENU_CHAR_SEQUENCE='"11gxxQ"'  # this default character sequence runs golden tests for PDIT8
+
 include ../proj.mk
