@@ -32,6 +32,7 @@ from litex.soc.integration.soc import SoCRegion
 from litex.tools.litex_sim import SimSoC
 
 from patch_cpu_variant import patch_cpu_variant, copy_cpu_variant_if_needed
+from patch_cpu_variant import build_cpu_variant_if_needed
 
 import argparse
 import os
@@ -82,6 +83,7 @@ def main():
     if args.cfu_mport:
         args.separate_arena = True
 
+    build_cpu_variant_if_needed(args.cpu_variant)
     copy_cpu_variant_if_needed(args.cpu_variant)
     soc_kwargs = soc_core_argdict(args)
     soc_kwargs["l2_size"] = 8 * 1024
@@ -137,6 +139,7 @@ def main():
         build=args.run,
         run=args.run,
         sim_config=sim_config,
+        interactive=False,
         trace=args.sim_trace,
         trace_fst=True,
         trace_start=int(float(args.sim_trace_start)),

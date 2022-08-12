@@ -27,7 +27,3 @@ dependencies:
   - pip
   - pip:
     - -r ./requirements-symbiflow.txt
-
-
-
-
