@@ -220,12 +220,13 @@ void ConvPerChannel(const ConvParams& params, const int32_t* output_multiplier,
 
 // Fixed-point per-channel-quantization convolution reference kernel.
 // 16-bit data and 8-bit filter
+template <typename AccumScalar>
 void ConvPerChannel(const ConvParams& params, const int32_t* output_multiplier,
                     const int32_t* output_shift,
                     const RuntimeShape& input_shape, const int16_t* input_data,
                     const RuntimeShape& filter_shape, const int8_t* filter_data,
                     const RuntimeShape& bias_shape,
-                    const std::int64_t* bias_data,
+                    const AccumScalar* bias_data,
                     const RuntimeShape& output_shape, int16_t* output_data) {
   // Get parameters.
   const int stride_width = params.stride_width;
@@ -308,6 +309,27 @@ void ConvPerChannel(const ConvParams& params, const int32_t* output_multiplier,
     }
   }
 }
+
+template
+void ConvPerChannel<std::int64_t>(
+                    const ConvParams& params, const int32_t* output_multiplier,
+                    const int32_t* output_shift,
+                    const RuntimeShape& input_shape, const int16_t* input_data,
+                    const RuntimeShape& filter_shape, const int8_t* filter_data,
+                    const RuntimeShape& bias_shape,
+                    const std::int64_t* bias_data,
+                    const RuntimeShape& output_shape, int16_t* output_data);
+
+template
+void ConvPerChannel<std::int32_t>(
+                    const ConvParams& params, const int32_t* output_multiplier,
+                    const int32_t* output_shift,
+                    const RuntimeShape& input_shape, const int16_t* input_data,
+                    const RuntimeShape& filter_shape, const int8_t* filter_data,
+                    const RuntimeShape& bias_shape,
+                    const std::int32_t* bias_data,
+                    const RuntimeShape& output_shape, int16_t* output_data);
+
 
 }  // namespace reference_integer_ops
 }  // namespace tflite

@@ -19,9 +19,9 @@ limitations under the License.
 namespace tflite {
 
 // Assumes 100 MHz
-int32_t ticks_per_second() { return 100000000 / 1024; }
+uint32_t ticks_per_second() { return 100000000 / 1024; }
 
 // 1 "tick" = 1024 clock cycles
-int32_t GetCurrentTimeTicks() { return perf_get_mcycle64() >> 10; }
+uint32_t GetCurrentTimeTicks() { return perf_get_mcycle64() >> 10; }
 
 }  // namespace tflite
