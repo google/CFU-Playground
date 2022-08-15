@@ -89,7 +89,10 @@ jobs:
         echo 'conda_pkgs_dir:'
         ls ~/conda_pkgs_dir
         echo 'which yosys:'
+        which yosys || true
+        echo "$CONDA/envs/test/bin" >> $GITHUB_PATH
         which yosys
+        yosys --version
 
   test-projects:
     runs-on: ubuntu-20.04
