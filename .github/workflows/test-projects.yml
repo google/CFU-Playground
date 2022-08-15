@@ -91,6 +91,9 @@ jobs:
         echo 'direct yosys:'
         $CONDA/envs/test/bin/yosys --version
         echo "$CONDA/envs/test/bin" >> $GITHUB_PATH
+
+    - name: Conda stuff part 2
+      run: |
         hash -r
         echo 'github path:'
         echo $GITHUB_PATH
