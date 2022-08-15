@@ -68,7 +68,7 @@ jobs:
       with:
         auto-update-conda: true
         python-version: '3.7'
-        environment-file: .github/workflows/test-environment.yml
+        environment-file: .github/misc/test-environment.yml
 
     - name: Check Conda Stuff
       run: |
