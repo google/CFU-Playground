@@ -88,8 +88,14 @@ jobs:
         ls $CONDA/envs/test/bin
         echo 'conda_pkgs_dir:'
         ls ~/conda_pkgs_dir
+        echo 'direct yosys:'
+        $CONDA/envs/test/bin/yosys --version
         echo "$CONDA/envs/test/bin" >> $GITHUB_PATH
         hash -r
+        echo 'github path:'
+        echo $GITHUB_PATH
+        echo 'path:'
+        echo $PATH
         echo 'which yosys:'
         which yosys
         yosys --version
