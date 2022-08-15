@@ -72,12 +72,21 @@ jobs:
 
     - name: Check Conda Stuff
       run: |
+        echo 'which conda:'
         which conda
+        echo 'conda info:'
         conda info
+        echo 'conda list'
         conda list
-        echo $CONDA
+        echo 'CONDA:' $CONDA
+        echo 'CONDA/envs:'
         ls $CONDA/envs
+        echo 'CONDA/envs/test:'
         ls $CONDA/envs/test
+        echo 'CONDA/envs/test/bin:'
+        ls $CONDA/envs/test/bin
+        echo 'conda_pkgs_dir:'
+        ls ~/conda_pkgs_dir
 
   test-projects:
     runs-on: ubuntu-20.04
