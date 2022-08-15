@@ -88,6 +88,8 @@ jobs:
         ls $CONDA/envs/test/bin
         echo 'conda_pkgs_dir:'
         ls ~/conda_pkgs_dir
+        echo 'which yosys:'
+        which yosys
 
   test-projects:
     runs-on: ubuntu-20.04
