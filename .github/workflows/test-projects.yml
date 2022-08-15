@@ -69,6 +69,7 @@ jobs:
         auto-update-conda: true
         python-version: '3.7'
         environment-file: .github/misc/test-environment.yml
+        activate-environment: 'test'
 
     - name: Check Conda Stuff
       run: |
