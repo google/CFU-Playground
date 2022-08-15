@@ -97,6 +97,7 @@ jobs:
         hash -r
         echo 'github path:'
         echo $GITHUB_PATH
+        cat $GITHUB_PATH
         echo 'path:'
         echo $PATH
         echo 'which yosys:'
