@@ -69,7 +69,7 @@ jobs:
         auto-update-conda: true
         python-version: '3.7'
         environment-file: .github/misc/test-environment.yml
-        activate-environment: 'test'
+        activate-environment: "test"
 
     - name: Check Conda Stuff
       run: |
@@ -88,21 +88,25 @@ jobs:
         ls $CONDA/envs/test/bin
         echo 'conda_pkgs_dir:'
         ls ~/conda_pkgs_dir
-        echo 'direct yosys:'
-        $CONDA/envs/test/bin/yosys --version
-        echo "$CONDA/envs/test/bin" >> $GITHUB_PATH
+#       echo 'direct yosys:'
+#       $CONDA/envs/test/bin/yosys --version
+#       echo "$CONDA/envs/test/bin" >> $GITHUB_PATH
 
     - name: Conda stuff part 2
       run: |
         hash -r
         echo 'github path:'
         echo $GITHUB_PATH
+        echo 'cat github path:'
         cat $GITHUB_PATH
         echo 'path:'
         echo $PATH
+        echo 'which conda:'
+        which conda
         echo 'which yosys:'
         which yosys
         yosys --version
+        riscv-unknown-elf-gcc --version
 
   test-projects:
     runs-on: ubuntu-20.04
