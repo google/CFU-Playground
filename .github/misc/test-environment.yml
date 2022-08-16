@@ -1,0 +1,8 @@
+name: test
+channels:
+  - defaults
+  - litex-hub
+dependencies:
+  - litex-hub::gcc-riscv32-elf-newlib
+  - litex-hub::yosys
+  - litex-hub::symbiflow-yosys-plugins

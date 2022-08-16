@@ -30,6 +30,10 @@ jobs:
     outputs:
       matrix-combinations: ${{ steps.setup-matrix-combinations.outputs.matrix-combinations }}
 
+    defaults:
+      run:
+        shell: bash -l {0}
+
     steps:
     - name: Clone repository
       uses: actions/checkout@v2
@@ -63,6 +67,22 @@ jobs:
         path: '${{ env.RENODE_DIR }}'
         key: cfu-cache-renode-${{ env.RENODE_VERSION }}
 
+    - name: Cache Conda packages
+      uses: actions/cache@v2
+      id: cache-conda
+      with:
+        path: ~/conda_pkgs_dir
+        key: cfu-cache-conda-${{ github.sha }}
+
+    - name: Build Conda Env
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        auto-update-conda: true
+        python-version: '3.7'
+        environment-file: .github/misc/test-environment.yml
+        activate-environment: "test"
+
+
   test-projects:
     runs-on: ubuntu-20.04
     continue-on-error: True
@@ -70,12 +90,11 @@ jobs:
     strategy:
       matrix: ${{ fromJson(needs.setup-matrix.outputs.matrix-combinations) }}
 
-    steps:
-    - name: Fetch toolchain
-      run: |
-        wget --progress=dot:giga -O- https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14.tar.gz | tar -xzC /opt
-        echo "/opt/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14/bin" >> $GITHUB_PATH
+    defaults:
+      run:
+        shell: bash -l {0}
 
+    steps:
     - name: Clone repository
       uses: actions/checkout@v2
       with:
@@ -97,6 +116,21 @@ jobs:
       with:
         path: '${{ env.RENODE_DIR }}'
         key: cfu-cache-renode-${{ env.RENODE_VERSION }}
+
+    - name: Cache Conda packages
+      uses: actions/cache@v2
+      id: cache-conda
+      with:
+        path: ~/conda_pkgs_dir
+        key: cfu-cache-conda-${{ github.sha }}
+
+    - name: Build Conda Env
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        auto-update-conda: true
+        python-version: '3.7'
+        environment-file: .github/misc/test-environment.yml
+        activate-environment: "test"
 
     - name: Setup environment
       run: |
