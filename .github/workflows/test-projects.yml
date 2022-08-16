@@ -117,7 +117,7 @@ jobs:
         path: '${{ env.RENODE_DIR }}'
         key: cfu-cache-renode-${{ env.RENODE_VERSION }}
 
-    - name: Cache Conda packages
+    - name: Restore cached Conda packages
       uses: actions/cache@v2
       id: cache-conda
       with:
