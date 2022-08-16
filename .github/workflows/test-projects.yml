@@ -67,6 +67,13 @@ jobs:
         path: '${{ env.RENODE_DIR }}'
         key: cfu-cache-renode-${{ env.RENODE_VERSION }}
 
+    - name: Cache Conda packages
+      uses: actions/cache@v2
+      id: cache-conda
+      with:
+        path: ~/conda_pkgs_dir
+        key: "cfu-cache-conda-$GITHUB_SHA"
+
     - name: Build Conda Env
       uses: conda-incubator/setup-miniconda@v2
       with:
@@ -112,13 +119,6 @@ jobs:
         yosys --version
         riscv32-unknown-elf-gcc --version
 
-    - name: Cache Conda installation
-      uses: actions/cache@v2
-      id: cache-conda
-      with:
-        path: "$CONDA/envs/test"
-        key: "cfu-cache-conda-$GITHUB_SHA"
-
   test-projects:
     runs-on: ubuntu-20.04
     continue-on-error: True
@@ -158,12 +158,20 @@ jobs:
         path: '${{ env.RENODE_DIR }}'
         key: cfu-cache-renode-${{ env.RENODE_VERSION }}
 
-    - name: Restore Conda env
+    - name: Cache Conda packages
       uses: actions/cache@v2
       id: cache-conda
       with:
-        path: "$CONDA/envs/test"
+        path: ~/conda_pkgs_dir
         key: "cfu-cache-conda-$GITHUB_SHA"
+
+    - name: Build Conda Env
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        auto-update-conda: true
+        python-version: '3.7'
+        environment-file: .github/misc/test-environment.yml
+        activate-environment: "test"
 
     - name: Check conda env
       run: |
