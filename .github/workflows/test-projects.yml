@@ -110,7 +110,7 @@ jobs:
         echo 'which yosys:'
         which yosys
         yosys --version
-        riscv-unknown-elf-gcc --version
+        riscv32-unknown-elf-gcc --version
 
   test-projects:
     runs-on: ubuntu-20.04
