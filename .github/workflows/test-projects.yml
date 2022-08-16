@@ -79,7 +79,7 @@ jobs:
       with:
         auto-update-conda: true
         python-version: '3.7'
-        environment-file: ~/.github/misc/test-environment.yml
+        environment-file: .github/misc/test-environment.yml
         activate-environment: "test"
 
     - name: Check Conda Stuff
@@ -163,7 +163,7 @@ jobs:
       with:
         auto-update-conda: true
         python-version: '3.7'
-        environment-file: ~/.github/misc/test-environment.yml
+        environment-file: .github/misc/test-environment.yml
         activate-environment: "test"
 
     - name: Check conda env
