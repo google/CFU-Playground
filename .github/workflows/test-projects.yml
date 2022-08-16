@@ -84,6 +84,7 @@ jobs:
 
     - name: Check Conda Stuff
       run: |
+        echo 'SHA:' ${{ env.GITHUB_SHA }}
         which conda
         conda info
         conda list
@@ -157,6 +158,12 @@ jobs:
       with:
         path: ~/conda_pkgs_dir
         key: cfu-cache-conda-${{ env.GITHUB_SHA }}
+
+    - name: Check packages
+      run: |
+        echo 'SHA:' ${{ env.GITHUB_SHA }}
+        echo ls ~/conda_pkgs_dir
+        ls ~/conda_pkgs_dir
 
     - name: Build Conda Env
       uses: conda-incubator/setup-miniconda@v2
