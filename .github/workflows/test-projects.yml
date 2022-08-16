@@ -30,6 +30,10 @@ jobs:
     outputs:
       matrix-combinations: ${{ steps.setup-matrix-combinations.outputs.matrix-combinations }}
 
+    defaults:
+      run:
+        shell: bash -l {0}
+
     steps:
     - name: Clone repository
       uses: actions/checkout@v2
