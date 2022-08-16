@@ -72,25 +72,21 @@ jobs:
       id: cache-conda
       with:
         path: ~/conda_pkgs_dir
-        key: "cfu-cache-conda-$GITHUB_SHA"
+        key: cfu-cache-conda-${{ env.GITHUB_SHA }}
 
     - name: Build Conda Env
       uses: conda-incubator/setup-miniconda@v2
       with:
         auto-update-conda: true
         python-version: '3.7'
-        environment-file: .github/misc/test-environment.yml
+        environment-file: ~/.github/misc/test-environment.yml
         activate-environment: "test"
 
     - name: Check Conda Stuff
       run: |
-        echo 'which conda:'
         which conda
-        echo 'conda info:'
         conda info
-        echo 'conda list'
         conda list
-        echo 'CONDA:' $CONDA
         echo 'CONDA/envs:'
         ls $CONDA/envs
         echo 'CONDA/envs/test:'
@@ -99,9 +95,6 @@ jobs:
         ls $CONDA/envs/test/bin
         echo 'conda_pkgs_dir:'
         ls ~/conda_pkgs_dir
-#       echo 'direct yosys:'
-#       $CONDA/envs/test/bin/yosys --version
-#       echo "$CONDA/envs/test/bin" >> $GITHUB_PATH
 
     - name: Conda stuff part 2
       run: |
@@ -163,14 +156,14 @@ jobs:
       id: cache-conda
       with:
         path: ~/conda_pkgs_dir
-        key: "cfu-cache-conda-$GITHUB_SHA"
+        key: cfu-cache-conda-${{ env.GITHUB_SHA }}
 
     - name: Build Conda Env
       uses: conda-incubator/setup-miniconda@v2
       with:
         auto-update-conda: true
         python-version: '3.7'
-        environment-file: .github/misc/test-environment.yml
+        environment-file: ~/.github/misc/test-environment.yml
         activate-environment: "test"
 
     - name: Check conda env
