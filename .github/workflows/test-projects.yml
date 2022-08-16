@@ -72,7 +72,7 @@ jobs:
       id: cache-conda
       with:
         path: ~/conda_pkgs_dir
-        key: cfu-cache-conda-${{ env.GITHUB_SHA }}
+        key: cfu-cache-conda-${{ github.sha }}
 
     - name: Build Conda Env
       uses: conda-incubator/setup-miniconda@v2
@@ -82,9 +82,16 @@ jobs:
         environment-file: .github/misc/test-environment.yml
         activate-environment: "test"
 
+    - name: Check packages
+      run: |
+        echo 'SHA:' ${{ github.sha }}
+        echo ls ~/conda_pkgs_dir
+        ls ~/conda_pkgs_dir
+
     - name: Check Conda Stuff
       run: |
-        echo 'SHA:' ${{ env.GITHUB_SHA }}
+        echo 'github.GITHUB_SHA:' ${{ github.GITHUB_SHA }}
+        echo 'github.sha:' ${{ github.sha }}
         which conda
         conda info
         conda list
@@ -157,11 +164,11 @@ jobs:
       id: cache-conda
       with:
         path: ~/conda_pkgs_dir
-        key: cfu-cache-conda-${{ env.GITHUB_SHA }}
+        key: cfu-cache-conda-${{ github.sha }}
 
     - name: Check packages
       run: |
-        echo 'SHA:' ${{ env.GITHUB_SHA }}
+        echo 'SHA:' ${{ github.sha }}
         echo ls ~/conda_pkgs_dir
         ls ~/conda_pkgs_dir
 
