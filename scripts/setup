@@ -162,6 +162,7 @@ fi
 
 # Check GCC
 if ! which riscv64-unknown-elf-gcc >/dev/null; then
+    echo "Ignore the following warning if you plan to use the Conda environment; it will provide RISCV GCC."
     echo "Warning: RISCV GCC toolchain not found. Please install one, following the instructions at"
     echo "https://cfu-playground.readthedocs.io/en/latest/setup-guide.html#step-3-install-riscv-toolchain"
 
@@ -169,12 +170,13 @@ elif ! riscv64-unknown-elf-gcc --version | grep 'SiFive GCC 10.1.' >/dev/null; t
     echo "Unsupported version of riscv64-unknown-elf-gcc. SiFive GCC 10.1.0 is known to work." >&2
     echo "To install this version, follow the instructions at"
     echo "https://cfu-playground.readthedocs.io/en/latest/setup-guide.html#step-3-install-riscv-toolchain"
+    echo "(or, preferably, use the Conda environment)."
 fi
 
 # Verify other dependencies
 
 if ! which vivado >/dev/null; then
-    echo -e "\e[0;31mWARNING:\e[0;33m vivado not in path.\e[m"
+    echo -e "\e[0;31mInfo:\e[0;33m vivado not found in path.\e[m"
 fi
 
 # Regenerate .env file for VSCode

@@ -81,6 +81,12 @@ jobs:
         python-version: '3.7'
         environment-file: .github/misc/test-environment.yml
         activate-environment: "test"
+        
+    - name: check conda env
+      run: |
+        conda info
+        conda list
+        yosys --version
 
 
   test-projects:
