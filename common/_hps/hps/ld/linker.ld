@@ -24,7 +24,7 @@ SECTIONS
 		/*
 		 * Align models and large chunks of data into a constant position
 		 */
-		. = _ftext + 0x81000;
+		. = _ftext + 0x81800;
 		_frodata = .;
 		src/models/*/*(SORT(.rodata.*))
 		src/conv2d_??.o(SORT(.rodata.*))  /* specific to hps_accel */

@@ -69,8 +69,10 @@ install-sf:
 	@echo "Done installing SymbiFlow.  To enter the environment, type 'make enter-sf', which creates a new subshell, and 'exit' when done."
 	@echo
 
+env-sf: install-sf
+
 enter-sf:
 	-@export F4PGA_INSTALL_DIR=$(TOP_DIR)/$(SF_INSTALL) && $(MAKE) USE_SYMBIFLOW=1 enter
 
 
-.PHONY: enter-sf install-sf info
+.PHONY: enter-sf env-sf install-sf info
