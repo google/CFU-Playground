@@ -57,4 +57,8 @@ ifeq 'hps' '$(PLATFORM)'
 export EXTRA_LITEX_ARGS='--cpu-variant=slim+cfu'
 endif
 
+# Uncomment to program menu sequence as you wish to run workload w/o interacting with menu 
+DEFINES += DSE_SIMULATION
+DEFINES += MENU_CHAR_SEQUENCE='"12gxxQ"'  # this default character sequence runs golden tests for PDIT8
+
 include ../proj.mk
