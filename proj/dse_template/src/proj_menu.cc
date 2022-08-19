@@ -17,53 +17,40 @@
 #include "proj_menu.h"
 
 #include <stdio.h>
+#include <string.h>
 
-#include "cfu.h"
+#include "b64_util.h"
+#include "golden_op_tests.h"
 #include "menu.h"
 
 namespace {
+void print_sample(const char* s) {
+  printf("in = %s\n", s);
+  b64_dump(static_cast<const int8_t*>(static_cast<const void*>(s)), strlen(s));
+}
 
-// Template Fn
-void do_hello_world(void) { puts("Hello, World!!!\n"); }
-
-// Test template instruction
-void do_exercise_cfu_op0(void) {
-  puts("\r\nExercise CFU Op0 aka ADD\r\n");
-
-  unsigned int a = 0;
-  unsigned int b = 0;
-  unsigned int cfu = 0;
-  unsigned int count = 0;
-  unsigned int pass_count = 0;
-  unsigned int fail_count = 0;
-
-  for (a = 0x00004567; a < 0xF8000000; a += 0x00212345) {
-    for (b = 0x0000ba98; b < 0xFF000000; b += 0x00770077) {
-      cfu = cfu_op0(0, a, b);
-      if (cfu != a + b) {
-        printf("[%4d] a: %08x b:%08x a+b=%08x cfu=%08x FAIL\r\n", count, a, b,
-               a + b, cfu);
-        fail_count++;
-      } else {
-        pass_count++;
-      }
-      count++;
-    }
-  }
-
-  printf("\r\nPerformed %d comparisons, %d pass, %d fail\r\n", count,
-         pass_count, fail_count);
+void do_b64_samples() {
+  print_sample("1234");
+  // See https://en.wikipedia.org/wiki/Base64#Examples
+  print_sample(
+      "Man is distinguished, not only by his reason, but by this singular "
+      "passion from other animals, which is a lust of the mind, that by a "
+      "perseverance of delight in the continued and indefatigable generation "
+      "of knowledge, exceeds the short vehemence of any carnal pleasure.");
 }
 
 struct Menu MENU = {
     "Project Menu",
-    "project",
+    "mnv2_first",
     {
-        MENU_ITEM('0', "exercise cfu op0", do_exercise_cfu_op0),
-        MENU_ITEM('h', "say Hello", do_hello_world),
+        MENU_ITEM('1', "1x1 conv2d golden tests", golden_op_run_1x1conv),
+        MENU_ITEM('2', "base64 samples", do_b64_samples),
         MENU_END,
     },
 };
 };  // anonymous namespace
 
-extern "C" void do_proj_menu() { menu_run(&MENU); }
+extern "C" void do_proj_menu() {
+  // sim_trace_enable_write(1);
+  menu_run(&MENU);
+}
