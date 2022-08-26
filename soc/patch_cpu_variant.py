@@ -127,6 +127,23 @@ def build_cpu_variant_if_needed(variant):
     if variant in core.CPU_VARIANTS:
         print(f"Variant \"{variant}\" already known.")
         return
+    
+    ########### ADD code to existing add_soc_components() #######
+    old_add_soc_components = core.VexRiscv.add_soc_components
+
+    def new_add_soc_components(self, soc, soc_region_cls):
+        old_add_soc_components(self, soc, soc_region_cls)
+
+        if 'dCacheSize:0' in self.variant:
+            # variant has *no* Dcache.
+            # This is here to avoid the dcache flush instruction (system.h).
+            soc.constants.pop('CONFIG_CPU_HAS_DCACHE', None)
+        if 'iCacheSize:0' in self.variant:
+            # variant has *no* Icache.
+            # This is here to avoid the dcache flush instruction (system.h).
+            soc.constants.pop('CONFIG_CPU_HAS_ICACHE', None)
+
+    core.VexRiscv.add_soc_components = new_add_soc_components
 
     cpu_params = {
         "csrPluginConfig":    "mcycle",
