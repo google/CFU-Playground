@@ -1,0 +1,22 @@
+name: hps_ci
+on:
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+      - 'LICENSE'
+      - 'CONTRIBUTING.md'
+      - 'CODE_OF_CONDUCT.md'
+      - 'AUTHORS'
+jobs:
+  build-hps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      - run: bash scripts/setup -ci
+      - run: which pip3 && which python3 && which pip
+      - run: make env
+      - run: pwd && source env/conda/bin/activate cfu-common && source environment && cd proj/hps_accel && pip3 list && make PLATFORM=hps software
