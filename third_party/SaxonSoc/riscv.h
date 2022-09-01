@@ -208,13 +208,25 @@ asm(".set regnum_t6  , 31");
 asm(".set CUSTOM0  , 0x0B");
 asm(".set CUSTOM1  , 0x2B");
 
+#ifdef ISSUE_582_WORKAROUND
+#define CUSTOM_INSTRUCTION_NOP "nop\n"
+#else
+#define CUSTOM_INSTRUCTION_NOP
+#endif
+
 #define opcode_R(opcode, func3, func7, rs1, rs2)   \
-({                                             \
-    register unsigned long __v;                \
-    asm volatile(                              \
-     ".word ((" #opcode ") | (regnum_%0 << 7) | (regnum_%1 << 15) | (regnum_%2 << 20) | ((" #func3 ") << 12) | ((" #func7 ") << 25));"   \
-     : [rd] "=r" (__v)                          \
-     : "r" (rs1), "r" (rs2)        \
-    );                                         \
-    __v;                                       \
+({                                                 \
+    register unsigned long result;                 \
+    asm volatile(                                  \
+     ".word ((" #opcode ") |                       \
+     (regnum_%[result] << 7) |                     \
+     (regnum_%[arg1] << 15) |                      \
+     (regnum_%[arg2] << 20) |                      \
+     ((" #func3 ") << 12) |                        \
+     ((" #func7 ") << 25));\n"                     \
+     CUSTOM_INSTRUCTION_NOP                        \
+     : [result] "=r" (result)                      \
+     : [arg1] "r" (rs1), [arg2] "r" (rs2)          \
+    );                                             \
+    result;                                        \
 })
