@@ -61,7 +61,7 @@ class DigilentArtySoCWorkflow(general.GeneralSoCWorkflow):
 
     def make_soc(self, **kwargs) -> litex_soc.LiteXSoC:
         """Runs make_soc with jtagbone disabled."""
-        return super().make_soc(l2_size=self.args.variant,
+        return super().make_soc(l2_size=self.args.l2_size,
                                 variant=self.args.variant,
                                 with_jtagbone=False,
                                 **kwargs)
