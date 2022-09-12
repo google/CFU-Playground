@@ -286,7 +286,7 @@ build-dir: $(BUILD_DIR)/src tflite-micro-src $(BUILD_DIR_EXTRA_DEP)
 	$(COPY) $(COMMON_DIR)/*              $(BUILD_DIR)
 	$(COPY) $(MLCOMMONS_SRC_DIR)/*       $(BUILD_DIR)/src
 	$(COPY) $(SAXON_SRC_DIR)/riscv.h     $(BUILD_DIR)/src
-	$(COPY) $(DONUT_SRC_DIR)/donut.c     $(BUILD_DIR)/src
+	$(COPY) $(DONUT_SRC_DIR)/donut.*     $(BUILD_DIR)/src
 	$(COPY) $(SRC_DIR)/*                 $(BUILD_DIR)/src
 	$(RM)			             $(BUILD_DIR)/_*
 ifdef SKIP_TFLM

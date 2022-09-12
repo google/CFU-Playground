@@ -22,6 +22,7 @@
 
 #include "base.h"
 #include "benchmarks.h"
+#include "donut.h"
 #include "fb_util.h"
 #include "functional_cfu_tests.h"
 #include "instruction_handler.h"
@@ -35,9 +36,6 @@
 #ifndef SKIP_TFLM
 #include "models/models.h"
 #endif
-
-void donut(void);
-
 
 #ifdef PLATFORM_sim
 static void trace_sim() {
