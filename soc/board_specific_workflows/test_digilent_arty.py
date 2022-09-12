@@ -50,7 +50,7 @@ class DigilentArtySoCWorkflowTest(unittest.TestCase):
         workflow.make_soc()
         kwargs = self.soc_constructor.call_args.kwargs
 
-        self.assertEqual(kwargs['l2_size'], 8 * 1024)
+        self.assertEqual(kwargs['l2_size'], workflow.args.l2_size)
         self.assertFalse(kwargs['with_jtagbone'], False)
         self.assertEqual(kwargs['variant'], workflow.args.variant)
 
