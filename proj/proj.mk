@@ -119,6 +119,7 @@ RVI_DIR            := $(COMMON_DIR)/renode-verilator-integration
 COMMON_FILES       := $(shell find $(COMMON_DIR) -type f)
 MLCOMMONS_SRC_DIR  := $(CFU_ROOT)/third_party/mlcommons
 SAXON_SRC_DIR      := $(CFU_ROOT)/third_party/SaxonSoc
+DONUT_SRC_DIR      := $(CFU_ROOT)/third_party/litex-donut
 RENODE_DIR         := $(CFU_ROOT)/third_party/renode
 VIL_DIR            := $(RENODE_DIR)/verilator-integration-library
 LITEX_RENODE_DIR   := $(CFU_ROOT)/third_party/python/litex-renode
@@ -285,6 +286,7 @@ build-dir: $(BUILD_DIR)/src tflite-micro-src $(BUILD_DIR_EXTRA_DEP)
 	$(COPY) $(COMMON_DIR)/*              $(BUILD_DIR)
 	$(COPY) $(MLCOMMONS_SRC_DIR)/*       $(BUILD_DIR)/src
 	$(COPY) $(SAXON_SRC_DIR)/riscv.h     $(BUILD_DIR)/src
+	$(COPY) $(DONUT_SRC_DIR)/donut.c     $(BUILD_DIR)/src
 	$(COPY) $(SRC_DIR)/*                 $(BUILD_DIR)/src
 	$(RM)			             $(BUILD_DIR)/_*
 ifdef SKIP_TFLM

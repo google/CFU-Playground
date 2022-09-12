@@ -1,0 +1,6 @@
+"donut.c" is copied with small changes from
+https://github.com/enjoy-digital/litex/blob/master/litex/soc/software/demo/donut.c
+The LiteX LICENSE is included in this directory.
+
+There are some comments in donut.c about the *original* source
+of the code.

@@ -28,5 +28,9 @@ export SKIP_TFLM=1
 # Uncomment this line to skip individual profiling output (has minor effect on performance).
 #DEFINES += NPROFILE
 
+# Uncomment this line to include the ASCII animated donut demo.
+DEFINES += DONUT_DEMO
+
+
 
 include ../proj.mk
