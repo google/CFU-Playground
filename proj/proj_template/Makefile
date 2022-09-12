@@ -39,4 +39,8 @@ DEFINES += INCLUDE_MODEL_PDTI8
 # Uncomment to include all TFLM examples (pdti8, micro_speech, magic_wand)
 #DEFINES += INCLUDE_ALL_TFLM_EXAMPLES
 
+# Uncomment this line to include the ASCII animated donut demo.
+DEFINES += DONUT_DEMO
+
+
 include ../proj.mk

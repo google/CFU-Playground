@@ -22,6 +22,7 @@
 
 #include "base.h"
 #include "benchmarks.h"
+#include "donut.h"
 #include "fb_util.h"
 #include "functional_cfu_tests.h"
 #include "instruction_handler.h"
@@ -63,6 +64,9 @@ static struct Menu MENU = {
         MENU_ITEM('6', "Benchmarks", do_benchmarks_menu),
         MENU_ITEM('7', "Util Tests", do_util_tests_menu),
         MENU_ITEM('8', "Embench IoT", embench_menu),
+#ifdef DONUT_DEMO
+        MENU_ITEM('d', "Donut demo", donut),
+#endif
 #ifdef SPIFLASH_BASE
         MENU_ITEM('9', "SPI Flash Debugging", spiflash_menu),
 #endif
