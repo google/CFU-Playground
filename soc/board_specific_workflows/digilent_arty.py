@@ -60,8 +60,8 @@ class DigilentArtySoCWorkflow(general.GeneralSoCWorkflow):
         super().__init__(args, soc_constructor, builder_constructor)
 
     def make_soc(self, **kwargs) -> litex_soc.LiteXSoC:
-        """Runs make_soc with a l2_size parameter and jtagbone disabled."""
-        return super().make_soc(l2_size=8 * 1024,
+        """Runs make_soc with jtagbone disabled."""
+        return super().make_soc(l2_size=self.args.l2_size,
                                 variant=self.args.variant,
                                 with_jtagbone=False,
                                 **kwargs)
