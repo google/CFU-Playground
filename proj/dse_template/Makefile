@@ -29,7 +29,7 @@ DEFINES += NDEBUG
 DEFINES += INCLUDE_MODEL_PDTI8
 #DEFINES += INCLUDE_MODEL_MICRO_SPEECH
 #DEFINES += INCLUDE_MODEL_MAGIC_WAND
-#DEFINES += INCLUDE_MODEL_MNV2
+DEFINES += INCLUDE_MODEL_MNV2
 #DEFINES += INCLUDE_MODEL_HPS
 #DEFINES += INLCUDE_MODEL_MLCOMMONS_TINY_V01_ANOMD
 #DEFINES += INLCUDE_MODEL_MLCOMMONS_TINY_V01_IMGC
@@ -41,6 +41,6 @@ DEFINES += INCLUDE_MODEL_PDTI8
 
 # Uncomment to program menu sequence as you wish to run workload w/o interacting with menu 
 DEFINES += DSE_SIMULATION
-DEFINES += MENU_CHAR_SEQUENCE='"11gxxQ"'  # this default character sequence runs golden tests for PDIT8
+DEFINES += MENU_CHAR_SEQUENCE='"12gxxQ"'  # this default character sequence runs golden tests for PDIT8
 
 include ../proj.mk
