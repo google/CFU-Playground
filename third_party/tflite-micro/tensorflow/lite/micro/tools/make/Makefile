@@ -265,9 +265,6 @@ endif
 # Kernel integration tests must be excluded on certain targets.
 MICRO_LITE_INTEGRATION_TESTS += $(shell find tensorflow/lite/micro/integration_tests -name Makefile.inc)
 
-MICRO_LITE_GEN_MUTABLE_OP_RESOLVER_TEST += $(shell find \
-tensorflow/lite/micro/tools/gen_micro_mutable_op_resolver_test/person_detect -name Makefile.inc)
-
 MICRO_LITE_BENCHMARKS := $(wildcard tensorflow/lite/micro/benchmarks/Makefile.inc)
 
 # TODO(b/152645559): move all benchmarks to benchmarks directory.
@@ -282,7 +279,7 @@ tensorflow/lite/micro/memory_helpers_test.cc \
 tensorflow/lite/micro/micro_allocator_test.cc \
 tensorflow/lite/micro/micro_allocation_info_test.cc \
 tensorflow/lite/micro/micro_context_test.cc \
-tensorflow/lite/micro/micro_error_reporter_test.cc \
+tensorflow/lite/micro/micro_log_test.cc \
 tensorflow/lite/micro/micro_interpreter_test.cc \
 tensorflow/lite/micro/micro_mutable_op_resolver_test.cc \
 tensorflow/lite/micro/micro_resource_variable_test.cc \
@@ -614,9 +611,6 @@ include $(MICRO_LITE_EXAMPLE_TESTS)
 
 # Load the integration tests.
 include $(MICRO_LITE_INTEGRATION_TESTS)
-
-# Load generated micro mutable op resolver test.
-include ${MICRO_LITE_GEN_MUTABLE_OP_RESOLVER_TEST}
 
 # Load the benchmarks.
 include $(MICRO_LITE_BENCHMARKS)
