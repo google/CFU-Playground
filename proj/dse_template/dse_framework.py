@@ -86,12 +86,9 @@ def run_config(variant, target):
     cells  = None
     run_succeeds = False 
     while not run_succeeds:
-        EXTRA_LITEX_ARGS = 'EXTRA_LITEX_ARGS="--cpu-variant=' + variant +'"'
         BITSTREAM_EXTRA_LITEX_ARGS = 'EXTRA_LITEX_ARGS="--no-ident-version --cpu-variant=' + variant +'"'
         SIM_EXTRA_LITEX_ARGS = 'EXTRA_LITEX_ARGS="--cpu-variant=' + variant +'"'
         subprocess.run(['make', 'clean']) 
-        subprocess.run(['make', 'bitstream', 'TARGET=' + target, EXTRA_LITEX_ARGS, "USE_SYMBIFLOW=1"])
-        workload_cmd = ['make', 'load', 'PLATFORM=sim', EXTRA_LITEX_ARGS]
         os.system("make bitstream TARGET=" + target + " " + BITSTREAM_EXTRA_LITEX_ARGS + " USE_SYMBIFLOW=1")
         #subprocess.run(['make', 'bitstream', 'TARGET=' + target, BITSTREAM_EXTRA_LITEX_ARGS, "USE_SYMBIFLOW=1"])
         workload_cmd = ['make', 'load', 'PLATFORM=sim', SIM_EXTRA_LITEX_ARGS]
