@@ -38,7 +38,7 @@ for i in range(len(lines)):
     #
     # 40000148:       0094280b                0x94280b
     #
-    m = re.match(r"^(\w+:\s+\w+\s+)(0x[0-9A-Fa-f]+)$", lin)
+    m = re.match(r"^( ?\w+:\s+\w+\s+)(0x[0-9A-Fa-f]+)$", lin)
     if m:
         bits   = int(m.group(2), 0)
         funct7 = (bits >> 25) & 127
@@ -51,7 +51,7 @@ for i in range(len(lines)):
         print(m.group(1) + op)
 
     else:
-        n = re.match(r"^(\w+:\s+\w+\s+)(\w+)(\s+)(\S+.*)$", lin)
+        n = re.match(r"^( ?\w+:\s+\w+\s+)(\w+)(\s+)(\S+.*)$", lin)
         if n:
             # Add two spaces so regular instruction lines line up with cfu[] lines
             print(n.group(1) + n.group(2) + n.group(3) + "  " + n.group(4))
