@@ -17,6 +17,8 @@ arithmetic right shift.
 The unaccelerated donut code is in `$CFUROOT/third_party/litex_donut/donut.c`.
 It was adapted from the LiteX "bare metal demo".
 The accelerated donut code for this project is in ./src/donut.c.
+It was modified by hand from the unaccelerated version.
+The only changes were replacing instances of "a*b" and "(a*b)>>10" with CFU instructions.
 
 In the demo we target the "icebreaker" board and use the "breaker+cfu"
 VexRiscv variant.  In this variant, the CPU 'mul' instruction is implemented 
@@ -32,10 +34,13 @@ make TARGET=icebreaker EXTRA_LITEX_ARGS="--cpu-variant=breaker+cfu" prog
 make TARGET=icebreaker EXTRA_LITEX_ARGS="--cpu-variant=breaker+cfu" load
 ```
 
+
 If all goes well, you will be connected to the CFU Playgroud menu running
 on the board.   You will probably need to hit SPACE for the menu to appear.
 Then just hid 'd' for the donut demo.
 
-To compare against the unaccelerated version, cd over to the 
+
+To compare against the unaccelerated version, cd over to the `proj_template_no_tflm`
+directory and run the same `make` commands listed above.
 
 
