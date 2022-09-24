@@ -34,9 +34,7 @@ module Cfu (
   //
   // select output -- note that we're not fully decoding the 3 function_id bits
   //
-  assign rsp_payload_outputs_0 = cmd_payload_function_id[0] ? 
-                                           cmd_payload_inputs_0 + cmd_payload_inputs_1:
-                                           cmd_payload_inputs_0 - cmd_payload_inputs_1;
+  assign rsp_payload_outputs_0 = ~cmd_payload_inputs_0 ^ cmd_payload_inputs_1;
 
 
 endmodule
