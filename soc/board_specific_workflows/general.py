@@ -74,6 +74,13 @@ class GeneralSoCWorkflow():
             'with_video_framebuffer': self.args.with_video_framebuffer,
         }
         base_soc_kwargs.update(soc_core.soc_core_argdict(self.args))
+        print("===== in general make_soc =====")
+        print("kwargs:")
+        print(kwargs)
+        print("self.args:")
+        print(self.args)
+        print("base_soc_kwargs:")
+        print(base_soc_kwargs)
         if self.args.toolchain:
             base_soc_kwargs['toolchain'] = self.args.toolchain
         if self.args.sys_clk_freq:
@@ -83,6 +90,8 @@ class GeneralSoCWorkflow():
         build_cpu_variant_if_needed(self.args.cpu_variant)
 
         base_soc_kwargs.update(kwargs)
+        print("base_soc_kwargs (updated):")
+        print(base_soc_kwargs)
         return self.soc_constructor(**base_soc_kwargs)
 
     def build_soc(self, soc: litex_soc.LiteXSoC, **kwargs) -> builder.Builder:

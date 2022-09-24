@@ -30,6 +30,8 @@ def patch_cpu_variant():
     vexriscv_core.CPU_VARIANTS.update({
         'fomu':                 'VexRiscv_Fomu',
         'fomu+cfu':             'VexRiscv_FomuCfu',
+        'breaker':              'VexRiscv_Breaker',
+        'breaker+cfu':          'VexRiscv_BreakerCfu',
         'custom':               'VexRiscv_Custom',
         'custom+cfu':           'VexRiscv_CustomCfu',
         'fpu':                  'VexRiscv_Fpu',
@@ -49,6 +51,8 @@ def patch_cpu_variant():
     vexriscv_core.GCC_FLAGS.update({
         'fomu':                 '-march=rv32im -mabi=ilp32 -mno-div',
         'fomu+cfu':             '-march=rv32im -mabi=ilp32 -mno-div',
+        'breaker':              '-march=rv32im -mabi=ilp32 -mno-div',
+        'breaker+cfu':          '-march=rv32im -mabi=ilp32 -mno-div',
         'custom':               '-march=rv32im -mabi=ilp32',
         'custom+cfu':           '-march=rv32im -mabi=ilp32',
         'fpu':                  '-march=rv32imf -mabi=ilp32',
@@ -82,7 +86,7 @@ def patch_cpu_variant():
         if 'perf' in self.variant:
             soc.add_config('CPU_PERF_CSRS', 8)
 
-        if 'fomu' in self.variant:
+        if ('fomu' in self.variant) or ('breaker' in self.variant):
             soc.add_config('CPU_DIV_UNIMPLEMENTED')
 
             # Fomu variant has *no* Dcache.

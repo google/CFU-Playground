@@ -37,11 +37,20 @@ class Ice40UP5KWorkflow(general.GeneralSoCWorkflow):
                  builder_constructor: Callable[..., builder.Builder] = None,
                  warn: bool = True) -> None:
 
-        if warn and args.cpu_variant != 'fomu+cfu':
-            warnings.warn('Only fomu+cfu variant of Vexriscv supported for ' +
-                          f'{type(self).__name__}, not {args.cpu_variant}.\n' +
-                          'Using fomu+cfu.')
-        args.cpu_variant = 'fomu+cfu'
+        allowed_variants = {
+                'fomu':         ['fomu', 'fonu+cfu', 'minimal', 'minimal+cfu'],
+                'icebreaker':   ['fomu', 'fomu+cfu', 'breaker', 'breaker+cfu', 'minimal', 'minimal+cfu'],
+        }
+        if args.cpu_variant not in allowed_variants[args.target]:
+            if warn:
+                warnings.warn(
+                      f'\nOnly {allowed_variants[args.target]} variants of Vexriscv are supported for ' +
+                      f'"{args.target}"; {args.cpu_variant} is not supported.\n' +
+                      'Using fomu+cfu.')
+            if 'cfu' in args.cpu_variant:
+                args.cpu_variant = 'fomu+cfu'
+            else:
+                args.cpu_variant = 'fomu'
 
         # Offset of bios dictates CPU reset address. When loading the software
         # on the board, we overwrite the bios so now the CPU reset address
