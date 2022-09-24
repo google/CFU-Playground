@@ -8,17 +8,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <cfu.h>
 #include <perf.h>
 
 #include <console.h>
 
+#define multshift10(a,b)     ((int)cfu_op(0, 0, (a), (b)))
+#define cfumul(a,b)          ((int)cfu_op(1, 1, (a), (b)))
+
 #define R(mul,shift,x,y) \
   _=x; \
-  x -= mul*y>>shift; \
-  y += mul*_>>shift; \
-  _ = 3145728-x*x-y*y>>11; \
-  x = x*_>>10; \
-  y = y*_>>10;
+  x -= cfumul(mul,y)>>shift; \
+  y += cfumul(mul,_)>>shift; \
+  _ = 3145728-cfumul(x,x)-cfumul(y,y)>>11; \
+  x = cfumul(x,_)>>10; \
+  y = cfumul(y,_)>>10;
 
 static signed char b[1760], z[1760];
 
@@ -32,7 +36,7 @@ void donut(void);
 void donut(void) {
   int sA=1024,cA=0,sB=1024,cB=0,_;
   int R1 = 1, R2 = 2048, K2 = 5120*1024;
-  puts("\nPress any key to exit.\n");
+  puts("\nPress any key to exit.  Accelerated version.\n");
   for (;;) {
     unsigned start_cycle = perf_get_mcycle();
     memset(b, 32, 1760);  // text buffer
@@ -42,19 +46,23 @@ void donut(void) {
       int si = 0, ci = 1024;  // sine and cosine of angle i
       for (int i = 0; i < 324; i++) {
 
-        int x0 = R1*cj + R2,
-            x1 = ci*x0 >> 10,
-            x2 = cA*sj >> 10,
-            x3 = si*x0 >> 10,
-            x4 = R1*x2 - (sA*x3 >> 10),
-            x5 = sA*sj >> 10,
-            x6 = K2 + R1*1024*x5 + cA*x3,
-            x7 = cj*si >> 10,
-            x = 40 + 30*(cB*x1 - sB*x4)/x6,
-            y = 12 + 15*(cB*x4 + sB*x1)/x6,
-            N = (-cA*x7 - cB*((-sA*x7>>10) + x2) - ci*(cj*sB >> 10) >> 10) - x5 >> 7;
+        int x0 = cfumul(R1,cj) + R2,
+            x1 = multshift10(ci,x0),
+            x2 = multshift10(cA,sj),
+            x3 = multshift10(si,x0),
+            x4 = cfumul(R1,x2) - multshift10(sA,x3),
+            x5 = multshift10(sA,sj),
+            x6 = K2 + (cfumul(R1,x5)<<10) + cfumul(cA,x3),
+            x7 = multshift10(cj,si),
+            x8 = cfumul(cB,x1) - cfumul(sB,x4),
+            x = 40 + cfumul(30,x8)/x6,
+            x9 = cfumul(cB,x4) + cfumul(sB,x1),
+            y = 12 + cfumul(15,x9)/x6;
+            int xx = multshift10(cj,sB);
+            int N =   (-cfumul(cA,x7) - cB*((-multshift10(sA,x7))      + x2) - cfumul(ci,xx) >> 10) - x5 >> 7;
 
-        int o = x + 80 * y;
+
+        int o = x + cfumul(80,y);
         signed char zz = (x6-K2)>>15;
         if (22 > y && y > 0 && x > 0 && 80 > x && zz < z[o]) {
           z[o] = zz;
