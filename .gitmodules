@@ -68,3 +68,6 @@
 	path = third_party/python/valentyusb
 	url = https://github.com/litex-hub/valentyusb
 	branch = hw_cdc_eptri
+[submodule "third_party/python/vizier"]
+	path = third_party/python/vizier
+	url = git@github.com:ShvetankPrakash/vizier.git
