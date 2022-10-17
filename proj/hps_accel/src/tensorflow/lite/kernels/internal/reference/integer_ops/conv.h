@@ -15,6 +15,7 @@ limitations under the License.
 #ifndef TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_CONV_H_
 #define TENSORFLOW_LITE_KERNELS_INTERNAL_REFERENCE_INTEGER_OPS_CONV_H_
 
+#include <algorithm>
 #include <cstdio>
 #include <limits>
 
@@ -22,6 +23,7 @@ limitations under the License.
 #include "playground_util/murmurhash.h"
 #include "playground_util/print_params.h"
 #include "tensorflow/lite/kernels/internal/common.h"
+#include "tensorflow/lite/kernels/internal/portable_tensor_utils.h"
 #include "tensorflow/lite/kernels/internal/reference/integer_ops/conv_accel_gen_2.h"
 
 namespace tflite {
@@ -233,6 +235,23 @@ inline void ConvPerChannel(
   hash_layer++;
 #endif
 }
+
+
+inline void ConvPerChannelWithPackedInt4Weights(
+    const ConvParams& params, const int32_t* output_multiplier,
+    const int32_t* output_shift, const RuntimeShape& input_shape,
+    const int8_t* input_data, const RuntimeShape& filter_shape,
+    const int8_t* filter_input, int8_t* unpacked_filter_data,
+    const RuntimeShape& bias_shape, const int32_t* bias_data,
+    const RuntimeShape& output_shape, int8_t* output_data) {
+  TFLITE_DCHECK(unpacked_filter_data != nullptr);
+  tflite::tensor_utils::UnpackDenseInt4IntoInt8(
+      filter_input, filter_shape.FlatSize(), unpacked_filter_data);
+  ConvPerChannel(params, output_multiplier, output_shift, input_shape,
+                 input_data, filter_shape, unpacked_filter_data, bias_shape,
+                 bias_data, output_shape, output_data);
+}
+
 
 // Fixed-point per-channel-quantization convolution reference kernel.
 // 16-bit data and 8-bit filter
