@@ -4,7 +4,8 @@
 
 layout: default
 conference: FCCM 
-conference-date: May 18, 2022 
+date: 2022-05-18
+prettify-conference-date: May 18, 2022 
 collectionid: 'fccm-2022-pages' 
 ---
 

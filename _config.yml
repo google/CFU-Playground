@@ -18,13 +18,13 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: "CFU-Playground Workshop"
+title: "CFU-Playground"
 github: "https://github.com/google/CFU-Playground/"
 description: >- # this means to ignore newlines until "baseurl:"
-  A full stack workshop for accelerating TinyML 
+  A full-stack open-source framework for accelerating TinyML 
 baseurl: "/CFU-Playground" # the subpath of your site, e.g. /blog
 url: "google.github.io" # the base hostname & protocol for your site, e.g. http://example.com
-version: "July 2022"
+version: "October 2022"
 
 # Build settings
 theme: jekyll-theme-dinky
@@ -42,6 +42,9 @@ collections:
   micro-2022-pages:
     output: true
     permalink: /workshops/micro-2022/:name
+  hpca-2023-pages:
+    output: true
+    permalink: /workshops/hpca-2023/:name
 
 # Exclude from processing.
 # The following items will not be processed, by default.

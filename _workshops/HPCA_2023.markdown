@@ -3,12 +3,11 @@
 # To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 
 layout: default
-conference: MICRO 
-date: 2022-10-01
-prettify-conference-date: "October 1, 2022 - CANCELED"
-collectionid: 'micro-2022-pages'
-canceled: true
-conference-url: "https://www.microarch.org/micro55/program/workshops.php"
+conference: HPCA
+date: 2023-02-28
+prettify-conference-date: February 2023 
+collectionid: 'hpca-2023-pages' 
+canceled: false
 ---
 
 <div id="toc_container" style="position: absolute" markdown="1">
@@ -52,5 +51,88 @@ New ML accelerators are being announced and released each month for a variety of
 - All software (RISCV toolchain, Symbiflow, etc.) installed in via environment pre-packaged with CFU Playground. 
 
 ### Schedule
-
-*TBA Coming Soon* 
+<div>
+<table>
+<thead>
+  <tr>
+    <th>Time</th>
+    <th>Material/Activity</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>1:00 PM</td>
+    <td>Welcome &amp; Tiny Machine Learning (TinyML)
+    	<ul>
+    	<li>General overview of tinyML as a field</li>
+    	<li>What are the common use cases</li>
+    	<li>What kind of models do we run</li>
+    	<li>What are the typical resource constraints, challenges, etc.</li>
+    	</ul>
+    </td>
+  </tr>
+  <tr>
+    <td>1:30 PM</td>
+    <td>Benchmarking of TinyML Systems
+    	<ul>
+         <li>Importance of benchmarking and challenges of benchmarking TinyML systems</li>
+         <li>MLPerf Tiny and it's workloads well suited for CFUs</li>
+         <li>FPGA submissions to MLPerf Tiny</li>
+         <li>Demo of Profiling/Microbenchmarking support in CFU-Playground</li>
+    	</ul>
+	</td>
+  </tr>
+  <tr>
+    <td>2:00 PM</td>
+    <td>TensorFlow Lite Microcontrollers (TFLM)
+    	<ul>
+    		<li>What is TF Lite Micro</li>
+         <li>TF vs. TF Lite vs TF Lite Micro</li>
+         <li>Running TF Lite on-device</li>
+    	</ul>
+	</td>
+  </tr>
+  <tr>
+    <td>2:30 PM</td>
+    <td>Custom Function Units
+    	<ul>
+    		<li>General overview of CFU</li>
+                <li>Tour of CFU Playground</li>
+                <li>Build your first CFU in a Colab</li>
+    	</ul>
+	</td>
+  </tr>
+  <tr>
+    <td>3:00 PM</td>
+    <td>Introduction to Amaranth
+        <ul>
+                <li>Using Amaranth to design a CFU</li>
+                <li>Unit testing in Amaranth</li>
+        </ul>
+	</td>
+  </tr>
+  <tr>
+    <td>3:30 PM</td>
+    <td>Renode/Antmicro
+    	<ul>
+                <li>Renode's simulation solution</li>
+                <li>Renode Development Lifecycle</li>
+                <li>Verilator Integration</li>
+                <li>Integration with CFU</li>
+    	</ul>
+    </td>
+  </tr>
+  <tr>
+    <td>4:00 PM</td>
+    <td>Accelerate a TinyML Model
+    	<ul>
+                <li>Case study of model and profiling results provided</li>
+                <li>Implement a new instruction in the CFU</li>
+                <li>Use the new instruction in a TFLM kernel</li>
+                <li>Measure performance speed up</li>
+    	</ul>
+    </td>
+  </tr>
+</tbody>
+</table>
+</div>
