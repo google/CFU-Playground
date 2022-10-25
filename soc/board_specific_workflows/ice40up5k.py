@@ -38,9 +38,11 @@ class Ice40UP5KWorkflow(general.GeneralSoCWorkflow):
                  warn: bool = True) -> None:
 
         allowed_variants = {
-                'fomu':         ['fomu', 'fonu+cfu', 'minimal', 'minimal+cfu'],
+                'kosagi_fomu':  ['fomu', 'fonu+cfu', 'minimal', 'minimal+cfu'],
                 'icebreaker':   ['fomu', 'fomu+cfu', 'breaker', 'breaker+cfu', 'minimal', 'minimal+cfu'],
         }
+        assert args.target in allowed_variants, f"Internal error: unexpected target {args.target} for ice40-specific workflow."
+
         if args.cpu_variant not in allowed_variants[args.target]:
             if warn:
                 warnings.warn(
