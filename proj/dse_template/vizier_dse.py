@@ -9,7 +9,7 @@ from vizier.service import vizier_service_pb2_grpc
 
 from dse_framework import dse
 
-NUM_TRIALS = 5
+NUM_TRIALS = 2
 
 problem = vz.ProblemStatement()
 problem.search_space.select_root().add_bool_param(name='bypass')
