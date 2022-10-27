@@ -27,7 +27,8 @@ Optimal Trial Suggestion and Objective: ParameterDict(_items={'bypass': False, '
 Similar to the typical Playground flow, developers should first profile the workload they would like to accelerate and then design a CFU to speedup the intended operation. After designing your CFU in the project, you can now perform design space exploration between your CFU and CPU. This is especially interesting if you are considering different versions of a CFU. It is also useful simply for optimizing the soft-CPU for your workload after you are happy with your CFU.
 
 ### Running Automated DSE with Vizier
-- Diagram
+![Alt text](../../docs/source/images/CFU_vs_CPU.png?raw=true "Title")
+
 - Changing number of Trials
 - Build your own custom VexRiscv
 
