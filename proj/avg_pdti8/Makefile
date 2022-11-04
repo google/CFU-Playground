@@ -32,8 +32,6 @@ DEFINES += INCLUDE_MODEL_PDTI8
 #DEFINES += SHOW_CONV_PARAMS
 #DEFINES += SHOW_CONV_OUT_WEIGHTS
 
-export UART_SPEED := 3686400
-
 # Tests are in implementation files in this project
 PYTEST_PATTERN := '*.py'
 
