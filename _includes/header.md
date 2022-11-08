@@ -10,7 +10,9 @@
 </style>
 
 <div class="header-container">
-{% if page.conference %}
+{% if page.hpca %}
+<h1><b> TinyML: Accelerating Tiny Machine Learning by Building Your Own Processor (BYOP) </b></h1><br><br>
+{% elsif page.conference %}
 <h1><b> Build Your Own Custom TinyML Processor </b></h1><br><br>
 {% else %}
 <h1><b> CFU-Playground</b></h1><br><br>
@@ -19,7 +21,7 @@
 <p>
 {% if page.conference %}
 A full-stack workshop for accelerating TinyML<br>
-{{page.conference}} | {{page.conference-date}}<br>
+{{page.conference}} | {{page.prettify-conference-date}}<br>
 {% else %}
 A full-stack open-source framework for accelerating TinyML<br>
 {% endif %}
