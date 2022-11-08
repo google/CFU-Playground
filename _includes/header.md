@@ -33,7 +33,7 @@ A full-stack open-source framework for accelerating TinyML<br>
   </a>
 </div>
 <div style="display:inline-block;">
-  <a style="text-decoration:none" href="https://www.seas.harvard.edu/">
+  <a style="text-decoration:none" href="https://www.seas.harvard.edu/](https://edge.seas.harvard.edu/">
     <img src="{{ '/assets/logos/seas.svg' | relative_url }}" alt="Harvard SEAS" style="height: 2.5rem">
   </a>
 </div>
