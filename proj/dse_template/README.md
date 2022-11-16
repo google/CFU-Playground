@@ -15,6 +15,7 @@ This project template is intended for performing architectural design space expl
 
 4. Test DSE 
 - In `proj/dse_template` run `python vizier_dse.py`
+- Depending on your machine, this could take somewhere between 40-60 min to run
 - Sample output should look like this (with different raw values):
 ```
 EXITING DSE...
