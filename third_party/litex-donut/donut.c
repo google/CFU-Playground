@@ -31,7 +31,6 @@ void donut(void);
 
 void donut(void) {
   int sA=1024,cA=0,sB=1024,cB=0,_;
-  int R1 = 1, R2 = 2048, K2 = 5120*1024;
   puts("\nPress any key to exit.\n");
   for (;;) {
     unsigned start_cycle = perf_get_mcycle();
@@ -41,6 +40,7 @@ void donut(void) {
     for (int j = 0; j < 90; j++) {
       int si = 0, ci = 1024;  // sine and cosine of angle i
       for (int i = 0; i < 324; i++) {
+        int R1 = 1, R2 = 2048, K2 = 5120*1024;
 
         int x0 = R1*cj + R2,
             x1 = ci*x0 >> 10,
