@@ -19,6 +19,7 @@
 
 from litex import get_data_mod
 from litex.soc.cores.cpu.vexriscv import core
+from litex.soc.cores.cpu.serv import core as core2
 from shutil import copyfile
 
 import os
@@ -124,7 +125,7 @@ def copy_cpu_variant_if_needed(variant):
 # This builds a CPU variant on demand 
 ################################################################
 def build_cpu_variant_if_needed(variant):
-    if variant in core.CPU_VARIANTS:
+    if variant in core.CPU_VARIANTS or variant in core2.CPU_VARIANTS:
         print(f"Variant \"{variant}\" already known.")
         return
 
@@ -152,15 +153,20 @@ def build_cpu_variant_if_needed(variant):
         "dCacheSize":         "4096",  
         "hardwareDiv":        "false",
         "iCacheSize":         "4096", 
-        "mulDiv":             "true", 
-        "prediction":         "none", 
-        "safe":               "true", 
-        "singleCycleShift":   "true", 
-        "singleCycleMulDiv":  "true" 
+        "mulDiv":             "false", 
+        "prediction":         "static", 
+        "safe":               "false", 
+        "singleCycleShift":   "false", 
+        "singleCycleMulDiv":  "false" 
     }
 
     # Parse variant into param list w/o 'generate' keyword
-    params = variant.split("+")[1:]
+    params = variant.split("+")
+    if params[0] != "generate":
+        print("ERROR: Need generate keyword.")
+        exit()
+        
+    params = params[1:]
     for param in params:
         if "cfu" in param:
             cpu_params[param] = "true"
