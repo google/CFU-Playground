@@ -16,6 +16,8 @@
 
 #include <stdio.h>
 
+#include "generated/csr.h"
+
 #include "menu.h"
 
 unsigned CFU_start_counts[NUM_PERF_COUNTERS];
@@ -181,3 +183,4 @@ static struct Menu MENU = {
 };
 
 void perf_test_menu() { menu_run(&MENU); }
+
