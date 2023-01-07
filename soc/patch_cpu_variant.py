@@ -163,7 +163,7 @@ def build_cpu_variant_if_needed(variant):
     # Parse variant into param list w/o 'generate' keyword
     params = variant.split("+")
     if params[0] != "generate":
-        print("ERROR: Need generate keyword to begin on demand Vexrisv build.")
+        print("ERROR: Need generate keyword to begin on demand Vexriscv build.")
         exit()
         
     params = params[1:]
