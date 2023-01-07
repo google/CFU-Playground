@@ -2,6 +2,8 @@
 This project template is intended for performing architectural design space exploration (DSE) in CFU Playground. 
 
 ## Prerequisites & Setup
+*NOTE: This has been tested and verified on Ubuntu 18.04 LTS.*
+
 1. Playground Installation
 - Make sure you have run `$CFU_ROOT/scripts/setup`
 - Make sure you have installed and entered the Symbiflow environment via `make install-sf` & `make enter-sf`
