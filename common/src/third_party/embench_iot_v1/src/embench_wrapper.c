@@ -19,42 +19,34 @@
 #include <stdio.h>
 #include "generated/csr.h"
 
-// #define EMBENCH_WRAPPER(benchname) \
-// void embench_wrapper_##benchname () \
-// { \
-//   volatile int result; \
-//   int correct; \
-//   initialise_benchmark_##benchname (); \
-//   warm_caches_##benchname (WARMUP_HEAT); \
-//   unsigned int start = perf_get_mcycle(); \
-//   result = benchmark_##benchname (); \
-//   unsigned int end = perf_get_mcycle(); \
-//   correct = verify_benchmark_##benchname (result); \
-//   printf("%s\n", correct ? "OK  Benchmark result verified" : "FAIL  Benchmark result incorrect"); \
-//   printf("Spent %u cycles (mcycle)\n", end - start); \
-// }
+
+#ifdef USE_LITEX_TIMER
+#define TIMER_TYPE    uint64_t
+#define RESET_TIMER() perf_reset_litex_timer()
+#define GET_TIMER()   perf_get_litex_timer()
+#define PRINT_PERF(a, b)  printf("Spent %llu cycles\n", a - b) 
+#else // default timer to use is mcycle
+#define TIMER_TYPE    unsigned int
+#define RESET_TIMER() /* no reset for mcycle */
+#define GET_TIMER()   perf_get_mcycle() 
+#define PRINT_PERF(a, b)  printf("Spent %u cycles\n", b - a) 
+#endif
+
 
 #define EMBENCH_WRAPPER(benchname) \
 void embench_wrapper_##benchname () \
 { \
   volatile int result; \
   int correct; \
-  uint64_t start; \
-  uint64_t end; \
   initialise_benchmark_##benchname (); \
   warm_caches_##benchname (WARMUP_HEAT); \
-  timer_en_write(0); \
-  timer_reload_write(0); \
-  timer_load_write(0xffffffff); \
-  timer_en_write(1); \
-  timer_update_value_write(1); \
-  start = timer_value_read(); \
+  RESET_TIMER(); \
+  TIMER_TYPE start = GET_TIMER(); \
   result = benchmark_##benchname (); \
-  timer_update_value_write(1); \
-  end = timer_value_read(); \
+  TIMER_TYPE end = GET_TIMER(); \
   correct = verify_benchmark_##benchname (result); \
   printf("%s\n", correct ? "OK  Benchmark result verified" : "FAIL  Benchmark result incorrect"); \
-  printf("Spent %llu cycles (Litex Timer)\n", start - end); \
+  PRINT_PERF(start, end); \
 }
 
 
