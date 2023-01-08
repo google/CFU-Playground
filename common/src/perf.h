@@ -225,28 +225,20 @@ inline void perf_disable_counter(int counter_num) {
   perf_set_counter_enable(counter_num, 0);
 }
 
-
-// static inline uint64_t perf_get_litex_timer() { 
-//   uint64_t start;
-//   uint64_t end; 
-//   uint64_t result; 
-
-   
-  
+static void inline perf_reset_litex_timer(){
+  timer_en_write(0); 
+  timer_reload_write(0); 
+  timer_load_write(0xffffffff); 
+  timer_en_write(1);
+  return;
+} 
  
-//   start = 
-
-//   volatile int a = 1+2;
-//   volatile int b = 2+3;
-//   printf("%d", a+b);
-// 	timer0_update_value_write(1);
-// 	end = timer0_value_read();
-	
-
-//   result = start-end;
-//   printf("result: %llu", result); 
-//   return result; 
-// }
+static inline uint64_t perf_get_litex_timer() { 
+  uint64_t result; 
+  timer_update_value_write(1); 
+  result = timer_value_read(); 
+  return result; 
+}
 
 // Print a human readable number (useful for perf counters)
 void perf_print_human(uint64_t n);
