@@ -71,3 +71,6 @@
 [submodule "third_party/python/vizier"]
 	path = third_party/python/vizier
 	url = https://github.com/ShvetankPrakash/vizier.git
+[submodule "soc/deps/pythondata_cpu_serv"]
+	path = third_party/python/pythondata_cpu_serv
+	url = https://github.com/litex-hub/pythondata-cpu-serv.git
