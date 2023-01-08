@@ -81,6 +81,11 @@ ifdef SKIP_TFLM
 export DEFINES    += SKIP_TFLM
 endif
 
+# Need a slower baudrate when communicating with Serv
+ifdef SERV
+export UART_SPEED = 115200
+endif
+
 SHELL           := /bin/bash
 CRC             := 
 #CRC             := --no-crc
