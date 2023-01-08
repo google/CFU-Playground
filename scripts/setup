@@ -12,6 +12,7 @@ git submodule update --init
 # only these submodules need a recursive update
 git submodule update --init --recursive third_party/python/pythondata-software-picolibc
 git submodule update --init --recursive third_party/python/pythondata_cpu_vexriscv
+git submodule update --init --recursive third_party/python/pythondata_cpu_serv
 
 CFU_ROOT="$(dirname $(dirname $(realpath ${BASH_SOURCE[0]})))"
 
