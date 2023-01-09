@@ -225,6 +225,7 @@ inline void perf_disable_counter(int counter_num) {
   perf_set_counter_enable(counter_num, 0);
 }
 
+#ifdef USE_LITEX_TIMER
 static void inline perf_reset_litex_timer(){
   timer_en_write(0); 
   timer_reload_write(0); 
@@ -239,6 +240,7 @@ static inline uint64_t perf_get_litex_timer() {
   result = timer_value_read(); 
   return result; 
 }
+#endif
 
 // Print a human readable number (useful for perf counters)
 void perf_print_human(uint64_t n);
