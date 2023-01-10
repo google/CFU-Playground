@@ -47,6 +47,11 @@
 # $ make load PLATFORM=sim
 
 export UART_SPEED ?= 1843200
+# Need a slower baudrate when communicating with Serv
+ifdef SERV
+export UART_SPEED = 115200
+endif
+
 export PROJ       := $(lastword $(subst /, ,${CURDIR}))
 export CFU_ROOT   := $(realpath $(CURDIR)/../..)
 export PLATFORM   ?= common_soc
@@ -79,11 +84,6 @@ export DEFINES    += PLATFORM=$(PLATFORM)
 # We can specify NOT compiling the TFLite-micro library
 ifdef SKIP_TFLM
 export DEFINES    += SKIP_TFLM
-endif
-
-# Need a slower baudrate when communicating with Serv
-ifdef SERV
-export UART_SPEED = 115200
 endif
 
 SHELL           := /bin/bash
