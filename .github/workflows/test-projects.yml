@@ -39,10 +39,10 @@ jobs:
 
     steps:
     - name: Clone repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Setup Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
       with:
         python-version: '3.7'
 
@@ -64,14 +64,14 @@ jobs:
         renode-path: '${{ env.RENODE_DIR }}'
 
     - name: Cache Renode installation
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: cache-renode
       with:
         path: '${{ env.RENODE_DIR }}'
         key: cfu-cache-renode-${{ env.RENODE_VERSION }}
 
     - name: Cache Conda packages
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: cache-conda
       with:
         path: ~/conda_pkgs_dir
@@ -105,12 +105,12 @@ jobs:
 
     steps:
     - name: Clone repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         submodules: true
 
     - name: Setup Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
       with:
         python-version: '3.7'
 
@@ -120,14 +120,14 @@ jobs:
         echo "RENODE_DIR=third_party/renode" >> $GITHUB_ENV
 
     - name: Restore Renode
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: cache-renode
       with:
         path: '${{ env.RENODE_DIR }}'
         key: cfu-cache-renode-${{ env.RENODE_VERSION }}
 
     - name: Restore cached Conda packages
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: cache-conda
       with:
         path: ~/conda_pkgs_dir
@@ -161,7 +161,7 @@ jobs:
 
     - name: Archive results
       if: ${{ success() || failure() }}
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: test-results-${{ matrix.proj_name }}-${{ matrix.platform }}-${{ matrix.target }}
         path: |
