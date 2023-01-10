@@ -139,6 +139,7 @@ TFLM_COPY_SRC_DIRS := \
 	tensorflow/lite \
 	tensorflow/lite/c \
 	tensorflow/lite/core/api \
+	tensorflow/lite/core/c \
 	tensorflow/lite/kernels \
 	tensorflow/lite/kernels/internal \
 	tensorflow/lite/kernels/internal/optimized \
@@ -148,6 +149,7 @@ TFLM_COPY_SRC_DIRS := \
 	tensorflow/lite/micro/kernels \
 	tensorflow/lite/micro/memory_planner \
 	tensorflow/lite/micro/arena_allocator \
+	tensorflow/lite/micro/tflite_bridge \
 	tensorflow/lite/schema
 
 TFLM_FIND_PARAMS := \
