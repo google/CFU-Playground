@@ -19,6 +19,9 @@
 
 #include "generated/soc.h"
 #include <stdint.h>
+#include <stdio.h>
+#include "generated/csr.h"
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,6 +51,8 @@ inline unsigned perf_get_mcycle() {
   asm volatile("csrr %0, mcycle" : "=r"(result));
   return result;
 }
+
+
 
 // Reads both halves of the cycle counter.
 //
@@ -220,6 +225,23 @@ inline void perf_disable_counter(int counter_num) {
   perf_set_counter_enable(counter_num, 0);
 }
 
+#ifdef USE_LITEX_TIMER
+static void inline perf_reset_litex_timer(){
+  timer_en_write(0); 
+  timer_reload_write(0); 
+  timer_load_write(0xffffffff); 
+  timer_en_write(1);
+  return;
+} 
+ 
+static inline uint64_t perf_get_litex_timer() { 
+  uint64_t result; 
+  timer_update_value_write(1); 
+  result = timer_value_read(); 
+  return result; 
+}
+#endif
+
 // Print a human readable number (useful for perf counters)
 void perf_print_human(uint64_t n);
 
@@ -235,6 +257,7 @@ void perf_print_all_counters();
 
 // Test menu
 void perf_test_menu(void);
+
 
 #ifdef __cplusplus
 }

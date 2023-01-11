@@ -17,6 +17,21 @@
 #include "third_party/embench_iot_v1/support/support.h"
 #include "perf.h"
 #include <stdio.h>
+#include "generated/csr.h"
+
+
+#ifdef USE_LITEX_TIMER
+#define TIMER_TYPE    uint64_t
+#define RESET_TIMER() perf_reset_litex_timer()
+#define GET_TIMER()   perf_get_litex_timer()
+#define PRINT_PERF(a, b)  printf("Spent %llu cycles\n", a - b) 
+#else // default timer to use is mcycle
+#define TIMER_TYPE    unsigned int
+#define RESET_TIMER() /* no reset for mcycle */
+#define GET_TIMER()   perf_get_mcycle() 
+#define PRINT_PERF(a, b)  printf("Spent %u cycles\n", b - a) 
+#endif
+
 
 #define EMBENCH_WRAPPER(benchname) \
 void embench_wrapper_##benchname () \
@@ -25,13 +40,15 @@ void embench_wrapper_##benchname () \
   int correct; \
   initialise_benchmark_##benchname (); \
   warm_caches_##benchname (WARMUP_HEAT); \
-  unsigned int start = perf_get_mcycle(); \
+  RESET_TIMER(); \
+  TIMER_TYPE start = GET_TIMER(); \
   result = benchmark_##benchname (); \
-  unsigned int end = perf_get_mcycle(); \
+  TIMER_TYPE end = GET_TIMER(); \
   correct = verify_benchmark_##benchname (result); \
   printf("%s\n", correct ? "OK  Benchmark result verified" : "FAIL  Benchmark result incorrect"); \
-  printf("Spent %u cycles\n", end - start); \
+  PRINT_PERF(start, end); \
 }
+
 
 #if defined(INCLUDE_EMBENCH_PRIMECOUNT) || defined(INCLUDE_ALL_EMBENCH_EXAMPLES)
     EMBENCH_WRAPPER(primecount)

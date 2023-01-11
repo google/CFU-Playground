@@ -37,6 +37,7 @@ LIBBASE_DIR    := $(SOC_SOFTWARE_DIR)/libbase
 LIBC_DIR       := $(CFU_ROOT)/third_party/python/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc
 LITEX_DIR      := $(CFU_ROOT)/third_party/python/litex/litex
 VEX_SRC_DIR    := $(LITEX_DIR)/soc/cores/cpu/vexriscv
+SERV_SRC_DIR    := $(LITEX_DIR)/soc/cores/cpu/serv
 LITEX_HW_DIR   := $(LITEX_DIR)/soc/software/include
 PYRUN          := $(CFU_ROOT)/scripts/pyrun
 FIX_CFU_DIS    := $(PYRUN) $(CFU_ROOT)/scripts/fix_cfu_dis.py
@@ -66,6 +67,7 @@ SHARED_FLAGS := \
 	-I$(LIBC_DIR)/include \
     -I$(LITEX_HW_DIR) \
     -I$(VEX_SRC_DIR) \
+	-I$(SERV_SRC_DIR) \
 	-ffunction-sections \
 	-fdata-sections \
 	-fno-common \

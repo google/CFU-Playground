@@ -18,7 +18,8 @@
 # pylint:disable=E1101
 
 from litex import get_data_mod
-from litex.soc.cores.cpu.vexriscv import core
+from litex.soc.cores.cpu.vexriscv import core as vexriscv_core
+from litex.soc.cores.cpu.serv     import core as serv_core
 from shutil import copyfile
 
 import os
@@ -26,7 +27,7 @@ import os
 
 def patch_cpu_variant():
     """Monkey patches custom variants into LiteX."""
-    core.CPU_VARIANTS.update({
+    vexriscv_core.CPU_VARIANTS.update({
         'fomu':                 'VexRiscv_Fomu',
         'fomu+cfu':             'VexRiscv_FomuCfu',
         'custom':               'VexRiscv_Custom',
@@ -45,7 +46,7 @@ def patch_cpu_variant():
         'slimperf+cfu':         'VexRiscv_SlimPerfCfu',
         'slimperf+cfu+debug':   'VexRiscv_SlimPerfCfuDebug',
     })
-    core.GCC_FLAGS.update({
+    vexriscv_core.GCC_FLAGS.update({
         'fomu':                 '-march=rv32im -mabi=ilp32 -mno-div',
         'fomu+cfu':             '-march=rv32im -mabi=ilp32 -mno-div',
         'custom':               '-march=rv32im -mabi=ilp32',
@@ -73,7 +74,7 @@ def patch_cpu_variant():
     })
 
     ########### ADD code to existing add_soc_components() #######
-    old_add_soc_components = core.VexRiscv.add_soc_components
+    old_add_soc_components = vexriscv_core.VexRiscv.add_soc_components
 
     def new_add_soc_components(self, soc, soc_region_cls):
         old_add_soc_components(self, soc, soc_region_cls)
@@ -88,7 +89,7 @@ def patch_cpu_variant():
             # This is here to avoid the dcache flush instruction (system.h).
             soc.constants.pop('CONFIG_CPU_HAS_DCACHE', None)
 
-    core.VexRiscv.add_soc_components = new_add_soc_components
+    vexriscv_core.VexRiscv.add_soc_components = new_add_soc_components
 
 
 
@@ -99,8 +100,8 @@ def patch_cpu_variant():
 #  where the LiteX build expects to find it.
 ################################################################
 def copy_cpu_variant_if_needed(variant):
-    if variant in core.CPU_VARIANTS:
-        cpu_filename = core.CPU_VARIANTS[variant] + ".v"
+    if variant in vexriscv_core.CPU_VARIANTS:
+        cpu_filename = vexriscv_core.CPU_VARIANTS[variant] + ".v"
         vdir = get_data_mod("cpu", "vexriscv").data_location
         fullpath = os.path.join(vdir, cpu_filename)
 
@@ -124,12 +125,12 @@ def copy_cpu_variant_if_needed(variant):
 # This builds a CPU variant on demand 
 ################################################################
 def build_cpu_variant_if_needed(variant):
-    if variant in core.CPU_VARIANTS:
+    if variant in vexriscv_core.CPU_VARIANTS or variant in serv_core.CPU_VARIANTS:
         print(f"Variant \"{variant}\" already known.")
         return
 
     ########### ADD code to existing add_soc_components() #######
-    old_add_soc_components = core.VexRiscv.add_soc_components
+    old_add_soc_components = vexriscv_core.VexRiscv.add_soc_components
 
     def new_add_soc_components(self, soc, soc_region_cls):
         old_add_soc_components(self, soc, soc_region_cls)
@@ -143,7 +144,7 @@ def build_cpu_variant_if_needed(variant):
             # This is here to avoid the dcache flush instruction (system.h).
             soc.constants.pop('CONFIG_CPU_HAS_ICACHE', None)
 
-    core.VexRiscv.add_soc_components = new_add_soc_components
+    vexriscv_core.VexRiscv.add_soc_components = new_add_soc_components
 
     cpu_params = {
         "csrPluginConfig":    "mcycle",
@@ -160,7 +161,12 @@ def build_cpu_variant_if_needed(variant):
     }
 
     # Parse variant into param list w/o 'generate' keyword
-    params = variant.split("+")[1:]
+    params = variant.split("+")
+    if params[0] != "generate":
+        print("ERROR: Need generate keyword to begin on demand Vexriscv build.")
+        exit()
+        
+    params = params[1:]
     for param in params:
         if "cfu" in param:
             cpu_params[param] = "true"
@@ -219,10 +225,10 @@ def build_cpu_variant_if_needed(variant):
 
 
 
-    core.CPU_VARIANTS.update({
+    vexriscv_core.CPU_VARIANTS.update({
         variant:             cpu_filename_base,
     })
-    core.GCC_FLAGS.update({
+    vexriscv_core.GCC_FLAGS.update({
         variant:             gcc_flags,
     })
 

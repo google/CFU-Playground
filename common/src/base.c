@@ -30,12 +30,15 @@
 
 void isr(void) {
   __attribute__((unused)) unsigned int irqs;
-
+#ifdef UART_INTERRUPT
   irqs = irq_pending() & irq_getmask();
 
   if (irqs & (1 << UART_INTERRUPT)) {
+#endif
     uart_isr();
+#ifdef UART_INTERRUPT
   }
+#endif
 }
 
 void trap_handler(uint32_t* reg_base) {
@@ -47,8 +50,10 @@ void trap_handler(uint32_t* reg_base) {
 }
 
 void init_runtime() {
+#ifdef UART_INTERRUPT
   irq_setmask(0);
   irq_setie(1);
+#endif
   uart_init();
 }
 
