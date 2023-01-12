@@ -8,17 +8,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <cfu.h>
 #include <perf.h>
 
 #include <console.h>
 
+//
+// ACCELERATED VERSION
+//
+// using these two Custom Instructions
+//    added via CFU (Custom Function Unit)
+//
+#define MULTSHIFT10(a,b)     ((int)cfu_op(0, 0, (a), (b)))
+#define CFUMUL(a,b)          ((int)cfu_op(1, 1, (a), (b)))
+
 #define R(mul,shift,x,y) \
   _=x; \
-  x -= mul*y>>shift; \
-  y += mul*_>>shift; \
-  _ = 3145728-x*x-y*y>>11; \
-  x = x*_>>10; \
-  y = y*_>>10;
+  x -= CFUMUL(mul,y)>>shift; \
+  y += CFUMUL(mul,_)>>shift; \
+  _ = 3145728-CFUMUL(x,x)-CFUMUL(y,y)>>11; \
+  x = CFUMUL(x,_)>>10; \
+  y = CFUMUL(y,_)>>10;
+
 
 static signed char b[1760], z[1760];
 
@@ -31,7 +42,7 @@ void donut(void);
 
 void donut(void) {
   int sA=1024,cA=0,sB=1024,cB=0,_;
-  puts("\nPress any key to exit.\n");
+  puts("\nPress any key to exit.  Accelerated version.\n");
   for (;;) {
     unsigned start_cycle = perf_get_mcycle();
     memset(b, 32, 1760);  // text buffer
@@ -42,19 +53,23 @@ void donut(void) {
       for (int i = 0; i < 324; i++) {
         int R1 = 1, R2 = 2048, K2 = 5120*1024;
 
-        int x0 = R1*cj + R2,
-            x1 = ci*x0 >> 10,
-            x2 = cA*sj >> 10,
-            x3 = si*x0 >> 10,
-            x4 = R1*x2 - (sA*x3 >> 10),
-            x5 = sA*sj >> 10,
-            x6 = K2 + R1*1024*x5 + cA*x3,
-            x7 = cj*si >> 10,
-            x = 40 + 30*(cB*x1 - sB*x4)/x6,
-            y = 12 + 15*(cB*x4 + sB*x1)/x6,
-            N = (-cA*x7 - cB*((-sA*x7>>10) + x2) - ci*(cj*sB >> 10) >> 10) - x5 >> 7;
+        int x0 = CFUMUL(R1,cj) + R2,
+            x1 = MULTSHIFT10(ci,x0),
+            x2 = MULTSHIFT10(cA,sj),
+            x3 = MULTSHIFT10(si,x0),
+            x4 = CFUMUL(R1,x2) - MULTSHIFT10(sA,x3),
+            x5 = MULTSHIFT10(sA,sj),
+            x6 = K2 + (CFUMUL(R1,x5)<<10) + CFUMUL(cA,x3),
+            x7 = MULTSHIFT10(cj,si),
+            x8 = CFUMUL(cB,x1) - CFUMUL(sB,x4),
+            x = 40 + CFUMUL(30,x8)/x6,
+            x9 = CFUMUL(cB,x4) + CFUMUL(sB,x1),
+            y = 12 + CFUMUL(15,x9)/x6;
+            int xx = MULTSHIFT10(cj,sB);
+            int N =   (-CFUMUL(cA,x7) - cB*((-MULTSHIFT10(sA,x7))      + x2) - CFUMUL(ci,xx) >> 10) - x5 >> 7;
 
-        int o = x + 80 * y;
+
+        int o = x + CFUMUL(80,y);
         signed char zz = (x6-K2)>>15;
         if (22 > y && y > 0 && x > 0 && 80 > x && zz < z[o]) {
           z[o] = zz;

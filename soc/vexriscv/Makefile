@@ -1,6 +1,6 @@
 SRC := ${shell find . -type f -name \*.scala}
 
-VERILOGS := VexRiscv_Custom.v VexRiscv_CustomCfu.v VexRiscv_PerfCfu.v VexRiscv_PerfCfuDebug.v VexRiscv_SlimCfu.v VexRiscv_SlimCfuDebug.v VexRiscv_SlimPerfCfu.v VexRiscv_SlimPerfCfuDebug.v VexRiscv_Fomu.v VexRiscv_FomuCfu.v VexRiscv_SlimoptCfu.v VexRiscv_HpsCfu.v VexRiscv_HpsdeltaCfu.v VexRiscv_Fpu.v VexRiscv_FpuCfu.v VexRiscv_MinCfu.v VexRiscv_dbpl8Cfu.v
+VERILOGS := VexRiscv_Custom.v VexRiscv_CustomCfu.v VexRiscv_PerfCfu.v VexRiscv_PerfCfuDebug.v VexRiscv_SlimCfu.v VexRiscv_SlimCfuDebug.v VexRiscv_SlimPerfCfu.v VexRiscv_SlimPerfCfuDebug.v VexRiscv_Fomu.v VexRiscv_FomuCfu.v VexRiscv_SlimoptCfu.v VexRiscv_HpsCfu.v VexRiscv_HpsdeltaCfu.v VexRiscv_Fpu.v VexRiscv_FpuCfu.v VexRiscv_MinCfu.v VexRiscv_dbpl8Cfu.v VexRiscv_Breaker.v VexRiscv_BreakerCfu.v
 YAMLS    := $(VERILOGS:.v=.yaml)
 
 
@@ -61,3 +61,9 @@ VexRiscv_Fomu.v: $(SRC) Makefile
 
 VexRiscv_FomuCfu.v: $(SRC) Makefile
 	sbt compile "runMain vexriscv.GenCoreDefault --safe false --cfu true --iCacheSize 2048 --dCacheSize 0 --csrPluginConfig mcycle --mulDiv true --singleCycleShift false --singleCycleMulDiv true --bypass false --prediction none --hardwareDiv false --outputFile VexRiscv_FomuCfu"
+
+VexRiscv_Breaker.v: $(SRC) Makefile
+	sbt compile "runMain vexriscv.GenCoreDefault --safe false --cfu false --iCacheSize 2048 --dCacheSize 0 --csrPluginConfig mcycle --mulDiv true --singleCycleShift true --singleCycleMulDiv false --bypass true --prediction dynamic --hardwareDiv false --outputFile VexRiscv_Breaker"
+
+VexRiscv_BreakerCfu.v: $(SRC) Makefile
+	sbt compile "runMain vexriscv.GenCoreDefault --safe false --cfu true --iCacheSize 2048 --dCacheSize 0 --csrPluginConfig mcycle --mulDiv true --singleCycleShift true --singleCycleMulDiv false --bypass true --prediction dynamic --hardwareDiv false --outputFile VexRiscv_BreakerCfu"

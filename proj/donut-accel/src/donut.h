@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 The CFU-Playground Authors
+ * Copyright 2022 The CFU-Playground Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,4 @@
  * limitations under the License.
  */
 
-#ifndef SOFTWARE_CFU_H
-#define SOFTWARE_CFU_H
-
-#include <stdint.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
-// =============== Software implementation of custom op codes
-uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2);
-
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif  // SOFTWARE_CFU_H
+extern void donut(void);
