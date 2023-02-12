@@ -7,7 +7,7 @@ title: Home
 ---
 
 # Welcome
-*Introductory Tutorial Video Coming Soon* 
+<iframe src="https://drive.google.com/file/d/1l1eUSqSeUHHzTSWsa8wW87NKzPhfnYuy/preview" width="640" height="480" allow="autoplay"></iframe>
 
 
 # Github
