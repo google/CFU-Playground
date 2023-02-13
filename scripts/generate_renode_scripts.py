@@ -32,6 +32,7 @@ using sysbus
 mach create \"""" + target + """\"
 machine LoadPlatformDescription $ORIGIN/""" + target + """.repl
 machine StartGdbServer 10001
+cpu EnableProfilerPerfetto $ORIGIN/output.trace true
 showAnalyzer sysbus.uart
 showAnalyzer sysbus.uart Antmicro.Renode.Analyzers.LoggingUartAnalyzer
 """
