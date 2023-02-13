@@ -19,6 +19,10 @@ canceled: false
 {:toc}
 </div>
 
+### Welcome
+<iframe src="https://drive.google.com/file/d/1l1eUSqSeUHHzTSWsa8wW87NKzPhfnYuy/preview" width="746" height="449" allow="autoplay"></iframe>
+
+
 ### About 
 Running machine learning (ML) on embedded edge devices, as opposed to in the cloud, is gaining increased attention for multiple reasons such as privacy, latency, security, and accessibility. Given the need for energy efficiency when running ML on these embedded platforms, custom processor support and hardware accelerators for such systems could present the needed solutions. However, ML acceleration on microcontroller-class hardware is a new area, and there exists a need for agile hardware customization for tiny machine learning (tinyML). Building ASICs is both costly and time-consuming, though, and the opportunity exists with an FPGA platform to customize the processor to adapt it to perform the application’s computation efficiently while adding a small amount of custom hardware that exploits the bit-level flexibility of FPGAs. 
 
