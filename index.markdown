@@ -7,7 +7,7 @@ title: Home
 ---
 
 # Welcome
-<iframe src="https://drive.google.com/file/d/1l1eUSqSeUHHzTSWsa8wW87NKzPhfnYuy/preview" width="640" height="480" allow="autoplay"></iframe>
+<iframe src="https://drive.google.com/file/d/1l1eUSqSeUHHzTSWsa8wW87NKzPhfnYuy/preview" width="746" height="449" allow="autoplay"></iframe>
 
 
 # Github
