@@ -25,7 +25,7 @@ if ! which bzip2 >/dev/null; then
     missing+=(bzip2)
 fi
 if ! which python3 >/dev/null; then
-    missing+=(python3)
+    missing+=(python)
 fi
 if ! which unzip >/dev/null; then
     missing+=(unzip)
@@ -52,12 +52,12 @@ if ! which verilator >/dev/null; then
     missing+=(verilator libevent-dev libjson-c-dev)
 fi
 if ! which ninja >/dev/null; then
-    missing+=(ninja-build)
+    missing+=(ninja)
 fi
 
-# if ! (apt list -i | grep libusb-1.0-0-dev) ; then
-#     missing+=(libusb-1.0-0-dev libftdi1-dev)
-# fi
+if ! (pacman -Q | grep -i libusb) ; then
+    missing+=(libusb libftdi-compat)
+fi
 
 echo Missing:
 echo $missing
@@ -71,20 +71,20 @@ fi
 
 if [ ${#missing[@]} -gt 0 ]; then
     echo "Missing packages: ${missing[@]}" >&2
-    if which apt >/dev/null; then
+    if which pacman >/dev/null; then
         if which sudo >/dev/null; then
             _sudo='sudo'
         fi
 
         if [ $in_ci -gt 0 ]; then
-            $_sudo apt update
-            $_sudo apt install -y "${missing[@]}"
+            $_sudo pacman -Syu
+            $_sudo pacman -S --noconfirm "${missing[@]}"
         else
             echo -n "Install [y]/n? " >&2
             answer=$(read)
             if [ "$answer" == "y" -o -z "$answer" ]; then
-                $_sudo apt update
-                $_sudo apt install "${missing[@]}"
+                $_sudo pacman -Syu
+                $_sudo pacman -S --noconfirm "${missing[@]}"
             fi
         fi
         unset _sudo
