@@ -101,3 +101,7 @@ third_party/yosys
 
 # Environment
 env
+
+# Mine
+build_Debug
+build_Release

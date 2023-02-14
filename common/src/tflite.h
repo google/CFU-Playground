@@ -38,6 +38,11 @@ void tflite_set_input_float(const float* data);
 void tflite_randomize_input(int64_t seed);
 void tflite_set_grid_input(void);
 
+float tflite_input_scale();
+int tflite_input_zero_point();
+float tflite_output_scale();
+int tflite_output_zero_point();
+
 // Run classification with data already set into input.
 void tflite_classify();
 
@@ -46,5 +51,5 @@ int8_t* tflite_get_output();
 float* tflite_get_output_float();
 
 // The arena
-extern uint8_t *tflite_tensor_arena;
+extern uint8_t* tflite_tensor_arena;
 #endif  // _TFLITE_H

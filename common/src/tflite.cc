@@ -83,6 +83,9 @@ constexpr int kTensorArenaSize = const_max<int>(
 #ifdef INCLUDE_MODEL_PDTI8
     81 * 1024,
 #endif
+#ifdef INCLUDE_MODEL_SINE
+    2000,
+#endif
 #ifdef INCLUDE_MODEL_MICRO_SPEECH
     7 * 1024,
 #endif
@@ -241,6 +244,22 @@ void tflite_set_grid_input(void) {
     }
   }
   printf("Set %d bytes at %p\n", input->bytes, input->data.int8);
+}
+
+float tflite_input_scale() {
+  return interpreter->input(0)->params.scale;
+}
+
+int tflite_input_zero_point() {
+  return interpreter->input(0)->params.zero_point;
+}
+
+float tflite_output_scale() {
+  return interpreter->output(0)->params.scale;
+}
+
+int tflite_output_zero_point() {
+  return interpreter->output(0)->params.zero_point;
 }
 
 int8_t* tflite_get_output() { return interpreter->output(0)->data.int8; }

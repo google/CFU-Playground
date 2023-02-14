@@ -28,6 +28,7 @@
 #include "models/mlcommons_tiny_v01/vww/vww.h"
 #include "models/mnv2/mnv2.h"
 #include "models/pdti8/pdti8.h"
+#include "models/sine/sine.h"
 
 inline void no_menu() {}
 
@@ -42,6 +43,9 @@ static struct Menu MENU = {
     {
 #if defined(INCLUDE_MODEL_PDTI8) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
         MENU_ITEM(AUTO_INC_CHAR, "Person Detection int8 model", pdti8_menu),
+#endif
+#if defined(INCLUDE_MODEL_SINE) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "Primitive sine model", sine_menu),
 #endif
 #if defined(INCLUDE_MODEL_MICRO_SPEECH) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
         MENU_ITEM(AUTO_INC_CHAR, "Micro Speech", micro_speech_menu),
