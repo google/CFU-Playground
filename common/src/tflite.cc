@@ -86,6 +86,12 @@ constexpr int kTensorArenaSize = const_max<int>(
 #ifdef INCLUDE_MODEL_SINE
     2000,
 #endif
+#ifdef INCLUDE_MODEL_SIGNAL_MODULATION_1
+    81 * 1024,
+#endif
+#ifdef INCLUDE_MODEL_SIGNAL_MODULATION_2
+    110000,
+#endif
 #ifdef INCLUDE_MODEL_MICRO_SPEECH
     7 * 1024,
 #endif

@@ -38,7 +38,7 @@ def load_test_data():
     for i, label in enumerate(labels):
         if label not in test_data:
             test_data[label] = []
-        test_data[label].append(data[:, :, :, i])
+        test_data[label].append(data[:, :, :, i].astype(np.float32))
     after = time.time()
     print(f"[debug] Loaded train data with size {len(labels)} in {after - before}s")
     return test_data

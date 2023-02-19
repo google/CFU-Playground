@@ -29,6 +29,8 @@
 #include "models/mnv2/mnv2.h"
 #include "models/pdti8/pdti8.h"
 #include "models/sine/sine.h"
+#include "models/signal_modulation_1/signal_modulation_1.h"
+#include "models/signal_modulation_2/signal_modulation_2.h"
 
 inline void no_menu() {}
 
@@ -46,6 +48,12 @@ static struct Menu MENU = {
 #endif
 #if defined(INCLUDE_MODEL_SINE) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
         MENU_ITEM(AUTO_INC_CHAR, "Primitive sine model", sine_menu),
+#endif
+#if defined(INCLUDE_MODEL_SIGNAL_MODULATION_1) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "Signal modulation classification model 1", signal_modulation_1_menu),
+#endif
+#if defined(INCLUDE_MODEL_SIGNAL_MODULATION_2) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "Signal modulation classification model 2", signal_modulation_2_menu),
 #endif
 #if defined(INCLUDE_MODEL_MICRO_SPEECH) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
         MENU_ITEM(AUTO_INC_CHAR, "Micro Speech", micro_speech_menu),
