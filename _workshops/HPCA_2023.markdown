@@ -20,11 +20,18 @@ canceled: false
 </div>
 
 ### Welcome
+
+To build your own TinyML accelerator and processor during the tutorial, attendees will need to bring a Linux laptop with CFU Playground installed. See installation directions [here](https://cfu-playground.readthedocs.io/en/latest/setup-guide.html). *We will provide the Lattice FPGAs.*
+
 <iframe src="https://docs.google.com/presentation/d/e/2PACX-1vRBA7fvaeUFvxXuPnbeq6tl4tFIxRnMG09-TP7RCk5f6Hd9ZrEGvgijBeEwqOGSGDco3fMEjs7fBUiL/embed?start=false&loop=false&delayms=3000" frameborder="0" width="746" height="449" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
 
 ### Demo Video
 <iframe src="https://drive.google.com/file/d/1l1eUSqSeUHHzTSWsa8wW87NKzPhfnYuy/preview" width="746" height="449" allow="autoplay"></iframe>
 
+### Overview
+We are running a half-day tutorial on TinyML Acceleration at [HPCA 2023](https://hpca-conf.org/2023/workshop-tutorial/") in Montreal!
+
+Embedded FPGAs will be provided for free to in-person attendees to build their own TinyML processor and accelerator during the tutorial! Remote participation at HPCA 2023 is not supported.
 
 ### About 
 Need for the efficient processing of neural networks has given rise to the development of hardware accelerators. The increased adoption of specialized hardware has highlighted the need for more agile design flows for hardware-software co-design and domain-specific optimizations. We present CFU Playground, a full-stack open-source framework that enables rapid and iterative design and evaluation of machine learning (ML) accelerators for embedded ML systems. Our toolchain provides a completely open-source end-to-end flow for hardware-software co-design on FPGAs and future systems research. This full-stack framework gives the users access to explore experimental and bespoke architectures that are customized and co-optimized for embedded ML. Our rapid, deploy-profile-optimization feedback loop lets ML hardware and software developers achieve significant returns out of a relatively small investment in customization. Using CFU Playground’s design and evaluation loop, we show substantial speedups in just minutes! The soft CPU coupled with the accelerator opens up a new, rich design space between the two components that we explore in an automated fashion using Vizier, a black-box optimization service.
@@ -32,7 +39,7 @@ Need for the efficient processing of neural networks has given rise to the devel
 #### What is the goal of the workshop?
 - Learn what are the challenges and opportunities for designing TinyML hardware.
 - Design and develop model-specific accelerators quickly on FPGAs.
-- Get hands-on knowledge on how to build an ML accelerator using CFU playground!
+- Get hands-on knowledge on how to build an ML accelerator and perform design space exploration using CFU playground!
 
 #### Who is the audience for this workshop?
 New ML accelerators are being announced and released each month for a variety of applications. However, the large cost & complexity associated with designing an accelerator, integrating it into a larger System-on-Chip, and developing its software stack has made it a non-trivial task that is difficult for one to rapidly iterate upon. Attendees will be able to deploy their very own accelerated ML solutions within minutes, empowering them to explore the breadth of opportunity that exists in hardware acceleration. This in conjunction with the relevance and excitement surrounding ML today should welcome people with many different backgrounds and interests in ML, FPGAs, embedded systems, computer architecture, hardware design, and software development. 
@@ -43,6 +50,8 @@ New ML accelerators are being announced and released each month for a variety of
 - Open-Source Tools/Frameworks for HW & SW Development (Full-Stack)
 
 ### Requirements
+To build your own TinyML accelerator and processor during the tutorial, attendees will need to bring a Linux laptop with CFU Playground installed. See installation directions [here](https://cfu-playground.readthedocs.io/en/latest/setup-guide.html). *We will provide the Lattice FPGAs.*
+
 #### Pre-requisites
 - Knowledge of computer organization (RISC pipeline, registers, opcodes, etc.)
 - Basic experience with HDL (being able to read Verilog) & synthesis concepts for FPGAs
@@ -56,7 +65,7 @@ New ML accelerators are being announced and released each month for a variety of
 #### Software
 - All software (RISCV toolchain, Symbiflow, etc.) installed in via environment pre-packaged with CFU Playground. 
 
-### Schedule
+### Tutorial Schedule
 <div>
 <table>
 <thead>
