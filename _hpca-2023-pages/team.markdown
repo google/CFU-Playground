@@ -6,7 +6,7 @@ collectionid: 'hpca-2023-pages'
 categories: jekyll update
 ---
 
-## Speakers
+## Speakers &amp; Contributors
 <div class="person">
 	<table>
 		<tr>
@@ -76,9 +76,6 @@ categories: jekyll update
          </td>
 			<td class="person-bio">Alan V. Green is a member of Google's ChromeOS team and leader of the HPS project.</td>
 		</tr>
-      <tr>
-			<td class="person-bio"> *ADDITIONAL SPEAKERS TBD* </td>
-      </tr>
 	</table>
 </div> 
 
