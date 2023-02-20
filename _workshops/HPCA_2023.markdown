@@ -27,9 +27,7 @@ canceled: false
 
 
 ### About 
-Running machine learning (ML) on embedded edge devices, as opposed to in the cloud, is gaining increased attention for multiple reasons such as privacy, latency, security, and accessibility. Given the need for energy efficiency when running ML on these embedded platforms, custom processor support and hardware accelerators for such systems could present the needed solutions. However, ML acceleration on microcontroller-class hardware is a new area, and there exists a need for agile hardware customization for tiny machine learning (tinyML). Building ASICs is both costly and time-consuming, though, and the opportunity exists with an FPGA platform to customize the processor to adapt it to perform the application’s computation efficiently while adding a small amount of custom hardware that exploits the bit-level flexibility of FPGAs. 
-
-To this end, we present CFU Playground, a full-stack open-source framework that enables rapid and iterative design of tightly-coupled accelerators for tinyML systems. Our toolchain integrates open-source software, RTL generators, and FPGA tools for synthesis, place, and route. This full-stack development framework gives engineers access to explore bespoke architectures that are customized and co-optimized for tinyML. The rapid deploy-profile-optimization feedback loop lets ML hardware and software developers achieve significant returns out of a relatively small investment in customization for repetitive ML computations. CFU Playground is available as an open-source project here: https://github.com/google/CFU-Playground.
+Need for the efficient processing of neural networks has given rise to the development of hardware accelerators. The increased adoption of specialized hardware has highlighted the need for more agile design flows for hardware-software co-design and domain-specific optimizations. We present CFU Playground, a full-stack open-source framework that enables rapid and iterative design and evaluation of machine learning (ML) accelerators for embedded ML systems. Our toolchain provides a completely open-source end-to-end flow for hardware-software co-design on FPGAs and future systems research. This full-stack framework gives the users access to explore experimental and bespoke architectures that are customized and co-optimized for embedded ML. Our rapid, deploy-profile-optimization feedback loop lets ML hardware and software developers achieve significant returns out of a relatively small investment in customization. Using CFU Playground’s design and evaluation loop, we show substantial speedups in just minutes! The soft CPU coupled with the accelerator opens up a new, rich design space between the two components that we explore in an automated fashion using Vizier, a black-box optimization service.
 
 #### What is the goal of the workshop?
 - Learn what are the challenges and opportunities for designing TinyML hardware.
@@ -52,11 +50,10 @@ New ML accelerators are being announced and released each month for a variety of
 - Familiarity with ML “cycle” (inputs, preprocessing, training, inference, etc.) is helpful but not required
 
 #### Hardware
-- For the *workshop*, or to experiment with CFU-Playground using simulators, none is required.
+- For the *tutorial*, or to experiment with CFU-Playground using simulators, none is required.
 - To develop on an FPGA, one of the supported FPGA boards is required (or you might be able to add support!)
 
 #### Software
-- For the workshop, we expect most people will use the colabs, in which case only a Google account is needed.
 - All software (RISCV toolchain, Symbiflow, etc.) installed in via environment pre-packaged with CFU Playground. 
 
 ### Schedule
