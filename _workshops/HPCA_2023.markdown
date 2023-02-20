@@ -5,8 +5,8 @@
 layout: default
 conference: HPCA
 hpca: true
-date: 2022-11-06
-prettify-conference-date: "February 2023 - Coming Soon" 
+date: 2023-02-17
+prettify-conference-date: "February 25, 2023" 
 collectionid: 'hpca-2023-pages' 
 conference-url: "https://hpca-conf.org/2023/workshop-tutorial/"
 canceled: false
