@@ -57,4 +57,86 @@ New ML accelerators are being announced and released each month for a variety of
 - All software (RISCV toolchain, Symbiflow, etc.) installed in via environment pre-packaged with CFU Playground. 
 
 ### Schedule
-*Coming Soon*
+<div>
+<table>
+<thead>
+  <tr>
+    <th>Time</th>
+    <th>Material/Activity</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>1:20 PM</td>
+    <td>Welcome &amp; Tiny Machine Learning (TinyML)
+    	<ul>
+    	<li>Tutorial Overview</li>
+    	<li>General survey of the field of TinyML</li>
+    	<li>What are the common use cases</li>
+    	<li>What kind of models do we run</li>
+    	<li>What are the typical resource constraints, challenges, etc.</li>
+    	</ul>
+    </td>
+  </tr>
+  <tr>
+    <td>2:00 PM</td>
+    <td>TensorFlow Lite Microcontrollers (TFLM)
+    	<ul>
+    		<li>What is TF Lite Micro</li>
+         <li>TF vs. TF Lite vs TF Lite Micro</li>
+         <li>Running TF Lite on-device</li>
+    	</ul>
+	</td>
+  </tr>
+  <tr>
+    <td>2:30 PM</td>
+    <td>Benchmarking of TinyML Systems
+    	<ul>
+         <li>Importance of benchmarking and challenges of benchmarking TinyML systems</li>
+         <li>MLPerf Tiny and it's workloads well suited for CFUs</li>
+         <li>CFU Playground for Architects and the Hardware Lottery Problem</li>
+         <li>Demo of Profiling/Microbenchmarking support in CFU Playground</li>
+    	</ul>
+	</td>
+  </tr>
+  <tr>
+    <td>3:20 PM</td>
+    <td>Coffee Break
+	</td>
+  </tr>
+  <tr>
+    <td>3:40 PM</td>
+    <td>Custom Function Units
+    	<ul>
+    		<li>General overview of CFU</li>
+                <li>Tour of CFU Playground</li>
+                <li>Build your first CFU in a Colab</li>
+    	</ul>
+	</td>
+  </tr>
+  <tr>
+    <td>4:10 PM</td>
+    <td>Design Space Exploration
+    	<ul>
+                <li>Renode's simulation solution</li>
+                <li>Renode Development Lifecycle</li>
+                <li>Verilator Integration</li>
+                <li>Integration with CFU</li>
+    	</ul>
+    </td>
+  </tr>
+  <tr>
+    <td>4:40 PM</td>
+    <td>Build Your Own Processor (BYOP)
+    	<ul>
+                <li>Accelerate Your Own TinyML Model</li>
+                <li>Case study of model and profiling results provided</li>
+                <li>Implement a new instruction in the CFU</li>
+                <li>Use the new instruction in a TFLM kernel</li>
+                <li>Measure performance speed up</li>
+    	</ul>
+    </td>
+  </tr>
+</tbody>
+</table>
+</div>
