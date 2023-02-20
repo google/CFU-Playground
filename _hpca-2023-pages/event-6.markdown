@@ -1,6 +1,6 @@
 ---
 layout: page
-title:  "Accelerate Your Own Model"
+title:  "Build Your Own Processor (BYOP)"
 date:   2023-02-17 19:54:01 -0700
 collectionid: 'hpca-2023-pages' 
 categories: jekyll update
