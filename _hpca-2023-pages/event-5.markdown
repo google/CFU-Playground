@@ -1,8 +1,11 @@
 ---
 layout: page
-title:  "Renode/Antmicro"
-collectionid: 'fccm-2022-pages' 
+title:  "Design Space Exploration"
+date:   2023-02-17 19:54:01 -0700
+collectionid: 'hpca-2023-pages' 
+categories: jekyll update
 ---
+
 
 
 <div id="toc_container" style="position: absolute" markdown="1">
@@ -13,7 +16,4 @@ collectionid: 'fccm-2022-pages'
 </div>
 
 ## Presentation Slides
-<iframe src="https://docs.google.com/presentation/d/e/2PACX-1vRZ19FPKIJzMVu3CFqRBZ3M-Zl_X1qFVjxjSupdeE4G_85npsBXEVB1o9dUAzhZ8jDvzzj_1TF28EDi/embed?start=false&loop=false&delayms=10000" frameborder="0" width="746" height="449" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
-
-## Presentation Recording
-<iframe src="https://drive.google.com/file/d/1-tuC0rzqArFkJ_brJmm7w6OaC8c0RNH4/preview" width="746" height="449" allow="autoplay"></iframe>
+<iframe src="https://docs.google.com/presentation/d/e/2PACX-1vTZaYc7IllLeCpedB6-3_HcR0AWrDiGSqKPWAMKDCc8joPYn5Srwd77p1uCDUj_vrtyS1KR_YrWvebS/embed?start=false&loop=false&delayms=3000" frameborder="0" width="746" height="449" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
