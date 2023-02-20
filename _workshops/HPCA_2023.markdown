@@ -13,7 +13,7 @@ canceled: false
 ---
 
 <div id="toc_container" style="position: absolute" markdown="1">
-<p class="toc_title">Contents</p>
+<p class="toc_title">Table of Contents</p>
 
 - TOC
 {:toc}
