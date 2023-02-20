@@ -70,7 +70,7 @@ New ML accelerators are being announced and released each month for a variety of
 </thead>
 <tbody>
   <tr>
-    <td>1:20 PM</td>
+    <td>1:30 PM</td>
     <td>Welcome &amp; Tiny Machine Learning (TinyML)
     	<ul>
     	<li>Tutorial Overview</li>
@@ -83,24 +83,23 @@ New ML accelerators are being announced and released each month for a variety of
   </tr>
   <tr>
     <td>2:00 PM</td>
-    <td>TensorFlow Lite Microcontrollers (TFLM)
+    <td>CFU Playground: Full-Stack Framework for TinyML Acceleration Using HW-SW Co-Design
     	<ul>
-    		<li>What is TF Lite Micro</li>
-         <li>TF vs. TF Lite vs TF Lite Micro</li>
-         <li>Running TF Lite on-device</li>
+    		<li>General overview of CFUs</li>
+                <li>Tour of CFU Playground</li>
+                <li>End-to-end guide of building an ML Accelerator</li>
     	</ul>
 	</td>
   </tr>
   <tr>
-    <td>2:30 PM</td>
-    <td>Benchmarking of TinyML Systems
+    <td>2:50 PM</td>
+    <td>Design Space Exploration of CPU vs CFU accelerator
     	<ul>
-         <li>Importance of benchmarking and challenges of benchmarking TinyML systems</li>
-         <li>MLPerf Tiny and it's workloads well suited for CFUs</li>
-         <li>CFU Playground for Architects and the Hardware Lottery Problem</li>
-         <li>Demo of Profiling/Microbenchmarking support in CFU Playground</li>
+                <li>Renode and Verilator simulation</li>
+                <li>Google's Vizier for Black-Box Search Optimization</li>
+                <li>Integration with CFU Playground</li>
     	</ul>
-	</td>
+    </td>
   </tr>
   <tr>
     <td>3:20 PM</td>
@@ -109,24 +108,24 @@ New ML accelerators are being announced and released each month for a variety of
   </tr>
   <tr>
     <td>3:40 PM</td>
-    <td>Custom Function Units
+    <td>TensorFlow Lite Microcontrollers (TFLM)
     	<ul>
-    		<li>General overview of CFU</li>
-                <li>Tour of CFU Playground</li>
-                <li>Build your first CFU in a Colab</li>
+       	<li>What is TF Lite Micro</li>
+         <li>TF vs. TF Lite vs TF Lite Micro</li>
+         <li>Running TF Lite on-device</li>
     	</ul>
 	</td>
   </tr>
   <tr>
     <td>4:10 PM</td>
-    <td>Design Space Exploration
+    <td>Benchmarking of TinyML Systems
     	<ul>
-                <li>Renode's simulation solution</li>
-                <li>Renode Development Lifecycle</li>
-                <li>Verilator Integration</li>
-                <li>Integration with CFU</li>
+         <li>Importance of benchmarking and challenges of benchmarking TinyML systems</li>
+         <li>MLPerf Tiny and it's workloads well suited for CFUs</li>
+         <li>CFU Playground for Architects and the Hardware Lottery Problem</li>
+         <li>Demo of Profiling/Microbenchmarking support in CFU Playground</li>
     	</ul>
-    </td>
+	</td>
   </tr>
   <tr>
     <td>4:40 PM</td>
