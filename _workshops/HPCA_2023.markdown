@@ -97,7 +97,7 @@ New ML accelerators are being announced and released each month for a variety of
     	<ul>
                 <li>Renode and Verilator simulation</li>
                 <li>Google's Vizier for Black-Box Search Optimization</li>
-                <li>Integration with CFU Playground</li>
+                <li>Integration with CFU Playground for DSE</li>
     	</ul>
     </td>
   </tr>
