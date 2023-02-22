@@ -7,6 +7,7 @@
 #include "models/sine/model_sine.h"
 #include "tensorflow/lite/micro/examples/person_detection/no_person_image_data.h"
 #include "tensorflow/lite/micro/examples/person_detection/person_image_data.h"
+#include "playground_util/models_utils.h"
 #include "tflite.h"
 
 extern "C" {
@@ -23,15 +24,15 @@ extern "C" {
 
 static void sine_init(void) { tflite_load_model(sine_model, sine_model_len); }
 
-static int8_t quantize(float x) {
-  int8_t x_quantized = x / tflite_input_scale() + tflite_input_zero_point();
-  return x_quantized;
-}
+// static int8_t quantize(float x) {
+//   int8_t x_quantized = x / tflite_input_scale() + tflite_input_zero_point();
+//   return x_quantized;
+// }
 
-static float dequantize(int8_t y_pred_quantized) {
-  float y_pred = (y_pred_quantized - tflite_output_zero_point()) * tflite_output_scale();
-  return y_pred;
-}
+// static float dequantize(int8_t y_pred_quantized) {
+//   float y_pred = (y_pred_quantized - tflite_output_zero_point()) * tflite_output_scale();
+//   return y_pred;
+// }
 
 // Run classification, after input has been loaded
 static float sine_classify() {
