@@ -39,8 +39,44 @@ If all goes well, you will be connected to the CFU Playgroud menu running
 on the board.   You will probably need to hit SPACE for the menu to appear.
 Then just hid 'd' for the donut demo.
 
-
-To compare against the unaccelerated version, cd over to the `proj_template_no_tflm`
+To compare against the unaccelerated version, cd over to the `../proj_template_no_tflm`
 directory and run the same `make` commands listed above.
 
+## Using Verilator Simulation
 
+You can compare with and without acceleration in simulation without having a
+board.  In this directory (`proj/donut-accel`) run:
+
+```
+make PLATFORM=sim EXTRA_LITEX_ARGS="--cpu-variant=breaker+cfu" load
+```
+
+For unaccelerated performance, `cd` to `../proj_template_no_tflm` and run the
+same command.
+
+
+## Measured results
+
+We measured the following cycle counts per iteration on the iCEBreaker board
+(there is slight variation iteration to iteration):
+
+```
+iCEBreaker results
+________________________________________
+| Original non-accelerated   |  94.9M  |
+| Accelerated                |  17.7M  |
+----------------------------------------
+```
+
+Verilog simulation does not match on-board performance exactly.  The main reason
+is that in simulation, memory accesses (including from flash ROM memory) are
+idealized and return a result immediately.
+
+
+```
+Verilator simulation results
+________________________________________
+| Original non-accelerated   |  31.2M  |
+| Accelerated                |  16.7M  |
+----------------------------------------
+```
