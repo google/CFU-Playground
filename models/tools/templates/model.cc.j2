@@ -36,47 +36,56 @@ static void {{ model_name }}_init(void) {
 // {% endif %}
 
 // Run classification, after input has been loaded
-static float *{{ model_name }}_classify() {
+static {{ output_type }} *{{ model_name }}_classify() {
   printf("Running {{ model_name }} model classification\n");
   tflite_classify();
 
   // Process the inference results.
-  float* output = (float*)tflite_get_output();
+  {{ output_type }}* output = ({{ output_type }}*)tflite_get_output();
   return output;
 }
 
 #define NUM_CLASSES {{ num_classes }}
 
 /* Returns true if failed */
-static bool perform_one_test(float* input, float* expected_output, float epsilon) {
+static bool perform_one_test({{ input_type }}* input, {{ output_type }}* expected_output, {{ output_type }} epsilon) {
   bool failed = false;
   tflite_set_input(input);
-  float* output = {{ model_name }}_classify();
+  {{ output_type }}* output = {{ model_name }}_classify();
   for (size_t i = 0; i < NUM_CLASSES; ++i) {
-    float y_true = expected_output[i];
-    float y_pred = output[i];
-    float delta = CFU_MAX(y_true, y_pred) - CFU_MIN(y_true, y_pred);
+    {{ output_type }} y_true = expected_output[i];
+    {{ output_type }} y_pred = output[i];
 
-    int* y_true_u32 = (int*)(&y_true);
-    int* y_pred_u32 = (int*)(&y_pred);
+    {% if apply_quantization %}
+    {{ output_type }} delta = CFU_MAX(y_true, y_pred) - CFU_MIN(y_true, y_pred);
     if (delta > epsilon) {
       printf(
           "*** {{ model_name }} test failed %d (actual) != %d (pred). "
           "Class=%u\n",
-          *y_true_u32, *y_pred_u32, i);
+          y_true, y_pred, i);
+    {% else %}
+    {{ output_type }} delta = CFU_MAX(y_true, y_pred) - CFU_MIN(y_true, y_pred);
+    int* y_true_i32_ptr = (int*)(&y_true);
+    int* y_pred_i32_ptr = (int*)(&y_pred);
+    if (delta > epsilon) {
+      printf(
+          "*** {{ model_name }} test failed %d (actual) != %d (pred). "
+          "Class=%u\n",
+          *y_true_i32_ptr, *y_pred_i32_ptr, i);
+    {% endif %}
       failed = true;
     } else {
       // printf(
       //     "+++ Signal modulation 1 test success %d (actual) != %d (pred). "
       //     "Class=%u\n",
-      //     *y_true_u32, *y_pred_u32, i);
+      //     *y_true_u32_ptr, *y_pred_u32_ptr, i);
     }
   }
   return failed;
 }
 
 static void do_tests() {
-  float epsilon = {{ epsilon }}f;
+  {{ output_type }} epsilon = {{ epsilon }};
   bool failed = false;
 
   {% for cur_test_data in test_data %}

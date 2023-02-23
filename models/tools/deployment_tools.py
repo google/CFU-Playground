@@ -108,8 +108,15 @@ def export_test_data(
     # tests_per_class=1,
     predict=lambda model, data: model.predict(data),
     model_name="MODEL_1",
+    apply_quantization=False,
 ):
     print("[debug] Export test data")
+    if apply_quantization:
+        interpreter = tf.lite.Interpreter(model_content=model)
+        interpreter.allocate_tensors()
+        input_details = interpreter.get_input_details()[0]
+        output_details = interpreter.get_output_details()[0]
+
     define_name = model_name.upper() + "_TEST_DATA"
     with open(file, "w") as res_file:
         res_file.write(f"#ifndef {define_name}\n")
@@ -120,6 +127,18 @@ def export_test_data(
             for i in indecies:
                 data = np.array([test_data[i]])
                 pred = predict(model, data)
+
+                if apply_quantization:
+                    input_scale, input_zero_point = input_details["quantization"]
+                    if (input_scale, input_zero_point) != (0.0, 0):
+                        data = data / input_scale + input_zero_point
+                        data = data.astype(input_details["dtype"])
+                    output_scale, output_zero_point = output_details["quantization"]
+                    if (output_scale, output_zero_point) != (0.0, 0):
+                        pred = pred / output_scale + output_zero_point
+                        pred = pred.astype(output_details["dtype"])
+
+
                 data_str = _Tools.np_to_c_array(
                     data, arr_name=f"test_data_{model_name}_{cl}".replace("-", "_")
                 )
@@ -147,7 +166,7 @@ class _Tools:
         elif arr.dtype == np.uint8:
             type_specifier = "unsigned char"
         elif arr.dtype == np.int8:
-            type_specifier = "char"
+            type_specifier = "signed char"
         else:
             raise NotImplementedError(f"Type {arr.dtype} is not supported")
 
@@ -192,9 +211,6 @@ def deploy_model_tflite(
     create_cfu_playground_proj=False,
     proj_template="proj_template",
 ):
-    if apply_quantization:
-        raise NotImplementedError()
-
     # Output files
     model_header = f"{model_name}_model.h"
     test_data_header = f"{model_name}_test_data.h"
@@ -213,6 +229,7 @@ def deploy_model_tflite(
         test_data_header,
         model_name=model_name,
         predict=predict_tflite,
+        apply_quantization=apply_quantization,
     )
 
     # Load templates for tests, and fill context
@@ -236,8 +253,10 @@ def deploy_model_tflite(
         "model_name_upper": model_name.upper(),
         "apply_quantization": apply_quantization,
         "num_classes": str(num_classes),
-        "epsilon": str(epsilon),
+        "epsilon": str(epsilon), #if not apply_quantization else "0",
         "test_data": test_data_names,
+        "output_type": "int8_t" if apply_quantization else "float",
+        "input_type": "int8_t" if apply_quantization else "float",
     }
 
     # Save model tests

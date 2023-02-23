@@ -51,28 +51,30 @@ static bool perform_one_test(float* input, float* expected_output, float epsilon
   for (size_t i = 0; i < NUM_CLASSES; ++i) {
     float y_true = expected_output[i];
     float y_pred = output[i];
-    float delta = CFU_MAX(y_true, y_pred) - CFU_MIN(y_true, y_pred);
 
-    int* y_true_u32 = (int*)(&y_true);
-    int* y_pred_u32 = (int*)(&y_pred);
+    
+    float delta = CFU_MAX(y_true, y_pred) - CFU_MIN(y_true, y_pred);
+    int* y_true_i32_ptr = (int*)(&y_true);
+    int* y_pred_i32_ptr = (int*)(&y_pred);
     if (delta > epsilon) {
       printf(
           "*** simc_2 test failed %d (actual) != %d (pred). "
           "Class=%u\n",
-          *y_true_u32, *y_pred_u32, i);
+          *y_true_i32_ptr, *y_pred_i32_ptr, i);
+    
       failed = true;
     } else {
       // printf(
       //     "+++ Signal modulation 1 test success %d (actual) != %d (pred). "
       //     "Class=%u\n",
-      //     *y_true_u32, *y_pred_u32, i);
+      //     *y_true_u32_ptr, *y_pred_u32_ptr, i);
     }
   }
   return failed;
 }
 
 static void do_tests() {
-  float epsilon = 0.0005f;
+  float epsilon = 0.0005;
   bool failed = false;
 
   
