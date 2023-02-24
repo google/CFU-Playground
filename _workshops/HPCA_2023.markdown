@@ -21,7 +21,7 @@ canceled: false
 
 ### Welcome
 
-To build your own TinyML accelerator and processor during the tutorial, attendees will need to bring a Linux laptop with a USB port and CFU Playground installed. See repo installation directions [here](https://cfu-playground.readthedocs.io/en/latest/setup-guide.html). *We will provide the Lattice FPGAs (Option 4b).*
+To build your own TinyML accelerator and processor during the tutorial, attendees will need to bring a laptop running Ubuntu 18 or 20 with a USB port and CFU Playground installed. See repo installation directions [here](https://cfu-playground.readthedocs.io/en/latest/setup-guide.html). *We will provide the Lattice FPGAs (Option 4b).*
 
 <iframe src="https://docs.google.com/presentation/d/e/2PACX-1vRBA7fvaeUFvxXuPnbeq6tl4tFIxRnMG09-TP7RCk5f6Hd9ZrEGvgijBeEwqOGSGDco3fMEjs7fBUiL/embed?start=false&loop=false&delayms=3000" frameborder="0" width="746" height="449" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
 
