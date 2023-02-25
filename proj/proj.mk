@@ -92,7 +92,7 @@ CRC             :=
 
 #
 # tools we use
-COPY := /bin/cp -a
+COPY := /bin/cp -r
 RM := /bin/rm -rf
 MKDIR := /bin/mkdir
 
