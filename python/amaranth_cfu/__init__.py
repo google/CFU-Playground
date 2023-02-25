@@ -17,3 +17,4 @@
 __package__ = 'amaranth_cfu'
 from .cfu import *
 from .util import *
+from time import *
