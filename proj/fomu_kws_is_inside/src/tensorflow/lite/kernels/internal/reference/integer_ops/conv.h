@@ -60,7 +60,7 @@ inline void ConvPerChannel(
     TFLITE_DCHECK_EQ(bias_shape.FlatSize(), output_depth);
   }
 
-  printf("(CONV)\n");
+  printf("(CONV)");
 
   // Check dimensions of the tensors.
   const int input_height = input_shape.Dims(1);
