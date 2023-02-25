@@ -23,14 +23,30 @@
 // the Makefile.
 uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2)
 {
-  static int w=0, h=0;
   int srs1 = (int)rs1;
-  int srs2 = (int)rs2;
 
-  if (funct3 & 1) {
-      w = srs1;
-      h = srs2;
+  static int input_offset = 0;
+  static int acc = 0;
+
+  if (funct3 == 0) input_offset = srs1;
+
+  if (funct3 == 1) acc = rs1;
+
+  if (funct3 == 2) {
+      signed char f0 = rs1 & 255;
+      signed char f1 = (rs1 >> 8) & 255;
+      signed char f2 = (rs1 >> 16) & 255;
+      signed char f3 = (rs1 >> 24) & 255;
+      signed char i0 = rs2 & 255;
+      signed char i1 = (rs2 >> 8) & 255;
+      signed char i2 = (rs2 >> 16) & 255;
+      signed char i3 = (rs2 >> 24) & 255;
+
+      acc += f0 * (i0 + input_offset) +
+             f1 * (i1 + input_offset) +
+             f2 * (i2 + input_offset) +
+             f3 * (i3 + input_offset);
   }
 
-  return ( srs1 >= 0 && srs1 < w && srs2 >= 0 && srs2 < h);
+  return acc;
 }
