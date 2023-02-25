@@ -92,7 +92,8 @@ CRC             :=
 
 #
 # tools we use
-COPY := /bin/cp -r
+COPY  := /bin/cp -a
+COPYR := /bin/cp -r
 RM := /bin/rm -rf
 MKDIR := /bin/mkdir
 
@@ -294,7 +295,7 @@ build-dir: $(BUILD_DIR)/src tflite-micro-src $(BUILD_DIR_EXTRA_DEP)
 	$(COPY) $(MLCOMMONS_SRC_DIR)/*       $(BUILD_DIR)/src
 	$(COPY) $(SAXON_SRC_DIR)/riscv.h     $(BUILD_DIR)/src
 	$(COPY) $(DONUT_SRC_DIR)/donut.*     $(BUILD_DIR)/src
-	$(COPY) $(SRC_DIR)/*                 $(BUILD_DIR)/src
+	$(COPYR) $(SRC_DIR)/*                $(BUILD_DIR)/src
 	$(RM)			             $(BUILD_DIR)/_*
 ifdef SKIP_TFLM
 	$(RM)                                $(BUILD_DIR)/src/tensorflow

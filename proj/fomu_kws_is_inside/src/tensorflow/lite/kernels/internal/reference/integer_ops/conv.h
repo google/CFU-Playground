@@ -73,6 +73,10 @@ inline void ConvPerChannel(
   const int filters_per_group = output_depth / groups;
   const int output_height = output_shape.Dims(1);
   const int output_width = output_shape.Dims(2);
+
+  cfu_op(1,1,input_width,input_height);
+  //printf("init %d %d\n", input_width, input_height);
+
   for (int batch = 0; batch < batches; ++batch) {
     for (int out_y = 0; out_y < output_height; ++out_y) {
       const int in_y_origin = (out_y * stride_height) - pad_height;
@@ -88,8 +92,12 @@ inline void ConvPerChannel(
 
               // Zero padding by omitting the areas outside the image.
               const bool is_point_inside_image =
-                  (in_x >= 0) && (in_x < input_width) && (in_y >= 0) &&
-                  (in_y < input_height);
+                              cfu_op(0,0,in_x,in_y);
+
+                  //(in_x >= 0) && (in_x < input_width) && (in_y >= 0) &&
+                  //(in_y < input_height);
+
+              //printf("check %d %d --> %d\n", in_x, in_y, is_point_inside_image);
 
               if (!is_point_inside_image) {
                 continue;
