@@ -47,6 +47,7 @@
 # $ make load PLATFORM=sim
 
 export UART_SPEED ?= 1843200
+# export UART_SPEED ?= 115200
 # Need a slower baudrate when communicating with Serv
 ifdef SERV
 export UART_SPEED = 115200
