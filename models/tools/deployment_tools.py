@@ -93,7 +93,7 @@ def export_tf_lite_micto_model_form(
 
     if model_name is None:
         model_name = tflm_model_path.replace("/", "_").replace(".", "_")
-    os.system(f"xxd -i -n {model_name}_model {tf_lite_model_path} > {tflm_model_path}")
+    os.system(f"/development/RISC-V-SIMD-extension-for-the-AI-workload/custom_bin/xxd -i -n {model_name}_model {tf_lite_model_path} > {tflm_model_path}")
 
     if isinstance(tf_lite_model, bytes):
         os.remove(tf_lite_model_path)
@@ -303,6 +303,15 @@ def deploy_model_tflite(
         models_file_bak,
         line=_Tools.ANCHOR,
         add_what=add_model_menu_str,
+        res_path=models_file,
+    )
+
+    models_file = _Tools.CFU_SRC_PATH / "models" / "models.c"
+    models_file_bak = _Tools.CFU_SRC_PATH / "models" / "models.c"
+    _Tools.add_after_line(
+        models_file_bak,
+        line="// My models include anchor",
+        add_what=f"#include \"models/{model_name}/{model_name}.h\"\n",
         res_path=models_file,
     )
 

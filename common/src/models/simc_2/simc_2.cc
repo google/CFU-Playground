@@ -86,65 +86,65 @@ static void do_tests() {
     epsilon
   );    
   
-  // failed = failed || perform_one_test(
-  //   test_data_simc_2_64QAM,
-  //   pred_simc_2_64QAM, 
-  //   epsilon
-  // );    
+  failed = failed || perform_one_test(
+    test_data_simc_2_64QAM,
+    pred_simc_2_64QAM, 
+    epsilon
+  );    
   
-  // failed = failed || perform_one_test(
-  //   test_data_simc_2_8PSK,
-  //   pred_simc_2_8PSK, 
-  //   epsilon
-  // );    
+  failed = failed || perform_one_test(
+    test_data_simc_2_8PSK,
+    pred_simc_2_8PSK, 
+    epsilon
+  );    
   
-  // failed = failed || perform_one_test(
-  //   test_data_simc_2_B_FM,
-  //   pred_simc_2_B_FM, 
-  //   epsilon
-  // );    
+  failed = failed || perform_one_test(
+    test_data_simc_2_B_FM,
+    pred_simc_2_B_FM, 
+    epsilon
+  );    
   
-  // failed = failed || perform_one_test(
-  //   test_data_simc_2_BPSK,
-  //   pred_simc_2_BPSK, 
-  //   epsilon
-  // );    
+  failed = failed || perform_one_test(
+    test_data_simc_2_BPSK,
+    pred_simc_2_BPSK, 
+    epsilon
+  );    
   
-  // failed = failed || perform_one_test(
-  //   test_data_simc_2_CPFSK,
-  //   pred_simc_2_CPFSK, 
-  //   epsilon
-  // );    
+  failed = failed || perform_one_test(
+    test_data_simc_2_CPFSK,
+    pred_simc_2_CPFSK, 
+    epsilon
+  );    
   
-  // failed = failed || perform_one_test(
-  //   test_data_simc_2_DSB_AM,
-  //   pred_simc_2_DSB_AM, 
-  //   epsilon
-  // );    
+  failed = failed || perform_one_test(
+    test_data_simc_2_DSB_AM,
+    pred_simc_2_DSB_AM, 
+    epsilon
+  );    
   
-  // failed = failed || perform_one_test(
-  //   test_data_simc_2_GFSK,
-  //   pred_simc_2_GFSK, 
-  //   epsilon
-  // );    
+  failed = failed || perform_one_test(
+    test_data_simc_2_GFSK,
+    pred_simc_2_GFSK, 
+    epsilon
+  );    
   
-  // failed = failed || perform_one_test(
-  //   test_data_simc_2_PAM4,
-  //   pred_simc_2_PAM4, 
-  //   epsilon
-  // );    
+  failed = failed || perform_one_test(
+    test_data_simc_2_PAM4,
+    pred_simc_2_PAM4, 
+    epsilon
+  );    
   
-  // failed = failed || perform_one_test(
-  //   test_data_simc_2_QPSK,
-  //   pred_simc_2_QPSK, 
-  //   epsilon
-  // );    
+  failed = failed || perform_one_test(
+    test_data_simc_2_QPSK,
+    pred_simc_2_QPSK, 
+    epsilon
+  );    
   
-  // failed = failed || perform_one_test(
-  //   test_data_simc_2_SSB_AM,
-  //   pred_simc_2_SSB_AM, 
-  //   epsilon
-  // );    
+  failed = failed || perform_one_test(
+    test_data_simc_2_SSB_AM,
+    pred_simc_2_SSB_AM, 
+    epsilon
+  );    
   
 
   if (failed) {

@@ -82,7 +82,7 @@ constexpr T const& const_max(const T& x, const T& y, const Args&... rest) {
 constexpr int kTensorArenaSize = const_max<int>(
 
 // My_models_anchor
-#ifdef INCLUDE_MODEL_SIMC_2
+#ifdef INCLUDE_MODEL_SIMC_3_MIXED_V2
     110000,
 #endif
 #ifdef INCLUDE_MODEL_SINE

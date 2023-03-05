@@ -35,9 +35,10 @@ inline void ConvPerChannel(
     const int32_t* bias_data, const RuntimeShape& output_shape,
     int8_t* output_data) {
   // Get parameters.
-  print_conv_params(params, input_shape, filter_shape, output_shape);
+  // print_conv_params(params, input_shape, filter_shape, output_shape);
   const int32_t input_offset = params.input_offset;  // r = s(q - Z)
   cfu_op0(2, input_offset, 0);
+
   // int32_t ret_input_offset = cfu_op0(3, input_offset, 0);
   // printf("ret input offset: %ld\n", ret_input_offset);
   // (void)input_offset;   // Can be unused if I replace de-facto constant parameters with constant
@@ -77,7 +78,7 @@ inline void ConvPerChannel(
   TFLITE_DCHECK_EQ(output_shape.DimensionsCount(), 4);
   const int batches = MatchingDim(input_shape, 0, output_shape, 0);
   const int input_depth = input_shape.Dims(3);
-  printf("Input depth: %d\n", input_depth);
+  // printf("Input depth: %d\n", input_depth);
   const int output_depth = MatchingDim(filter_shape, 0, output_shape, 3);
   if (bias_data) {
     TFLITE_DCHECK_EQ(bias_shape.FlatSize(), output_depth);
@@ -202,6 +203,7 @@ inline void ConvPerChannel(
               // }
 
               // CFU SIMD 
+              // perf_enable_counter(0);
               if (input_depth % 4 == 0) {
                   for (int in_channel = 0; in_channel < input_depth;
                     in_channel += 4) {
@@ -228,6 +230,7 @@ inline void ConvPerChannel(
                                        filter_x, 1)];
                 acc += filter_val * (input_val + input_offset);
               }
+              // perf_disable_counter(0);
             }
           }
 

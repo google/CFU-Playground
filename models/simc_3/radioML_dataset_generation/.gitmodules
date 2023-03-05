@@ -1,0 +1,3 @@
+[submodule "source_material"]
+	path = source_material
+    url = git@github.com:radioML/source_material.git

@@ -1,11 +1,13 @@
 from dataclasses import dataclass, field
 import glob
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 from pathlib import Path
 import os
+import pickle
 
 import numpy as np
 from scipy import io
+from tqdm import tqdm
 from .logger import logger
 import time
 from tools.matlab_helpers import get_engine
@@ -120,22 +122,80 @@ def preprocess_raw_data(samples: np.ndarray, model_dtype=np.float32) -> np.ndarr
     return np.hstack([I, Q]).astype(model_dtype)
 
 
-def load_data_simc_v1(classes, path=Path("train_data"), model_dtype=np.float32) -> Tuple[np.ndarray, np.ndarray]:
+def load_data_simc_v1(classes, path=Path("train_data"), model_dtype=np.float32, max_frames_per_mod=-1) -> Tuple[np.ndarray, np.ndarray]:
     before = time.time()
     # train_data = {}
     labels = []
     data = []
 
     n_data = 0
-    for cl_idx, cl in enumerate(classes):
+    for cl_idx, cl in enumerate(tqdm(classes)):
         mat_files = glob.glob(f"{path}/*{cl}*.mat")
-        for mat_file in mat_files:
+        for mat_idx, mat_file in enumerate(mat_files):
             np_data = io.loadmat(mat_file)["frame"]
             np_data = preprocess_raw_data(np_data, model_dtype)
             n_data += len(np_data)
 
             labels.append(cl_idx)
             data.append(np_data)
+            if max_frames_per_mod == mat_idx:
+                break
     after = time.time()
     print(f"[debug] Loaded train data with size {n_data} in {after - before}s")
     return np.array(labels), np.expand_dims(np.array(data), axis=1)
+
+
+def _postprocess_radioml_v1(raw_ds: Dict, to_1024: bool, transpose: bool):
+    ds_keys = list(raw_ds.keys())
+    classes = list(set(map(lambda v: v[0], ds_keys)))
+    class_name_to_class_idx = {name: idx for idx, name in enumerate(classes)}
+
+    frames_per_modulation = raw_ds[ds_keys[0]].shape[0]     # 100
+
+    # 220 * 1000 // 8
+    ds_size = len(ds_keys) * frames_per_modulation
+    if to_1024: ds_size //= 8
+
+    if transpose:
+        data = np.empty((ds_size, 1, 1024, 2)) if to_1024 else np.empty((ds_size, 1, 128, 2))
+    else:
+        data = np.empty((ds_size, 1, 2, 1024)) if to_1024 else np.empty((ds_size, 1, 2, 128))
+
+    labels = np.empty((ds_size,), dtype=np.uint8)
+
+
+    cur_idx = 0
+    for (class_name, _), raw_data in raw_ds.items():
+
+        if to_1024:
+            for frame_idx in range(0, len(raw_data), 8):
+                frame_1024 = np.hstack([raw_data[idx] for idx in range(frame_idx, frame_idx+8)])
+                # print(frame_1024.shape)
+                data[cur_idx] = np.transpose(frame_1024).reshape((1, 1024, 2)) if transpose else frame_1024.reshape(1, 2, 1024)
+                # data[cur_idx] = frame_1024.reshape((1, 1024, 2))
+                labels[cur_idx] = class_name_to_class_idx[class_name]
+                cur_idx += 1
+                # break
+        else:
+            for frame_idx in range(0, len(raw_data)):
+                frame = raw_data[frame_idx]
+                data[cur_idx] = np.transpose(frame).reshape((1, 128, 2)) if transpose else frame.reshape(1, 2, 128)
+                labels[cur_idx] = class_name_to_class_idx[class_name]
+                cur_idx += 1
+    return labels, data, classes
+
+
+
+# Returns {(modulation, snr): frames}               if not postprocess
+#         (labels, frames, classes)                 if postprocess
+def load_data_radioml_v1(ds_path: str, postprocess=True, to_1024=True, transpose=True):
+    with open(ds_path, 'rb') as crmrn_file:
+        raw_ds = pickle.load(crmrn_file, encoding="bytes")
+    decoded_raw_ds = {}
+    for (class_name_bytes, snr), raw_data in raw_ds.items():
+        decoded_raw_ds[(class_name_bytes.decode("utf-8"), snr)] = raw_data
+    raw_ds = decoded_raw_ds
+
+    if not postprocess:
+        return raw_ds
+    return _postprocess_radioml_v1(raw_ds, to_1024, transpose)
