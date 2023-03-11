@@ -75,21 +75,26 @@ endmodule
             - inp0 - buffer_size
         - 5 - start computation
         
-        // below for debug purposes
+        // debug purposes
         - 6 - read from the input buffer
             - inp0 - address / 4
         - 7 - read from the kernel weights
             - inp0 - addres / 4
+
+        // 
+        - 8 - set bias
+            - inp0 - bias
+        
 */
 module conv1d #(
     parameter BYTE_SIZE = 8,
-    parameter IN32_SIZE = 32
+    parameter INT32_SIZE = 32
 )(
     input                         clk,
     input       [9:0]             cmd,
-    input       [IN32_SIZE-1:0]   inp0,
-    input       [IN32_SIZE-1:0]   inp1,
-    output reg  [IN32_SIZE-1:0]   ret,
+    input       [INT32_SIZE-1:0]   inp0,
+    input       [INT32_SIZE-1:0]   inp1,
+    output reg  [INT32_SIZE-1:0]   ret,
     output reg                    output_buffer_valid = 1
 );
 localparam MAX_BUFFER_SIZE = 1024;
@@ -100,29 +105,30 @@ localparam KERNEL_LENGTH = 8;
 localparam PADDING = 4; // (8 / 2)
 
 
-wire [IN32_SIZE-1:0] padded_address  = inp0 * 4 + PADDING;
-wire [IN32_SIZE-1:0] address = inp0 * 4;
+wire [INT32_SIZE-1:0] padded_address  = inp0 * 4 + PADDING;
+wire [INT32_SIZE-1:0] address = inp0 * 4;
 
 
 // INPUT/OUTPUT BUFFER
-reg [IN32_SIZE-1:0] buffer_size;
+reg [INT32_SIZE-1:0]       buffer_size;
 reg signed [BYTE_SIZE-1:0] input_buffer          [0:MAX_BUFFER_SIZE + 2 * PADDING - 1];
 reg signed [BYTE_SIZE-1:0] kernel_weights_buffer [0:KERNEL_LENGTH - 1];
 reg signed [BYTE_SIZE-1:0] output_buffer         [0:MAX_BUFFER_SIZE - 1];
 
 // Convolution
-reg [IN32_SIZE-1:0] convolution_pointer;     
+reg [INT32_SIZE-1:0] convolution_pointer;     
 reg increment_pointer_phase;
+reg [INT32_SIZE-1:0] bias = 32'b0;
 // reg signed [BYTE_SIZE-1:0] working_regs [0:CONVOLUTE_AT_ONCE-1] [0:KERNEL_LENGTH-1];
 
 always @(posedge clk) begin
     if (!output_buffer_valid) begin
         if (!increment_pointer_phase) begin
-            for (reg [IN32_SIZE-1:0] idx = 0; idx < CONVOLUTE_AT_ONCE; idx = idx + 1) begin
+            for (reg [INT32_SIZE-1:0] idx = 0; idx < CONVOLUTE_AT_ONCE; idx = idx + 1) begin
                 // Since size is even, the offset are the following:
                 // -4 -3 -2 -1 0 +1 +2 +3
                 // output_buffer[convolution_pointer + idx - PADDING] = 0;
-                // for (reg [IN32_SIZE-1:0] jdx = 0; jdx < KERNEL_LENGTH; jdx = jdx + 1) begin
+                // for (reg [INT32_SIZE-1:0] jdx = 0; jdx < KERNEL_LENGTH; jdx = jdx + 1) begin
                 //     // working_regs[idx][jdx] = input_buffer[(convolution_pointer + idx + jdx - PADDING)] * kernel_weights_buffer[jdx];
                 //     output_buffer[convolution_pointer + idx - PADDING] = output_buffer[convolution_pointer + idx - PADDING] + input_buffer[(convolution_pointer + idx + jdx - 4)] * kernel_weights_buffer[jdx];
                 // end
@@ -135,7 +141,8 @@ always @(posedge clk) begin
                                                                       input_buffer[(convolution_pointer + idx    )] * kernel_weights_buffer[4] + 
                                                                       input_buffer[(convolution_pointer + idx + 1)] * kernel_weights_buffer[5] + 
                                                                       input_buffer[(convolution_pointer + idx + 2)] * kernel_weights_buffer[6] + 
-                                                                      input_buffer[(convolution_pointer + idx + 3)] * kernel_weights_buffer[7];
+                                                                      input_buffer[(convolution_pointer + idx + 3)] * kernel_weights_buffer[7] + 
+                                                                      bias;
             end
             increment_pointer_phase <= 1;
         end else begin
@@ -198,7 +205,9 @@ always @(posedge clk) begin
                 ret[23:16] <= kernel_weights_buffer[address + 1];
                 ret[15: 8] <= kernel_weights_buffer[address + 2];
                 ret[7 : 0] <= kernel_weights_buffer[address + 3];
-
+            end
+            8: begin
+                bias <= inp0;
             end
         endcase
     end
@@ -239,6 +248,9 @@ initial begin
         cmd = 7; inp0 = 0;              // read  kernel weights buffer[0:3]
     #10 cmd = 7; inp0 = 1;              // read  kernel weights buffer[4:7]
 
+    #10 $display("Set bias");
+        cmd = 8; inp0 = 1;
+
     #10 $display("Set buffer size");
         cmd = 4; inp0 = 8; inp1 = 0;
     
@@ -248,14 +260,6 @@ initial begin
     #30 $display("Read output");
         cmd = 3; inp0 = 0; inp1 = 0;
     #20 cmd = 3; inp0 = 1;
-
-    //   #15 reset = 0;
-    //   #10 req0 = 1;
-    //   #10 req0 = 0;
-    //   #10 req1 = 1;
-    //   #10 req1 = 0;
-    //   #10 {req0,req1} = 2'b11;
-    //   #10 {req0,req1} = 2'b00;
     #10 $finish;
 end
 
