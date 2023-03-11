@@ -81,7 +81,7 @@ endmodule
         - 7 - read from the kernel weights
             - inp0 - addres / 4
 */
-module convolution_1d #(
+module conv1d #(
     parameter BYTE_SIZE = 8,
     parameter IN32_SIZE = 32
 )(
@@ -93,7 +93,7 @@ module convolution_1d #(
     output reg                    output_buffer_valid = 1
 );
 localparam MAX_BUFFER_SIZE = 1024;
-localparam CONVOLUTE_AT_ONCE = 1;
+localparam CONVOLUTE_AT_ONCE = 8;
 
 // Kerbel has size (1, 8)
 localparam KERNEL_LENGTH = 8;
@@ -112,36 +112,47 @@ reg signed [BYTE_SIZE-1:0] output_buffer         [0:MAX_BUFFER_SIZE - 1];
 
 // Convolution
 reg [IN32_SIZE-1:0] convolution_pointer;     
-reg signed [BYTE_SIZE-1:0] working_regs [0:CONVOLUTE_AT_ONCE-1] [0:KERNEL_LENGTH-1];
-
-// reg signed [INT32_SIZE-1:0] convolve_res0;
-// assign convolve_res0 = working_regs[0][0] + working_regs[0][1] + working_regs[0][2] + working_regs[0][3] + 
-//                        working_regs[0][4] + working_regs[0][5] + working_regs[0][6] + working_regs[0][7];
+reg increment_pointer_phase;
+// reg signed [BYTE_SIZE-1:0] working_regs [0:CONVOLUTE_AT_ONCE-1] [0:KERNEL_LENGTH-1];
 
 always @(posedge clk) begin
     if (!output_buffer_valid) begin
-        // for (idx = 0; idx < CONVOLUTE_AT_ONCE; idx = idx + 1) begin
-            // Since size is even, the offset are the following:
-            // -4 -3 -2 -1 0 +1 +2 +3
-            working_regs[0 /*idx*/][0] = input_buffer[(convolution_pointer /*+ idx*/ - 4)] * kernel_weights_buffer[0];
-            working_regs[0 /*idx*/][1] = input_buffer[(convolution_pointer /*+ idx*/ - 3)] * kernel_weights_buffer[1];
-            working_regs[0 /*idx*/][2] = input_buffer[(convolution_pointer /*+ idx*/ - 2)] * kernel_weights_buffer[2];
-            working_regs[0 /*idx*/][3] = input_buffer[(convolution_pointer /*+ idx*/ - 1)] * kernel_weights_buffer[3];
-            working_regs[0 /*idx*/][4] = input_buffer[(convolution_pointer /*+ idx*/    )] * kernel_weights_buffer[4];
-            working_regs[0 /*idx*/][5] = input_buffer[(convolution_pointer /*+ idx*/ + 1)] * kernel_weights_buffer[5];
-            working_regs[0 /*idx*/][6] = input_buffer[(convolution_pointer /*+ idx*/ + 2)] * kernel_weights_buffer[6];
-            working_regs[0 /*idx*/][7] = input_buffer[(convolution_pointer /*+ idx*/ + 3)] * kernel_weights_buffer[7];
-        // end
+        if (!increment_pointer_phase) begin
+            for (reg [IN32_SIZE-1:0] idx = 0; idx < CONVOLUTE_AT_ONCE; idx = idx + 1) begin
+                // Since size is even, the offset are the following:
+                // -4 -3 -2 -1 0 +1 +2 +3
+                // output_buffer[convolution_pointer + idx - PADDING] = 0;
+                // for (reg [IN32_SIZE-1:0] jdx = 0; jdx < KERNEL_LENGTH; jdx = jdx + 1) begin
+                //     // working_regs[idx][jdx] = input_buffer[(convolution_pointer + idx + jdx - PADDING)] * kernel_weights_buffer[jdx];
+                //     output_buffer[convolution_pointer + idx - PADDING] = output_buffer[convolution_pointer + idx - PADDING] + input_buffer[(convolution_pointer + idx + jdx - 4)] * kernel_weights_buffer[jdx];
+                // end
+                // output_buffer[convolution_pointer + idx - PADDING] = working_regs[idx][0] + working_regs[idx][1] + working_regs[idx][2] + working_regs[idx][3] + working_regs[idx][4] + working_regs[idx][5] + working_regs[idx][6] + working_regs[idx][7];
+
+                output_buffer[convolution_pointer + idx - PADDING] <= input_buffer[(convolution_pointer + idx - 4)] * kernel_weights_buffer[0] + 
+                                                                      input_buffer[(convolution_pointer + idx - 3)] * kernel_weights_buffer[1] + 
+                                                                      input_buffer[(convolution_pointer + idx - 2)] * kernel_weights_buffer[2] + 
+                                                                      input_buffer[(convolution_pointer + idx - 1)] * kernel_weights_buffer[3] + 
+                                                                      input_buffer[(convolution_pointer + idx    )] * kernel_weights_buffer[4] + 
+                                                                      input_buffer[(convolution_pointer + idx + 1)] * kernel_weights_buffer[5] + 
+                                                                      input_buffer[(convolution_pointer + idx + 2)] * kernel_weights_buffer[6] + 
+                                                                      input_buffer[(convolution_pointer + idx + 3)] * kernel_weights_buffer[7];
+            end
+            increment_pointer_phase <= 1;
+        end else begin
+            if (convolution_pointer >= (buffer_size + PADDING - CONVOLUTE_AT_ONCE)) begin
+                output_buffer_valid <= 1;
+                convolution_pointer <= PADDING;
+            end else begin
+                convolution_pointer <= convolution_pointer + CONVOLUTE_AT_ONCE;
+            end
+            increment_pointer_phase <= 0;
+        end
+
 
         // convolve_res0 = working_regs[0][0] + working_regs[0][1] + working_regs[0][2] + working_regs[0][3] +  
                         // working_regs[0][4] + working_regs[0][5] + working_regs[0][6] + working_regs[0][7];
-        output_buffer[convolution_pointer /*+ idx*/ - PADDING] = working_regs[0][0] + working_regs[0][1] + working_regs[0][2] + working_regs[0][3] + working_regs[0][4] + working_regs[0][5] + working_regs[0][6] + working_regs[0][7];
-        $display("--- %d - %d", convolution_pointer - PADDING, output_buffer[convolution_pointer - PADDING]);
-        convolution_pointer                          = convolution_pointer + CONVOLUTE_AT_ONCE;
-        if (convolution_pointer == (buffer_size + PADDING)) begin
-            output_buffer_valid <= 1;
-            convolution_pointer = 0;
-        end
+        // $display("--- %d - %d", convolution_pointer - PADDING, output_buffer[convolution_pointer - PADDING]);
+
     end else begin 
         case (cmd)
             0: begin 
@@ -175,6 +186,7 @@ always @(posedge clk) begin
             5: begin
                 output_buffer_valid <= 0;
                 convolution_pointer <= PADDING;
+                increment_pointer_phase <= 0;
                 input_buffer[buffer_size + 2 * PADDING - 1] <= 0;
                 input_buffer[buffer_size + 2 * PADDING - 2] <= 0;
                 input_buffer[buffer_size + 2 * PADDING - 3] <= 0;
@@ -201,7 +213,7 @@ endmodule
 
 
 // Testbench Code Goes here
-module convolution_1d_tb;
+module conv1d_tb;
 reg clk;
 reg [9:0]  cmd;
 reg signed [31:0] inp0, inp1;
@@ -235,12 +247,12 @@ initial begin
     #10 $display("Set buffer size");
         cmd = 4; inp0 = 8; inp1 = 0;
     
-    #10 $display("Start calculations. Wait 8 clock cycles");
+    #10 $display("Start calculations.");
         cmd = 5;
 
-    #10 $display("Read output");
+    #30 $display("Read output");
         cmd = 3; inp0 = 0; inp1 = 0;
-    #90 cmd = 3; inp0 = 1;
+    #20 cmd = 3; inp0 = 1;
 
     //   #15 reset = 0;
     //   #10 req0 = 1;
@@ -256,7 +268,7 @@ always begin
     #5 clk = !clk;
 end
 
-convolution_1d U0 (
+conv1d U0 (
     .clk (clk),
     .cmd (cmd),
     .inp0 (inp0),
