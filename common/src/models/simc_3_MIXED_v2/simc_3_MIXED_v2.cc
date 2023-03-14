@@ -48,40 +48,6 @@ static int8_t *simc_3_MIXED_v2_classify() {
 
 #define NUM_CLASSES 11
 
-/*
-  https://five-embeddev.com/riscv-isa-manual/latest/csr.html
-
-  RISC-V manual: 
-  3.1.14 Machine Timer Registers (mtime and mtimecmp)
-*/
-// static inline uint64_t perf_get_mtime() {
-//   uint32_t counts = 0;
-//   uint32_t zero = 0;
-//   asm volatile(
-//       "li %0, 0xc01;"
-//       "lw %1, 0(%0);"
-//       : "+r"(zero), "=r"(counts)
-//       :);
-//   return (uint64_t) counts;
-// }
-// static inline uint64_t perf_get_mtime() {
-//   uint32_t time_low = 0;
-//   uint32_t time_high = 0;
-//   uint32_t time_high_2 = 0;
-//   asm volatile(
-//       "read%=:"
-//       "  csrr %0, 0xc80;"     // Read `timeh`.
-//       "  csrr %1, 0xc00;"      // Read `time`.
-//       "  csrr %2, 0xc80;"     // Read `timeh` again.
-//       "  bne  %0, %2, read%=;"  // Try again if `time` overflowed before
-//                                 // reading `timeh`.
-//       : "+r"(time_high), "=r"(time_low), "+r"(time_high_2)
-//       :);
-//   return (uint64_t) time_high << 32 | time_low;
-// }
-
-
-
 /* Returns true if failed */
 static bool perform_one_test(int8_t* input, int8_t* expected_output, int8_t epsilon) {
   bool failed = false;
@@ -114,74 +80,71 @@ static void do_tests() {
   int8_t epsilon = 20;
   bool failed = false;
 
-  // uint64_t before = perf_get_mtime();
   failed = failed || perform_one_test(
     test_data_simc_3_MIXED_v2_16QAM,
     pred_simc_3_MIXED_v2_16QAM, 
     epsilon
   );    
-  // uint64_t after = perf_get_mtime();
-  // printf("after - before: %llu\n", (after - before));
   
-  // failed = failed || perform_one_test(
-  //   test_data_simc_3_MIXED_v2_64QAM,
-  //   pred_simc_3_MIXED_v2_64QAM, 
-  //   epsilon
-  // );    
+  failed = failed || perform_one_test(
+    test_data_simc_3_MIXED_v2_64QAM,
+    pred_simc_3_MIXED_v2_64QAM, 
+    epsilon
+  );    
   
-  // failed = failed || perform_one_test(
-  //   test_data_simc_3_MIXED_v2_8PSK,
-  //   pred_simc_3_MIXED_v2_8PSK, 
-  //   epsilon
-  // );    
+  failed = failed || perform_one_test(
+    test_data_simc_3_MIXED_v2_8PSK,
+    pred_simc_3_MIXED_v2_8PSK, 
+    epsilon
+  );    
   
-  // failed = failed || perform_one_test(
-  //   test_data_simc_3_MIXED_v2_B_FM,
-  //   pred_simc_3_MIXED_v2_B_FM, 
-  //   epsilon
-  // );    
+  failed = failed || perform_one_test(
+    test_data_simc_3_MIXED_v2_B_FM,
+    pred_simc_3_MIXED_v2_B_FM, 
+    epsilon
+  );    
   
-  // failed = failed || perform_one_test(
-  //   test_data_simc_3_MIXED_v2_BPSK,
-  //   pred_simc_3_MIXED_v2_BPSK, 
-  //   epsilon
-  // );    
+  failed = failed || perform_one_test(
+    test_data_simc_3_MIXED_v2_BPSK,
+    pred_simc_3_MIXED_v2_BPSK, 
+    epsilon
+  );    
   
-  // failed = failed || perform_one_test(
-  //   test_data_simc_3_MIXED_v2_CPFSK,
-  //   pred_simc_3_MIXED_v2_CPFSK, 
-  //   epsilon
-  // );    
+  failed = failed || perform_one_test(
+    test_data_simc_3_MIXED_v2_CPFSK,
+    pred_simc_3_MIXED_v2_CPFSK, 
+    epsilon
+  );    
   
-  // failed = failed || perform_one_test(
-  //   test_data_simc_3_MIXED_v2_DSB_AM,
-  //   pred_simc_3_MIXED_v2_DSB_AM, 
-  //   epsilon
-  // );    
+  failed = failed || perform_one_test(
+    test_data_simc_3_MIXED_v2_DSB_AM,
+    pred_simc_3_MIXED_v2_DSB_AM, 
+    epsilon
+  );    
   
-  // failed = failed || perform_one_test(
-  //   test_data_simc_3_MIXED_v2_GFSK,
-  //   pred_simc_3_MIXED_v2_GFSK, 
-  //   epsilon
-  // );    
+  failed = failed || perform_one_test(
+    test_data_simc_3_MIXED_v2_GFSK,
+    pred_simc_3_MIXED_v2_GFSK, 
+    epsilon
+  );    
   
-  // failed = failed || perform_one_test(
-  //   test_data_simc_3_MIXED_v2_PAM4,
-  //   pred_simc_3_MIXED_v2_PAM4, 
-  //   epsilon
-  // );    
+  failed = failed || perform_one_test(
+    test_data_simc_3_MIXED_v2_PAM4,
+    pred_simc_3_MIXED_v2_PAM4, 
+    epsilon
+  );    
   
-  // failed = failed || perform_one_test(
-  //   test_data_simc_3_MIXED_v2_QPSK,
-  //   pred_simc_3_MIXED_v2_QPSK, 
-  //   epsilon
-  // );    
+  failed = failed || perform_one_test(
+    test_data_simc_3_MIXED_v2_QPSK,
+    pred_simc_3_MIXED_v2_QPSK, 
+    epsilon
+  );    
   
-  // failed = failed || perform_one_test(
-  //   test_data_simc_3_MIXED_v2_SSB_AM,
-  //   pred_simc_3_MIXED_v2_SSB_AM, 
-  //   epsilon
-  // );    
+  failed = failed || perform_one_test(
+    test_data_simc_3_MIXED_v2_SSB_AM,
+    pred_simc_3_MIXED_v2_SSB_AM, 
+    epsilon
+  );    
   
 
   if (failed) {

@@ -21,12 +21,13 @@ export DEFINES :=
 
 # Uncomment this line to skip debug code (large effect on performance)
 DEFINES += NDEBUG
+# DEFINES += CONFIG_CPU_PERF_CSRS
 
 # Uncomment this line to skip individual profiling output (has minor effect on performance).
-#DEFINES += NPROFILE
+DEFINES += NPROFILE
 
 # Uncomment to include specified model in built binary
-DEFINES += INCLUDE_MODEL_PDTI8
+# DEFINES += INCLUDE_MODEL_PDTI8
 DEFINES += INCLUDE_MODEL_SIMC_3_MIXED_V2
 
 # Uncomment to include all TFLM examples (pdti8, micro_speech, magic_wand)
@@ -35,6 +36,10 @@ DEFINES += INCLUDE_MODEL_SIMC_3_MIXED_V2
 export EXTRA_LITEX_ARGS
 EXTRA_LITEX_ARGS += --variant=a7-100
 EXTRA_LITEX_ARGS += --sys-clk-freq=75000000
+
+TARGET=digilent_arty
+USE_SYMBIFLOW=1
+BUILD_JOBS=16
 
 # Uncomment this line to include the ASCII animated donut demo.
 # DEFINES += DONUT_DEMO
