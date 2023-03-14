@@ -29,9 +29,8 @@
 #include "models/mnv2/mnv2.h"
 #include "models/pdti8/pdti8.h"
 
-// My models
-#include "models/simc_2/simc_2.h"
-#include "models/signal_modulation_2/signal_modulation_2.h"
+// My models include anchor
+#include "models/simc_3_MIXED_v2/simc_3_MIXED_v2.h"
 #include "models/sine/sine.h"
 
 inline void no_menu() {}
@@ -47,8 +46,8 @@ static struct Menu MENU = {
     {
 
 // My_models_anchor
-#if defined(INCLUDE_MODEL_SIMC_2) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
-        MENU_ITEM(AUTO_INC_CHAR, "simc_2", simc_2_menu),
+#if defined(INCLUDE_MODEL_SIMC_3_MIXED_V2) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "simc_3_MIXED_v2", simc_3_MIXED_v2_menu),
 #endif        
 #if defined(INCLUDE_MODEL_SIGNAL_MODULATION_2) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
         MENU_ITEM(AUTO_INC_CHAR, "Signal modulation classification model 2", signal_modulation_2_menu),

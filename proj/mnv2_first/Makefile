@@ -51,6 +51,10 @@ RUN_MENU_ITEMS := 3 1
 
 DEFINES += ACCEL_CONV
 
+export EXTRA_LITEX_ARGS                     
+EXTRA_LITEX_ARGS += --variant=a7-100        
+EXTRA_LITEX_ARGS += --sys-clk-freq=75000000 
+
 # Used by soc/hps.mk
 # Choose the slimmer version of VexRiscv to fit with this large CFU
 ifeq 'hps' '$(PLATFORM)'

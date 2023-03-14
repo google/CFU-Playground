@@ -12,6 +12,9 @@
 // 
 // #include "playground_util/models_utils.h"
 // 
+
+#include <time.h>
+
 #include "tflite.h"
 
 extern "C" {
@@ -79,6 +82,11 @@ static void do_tests() {
   int8_t epsilon = 10;
   bool failed = false;
 
+  clock_t start_t, end_t;
+  double total_t;
+
+  start_t = clock();
+  printf("Starting of the program, start_t = %ld\n", start_t);
   
   failed = failed || perform_one_test(
     test_data_simc_2_16QAM,
@@ -86,6 +94,13 @@ static void do_tests() {
     epsilon
   );    
   
+  end_t = clock();
+  printf("End of the big loop, end_t = %ld\n", end_t);
+  
+  total_t = (double)(end_t - start_t) / CLOCKS_PER_SEC;
+  printf("Total time taken by CPU: %f\n", total_t  );
+  printf("Exiting of the program...\n");
+
   // failed = failed || perform_one_test(
   //   test_data_simc_2_64QAM,
   //   pred_simc_2_64QAM, 
