@@ -391,3 +391,8 @@ endif
 .PHONY: pytest
 pytest:
 	$(PYRUN) -m unittest discover -p ${PYTEST_PATTERN}
+
+.PHONY: cfu-asic
+cfu-asic:
+	@echo Working on Dummy POC for Openlane Integration into CFU Playground
+	cd $(SOC_DIR)/openlane/ && make mount && ./flow.tcl -design spm

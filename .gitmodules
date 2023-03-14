@@ -74,3 +74,6 @@
 [submodule "soc/deps/pythondata_cpu_serv"]
 	path = third_party/python/pythondata_cpu_serv
 	url = https://github.com/litex-hub/pythondata-cpu-serv.git
+[submodule "soc/openlane"]
+	path = soc/openlane
+	url = https://github.com/The-OpenROAD-Project/OpenLane.git
