@@ -84,9 +84,9 @@ static void simc_3_MIXED_v2_init(void) {
 #define CFU_WRITE_TO_KERNEL_BUFFER 2
 #define CFU_READ_OUTPUT_BUFFER 3
 #define CFU_SET_BUFFER_SIZE 4
-#define CFU_START_COMPOTATION 5
+#define CFU_START_COMPUTATION 5
 #define CFU_READ_INPUT_BUFFER 6
-#define CFU_READ_OUTPUT_KERNEL_BUFFER 7
+#define CFU_READ_KERNEL_BUFFER 7
 #define CFU_SET_BIAS 8
 
 
@@ -110,8 +110,45 @@ static void test_conv1d_cfu_v1() {
   uint32_t read_input_part2_merged = cfu_op0(CFU_READ_INPUT_BUFFER, 1, 0);
   printf("input[0:3] = %lx\n", read_input_part1_merged);
   printf("input[4:7] = %lx\n", read_input_part2_merged);
-  read_input_part2_merged = cfu_op0(CFU_READ_INPUT_BUFFER, 1, 0);
-  printf("input[4:7] = %lx\n", read_input_part2_merged);
+
+  printf("Write data to kernel weights buffer\n");
+  uint8_t kernel_part1[] = {2, 2, 2, 2};
+  uint32_t *kernel_part1_merged_ptr = (uint32_t *)kernel_part1;
+
+  uint8_t kernel_part2[] = {2, 2, 2, 2};
+  uint32_t *kernel_part2_merged_ptr = (uint32_t *)kernel_part2;
+
+  cfu_op0(CFU_WRITE_TO_KERNEL_BUFFER, 0, *kernel_part1_merged_ptr);
+  cfu_op0(CFU_WRITE_TO_KERNEL_BUFFER, 1, *kernel_part2_merged_ptr);
+  printf("kernel[0:3] = %lx\n", *kernel_part1_merged_ptr);
+  printf("kernel[4:7] = %lx\n", *kernel_part2_merged_ptr);
+
+  printf("Read data from kernel buffer\n");
+  uint32_t read_kernel_part1_merged = cfu_op0(CFU_READ_KERNEL_BUFFER, 0, 0);
+  uint32_t read_kernel_part2_merged = cfu_op0(CFU_READ_KERNEL_BUFFER, 1, 0);
+  printf("kernel[0:3] = %lx\n", read_kernel_part1_merged);
+  printf("kernel[4:7] = %lx\n", read_kernel_part2_merged);
+
+  printf("Set bias\n");
+  cfu_op0(CFU_SET_BIAS, 1, 0);
+
+  printf("Set buffer size\n");
+  cfu_op0(CFU_SET_BUFFER_SIZE, 8, 0);
+
+  printf("Start calculations\n");
+  cfu_op0(CFU_START_COMPUTATION, 0, 0);
+
+  printf("Read output\n");
+  uint32_t read_output_part1_merged = cfu_op0(CFU_READ_OUTPUT_BUFFER, 0, 0);
+  uint32_t read_output_part2_merged = cfu_op0(CFU_READ_OUTPUT_BUFFER, 1, 0);
+  printf("output[0:3] = %lx\n", read_output_part1_merged);
+  printf("output[4:7] = %lx\n", read_output_part2_merged);
+
+  read_output_part1_merged = cfu_op0(CFU_READ_OUTPUT_BUFFER, 0, 0);
+  read_output_part2_merged = cfu_op0(CFU_READ_OUTPUT_BUFFER, 1, 0);
+  printf("output[0:3] = %lx\n", read_output_part1_merged);
+  printf("output[4:7] = %lx\n", read_output_part2_merged);
+
 
 }
 

@@ -182,6 +182,7 @@ module Cfu (
     .output_buffer_valid(output_buffer_valid)
   );
 
+  reg delay_counter = 0;
 
   // Only not ready for a command when we have a response.
   assign cmd_ready = ~rsp_valid;
@@ -194,10 +195,22 @@ module Cfu (
       // Waiting to hand off response to CPU.
       rsp_valid <= ~rsp_ready;
     end else if (cmd_valid) begin
-      if (output_buffer_valid) begin
-        rsp_payload_outputs_0 <= ret;
-      end
-      rsp_valid <= output_buffer_valid;
+        // if (delay_counter) begin
+        //     rsp_valid <= 1'b1;
+        // end else begin
+        //     if (output_buffer_valid) begin
+        //         delay_counter <= 1'b0;
+        //         rsp_payload_outputs_0 <= ret;         
+        //     end
+        // end
+
+        if (delay_counter) begin
+            rsp_valid <= output_buffer_valid;
+            if (output_buffer_valid) begin
+                rsp_payload_outputs_0 <= ret;
+            end    
+        end
+        delay_counter <= delay_counter + 1;
     end
   end
 endmodule
