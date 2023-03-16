@@ -56,7 +56,7 @@ reg signed [BYTE_SIZE-1:0] output_buffer         [0:MAX_BUFFER_SIZE - 1];
 // Convolution
 reg [INT32_SIZE-1:0] convolution_pointer;     
 reg increment_pointer_phase;
-reg [INT32_SIZE-1:0] bias = 32'b0;
+reg [BYTE_SIZE-1:0] bias = 8'b0;
 // reg signed [BYTE_SIZE-1:0] working_regs [0:CONVOLUTE_AT_ONCE-1] [0:KERNEL_LENGTH-1];
 
 always @(posedge clk) begin
@@ -169,14 +169,15 @@ initial begin
     inp0 = 0;
     inp1 = 0;
 
+    // Test 1
+    $display("==================== TEST 1 ! ====================");
     $display("Write data to input buffer");
-    #15 cmd = 1; inp0 = 0; inp1 = {8'd7, 8'd6, 8'd5, 8'd4};   // write input_buffer[0:3] = 7;
-    #10 cmd = 1; inp0 = 1; inp1 = {8'd3, 8'd2, 8'd1, 8'd0};   // write input_buffer[4:7] = 6;
+    #15 cmd = 1; inp0 = 0; inp1 = {8'd7, 8'd6, 8'd5, 8'd4};   
+    #10 cmd = 1; inp0 = 1; inp1 = {8'd3, 8'd2, 8'd1, 8'd0};
 
     #10 $display("Read data from input buffer");
         cmd = 6; inp0 = 0;              // read  input_buffer[0:3]
     #10 cmd = 6; inp0 = 1;              // read  input_buffer[4:7]
-    #10 cmd = 6; inp0 = 2;              // read  input_buffer[4:7]
 
     #10 $display("Write data to kernel weights buffer");
         cmd = 2; inp0 = 0; inp1 = {8'd2, 8'd2, 8'd2, 8'd2};   // write kernel_weights_buffer[0:3] = 7;
@@ -198,6 +199,47 @@ initial begin
     #30 $display("Read output");
         cmd = 3; inp0 = 0; inp1 = 0;
     #20 cmd = 3; inp0 = 1;
+
+    // Test 2
+    $display("==================== TEST 2 ! ====================");
+    #15 cmd = 0;
+    inp0 = 0;
+    inp1 = 0;
+
+    $display("Write data to input buffer");
+    #20 cmd = 1; inp0 = 0; inp1 = {8'd7, 8'd7, 8'd6, 8'd6};
+    #10 cmd = 1; inp0 = 1; inp1 = {8'd5, 8'd5, 8'd4, 8'd4};
+    #15 cmd = 1; inp0 = 2; inp1 = {8'd3, 8'd3, 8'd2, 8'd2};
+    #10 cmd = 1; inp0 = 3; inp1 = {8'd1, 8'd1, 8'd0, 8'd0};
+
+    #10 $display("Read data from input buffer");
+        cmd = 6; inp0 = 0;              // read  input_buffer[0:3]
+    #10 cmd = 6; inp0 = 1;              // read  input_buffer[4:7]
+    #10 cmd = 6; inp0 = 2;
+    #10 cmd = 6; inp0 = 3;
+
+    #10 $display("Write data to kernel weights buffer");
+        cmd = 2; inp0 = 0; inp1 = {8'd2, 8'd2, 8'd2, 8'd2};   // write kernel_weights_buffer[0:3];
+    #10 cmd = 2; inp0 = 1; inp1 = {8'd2, 8'd2, 8'd2, 8'd2};   // write kernel_weights_buffer[4:7];
+
+    #10 $display("Read data from kernel weights buffer");
+        cmd = 7; inp0 = 0;              // read  kernel weights buffer[0:3]
+    #10 cmd = 7; inp0 = 1;              // read  kernel weights buffer[4:7]
+
+    #10 $display("Set bias");
+        cmd = 8; inp0 = 1;
+
+    #10 $display("Set buffer size");
+        cmd = 4; inp0 = 16; inp1 = 0;
+    
+    #10 $display("Start calculations.");
+        cmd = 5;
+
+    #50 $display("Read output");
+        cmd = 3; inp0 = 0; inp1 = 0;
+    #10 cmd = 3; inp0 = 1;
+    #10 cmd = 3; inp0 = 2;
+    #10 cmd = 3; inp0 = 3;
     #10 $finish;
 end
 

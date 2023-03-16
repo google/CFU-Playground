@@ -56,7 +56,7 @@ reg signed [BYTE_SIZE-1:0] output_buffer         [0:MAX_BUFFER_SIZE - 1];
 // Convolution
 reg [INT32_SIZE-1:0] convolution_pointer;     
 reg increment_pointer_phase;
-reg [INT32_SIZE-1:0] bias = 32'b0;
+reg [BYTE_SIZE-1:0] bias = 8'b0;
 // reg signed [BYTE_SIZE-1:0] working_regs [0:CONVOLUTE_AT_ONCE-1] [0:KERNEL_LENGTH-1];
 
 always @(posedge clk) begin
@@ -161,7 +161,7 @@ module Cfu (
   input      [31:0]   cmd_payload_inputs_1,
   output reg          rsp_valid,
   input               rsp_ready,
-  output reg [31:0]   rsp_payload_outputs_0,
+  output wire [31:0]  rsp_payload_outputs_0,
   input               reset,
   input               clk
 );
@@ -178,39 +178,21 @@ module Cfu (
     .cmd(funct7),
     .inp0(cmd_payload_inputs_0),
     .inp1(cmd_payload_inputs_1),
-    .ret(ret),
+    .ret(rsp_payload_outputs_0),
     .output_buffer_valid(output_buffer_valid)
   );
-
-  reg delay_counter = 0;
 
   // Only not ready for a command when we have a response.
   assign cmd_ready = ~rsp_valid;
 
   always @(posedge clk) begin
     if (reset) begin
-      rsp_payload_outputs_0 <= 32'b0;
       rsp_valid <= 1'b0;
     end else if (rsp_valid) begin
       // Waiting to hand off response to CPU.
       rsp_valid <= ~rsp_ready;
     end else if (cmd_valid) begin
-        // if (delay_counter) begin
-        //     rsp_valid <= 1'b1;
-        // end else begin
-        //     if (output_buffer_valid) begin
-        //         delay_counter <= 1'b0;
-        //         rsp_payload_outputs_0 <= ret;         
-        //     end
-        // end
-
-        if (delay_counter) begin
-            rsp_valid <= output_buffer_valid;
-            if (output_buffer_valid) begin
-                rsp_payload_outputs_0 <= ret;
-            end    
-        end
-        delay_counter <= delay_counter + 1;
+        rsp_valid <= output_buffer_valid;
     end
   end
 endmodule
