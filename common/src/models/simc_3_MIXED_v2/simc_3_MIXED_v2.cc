@@ -83,21 +83,22 @@ static void simc_3_MIXED_v2_init(void) {
 #define CFU_WRITE_TO_INPUT_BUFFER 1
 #define CFU_WRITE_TO_KERNEL_BUFFER 2
 #define CFU_READ_OUTPUT_BUFFER 3
-#define CFU_SET_BUFFER_SIZE 4
+#define CFU_GET_BUFFER_SIZE 4
 #define CFU_START_COMPUTATION 5
 #define CFU_READ_INPUT_BUFFER 6
 #define CFU_READ_KERNEL_BUFFER 7
 #define CFU_SET_BIAS 8
 
 /*
-  kernel_uint8_t4 should be of size 2 (2*4=8)
+  input_uin8t_t4  should be of size 4 (2*4 + 2*4 bytes) 
+  kernel_uint8_t4 should be of size 2 (2*4=8 bytes)
 */
-static void test_conv1d_cfu_v1(
+static void test_conv1d_cfu_v2(
   uint32_t* input_uin8t_t4, 
-  uint32_t n_input,
   uint32_t* kernel_uint8_t4, 
   uint8_t bias
 ) {
+  const int n_input = 4;
   printf("\n==================== Start CFU test (check output) ====================\n");
   cfu_op0(CFU_INITIALIZE, 0, 0);
 
@@ -125,84 +126,25 @@ static void test_conv1d_cfu_v1(
   printf("Set bias\n");
   cfu_op0(CFU_SET_BIAS, bias, 0);
 
-  printf("Set buffer size\n");
-  cfu_op0(CFU_SET_BUFFER_SIZE, n_input * 4, 0);
+  printf("Read buffer size (should be 4 * 2 = 8)\n");
+  printf("Output buffer size (bytes) = %ld\n", cfu_op0(CFU_GET_BUFFER_SIZE, 0, 0));
 
   printf("Start calculations\n");
   cfu_op0(CFU_START_COMPUTATION, 0, 0);
 
   printf("Read output\n");
-  for (size_t output_address = 0; output_address < n_input; ++output_address) {
+  for (size_t output_address = 0; output_address < n_input - 2; ++output_address) {
     uint32_t read_output_uint8_t4 = cfu_op0(CFU_READ_OUTPUT_BUFFER, output_address, 0);
     printf("output_buffer[%d:%d] = %lx\n", output_address * 4, (output_address + 1) * 4, read_output_uint8_t4);
   }
 }
 
-static void test_1_conv1d_cfu_v1() {
-  printf("\n=== CFU test 1 ===\n");
-  cfu_op0(CFU_INITIALIZE, 0, 0);
-
-  printf("Write data to input buffer\n");
-  uint8_t input_part1[] = {4, 5, 6, 7};
-  uint32_t* input_part1_merged_ptr = (uint32_t*)input_part1;
-
-  uint8_t input_part2[] = {0, 1, 2, 3};
-  uint32_t* input_part2_merged_ptr = (uint32_t*)input_part2;
-
-  cfu_op0(CFU_WRITE_TO_INPUT_BUFFER, 0, *input_part1_merged_ptr);
-  cfu_op0(CFU_WRITE_TO_INPUT_BUFFER, 1, *input_part2_merged_ptr);
-  printf("input[0:3] = %lx\n", *input_part1_merged_ptr);
-  printf("input[4:7] = %lx\n", *input_part2_merged_ptr);
-
-  printf("Read data from input buffer\n");
-  uint32_t read_input_part1_merged = cfu_op0(CFU_READ_INPUT_BUFFER, 0, 0);
-  uint32_t read_input_part2_merged = cfu_op0(CFU_READ_INPUT_BUFFER, 1, 0);
-  printf("input[0:3] = %lx\n", read_input_part1_merged);
-  printf("input[4:7] = %lx\n", read_input_part2_merged);
-
-  printf("Write data to kernel weights buffer\n");
-  uint8_t kernel_part1[] = {2, 2, 2, 2};
-  uint32_t* kernel_part1_merged_ptr = (uint32_t*)kernel_part1;
-
-  uint8_t kernel_part2[] = {2, 2, 2, 2};
-  uint32_t* kernel_part2_merged_ptr = (uint32_t*)kernel_part2;
-
-  cfu_op0(CFU_WRITE_TO_KERNEL_BUFFER, 0, *kernel_part1_merged_ptr);
-  cfu_op0(CFU_WRITE_TO_KERNEL_BUFFER, 1, *kernel_part2_merged_ptr);
-  printf("kernel[0:3] = %lx\n", *kernel_part1_merged_ptr);
-  printf("kernel[4:7] = %lx\n", *kernel_part2_merged_ptr);
-
-  printf("Read data from kernel buffer\n");
-  uint32_t read_kernel_part1_merged = cfu_op0(CFU_READ_KERNEL_BUFFER, 0, 0);
-  uint32_t read_kernel_part2_merged = cfu_op0(CFU_READ_KERNEL_BUFFER, 1, 0);
-  printf("kernel[0:3] = %lx\n", read_kernel_part1_merged);
-  printf("kernel[4:7] = %lx\n", read_kernel_part2_merged);
-
-  printf("Set bias\n");
-  cfu_op0(CFU_SET_BIAS, 1, 0);
-
-  printf("Set buffer size\n");
-  cfu_op0(CFU_SET_BUFFER_SIZE, 8, 0);
-
-  printf("Start calculations\n");
-  cfu_op0(CFU_START_COMPUTATION, 0, 0);
-
-  printf("Read output\n");
-  uint32_t read_output_part1_merged = cfu_op0(CFU_READ_OUTPUT_BUFFER, 0, 0);
-  uint32_t read_output_part2_merged = cfu_op0(CFU_READ_OUTPUT_BUFFER, 1, 0);
-  printf("output[0:3] = %lx\n", read_output_part1_merged);
-  printf("output[4:7] = %lx\n", read_output_part2_merged);
-}
-
 static void do_tests() {
-  test_1_conv1d_cfu_v1();
-
-  uint32_t input_uin8t_t4[4] = {0x07070606, 0x05050404, 0x03030202, 0x01010000};
-  uint32_t n_input = 4;
+  uint32_t input_uin8t_t4[4] = {0x000000, 0x07060504, 0x03020100, 0x00000000};
   uint32_t kernel_uint8_t4[2] = {0x02020202, 0x02020202};
   uint8_t bias = 1;
 
-  test_conv1d_cfu_v1(input_uin8t_t4, n_input, kernel_uint8_t4, bias);
+  test_conv1d_cfu_v2(input_uin8t_t4, kernel_uint8_t4, bias);
 
 
   // uint32_t input_uin8t_t4[4] = {0x04050607, 0x0001020304};

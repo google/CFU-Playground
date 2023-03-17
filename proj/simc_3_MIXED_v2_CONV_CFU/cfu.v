@@ -9,8 +9,7 @@
             - inp1 - 4 values
         - 3 - read from output_buffer 
             - inp0 - address / 4
-        - 4 - set buffer_size
-            - inp0 - buffer_size
+        - 4 - read buffer_size
         - 5 - start computation
         
         // debug purposes
@@ -35,29 +34,26 @@ module conv1d #(
     output reg  [INT32_SIZE-1:0]   ret,
     output reg                    output_buffer_valid = 1
 );
-localparam MAX_BUFFER_SIZE = 1024;
-localparam CONVOLUTE_AT_ONCE = 8;
-
-// Kerbel has size (1, 8)
+// Kernel has size (1, 8)
 localparam KERNEL_LENGTH = 8;
 localparam PADDING = 4; // (8 / 2)
+localparam CONVOLUTE_AT_ONCE = 8;
+localparam OUTPUT_BUFFER_SIZE = CONVOLUTE_AT_ONCE;
 
 
-wire [INT32_SIZE-1:0] padded_address  = inp0 * 4 + PADDING;
 wire [INT32_SIZE-1:0] address = inp0 * 4;
 
 
-// INPUT/OUTPUT BUFFER
-reg [INT32_SIZE-1:0]       buffer_size;
-reg signed [BYTE_SIZE-1:0] input_buffer          [0:MAX_BUFFER_SIZE + 2 * PADDING - 1];
+// Warning: input buffer is on 8 bytes bigger then output, because of padding. 
+// User should fill paddings themself correcly if they want to get correct value
+reg signed [BYTE_SIZE-1:0] input_buffer          [0:OUTPUT_BUFFER_SIZE + 2 * PADDING - 1];
 reg signed [BYTE_SIZE-1:0] kernel_weights_buffer [0:KERNEL_LENGTH - 1];
-reg signed [BYTE_SIZE-1:0] output_buffer         [0:MAX_BUFFER_SIZE - 1];
+reg signed [BYTE_SIZE-1:0] output_buffer         [0:OUTPUT_BUFFER_SIZE - 1];
 
 // Convolution
-reg [INT32_SIZE-1:0] convolution_pointer;     
+reg [INT32_SIZE-1:0] convolution_pointer = PADDING;     
 reg increment_pointer_phase;
 reg [BYTE_SIZE-1:0] bias = 8'b0;
-// reg signed [BYTE_SIZE-1:0] working_regs [0:CONVOLUTE_AT_ONCE-1] [0:KERNEL_LENGTH-1];
 
 always @(posedge clk) begin
     if (!output_buffer_valid) begin
@@ -84,7 +80,7 @@ always @(posedge clk) begin
             end
             increment_pointer_phase <= 1;
         end else begin
-            if (convolution_pointer >= (buffer_size + PADDING - CONVOLUTE_AT_ONCE)) begin
+            if (convolution_pointer >= (OUTPUT_BUFFER_SIZE + PADDING - CONVOLUTE_AT_ONCE)) begin
                 output_buffer_valid <= 1;
                 convolution_pointer <= PADDING;
             end else begin
@@ -96,17 +92,13 @@ always @(posedge clk) begin
     end else begin 
         case (cmd)
             0: begin 
-                input_buffer[0] <= 0;
-                input_buffer[1] <= 0;
-                input_buffer[2] <= 0;
-                input_buffer[3] <= 0;
                 convolution_pointer <= PADDING;
             end 
             1: begin
-                input_buffer[padded_address    ] <= inp1[31:24];
-                input_buffer[padded_address + 1] <= inp1[23:16];
-                input_buffer[padded_address + 2] <= inp1[15: 8];
-                input_buffer[padded_address + 3] <= inp1[7 : 0];
+                input_buffer[address    ] <= inp1[31:24];
+                input_buffer[address + 1] <= inp1[23:16];
+                input_buffer[address + 2] <= inp1[15: 8];
+                input_buffer[address + 3] <= inp1[7 : 0];
             end
             2: begin
                 kernel_weights_buffer[address    ] <= inp1[31:24];
@@ -121,22 +113,18 @@ always @(posedge clk) begin
                 ret[7 : 0] <= output_buffer[address + 3];
             end
             4: begin
-                buffer_size <= inp0;
+                ret <= OUTPUT_BUFFER_SIZE;
             end
             5: begin
                 output_buffer_valid <= 0;
                 convolution_pointer <= PADDING;
                 increment_pointer_phase <= 0;
-                input_buffer[buffer_size + 2 * PADDING - 1] <= 0;
-                input_buffer[buffer_size + 2 * PADDING - 2] <= 0;
-                input_buffer[buffer_size + 2 * PADDING - 3] <= 0;
-                input_buffer[buffer_size + 2 * PADDING - 4] <= 0;
             end
             6: begin
-                ret[31:24] <= input_buffer[padded_address    ];
-                ret[23:16] <= input_buffer[padded_address + 1];
-                ret[15: 8] <= input_buffer[padded_address + 2];
-                ret[7 : 0] <= input_buffer[padded_address + 3];
+                ret[31:24] <= input_buffer[address    ];
+                ret[23:16] <= input_buffer[address + 1];
+                ret[15: 8] <= input_buffer[address + 2];
+                ret[7 : 0] <= input_buffer[address + 3];
             end
             7: begin
                 ret[31:24] <= kernel_weights_buffer[address    ];
