@@ -34,6 +34,7 @@ limitations under the License.
   #define CFU_READ_INPUT_BUFFER 5
   #define CFU_READ_KERNEL_BUFFER 6
   #define CFU_SET_BIAS 7
+  #define CFU_SET_INPUT_OFFSET 8
 #endif // CFU_CONV1d_V3_PARAMS
 
 
@@ -125,12 +126,14 @@ inline void ConvPerChannel(
   // Convolution with CFU
   // Initialize CFU
   cfu_op0(CFU_INITIALIZE, 0, 0);
+  // Set input offset
+  cfu_op0(CFU_SET_INPUT_OFFSET, input_offset, 0);
 
   // Copy input to the buffer
   uint32_t input_buffer_address = 4 * filter_input_depth; // because of paddings
   for (int in_x = 0; in_x < input_width; ++in_x) {
     for (int in_channel = 0; in_channel < filter_input_depth; in_channel += 4, input_buffer_address+=4) {
-      int32_t input_val = *(uint32_t*) input_data + Offset(input_shape, 0, 0, in_x, in_channel + filter_input_depth);
+      int32_t input_val = *(uint32_t*) input_data + Offset(input_shape, 0, 0, in_x, in_channel);
       cfu_op0(CFU_WRITE_TO_INPUT_BUFFER, input_buffer_address, input_val);
     }
   }
@@ -155,7 +158,7 @@ inline void ConvPerChannel(
 
     // Copy output from the output buffer
     for (int out_x = 0; out_x < output_width; out_x += 4) { 
-      uint32_t acc4 = cfu_op0(CFU_READ_OUTPUT_BUFFER, out_x, 0) >> 1;
+      uint32_t acc4 = cfu_op0(CFU_READ_OUTPUT_BUFFER, out_x, 0);
       for (int i = 0; i < 4; ++i) {
         int32_t acc = ((int8_t *) &acc4)[i];
         acc = MultiplyByQuantizedMultiplier(acc, output_multiplier[out_channel], output_shift[out_channel]);

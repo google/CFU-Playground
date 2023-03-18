@@ -112,6 +112,9 @@ initial begin
     #10 $display("Set bias");
         cmd = 7; inp0 = 1;
 
+    // #10 $display("Set input offset");
+        // cmd = 8; inp0 = -1;
+
     #10 $display("Start calculations.");
         cmd = 4;
 
