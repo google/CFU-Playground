@@ -17,7 +17,7 @@ wire [31:0] input_address = row * 128 + col;
 wire [31:0] kernel_address = input_address;
 
 initial begin
-    $monitor ("cmd=%d | inp0=%h | inp1=%h | output_valid=%d | ret=%h", cmd, inp0, inp1, output_buffer_valid, ret);
+    $monitor ("cmd=%d | inp0=%d | inp1=%h | output_valid=%d | ret=%h", cmd, inp0, inp1, output_buffer_valid, ret);
     clk = 0;
     cmd = 0;
     inp0 = 0;

@@ -20,6 +20,8 @@
         // 
         - 7 - set bias
             - inp0 - bias
+        - 8 - set input offset
+            - inp0 - input_offset
         
 */
 module conv1d #(
@@ -62,6 +64,7 @@ reg signed [BYTE_SIZE-1:0] output_buffer         [0:MAX_INPUT_SIZE - 1];
 
 // Convolution
 reg signed [BYTE_SIZE-1:0] bias = 8'd0;
+// reg signed [BYTE_SIZE=1:0] input_offset = 8'b0;
 // reg signed [BYTE_SIZE-1:0] working_regs [0:CONVOLUTE_AT_ONCE-1] [0:KERNEL_LENGTH-1];
 
 always @(posedge clk) begin
@@ -69,20 +72,20 @@ always @(posedge clk) begin
         0: begin    // Reset module
             // Fill output with zeros
             for (reg [INT32_SIZE-1:0] out_idx = 0; out_idx < MAX_INPUT_SIZE; out_idx = out_idx + 1) begin
-                output_buffer[out_idx] <= 0;
+                output_buffer[out_idx] = 0;
             end 
 
             // Fill input with zeros
             for (reg [INT32_SIZE-1:0] in_idx = 0; in_idx < MAX_PADDED_INPUT_SIZE; in_idx = in_idx + 1) begin
                 for (reg [INT32_SIZE-1:0] channel_idx = 0; channel_idx < MAX_INPUT_CHANNELS; channel_idx = channel_idx + 1) begin
-                    input_buffer[in_idx][channel_idx] <= 0;
+                    input_buffer[in_idx][channel_idx] = 0;
                 end   
             end 
 
             // Fill kernel_weights_buffer with zeros
             for (reg [INT32_SIZE-1:0] channel_idx = 0; channel_idx < MAX_INPUT_CHANNELS; channel_idx = channel_idx + 1) begin
                 for (reg [INT32_SIZE-1:0] kernel_idx = 0; kernel_idx < KERNEL_LENGTH; kernel_idx = kernel_idx + 1) begin
-                    kernel_weights_buffer[kernel_idx][channel_idx] <= 0;
+                    kernel_weights_buffer[kernel_idx][channel_idx] = 0;
                 end   
             end 
         end 
@@ -106,6 +109,7 @@ always @(posedge clk) begin
             ret[7 : 0] <= output_buffer[address + 3];
         end
         4: begin    // Start computation
+            // output_buffer_valid = 0;
             for (reg [INT32_SIZE-1:0] out_idx = 0; out_idx < MAX_INPUT_SIZE; out_idx = out_idx + 1) begin
                 for (reg [INT32_SIZE-1:0] channel_idx = 0; channel_idx < MAX_INPUT_CHANNELS; channel_idx = channel_idx + 1) begin
                     output_buffer[out_idx] += 
@@ -120,6 +124,7 @@ always @(posedge clk) begin
                 end
                 output_buffer[out_idx] += bias; 
             end
+            // output_buffer_valid = 1;
         end
         5: begin    // Read input buffer
             ret[31:24] <= input_buffer[input_row][input_col    ];
@@ -155,8 +160,6 @@ module Cfu (
   input               reset,
   input               clk
 );
-  // localparam InputOffset = $signed(9'd128);
-  reg signed [8:0] input_offset = 128;
   wire output_buffer_valid;
   
   wire [6:0] funct7;
