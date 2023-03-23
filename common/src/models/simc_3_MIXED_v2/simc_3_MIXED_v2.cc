@@ -160,8 +160,8 @@ static void test_conv1d_cfu_v3(
   printf("Read output\n");
   for (size_t output_address = 0; output_address < (n_input - 4 * 2) / 4; ++output_address) {
     uint32_t read_output_uint8_t4 = cfu_op0(CFU_READ_OUTPUT_BUFFER, output_address * 4, 0) ;
-    int32_t read_output = *(int32_t*)&read_output_uint8_t4;
-    printf("output_buffer[%d] = %lx\n", output_address * 4, read_output);
+    int32_t *read_output = (int32_t*)&read_output_uint8_t4;
+    printf("output_buffer[%d] = %lx\n", output_address * 4, *read_output);
     // printBits(sizeof(uint32_t), &read_output_uint8_t4);
   }
   printf("\n==================== End CFU test ====================\n");
@@ -173,7 +173,7 @@ static void do_tests() {
   #define n_kernel_weights 8
   uint32_t input_uin8t_t4[n_input] = {
     0, 0, 0, 0,       // Left padding
-    0x07000000, 0x06010000, 0x05020000, 0x04030000, 0x03040000, 0x02050000, 0x01060000, 0x00070000, 
+    0x00000007, 0x00000106, 0x00000205, 0x00000304, 0x00000403, 0x00000502, 0x00000601, 0x00000700, 
     // 0x70000000, 0x60100000, 0x50200000, 0x40300000, 0x30400000, 0x20500000, 0x10600000, 0x00700000, 
     0, 0, 0, 0        // Right padding
     };
@@ -183,7 +183,7 @@ static void do_tests() {
   }
 
   uint32_t kernel_weights_uint8_t4[n_kernel_weights] = {
-    0x02010000, 0x02010000, 0x02010000, 0x02010000, 0x02010000, 0x02010000, 0x02010000, 0x02010000
+    0x00000102, 0x00000102, 0x00000102, 0x00000102, 0x00000102, 0x00000102, 0x00000102, 0x00000102
     // 0x01010000, 0x01010000, 0x01010000, 0x01010000, 0x01010000, 0x01010000, 0x01010000, 0x01010000
   };
   uint32_t kernel_addresses[n_kernel_weights];

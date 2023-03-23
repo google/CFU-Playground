@@ -30,9 +30,9 @@ module conv1d #(
 )(
     input                         clk,
     input       [6:0]             cmd,
-    input       [INT32_SIZE-1:0]   inp0,
-    input       [INT32_SIZE-1:0]   inp1,
-    output reg  [INT32_SIZE-1:0]   ret,
+    input       [INT32_SIZE-1:0]  inp0,
+    input       [INT32_SIZE-1:0]  inp1,
+    output reg  [INT32_SIZE-1:0]  ret,
     output reg                    output_buffer_valid = 1
 );
 localparam PADDING = 4; // (8 / 2)
@@ -90,23 +90,24 @@ always @(posedge clk) begin
             end 
         end 
         1: begin    // Write input buffer
-            input_buffer[input_row][input_col    ] <= inp1[31:24];
-            input_buffer[input_row][input_col + 1] <= inp1[23:16];
-            input_buffer[input_row][input_col + 2] <= inp1[15: 8];
-            input_buffer[input_row][input_col + 3] <= inp1[7 : 0];
+            // Note that processor is little-endian
+            input_buffer[input_row][input_col    ] <= inp1[7 : 0];
+            input_buffer[input_row][input_col + 1] <= inp1[15: 8];
+            input_buffer[input_row][input_col + 2] <= inp1[23:16];
+            input_buffer[input_row][input_col + 3] <= inp1[31:24];
         end
         2: begin    // Write kernel weights buffer
             // $display("kernel row: %d", kernel_row);
-            kernel_weights_buffer[kernel_row][kernel_col    ] <= inp1[31:24];
-            kernel_weights_buffer[kernel_row][kernel_col + 1] <= inp1[23:16];
-            kernel_weights_buffer[kernel_row][kernel_col + 2] <= inp1[15: 8];
-            kernel_weights_buffer[kernel_row][kernel_col + 3] <= inp1[7 : 0];
+            kernel_weights_buffer[kernel_row][kernel_col    ] <= inp1[7 : 0];
+            kernel_weights_buffer[kernel_row][kernel_col + 1] <= inp1[15: 8];
+            kernel_weights_buffer[kernel_row][kernel_col + 2] <= inp1[23:16];
+            kernel_weights_buffer[kernel_row][kernel_col + 3] <= inp1[31:24];
         end
         3: begin    // Read output buffer
-            ret[31:24] <= output_buffer[address    ] >> 1;
-            ret[23:16] <= output_buffer[address + 1] >> 1;
-            ret[15: 8] <= output_buffer[address + 2] >> 1;
-            ret[7 : 0] <= output_buffer[address + 3] >> 1;
+            ret[7 : 0] <= output_buffer[address    ] >> 1;
+            ret[15: 8] <= output_buffer[address + 1] >> 1;
+            ret[23:16] <= output_buffer[address + 2] >> 1;
+            ret[31:24] <= output_buffer[address + 3] >> 1;
         end
         4: begin    // Start computation
             // output_buffer_valid = 0;
@@ -127,16 +128,16 @@ always @(posedge clk) begin
             // output_buffer_valid = 1;
         end
         5: begin    // Read input buffer
-            ret[31:24] <= input_buffer[input_row][input_col    ];
-            ret[23:16] <= input_buffer[input_row][input_col + 1];
-            ret[15: 8] <= input_buffer[input_row][input_col + 2];
-            ret[7 : 0] <= input_buffer[input_row][input_col + 3];
+            ret[7 : 0] <= input_buffer[input_row][input_col    ];
+            ret[15: 8] <= input_buffer[input_row][input_col + 1];
+            ret[23:16] <= input_buffer[input_row][input_col + 2];
+            ret[31:24] <= input_buffer[input_row][input_col + 3];
         end
         6: begin    // Read kernel_weights buffer
-            ret[31:24] <= kernel_weights_buffer[kernel_row][kernel_col    ];
-            ret[23:16] <= kernel_weights_buffer[kernel_row][kernel_col + 1];
-            ret[15: 8] <= kernel_weights_buffer[kernel_row][kernel_col + 2];
-            ret[7 : 0] <= kernel_weights_buffer[kernel_row][kernel_col + 3];
+            ret[7 : 0] <= kernel_weights_buffer[kernel_row][kernel_col    ];
+            ret[15: 8] <= kernel_weights_buffer[kernel_row][kernel_col + 1];
+            ret[23:16] <= kernel_weights_buffer[kernel_row][kernel_col + 2];
+            ret[31:24] <= kernel_weights_buffer[kernel_row][kernel_col + 3];
         end
         7: begin    // Write bias
             bias <= inp0;
