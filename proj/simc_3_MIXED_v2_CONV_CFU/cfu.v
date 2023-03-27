@@ -56,11 +56,11 @@ wire [INT32_SIZE-1:0] kernel_col = address % MAX_INPUT_CHANNELS;
 // INPUT/OUTPUT BUFFER
 reg [INT32_SIZE-1:0]       buffer_size;
 // Input buffer has shape of (1024 + 8) x 128 
-reg signed [BYTE_SIZE:0] input_buffer          [0:MAX_INPUT_SIZE + 2 * PADDING - 1] [0:MAX_INPUT_CHANNELS-1];
+reg signed [BYTE_SIZE*2:0] input_buffer          [0:MAX_INPUT_SIZE + 2 * PADDING - 1] [0:MAX_INPUT_CHANNELS-1];
 // kernel weights buffer has shape of 8 x 128 
-reg signed [BYTE_SIZE:0] kernel_weights_buffer [0:KERNEL_LENGTH - 1] [0: MAX_INPUT_CHANNELS-1];
+reg signed [BYTE_SIZE*2:0] kernel_weights_buffer [0:KERNEL_LENGTH - 1] [0: MAX_INPUT_CHANNELS-1];
 // output buffer has a shape of 1024
-reg signed [BYTE_SIZE:0] output_buffer         [0:MAX_INPUT_SIZE - 1];
+reg signed [INT32_SIZE:0] output_buffer         [0:MAX_INPUT_SIZE - 1];
 
 // Convolution
 reg signed [BYTE_SIZE-1:0] bias = 8'd0;
@@ -104,24 +104,29 @@ always @(posedge clk) begin
             kernel_weights_buffer[kernel_row][kernel_col + 3] <= inp1[31:24];
         end
         3: begin    // Read output buffer
-            ret[7 : 0] <= output_buffer[address    ] >> 1;
-            ret[15: 8] <= output_buffer[address + 1] >> 1;
-            ret[23:16] <= output_buffer[address + 2] >> 1;
-            ret[31:24] <= output_buffer[address + 3] >> 1;
+            ret[7 : 0] <= output_buffer[address][31:24] >> 1;
+            ret[15: 8] <= output_buffer[address][23:16] >> 1;
+            ret[23:16] <= output_buffer[address][15: 8] >> 1;
+            ret[31:24] <= output_buffer[address][7 : 0] >> 1;
+
+            // ret[7 : 0] <= output_buffer[address    ] >> 1;
+            // ret[15: 8] <= output_buffer[address + 1] >> 1;
+            // ret[23:16] <= output_buffer[address + 2] >> 1;
+            // ret[31:24] <= output_buffer[address + 3] >> 1;
         end
         4: begin    // Start computation
             // output_buffer_valid = 0;
             for (reg [INT32_SIZE-1:0] out_idx = 0; out_idx < MAX_INPUT_SIZE; out_idx = out_idx + 1) begin
                 for (reg [INT32_SIZE-1:0] channel_idx = 0; channel_idx < MAX_INPUT_CHANNELS; channel_idx = channel_idx + 1) begin
                     output_buffer[out_idx] += 
-                        input_buffer[(PADDING + out_idx - 4)][channel_idx] * (kernel_weights_buffer[0][channel_idx] + input_offset) + 
-                        input_buffer[(PADDING + out_idx - 3)][channel_idx] * (kernel_weights_buffer[1][channel_idx] + input_offset) + 
-                        input_buffer[(PADDING + out_idx - 2)][channel_idx] * (kernel_weights_buffer[2][channel_idx] + input_offset) + 
-                        input_buffer[(PADDING + out_idx - 1)][channel_idx] * (kernel_weights_buffer[3][channel_idx] + input_offset) + 
-                        input_buffer[(PADDING + out_idx    )][channel_idx] * (kernel_weights_buffer[4][channel_idx] + input_offset) + 
-                        input_buffer[(PADDING + out_idx + 1)][channel_idx] * (kernel_weights_buffer[5][channel_idx] + input_offset) + 
-                        input_buffer[(PADDING + out_idx + 2)][channel_idx] * (kernel_weights_buffer[6][channel_idx] + input_offset) + 
-                        input_buffer[(PADDING + out_idx + 3)][channel_idx] * (kernel_weights_buffer[7][channel_idx] + input_offset);
+                        input_buffer[(PADDING + out_idx - 3)][channel_idx] * (kernel_weights_buffer[0][channel_idx] + input_offset) + 
+                        input_buffer[(PADDING + out_idx - 2)][channel_idx] * (kernel_weights_buffer[1][channel_idx] + input_offset) + 
+                        input_buffer[(PADDING + out_idx - 1)][channel_idx] * (kernel_weights_buffer[2][channel_idx] + input_offset) + 
+                        input_buffer[(PADDING + out_idx    )][channel_idx] * (kernel_weights_buffer[3][channel_idx] + input_offset) + 
+                        input_buffer[(PADDING + out_idx + 1)][channel_idx] * (kernel_weights_buffer[4][channel_idx] + input_offset) + 
+                        input_buffer[(PADDING + out_idx + 2)][channel_idx] * (kernel_weights_buffer[5][channel_idx] + input_offset) + 
+                        input_buffer[(PADDING + out_idx + 3)][channel_idx] * (kernel_weights_buffer[6][channel_idx] + input_offset) + 
+                        input_buffer[(PADDING + out_idx + 4)][channel_idx] * (kernel_weights_buffer[7][channel_idx] + input_offset);
                 end
                 output_buffer[out_idx] += bias; 
             end
