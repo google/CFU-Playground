@@ -26,6 +26,7 @@
 // In this function, place C code to emulate your CFU. You can switch between
 // hardware and emulated CFU by setting the CFU_SOFTWARE_DEFINED DEFINE in
 // the Makefile.
+
 #define MAX_INPUT_SIZE 1024
 #define PADDING 4
 #define MAX_PADDED_INPUT_SIZE MAX_INPUT_SIZE + 2 * PADDING
@@ -33,123 +34,6 @@
 #define CONVOLUTE_AT_ONCE 8
 #define KERNEL_LENGTH 8
 
-// uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
-//     if (funct3 != 0) {
-//         return 0;
-//     }
-
-//     // Buffers
-//     static int8_t input_buffer[MAX_PADDED_INPUT_SIZE][MAX_INPUT_CHANNELS];
-//     static int8_t kernel_weights_buffer[KERNEL_LENGTH][MAX_INPUT_CHANNELS];
-//     static uint32_t output_buffer[MAX_INPUT_SIZE];
-
-//     // Static variables
-//     static int8_t bias         = 0;
-//     static int32_t input_offset = 0;
-
-//     // Other variables
-//     uint32_t address     = rs1;
-//     uint32_t value       = rs2;
-//     uint32_t address_row = rs1 / MAX_INPUT_CHANNELS;
-//     uint32_t address_col = rs1 % MAX_INPUT_CHANNELS;
-
-//     // State machine
-//     switch (funct7) {
-//         case 0:  // Zero out buffers
-//             for (uint32_t out_idx = 0; out_idx < MAX_INPUT_SIZE; ++out_idx) {
-//                 output_buffer[out_idx] = 0;
-//             }
-
-//             for (uint32_t in_idx = 0; in_idx < MAX_PADDED_INPUT_SIZE; ++in_idx) {
-//                 for (uint32_t channel_idx = 0; channel_idx < MAX_INPUT_CHANNELS; ++channel_idx) {
-//                     input_buffer[in_idx][channel_idx] = 0;
-//                 }
-//             }
-
-//             for (uint32_t kernel_idx = 0; kernel_idx < KERNEL_LENGTH; ++kernel_idx) {
-//                 for (uint32_t channel_idx = 0; channel_idx < MAX_INPUT_CHANNELS; ++channel_idx) {
-//                     kernel_weights_buffer[kernel_idx][channel_idx] = 0;
-//                 }
-//             }
-//             return 0;
-
-//         case 1:  // Write to input buffer
-//             input_buffer[address_row][address_col] = (int8_t) value;
-//             return 0;
-//         case 2:  // Write to kernel weights buffer
-//             kernel_weights_buffer[address_row][address_col] = (int8_t) value;
-//             return 0;
-//         case 3:  // Read output buffer
-//             return output_buffer[address];
-//         case 4:  // Start computation
-//             for (uint32_t out_idx = 0; out_idx < MAX_INPUT_SIZE; ++out_idx) {
-//                 for (uint32_t channel_idx = 0; channel_idx < MAX_INPUT_CHANNELS; ++channel_idx) {
-//                     // uint32_t before = output_buffer[out_idx];
-//                     output_buffer[out_idx] +=
-//                         input_buffer[(PADDING + out_idx - 3)][channel_idx] *
-//                             (kernel_weights_buffer[0][channel_idx] + input_offset) +
-//                         input_buffer[(PADDING + out_idx - 2)][channel_idx] *
-//                             (kernel_weights_buffer[1][channel_idx] + input_offset) +
-//                         input_buffer[(PADDING + out_idx - 1)][channel_idx] *
-//                             (kernel_weights_buffer[2][channel_idx] + input_offset) +
-//                         input_buffer[(PADDING + out_idx)][channel_idx] *
-//                             (kernel_weights_buffer[3][channel_idx] + input_offset) +
-//                         input_buffer[(PADDING + out_idx + 1)][channel_idx] *
-//                             (kernel_weights_buffer[4][channel_idx] + input_offset) +
-//                         input_buffer[(PADDING + out_idx + 2)][channel_idx] *
-//                             (kernel_weights_buffer[5][channel_idx] + input_offset) +
-//                         input_buffer[(PADDING + out_idx + 3)][channel_idx] *
-//                             (kernel_weights_buffer[6][channel_idx] + input_offset) +
-//                         input_buffer[(PADDING + out_idx + 4)][channel_idx] *
-//                             (kernel_weights_buffer[7][channel_idx] + input_offset);
-//                 }
-//                 output_buffer[out_idx] += bias;
-//             }
-//             return 0;
-//         case 5:  // Read input buffer
-//             return input_buffer[address_row][address_col];
-//         case 6:  // Read kernel weights buffer
-//             return kernel_weights_buffer[address_row][address_col];
-//         case 7:  // Write bias
-//             bias = (int8_t) rs1;
-//             return bias;
-//         case 8:  // Write input offset
-//             input_offset = (int32_t) rs1;
-//             return input_offset;
-//         default:
-//             return 0;
-//     }
-// }
-
-// namespace {
-
-// template <typename IntegerType>
-// inline IntegerType rounding_divide_by_POT(IntegerType x, int exponent) {
-//   const IntegerType mask      = (1ll << exponent) - 1;
-//   const IntegerType zero      = 0;
-//   const IntegerType one       = 1;
-//   const IntegerType remainder = x & mask;
-//   const IntegerType threshold = (mask >> 1) + (((x < zero) ? ~0 : 0) & one);
-//   return (x >> exponent) + (((remainder > threshold) ? ~0 : 0) & one);
-// }
-
-// inline int32_t saturating_rounding_doubling_high_mul(int32_t a, int32_t b) {
-//   bool overflow = a == b && a == std::numeric_limits<int32_t>::min();
-//   int64_t a_64(a);
-//   int64_t b_64(b);
-//   int64_t ab_64        = a_64 * b_64;
-//   int32_t nudge        = ab_64 >= 0 ? (1 << 30) : (1 - (1 << 30));
-//   int32_t ab_x2_high32 = static_cast<int32_t>((ab_64 + nudge) / (1ll << 31));
-//   return overflow ? std::numeric_limits<int32_t>::max() : ab_x2_high32;
-// }
-
-// inline int32_t multiply_by_quant_mult(int32_t x, int32_t quantized_multiplier, int shift) {
-//   int left_shift  = shift > 0 ? shift : 0;
-//   int right_shift = shift > 0 ? 0 : -shift;
-//   return rounding_divide_by_POT(
-//       saturating_rounding_doubling_high_mul(x * (1 << left_shift), quantized_multiplier),
-//       right_shift);
-// }
 template <typename IntegerType>
 inline IntegerType rounding_divide_by_POT(IntegerType x, int exponent) {
   assert(exponent >= 0);
@@ -180,9 +64,7 @@ inline int32_t multiply_by_quant_mult(int32_t x, int32_t quantized_multiplier, i
       right_shift);
 }
 
-// }  // namespace
-
-uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
+uint32_t software_cfu_v3(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
   if (funct3 != 0) {
     return 0;
   }
@@ -312,140 +194,232 @@ uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
   }
 }
 
-// #define MAX_OUTPUT_CHANNELS 192
-// uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
-//   if (funct3 != 0) {
-//     return 0;
-//   }
+#define MAX_OUTPUT_CHANNELS 192
+uint32_t software_cfu_v2(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
+  if (funct3 != 0) {
+    return 0;
+  }
 
-//   // Buffers
-//   static int8_t input_buffer[MAX_INPUT_SIZE * MAX_INPUT_CHANNELS];
-//   static int8_t kernel_weights_buffer[KERNEL_LENGTH * MAX_INPUT_CHANNELS * MAX_OUTPUT_CHANNELS];
-//   static int8_t output_buffer[MAX_INPUT_SIZE * MAX_OUTPUT_CHANNELS];
-//   static int32_t bias_buffer[MAX_OUTPUT_CHANNELS];
-//   static int32_t output_multiplier_buffer[MAX_OUTPUT_CHANNELS];
-//   static int32_t output_shift_buffer[MAX_OUTPUT_CHANNELS];
+  // Buffers
+  static int8_t input_buffer[MAX_INPUT_SIZE * MAX_INPUT_CHANNELS];
+  static int8_t kernel_weights_buffer[KERNEL_LENGTH * MAX_INPUT_CHANNELS * MAX_OUTPUT_CHANNELS];
+  static int8_t output_buffer[MAX_INPUT_SIZE * MAX_OUTPUT_CHANNELS];
+  static int32_t bias_buffer[MAX_OUTPUT_CHANNELS];
+  static int32_t output_multiplier_buffer[MAX_OUTPUT_CHANNELS];
+  static int32_t output_shift_buffer[MAX_OUTPUT_CHANNELS];
 
-//   // Static variables
-//   // static int8_t bias          = 0;
-//   static int32_t input_offset = 0;
+  // Static variables
+  // static int8_t bias          = 0;
+  static int32_t input_offset = 0;
 
-//   static int32_t output_offset         = 0;
-//   static int32_t output_activation_min = 0;
-//   static int32_t output_activation_max = 0;
+  static int32_t output_offset         = 0;
+  static int32_t output_activation_min = 0;
+  static int32_t output_activation_max = 0;
 
-//   static int output_depth       = 0;
-//   static int input_output_width = 0;
-//   static int input_depth        = 0;
+  static int output_depth       = 0;
+  static int input_output_width = 0;
+  static int input_depth        = 0;
 
-//   // Other variables
-//   uint32_t address = rs1;
-//   uint32_t value   = rs2;
+  // Other variables
+  uint32_t address = rs1;
+  uint32_t value   = rs2;
 
-//   // State machine
-//   switch (funct7) {
-//     case 0:  // Zero out buffers
-//       for (uint32_t out_idx = 0; out_idx < MAX_INPUT_SIZE * MAX_OUTPUT_CHANNELS; ++out_idx) {
-//         output_buffer[out_idx] = 0;
-//       }
+  // State machine
+  switch (funct7) {
+    case 0:  // Zero out buffers
+      for (uint32_t out_idx = 0; out_idx < MAX_INPUT_SIZE * MAX_OUTPUT_CHANNELS; ++out_idx) {
+        output_buffer[out_idx] = 0;
+      }
 
-//       for (uint32_t in_idx = 0; in_idx < MAX_INPUT_SIZE * MAX_INPUT_CHANNELS; ++in_idx) {
-//         input_buffer[in_idx] = 0;
-//       }
+      for (uint32_t in_idx = 0; in_idx < MAX_INPUT_SIZE * MAX_INPUT_CHANNELS; ++in_idx) {
+        input_buffer[in_idx] = 0;
+      }
 
-//       for (uint32_t kernel_idx = 0;
-//            kernel_idx < KERNEL_LENGTH * MAX_INPUT_CHANNELS * MAX_OUTPUT_CHANNELS; ++kernel_idx) {
-//         kernel_weights_buffer[kernel_idx] = 0;
-//       }
+      for (uint32_t kernel_idx = 0;
+           kernel_idx < KERNEL_LENGTH * MAX_INPUT_CHANNELS * MAX_OUTPUT_CHANNELS; ++kernel_idx) {
+        kernel_weights_buffer[kernel_idx] = 0;
+      }
 
-//       for (uint32_t output_channel = 0; output_channel < MAX_OUTPUT_CHANNELS; ++output_channel) {
-//         bias_buffer[output_activation_max] = 0;
-//         output_multiplier_buffer[output_activation_max] = 0;
-//         output_shift_buffer[output_activation_max] = 0;
-//       }
-//       return 0;
+      for (uint32_t output_channel = 0; output_channel < MAX_OUTPUT_CHANNELS; ++output_channel) {
+        bias_buffer[output_activation_max]              = 0;
+        output_multiplier_buffer[output_activation_max] = 0;
+        output_shift_buffer[output_activation_max]      = 0;
+      }
+      return 0;
 
-//     case 1:  // Write to input buffer
-//       input_buffer[address] = (int8_t)value;
-//       return 0;
-//     case 2:  // Write to kernel weights buffer
-//       kernel_weights_buffer[address] = (int8_t)value;
-//       return 0;
-//     case 3:  // Read output buffer
-//       return output_buffer[address];
-//     case 4:  // Read input buffer
-//       return input_buffer[address];
-//     case 5:  // Read kernel weights buffer
-//       return kernel_weights_buffer[address];
-//     // case 6:  // Write bias
-//     //   bias = (int8_t)rs1;
-//     //   return bias;
-//     case 7:  // Write input offset
-//       input_offset = (int32_t)rs1;
-//       return input_offset;
-//     case 8:  // Write output_offset
-//       output_offset = (int32_t)rs1;
-//       return output_offset;
-//     case 9:  // Write output_activation_min
-//       output_activation_min = (int32_t)rs1;
-//       return output_activation_min;
-//     case 10:  // Write output_activation_max
-//       output_activation_max = (int32_t)rs1;
-//       return output_activation_max;
-//     case 11:  // Write output_depth
-//       output_depth = (int)rs1;
-//       return output_depth;
-//     case 12:  // Write input_output_width
-//       input_output_width = (int)rs1;
-//       return input_output_width;
-//     case 13:  // Write input_depth
-//       input_depth = (int)rs1;
-//       return input_depth;
-//     case 14:  // Write bias_buffer
-//       bias_buffer[address] = (int32_t)value;
-//       return 0;
-//     case 15:  // Write output_multiplier_buffer
-//       output_multiplier_buffer[address] = (int32_t)value;
-//       return 0;
-//     case 16:  // Write output_shift_buffer
-//       output_shift_buffer[address] = (int32_t)value;
-//       return 0;
+    case 1:  // Write to input buffer
+      input_buffer[address] = (int8_t)value;
+      return 0;
+    case 2:  // Write to kernel weights buffer
+      kernel_weights_buffer[address] = (int8_t)value;
+      return 0;
+    case 3:  // Read output buffer
+      return output_buffer[address];
+    case 4:  // Read input buffer
+      return input_buffer[address];
+    case 5:  // Read kernel weights buffer
+      return kernel_weights_buffer[address];
+    // case 6:  // Write bias
+    //   bias = (int8_t)rs1;
+    //   return bias;
+    case 7:  // Write input offset
+      input_offset = (int32_t)rs1;
+      return input_offset;
+    case 8:  // Write output_offset
+      output_offset = (int32_t)rs1;
+      return output_offset;
+    case 9:  // Write output_activation_min
+      output_activation_min = (int32_t)rs1;
+      return output_activation_min;
+    case 10:  // Write output_activation_max
+      output_activation_max = (int32_t)rs1;
+      return output_activation_max;
+    case 11:  // Write output_depth
+      output_depth = (int)rs1;
+      return output_depth;
+    case 12:  // Write input_output_width
+      input_output_width = (int)rs1;
+      return input_output_width;
+    case 13:  // Write input_depth
+      input_depth = (int)rs1;
+      return input_depth;
+    case 14:  // Write bias_buffer
+      bias_buffer[address] = (int32_t)value;
+      return 0;
+    case 15:  // Write output_multiplier_buffer
+      output_multiplier_buffer[address] = (int32_t)value;
+      return 0;
+    case 16:  // Write output_shift_buffer
+      output_shift_buffer[address] = (int32_t)value;
+      return 0;
 
-//     case 17:  // Start computation
-//       for (int out_x = 0; out_x < input_output_width; ++out_x) {
-//         const int in_x_origin = out_x - (PADDING - 1);
-//         for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
-//           int32_t acc = 0;
-//           for (int filter_x = 0; filter_x < 8; ++filter_x) {
-//             const int in_x = in_x_origin + filter_x;
+    case 17:  // Start computation
+      for (int out_x = 0; out_x < input_output_width; ++out_x) {
+        const int in_x_origin = out_x - (PADDING - 1);
+        for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
+          int32_t acc = 0;
+          for (int filter_x = 0; filter_x < 8; ++filter_x) {
+            const int in_x = in_x_origin + filter_x;
 
-//             // Zero padding by omitting the areas outside the image.
-//             const bool is_point_inside_image = (in_x >= 0) && (in_x < input_output_width);
-//             if (!is_point_inside_image) {
-//               continue;
-//             }
+            // Zero padding by omitting the areas outside the image.
+            const bool is_point_inside_image = (in_x >= 0) && (in_x < input_output_width);
+            if (!is_point_inside_image) {
+              continue;
+            }
 
-//             for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-//               int32_t input_val  = input_buffer[in_x * input_depth + in_channel];
-//               int32_t filter_val = kernel_weights_buffer[out_channel * (8 * input_depth) +
-//                                                          filter_x * input_depth + in_channel];
+            for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
+              int32_t input_val  = input_buffer[in_x * input_depth + in_channel];
+              int32_t filter_val = kernel_weights_buffer[out_channel * (8 * input_depth) +
+                                                         filter_x * input_depth + in_channel];
 
-//               acc += filter_val * (input_val + input_offset);
-//             }
-//           }
+              acc += filter_val * (input_val + input_offset);
+            }
+          }
 
-//           acc += bias_buffer[out_channel];
-//           acc = multiply_by_quant_mult(acc, (int32_t)output_multiplier_buffer[out_channel],
-//                                        (int32_t)output_shift_buffer[out_channel]);
-//           acc += output_offset;
-//           acc                                               = std::max(acc,
-//           output_activation_min); acc                                               =
-//           std::min(acc, output_activation_max); output_buffer[out_x * output_depth + out_channel]
-//           = static_cast<int8_t>(acc);
-//         }
-//       }
-//       return 0;
-//     default:
-//       return 0;
-//   }
-// }
+          acc += bias_buffer[out_channel];
+          acc = multiply_by_quant_mult(acc, (int32_t)output_multiplier_buffer[out_channel],
+                                       (int32_t)output_shift_buffer[out_channel]);
+          acc += output_offset;
+          acc                                               = std::max(acc, output_activation_min);
+          acc                                               = std::min(acc, output_activation_max);
+          output_buffer[out_x * output_depth + out_channel] = static_cast<int8_t>(acc);
+        }
+      }
+      return 0;
+    default:
+      return 0;
+  }
+}
+
+uint32_t software_cfu_v1(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
+    if (funct3 != 0) {
+        return 0;
+    }
+
+    // Buffers
+    static int8_t input_buffer[MAX_PADDED_INPUT_SIZE][MAX_INPUT_CHANNELS];
+    static int8_t kernel_weights_buffer[KERNEL_LENGTH][MAX_INPUT_CHANNELS];
+    static uint32_t output_buffer[MAX_INPUT_SIZE];
+
+    // Static variables
+    static int8_t bias         = 0;
+    static int32_t input_offset = 0;
+
+    // Other variables
+    uint32_t address     = rs1;
+    uint32_t value       = rs2;
+    uint32_t address_row = rs1 / MAX_INPUT_CHANNELS;
+    uint32_t address_col = rs1 % MAX_INPUT_CHANNELS;
+
+    // State machine
+    switch (funct7) {
+        case 0:  // Zero out buffers
+            for (uint32_t out_idx = 0; out_idx < MAX_INPUT_SIZE; ++out_idx) {
+                output_buffer[out_idx] = 0;
+            }
+
+            for (uint32_t in_idx = 0; in_idx < MAX_PADDED_INPUT_SIZE; ++in_idx) {
+                for (uint32_t channel_idx = 0; channel_idx < MAX_INPUT_CHANNELS; ++channel_idx) {
+                    input_buffer[in_idx][channel_idx] = 0;
+                }
+            }
+
+            for (uint32_t kernel_idx = 0; kernel_idx < KERNEL_LENGTH; ++kernel_idx) {
+                for (uint32_t channel_idx = 0; channel_idx < MAX_INPUT_CHANNELS; ++channel_idx) {
+                    kernel_weights_buffer[kernel_idx][channel_idx] = 0;
+                }
+            }
+            return 0;
+
+        case 1:  // Write to input buffer
+            input_buffer[address_row][address_col] = (int8_t) value;
+            return 0;
+        case 2:  // Write to kernel weights buffer
+            kernel_weights_buffer[address_row][address_col] = (int8_t) value;
+            return 0;
+        case 3:  // Read output buffer
+            return output_buffer[address];
+        case 4:  // Start computation
+            for (uint32_t out_idx = 0; out_idx < MAX_INPUT_SIZE; ++out_idx) {
+                for (uint32_t channel_idx = 0; channel_idx < MAX_INPUT_CHANNELS; ++channel_idx) {
+                    // uint32_t before = output_buffer[out_idx];
+                    output_buffer[out_idx] +=
+                        input_buffer[(PADDING + out_idx - 3)][channel_idx] *
+                            (kernel_weights_buffer[0][channel_idx] + input_offset) +
+                        input_buffer[(PADDING + out_idx - 2)][channel_idx] *
+                            (kernel_weights_buffer[1][channel_idx] + input_offset) +
+                        input_buffer[(PADDING + out_idx - 1)][channel_idx] *
+                            (kernel_weights_buffer[2][channel_idx] + input_offset) +
+                        input_buffer[(PADDING + out_idx)][channel_idx] *
+                            (kernel_weights_buffer[3][channel_idx] + input_offset) +
+                        input_buffer[(PADDING + out_idx + 1)][channel_idx] *
+                            (kernel_weights_buffer[4][channel_idx] + input_offset) +
+                        input_buffer[(PADDING + out_idx + 2)][channel_idx] *
+                            (kernel_weights_buffer[5][channel_idx] + input_offset) +
+                        input_buffer[(PADDING + out_idx + 3)][channel_idx] *
+                            (kernel_weights_buffer[6][channel_idx] + input_offset) +
+                        input_buffer[(PADDING + out_idx + 4)][channel_idx] *
+                            (kernel_weights_buffer[7][channel_idx] + input_offset);
+                }
+                output_buffer[out_idx] += bias;
+            }
+            return 0;
+        case 5:  // Read input buffer
+            return input_buffer[address_row][address_col];
+        case 6:  // Read kernel weights buffer
+            return kernel_weights_buffer[address_row][address_col];
+        case 7:  // Write bias
+            bias = (int8_t) rs1;
+            return bias;
+        case 8:  // Write input offset
+            input_offset = (int32_t) rs1;
+            return input_offset;
+        default:
+            return 0;
+    }
+}
+
+
+uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
+  return software_cfu_v3(funct3, funct7, rs1, rs2);
+}
