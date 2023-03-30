@@ -129,100 +129,164 @@ inline void ConvPerChannel(
   // // Set input offset
   // cfu_op0(CFU_SET_INPUT_OFFSET, input_offset, 0);
 
-  // // Copy input to the buffer
-  // uint32_t input_buffer_address = 4 * filter_input_depth; // because of paddings
-  // for (int in_x = 0; in_x < input_width; ++in_x) {
-  //   for (int in_channel = 0; in_channel < filter_input_depth; in_channel += 4, input_buffer_address+=4) {
-  //     int32_t input_val = *(uint32_t*) input_data + Offset(input_shape, 0, 0, in_x, in_channel);
-  //     cfu_op0(CFU_WRITE_TO_INPUT_BUFFER, input_buffer_address, input_val);
-  //   }
+
+  
+  uint32_t max_input_channels = 128;
+  uint32_t counter = 0;
+  // Copy input to the buffer
+  for (int in_x = 0; in_x < input_width; ++in_x) {
+    uint32_t input_buffer_address = (4 + in_x) * max_input_channels; 
+    for (int in_channel = 0; in_channel < filter_input_depth; in_channel += 4, input_buffer_address+=4) {
+      // printf("%p - %d\n", input_data + Offset(input_shape, 0, 0, in_x, in_channel), Offset(input_shape, 0, 0, in_x, in_channel));
+      const int8_t *input_vals = &input_data[Offset(input_shape, 0, 0, in_x, in_channel)];
+      uint32_t value4;
+      if (filter_input_depth == 2) {
+        uint16_t value_16 = *(uint16_t *) input_vals;
+        uint16_t *value_ptr_16 = (uint16_t *)&value4;
+        value_ptr_16[0] = value_16;
+        value_ptr_16[1] = 0;
+      } else {
+        value4 = *(uint32_t *) input_vals;
+      }
+      cfu_op0(CFU_WRITE_TO_INPUT_BUFFER, input_buffer_address, value4);
+    ++counter;
+    }
+  }
+
+  // printf("Input[:20]: \n");
+  // for (size_t i = 0; i < 20; ++i) {
+  //   printf("input[%d] = %d\n", i, input_data[i]);
+  //   uint32_t addr = (4 + i / 2) * max_input_channels;
+  //   uint32_t read_input4 = cfu_op0(CFU_READ_INPUT_BUFFER, addr, 0);
+  //   int8_t *read_input1 = (int8_t *) &read_input4;
+  //   if (i % 2)
+  //     printf("input_buffer[%ld] = %d\n", addr, read_input1[1]);
+  //   else 
+  //     printf("input_buffer[%ld] = %d\n", addr, read_input1[0]);
   // }
 
-  // for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
-  //   // Copy kernel to the buffer
-  //   uint32_t kernel_buffer_address = 0;
-  //   for (int filter_x = 0; filter_x <= filter_width; ++filter_x) {
-  //     for (int in_channel = 0; in_channel < filter_input_depth; in_channel += 4, kernel_buffer_address+=4) {
-  //       int32_t filter_val = *(uint32_t*) filter_data + Offset(filter_shape, out_channel, 0, filter_x, in_channel);
-  //       cfu_op0(CFU_WRITE_TO_KERNEL_BUFFER, kernel_buffer_address, filter_val);
-  //     }
-  //   }
+  for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
+    // Copy kernel to the buffer
+    for (int filter_x = 0; filter_x < filter_width; ++filter_x) {
+      uint32_t kernel_buffer_address = filter_x * max_input_channels;
+      for (int in_channel = 0; in_channel < filter_input_depth; in_channel += 4, kernel_buffer_address+=4) {
+        const int8_t *filter_vals = &filter_data[Offset(filter_shape, out_channel, 0, filter_x, in_channel)];
+        int32_t value4;
+        if (filter_input_depth == 2) {
+          uint16_t filter_vals_16 = *(uint16_t *) filter_vals;
+          uint16_t *value_ptr_16 = (uint16_t *)&value4;
+          value_ptr_16[0] = filter_vals_16;
+          value_ptr_16[1] = 0;
+        } else {
+          value4 = *(uint32_t*) filter_vals;
+        }
 
-  //   // Set bias
-  //   if (bias_data) {
-  //     cfu_op0(CFU_SET_BIAS, bias_data[out_channel], 0);
-  //   }
+        cfu_op0(CFU_WRITE_TO_KERNEL_BUFFER, kernel_buffer_address, value4);
+      }
+    }
+
+    // printf("\n\nm=%d, Kernel[:8]: \n", out_channel);
+    // const int8_t *cur_filter_data = &filter_data[Offset(filter_shape, out_channel, 0, 0, 0)];
+    // for (size_t i = 0; i < 16; ++i) {
+    //   printf("kernel[%d] => %d\n", i, cur_filter_data[i]);
+    //   uint32_t addr = (i / 2) * max_input_channels;
+    //   uint32_t read_kernel4 = cfu_op0(CFU_READ_KERNEL_BUFFER, addr, 0);
+    //   int8_t *read_kernel1 = (int8_t *) &read_kernel4;
+    //   if (i % 2)
+    //     printf("kernel_buffer[%ld] => %d\n", addr, read_kernel1[1]);
+    //   else 
+    //     printf("kernel_buffer[%ld] => %d\n", addr, read_kernel1[0]);
+    // }
+
+
+    // Set bias
+    if (bias_data) {
+      cfu_op0(CFU_SET_BIAS, bias_data[out_channel], 0);
+    }
 
   //   // Start computation
   //   cfu_op0(CFU_START_COMPUTATION, 0, 0);
 
-  //   // Copy output from the output buffer
-  //   for (int out_x = 0; out_x < output_width; out_x += 4) { 
-  //     uint32_t acc4 = cfu_op0(CFU_READ_OUTPUT_BUFFER, out_x, 0);
-  //     for (int i = 0; i < 4; ++i) {
-  //       int32_t acc = ((int8_t *) &acc4)[i];
-  //       acc = MultiplyByQuantizedMultiplier(acc, output_multiplier[out_channel], output_shift[out_channel]);
-  //       acc += output_offset;
-  //       acc = std::max(acc, output_activation_min);
-  //       acc = std::min(acc, output_activation_max);
-  //       output_data[Offset(output_shape, 0, 0, out_x, out_channel)] = static_cast<int8_t>(acc);
-  //     }
-  //   }
-  // }
-
-  // Original convolution code
-  for (int batch = 0; batch < batches; ++batch) {
-    for (int out_y = 0; out_y < output_height; ++out_y) {
-      const int in_y_origin = (out_y * stride_height) - pad_height;
-      for (int out_x = 0; out_x < output_width; ++out_x) {
-        const int in_x_origin = (out_x * stride_width) - pad_width;
-        for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
-
-          auto group = out_channel / filters_per_group;
-          int32_t acc = 0;
-          for (int filter_y = 0; filter_y < filter_height; ++filter_y) {
-            const int in_y = in_y_origin + dilation_height_factor * filter_y;
-            for (int filter_x = 0; filter_x < filter_width; ++filter_x) {
-              const int in_x = in_x_origin + dilation_width_factor * filter_x;
-
-              // Zero padding by omitting the areas outside the image.
-              const bool is_point_inside_image =
-                  (in_x >= 0) && (in_x < input_width) && (in_y >= 0) &&
-                  (in_y < input_height);
-
-              if (!is_point_inside_image) {
-                continue;
-              }
-
-              // DEFAULT IMPLEMENTATION
-              for (int in_channel = 0; in_channel < filter_input_depth;
-                   ++in_channel) {
-                int32_t input_val =
-                    input_data[Offset(input_shape, batch, in_y, in_x,
-                                      in_channel + group * filter_input_depth)];
-                int32_t filter_val = filter_data[Offset(
-                    filter_shape, out_channel, filter_y, filter_x, in_channel)];
-                acc += filter_val * (input_val + input_offset);
-              }
-
-            }
-          }
-
-          if (bias_data) {
-            acc += bias_data[out_channel];
-          }
-          acc = MultiplyByQuantizedMultiplier(
-              acc, output_multiplier[out_channel], output_shift[out_channel]);
-          acc += output_offset;
-          acc = std::max(acc, output_activation_min);
-          acc = std::min(acc, output_activation_max);
-          output_data[Offset(output_shape, batch, out_y, out_x, out_channel)] =
-              static_cast<int8_t>(acc);
-        }
-      }
+    // Copy output from the output buffer
+    for (int out_x = 0; out_x < output_width; out_x += 1) { 
+      int32_t acc = cfu_op0(CFU_READ_OUTPUT_BUFFER, out_x, 0);
+      if (out_x == 0) printf("acc = %ld\n", acc);
+      acc = MultiplyByQuantizedMultiplier(acc, output_multiplier[out_channel], output_shift[out_channel]);
+      acc += output_offset;
+      acc = std::max(acc, output_activation_min);
+      acc = std::min(acc, output_activation_max);
+      output_data[Offset(output_shape, 0, 0, out_x, out_channel)] = static_cast<int8_t>(acc);
+      if (out_x == 0) printf("quant acc = %ld\n", acc);
     }
   }
 
+  // // Original convolution code
+  // for (int batch = 0; batch < batches; ++batch) {
+  //   for (int out_y = 0; out_y < output_height; ++out_y) {
+  //     const int in_y_origin = (out_y * stride_height) - pad_height;
+  //     for (int out_x = 0; out_x < output_width; ++out_x) {
+  //       const int in_x_origin = (out_x * stride_width) - pad_width;
+  //       for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
+
+  //         auto group = out_channel / filters_per_group;
+  //         int32_t acc = 0;
+  //         for (int filter_y = 0; filter_y < filter_height; ++filter_y) {
+  //           const int in_y = in_y_origin + dilation_height_factor * filter_y;
+  //           for (int filter_x = 0; filter_x < filter_width; ++filter_x) {
+  //             const int in_x = in_x_origin + dilation_width_factor * filter_x;
+
+  //             // Zero padding by omitting the areas outside the image.
+  //             const bool is_point_inside_image =
+  //                 (in_x >= 0) && (in_x < input_width) && (in_y >= 0) &&
+  //                 (in_y < input_height);
+
+  //             if (!is_point_inside_image) {
+  //               continue;
+  //             }
+
+  //             // DEFAULT IMPLEMENTATION
+  //             for (int in_channel = 0; in_channel < filter_input_depth;
+  //                  ++in_channel) {
+  //               int32_t input_val =
+  //                   input_data[Offset(input_shape, batch, in_y, in_x,
+  //                                     in_channel + group * filter_input_depth)];
+  //               int32_t filter_val = filter_data[Offset(
+  //                   filter_shape, out_channel, filter_y, filter_x, in_channel)];
+
+  //               if (out_x == 0) printf("filter_val: %ld, input_val: %ld, input_offset: %ld, acc+=%ld\n", filter_val, input_val, input_offset, filter_val * (input_val + input_offset));
+
+  //               acc += filter_val * (input_val + input_offset);
+  //             }
+
+  //           }
+  //         }
+  //         if (out_x == 0)  printf("acc = %ld\n", acc);
+
+  //         if (bias_data) {
+  //           acc += bias_data[out_channel];
+  //         }
+  //         acc = MultiplyByQuantizedMultiplier(
+  //             acc, output_multiplier[out_channel], output_shift[out_channel]);
+  //         acc += output_offset;
+  //         acc = std::max(acc, output_activation_min);
+  //         acc = std::min(acc, output_activation_max);
+  //         output_data[Offset(output_shape, batch, out_y, out_x, out_channel)] =
+  //             static_cast<int8_t>(acc);
+  //         if (out_x == 0) printf("quant acc = %ld\n", acc);
+  //       }
+  //     }
+  //   }
+  // }
+  
+  printf("Output: \n");
+  for (size_t x = 0; x < 10; ++x) {
+    for (size_t out_c = 0; out_c < 10; ++out_c) {
+      int offset = Offset(output_shape, 0, 0, x, out_c);
+      printf("output[%d][%d] = %d, offset = %d\n", x, out_c, output_data[offset], offset);
+    }
+  }
+
+  abort();
 
 }
 

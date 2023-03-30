@@ -64,14 +64,14 @@ initial begin
     #10 cmd = 1; row = row + 1; col = 0; inp0 = input_address; inp1 = 0;
 
     // Input values
-    #10 cmd = 1; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd7, 8'd0, 8'd0, 8'd0};
-    #10 cmd = 1; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd6, 8'd1, 8'd0, 8'd0};
-    #10 cmd = 1; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd5, 8'd2, 8'd0, 8'd0};
-    #10 cmd = 1; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd4, 8'd3, 8'd0, 8'd0};
-    #10 cmd = 1; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd3, 8'd4, 8'd0, 8'd0};
-    #10 cmd = 1; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd2, 8'd5, 8'd0, 8'd0};
-    #10 cmd = 1; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd1, 8'd6, 8'd0, 8'd0};
-    #10 cmd = 1; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd0, 8'd7, 8'd0, 8'd0};
+    #10 cmd = 1; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd0, 8'd0, 8'd0, 8'd7};
+    #10 cmd = 1; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd0, 8'd0, 8'd1, 8'd6};
+    #10 cmd = 1; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd0, 8'd0, 8'd2, 8'd5};
+    #10 cmd = 1; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd0, 8'd0, 8'd3, 8'd4};
+    #10 cmd = 1; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd0, 8'd0, 8'd4, 8'd3};
+    #10 cmd = 1; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd0, 8'd0, 8'd5, 8'd2};
+    #10 cmd = 1; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd0, 8'd0, 8'd6, 8'd1};
+    #10 cmd = 1; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd0, 8'd0, 8'd7, 8'd0};
 
     // Paddings at the end
     #10 cmd = 1; row = row + 1; col = 0; inp0 = input_address; inp1 = 0;
@@ -90,14 +90,14 @@ initial begin
     #10 cmd = 5; row = row + 1; col = 0; inp0 = input_address;
 
     #10 $display("Write data to kernel weights buffer");
-        cmd = 2; row = 0;       col = 0; inp0 = input_address; inp1 = {8'd2, 8'd1, 8'd0, 8'd0};
-    #10 cmd = 2; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd2, 8'd1, 8'd0, 8'd0};
-    #10 cmd = 2; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd2, 8'd1, 8'd0, 8'd0};
-    #10 cmd = 2; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd2, 8'd1, 8'd0, 8'd0};
-    #10 cmd = 2; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd2, 8'd1, 8'd0, 8'd0};
-    #10 cmd = 2; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd2, 8'd1, 8'd0, 8'd0};
-    #10 cmd = 2; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd2, 8'd1, 8'd0, 8'd0};
-    #10 cmd = 2; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd2, 8'd1, 8'd0, 8'd0};
+        cmd = 2; row = 0;       col = 0; inp0 = input_address; inp1 = {8'd0, 8'd0, 8'd1, 8'd2};
+    #10 cmd = 2; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd0, 8'd0, 8'd1, 8'd2};
+    #10 cmd = 2; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd0, 8'd0, 8'd1, 8'd2};
+    #10 cmd = 2; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd0, 8'd0, 8'd1, 8'd2};
+    #10 cmd = 2; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd0, 8'd0, 8'd1, 8'd2};
+    #10 cmd = 2; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd0, 8'd0, 8'd1, 8'd2};
+    #10 cmd = 2; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd0, 8'd0, 8'd1, 8'd2};
+    #10 cmd = 2; row = row + 1; col = 0; inp0 = input_address; inp1 = {8'd0, 8'd0, 8'd1, 8'd2};
 
     #10 $display("Read data from kernel weights buffer");
         cmd = 6; row = 0;       col = 0; inp0 = input_address;

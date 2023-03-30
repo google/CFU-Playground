@@ -13,5 +13,10 @@
 # limitations under the License.
 
 # Format consistent with Tensorflow
-BasedOnStyle: Google
-DerivePointerAlignment: false
+# BasedOnStyle: Google
+# DerivePointerAlignment: false
+
+BasedOnStyle: Chromium
+IndentWidth: 2
+ColumnLimit: 100
+AlignConsecutiveAssignments: true
