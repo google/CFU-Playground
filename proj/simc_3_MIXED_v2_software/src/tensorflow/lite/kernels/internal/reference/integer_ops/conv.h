@@ -43,7 +43,8 @@ namespace reference_integer_ops {
 // #define ConvPerChannel ConvPerChannelOriginal
 // #define ConvPerChannel ConvPerChannelCFU
 // #define ConvPerChannel ConvPerChannelCFUSoftware
-#define ConvPerChannel ConvPerChannelCFUSoftware2
+// #define ConvPerChannel ConvPerChannelCFUSoftware2
+#define ConvPerChannel ConvPerChannelCFUSoftware3
 // #define ConvPerChannel ConvPerChannelOriginalSimple
 #define DEBUG_PRINTS 1
 
@@ -93,6 +94,81 @@ inline int32_t multiply_by_quant_mult(int32_t x, int32_t quantized_multiplier, i
       right_shift);
 }
 }  // namespace
+
+inline void ConvPerChannelCFUSoftware3(const ConvParams& params,
+                                       const int32_t* output_multiplier,
+                                       const int32_t* output_shift,
+                                       const RuntimeShape& input_shape,
+                                       const int8_t* input_data,
+                                       const RuntimeShape& filter_shape,
+                                       const int8_t* filter_data,
+                                       const RuntimeShape& bias_shape,
+                                       const int32_t* bias_data,
+                                       const RuntimeShape& output_shape,
+                                       int8_t* output_data) {
+  // static int call = 0;
+  // Initialize cfu
+  cfu_op0(0, 0, 0);
+
+  // Get parameters.
+  const int32_t input_offset = params.input_offset;  // r = s(q - Z)
+  cfu_op0(7, input_offset, 0);
+
+  const int pad_width = 3;
+  (void)pad_width;
+
+  const int32_t output_offset = -128;
+  cfu_op0(8, output_offset, 0);
+  const int32_t output_activation_min = -128;
+  cfu_op0(9, output_activation_min, 0);
+  const int32_t output_activation_max = 127;
+  cfu_op0(10, output_activation_max, 0);
+
+  const int output_depth = MatchingDim(filter_shape, 0, output_shape, 3);
+  cfu_op0(11, output_depth, 0);
+
+  const int input_width = input_shape.Dims(2);
+  cfu_op0(12, input_width, 0);
+
+  const int filter_width = 8;
+
+  const int input_depth = filter_shape.Dims(3);
+  cfu_op0(13, input_depth, 0);
+
+  // const int output_width = output_shape.Dims(2);
+  const int output_width = input_width;
+
+  // Copy input
+  for (int in_x = 0; in_x < input_width; ++in_x) {
+    for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
+      int addr = in_x * input_depth + in_channel;
+      cfu_op0(1, addr, input_data[addr]);
+    }
+  }
+
+  for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
+    // Copy output_multiplier, output_shift, bias
+    cfu_op0(15, output_multiplier[out_channel], 0);
+    cfu_op0(16, output_shift[out_channel], 0);
+    cfu_op0(14, bias_data[out_channel], 0);
+
+    // Copy kernel
+    for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
+      for (int kernel_x = 0; kernel_x < filter_width; ++kernel_x) {
+        int addr = out_channel * (8 * input_depth) + kernel_x * input_depth + in_channel;
+        cfu_op0(2, kernel_x * input_depth + in_channel, filter_data[addr]);
+      }
+    }
+
+    // Start Convolution
+    cfu_op0(17, 0, 0);
+
+    for (int out_x = 0; out_x < output_width; ++out_x) {
+      int addr          = out_x * output_depth + out_channel;
+      output_data[addr] = static_cast<int8_t>(cfu_op0(3, out_x, 0));
+    }
+  }
+}
 
 inline void ConvPerChannelCFUSoftware2(const ConvParams& params,
                                        const int32_t* output_multiplier,
@@ -172,52 +248,6 @@ inline void ConvPerChannelCFUSoftware2(const ConvParams& params,
       output_data[addr] = static_cast<int8_t>(cfu_op0(3, addr, 0));
     }
   }
-
-  // input_shape = 1 x 1 x input_width x input_channels
-  // kerne_shape = output_channels x 1 x 8 x input_channels
-  // output_shaoe = 1 x 1 x output_width x output_channels
-
-  // for (int out_x = 0; out_x < output_width; ++out_x) {
-  //   const int in_x_origin = out_x - pad_width;
-  //   for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
-  //     int addr    = out_x * output_depth + out_channel;
-  //     int32_t acc = 0;
-  //     for (int filter_x = 0; filter_x < filter_width; ++filter_x) {
-  //       const int in_x = in_x_origin + filter_x;
-
-  //       // Zero padding by omitting the areas outside the image.
-  //       const bool is_point_inside_image = (in_x >= 0) && (in_x < input_width);
-  //       if (!is_point_inside_image) {
-  //         continue;
-  //       }
-
-  //       for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-  //         int32_t input_val = input_data[in_x * input_depth + in_channel];
-  //         int32_t filter_val =
-  //             filter_data[out_channel * (8 * input_depth) + filter_x * input_depth + in_channel];
-
-  //         acc += filter_val * (input_val + input_offset);
-  //       }
-  //     }
-  //     if (bias_data) {
-  //       acc += bias_data[out_channel];
-  //     }
-
-  //     acc = multiply_by_quant_mult(acc, output_multiplier[out_channel], output_shift[out_channel]);
-
-  //     acc += output_offset;
-  //     acc            = std::max(acc, output_activation_min);
-  //     acc            = std::min(acc, output_activation_max);
-  //     int8_t acc_res = static_cast<int8_t>(acc);
-  //     if (acc_res != output_data[addr]) {
-  //       printf("[call %d] output_width: %d, addr: %d, %d != %d\n", call, output_width, addr,
-  //              acc_res, output_data[addr]);
-  //       abort();
-  //     }
-  //     // output_data[out_x * output_depth + out_channel] = static_cast<int8_t>(acc);
-  //   }
-  // }
-  // ++call;
 }
 
 // Fixed-point per-channel-quantization convolution reference kernel.
