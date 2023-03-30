@@ -105,6 +105,7 @@ inline void ConvPerChannelCFUSoftware2(const ConvParams& params,
                                        const int32_t* bias_data,
                                        const RuntimeShape& output_shape,
                                        int8_t* output_data) {
+  // static int call = 0;
   // Initialize cfu
   cfu_op0(0, 0, 0);
 
@@ -138,7 +139,6 @@ inline void ConvPerChannelCFUSoftware2(const ConvParams& params,
 
   // Copy output_multiplier, output_shift, bias
   for (int i = 0; i < output_depth; ++i) {
-    printf("[CPU] output_shift[%d] = %ld\n", i, output_shift[i]);
     cfu_op0(15, i, output_multiplier[i]);
     cfu_op0(16, i, output_shift[i]);
     cfu_op0(14, i, bias_data[i]);
@@ -177,55 +177,47 @@ inline void ConvPerChannelCFUSoftware2(const ConvParams& params,
   // kerne_shape = output_channels x 1 x 8 x input_channels
   // output_shaoe = 1 x 1 x output_width x output_channels
 
-  for (int out_x = 0; out_x < output_width; ++out_x) {
-    const int in_x_origin = out_x - pad_width;
-    for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
-      int32_t acc = 0;
-      for (int filter_x = 0; filter_x < filter_width; ++filter_x) {
-        const int in_x = in_x_origin + filter_x;
+  // for (int out_x = 0; out_x < output_width; ++out_x) {
+  //   const int in_x_origin = out_x - pad_width;
+  //   for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
+  //     int addr    = out_x * output_depth + out_channel;
+  //     int32_t acc = 0;
+  //     for (int filter_x = 0; filter_x < filter_width; ++filter_x) {
+  //       const int in_x = in_x_origin + filter_x;
 
-        // Zero padding by omitting the areas outside the image.
-        const bool is_point_inside_image = (in_x >= 0) && (in_x < input_width);
-        if (!is_point_inside_image) {
-          continue;
-        }
+  //       // Zero padding by omitting the areas outside the image.
+  //       const bool is_point_inside_image = (in_x >= 0) && (in_x < input_width);
+  //       if (!is_point_inside_image) {
+  //         continue;
+  //       }
 
-        // DEFAULT IMPLEMENTATION
-        for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-          int32_t input_val = input_data[in_x * input_depth + in_channel];
-          int32_t filter_val =
-              filter_data[out_channel * (8 * input_depth) + filter_x * input_depth + in_channel];
+  //       for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
+  //         int32_t input_val = input_data[in_x * input_depth + in_channel];
+  //         int32_t filter_val =
+  //             filter_data[out_channel * (8 * input_depth) + filter_x * input_depth + in_channel];
 
-          acc += filter_val * (input_val + input_offset);
-        }
-      }
-      if (bias_data) {
-        acc += bias_data[out_channel];
-      }
+  //         acc += filter_val * (input_val + input_offset);
+  //       }
+  //     }
+  //     if (bias_data) {
+  //       acc += bias_data[out_channel];
+  //     }
 
-      int addr = out_x * output_depth + out_channel;
-      if (addr == 1056) {
-        printf("[CPU] acc = %ld\n", acc);
-        printf("[CPU] %ld - %ld - %ld\n", acc, output_multiplier[out_channel], output_shift[out_channel]);
-      }
+  //     acc = multiply_by_quant_mult(acc, output_multiplier[out_channel], output_shift[out_channel]);
 
-      acc = multiply_by_quant_mult(acc, output_multiplier[out_channel], output_shift[out_channel]);
-      if (addr == 1056) {
-        printf("[CPU] acc = %ld\n", acc);
-      }
-
-      acc += output_offset;
-      acc            = std::max(acc, output_activation_min);
-      acc            = std::min(acc, output_activation_max);
-      int8_t acc_res = static_cast<int8_t>(acc);
-      if (acc_res != output_data[addr]) {
-        printf("output_width: %d, addr: %d, %d != %d\n", output_width, addr, acc_res,
-               output_data[addr]);
-        abort();
-      }
-      // output_data[out_x * output_depth + out_channel] = static_cast<int8_t>(acc);
-    }
-  }
+  //     acc += output_offset;
+  //     acc            = std::max(acc, output_activation_min);
+  //     acc            = std::min(acc, output_activation_max);
+  //     int8_t acc_res = static_cast<int8_t>(acc);
+  //     if (acc_res != output_data[addr]) {
+  //       printf("[call %d] output_width: %d, addr: %d, %d != %d\n", call, output_width, addr,
+  //              acc_res, output_data[addr]);
+  //       abort();
+  //     }
+  //     // output_data[out_x * output_depth + out_channel] = static_cast<int8_t>(acc);
+  //   }
+  // }
+  // ++call;
 }
 
 // Fixed-point per-channel-quantization convolution reference kernel.
