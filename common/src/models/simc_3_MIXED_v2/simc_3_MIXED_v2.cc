@@ -247,37 +247,25 @@ static void test_conv1d_cfu_v4() {
   printf("\n==================== Start CFU test (check output) ====================\n");
   cfu_op0(0, 0, 0);
 
-  int32_t input_offset             = -2;
-  int32_t output_offset            = -3;
-
-  // input offset
-  cfu_op0(70, 0, input_offset);
-  input_offset = cfu_op0(71, 0, 0);
-  test_assert_equal(-2, input_offset, "Input offset write/read failed");
-
-  // output_offset
-  cfu_op0(80, 0, output_offset);
-  output_offset = cfu_op0(81, 0, 0);
-  test_assert_equal(-3, output_offset, "Output offset write/read failed");
-
-  // input buffer
-  cfu_op0(10, 0, -100);       // first address 
-  cfu_op0(10, 131071, -20); // last  address
-  int8_t input_val = cfu_op0(40, 0, 0);
-  test_assert_equal(-100, input_val, "input_buffer write/read failed");
-  input_val = cfu_op0(40, 131071, 0);
-  test_assert_equal(-20, input_val, "input_buffer write/read failed");
-
-  // kernel weights buffer
-  cfu_op0(20, 0, 3);
-  int8_t kernel_weight = cfu_op0(50, 0, 0);
-  test_assert_equal(3, kernel_weight, "kernel_weights_buffer write/read failed");
-
-  int32_t test_value = cfu_op0(1, 0, 0);
-  test_assert_equal(3 * (-100 + input_offset), test_value, "test_value write/read failed");
+  // cfu_op0(20, 0, -2);
+  // cfu_op0(1, 0, 100);
+  // printf("%d\n", (int8_t) cfu_op0(4, 0, 0));
+  // cfu_op0(2, 0, -100);
+  // printf("%d\n", (int8_t) cfu_op0(5, 0, 0));
+  // int32_t test_val = cfu_op0(3, 0, 0);
+  // test_assert_equal(-100 * (100 - 2), test_val, "test val failed");
 
 
-
+  // int32_t input_offset = -2;
+  // cfu_op0(20, 0, input_offset);
+  // cfu_op0(10, 0, 100);    // input[0] = 100
+  // cfu_op0(11, 30, -100);   // kernel[30] = -100
+  // cfu_op0(25, 0, 100);    // input/output width = 100
+  // cfu_op0(26, 0, 10);     // input_deptj = 10
+  // cfu_op0(40, 0, 0);      // Start computation
+  // int32_t test_val = cfu_op0(12, 0, 0);   // output[0]
+  // test_assert_equal(-100 * (100 - 2), test_val, "input_buffer write/read failed");
+  
 
   printf("\n==================== End CFU test ====================\n");
 }

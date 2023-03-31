@@ -120,52 +120,52 @@ uint32_t software_cfu_v4(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
     case 10:  // Write to input buffer
       input_buffer[address] = (int8_t)value;
       return 0;
-    case 20:  // Write to kernel weights buffer
+    case 11:  // Write to kernel weights buffer
       kernel_weights_buffer[address] = (int8_t)value;
       return 0;
-    case 30:  // Read output buffer
+    case 12:  // Read output buffer
       return output_buffer[address];
-    case 40:  // Read input buffer
+    case 13:  // Read input buffer
       return input_buffer[address];
-    case 50:  // Read kernel weights buffer
+    case 14:  // Read kernel weights buffer
       return kernel_weights_buffer[address];
-    case 60:  // Zero out output buffer
+    case 15:  // Zero out output buffer
       for (uint32_t out_idx = 0; out_idx < MAX_INPUT_SIZE; ++out_idx) {
         output_buffer[out_idx] = 0;
       }
       return 0;
-    case 70:  // Write input offset
+    case 20:  // Write input offset
       input_offset = (int32_t)value;
       return input_offset;
-    case 80:  // Write output_offset
+    case 21:  // Write output_offset
       output_offset = (int32_t)value;
       return output_offset;
-    case 90:  // Write output_activation_min
+    case 22:  // Write output_activation_min
       output_activation_min = (int32_t)value;
       return output_activation_min;
-    case 100:  // Write output_activation_max
+    case 23:  // Write output_activation_max
       output_activation_max = (int32_t)value;
       return output_activation_max;
-    case 110:  // Write output_depth
+    case 24:  // Write output_depth
       output_depth = (int)value;
       return output_depth;
-    case 120:  // Write input_output_width
+    case 25:  // Write input_output_width
       input_output_width = (int)value;
       return input_output_width;
-    case 130:  // Write input_depth
+    case 26:  // Write input_depth
       input_depth = (int)value;
       return input_depth;
-    case 140:  // Write bias_buffer
+    case 27:  // Write bias_buffer
       bias = (int32_t)value;
       return 0;
-    case 150:  // Write output_multiplier_buffer
+    case 28:  // Write output_multiplier_buffer
       output_multiplier = (int32_t)value;
       return 0;
-    case 160:  // Write output_shift_buffer
+    case 29:  // Write output_shift_buffer
       output_shift = (int32_t)value;
       return 0;
 
-    case 170:  // Start computation
+    case 40:  // Start computation
       for (int out_x = 0; out_x < MAX_INPUT_SIZE; ++out_x) {
         const int in_x_origin = out_x - (PADDING - 1);
         // int32_t acc           = 0;
