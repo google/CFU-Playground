@@ -160,6 +160,8 @@ inline void ConvPerChannelCFUSoftware4(const ConvParams& params,
 
       output_data[addr] = acc;
     }
+    // Zero out output buffer
+    cfu_op0(6, 0, 0);
   }
 }
 
