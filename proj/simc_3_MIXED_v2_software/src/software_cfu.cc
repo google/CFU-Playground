@@ -117,71 +117,65 @@ uint32_t software_cfu_v4(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
       output_shift      = 0;
       return 0;
 
-    case 1:  // Write to input buffer
+    case 10:  // Write to input buffer
       input_buffer[address] = (int8_t)value;
       return 0;
-    case 2:  // Write to kernel weights buffer
+    case 20:  // Write to kernel weights buffer
       kernel_weights_buffer[address] = (int8_t)value;
       return 0;
-    case 3:  // Read output buffer
+    case 30:  // Read output buffer
       return output_buffer[address];
-    case 4:  // Read input buffer
+    case 40:  // Read input buffer
       return input_buffer[address];
-    case 5:  // Read kernel weights buffer
+    case 50:  // Read kernel weights buffer
       return kernel_weights_buffer[address];
-    case 6:  // Zero out output buffer
+    case 60:  // Zero out output buffer
       for (uint32_t out_idx = 0; out_idx < MAX_INPUT_SIZE; ++out_idx) {
         output_buffer[out_idx] = 0;
       }
       return 0;
-    case 7:  // Write input offset
-      input_offset = (int32_t)rs1;
+    case 70:  // Write input offset
+      input_offset = (int32_t)value;
       return input_offset;
-    case 8:  // Write output_offset
-      output_offset = (int32_t)rs1;
+    case 80:  // Write output_offset
+      output_offset = (int32_t)value;
       return output_offset;
-    case 9:  // Write output_activation_min
-      output_activation_min = (int32_t)rs1;
+    case 90:  // Write output_activation_min
+      output_activation_min = (int32_t)value;
       return output_activation_min;
-    case 10:  // Write output_activation_max
-      output_activation_max = (int32_t)rs1;
+    case 100:  // Write output_activation_max
+      output_activation_max = (int32_t)value;
       return output_activation_max;
-    case 11:  // Write output_depth
-      output_depth = (int)rs1;
+    case 110:  // Write output_depth
+      output_depth = (int)value;
       return output_depth;
-    case 12:  // Write input_output_width
-      input_output_width = (int)rs1;
+    case 120:  // Write input_output_width
+      input_output_width = (int)value;
       return input_output_width;
-    case 13:  // Write input_depth
-      input_depth = (int)rs1;
+    case 130:  // Write input_depth
+      input_depth = (int)value;
       return input_depth;
-    case 14:  // Write bias_buffer
-      bias = (int32_t)rs1;
+    case 140:  // Write bias_buffer
+      bias = (int32_t)value;
       return 0;
-    case 15:  // Write output_multiplier_buffer
-      output_multiplier = (int32_t)rs1;
+    case 150:  // Write output_multiplier_buffer
+      output_multiplier = (int32_t)value;
       return 0;
-    case 16:  // Write output_shift_buffer
-      output_shift = (int32_t)rs1;
+    case 160:  // Write output_shift_buffer
+      output_shift = (int32_t)value;
       return 0;
 
-    case 17:  // Start computation
+    case 170:  // Start computation
       for (int out_x = 0; out_x < MAX_INPUT_SIZE; ++out_x) {
         const int in_x_origin = out_x - (PADDING - 1);
         // int32_t acc           = 0;
         for (int filter_x = 0; filter_x < 8; ++filter_x) {
           const int in_x = in_x_origin + filter_x;
-
-          // Zero padding by omitting the areas outside the image.
-
           for (int in_channel = 0; in_channel < MAX_INPUT_CHANNELS; ++in_channel) {
-            const bool is_point_inside_image =
-                (in_x >= 0) && (in_x < input_output_width) && (in_channel < input_depth);
-            int32_t input_val  = input_buffer[in_x * input_depth + in_channel];
-            int32_t filter_val = kernel_weights_buffer[filter_x * input_depth + in_channel];
-
-            output_buffer[out_x] +=
-                is_point_inside_image ? filter_val * (input_val + input_offset) : 0;
+            if ((in_x >= 0) && (in_x < input_output_width) && (in_channel < input_depth)) {
+              output_buffer[out_x] += kernel_weights_buffer[filter_x * input_depth + in_channel] 
+                * (input_buffer[in_x * input_depth + in_channel] + input_offset);
+            }
           }
         }
 
@@ -226,7 +220,7 @@ uint32_t software_cfu_v3(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
 
   // State machine
   switch (funct7) {
-    case 0:  // Zero out buffers
+    case 00:  // Zero out buffers
       for (uint32_t out_idx = 0; out_idx < MAX_INPUT_SIZE; ++out_idx) {
         output_buffer[out_idx] = 0;
       }
@@ -244,53 +238,53 @@ uint32_t software_cfu_v3(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
       output_shift      = 0;
       return 0;
 
-    case 1:  // Write to input buffer
+    case 10:  // Write to input buffer
       input_buffer[address] = (int8_t)value;
       return 0;
-    case 2:  // Write to kernel weights buffer
+    case 20:  // Write to kernel weights buffer
       kernel_weights_buffer[address] = (int8_t)value;
       return 0;
-    case 3:  // Read output buffer
+    case 30:  // Read output buffer
       return output_buffer[address];
-    case 4:  // Read input buffer
+    case 40:  // Read input buffer
       return input_buffer[address];
-    case 5:  // Read kernel weights buffer
+    case 50:  // Read kernel weights buffer
       return kernel_weights_buffer[address];
-    // case 6:  // Write bias
+    // case 60:  // Write bias
     //   bias = (int8_t)rs1;
     //   return bias;
-    case 7:  // Write input offset
+    case 70:  // Write input offset
       input_offset = (int32_t)rs1;
       return input_offset;
-    case 8:  // Write output_offset
+    case 80:  // Write output_offset
       output_offset = (int32_t)rs1;
       return output_offset;
-    case 9:  // Write output_activation_min
+    case 90:  // Write output_activation_min
       output_activation_min = (int32_t)rs1;
       return output_activation_min;
-    case 10:  // Write output_activation_max
+    case 100:  // Write output_activation_max
       output_activation_max = (int32_t)rs1;
       return output_activation_max;
-    case 11:  // Write output_depth
+    case 110:  // Write output_depth
       output_depth = (int)rs1;
       return output_depth;
-    case 12:  // Write input_output_width
+    case 120:  // Write input_output_width
       input_output_width = (int)rs1;
       return input_output_width;
-    case 13:  // Write input_depth
+    case 130:  // Write input_depth
       input_depth = (int)rs1;
       return input_depth;
-    case 14:  // Write bias_buffer
+    case 140:  // Write bias_buffer
       bias = (int32_t)rs1;
       return 0;
-    case 15:  // Write output_multiplier_buffer
+    case 150:  // Write output_multiplier_buffer
       output_multiplier = (int32_t)rs1;
       return 0;
-    case 16:  // Write output_shift_buffer
+    case 160:  // Write output_shift_buffer
       output_shift = (int32_t)rs1;
       return 0;
 
-    case 17:  // Start computation
+    case 170:  // Start computation
       for (int out_x = 0; out_x < input_output_width; ++out_x) {
         const int in_x_origin = out_x - (PADDING - 1);
         int32_t acc           = 0;
@@ -353,7 +347,7 @@ uint32_t software_cfu_v2(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
 
   // State machine
   switch (funct7) {
-    case 0:  // Zero out buffers
+    case 00:  // Zero out buffers
       for (uint32_t out_idx = 0; out_idx < MAX_INPUT_SIZE * MAX_OUTPUT_CHANNELS; ++out_idx) {
         output_buffer[out_idx] = 0;
       }
@@ -374,53 +368,53 @@ uint32_t software_cfu_v2(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
       }
       return 0;
 
-    case 1:  // Write to input buffer
+    case 10:  // Write to input buffer
       input_buffer[address] = (int8_t)value;
       return 0;
-    case 2:  // Write to kernel weights buffer
+    case 20:  // Write to kernel weights buffer
       kernel_weights_buffer[address] = (int8_t)value;
       return 0;
-    case 3:  // Read output buffer
+    case 30:  // Read output buffer
       return output_buffer[address];
-    case 4:  // Read input buffer
+    case 40:  // Read input buffer
       return input_buffer[address];
-    case 5:  // Read kernel weights buffer
+    case 50:  // Read kernel weights buffer
       return kernel_weights_buffer[address];
-    // case 6:  // Write bias
+    // case 60:  // Write bias
     //   bias = (int8_t)rs1;
     //   return bias;
-    case 7:  // Write input offset
+    case 70:  // Write input offset
       input_offset = (int32_t)rs1;
       return input_offset;
-    case 8:  // Write output_offset
+    case 80:  // Write output_offset
       output_offset = (int32_t)rs1;
       return output_offset;
-    case 9:  // Write output_activation_min
+    case 90:  // Write output_activation_min
       output_activation_min = (int32_t)rs1;
       return output_activation_min;
-    case 10:  // Write output_activation_max
+    case 100:  // Write output_activation_max
       output_activation_max = (int32_t)rs1;
       return output_activation_max;
-    case 11:  // Write output_depth
+    case 110:  // Write output_depth
       output_depth = (int)rs1;
       return output_depth;
-    case 12:  // Write input_output_width
+    case 120:  // Write input_output_width
       input_output_width = (int)rs1;
       return input_output_width;
-    case 13:  // Write input_depth
+    case 130:  // Write input_depth
       input_depth = (int)rs1;
       return input_depth;
-    case 14:  // Write bias_buffer
+    case 140:  // Write bias_buffer
       bias_buffer[address] = (int32_t)value;
       return 0;
-    case 15:  // Write output_multiplier_buffer
+    case 150:  // Write output_multiplier_buffer
       output_multiplier_buffer[address] = (int32_t)value;
       return 0;
-    case 16:  // Write output_shift_buffer
+    case 160:  // Write output_shift_buffer
       output_shift_buffer[address] = (int32_t)value;
       return 0;
 
-    case 17:  // Start computation
+    case 170:  // Start computation
       for (int out_x = 0; out_x < input_output_width; ++out_x) {
         const int in_x_origin = out_x - (PADDING - 1);
         for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
@@ -480,7 +474,7 @@ uint32_t software_cfu_v1(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
 
   // State machine
   switch (funct7) {
-    case 0:  // Zero out buffers
+    case 00:  // Zero out buffers
       for (uint32_t out_idx = 0; out_idx < MAX_INPUT_SIZE; ++out_idx) {
         output_buffer[out_idx] = 0;
       }
@@ -498,15 +492,15 @@ uint32_t software_cfu_v1(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
       }
       return 0;
 
-    case 1:  // Write to input buffer
+    case 10:  // Write to input buffer
       input_buffer[address_row][address_col] = (int8_t)value;
       return 0;
-    case 2:  // Write to kernel weights buffer
+    case 20:  // Write to kernel weights buffer
       kernel_weights_buffer[address_row][address_col] = (int8_t)value;
       return 0;
-    case 3:  // Read output buffer
+    case 30:  // Read output buffer
       return output_buffer[address];
-    case 4:  // Start computation
+    case 40:  // Start computation
       for (uint32_t out_idx = 0; out_idx < MAX_INPUT_SIZE; ++out_idx) {
         for (uint32_t channel_idx = 0; channel_idx < MAX_INPUT_CHANNELS; ++channel_idx) {
           // uint32_t before = output_buffer[out_idx];
@@ -530,14 +524,14 @@ uint32_t software_cfu_v1(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
         output_buffer[out_idx] += bias;
       }
       return 0;
-    case 5:  // Read input buffer
+    case 50:  // Read input buffer
       return input_buffer[address_row][address_col];
-    case 6:  // Read kernel weights buffer
+    case 60:  // Read kernel weights buffer
       return kernel_weights_buffer[address_row][address_col];
-    case 7:  // Write bias
+    case 70:  // Write bias
       bias = (int8_t)rs1;
       return bias;
-    case 8:  // Write input offset
+    case 80:  // Write input offset
       input_offset = (int32_t)rs1;
       return input_offset;
     default:

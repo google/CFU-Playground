@@ -31,47 +31,47 @@ extern "C" {
 
 // This method creates interpreter, arena, loads model to memory
 static void simc_3_MIXED_v2_init(void) {
-    tflite_load_model(simc_3_MIXED_v2_model, simc_3_MIXED_v2_model_len);
+  tflite_load_model(simc_3_MIXED_v2_model, simc_3_MIXED_v2_model_len);
 }
 
 // float dequantized_output[11];
 
 // Run classification, after input has been loaded
 static int8_t* simc_3_MIXED_v2_classify() {
-    printf("Running simc_3_MIXED_v2 model classification\n");
-    tflite_classify();
+  printf("Running simc_3_MIXED_v2 model classification\n");
+  tflite_classify();
 
-    // Process the inference results.
-    int8_t* output = (int8_t*)tflite_get_output();
-    return output;
+  // Process the inference results.
+  int8_t* output = (int8_t*)tflite_get_output();
+  return output;
 }
 
 #define NUM_CLASSES 11
 
 /* Returns true if failed */
 static bool perform_one_test(int8_t* input, int8_t* expected_output, int8_t epsilon) {
-    bool failed = false;
-    tflite_set_input(input);
-    int8_t* output = simc_3_MIXED_v2_classify();
-    for (size_t i = 0; i < NUM_CLASSES; ++i) {
-        int8_t y_true = expected_output[i];
-        int8_t y_pred = output[i];
-        // printf("expected[%d] = %d, actual[%d] = %d\n", i, y_true, i, y_pred);
+  bool failed = false;
+  tflite_set_input(input);
+  int8_t* output = simc_3_MIXED_v2_classify();
+  for (size_t i = 0; i < NUM_CLASSES; ++i) {
+    int8_t y_true = expected_output[i];
+    int8_t y_pred = output[i];
+    // printf("expected[%d] = %d, actual[%d] = %d\n", i, y_true, i, y_pred);
 
-        int32_t delta = CFU_MAX(y_true, y_pred) - CFU_MIN(y_true, y_pred);
-        // printf("epsilon = %d, delta = %ld, max=%d, min=%d\n", epsilon, delta,
-        //   CFU_MAX(y_true, y_pred), CFU_MIN(y_true, y_pred));
-        if (delta > epsilon) {
-            printf(
-                "*** simc_3_MIXED_v2 test failed %d (actual) != %d (pred). "
-                "Class=%u\n",
-                y_true, y_pred, i);
+    int32_t delta = CFU_MAX(y_true, y_pred) - CFU_MIN(y_true, y_pred);
+    // printf("epsilon = %d, delta = %ld, max=%d, min=%d\n", epsilon, delta,
+    //   CFU_MAX(y_true, y_pred), CFU_MIN(y_true, y_pred));
+    if (delta > epsilon) {
+      printf(
+          "*** simc_3_MIXED_v2 test failed %d (actual) != %d (pred). "
+          "Class=%u\n",
+          y_true, y_pred, i);
 
-            failed = true;
-        } else {
-        }
+      failed = true;
+    } else {
     }
-    return failed;
+  }
+  return failed;
 }
 
 #ifndef CFU_CONV1d_V3_PARAMS
@@ -88,19 +88,19 @@ static bool perform_one_test(int8_t* input, int8_t* expected_output, int8_t epsi
 #define CFU_SET_INPUT_OFFSET 8
 #endif  // CFU_CONV1d_V3_PARAMS
 
-// void printBits(size_t const size, void const* const ptr) {
-//     unsigned char* b = (unsigned char*)ptr;
-//     unsigned char byte;
-//     int i, j;
+void printBits(size_t const size, void const* const ptr) {
+  unsigned char* b = (unsigned char*)ptr;
+  unsigned char byte;
+  int i, j;
 
-//     for (i = size - 1; i >= 0; i--) {
-//         for (j = 7; j >= 0; j--) {
-//             byte = (b[i] >> j) & 1;
-//             printf("%u", byte);
-//         }
-//     }
-//     puts("");
-// }
+  for (i = size - 1; i >= 0; i--) {
+    for (j = 7; j >= 0; j--) {
+      byte = (b[i] >> j) & 1;
+      printf("%u", byte);
+    }
+  }
+  puts("");
+}
 
 /*
   input_uin8t_t4  should be of size 4 (2*4 + 2*4 bytes)
@@ -160,13 +160,26 @@ static bool perform_one_test(int8_t* input, int8_t* expected_output, int8_t epsi
 //   printf("\n==================== End CFU test ====================\n");
 // }
 
+[[maybe_unused]] static void test_assert_equal(int8_t v1, int8_t v2, const char* msg = "") {
+  if (v1 == v2)
+    return;
+  printf("*** Assert error: %d != %d :%s\n", v1, v2, msg);
+  abort();
+}
 
-// static void test_assert_equal(uint32_t v1, uint32_t v2, const char* msg = "") {
-//     if (v1 == v2)
-//         return;
-//     printf("*** Assert error: %ld != %ld :%s\n", v1, v2, msg);
-//     abort();
-// }
+[[maybe_unused]] static void test_assert_equal(int32_t v1, int32_t v2, const char* msg = "") {
+  if (v1 == v2)
+    return;
+  printf("*** Assert error: %ld != %ld :%s\n", v1, v2, msg);
+  abort();
+}
+
+[[maybe_unused]] static void test_assert_equal(uint32_t v1, uint32_t v2, const char* msg = "") {
+  if (v1 == v2)
+    return;
+  printf("*** Assert error: %ld != %ld :%s\n", v1, v2, msg);
+  abort();
+}
 
 // static void test_software_cfu(uint32_t* input,
 //                               uint32_t* input_addresses,
@@ -230,142 +243,153 @@ static bool perform_one_test(int8_t* input, int8_t* expected_output, int8_t epsi
 //     printf("\n==================== End CFU test ====================\n");
 // }
 
+static void test_conv1d_cfu_v4() {
+  printf("\n==================== Start CFU test (check output) ====================\n");
+  cfu_op0(0, 0, 0);
+
+  int32_t input_offset             = -2;
+  int32_t output_offset            = -3;
+
+  // input offset
+  cfu_op0(70, 0, input_offset);
+  input_offset = cfu_op0(71, 0, 0);
+  test_assert_equal(-2, input_offset, "Input offset write/read failed");
+
+  // output_offset
+  cfu_op0(80, 0, output_offset);
+  output_offset = cfu_op0(81, 0, 0);
+  test_assert_equal(-3, output_offset, "Output offset write/read failed");
+
+  // input buffer
+  cfu_op0(10, 0, -100);       // first address 
+  cfu_op0(10, 131071, -20); // last  address
+  int8_t input_val = cfu_op0(40, 0, 0);
+  test_assert_equal(-100, input_val, "input_buffer write/read failed");
+  input_val = cfu_op0(40, 131071, 0);
+  test_assert_equal(-20, input_val, "input_buffer write/read failed");
+
+  // kernel weights buffer
+  cfu_op0(20, 0, 3);
+  int8_t kernel_weight = cfu_op0(50, 0, 0);
+  test_assert_equal(3, kernel_weight, "kernel_weights_buffer write/read failed");
+
+  int32_t test_value = cfu_op0(1, 0, 0);
+  test_assert_equal(3 * (-100 + input_offset), test_value, "test_value write/read failed");
+
+
+
+
+  printf("\n==================== End CFU test ====================\n");
+}
+
 static void do_tests() {
-    // #define max_input_channels 128
-    // #define n_input 16
-    // #define n_kernel_weights 8
-    // uint32_t input_uin8t_t4[n_input] = {
-    //   0, 0, 0, 0,       // Left padding
-    //   0x00000007, 0x00000106, 0x00000205, 0x00000304, 0x00000403, 0x00000502, 0x00000601,
-    //   0x00000700,
-    //   // 0x70000000, 0x60100000, 0x50200000, 0x40300000, 0x30400000, 0x20500000, 0x10600000,
-    //   0x00700000, 0, 0, 0, 0        // Right padding
-    //   };
-    // uint32_t input_addresses[n_input];
-    // for (size_t i = 0; i < n_input; ++i) {
-    //   input_addresses[i] = i * max_input_channels;
-    // }
+  // #define max_input_channels 128
+  // #define n_input 16
+  // #define n_kernel_weights 8
+  // uint32_t input_uin8t_t4[n_input] = {
+  //   0, 0, 0, 0,       // Left padding
+  //   0x00000007, 0x00000106, 0x00000205, 0x00000304, 0x00000403, 0x00000502, 0x00000601,
+  //   0x00000700,
+  //   // 0x70000000, 0x60100000, 0x50200000, 0x40300000, 0x30400000, 0x20500000, 0x10600000,
+  //   0x00700000, 0, 0, 0, 0        // Right padding
+  //   };
+  // uint32_t input_addresses[n_input];
+  // for (size_t i = 0; i < n_input; ++i) {
+  //   input_addresses[i] = i * max_input_channels;
+  // }
 
-    // uint32_t kernel_weights_uint8_t4[n_kernel_weights] = {
-    //   0x00000102, 0x00000102, 0x00000102, 0x00000102, 0x00000102, 0x00000102, 0x00000102,
-    //   0x00000102
-    //   // 0x01010000, 0x01010000, 0x01010000, 0x01010000, 0x01010000, 0x01010000, 0x01010000,
-    //   0x01010000
-    // };
-    // uint32_t kernel_addresses[n_kernel_weights];
-    // for (size_t i = 0; i < n_kernel_weights; ++i) {
-    //   kernel_addresses[i] = i * max_input_channels;
-    // }
+  // uint32_t kernel_weights_uint8_t4[n_kernel_weights] = {
+  //   0x00000102, 0x00000102, 0x00000102, 0x00000102, 0x00000102, 0x00000102, 0x00000102,
+  //   0x00000102
+  //   // 0x01010000, 0x01010000, 0x01010000, 0x01010000, 0x01010000, 0x01010000, 0x01010000,
+  //   0x01010000
+  // };
+  // uint32_t kernel_addresses[n_kernel_weights];
+  // for (size_t i = 0; i < n_kernel_weights; ++i) {
+  //   kernel_addresses[i] = i * max_input_channels;
+  // }
 
-    // uint8_t bias = 1;
+  // uint8_t bias = 1;
 
-    // test_conv1d_cfu_v3(input_uin8t_t4, input_addresses, n_input,
-    //                    kernel_weights_uint8_t4, kernel_addresses, n_kernel_weights,
-    //                    bias);
+  // test_conv1d_cfu_v3(input_uin8t_t4, input_addresses, n_input,
+  //                    kernel_weights_uint8_t4, kernel_addresses, n_kernel_weights,
+  //                    bias);
 
+  // #define max_input_channels 128
+  // #define n_input 2 * (4 * 2 + 8)
+  // #define n_kernel_weights 2 * 8
+  // #define n_expected_output 8
+  //     uint32_t input_uin8t_t4[n_input] = {
+  //         0, 0, 0, 0, 0, 0, 0, 0,                                                 // Left padding
+  //         7, 0, 6, 1, 5, 2, 4, 3, 3, 4, 2, 5, 1, 6, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0  // Right
+  //         padding
+  //     };
+  //     uint32_t input_addresses[n_input];
+  //     for (size_t i = 0; i < n_input; ++i) {
+  //         input_addresses[i] = (i / 2) * max_input_channels + i % 2;
+  //     }
 
+  //     uint32_t kernel_weights_uint8_t4[n_kernel_weights] = {2, 1, 2, 1, 2, 1, 2, 1,
+  //                                                           2, 1, 2, 1, 2, 1, 2, 1};
+  //     uint32_t kernel_addresses[n_kernel_weights];
+  //     for (size_t i = 0; i < n_kernel_weights; ++i) {
+  //         kernel_addresses[i] = (i / 2) * max_input_channels + i % 2;
+  //     }
 
-// #define max_input_channels 128
-// #define n_input 2 * (4 * 2 + 8)
-// #define n_kernel_weights 2 * 8
-// #define n_expected_output 8
-//     uint32_t input_uin8t_t4[n_input] = {
-//         0, 0, 0, 0, 0, 0, 0, 0,                                                 // Left padding
-//         7, 0, 6, 1, 5, 2, 4, 3, 3, 4, 2, 5, 1, 6, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0  // Right padding
-//     };
-//     uint32_t input_addresses[n_input];
-//     for (size_t i = 0; i < n_input; ++i) {
-//         input_addresses[i] = (i / 2) * max_input_channels + i % 2;
-//     }
+  //     uint32_t expected_output[n_expected_output] = {61, 70, 78, 85, 71, 58, 46, 35};
 
-//     uint32_t kernel_weights_uint8_t4[n_kernel_weights] = {2, 1, 2, 1, 2, 1, 2, 1,
-//                                                           2, 1, 2, 1, 2, 1, 2, 1};
-//     uint32_t kernel_addresses[n_kernel_weights];
-//     for (size_t i = 0; i < n_kernel_weights; ++i) {
-//         kernel_addresses[i] = (i / 2) * max_input_channels + i % 2;
-//     }
+  //     uint32_t bias         = 1;
+  //     uint32_t input_offset = 0;
 
-//     uint32_t expected_output[n_expected_output] = {61, 70, 78, 85, 71, 58, 46, 35};
+  //     test_software_cfu(input_uin8t_t4, input_addresses, n_input, kernel_weights_uint8_t4,
+  //                       kernel_addresses, n_kernel_weights, expected_output, n_expected_output,
+  //                       bias, input_offset);
+  test_conv1d_cfu_v4();
 
-//     uint32_t bias         = 1;
-//     uint32_t input_offset = 0;
+  int8_t epsilon = 20;
+  bool failed    = false;
 
-//     test_software_cfu(input_uin8t_t4, input_addresses, n_input, kernel_weights_uint8_t4,
-//                       kernel_addresses, n_kernel_weights, expected_output, n_expected_output, bias,
-//                       input_offset);
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_16QAM, pred_simc_3_MIXED_v2_16QAM, epsilon);
 
-    int8_t epsilon = 20;
-    bool failed    = false;
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_64QAM, pred_simc_3_MIXED_v2_64QAM, epsilon);
 
-    failed = failed ||
-             perform_one_test(test_data_simc_3_MIXED_v2_16QAM, pred_simc_3_MIXED_v2_16QAM,
-             epsilon);
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_8PSK, pred_simc_3_MIXED_v2_8PSK, epsilon);
 
-    failed = failed || perform_one_test(
-      test_data_simc_3_MIXED_v2_64QAM,
-      pred_simc_3_MIXED_v2_64QAM,
-      epsilon
-    );
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_B_FM, pred_simc_3_MIXED_v2_B_FM, epsilon);
 
-    failed = failed || perform_one_test(
-      test_data_simc_3_MIXED_v2_8PSK,
-      pred_simc_3_MIXED_v2_8PSK,
-      epsilon
-    );
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_BPSK, pred_simc_3_MIXED_v2_BPSK, epsilon);
 
-    failed = failed || perform_one_test(
-      test_data_simc_3_MIXED_v2_B_FM,
-      pred_simc_3_MIXED_v2_B_FM,
-      epsilon
-    );
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_CPFSK, pred_simc_3_MIXED_v2_CPFSK, epsilon);
 
-    failed = failed || perform_one_test(
-      test_data_simc_3_MIXED_v2_BPSK,
-      pred_simc_3_MIXED_v2_BPSK,
-      epsilon
-    );
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_DSB_AM, pred_simc_3_MIXED_v2_DSB_AM, epsilon);
 
-    failed = failed || perform_one_test(
-      test_data_simc_3_MIXED_v2_CPFSK,
-      pred_simc_3_MIXED_v2_CPFSK,
-      epsilon
-    );
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_GFSK, pred_simc_3_MIXED_v2_GFSK, epsilon);
 
-    failed = failed || perform_one_test(
-      test_data_simc_3_MIXED_v2_DSB_AM,
-      pred_simc_3_MIXED_v2_DSB_AM,
-      epsilon
-    );
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_PAM4, pred_simc_3_MIXED_v2_PAM4, epsilon);
 
-    failed = failed || perform_one_test(
-      test_data_simc_3_MIXED_v2_GFSK,
-      pred_simc_3_MIXED_v2_GFSK,
-      epsilon
-    );
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_QPSK, pred_simc_3_MIXED_v2_QPSK, epsilon);
 
-    failed = failed || perform_one_test(
-      test_data_simc_3_MIXED_v2_PAM4,
-      pred_simc_3_MIXED_v2_PAM4,
-      epsilon
-    );
+  // failed = failed || perform_one_test(
+  //   test_data_simc_3_MIXED_v2_SSB_AM,
+  //   pred_simc_3_MIXED_v2_SSB_AM,
+  //   epsilon
+  // );
 
-    failed = failed || perform_one_test(
-      test_data_simc_3_MIXED_v2_QPSK,
-      pred_simc_3_MIXED_v2_QPSK,
-      epsilon
-    );
-
-    // failed = failed || perform_one_test(
-    //   test_data_simc_3_MIXED_v2_SSB_AM,
-    //   pred_simc_3_MIXED_v2_SSB_AM,
-    //   epsilon
-    // );
-
-    if (failed) {
-        printf("FAIL simc_3_MIXED_v2 tests failed\n");
-    } else {
-        printf("OK   simc_3_MIXED_v2 tests passed\n");
-    }
+  if (failed) {
+    printf("FAIL simc_3_MIXED_v2 tests failed\n");
+  } else {
+    printf("OK   simc_3_MIXED_v2 tests passed\n");
+  }
 }
 
 static struct Menu MENU = {
@@ -379,6 +403,6 @@ static struct Menu MENU = {
 
 // For integration into menu system
 void simc_3_MIXED_v2_menu() {
-    simc_3_MIXED_v2_init();
-    menu_run(&MENU);
+  simc_3_MIXED_v2_init();
+  menu_run(&MENU);
 }

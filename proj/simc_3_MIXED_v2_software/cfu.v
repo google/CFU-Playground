@@ -65,6 +65,11 @@ reg signed [INT32_SIZE-1:0] bias = 32'd0;
 reg signed [INT32_SIZE-1:0] output_multiplier = 32'd0;
 reg signed [INT32_SIZE-1:0] output_shift = 32'd0;
 
+wire signed [INT32_SIZE-1:0] test_value = kernel_weights_buffer[0] * (input_buffer[0] + input_offset);
+
+reg signed [INT32_SIZE-1:0] input_val = 32'd0;
+reg signed [INT32_SIZE-1:0] filter_val = 32'd0;
+
 
 always @(posedge clk) begin
     // Note that processor is little-endian
@@ -87,118 +92,102 @@ always @(posedge clk) begin
             end   
         end 
 
+        1: begin
+            ret <= test_value;
+        end
+
         // Write buffers
-        1: begin    // Write input buffer
+        10: begin    // Write input buffer
             input_buffer[address] <= value[7:0];
         end
-        2: begin    // Write kernel weights buffer
+        20: begin    // Write kernel weights buffer
             // Note that processor is little-endian
             kernel_weights_buffer[address] <= value[7:0];
         end
 
         // Read buffers
-        3: begin    // Read output buffer
+        30: begin    // Read output buffer
             // Note that processor is little-endian
-            ret[7 : 0] <= output_buffer[address][31:24];
-            ret[15: 8] <= output_buffer[address][23:16];
-            ret[23:16] <= output_buffer[address][15: 8];
-            ret[31:24] <= output_buffer[address][7 : 0];
+            ret <= output_buffer[address];
         end
-        4: begin
+        40: begin
             ret[7 : 0] <= input_buffer[address];
-            ret[15: 8] <= 0;
-            ret[23:16] <= 0;
-            ret[31:24] <= 0;
         end
-        5: begin
+        50: begin
             ret[7 : 0] <= kernel_weights_buffer[address];
-            ret[15: 8] <= 0;
-            ret[23:16] <= 0;
-            ret[31:24] <= 0;
         end
-        6: begin    // Zero out output buffer
+        60: begin    // Zero out output buffer
             for (reg [INT32_SIZE-1:0] out_x = 0; out_x < MAX_INPUT_SIZE; out_x = out_x + 1) begin
                 output_buffer[out_x] = 0;
             end 
         end
 
         // Write parameters
-        7: begin
-            input_offset[7 : 0] <= value[31:24];
-            input_offset[15: 8] <= value[23:16];
-            input_offset[23:16] <= value[15: 8];
-            input_offset[31:24] <= value[7 : 0];
+        70: begin
+            input_offset <= value;
         end
-        8: begin
-            output_offset[7 : 0] <= value[31:24];
-            output_offset[15: 8] <= value[23:16];
-            output_offset[23:16] <= value[15: 8];
-            output_offset[31:24] <= value[7 : 0];
-        end
-        9: begin
-            output_activation_min[7 : 0] <= value[31:24];
-            output_activation_min[15: 8] <= value[23:16];
-            output_activation_min[23:16] <= value[15: 8];
-            output_activation_min[31:24] <= value[7 : 0];
-        end
-        10: begin
-            output_activation_max[7 : 0] <= value[31:24];
-            output_activation_max[15: 8] <= value[23:16];
-            output_activation_max[23:16] <= value[15: 8];
-            output_activation_max[31:24] <= value[7 : 0];
-        end
-        11: begin
-            output_depth[7 : 0] <= value[31:24];
-            output_depth[15: 8] <= value[23:16];
-            output_depth[23:16] <= value[15: 8];
-            output_depth[31:24] <= value[7 : 0];
-        end
-        12: begin
-            input_output_width[7 : 0] <= value[31:24];
-            input_output_width[15: 8] <= value[23:16];
-            input_output_width[23:16] <= value[15: 8];
-            input_output_width[31:24] <= value[7 : 0];
-        end
-        13: begin
-            input_depth[7 : 0] <= value[31:24];
-            input_depth[15: 8] <= value[23:16];
-            input_depth[23:16] <= value[15: 8];
-            input_depth[31:24] <= value[7 : 0];
-        end
-        14: begin
-            bias[7 : 0] <= value[31:24];
-            bias[15: 8] <= value[23:16];
-            bias[23:16] <= value[15: 8];
-            bias[31:24] <= value[7 : 0];
-        end
-        15: begin
-            output_multiplier[7 : 0] <= value[31:24];
-            output_multiplier[15: 8] <= value[23:16];
-            output_multiplier[23:16] <= value[15: 8];
-            output_multiplier[31:24] <= value[7 : 0];
-        end
-        16: begin
-            output_shift[7 : 0] <= value[31:24];
-            output_shift[15: 8] <= value[23:16];
-            output_shift[23:16] <= value[15: 8];
-            output_shift[31:24] <= value[7 : 0];
+        71: begin
+            ret <= input_offset;
         end
 
-        17: begin    // Start computation
+        80: begin
+            output_offset <= value;
+        end
+        81: begin
+            ret <= output_offset;
+        end
+
+        90: begin
+            output_activation_min <= value;
+        end
+        100: begin
+            output_activation_max <= value;
+        end
+        110: begin
+            output_depth <= value;
+        end
+        120: begin
+            input_output_width <= value;
+        end
+        130: begin
+            input_depth <= value;
+        end
+        140: begin
+            bias <= value;
+        end
+        150: begin
+            output_multiplier <= value;
+        end
+        160: begin
+            output_shift <= value;
+        end
+
+        170: begin    // Start computation
             // output_buffer_valid = 0;
             for (reg signed [INT32_SIZE-1:0] out_x = 0; out_x < MAX_INPUT_SIZE; out_x = out_x + 1) begin
+                reg signed [INT32_SIZE-1:0] in_x_origin = out_x - 3;
                 for (reg signed [INT32_SIZE-1:0] filter_x = 0; filter_x < 8; filter_x = filter_x + 1) begin
+                    reg signed [INT32_SIZE-1:0] in_x = in_x_origin + filter_x;
                     for (reg signed [INT32_SIZE-1:0] in_channel = 0; in_channel < MAX_INPUT_CHANNELS; in_channel = in_channel + 1) begin
-                      if ( ((out_x - 3 + filter_x) >= 0) && ((out_x - 3 + filter_x) <= input_output_width) && (in_channel < input_depth)) begin
-                          output_buffer[out_x] += 
-                            input_buffer[(out_x - 3 + filter_x) * input_depth + in_channel] * (kernel_weights_buffer[0 * input_depth + in_channel] + input_offset);
-                      end
+                        if ( (in_x >= 0) && (in_x <= input_output_width) && (in_channel < input_depth)) begin
+                            output_buffer[out_x] +=  kernel_weights_buffer[filter_x * input_depth + in_channel]
+                                    * (input_buffer[in_x * input_depth + in_channel] + input_offset);
+                        end
                     end
                 end
                 output_buffer[out_x] += bias; 
             end
             // output_buffer_valid = 1;
         end
+        171: begin
+            input_val <= value;
+        end
+        172: begin
+            filter_val <= value;
+        end
+        // 173: begin
+        //     ret <= filter_val + 
+        // end
     endcase
 end
     
