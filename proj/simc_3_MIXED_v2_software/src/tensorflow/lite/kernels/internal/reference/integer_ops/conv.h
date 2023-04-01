@@ -109,12 +109,9 @@ inline void ConvPerChannelCFUHardware6(const ConvParams& params,
   const int32_t output_offset = -128;
   cfu_op0(21, 0, output_offset);
   const int32_t output_activation_min = -128;
-  cfu_op0(22, 0, output_activation_min);
   const int32_t output_activation_max = 127;
-  cfu_op0(23, 0, output_activation_max);
 
   const int output_depth = MatchingDim(filter_shape, 0, output_shape, 3);
-  cfu_op0(24, 0, output_depth);
 
   const int input_width = input_shape.Dims(2);
   cfu_op0(25, 0, input_width);
