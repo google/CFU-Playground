@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 import glob
 import random
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 from pathlib import Path
 import os
 import pickle
@@ -249,8 +249,8 @@ def load_data_simc_v1(classes, path=Path("train_data"), model_dtype=np.float32, 
     return np.array(labels), np.expand_dims(np.array(data), axis=1)
 
 
-def _postprocess_radioml_v1(raw_ds: Dict, to_1024: bool, transpose: bool):
-    ds_keys = list(raw_ds.keys())
+def _postprocess_radioml_v1(raw_ds: Dict, to_1024: bool, transpose: bool, minimum_snr: int):
+    ds_keys = [k for k in raw_ds.keys() if k[1] >= minimum_snr]
     classes = list(set(map(lambda v: v[0], ds_keys)))
     class_name_to_class_idx = {name: idx for idx, name in enumerate(classes)}
 
@@ -269,8 +269,9 @@ def _postprocess_radioml_v1(raw_ds: Dict, to_1024: bool, transpose: bool):
 
 
     cur_idx = 0
-    for (class_name, _), raw_data in raw_ds.items():
-
+    for (class_name, snr), raw_data in raw_ds.items():
+        if snr < minimum_snr:
+            continue
         if to_1024:
             for frame_idx in range(0, len(raw_data), 8):
                 frame_1024 = np.hstack([raw_data[idx] for idx in range(frame_idx, frame_idx+8)])
@@ -292,7 +293,7 @@ def _postprocess_radioml_v1(raw_ds: Dict, to_1024: bool, transpose: bool):
 
 # Returns {(modulation, snr): frames}               if not postprocess
 #         (labels, frames, classes)                 if postprocess
-def load_data_radioml_v1(ds_path: str, postprocess=True, to_1024=True, transpose=True):
+def load_data_radioml_v1(ds_path: str, postprocess=True, to_1024=True, transpose=True, minimum_snr: Optional[int]=None):
     with open(ds_path, 'rb') as crmrn_file:
         raw_ds = pickle.load(crmrn_file, encoding="bytes")
     decoded_raw_ds = {}
@@ -302,4 +303,6 @@ def load_data_radioml_v1(ds_path: str, postprocess=True, to_1024=True, transpose
 
     if not postprocess:
         return raw_ds
-    return _postprocess_radioml_v1(raw_ds, to_1024, transpose)
+    if minimum_snr is None:
+        minimum_snr = -100
+    return _postprocess_radioml_v1(raw_ds, to_1024, transpose, minimum_snr)
