@@ -107,7 +107,6 @@ inline void ConvPerChannelCFUHardware6(const ConvParams& params,
   (void)pad_width;
 
   const int32_t output_offset = -128;
-  cfu_op0(21, 0, output_offset);
   const int32_t output_activation_min = -128;
   const int32_t output_activation_max = 127;
 
