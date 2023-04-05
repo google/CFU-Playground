@@ -144,25 +144,28 @@ inline void ConvPerChannelCFUHardware7(const ConvParams& params,
       }
     }
 
-    for (int out_x = 0; out_x < output_width; ++out_x) {
-      const int in_x_origin = out_x - pad_width;
-
-      // Copy input
-      for (int filter_x = 0; filter_x < 8; ++filter_x) {
-        int32_t in_x = in_x_origin + filter_x;
-        for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-          int buffer_addr = filter_x * input_depth + in_channel;
-          int8_t value    = -input_offset;
-          if ((in_x >= 0) && (in_x < input_width)) {
-            int input_addr = in_x * input_depth + in_channel;
-            value          = input_data[input_addr];
-          }
-          cfu_op0(10, buffer_addr, value);
-          // printf("input_buffer[%d] <= %d\n", buffer_addr, value);
+    int input_cur_x = -pad_width;
+    // Copy input
+    for (int filter_x = 0; filter_x < 8; ++filter_x) {
+      for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
+        int buffer_addr = filter_x * input_depth + in_channel;
+        int8_t value    = -input_offset;
+        if ((input_cur_x >= 0) && (input_cur_x < input_width)) {
+          int input_addr = input_cur_x * input_depth + in_channel;
+          value          = input_data[input_addr];
         }
+        cfu_op0(10, buffer_addr, value);
       }
+      ++input_cur_x;
+    }
+
+    int start_filter_x = 0;
+
+    for (int out_x = 0; out_x < output_width; ++out_x) {
+      // const int in_x_origin = out_x - pad_width;
 
       // cfu_op0(42, 0, in_x_origin);
+      cfu_op0(44, 0, start_filter_x);
       cfu_op0(41, 0, 0);
       int32_t acc = cfu_op0(43, 0, 0);
       // printf("out_x: %d, acc: %ld\n", out_x, acc);
@@ -178,6 +181,23 @@ inline void ConvPerChannelCFUHardware7(const ConvParams& params,
       acc               = std::min(acc, output_activation_max);
       int addr          = out_x * output_depth + out_channel;
       output_data[addr] = static_cast<int8_t>(acc);
+
+      // Copy input
+      if (out_x == (output_width - 1)) {
+        continue;
+      }
+      for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
+        int buffer_addr = start_filter_x * input_depth + in_channel;
+        int8_t value    = -input_offset;
+        if ((input_cur_x >= 0) && (input_cur_x < input_width)) {
+          int input_addr = input_cur_x * input_depth + in_channel;
+          value          = input_data[input_addr];
+        }
+        cfu_op0(10, buffer_addr, value);
+      }
+      ++input_cur_x;
+      start_filter_x = (start_filter_x + 1) % 8;
+
     }
     // abort();
   }
