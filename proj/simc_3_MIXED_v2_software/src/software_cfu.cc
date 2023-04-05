@@ -35,7 +35,7 @@
 #define KERNEL_LENGTH 8
 
 template <typename IntegerType>
-inline IntegerType rounding_divide_by_POT(IntegerType x, int exponent) {
+IntegerType rounding_divide_by_POT(IntegerType x, int exponent) {
   assert(exponent >= 0);
   assert(exponent <= 31);
   const IntegerType mask      = (1ll << exponent) - 1;
@@ -46,7 +46,7 @@ inline IntegerType rounding_divide_by_POT(IntegerType x, int exponent) {
   return (x >> exponent) + (((remainder > threshold) ? ~0 : 0) & one);
 }
 
-inline std::int32_t saturating_rounding_doubling_high_mul(std::int32_t a, std::int32_t b) {
+std::int32_t saturating_rounding_doubling_high_mul(std::int32_t a, std::int32_t b) {
   bool overflow = a == b && a == std::numeric_limits<std::int32_t>::min();
   std::int64_t a_64(a);
   std::int64_t b_64(b);
@@ -62,6 +62,85 @@ inline int32_t multiply_by_quant_mult(int32_t x, int32_t quantized_multiplier, i
   return rounding_divide_by_POT(
       saturating_rounding_doubling_high_mul(x * (1 << left_shift), quantized_multiplier),
       right_shift);
+}
+
+uint32_t software_cfu_v7(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
+  if (funct3 != 0) {
+    return 0;
+  }
+
+  // Buffers
+  // static int8_t input_buffer[MAX_INPUT_SIZE * MAX_INPUT_CHANNELS];
+  static int8_t input_buffer[KERNEL_LENGTH * MAX_INPUT_CHANNELS];
+  static int8_t kernel_weights_buffer[KERNEL_LENGTH * MAX_INPUT_CHANNELS];
+
+  static int32_t input_offset   = 0;
+  static int input_output_width = 0;
+  static int input_depth        = 0;
+
+  static int32_t in_x_origin = 0;
+  (void) in_x_origin;
+  static int32_t acc         = 0;
+
+  // Other variables
+  uint32_t address = rs1;
+  uint32_t value   = rs2;
+
+  // State machine
+  switch (funct7) {
+    case 0:  // Zero out buffers
+      // for (uint32_t in_idx = 0; in_idx < MAX_INPUT_SIZE * MAX_INPUT_CHANNELS; ++in_idx) {
+      for (uint32_t in_idx = 0; in_idx < KERNEL_LENGTH * MAX_INPUT_CHANNELS; ++in_idx) {
+        input_buffer[in_idx] = 0;
+      }
+
+      for (uint32_t kernel_idx = 0; kernel_idx < KERNEL_LENGTH * MAX_INPUT_CHANNELS; ++kernel_idx) {
+        kernel_weights_buffer[kernel_idx] = 0;
+      }
+
+      return 0;
+      // case 1: // zero out input buffer
+
+    case 10:  // Write to input buffer
+      input_buffer[address] = (int8_t)value;
+      return 0;
+    case 11:  // Write to kernel weights buffer
+      kernel_weights_buffer[address] = (int8_t)value;
+      return 0;
+    case 13:  // Read input buffer
+      return input_buffer[address];
+    case 14:  // Read kernel weights buffer
+      return kernel_weights_buffer[address];
+    case 20:  // Write input offset
+      input_offset = (int32_t)value;
+      return input_offset;
+    case 25:  // Write input_output_width
+      input_output_width = (int)value;
+      return input_output_width;
+    case 26:  // Write input_depth
+      input_depth = (int)value;
+      return input_depth;
+
+    case 41:  // Start computation
+      acc = 0;
+      for (int filter_x = 0; filter_x < 8; ++filter_x) {
+        for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
+          // if ((in_x >= 0) && (in_x < input_output_width) && (in_channel < input_depth)) {
+          int addr = filter_x * input_depth + in_channel;
+          // printf("acc += %d * (%d + %ld)\n", kernel_weights_buffer[addr], input_buffer[addr], input_offset);
+          acc += kernel_weights_buffer[addr] * (input_buffer[addr] + input_offset);
+          // }
+        }
+      }
+      return 0;
+    case 42:
+      in_x_origin = value;
+      return 0;
+    case 43:
+      return acc;
+    default:
+      return 0;
+  }
 }
 
 uint32_t software_cfu_v6(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
@@ -616,5 +695,5 @@ uint32_t software_cfu_v1(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
 }
 
 uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
-  return software_cfu_v6(funct3, funct7, rs1, rs2);
+  return software_cfu_v7(funct3, funct7, rs1, rs2);
 }

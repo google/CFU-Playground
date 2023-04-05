@@ -102,63 +102,6 @@ void printBits(size_t const size, void const* const ptr) {
   puts("");
 }
 
-/*
-  input_uin8t_t4  should be of size 4 (2*4 + 2*4 bytes)
-  kernel_weights_uint8_t4 should be of size 2 (2*4=8 bytes)
-*/
-// static void test_conv1d_cfu_v3(
-//   uint32_t* input_uin8t_t4,
-//   uint32_t* input_addresses,
-//   uint32_t  n_input,
-
-//   uint32_t* kernel_weights_uint8_t4,
-//   uint32_t* kernel_addresses,
-//   uint32_t  n_kernel_weights,
-
-//   uint8_t bias
-// ) {
-//   printf("\n==================== Start CFU test (check output) ====================\n");
-//   cfu_op0(CFU_INITIALIZE, 0, 0);
-
-//   printf(">>> Write data to the input buffer\n");
-//   for (size_t i = 0; i < n_input; ++i) {
-//     cfu_op0(CFU_WRITE_TO_INPUT_BUFFER, input_addresses[i], input_uin8t_t4[i]);
-//   }
-
-//   printf(">>> Read data from the input buffer\n");
-//   for (size_t i = 0; i < n_input; ++i) {
-//     uint32_t read_input_uint8_t4 = cfu_op0(CFU_READ_INPUT_BUFFER, input_addresses[i], 0);
-//     printf("input_buffer[%ld:%ld] = %lx\n", input_addresses[i], input_addresses[i] + 4,
-//     read_input_uint8_t4);
-//   }
-
-//   printf(">>> Write data to kernel weights buffer\n");
-//   for (size_t i = 0; i < n_kernel_weights; ++i) {
-//     cfu_op0(CFU_WRITE_TO_KERNEL_BUFFER, kernel_addresses[i], kernel_weights_uint8_t4[i]);
-//   }
-
-//   printf(">>> Read data from kernel buffer\n");
-//   for (size_t i = 0; i < n_kernel_weights; ++i) {
-//     uint32_t read_kernel_uint8_t4 = cfu_op0(CFU_READ_KERNEL_BUFFER, kernel_addresses[i], 0);
-//     printf("kernel_weights_buffer[%ld:%ld] = %lx\n", kernel_addresses[i], kernel_addresses[i] +
-//     4, read_kernel_uint8_t4);
-//   }
-
-//   printf(">>> Set bias\n");
-//   cfu_op0(CFU_SET_BIAS, bias, 0);
-
-//   printf("Start calculations\n");
-//   cfu_op0(CFU_START_COMPUTATION, 0, 0);
-
-//   printf("Read output\n");
-//   for (size_t output_address = 0; output_address < (n_input - 4 * 2) / 4; ++output_address) {
-//     uint32_t read_output_uint8_t4 = cfu_op0(CFU_READ_OUTPUT_BUFFER, output_address * 4, 0) ;
-//     int32_t *read_output = (int32_t*)&read_output_uint8_t4;
-//     printf("output_buffer[%d] = %lx\n", output_address * 4, *read_output);
-//     // printBits(sizeof(uint32_t), &read_output_uint8_t4);
-//   }
-//   printf("\n==================== End CFU test ====================\n");
-// }
 
 [[maybe_unused]] static void test_assert_equal(int8_t v1, int8_t v2, const char* msg = "") {
   if (v1 == v2)
@@ -181,67 +124,6 @@ void printBits(size_t const size, void const* const ptr) {
   abort();
 }
 
-// static void test_software_cfu(uint32_t* input,
-//                               uint32_t* input_addresses,
-//                               uint32_t n_input,
-
-//                               uint32_t* kernel_weights,
-//                               uint32_t* kernel_addresses,
-//                               uint32_t n_kernel_weights,
-
-//                               uint32_t* expected_output,
-//                               uint32_t n_expexted_output,
-
-//                               uint32_t bias,
-//                               uint32_t input_offset
-
-// ) {
-//     printf("\n==================== Start CFU test (check output) ====================\n");
-//     cfu_op0(CFU_INITIALIZE, 0, 0);
-
-//     printf(">>> Write data to the input buffer\n");
-//     for (size_t i = 0; i < n_input; ++i) {
-//         cfu_op0(CFU_WRITE_TO_INPUT_BUFFER, input_addresses[i], input[i]);
-//         printf("input_buffer[%ld] <= %lx\n", input_addresses[i], input[i]);
-//     }
-
-//     printf(">>> Read data from the input buffer\n");
-//     for (size_t i = 0; i < n_input; ++i) {
-//         uint32_t read_input = cfu_op0(CFU_READ_INPUT_BUFFER, input_addresses[i], 0);
-//         printf("input_buffer[%ld] => %lx\n", input_addresses[i], read_input);
-//     }
-
-//     printf(">>> Write data to kernel weights buffer\n");
-//     for (size_t i = 0; i < n_kernel_weights; ++i) {
-//         cfu_op0(CFU_WRITE_TO_KERNEL_BUFFER, kernel_addresses[i], kernel_weights[i]);
-//         printf("input_buffer[%ld] <= %lx\n", kernel_addresses[i], kernel_weights[i]);
-//     }
-
-//     printf(">>> Read data from kernel buffer\n");
-//     for (size_t i = 0; i < n_kernel_weights; ++i) {
-//         uint32_t read_kernel = cfu_op0(CFU_READ_KERNEL_BUFFER, kernel_addresses[i], 0);
-//         printf("input_buffer[%ld] => %lx\n", kernel_addresses[i], read_kernel);
-//     }
-
-//     printf(">>> Set bias\n");
-//     cfu_op0(CFU_SET_BIAS, bias, 0);
-//     printf("bias <= %ld\n", bias);
-
-//     printf(">>> Set input offset\n");
-//     cfu_op0(CFU_SET_INPUT_OFFSET, input_offset, 0);
-//     printf("input_offset <= %ld\n", input_offset);
-
-//     printf("Start calculations\n");
-//     cfu_op0(CFU_START_COMPUTATION, 0, 0);
-
-//     printf("Read output\n");
-//     for (size_t output_address = 0; output_address < n_expexted_output; ++output_address) {
-//         uint32_t read_output = cfu_op0(CFU_READ_OUTPUT_BUFFER, output_address, 0);
-//         printf("output_buffer[%d] = %ld\n", output_address, read_output);
-//         test_assert_equal(read_output, expected_output[output_address]);
-//     }
-//     printf("\n==================== End CFU test ====================\n");
-// }
 
 static void test_conv1d_cfu_v4() {
   printf("\n==================== Start CFU test (check output) ====================\n");
