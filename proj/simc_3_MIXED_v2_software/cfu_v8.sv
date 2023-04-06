@@ -32,23 +32,6 @@ module conv1d #(
     case (cmd)
       // Initialize
       0: begin  // Reset module
-        // Fill input with zeros
-        // for (
-        //     reg [INT32_SIZE-1:0] in_idx = 0;
-        //     in_idx < MAX_INPUT_SIZE * MAX_INPUT_CHANNELS;
-        //     in_idx = in_idx + 1
-        // ) begin
-        //   input_buffer[in_idx] = 0;
-        // end
-
-        // // Fill kernel_weights_buffer with zeros
-        // for (
-        //     reg [INT32_SIZE-1:0] kernel_idx = 0;
-        //     kernel_idx < KERNEL_LENGTH * MAX_INPUT_CHANNELS;
-        //     kernel_idx = kernel_idx + 1
-        // ) begin
-        //   kernel_weights_buffer[kernel_idx] = 0;
-        // end
       end
 
       // Write buffers

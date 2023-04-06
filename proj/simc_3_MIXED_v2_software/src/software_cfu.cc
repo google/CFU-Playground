@@ -25,6 +25,7 @@
 #include "software_cfu_v4.hh"
 #include "software_cfu_v6.hh"
 #include "software_cfu_v7.hh"
+#include "software_cfu_v8.hh"
 
 //
 // In this function, place C code to emulate your CFU. You can switch between
@@ -32,7 +33,7 @@
 // the Makefile.
 
 uint32_t software_cfu(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
-  return software_cfu_v7(funct3, funct7, rs1, rs2);
+  return software_cfu_v8(funct3, funct7, rs1, rs2);
 }
 
 // Doesn' work

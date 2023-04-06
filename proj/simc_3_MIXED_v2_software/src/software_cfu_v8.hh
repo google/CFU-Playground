@@ -2,12 +2,8 @@
 
 #include "software_cfu_common.hh"
 
-
-/*
-  Input buffer is now a ring buffer with much smaller size. 
-  This optimization is not free, since now more input copy calls are required
-*/
-uint32_t software_cfu_v7(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
+#define ACC_AT_ONCE 128 
+uint32_t software_cfu_v8(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
   if (funct3 != 0) {
     return 0;
   }
@@ -21,8 +17,6 @@ uint32_t software_cfu_v7(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
   static int input_output_width = 0;
   static int input_depth        = 0;
 
-  static int32_t in_x_origin = 0;
-  (void)in_x_origin;
   static int32_t start_filter_x = 0;
   static int32_t acc            = 0;
 
@@ -55,20 +49,18 @@ uint32_t software_cfu_v7(int funct3, int funct7, uint32_t rs1, uint32_t rs2) {
       return input_depth;
 
     case 41:  // Start computation
-      acc = 0;
-      for (int filter_x = 0; filter_x < 8; ++filter_x) {
-        for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-          int kernel_addr = filter_x * input_depth + in_channel;
-          int input_addr = ((filter_x + start_filter_x) % 8) * input_depth + in_channel;
-          acc += kernel_weights_buffer[kernel_addr] * (input_buffer[input_addr] + input_offset);
-          // printf("%ld: acc += %d * (%d + %ld)\n", (filter_x + start_filter_x) % 8,
-          //        kernel_weights_buffer[kernel_addr], input_buffer[input_addr], input_offset);
-        }
+    {
+      acc             = 0;
+      int kernel_addr = 0;
+      int input_addr  = start_filter_x * input_depth;
+      while (kernel_addr < 8 * input_depth) {
+        acc += kernel_weights_buffer[kernel_addr] * (input_buffer[input_addr] + input_offset);
+        ++kernel_addr;
+        input_addr = (input_addr + 1) % (8 * input_depth);
       }
       return 0;
-    case 42:
-      in_x_origin = value;
-      return 0;
+    }
+
     case 43:
       return acc;
     case 44:
