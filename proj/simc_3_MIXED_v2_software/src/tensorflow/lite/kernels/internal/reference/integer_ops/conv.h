@@ -23,19 +23,34 @@ limitations under the License.
 #include "tensorflow/lite/kernels/internal/common.h"
 #include "tensorflow/lite/kernels/internal/portable_tensor_utils.h"
 
-#ifndef CFU_CONV1d_V3_PARAMS
-#define CFU_CONV1d_V3_PARAMS
+// #ifndef CFU_CONV1d_V3_PARAMS
+// #define CFU_CONV1d_V3_PARAMS
+// #define CFU_INITIALIZE 0
+// #define CFU_WRITE_TO_INPUT_BUFFER 1
+// #define CFU_WRITE_TO_KERNEL_BUFFER 2
+// #define CFU_READ_OUTPUT_BUFFER 3
+// #define CFU_START_COMPUTATION 4
+// #define CFU_READ_INPUT_BUFFER 5
+// #define CFU_READ_KERNEL_BUFFER 6
+// #define CFU_SET_BIAS 7
+// #define CFU_SET_INPUT_OFFSET 8
+// #endif  // CFU_CONV1d_V3_PARAMS
+
+#ifndef CFU_CONV1d_V8_PARAMS
+#define CFU_CONV1d_V8_PARAMS
 
 #define CFU_INITIALIZE 0
-#define CFU_WRITE_TO_INPUT_BUFFER 1
-#define CFU_WRITE_TO_KERNEL_BUFFER 2
-#define CFU_READ_OUTPUT_BUFFER 3
-#define CFU_START_COMPUTATION 4
-#define CFU_READ_INPUT_BUFFER 5
-#define CFU_READ_KERNEL_BUFFER 6
-#define CFU_SET_BIAS 7
-#define CFU_SET_INPUT_OFFSET 8
-#endif  // CFU_CONV1d_V3_PARAMS
+#define CFU_WRITE_INPUT_BUFFER 1
+#define CFU_WRITE_KERNEL_BUFFER 2
+#define CFU_WRITE_INPUT_OFFSET 3
+#define CFU_WRITE_INPUT_OUTPUT_OFFSET 4
+#define CFU_WRITE_INPUT_DEPTH 5
+#define CFU_START_COMPUTATION 6
+#define CFU_READ_ACCUMULATOR 7
+#define CFU_WRITE_START_FILTER_X 8
+#define CFU_FINISHED 9
+
+#endif  // CFU_CONV1d_V8_PARAMS
 
 namespace tflite {
 namespace reference_integer_ops {
@@ -99,16 +114,16 @@ inline void ConvPerChannelCFUHardware8(const ConvParams& params,
                                        int8_t* output_data) {
   // static int call = 0;
   // Initialize cfu
-  cfu_op0(0, 0, 0);
+  cfu_op0(CFU_INITIALIZE, 0, 0);
   // Zero out buffers
   for (int addr = 0; addr < 8 * 128; ++addr) {
-    cfu_op0(10, addr, 0);
-    cfu_op0(11, addr, 0);
+    cfu_op0(CFU_WRITE_INPUT_BUFFER, addr, 0);
+    cfu_op0(CFU_WRITE_KERNEL_BUFFER, addr, 0);
   }
 
   // Get parameters.
   const int32_t input_offset = params.input_offset;  // r = s(q - Z)
-  cfu_op0(20, 0, input_offset);
+  cfu_op0(CFU_WRITE_INPUT_OFFSET, 0, input_offset);
 
   const int pad_width = 3;
   (void)pad_width;
@@ -120,13 +135,13 @@ inline void ConvPerChannelCFUHardware8(const ConvParams& params,
   const int output_depth = MatchingDim(filter_shape, 0, output_shape, 3);
 
   const int input_width = input_shape.Dims(2);
-  cfu_op0(25, 0, input_width);
+  cfu_op0(CFU_WRITE_INPUT_OUTPUT_OFFSET, 0, input_width);
 
   const int filter_width = 8;
   (void)filter_width;
 
   const int input_depth = filter_shape.Dims(3);
-  cfu_op0(26, 0, input_depth);
+  cfu_op0(CFU_WRITE_INPUT_DEPTH, 0, input_depth);
 
   // const int output_width = output_shape.Dims(2);
   const int output_width = input_width;
@@ -136,14 +151,14 @@ inline void ConvPerChannelCFUHardware8(const ConvParams& params,
     for (int kernel_x = 0; kernel_x < filter_width; ++kernel_x) {
       for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
         int addr = out_channel * (8 * input_depth) + kernel_x * input_depth + in_channel;
-        cfu_op0(11, kernel_x * input_depth + in_channel, filter_data[addr]);
+        cfu_op0(CFU_WRITE_KERNEL_BUFFER, kernel_x * input_depth + in_channel, filter_data[addr]);
         // printf("kernel_buffer[%d] <= %d\n", kernel_x * input_depth + in_channel,
         // filter_data[addr]);
       }
     }
 
     int input_cur_x = -pad_width;
-    // Copy input
+    // Copy input - first 8 xs
     for (int filter_x = 0; filter_x < 8; ++filter_x) {
       for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
         int buffer_addr = filter_x * input_depth + in_channel;
@@ -152,7 +167,7 @@ inline void ConvPerChannelCFUHardware8(const ConvParams& params,
           int input_addr = input_cur_x * input_depth + in_channel;
           value          = input_data[input_addr];
         }
-        cfu_op0(10, buffer_addr, value);
+        cfu_op0(CFU_WRITE_INPUT_BUFFER, buffer_addr, value);
       }
       ++input_cur_x;
     }
@@ -160,12 +175,12 @@ inline void ConvPerChannelCFUHardware8(const ConvParams& params,
     int start_filter_x = 0;
 
     for (int out_x = 0; out_x < output_width; ++out_x) {
-      // const int in_x_origin = out_x - pad_width;
 
-      cfu_op0(44, 0, start_filter_x);
-      cfu_op0(41, 0, 0);
-      while (!cfu_op0(45, 0, 0));
-      int32_t acc = cfu_op0(43, 0, 0);
+      cfu_op0(CFU_WRITE_START_FILTER_X, 0, start_filter_x);
+      cfu_op0(CFU_START_COMPUTATION, 0, 0);
+      while (!cfu_op0(CFU_FINISHED, 0, 0)) {
+      };
+      int32_t acc = cfu_op0(CFU_READ_ACCUMULATOR, 0, 0);
       // printf("out_x: %d, acc: %ld\n", out_x, acc);
       // abort();
 
@@ -191,11 +206,10 @@ inline void ConvPerChannelCFUHardware8(const ConvParams& params,
           int input_addr = input_cur_x * input_depth + in_channel;
           value          = input_data[input_addr];
         }
-        cfu_op0(10, buffer_addr, value);
+        cfu_op0(CFU_WRITE_INPUT_BUFFER, buffer_addr, value);
       }
       ++input_cur_x;
       start_filter_x = (start_filter_x + 1) % 8;
-
     }
     // abort();
   }
@@ -313,7 +327,6 @@ inline void ConvPerChannelCFUHardware7(const ConvParams& params,
       }
       ++input_cur_x;
       start_filter_x = (start_filter_x + 1) % 8;
-
     }
     // abort();
   }
