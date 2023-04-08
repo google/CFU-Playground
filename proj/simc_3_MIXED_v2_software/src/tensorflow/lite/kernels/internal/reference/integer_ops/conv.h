@@ -43,7 +43,7 @@ limitations under the License.
 #define CFU_WRITE_INPUT_BUFFER 1
 #define CFU_WRITE_KERNEL_BUFFER 2
 #define CFU_WRITE_INPUT_OFFSET 3
-#define CFU_WRITE_INPUT_OUTPUT_OFFSET 4
+#define CFU_WRITE_INPUT_OUTPUT_WIDTH 4
 #define CFU_WRITE_INPUT_DEPTH 5
 #define CFU_START_COMPUTATION 6
 #define CFU_READ_ACCUMULATOR 7
@@ -121,6 +121,11 @@ inline void ConvPerChannelCFUHardware9(const ConvParams& params,
   const int32_t input_offset = params.input_offset;  // r = s(q - Z)
   cfu_op0(CFU_WRITE_INPUT_OFFSET, 0, input_offset);
 
+  // for (int addr = 0; addr < 8 * 128; ++addr) {
+  //   cfu_op0(CFU_WRITE_INPUT_BUFFER, addr, -input_offset);
+  //   cfu_op0(CFU_WRITE_KERNEL_BUFFER, addr, -input_offset);
+  // }
+
   const int pad_width = 3;
   (void)pad_width;
 
@@ -131,7 +136,7 @@ inline void ConvPerChannelCFUHardware9(const ConvParams& params,
   const int output_depth = MatchingDim(filter_shape, 0, output_shape, 3);
 
   const int input_width = input_shape.Dims(2);
-  cfu_op0(CFU_WRITE_INPUT_OUTPUT_OFFSET, 0, input_width);
+  cfu_op0(CFU_WRITE_INPUT_OUTPUT_WIDTH, 0, input_width);
 
   const int filter_width = 8;
   (void)filter_width;
@@ -254,7 +259,7 @@ inline void ConvPerChannelCFUHardware8(const ConvParams& params,
   const int output_depth = MatchingDim(filter_shape, 0, output_shape, 3);
 
   const int input_width = input_shape.Dims(2);
-  cfu_op0(CFU_WRITE_INPUT_OUTPUT_OFFSET, 0, input_width);
+  cfu_op0(CFU_WRITE_INPUT_OUTPUT_WIDTH, 0, input_width);
 
   const int filter_width = 8;
   (void)filter_width;
