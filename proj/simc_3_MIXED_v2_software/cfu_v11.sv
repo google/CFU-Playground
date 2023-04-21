@@ -136,6 +136,18 @@
 
 // endmodule
 
+module c_shift_right #(
+    parameter INT32_SIZE = 32
+) (
+    input  signed [INT32_SIZE-1:0] x,
+    input  signed [INT32_SIZE-1:0] shift,
+    output signed [INT32_SIZE-1:0] ret
+);
+
+  assign ret = (x >= 0) ? (x >> shift) : (-(-x >> shift) - ((shift == 0) ? 0 : 1));
+
+endmodule
+
 module rounding_divide_by_POT #(
     parameter INT32_SIZE = 32
 ) (
@@ -150,7 +162,15 @@ module rounding_divide_by_POT #(
   wire signed [INT32_SIZE-1:0] remainder = x & mask;
   wire signed [INT32_SIZE-1:0] threshold = (mask >> 1) + (((x < zero) ? ~0 : 0) & one);
 
-  assign ret = (x >> exponent) + (((remainder > threshold) ? ~0 : 0) & one);
+  wire signed [INT32_SIZE-1:0] shifted_x;
+
+  c_shift_right shift_x (
+      .x(x),
+      .shift(exponent),
+      .ret(shifted_x)
+  );
+
+  assign ret = shifted_x + (((remainder > threshold) ? ~0 : 0) & one);
 
 endmodule
 
@@ -200,10 +220,17 @@ module quant #(
   wire signed [INT32_SIZE-1:0] left_shift = (output_shift > 0) ? output_shift : 0;
   wire signed [INT32_SIZE-1:0] right_shift = (output_shift > 0) ? 0 : -output_shift;
 
-  wire signed [INT32_SIZE-1:0] a = (inp1 * (1 << left_shift));
+  wire signed [INT32_SIZE-1:0] biased_acc = inp1 + bias;
+  wire signed [INT32_SIZE-1:0] a = ((biased_acc) * (1 << left_shift));
+  // wire signed [INT32_SIZE-1:0] a = (inp1 * (1 << left_shift));
 
   wire signed [INT32_SIZE-1:0] SRDHM_ret;
   wire signed [INT32_SIZE-1:0] RDBP_ret;
+
+  wire signed [INT32_SIZE-1:0] RDBP_ret_offseted = RDBP_ret + output_offset;
+
+  wire signed [INT32_SIZE-1:0] bound_lower_ret = RDBP_ret_offseted < output_activation_min ? output_activation_min : RDBP_ret_offseted;
+  wire signed [INT32_SIZE-1:0] bound_lower_higher_ret = bound_lower_ret > output_activation_max ? output_activation_max : bound_lower_ret;
 
   saturating_rounding_doubling_high_mul SRDHM (
       .a  (a),
@@ -212,7 +239,7 @@ module quant #(
   );
 
   rounding_divide_by_POT RDBP (
-      .x(SRDHM_ret),
+      .x(-SRDHM_ret),
       .exponent(right_shift),
       .ret(RDBP_ret)
   );
@@ -249,7 +276,11 @@ module quant #(
       end
 
       7: begin
-        ret <= -RDBP_ret;
+        // ret <= -RDBP_ret;
+        // ret <= RDBP_ret_offseted;
+        ret <= bound_lower_higher_ret;
+        // ret <= -SRDHM_ret;
+        // ret <= RDBP_ret_offseted;
       end
 
       default: begin

@@ -145,7 +145,8 @@ inline IntegerType rounding_divide_by_POT(IntegerType x, int exponent) {
   const IntegerType one       = 1;
   const IntegerType remainder = x & mask;
   const IntegerType threshold = (mask >> 1) + (((x < zero) ? ~0 : 0) & one);
-  return (x >> exponent) + (((remainder > threshold) ? ~0 : 0) & one);
+  IntegerType result = (x >> exponent) + (((remainder > threshold) ? ~0 : 0) & one);
+  return result;
 }
 
 inline std::int32_t saturating_rounding_doubling_high_mul(std::int32_t a, std::int32_t b) {
@@ -155,16 +156,18 @@ inline std::int32_t saturating_rounding_doubling_high_mul(std::int32_t a, std::i
   std::int64_t ab_64        = a_64 * b_64;
   std::int32_t nudge        = ab_64 >= 0 ? (1 << 30) : (1 - (1 << 30));
   std::int32_t ab_x2_high32 = static_cast<std::int32_t>((ab_64 + nudge) / (1ll << 31));
-  // std::int32_t ab_x2_high32 = static_cast<std::int32_t>((ab_64 + nudge) >> 31);
-  return overflow ? std::numeric_limits<std::int32_t>::max() : ab_x2_high32;
+  int32_t result = overflow ? std::numeric_limits<std::int32_t>::max() : ab_x2_high32;
+  // printf("SRDHM: %ld\n", result);
+  return result;
 }
 
 inline int32_t multiply_by_quant_mult(int32_t x, int32_t quantized_multiplier, int shift) {
   int left_shift  = shift > 0 ? shift : 0;
   int right_shift = shift > 0 ? 0 : -shift;
-  return rounding_divide_by_POT(
+  int32_t result  = rounding_divide_by_POT(
       saturating_rounding_doubling_high_mul(x * (1 << left_shift), quantized_multiplier),
       right_shift);
+  return result;
 }
 }  // namespace
 
@@ -173,21 +176,40 @@ inline int32_t multiply_by_quant_mult(int32_t x, int32_t quantized_multiplier, i
   printf("\n==================== Start CFU test (check output) ====================\n");
 
   // Test quant module
-  int32_t output_multiplier = 10;
-  int32_t output_shift      = 10;
-  cfu_op0(2, 0, output_multiplier);
-  cfu_op0(3, 0, output_shift);
+  int32_t output_activation_min = -128;
+  int32_t output_activation_max = 127;
+  int32_t output_offset         = -128;
 
-  int32_t accs[] = {123457, 1234578, 12345789, 123457890, 987654321, 
-                    -123457, -1234578, -12345789, -123457890, -987654321};
-  auto accs_size = sizeof(accs) / sizeof(int32_t);
+  cfu_op0(4, 0, output_activation_min);
+  cfu_op0(5, 0, output_activation_max);
+  cfu_op0(6, 0, output_offset);
+
+  const size_t accs_size    = 10;
+  int32_t accs[accs_size]   = {-2005, -511, -4625, -8390, 4418, -3837, 8253, -560, -3151, -8283};
+  int32_t biases[accs_size] = {-487, 4205, 3627, -1883, -212, -309, -1601, 3002, 2046, 4152};
+  int32_t output_multipliers[accs_size] = {1848936157, 1106019876, 1245158167, 1182598461,
+                                           1096005635, 1372768501, 1323832581, 1804904954,
+                                           1420567106, 2001228717};
+  int32_t output_shifts[accs_size]      = {-7 - 7, -7, -7, -7, -7, -7, -8, -7, -8};
+  // auto accs_size               = sizeof(accs) / sizeof(int32_t);
   for (size_t i = 0; i < accs_size; ++i) {
-    int32_t acc          = accs[i];
-    int32_t expected_acc = multiply_by_quant_mult(acc, output_multiplier, output_shift);
-    acc = cfu_op0(7, 0, acc);
+    // if (i != 1) {
+    //   continue;
+    // }
+    int32_t acc = accs[i];
+    acc += biases[i];
+    acc = multiply_by_quant_mult(acc, output_multipliers[i], output_shifts[i]);
+    acc += output_offset;
+    acc                  = std::max(acc, output_activation_min);
+    acc                  = std::min(acc, output_activation_max);
+    int32_t expected_acc = acc;
+
+    cfu_op0(1, 0, biases[i]);
+    cfu_op0(2, 0, output_multipliers[i]);
+    cfu_op0(3, 0, output_shifts[i]);
+    acc = cfu_op0(7, 0, accs[i]);
     printf("acc = %ld expected( %ld )\n", acc, expected_acc);
   }
-
 
   ////////////////////////////////////
 
