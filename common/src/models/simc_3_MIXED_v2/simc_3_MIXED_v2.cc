@@ -9,6 +9,8 @@
 #include "playground_util/models_utils.h"
 #include "tensorflow/lite/micro/examples/person_detection/no_person_image_data.h"
 #include "tensorflow/lite/micro/examples/person_detection/person_image_data.h"
+#include <algorithm>
+
 //
 // #include "playground_util/models_utils.h"
 //
@@ -132,49 +134,89 @@ void printBits(size_t const size, void const* const ptr) {
 }
 
 [[maybe_unused]] static void test_conv1d_cfu() {
-  const int32_t kernel_length = 8;
+  // const int32_t kernel_length = 8;
   printf("\n==================== Start CFU test (check output) ====================\n");
-  cfu_op0(CFU_INITIALIZE, 0, 0);
 
-  // Write values to the input
-  cfu_op0(CFU_WRITE_INPUT_BUFFER, 0, 123);
-  cfu_op0(CFU_WRITE_INPUT_BUFFER, 1, 255);
+  // Test quant module
+  printf("%ld -- %ld\n", std::numeric_limits<std::int32_t>::max(),
+         std::numeric_limits<std::int32_t>::min());
 
-  // Read values from the input
-  int8_t v0 = cfu_op0(CFU_READ_INPUT_BUFFER, 0, 0);
-  int8_t v1 = cfu_op0(CFU_READ_INPUT_BUFFER, 1, 0);
+  ////////////////////////////////////
 
-  printf("Write/Read input: v0 = %d (expected 123); v1 = %d (expected -1)\n", v0, v1);
+  // // Test Write/REad 4 values at once
+  // cfu_op0(CFU_INITIALIZE, 0, 0);
 
-  // Write values to the kernel
-  cfu_op0(CFU_WRITE_FILTER_BUFFER, 0, 13);
-  cfu_op0(CFU_WRITE_FILTER_BUFFER, 1, -3);
+  // for (int i = 0; i < 4; ++i) {
+  //   cfu_op0(CFU_WRITE_INPUT_BUFFER, i, static_cast<int8_t>(i + 1));
+  // }
 
-  // Read values from the kernel
-  v0 = cfu_op0(CFU_READ_FILTER_BUFFER, 0, 0);
-  v1 = cfu_op0(CFU_READ_FILTER_BUFFER, 1, 0);
+  // for (int i = 0; i < 4; ++i) {
+  //   int8_t v = cfu_op0(CFU_READ_INPUT_BUFFER, i, 0);
+  //   printf("v = %d (expected %d)\n", v, i+1);
+  // }
 
-  printf("Write/Read filter: v0 = %d; (expected 13) v1 = %d (expexted -3) \n", v0, v1);
+  // // Write input
+  // cfu_op0(CFU_WRITE_INPUT_BUFFER, 0, 0x01020304);  // in memory this is 04 03 02 01
 
-  // Write input depth for test convolution
-  int32_t input_depth = 1;
-  cfu_op0(CFU_WRITE_INPUT_DEPTH, 0, input_depth);
+  // // Read input
+  // for (size_t i = 0; i < 4; ++i) {
+  //   int8_t v = cfu_op0(CFU_READ_INPUT_BUFFER, i, 0);
+  //   printf("v = %x (expected %d)\n", v, 4 - i);
+  // }
 
-  // Write input buffer values (8 * input_depth = 8)
-  for (size_t i = 0; i < static_cast<size_t>(kernel_length * input_depth); ++i) {
-    cfu_op0(CFU_WRITE_INPUT_BUFFER, i, i);
-    cfu_op0(CFU_WRITE_FILTER_BUFFER, i, i);
-  }
+  // int8_t arr[]  = {10, 20, 30, 40, 60, 60, 70, 80};
+  // int32_t* arr4 = reinterpret_cast<int32_t*>(arr);
+  // for (int i = 0; i < 2; ++i) {
+  //   cfu_op0(CFU_WRITE_INPUT_BUFFER, i * 4, arr4[i]);
+  // }
 
-  // Start computation
-  cfu_op0(CFU_START_COMPUTATION, 0, 0);
-  // Wait for result
-  while (!cfu_op0(CFU_FINISHED, 0, 0)) {
-  }
-  // Get result
-  int32_t acc = cfu_op0(CFU_READ_ACCUMULATOR, 0, 0);
-  // 0**2 + 1**2 + ... 7 **2 = 140
-  printf("Computation: acc = %ld (expected 140)\n", acc);
+  // for (int i = 0; i < 8; ++i) {
+  //   int8_t v8 = cfu_op0(CFU_READ_INPUT_BUFFER, i, 0);
+  //   printf("v8 = %d (expected %d)\n", v8, (i + 1) * 10);
+  // }
+
+  ////////////////////
+
+  // Very simple test for conv1d v9
+  // // Write values to the input
+  // cfu_op0(CFU_WRITE_INPUT_BUFFER, 0, 123);
+  // cfu_op0(CFU_WRITE_INPUT_BUFFER, 1, 255);
+
+  // // Read values from the input
+  // int8_t v0 = cfu_op0(CFU_READ_INPUT_BUFFER, 0, 0);
+  // int8_t v1 = cfu_op0(CFU_READ_INPUT_BUFFER, 1, 0);
+
+  // printf("Write/Read input: v0 = %d (expected 123); v1 = %d (expected -1)\n", v0, v1);
+
+  // // Write values to the kernel
+  // cfu_op0(CFU_WRITE_FILTER_BUFFER, 0, 13);
+  // cfu_op0(CFU_WRITE_FILTER_BUFFER, 1, -3);
+
+  // // Read values from the kernel
+  // v0 = cfu_op0(CFU_READ_FILTER_BUFFER, 0, 0);
+  // v1 = cfu_op0(CFU_READ_FILTER_BUFFER, 1, 0);
+
+  // printf("Write/Read filter: v0 = %d; (expected 13) v1 = %d (expexted -3) \n", v0, v1);
+
+  // // Write input depth for test convolution
+  // int32_t input_depth = 1;
+  // cfu_op0(CFU_WRITE_INPUT_DEPTH, 0, input_depth);
+
+  // // Write input buffer values (8 * input_depth = 8)
+  // for (size_t i = 0; i < static_cast<size_t>(kernel_length * input_depth); ++i) {
+  //   cfu_op0(CFU_WRITE_INPUT_BUFFER, i, i);
+  //   cfu_op0(CFU_WRITE_FILTER_BUFFER, i, i);
+  // }
+
+  // // Start computation
+  // cfu_op0(CFU_START_COMPUTATION, 0, 0);
+  // // Wait for result
+  // while (!cfu_op0(CFU_FINISHED, 0, 0)) {
+  // }
+  // // Get result
+  // int32_t acc = cfu_op0(CFU_READ_ACCUMULATOR, 0, 0);
+  // // 0**2 + 1**2 + ... 7 **2 = 140
+  // printf("Computation: acc = %ld (expected 140)\n", acc);
 
   printf("\n==================== End CFU test ====================\n");
 }
