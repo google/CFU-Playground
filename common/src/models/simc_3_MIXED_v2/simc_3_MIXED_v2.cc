@@ -3,13 +3,15 @@
 #include <math.h>
 #include <stdio.h>
 
+#include <algorithm>
+#include <cassert>
+
 #include "menu.h"
 #include "models/simc_3_MIXED_v2/simc_3_MIXED_v2_model.h"
 #include "models/simc_3_MIXED_v2/simc_3_MIXED_v2_test_data.h"
 #include "playground_util/models_utils.h"
 #include "tensorflow/lite/micro/examples/person_detection/no_person_image_data.h"
 #include "tensorflow/lite/micro/examples/person_detection/person_image_data.h"
-#include <algorithm>
 
 //
 // #include "playground_util/models_utils.h"
@@ -133,13 +135,59 @@ void printBits(size_t const size, void const* const ptr) {
   abort();
 }
 
+namespace {
+template <typename IntegerType>
+inline IntegerType rounding_divide_by_POT(IntegerType x, int exponent) {
+  assert(exponent >= 0);
+  assert(exponent <= 31);
+  const IntegerType mask      = (1ll << exponent) - 1;
+  const IntegerType zero      = 0;
+  const IntegerType one       = 1;
+  const IntegerType remainder = x & mask;
+  const IntegerType threshold = (mask >> 1) + (((x < zero) ? ~0 : 0) & one);
+  return (x >> exponent) + (((remainder > threshold) ? ~0 : 0) & one);
+}
+
+inline std::int32_t saturating_rounding_doubling_high_mul(std::int32_t a, std::int32_t b) {
+  bool overflow = a == b && a == std::numeric_limits<std::int32_t>::min();
+  std::int64_t a_64(a);
+  std::int64_t b_64(b);
+  std::int64_t ab_64        = a_64 * b_64;
+  std::int32_t nudge        = ab_64 >= 0 ? (1 << 30) : (1 - (1 << 30));
+  std::int32_t ab_x2_high32 = static_cast<std::int32_t>((ab_64 + nudge) / (1ll << 31));
+  // std::int32_t ab_x2_high32 = static_cast<std::int32_t>((ab_64 + nudge) >> 31);
+  return overflow ? std::numeric_limits<std::int32_t>::max() : ab_x2_high32;
+}
+
+inline int32_t multiply_by_quant_mult(int32_t x, int32_t quantized_multiplier, int shift) {
+  int left_shift  = shift > 0 ? shift : 0;
+  int right_shift = shift > 0 ? 0 : -shift;
+  return rounding_divide_by_POT(
+      saturating_rounding_doubling_high_mul(x * (1 << left_shift), quantized_multiplier),
+      right_shift);
+}
+}  // namespace
+
 [[maybe_unused]] static void test_conv1d_cfu() {
   // const int32_t kernel_length = 8;
   printf("\n==================== Start CFU test (check output) ====================\n");
 
   // Test quant module
-  printf("%ld -- %ld\n", std::numeric_limits<std::int32_t>::max(),
-         std::numeric_limits<std::int32_t>::min());
+  int32_t output_multiplier = 10;
+  int32_t output_shift      = 10;
+  cfu_op0(2, 0, output_multiplier);
+  cfu_op0(3, 0, output_shift);
+
+  int32_t accs[] = {123457, 1234578, 12345789, 123457890, 987654321, 
+                    -123457, -1234578, -12345789, -123457890, -987654321};
+  auto accs_size = sizeof(accs) / sizeof(int32_t);
+  for (size_t i = 0; i < accs_size; ++i) {
+    int32_t acc          = accs[i];
+    int32_t expected_acc = multiply_by_quant_mult(acc, output_multiplier, output_shift);
+    acc = cfu_op0(7, 0, acc);
+    printf("acc = %ld expected( %ld )\n", acc, expected_acc);
+  }
+
 
   ////////////////////////////////////
 

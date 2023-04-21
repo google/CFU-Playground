@@ -139,41 +139,43 @@
 module rounding_divide_by_POT #(
     parameter INT32_SIZE = 32
 ) (
-    input signed [INT32_SIZE-1:0] x,
-    input signed [INT32_SIZE-1:0] exponent,
+    input  signed [INT32_SIZE-1:0] x,
+    input  signed [INT32_SIZE-1:0] exponent,
     output signed [INT32_SIZE-1:0] ret
 );
 
-wire signed [INT32_SIZE-1:0] mask = (1 << exponent) - 1;
-wire signed [INT32_SIZE-1:0] remainder = x & mask;
-wire signed [INT32_SIZE-1:0] threshold = (mask >> 1) + (((x < 0) ? ~0 : 0) & 1);
+  wire signed [INT32_SIZE-1:0] mask = (1 << exponent) - 1;
+  wire signed [INT32_SIZE-1:0] zero = 0;
+  wire signed [INT32_SIZE-1:0] one = 1;
+  wire signed [INT32_SIZE-1:0] remainder = x & mask;
+  wire signed [INT32_SIZE-1:0] threshold = (mask >> 1) + (((x < zero) ? ~0 : 0) & one);
 
-assign ret = (x >> exponent) + (((remainder > threshold) ? ~0 : 0) & 1);
-  
+  assign ret = (x >> exponent) + (((remainder > threshold) ? ~0 : 0) & one);
+
 endmodule
 
 module saturating_rounding_doubling_high_mul #(
-    parameter INT32_SIZE = 32,
-    parameter INT64_SIZE = 64,
+    parameter INT32_SIZE   = 32,
+    parameter INT64_SIZE   = 64,
     parameter one_shift_30 = (1 << 30),
     parameter one_shift_31 = (1 << 31),
-    parameter int32_t_max = 2147483647,
-    parameter int32_t_min = -2147483648
+    parameter int32_t_max  = 2147483647,
+    parameter int32_t_min  = -2147483648
 ) (
-  input signed [INT32_SIZE-1:0] a,
-  input signed [INT32_SIZE-1:0] b,
-  output signed [INT32_SIZE-1:0] ret
+    input  signed [INT32_SIZE-1:0] a,
+    input  signed [INT32_SIZE-1:0] b,
+    output signed [INT32_SIZE-1:0] ret
 );
 
-wire overflow = ((a == b) && (a == int32_t_min));
-wire signed [INT64_SIZE-1:0] a_64 = a;
-wire signed [INT64_SIZE-1:0] b_64 = b;
-wire signed [INT64_SIZE-1:0] ab_64 = a_64 * b_64;
-wire signed [INT32_SIZE-1:0] nudge = ab_64 > 0 ? one_shift_30 : (1 - one_shift_30);
-wire signed [INT32_SIZE-1:0] ab_x2_high32 = (ab_64 + nudge) / one_shift_31;
+  wire overflow = ((a == b) && (a == int32_t_min));
+  wire signed [INT64_SIZE-1:0] a_64 = a;
+  wire signed [INT64_SIZE-1:0] b_64 = b;
+  wire signed [INT64_SIZE-1:0] ab_64 = a_64 * b_64;
+  wire signed [INT32_SIZE-1:0] nudge = (ab_64 > 0) ? one_shift_30 : (1 - one_shift_30);
+  wire signed [INT32_SIZE-1:0] ab_x2_high32 = (ab_64 + nudge) / one_shift_31;
 
-assign ret = overflow ? int32_t_max : ab_x2_high32;
-  
+  assign ret = overflow ? int32_t_max : ab_x2_high32;
+
 endmodule
 
 module quant #(
@@ -196,23 +198,23 @@ module quant #(
   reg signed [INT32_SIZE-1:0] output_offset;
 
   wire signed [INT32_SIZE-1:0] left_shift = (output_shift > 0) ? output_shift : 0;
-  wire signed [INT32_SIZE-1:0] right_shift = (output_shift > 0) ? 0 : output_shift;
+  wire signed [INT32_SIZE-1:0] right_shift = (output_shift > 0) ? 0 : -output_shift;
 
   wire signed [INT32_SIZE-1:0] a = (inp1 * (1 << left_shift));
 
   wire signed [INT32_SIZE-1:0] SRDHM_ret;
   wire signed [INT32_SIZE-1:0] RDBP_ret;
 
-  saturating_rounding_doubling_high_mul SRDHM(
-    .a(a),
-    .b(output_multiplier),
-    .ret(SRDHM_ret)
+  saturating_rounding_doubling_high_mul SRDHM (
+      .a  (a),
+      .b  (output_multiplier),
+      .ret(SRDHM_ret)
   );
 
-  rounding_divide_by_POT RDBP(
-    .x(SRDHM_ret),
-    .exponent(right_shift),
-    .ret(RDBP_ret)
+  rounding_divide_by_POT RDBP (
+      .x(SRDHM_ret),
+      .exponent(right_shift),
+      .ret(RDBP_ret)
   );
 
   always @(posedge clk) begin
@@ -222,11 +224,11 @@ module quant #(
         ret <= 0;
       end
 
-      1: begin 
+      1: begin
         bias <= inp1;
       end
 
-      2: begin 
+      2: begin
         output_multiplier <= inp1;
       end
 
@@ -247,7 +249,7 @@ module quant #(
       end
 
       7: begin
-        ret <= RDBP_ret;
+        ret <= -RDBP_ret;
       end
 
       default: begin
