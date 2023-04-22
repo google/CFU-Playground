@@ -175,41 +175,38 @@ inline int32_t multiply_by_quant_mult(int32_t x, int32_t quantized_multiplier, i
   // const int32_t kernel_length = 8;
   printf("\n==================== Start CFU test (check output) ====================\n");
 
-  // Test quant module
-  int32_t output_activation_min = -128;
-  int32_t output_activation_max = 127;
-  int32_t output_offset         = -128;
+  // // Test quant cfu
+  // int32_t output_activation_min = -128;
+  // int32_t output_activation_max = 127;
+  // int32_t output_offset         = -128;
 
-  cfu_op0(4, 0, output_activation_min);
-  cfu_op0(5, 0, output_activation_max);
-  cfu_op0(6, 0, output_offset);
+  // cfu_op0(4, 0, output_activation_min);
+  // cfu_op0(5, 0, output_activation_max);
+  // cfu_op0(6, 0, output_offset);
 
-  const size_t accs_size    = 10;
-  int32_t accs[accs_size]   = {-2005, -511, -4625, -8390, 4418, -3837, 8253, -560, -3151, -8283};
-  int32_t biases[accs_size] = {-487, 4205, 3627, -1883, -212, -309, -1601, 3002, 2046, 4152};
-  int32_t output_multipliers[accs_size] = {1848936157, 1106019876, 1245158167, 1182598461,
-                                           1096005635, 1372768501, 1323832581, 1804904954,
-                                           1420567106, 2001228717};
-  int32_t output_shifts[accs_size]      = {-7 - 7, -7, -7, -7, -7, -7, -8, -7, -8};
-  // auto accs_size               = sizeof(accs) / sizeof(int32_t);
-  for (size_t i = 0; i < accs_size; ++i) {
-    // if (i != 1) {
-    //   continue;
-    // }
-    int32_t acc = accs[i];
-    acc += biases[i];
-    acc = multiply_by_quant_mult(acc, output_multipliers[i], output_shifts[i]);
-    acc += output_offset;
-    acc                  = std::max(acc, output_activation_min);
-    acc                  = std::min(acc, output_activation_max);
-    int32_t expected_acc = acc;
+  // const size_t accs_size    = 10;
+  // int32_t accs[accs_size]   = {-2005, -511, -4625, -8390, 4418, -3837, 8253, -560, -3151, -8283};
+  // int32_t biases[accs_size] = {-487, 4205, 3627, -1883, -212, -309, -1601, 3002, 2046, 4152};
+  // int32_t output_multipliers[accs_size] = {1848936157, 1106019876, 1245158167, 1182598461,
+  //                                          1096005635, 1372768501, 1323832581, 1804904954,
+  //                                          1420567106, 2001228717};
+  // int32_t output_shifts[accs_size]      = {-7 - 7, -7, -7, -7, -7, -7, -8, -7, -8};
+  // // auto accs_size               = sizeof(accs) / sizeof(int32_t);
+  // for (size_t i = 0; i < accs_size; ++i) {
+  //   int32_t acc = accs[i];
+  //   acc += biases[i];
+  //   acc = multiply_by_quant_mult(acc, output_multipliers[i], output_shifts[i]);
+  //   acc += output_offset;
+  //   acc                  = std::max(acc, output_activation_min);
+  //   acc                  = std::min(acc, output_activation_max);
+  //   int32_t expected_acc = acc;
 
-    cfu_op0(1, 0, biases[i]);
-    cfu_op0(2, 0, output_multipliers[i]);
-    cfu_op0(3, 0, output_shifts[i]);
-    acc = cfu_op0(7, 0, accs[i]);
-    printf("acc = %ld expected( %ld )\n", acc, expected_acc);
-  }
+  //   cfu_op0(1, 0, biases[i]);
+  //   cfu_op0(2, 0, output_multipliers[i]);
+  //   cfu_op0(3, 0, output_shifts[i]);
+  //   acc = cfu_op0(7, 0, accs[i]);
+  //   printf("acc = %ld expected( %ld )\n", acc, expected_acc);
+  // }
 
   ////////////////////////////////////
 
@@ -294,42 +291,42 @@ inline int32_t multiply_by_quant_mult(int32_t x, int32_t quantized_multiplier, i
 static void do_tests() {
   test_conv1d_cfu();
 
-  // int8_t epsilon = 20;
-  // bool failed    = false;
+  int8_t epsilon = 20;
+  bool failed    = false;
 
-  // failed = failed ||
-  //          perform_one_test(test_data_simc_3_MIXED_v2_16QAM, pred_simc_3_MIXED_v2_16QAM,
-  //          epsilon);
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_16QAM, pred_simc_3_MIXED_v2_16QAM,
+           epsilon);
 
-  // failed = failed ||
-  //          perform_one_test(test_data_simc_3_MIXED_v2_64QAM, pred_simc_3_MIXED_v2_64QAM,
-  //          epsilon);
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_64QAM, pred_simc_3_MIXED_v2_64QAM,
+           epsilon);
 
-  // failed = failed ||
-  //          perform_one_test(test_data_simc_3_MIXED_v2_8PSK, pred_simc_3_MIXED_v2_8PSK, epsilon);
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_8PSK, pred_simc_3_MIXED_v2_8PSK, epsilon);
 
-  // failed = failed ||
-  //          perform_one_test(test_data_simc_3_MIXED_v2_B_FM, pred_simc_3_MIXED_v2_B_FM, epsilon);
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_B_FM, pred_simc_3_MIXED_v2_B_FM, epsilon);
 
-  // failed = failed ||
-  //          perform_one_test(test_data_simc_3_MIXED_v2_BPSK, pred_simc_3_MIXED_v2_BPSK, epsilon);
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_BPSK, pred_simc_3_MIXED_v2_BPSK, epsilon);
 
-  // failed = failed ||
-  //          perform_one_test(test_data_simc_3_MIXED_v2_CPFSK, pred_simc_3_MIXED_v2_CPFSK,
-  //          epsilon);
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_CPFSK, pred_simc_3_MIXED_v2_CPFSK,
+           epsilon);
 
-  // failed = failed ||
-  //          perform_one_test(test_data_simc_3_MIXED_v2_DSB_AM, pred_simc_3_MIXED_v2_DSB_AM,
-  //          epsilon);
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_DSB_AM, pred_simc_3_MIXED_v2_DSB_AM,
+           epsilon);
 
-  // failed = failed ||
-  //          perform_one_test(test_data_simc_3_MIXED_v2_GFSK, pred_simc_3_MIXED_v2_GFSK, epsilon);
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_GFSK, pred_simc_3_MIXED_v2_GFSK, epsilon);
 
-  // failed = failed ||
-  //          perform_one_test(test_data_simc_3_MIXED_v2_PAM4, pred_simc_3_MIXED_v2_PAM4, epsilon);
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_PAM4, pred_simc_3_MIXED_v2_PAM4, epsilon);
 
-  // failed = failed ||
-  //          perform_one_test(test_data_simc_3_MIXED_v2_QPSK, pred_simc_3_MIXED_v2_QPSK, epsilon);
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_QPSK, pred_simc_3_MIXED_v2_QPSK, epsilon);
 
   // failed = failed || perform_one_test(
   //   test_data_simc_3_MIXED_v2_SSB_AM,
@@ -337,11 +334,11 @@ static void do_tests() {
   //   epsilon
   // );
 
-  // if (failed) {
-  //   printf("FAIL simc_3_MIXED_v2 tests failed\n");
-  // } else {
-  //   printf("OK   simc_3_MIXED_v2 tests passed\n");
-  // }
+  if (failed) {
+    printf("FAIL simc_3_MIXED_v2 tests failed\n");
+  } else {
+    printf("OK   simc_3_MIXED_v2 tests passed\n");
+  }
 }
 
 static struct Menu MENU = {

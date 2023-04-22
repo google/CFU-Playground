@@ -50,6 +50,13 @@ limitations under the License.
 #define CFU_WRITE_START_FILTER_X 8
 #define CFU_FINISHED 9
 
+#define CFU_WRITE_BIAS 12
+#define CFU_WRITE_OUTPUT_MULTIPLIER 13
+#define CFU_WRITE_OUTPUT_SHIFT 14
+#define CFU_WRITE_OUTPUT_ACTIVATION_MIN 15
+#define CFU_WRITE_OUTPUT_ACTIVATION_MAX 16
+#define CFU_WRITE_OUTPUT_OFFSET 17
+
 #endif  // CFU_CONV1d_V8_PARAMS
 
 namespace tflite {
@@ -66,9 +73,9 @@ namespace reference_integer_ops {
 // #define ConvPerChannel ConvPerChannelCFUHardware6
 // #define ConvPerChannel ConvPerChannelCFUHardware7
 // #define ConvPerChannel ConvPerChannelCFUHardware8
-#define ConvPerChannel ConvPerChannelCFUHardware9
+// #define ConvPerChannel ConvPerChannelCFUHardware9
 // #define ConvPerChannel ConvPerChannelCFUHardware10
-// #define ConvPerChannel ConvPerChannelCFUHardware11
+#define ConvPerChannel ConvPerChannelCFUHardware11
 // #define ConvPerChannel ConvPerChannelOriginalSimple
 #define DEBUG_PRINTS 1
 
@@ -105,16 +112,16 @@ inline int32_t multiply_by_quant_mult(int32_t x, int32_t quantized_multiplier, i
 }  // namespace
 
 inline void ConvPerChannelCFUHardware11(const ConvParams& params,
-                                       const int32_t* output_multiplier,
-                                       const int32_t* output_shift,
-                                       const RuntimeShape& input_shape,
-                                       const int8_t* input_data,
-                                       const RuntimeShape& filter_shape,
-                                       const int8_t* filter_data,
-                                       const RuntimeShape& bias_shape,
-                                       const int32_t* bias_data,
-                                       const RuntimeShape& output_shape,
-                                       int8_t* output_data) {
+                                        const int32_t* output_multiplier,
+                                        const int32_t* output_shift,
+                                        const RuntimeShape& input_shape,
+                                        const int8_t* input_data,
+                                        const RuntimeShape& filter_shape,
+                                        const int8_t* filter_data,
+                                        const RuntimeShape& bias_shape,
+                                        const int32_t* bias_data,
+                                        const RuntimeShape& output_shape,
+                                        int8_t* output_data) {
   // static int call = 0;
   // Initialize cfu
   cfu_op0(CFU_INITIALIZE, 0, 0);
@@ -135,6 +142,11 @@ inline void ConvPerChannelCFUHardware11(const ConvParams& params,
   const int32_t output_activation_min = -128;
   const int32_t output_activation_max = 127;
 
+  cfu_op0(CFU_WRITE_OUTPUT_OFFSET, 0, output_offset);
+  cfu_op0(CFU_WRITE_OUTPUT_ACTIVATION_MIN, 0, output_activation_min);
+  cfu_op0(CFU_WRITE_OUTPUT_ACTIVATION_MAX, 0, output_activation_max);
+
+
   const int output_depth = MatchingDim(filter_shape, 0, output_shape, 3);
 
   const int input_width = input_shape.Dims(2);
@@ -150,6 +162,11 @@ inline void ConvPerChannelCFUHardware11(const ConvParams& params,
   const int output_width = input_width;
 
   for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
+    // Quant parameters
+    cfu_op0(CFU_WRITE_BIAS, 0, bias_data[out_channel]);
+    cfu_op0(CFU_WRITE_OUTPUT_MULTIPLIER, 0, output_multiplier[out_channel]);
+    cfu_op0(CFU_WRITE_OUTPUT_SHIFT, 0, output_shift[out_channel]);
+
     // Copy kernel
     for (int kernel_x = 0; kernel_x < filter_width; ++kernel_x) {
       for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
@@ -191,14 +208,14 @@ inline void ConvPerChannelCFUHardware11(const ConvParams& params,
       // printf("out_x: %d, acc: %ld\n", out_x, acc);
       // abort();
 
-      if (bias_data) {
-        acc += bias_data[out_channel];
-      }
-      acc = multiply_by_quant_mult(acc, output_multiplier[out_channel], output_shift[out_channel]);
+      // if (bias_data) {
+      //   acc += bias_data[out_channel];
+      // }
+      // acc = multiply_by_quant_mult(acc, output_multiplier[out_channel], output_shift[out_channel]);
 
-      acc += output_offset;
-      acc               = std::max(acc, output_activation_min);
-      acc               = std::min(acc, output_activation_max);
+      // acc += output_offset;
+      // acc               = std::max(acc, output_activation_min);
+      // acc               = std::min(acc, output_activation_max);
       int addr          = out_x * output_depth + out_channel;
       output_data[addr] = static_cast<int8_t>(acc);
 
@@ -325,7 +342,8 @@ inline void ConvPerChannelCFUHardware11(const ConvParams& params,
 //       if (bias_data) {
 //         acc += bias_data[out_channel];
 //       }
-//       acc = multiply_by_quant_mult(acc, output_multiplier[out_channel], output_shift[out_channel]);
+//       acc = multiply_by_quant_mult(acc, output_multiplier[out_channel],
+//       output_shift[out_channel]);
 
 //       acc += output_offset;
 //       acc               = std::max(acc, output_activation_min);

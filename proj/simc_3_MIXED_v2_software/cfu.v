@@ -1,4 +1,3 @@
-// `include "cfu_v10.sv"
 `include "cfu_v11.sv"
 
 
@@ -21,8 +20,7 @@ module Cfu (
   // reg wait_reg = 0;
   wire [31:0] ret;
 
-  // conv1d CONV_1D (
-  quant QUANT (
+  conv1d CONV_1D (
       .clk(clk),
       .cmd(funct7),
       .inp0(cmd_payload_inputs_0),
