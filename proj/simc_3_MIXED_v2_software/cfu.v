@@ -1,4 +1,9 @@
-`include "cfu_v11.sv"
+// `include "cfu_v6.sv"
+// `include "cfu_v7.sv"
+// `include "cfu_v8.sv"
+// `include "cfu_v9.sv"
+// `include "cfu_v11.sv"
+`include "cfu_v12.sv"
 
 
 module Cfu (

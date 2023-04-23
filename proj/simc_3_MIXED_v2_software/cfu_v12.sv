@@ -1,5 +1,5 @@
-// Differs from v9 by quantation module.
-
+// Differs from quntation module by writing/reading 
+// 4 values at a time to/from buffers
 `include "quant.sv"
 
 module conv1d #(
@@ -27,10 +27,10 @@ module conv1d #(
 
   // Buffers
   (* RAM_STYLE="BLOCK" *)
-  reg signed [BYTE_SIZE-1:0] input_buffer[0:BUFFERS_SIZE - 1];
+  reg signed [BYTE_SIZE-1:0] input_buffer[0:BUFFERS_SIZE - 1 + 4];
 
   (* RAM_STYLE="BLOCK" *)
-  reg signed [BYTE_SIZE-1:0] filter_buffer[0:BUFFERS_SIZE - 1];
+  reg signed [BYTE_SIZE-1:0] filter_buffer[0:BUFFERS_SIZE - 1 + 3];
 
   // Parameters
   reg signed [INT32_SIZE-1:0] input_offset = 32'd0;
@@ -46,6 +46,8 @@ module conv1d #(
   reg signed [INT32_SIZE-1:0] output_offset;
 
   wire signed [INT32_SIZE-1:0] quanted_acc;
+
+  reg [7:0] read_write_at_once = 4;
 
 
   // Computation related registers
@@ -109,14 +111,29 @@ module conv1d #(
 
       // Write buffers
       1: begin  // Write input buffer
-        // if (address < BUFFERS_SIZE) begin
         input_buffer[address] <= value[7:0];
-        // end
+
+        if (read_write_at_once > 1) begin
+          input_buffer[address+1] <= value[15:8];
+
+          if (read_write_at_once == 4) begin
+            input_buffer[address+2] <= value[23:16];
+            input_buffer[address+3] <= value[31:24];
+          end
+        end
+
       end
       2: begin  // Write kernel weights buffer
-        // if (address < BUFFERS_SIZE) begin
         filter_buffer[address] <= value[7:0];
-        // end
+
+        if (read_write_at_once > 1) begin
+          filter_buffer[address+1] <= value[15:8];
+
+          if (read_write_at_once == 4) begin
+            filter_buffer[address+2] <= value[23:16];
+            filter_buffer[address+3] <= value[31:24];
+          end
+        end
       end
 
       // Write parameters
@@ -152,10 +169,28 @@ module conv1d #(
       end
 
       10: begin
-        ret <= input_buffer[address];
+        ret[7:0] <= input_buffer[address];
+
+        if (read_write_at_once > 1) begin
+          ret[15:8] <= input_buffer[address+1];
+
+          if (read_write_at_once == 4) begin
+            ret[23:16] <= input_buffer[address+2];
+            ret[31:24] <= input_buffer[address+3];
+          end
+        end
       end
       11: begin
-        ret <= filter_buffer[address];
+        ret[7:0] <= filter_buffer[address];
+
+        if (read_write_at_once > 1) begin
+          ret[15:8] <= filter_buffer[address+1];
+
+          if (read_write_at_once == 4) begin
+            ret[23:16] <= filter_buffer[address+2];
+            ret[31:24] <= filter_buffer[address+3];
+          end
+        end
       end
 
       // Quant parameters
@@ -176,6 +211,10 @@ module conv1d #(
       end
       17: begin
         output_offset <= inp1;
+      end
+
+      18: begin
+        read_write_at_once <= inp1;
       end
 
 

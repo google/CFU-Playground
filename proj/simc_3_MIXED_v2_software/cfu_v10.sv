@@ -91,7 +91,6 @@ module conv1d #(
 
       // Write buffers
       1: begin  // Write input buffer
-        // if (address < BUFFERS_SIZE) begin
         input_buffer[address]   <= value[7:0];
         input_buffer[address+1] <= value[15:8];
         input_buffer[address+2] <= value[23:16];
@@ -99,7 +98,6 @@ module conv1d #(
         // end
       end
       2: begin  // Write filter buffer
-        // if (address < BUFFERS_SIZE) begin
         filter_buffer[address]   <= value[7:0];
         filter_buffer[address+1] <= value[15:8];
         filter_buffer[address+2] <= value[23:16];

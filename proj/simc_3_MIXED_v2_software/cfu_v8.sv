@@ -15,7 +15,7 @@ module conv1d #(
   localparam KERNEL_LENGTH = 8;
 
   localparam BUFFERS_SIZE = KERNEL_LENGTH * MAX_INPUT_CHANNELS;
-  localparam SUM_AT_ONCE = 16;
+  localparam SUM_AT_ONCE = 8;
   localparam CLOCKS_TODO_JOB = BUFFERS_SIZE / SUM_AT_ONCE;
 
 
@@ -40,23 +40,41 @@ module conv1d #(
         finished_work = 1;
       end else begin
         acc <= acc + 
+          kernel_weights_buffer[addr_counter     ] * (input_buffer[(addr_counter +      start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
           kernel_weights_buffer[addr_counter +  1] * (input_buffer[(addr_counter +  1 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
-          kernel_weights_buffer[addr_counter +  2] * (input_buffer[(addr_counter +  2 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
+          kernel_weights_buffer[addr_counter +  2] * (input_buffer[(addr_counter +  2 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) +
           kernel_weights_buffer[addr_counter +  3] * (input_buffer[(addr_counter +  3 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
-          kernel_weights_buffer[addr_counter +  4] * (input_buffer[(addr_counter +  4 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
+          kernel_weights_buffer[addr_counter +  4] * (input_buffer[(addr_counter +  4 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) +
           kernel_weights_buffer[addr_counter +  5] * (input_buffer[(addr_counter +  5 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
           kernel_weights_buffer[addr_counter +  6] * (input_buffer[(addr_counter +  6 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
-          kernel_weights_buffer[addr_counter +  7] * (input_buffer[(addr_counter +  7 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
-          kernel_weights_buffer[addr_counter +  8] * (input_buffer[(addr_counter +  8 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
+          kernel_weights_buffer[addr_counter +  7] * (input_buffer[(addr_counter +  7 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset);
 
-          kernel_weights_buffer[addr_counter +  9] * (input_buffer[(addr_counter +  9 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
-          kernel_weights_buffer[addr_counter + 10] * (input_buffer[(addr_counter + 10 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
-          kernel_weights_buffer[addr_counter + 11] * (input_buffer[(addr_counter + 11 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
-          kernel_weights_buffer[addr_counter + 12] * (input_buffer[(addr_counter + 12 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
-          kernel_weights_buffer[addr_counter + 13] * (input_buffer[(addr_counter + 13 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
-          kernel_weights_buffer[addr_counter + 14] * (input_buffer[(addr_counter + 14 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
-          kernel_weights_buffer[addr_counter + 15] * (input_buffer[(addr_counter + 15 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
-          kernel_weights_buffer[addr_counter + 16] * (input_buffer[(addr_counter + 16 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset);
+          // kernel_weights_buffer[addr_counter +  8] * (input_buffer[(addr_counter +  8 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) +
+          // kernel_weights_buffer[addr_counter +  9] * (input_buffer[(addr_counter +  9 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
+          // kernel_weights_buffer[addr_counter + 10] * (input_buffer[(addr_counter + 10 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
+          // kernel_weights_buffer[addr_counter + 11] * (input_buffer[(addr_counter + 11 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
+          // kernel_weights_buffer[addr_counter + 12] * (input_buffer[(addr_counter + 12 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
+          // kernel_weights_buffer[addr_counter + 13] * (input_buffer[(addr_counter + 13 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
+          // kernel_weights_buffer[addr_counter + 14] * (input_buffer[(addr_counter + 14 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
+          // kernel_weights_buffer[addr_counter + 15] * (input_buffer[(addr_counter + 15 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) +
+
+          // kernel_weights_buffer[addr_counter + 16] * (input_buffer[(addr_counter + 16 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) +
+          // kernel_weights_buffer[addr_counter + 17] * (input_buffer[(addr_counter + 17 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
+          // kernel_weights_buffer[addr_counter + 18] * (input_buffer[(addr_counter + 18 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) +
+          // kernel_weights_buffer[addr_counter + 19] * (input_buffer[(addr_counter + 19 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
+          // kernel_weights_buffer[addr_counter + 20] * (input_buffer[(addr_counter + 20 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) +
+          // kernel_weights_buffer[addr_counter + 21] * (input_buffer[(addr_counter + 21 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
+          // kernel_weights_buffer[addr_counter + 22] * (input_buffer[(addr_counter + 22 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
+          // kernel_weights_buffer[addr_counter + 23] * (input_buffer[(addr_counter + 23 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
+
+          // kernel_weights_buffer[addr_counter + 24] * (input_buffer[(addr_counter + 24 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) +
+          // kernel_weights_buffer[addr_counter + 25] * (input_buffer[(addr_counter + 25 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
+          // kernel_weights_buffer[addr_counter + 26] * (input_buffer[(addr_counter + 26 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
+          // kernel_weights_buffer[addr_counter + 27] * (input_buffer[(addr_counter + 27 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
+          // kernel_weights_buffer[addr_counter + 28] * (input_buffer[(addr_counter + 28 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
+          // kernel_weights_buffer[addr_counter + 29] * (input_buffer[(addr_counter + 29 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
+          // kernel_weights_buffer[addr_counter + 30] * (input_buffer[(addr_counter + 30 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
+          // kernel_weights_buffer[addr_counter + 31] * (input_buffer[(addr_counter + 31 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset);
 
 
         addr_counter = addr_counter + SUM_AT_ONCE;
