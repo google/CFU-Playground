@@ -1,29 +1,3 @@
-/*
-    cmd: 
-        - 0 - initialize - Fills paddings with 0
-        - 1 - write to input buffer
-            - inp0 - address / 4
-            - inp1 - 4 values
-        - 2 - write to kernel weights buffer
-            - inp0 - address / 4
-            - inp1 - 4 values
-        - 3 - read from output_buffer 
-            - inp0 - address / 4
-        - 4 - start computation
-        
-        // debug purposes
-        - 5 - read from the input buffer
-            - inp0 - address / 4
-        - 6 - read from the kernel weights
-            - inp0 - addres / 4
-
-        // 
-        - 7 - set bias
-            - inp0 - bias
-        - 8 - set input offset
-            - inp0 - input_offset
-        
-*/
 module conv1d #(
     parameter BYTE_SIZE = 8,
     parameter INT32_SIZE = 32
