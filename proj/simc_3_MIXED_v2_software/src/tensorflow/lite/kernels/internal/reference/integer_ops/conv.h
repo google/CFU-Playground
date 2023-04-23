@@ -79,7 +79,6 @@ namespace reference_integer_ops {
 // #define ConvPerChannel ConvPerChannelCFUHardware7
 // #define ConvPerChannel ConvPerChannelCFUHardware8
 // #define ConvPerChannel ConvPerChannelCFUHardware9
-// #define ConvPerChannel ConvPerChannelCFUHardware10
 // #define ConvPerChannel ConvPerChannelCFUHardware11
 #define ConvPerChannel ConvPerChannelCFUHardware12
 // #define ConvPerChannel ConvPerChannelOriginalSimple
@@ -143,11 +142,6 @@ inline void ConvPerChannelCFUHardware12(const ConvParams& params,
   int16_t min_input_offset2       = *reinterpret_cast<int16_t*>(min_input_offset_arr2);
   int32_t min_input_offset4       = *reinterpret_cast<int32_t*>(min_input_offset_arr4);
 
-  // for (int addr = 0; addr < 8 * 128; ++addr) {
-  //   cfu_op0(CFU_WRITE_INPUT_BUFFER, addr, -input_offset);
-  //   cfu_op0(CFU_WRITE_KERNEL_BUFFER, addr, -input_offset);
-  // }
-
   const int pad_width = 3;
   (void)pad_width;
 
@@ -181,6 +175,7 @@ inline void ConvPerChannelCFUHardware12(const ConvParams& params,
     cfu_op0(CFU_WRITE_OUTPUT_SHIFT, 0, output_shift[out_channel]);
 
     cfu_op0(18, 0, 4);
+
     // Copy kernel
     for (int kernel_addr = 0; kernel_addr < filter_width * input_depth; kernel_addr += 4) {
       int addr             = out_channel * (8 * input_depth) + kernel_addr;
@@ -189,35 +184,8 @@ inline void ConvPerChannelCFUHardware12(const ConvParams& params,
     }
     cfu_op0(18, 0, 1);
 
-    // for (int kernel_x = 0; kernel_x < filter_width; ++kernel_x) {
-    //   for (int in_channel = 0; in_channel < input_depth; in_channel += increase_v) {
-    //     int addr = out_channel * (8 * input_depth) + kernel_x * input_depth + in_channel;
-
-    //     int32_t filter_value;
-    //     if (input_depth == 2) {
-    //       filter_value =
-    //           static_cast<int32_t>(*reinterpret_cast<const int16_t*>(filter_data + addr));
-    //     } else {
-    //       filter_value = *reinterpret_cast<const int32_t*>(filter_data + addr);
-    //     }
-    //     cfu_op0(CFU_WRITE_KERNEL_BUFFER, kernel_x * input_depth + in_channel, filter_value);
-    //     // printf("kernel_buffer[%d] <= %d\n", kernel_x * input_depth + in_channel,
-    //     // filter_data[addr]);
-    //   }
-    // }
-
-    // for (int kernel_x = 0; kernel_x < filter_width; ++kernel_x) {
-    //   for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-    //     int8_t filter_value =
-    //         cfu_op0(CFU_READ_FILTER_BUFFER, kernel_x * input_depth + in_channel, 0);
-    //     printf("filter_value: %d\n", filter_value);
-    //   }
-    // }
-    // abort();
-
-    int input_cur_x = -pad_width;
     // Copy input - first 8 xs
-
+    int input_cur_x = -pad_width;
     int write_at_once = (input_depth == 2) ? 2 : 4;
     cfu_op0(18, 0, write_at_once);
 
@@ -251,42 +219,10 @@ inline void ConvPerChannelCFUHardware12(const ConvParams& params,
         }
       }
 
-      // for (int in_channel = 0; in_channel < input_depth; in_channel += increase_v) {
-      //   int buffer_addr = filter_x * input_depth + in_channel;
-      //   int8_t value    = -input_offset;
-      //   if ((input_cur_x >= 0) && (input_cur_x < input_width)) {
-      //     int input_addr = input_cur_x * input_depth + in_channel;
-      //     if (input_depth == 2) {
-      //       value =
-      //           static_cast<int32_t>(*reinterpret_cast<const int16_t*>(input_data + input_addr));
-      //     } else {
-      //       value = *reinterpret_cast<const int32_t*>(input_data + input_addr);
-      //     }
-      //     // value          = input_data[input_addr];
-      //   }
-      //   cfu_op0(CFU_WRITE_INPUT_BUFFER, buffer_addr, value);
-
-      //   // This is required to avoid mod in cfu
-      //   if (input_depth == 2) {
-      //     cfu_op0(CFU_WRITE_INPUT_BUFFER, buffer_addr + 8 * input_depth, value);
-      //   }
-      // }
       ++input_cur_x;
     }
 
-    // for (int filter_x = 0; filter_x < 8; ++filter_x) {
-    //   // for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-    //   for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-    //     int buffer_addr = filter_x * input_depth + in_channel;
-    //     int8_t v1       = cfu_op0(CFU_READ_INPUT_BUFFER, buffer_addr, 0);
-    //     int8_t v2       = cfu_op0(CFU_READ_INPUT_BUFFER, buffer_addr + 8 * input_depth, 0);
-    //     printf("v1 - %d, v2 - %d\n", v1, v2);
-    //   }
-    // }
-    // abort();
-
     int start_filter_x = 0;
-
     for (int out_x = 0; out_x < output_width; ++out_x) {
       cfu_op0(CFU_WRITE_START_FILTER_X, 0, start_filter_x);
       cfu_op0(CFU_START_COMPUTATION, 0, 0);
@@ -300,8 +236,6 @@ inline void ConvPerChannelCFUHardware12(const ConvParams& params,
       if (out_x == (output_width - 1)) {
         continue;
       }
-      // write_at_once = (input_depth == 2) ? 2 : 4;
-      // cfu_op0(18, 0, write_at_once);
 
       if (write_at_once == 2) {
         for (int in_channel = 0; in_channel < input_depth; in_channel += write_at_once) {
@@ -330,19 +264,7 @@ inline void ConvPerChannelCFUHardware12(const ConvParams& params,
 
       ++input_cur_x;
       start_filter_x = (start_filter_x + 1) % 8;
-
-      // for (int filter_x = 0; filter_x < 8; ++filter_x) {
-      //   // for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-      //   for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-      //     int buffer_addr = filter_x * input_depth + in_channel;
-      //     int8_t v1       = cfu_op0(CFU_READ_INPUT_BUFFER, buffer_addr, 0);
-      //     int8_t v2       = cfu_op0(CFU_READ_INPUT_BUFFER, buffer_addr + 8 * input_depth, 0);
-      //     printf("v1 - %d, v2 - %d\n", v1, v2);
-      //   }
-      // }
-      // abort();
     }
-    // abort();
   }
 }
 
@@ -357,18 +279,12 @@ inline void ConvPerChannelCFUHardware11(const ConvParams& params,
                                         const int32_t* bias_data,
                                         const RuntimeShape& output_shape,
                                         int8_t* output_data) {
-  // static int call = 0;
   // Initialize cfu
   cfu_op0(CFU_INITIALIZE, 0, 0);
 
   // Get parameters.
   const int32_t input_offset = params.input_offset;  // r = s(q - Z)
   cfu_op0(CFU_WRITE_INPUT_OFFSET, 0, input_offset);
-
-  // for (int addr = 0; addr < 8 * 128; ++addr) {
-  //   cfu_op0(CFU_WRITE_INPUT_BUFFER, addr, -input_offset);
-  //   cfu_op0(CFU_WRITE_KERNEL_BUFFER, addr, -input_offset);
-  // }
 
   const int pad_width = 3;
   (void)pad_width;
@@ -406,172 +322,6 @@ inline void ConvPerChannelCFUHardware11(const ConvParams& params,
       for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
         int addr = out_channel * (8 * input_depth) + kernel_x * input_depth + in_channel;
         cfu_op0(CFU_WRITE_KERNEL_BUFFER, kernel_x * input_depth + in_channel, filter_data[addr]);
-        // printf("kernel_buffer[%d] <= %d\n", kernel_x * input_depth + in_channel,
-        // filter_data[addr]);
-      }
-    }
-
-    // for (int kernel_x = 0; kernel_x < filter_width; ++kernel_x) {
-    //   for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-    //     int8_t filter_value =
-    //         cfu_op0(CFU_READ_FILTER_BUFFER, kernel_x * input_depth + in_channel, 0);
-    //     printf("filter_value: %d\n", filter_value);
-    //   }
-    // }
-    // abort();
-
-    int input_cur_x = -pad_width;
-    // Copy input - first 8 xs
-    for (int filter_x = 0; filter_x < 8; ++filter_x) {
-      for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-        int buffer_addr = filter_x * input_depth + in_channel;
-        int8_t value    = -input_offset;
-        if ((input_cur_x >= 0) && (input_cur_x < input_width)) {
-          int input_addr = input_cur_x * input_depth + in_channel;
-          value          = input_data[input_addr];
-        }
-        cfu_op0(CFU_WRITE_INPUT_BUFFER, buffer_addr, value);
-
-        // This is required to avoid mod in cfu
-        if (input_depth == 2) {
-          cfu_op0(CFU_WRITE_INPUT_BUFFER, buffer_addr + 8 * input_depth, value);
-        }
-      }
-      ++input_cur_x;
-    }
-
-    // for (int filter_x = 0; filter_x < 8; ++filter_x) {
-    //   // for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-    //   for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-    //     int buffer_addr = filter_x * input_depth + in_channel;
-    //     int8_t v1       = cfu_op0(CFU_READ_INPUT_BUFFER, buffer_addr, 0);
-    //     int8_t v2       = cfu_op0(CFU_READ_INPUT_BUFFER, buffer_addr + 8 * input_depth, 0);
-    //     printf("v1 - %d, v2 - %d\n", v1, v2);
-    //   }
-    // }
-    // abort();
-
-    int start_filter_x = 0;
-
-    for (int out_x = 0; out_x < output_width; ++out_x) {
-      cfu_op0(CFU_WRITE_START_FILTER_X, 0, start_filter_x);
-      cfu_op0(CFU_START_COMPUTATION, 0, 0);
-      while (!cfu_op0(CFU_FINISHED, 0, 0)) {
-      };
-      int32_t acc = cfu_op0(CFU_READ_ACCUMULATOR, 0, 0);
-      // printf("out_x: %d, acc: %ld\n", out_x, acc);
-      // abort();
-
-      // if (bias_data) {
-      //   acc += bias_data[out_channel];
-      // }
-      // acc = multiply_by_quant_mult(acc, output_multiplier[out_channel],
-      // output_shift[out_channel]);
-
-      // acc += output_offset;
-      // acc               = std::max(acc, output_activation_min);
-      // acc               = std::min(acc, output_activation_max);
-      int addr          = out_x * output_depth + out_channel;
-      output_data[addr] = static_cast<int8_t>(acc);
-
-      // Copy input
-      if (out_x == (output_width - 1)) {
-        continue;
-      }
-      for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-        int buffer_addr = start_filter_x * input_depth + in_channel;
-        int8_t value    = -input_offset;
-        if ((input_cur_x >= 0) && (input_cur_x < input_width)) {
-          int input_addr = input_cur_x * input_depth + in_channel;
-          value          = input_data[input_addr];
-        }
-        cfu_op0(CFU_WRITE_INPUT_BUFFER, buffer_addr, value);
-
-        // This is required to avoid mod in cfu
-        if (input_depth == 2) {
-          cfu_op0(CFU_WRITE_INPUT_BUFFER, buffer_addr + 8 * input_depth, value);
-        }
-      }
-      ++input_cur_x;
-      start_filter_x = (start_filter_x + 1) % 8;
-
-      // for (int filter_x = 0; filter_x < 8; ++filter_x) {
-      //   // for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-      //   for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-      //     int buffer_addr = filter_x * input_depth + in_channel;
-      //     int8_t v1       = cfu_op0(CFU_READ_INPUT_BUFFER, buffer_addr, 0);
-      //     int8_t v2       = cfu_op0(CFU_READ_INPUT_BUFFER, buffer_addr + 8 * input_depth, 0);
-      //     printf("v1 - %d, v2 - %d\n", v1, v2);
-      //   }
-      // }
-      // abort();
-    }
-    // abort();
-  }
-}
-
-inline void ConvPerChannelCFUHardware10(const ConvParams& params,
-                                        const int32_t* output_multiplier,
-                                        const int32_t* output_shift,
-                                        const RuntimeShape& input_shape,
-                                        const int8_t* input_data,
-                                        const RuntimeShape& filter_shape,
-                                        const int8_t* filter_data,
-                                        const RuntimeShape& bias_shape,
-                                        const int32_t* bias_data,
-                                        const RuntimeShape& output_shape,
-                                        int8_t* output_data) {
-  // static int call = 0;
-  // Initialize cfu
-  cfu_op0(CFU_INITIALIZE, 0, 0);
-
-  // Get parameters.
-  const int32_t input_offset = params.input_offset;  // r = s(q - Z)
-  cfu_op0(CFU_WRITE_INPUT_OFFSET, 0, input_offset);
-
-  // for (int addr = 0; addr < 8 * 128; ++addr) {
-  //   cfu_op0(CFU_WRITE_INPUT_BUFFER, addr, -input_offset);
-  //   cfu_op0(CFU_WRITE_KERNEL_BUFFER, addr, -input_offset);
-  // }
-
-  const int pad_width = 3;
-  (void)pad_width;
-
-  const int32_t output_offset         = -128;
-  const int32_t output_activation_min = -128;
-  const int32_t output_activation_max = 127;
-
-  const int output_depth = MatchingDim(filter_shape, 0, output_shape, 3);
-
-  const int input_width = input_shape.Dims(2);
-  cfu_op0(CFU_WRITE_INPUT_OUTPUT_WIDTH, 0, input_width);
-
-  const int filter_width = 8;
-  (void)filter_width;
-
-  const int input_depth = filter_shape.Dims(3);
-  cfu_op0(CFU_WRITE_INPUT_DEPTH, 0, input_depth);
-
-  // const int output_width = output_shape.Dims(2);
-  const int output_width = input_width;
-
-  int increase_v = (input_depth == 2) ? 2 : 4;
-  for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
-    // Copy kernel
-    for (int kernel_x = 0; kernel_x < filter_width; ++kernel_x) {
-      for (int in_channel = 0; in_channel < input_depth; in_channel += increase_v) {
-        int addr = out_channel * (8 * input_depth) + kernel_x * input_depth + in_channel;
-
-        int32_t filter_value;
-        if (input_depth == 2) {
-          filter_value =
-              static_cast<int32_t>(*reinterpret_cast<const int16_t*>(filter_data + addr));
-        } else {
-          filter_value = *reinterpret_cast<const int32_t*>(filter_data + addr);
-        }
-        cfu_op0(CFU_WRITE_KERNEL_BUFFER, kernel_x * input_depth + in_channel, filter_value);
-        // printf("kernel_buffer[%d] <= %d\n", kernel_x * input_depth + in_channel,
-        // filter_data[addr]);
       }
     }
 
@@ -603,17 +353,7 @@ inline void ConvPerChannelCFUHardware10(const ConvParams& params,
       while (!cfu_op0(CFU_FINISHED, 0, 0)) {
       };
       int32_t acc = cfu_op0(CFU_READ_ACCUMULATOR, 0, 0);
-      // printf("out_x: %d, acc: %ld\n", out_x, acc);
-      // abort();
 
-      if (bias_data) {
-        acc += bias_data[out_channel];
-      }
-      acc = multiply_by_quant_mult(acc, output_multiplier[out_channel], output_shift[out_channel]);
-
-      acc += output_offset;
-      acc               = std::max(acc, output_activation_min);
-      acc               = std::min(acc, output_activation_max);
       int addr          = out_x * output_depth + out_channel;
       output_data[addr] = static_cast<int8_t>(acc);
 
@@ -638,7 +378,6 @@ inline void ConvPerChannelCFUHardware10(const ConvParams& params,
       ++input_cur_x;
       start_filter_x = (start_filter_x + 1) % 8;
     }
-    // abort();
   }
 }
 
@@ -660,11 +399,6 @@ inline void ConvPerChannelCFUHardware9(const ConvParams& params,
   // Get parameters.
   const int32_t input_offset = params.input_offset;  // r = s(q - Z)
   cfu_op0(CFU_WRITE_INPUT_OFFSET, 0, input_offset);
-
-  // for (int addr = 0; addr < 8 * 128; ++addr) {
-  //   cfu_op0(CFU_WRITE_INPUT_BUFFER, addr, -input_offset);
-  //   cfu_op0(CFU_WRITE_KERNEL_BUFFER, addr, -input_offset);
-  // }
 
   const int pad_width = 3;
   (void)pad_width;
@@ -726,8 +460,6 @@ inline void ConvPerChannelCFUHardware9(const ConvParams& params,
       while (!cfu_op0(CFU_FINISHED, 0, 0)) {
       };
       int32_t acc = cfu_op0(CFU_READ_ACCUMULATOR, 0, 0);
-      // printf("out_x: %d, acc: %ld\n", out_x, acc);
-      // abort();
 
       if (bias_data) {
         acc += bias_data[out_channel];
@@ -761,7 +493,6 @@ inline void ConvPerChannelCFUHardware9(const ConvParams& params,
       ++input_cur_x;
       start_filter_x = (start_filter_x + 1) % 8;
     }
-    // abort();
   }
 }
 
@@ -776,7 +507,6 @@ inline void ConvPerChannelCFUHardware8(const ConvParams& params,
                                        const int32_t* bias_data,
                                        const RuntimeShape& output_shape,
                                        int8_t* output_data) {
-  // static int call = 0;
   // Initialize cfu
   cfu_op0(0, 0, 0);
   // Zero out buffers
@@ -816,8 +546,6 @@ inline void ConvPerChannelCFUHardware8(const ConvParams& params,
       for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
         int addr = out_channel * (8 * input_depth) + kernel_x * input_depth + in_channel;
         cfu_op0(11, kernel_x * input_depth + in_channel, filter_data[addr]);
-        // printf("kernel_buffer[%d] <= %d\n", kernel_x * input_depth + in_channel,
-        // filter_data[addr]);
       }
     }
 
@@ -874,7 +602,6 @@ inline void ConvPerChannelCFUHardware8(const ConvParams& params,
       ++input_cur_x;
       start_filter_x = (start_filter_x + 1) % 8;
     }
-    // abort();
   }
 }
 
@@ -889,7 +616,6 @@ inline void ConvPerChannelCFUHardware7(const ConvParams& params,
                                        const int32_t* bias_data,
                                        const RuntimeShape& output_shape,
                                        int8_t* output_data) {
-  // static int call = 0;
   // Initialize cfu
   cfu_op0(0, 0, 0);
 
@@ -919,12 +645,6 @@ inline void ConvPerChannelCFUHardware7(const ConvParams& params,
   const int output_width = input_width;
 
   // Copy input
-  // for (int in_x = 0; in_x < input_width; ++in_x) {
-  //   for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-  //     int addr = in_x * input_depth + in_channel;
-  //     cfu_op0(10, addr, input_data[addr]);
-  //   }
-  // }
 
   for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
     // Copy kernel
@@ -932,8 +652,6 @@ inline void ConvPerChannelCFUHardware7(const ConvParams& params,
       for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
         int addr = out_channel * (8 * input_depth) + kernel_x * input_depth + in_channel;
         cfu_op0(11, kernel_x * input_depth + in_channel, filter_data[addr]);
-        // printf("kernel_buffer[%d] <= %d\n", kernel_x * input_depth + in_channel,
-        // filter_data[addr]);
       }
     }
 
@@ -961,8 +679,6 @@ inline void ConvPerChannelCFUHardware7(const ConvParams& params,
       cfu_op0(44, 0, start_filter_x);
       cfu_op0(41, 0, 0);
       int32_t acc = cfu_op0(43, 0, 0);
-      // printf("out_x: %d, acc: %ld\n", out_x, acc);
-      // abort();
 
       if (bias_data) {
         acc += bias_data[out_channel];
@@ -991,7 +707,6 @@ inline void ConvPerChannelCFUHardware7(const ConvParams& params,
       ++input_cur_x;
       start_filter_x = (start_filter_x + 1) % 8;
     }
-    // abort();
   }
 }
 
@@ -1006,7 +721,6 @@ inline void ConvPerChannelCFUHardware6(const ConvParams& params,
                                        const int32_t* bias_data,
                                        const RuntimeShape& output_shape,
                                        int8_t* output_data) {
-  // static int call = 0;
   // Initialize cfu
   cfu_op0(0, 0, 0);
 
