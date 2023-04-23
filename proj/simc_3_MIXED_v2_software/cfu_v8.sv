@@ -25,16 +25,22 @@ module conv1d #(
   wire [INT32_SIZE-1:0] address = inp0;
   wire [INT32_SIZE-1:0] value = inp1;
 
+  // Buffers
+  (* RAM_STYLE="BLOCK" *)
   reg signed [BYTE_SIZE-1:0] input_buffer[0:BUFFERS_SIZE - 1];
+
+  (* RAM_STYLE="BLOCK" *)
   reg signed [BYTE_SIZE-1:0] kernel_weights_buffer[0:BUFFERS_SIZE - 1];
 
+  // Parameters
   reg signed [INT32_SIZE-1:0] input_offset = 32'd0;
   reg signed [INT32_SIZE-1:0] input_output_width = 32'd0;
   reg signed [INT32_SIZE-1:0] input_depth = 32'd0;
 
+  // Computation related registers
   reg signed [INT32_SIZE-1:0] start_filter_x = 0;
-  reg signed [INT32_SIZE-1:0] finished_work = 1;
-  reg signed [INT32_SIZE-1:0] addr_counter = 0;
+  reg finished_work = 1'b1;
+  reg unsigned [INT32_SIZE-1:0] addr_counter = 0; // KERNEL_LENGTH * MAX_INPUT_CHANNELS = 8 * 128 = 1024 == 2**10
   reg signed [INT32_SIZE-1:0] acc = 0;
 
   always @(posedge clk) begin
@@ -93,48 +99,38 @@ module conv1d #(
       end
 
       // Write buffers
-      10: begin  // Write input buffer
+      1: begin  // Write input buffer
         input_buffer[address] <= value[7:0];
       end
-      11: begin  // Write kernel weights buffer
+      2: begin  // Write kernel weights buffer
         kernel_weights_buffer[address] <= value[7:0];
       end
 
-      // Read buffers
-      // 13: begin
-      //   ret[7 : 0] <= input_buffer[address];
-      // end
-      // 14: begin
-      //   ret[7 : 0] <= kernel_weights_buffer[address];
-      // end
-
       // Write parameters
-      20: begin
+      3: begin
         input_offset <= value;
       end
 
-      25: begin
+      4: begin
         input_output_width <= value;
       end
-      26: begin
+      5: begin
         input_depth <= value;
       end
 
-      41: begin
+      6: begin  // Start computation
         acc <= 0;
         finished_work = 0;
-        addr_counter = 0;
+        addr_counter  = 0;
       end
-      // 42: begin
-      //   acc = value;
-      // end
-      43: begin
+
+      7: begin  // get acumulator
         ret <= acc;
       end
-      44: begin
+      8: begin  // Write start x in input ring buffer 
         start_filter_x <= value;
       end
-      45: begin
+      9: begin  // Check if computation is done
         ret <= finished_work;
       end
       default: begin
