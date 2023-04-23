@@ -1,3 +1,6 @@
+`include "conf.sv"
+`ifdef CFU_VERSION_5
+
 module conv1d #(
     parameter BYTE_SIZE = 8,
     parameter INT32_SIZE = 32
@@ -182,3 +185,4 @@ always @(posedge clk) begin
 end
     
 endmodule
+`endif

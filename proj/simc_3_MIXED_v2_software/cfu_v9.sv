@@ -1,3 +1,6 @@
+`include "conf.sv"
+`ifdef CFU_VERSION_9
+
 module conv1d #(
     parameter BYTE_SIZE  = 8,
     parameter INT32_SIZE = 32
@@ -133,4 +136,4 @@ module conv1d #(
   end
 
 endmodule
-
+`endif

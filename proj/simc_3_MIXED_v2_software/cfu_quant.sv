@@ -1,3 +1,5 @@
+`include "conf.sv"
+`ifdef CFU_VERSION_QUANT
 `include "quant.sv"
 
 module quant_cfu #(
@@ -78,4 +80,4 @@ module quant_cfu #(
   end
 
 endmodule
-
+`endif
