@@ -1,15 +1,3 @@
-module c_shift_right #(
-    parameter INT32_SIZE = 32
-) (
-    input  signed [INT32_SIZE-1:0] x,
-    input  signed [INT32_SIZE-1:0] shift,
-    output signed [INT32_SIZE-1:0] ret
-);
-
-  assign ret = (x >= 0) ? (x >> shift) : (-(-x >> shift) - ((shift == 0) ? 0 : 1));
-
-endmodule
-
 module rounding_divide_by_POT #(
     parameter INT32_SIZE = 32
 ) (
@@ -24,15 +12,7 @@ module rounding_divide_by_POT #(
   wire signed [INT32_SIZE-1:0] remainder = x & mask;
   wire signed [INT32_SIZE-1:0] threshold = (mask >> 1) + (((x < zero) ? ~0 : 0) & one);
 
-  wire signed [INT32_SIZE-1:0] shifted_x;
-
-  c_shift_right shift_x (
-      .x(x),
-      .shift(exponent),
-      .ret(shifted_x)
-  );
-
-  assign ret = shifted_x + (((remainder > threshold) ? ~0 : 0) & one);
+  assign ret = (x >>> exponent) + (((remainder > threshold) ? ~0 : 0) & one);
 
 endmodule
 
