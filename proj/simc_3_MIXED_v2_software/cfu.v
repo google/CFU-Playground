@@ -1,10 +1,10 @@
-`include "cfu_v5.sv"
-`include "cfu_v6.sv"
-`include "cfu_v7.sv"
-`include "cfu_v8.sv"
-`include "cfu_v9.sv"
-`include "cfu_v11.sv"
-`include "cfu_v12.sv"
+`include "verilog_src/cfu_v5.sv"
+`include "verilog_src/cfu_v6.sv"
+`include "verilog_src/cfu_v7.sv"
+`include "verilog_src/cfu_v8.sv"
+`include "verilog_src/cfu_v9.sv"
+`include "verilog_src/cfu_v11.sv"
+`include "verilog_src/cfu_v12.sv"
 
 
 module Cfu (
