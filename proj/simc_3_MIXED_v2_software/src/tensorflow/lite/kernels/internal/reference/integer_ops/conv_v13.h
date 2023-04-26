@@ -82,6 +82,8 @@ inline void ConvPerChannel(const ConvParams& params,
     cfu_op0(18, 0, write_at_once);
     int initial_start_filter_x = (write_at_once == 2) ? 0 : 8;
     int filter_x_mod = (write_at_once == 2) ? 8 : 9;
+    // int initial_start_filter_x = 0;
+    // int filter_x_mod = 8;
 
     for (int filter_x = 0; filter_x < 8; ++filter_x) {
       if (write_at_once == 2) {
@@ -118,6 +120,7 @@ inline void ConvPerChannel(const ConvParams& params,
 
     int start_filter_x = initial_start_filter_x;
     int cur_write_filter_x = (input_depth == 2) ? initial_start_filter_x : 8;
+    // int cur_write_filter_x = initial_start_filter_x;
     for (int out_x = 0; out_x < output_width; ++out_x) {
       cfu_op0(CFU_WRITE_START_FILTER_X, 0, start_filter_x);
       cfu_op0(CFU_START_COMPUTATION, 0, 0);
