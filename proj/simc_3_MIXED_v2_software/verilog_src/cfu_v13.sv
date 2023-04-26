@@ -27,6 +27,7 @@ module conv1d #(
   wire [INT32_SIZE-1:0] value = inp1;
   wire [INT32_SIZE-1:0] cur_kernel_buffer_size = KERNEL_LENGTH * input_depth;
   wire [INT32_SIZE-1:0] cur_input_buffer_size = (input_depth == 2) ? cur_kernel_buffer_size : cur_kernel_buffer_size + input_depth;
+  // wire [INT32_SIZE-1:0] cur_input_buffer_size = cur_kernel_buffer_size;
 
   // Buffers
   (* RAM_STYLE="BLOCK" *)

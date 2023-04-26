@@ -8,17 +8,17 @@
 
 namespace tflite {
 namespace reference_integer_ops {
-inline void ConvPerChannelCFUHardware5(const ConvParams& params,
-                                       const int32_t* output_multiplier,
-                                       const int32_t* output_shift,
-                                       const RuntimeShape& input_shape,
-                                       const int8_t* input_data,
-                                       const RuntimeShape& filter_shape,
-                                       const int8_t* filter_data,
-                                       const RuntimeShape& bias_shape,
-                                       const int32_t* bias_data,
-                                       const RuntimeShape& output_shape,
-                                       int8_t* output_data) {
+inline void ConvPerChannel(const ConvParams& params,
+                           const int32_t* output_multiplier,
+                           const int32_t* output_shift,
+                           const RuntimeShape& input_shape,
+                           const int8_t* input_data,
+                           const RuntimeShape& filter_shape,
+                           const int8_t* filter_data,
+                           const RuntimeShape& bias_shape,
+                           const int32_t* bias_data,
+                           const RuntimeShape& output_shape,
+                           int8_t* output_data) {
   // static int call = 0;
   // Initialize cfu
   cfu_op0(0, 0, 0);
@@ -59,7 +59,7 @@ inline void ConvPerChannelCFUHardware5(const ConvParams& params,
       cfu_op0(10, addr, input_data[addr]);
     }
   }
-  printf("Done copying input\n");
+  // printf("Done copying input\n");
 
   for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
     // Copy kernel

@@ -8,17 +8,17 @@
 
 namespace tflite {
 namespace reference_integer_ops {
-inline void ConvPerChannelCFUHardware6(const ConvParams& params,
-                                       const int32_t* output_multiplier,
-                                       const int32_t* output_shift,
-                                       const RuntimeShape& input_shape,
-                                       const int8_t* input_data,
-                                       const RuntimeShape& filter_shape,
-                                       const int8_t* filter_data,
-                                       const RuntimeShape& bias_shape,
-                                       const int32_t* bias_data,
-                                       const RuntimeShape& output_shape,
-                                       int8_t* output_data) {
+inline void ConvPerChannel(const ConvParams& params,
+                           const int32_t* output_multiplier,
+                           const int32_t* output_shift,
+                           const RuntimeShape& input_shape,
+                           const int8_t* input_data,
+                           const RuntimeShape& filter_shape,
+                           const int8_t* filter_data,
+                           const RuntimeShape& bias_shape,
+                           const int32_t* bias_data,
+                           const RuntimeShape& output_shape,
+                           int8_t* output_data) {
   // Initialize cfu
   cfu_op0(0, 0, 0);
 
@@ -85,7 +85,6 @@ inline void ConvPerChannelCFUHardware6(const ConvParams& params,
     }
   }
 }
-
 
 }  // namespace reference_integer_ops
 }  // namespace tflite

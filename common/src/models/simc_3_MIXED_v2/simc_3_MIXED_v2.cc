@@ -100,20 +100,6 @@ static int8_t* simc_3_MIXED_v2_classify() {
 
 #endif  // CFU_CONV1d_V8_PARAMS
 
-void printBits(size_t const size, void const* const ptr) {
-  unsigned char* b = (unsigned char*)ptr;
-  unsigned char byte;
-  int i, j;
-
-  for (i = size - 1; i >= 0; i--) {
-    for (j = 7; j >= 0; j--) {
-      byte = (b[i] >> j) & 1;
-      printf("%u", byte);
-    }
-  }
-  puts("");
-}
-
 [[maybe_unused]] static void test_assert_equal(int8_t v1, int8_t v2, const char* msg = "") {
   if (v1 == v2)
     return;
