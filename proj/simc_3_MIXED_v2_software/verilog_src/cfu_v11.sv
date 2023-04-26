@@ -1,5 +1,5 @@
 // Differs from v9 by quantation module.
-`include "conf.sv"
+`include "verilog_src/conf.sv"
 `ifdef CFU_VERSION_11
 
 `include "quant.sv"

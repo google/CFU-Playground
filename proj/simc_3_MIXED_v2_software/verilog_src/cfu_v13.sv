@@ -1,7 +1,7 @@
 // Differs from quntation module by writing/reading 
 // 4 values at a time to/from buffers
 `include "verilog_src/conf.sv"
-`ifdef CFU_VERSION_12
+`ifdef CFU_VERSION_13
 `include "quant.sv"
 
 module conv1d #(
@@ -25,11 +25,12 @@ module conv1d #(
 
   wire [INT32_SIZE-1:0] address = inp0;
   wire [INT32_SIZE-1:0] value = inp1;
-  wire [INT32_SIZE-1:0] cur_buffer_size = KERNEL_LENGTH * input_depth;
+  wire [INT32_SIZE-1:0] cur_kernel_buffer_size = KERNEL_LENGTH * input_depth;
+  wire [INT32_SIZE-1:0] cur_input_buffer_size = cur_kernel_buffer_size + input_depth;
 
   // Buffers
   (* RAM_STYLE="BLOCK" *)
-  reg signed [BYTE_SIZE-1:0] input_buffer[0:BUFFERS_SIZE - 1 + 4];
+  reg signed [BYTE_SIZE-1:0] input_buffer[0:BUFFERS_SIZE + MAX_INPUT_CHANNELS - 1 + 4];
 
   (* RAM_STYLE="BLOCK" *)
   reg signed [BYTE_SIZE-1:0] filter_buffer[0:BUFFERS_SIZE - 1 + 3];
@@ -79,14 +80,14 @@ module conv1d #(
     if (!finished_work) begin
       if (update_address) begin
         kernel_addr <= kernel_addr + SUM_AT_ONCE;
-        if ((input_addr + SUM_AT_ONCE) >= cur_buffer_size) begin
-          input_addr <= input_addr + SUM_AT_ONCE - cur_buffer_size;
+        if ((input_addr + SUM_AT_ONCE) >= cur_input_buffer_size) begin
+          input_addr <= input_addr + SUM_AT_ONCE - cur_input_buffer_size;
         end else begin
           input_addr <= input_addr + SUM_AT_ONCE;
         end
         update_address <= 0;
       end else begin
-        if (kernel_addr >= cur_buffer_size) begin
+        if (kernel_addr >= cur_kernel_buffer_size) begin
           finished_work <= 1;
         end else begin
           acc <= acc + 

@@ -1,4 +1,4 @@
-`include "conf.sv"
+`include "verilog_src/conf.sv"
 `ifdef CFU_VERSION_8
 
 module conv1d #(

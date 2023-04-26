@@ -33,6 +33,7 @@ limitations under the License.
 // #include "conv_v1234.h"
 #include "conv_v11.h"
 #include "conv_v12.h"
+#include "conv_v13.h"
 #include "conv_v5.h"
 #include "conv_v6.h"
 #include "conv_v7.h"
