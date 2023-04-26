@@ -92,14 +92,41 @@ module conv1d #(
           finished_work <= 1;
         end else begin
           acc <= acc + 
-            filter_buffer[kernel_addr     ] * (input_buffer[(input_addr    )] + input_offset) + 
-            filter_buffer[kernel_addr +  1] * (input_buffer[(input_addr + 1)] + input_offset) + 
-            filter_buffer[kernel_addr +  2] * (input_buffer[(input_addr + 2)] + input_offset) + 
-            filter_buffer[kernel_addr +  3] * (input_buffer[(input_addr + 3)] + input_offset) +
-            filter_buffer[kernel_addr +  4] * (input_buffer[(input_addr + 4)] + input_offset) + 
-            filter_buffer[kernel_addr +  5] * (input_buffer[(input_addr + 5)] + input_offset) + 
-            filter_buffer[kernel_addr +  6] * (input_buffer[(input_addr + 6)] + input_offset) + 
-            filter_buffer[kernel_addr +  7] * (input_buffer[(input_addr + 7)] + input_offset);
+            filter_buffer[kernel_addr     ] * (input_buffer[(input_addr     )] + input_offset) + 
+            filter_buffer[kernel_addr +  1] * (input_buffer[(input_addr +  1)] + input_offset) +
+            filter_buffer[kernel_addr +  2] * (input_buffer[(input_addr +  2)] + input_offset) + 
+            filter_buffer[kernel_addr +  3] * (input_buffer[(input_addr +  3)] + input_offset) +
+            filter_buffer[kernel_addr +  4] * (input_buffer[(input_addr +  4)] + input_offset) + 
+            filter_buffer[kernel_addr +  5] * (input_buffer[(input_addr +  5)] + input_offset) + 
+            filter_buffer[kernel_addr +  6] * (input_buffer[(input_addr +  6)] + input_offset) + 
+            filter_buffer[kernel_addr +  7] * (input_buffer[(input_addr +  7)] + input_offset);
+
+            // filter_buffer[kernel_addr +  8] * (input_buffer[(input_addr +  8)] + input_offset) + 
+            // filter_buffer[kernel_addr +  9] * (input_buffer[(input_addr +  9)] + input_offset) +
+            // filter_buffer[kernel_addr + 10] * (input_buffer[(input_addr + 10)] + input_offset) + 
+            // filter_buffer[kernel_addr + 11] * (input_buffer[(input_addr + 11)] + input_offset) +
+            // filter_buffer[kernel_addr + 12] * (input_buffer[(input_addr + 12)] + input_offset) + 
+            // filter_buffer[kernel_addr + 13] * (input_buffer[(input_addr + 13)] + input_offset) + 
+            // filter_buffer[kernel_addr + 14] * (input_buffer[(input_addr + 14)] + input_offset) + 
+            // filter_buffer[kernel_addr + 15] * (input_buffer[(input_addr + 15)] + input_offset) +
+
+            // filter_buffer[kernel_addr + 16] * (input_buffer[(input_addr + 16)] + input_offset) + 
+            // filter_buffer[kernel_addr + 17] * (input_buffer[(input_addr + 17)] + input_offset) +
+            // filter_buffer[kernel_addr + 18] * (input_buffer[(input_addr + 18)] + input_offset) + 
+            // filter_buffer[kernel_addr + 19] * (input_buffer[(input_addr + 19)] + input_offset) +
+            // filter_buffer[kernel_addr + 20] * (input_buffer[(input_addr + 20)] + input_offset) + 
+            // filter_buffer[kernel_addr + 21] * (input_buffer[(input_addr + 21)] + input_offset) + 
+            // filter_buffer[kernel_addr + 22] * (input_buffer[(input_addr + 22)] + input_offset) + 
+            // filter_buffer[kernel_addr + 23] * (input_buffer[(input_addr + 23)] + input_offset);
+
+            // filter_buffer[kernel_addr + 24] * (input_buffer[(input_addr + 24)] + input_offset) + 
+            // filter_buffer[kernel_addr + 25] * (input_buffer[(input_addr + 25)] + input_offset) +
+            // filter_buffer[kernel_addr + 26] * (input_buffer[(input_addr + 26)] + input_offset) + 
+            // filter_buffer[kernel_addr + 27] * (input_buffer[(input_addr + 27)] + input_offset) +
+            // filter_buffer[kernel_addr + 28] * (input_buffer[(input_addr + 28)] + input_offset) + 
+            // filter_buffer[kernel_addr + 29] * (input_buffer[(input_addr + 29)] + input_offset) + 
+            // filter_buffer[kernel_addr + 30] * (input_buffer[(input_addr + 30)] + input_offset) + 
+            // filter_buffer[kernel_addr + 31] * (input_buffer[(input_addr + 31)] + input_offset);
         end
         update_address <= 1;
       end
