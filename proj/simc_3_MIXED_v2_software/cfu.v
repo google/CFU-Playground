@@ -1,10 +1,15 @@
+// `include "cfu_full_v9.v"
+// `include "cfu_full_v111.v"
+
 `include "verilog_src/cfu_v5.sv"
 `include "verilog_src/cfu_v6.sv"
 `include "verilog_src/cfu_v7.sv"
 `include "verilog_src/cfu_v8.sv"
 `include "verilog_src/cfu_v9.sv"
 `include "verilog_src/cfu_v11.sv"
+`include "verilog_src/cfu_v11_1.sv"
 `include "verilog_src/cfu_v12.sv"
+`include "verilog_src/cfu_v12_1.sv"
 `include "verilog_src/cfu_v13.sv"
 
 
@@ -29,6 +34,7 @@ module Cfu (
 
   conv1d CONV_1D (
       .clk(clk),
+      .en(cmd_valid),
       .cmd(funct7),
       .inp0(cmd_payload_inputs_0),
       .inp1(cmd_payload_inputs_1),
@@ -58,6 +64,3 @@ module Cfu (
     end
   end
 endmodule
-
-
-

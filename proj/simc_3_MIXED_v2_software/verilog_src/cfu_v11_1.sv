@@ -1,6 +1,6 @@
 // Differs from v9 by quantation module.
 `include "verilog_src/conf.sv"
-`ifdef CFU_VERSION_11
+`ifdef CFU_VERSION_11_1
 
 `include "quant.sv"
 
@@ -50,11 +50,29 @@ module conv1d #(
 
   wire signed [INT32_SIZE-1:0] quanted_acc;
 
+  reg signed [BYTE_SIZE-1:0] sum_input_0;
+  reg signed [BYTE_SIZE-1:0] sum_input_1;
+  reg signed [BYTE_SIZE-1:0] sum_input_2;
+  reg signed [BYTE_SIZE-1:0] sum_input_3;
+  reg signed [BYTE_SIZE-1:0] sum_input_4;
+  reg signed [BYTE_SIZE-1:0] sum_input_5;
+  reg signed [BYTE_SIZE-1:0] sum_input_6;
+  reg signed [BYTE_SIZE-1:0] sum_input_7;
+
+  reg signed [BYTE_SIZE-1:0] sum_filter_0;
+  reg signed [BYTE_SIZE-1:0] sum_filter_1;
+  reg signed [BYTE_SIZE-1:0] sum_filter_2;
+  reg signed [BYTE_SIZE-1:0] sum_filter_3;
+  reg signed [BYTE_SIZE-1:0] sum_filter_4;
+  reg signed [BYTE_SIZE-1:0] sum_filter_5;
+  reg signed [BYTE_SIZE-1:0] sum_filter_6;
+  reg signed [BYTE_SIZE-1:0] sum_filter_7;
 
   // Computation related registers
   reg signed [INT32_SIZE-1:0] start_filter_x = 0;
   reg finished_work = 1'b1;
-  reg update_address = 1'b0;
+  // reg update_address = 1'b0;
+  reg load_data = 1'b0;
   reg [INT32_SIZE-1:0] kernel_addr;
   reg [INT32_SIZE-1:0] input_addr;
   reg signed [INT32_SIZE-1:0] acc;
@@ -76,34 +94,80 @@ module conv1d #(
 
   always @(posedge clk) begin
     if (en) begin
-
       if (!finished_work) begin
-        if (update_address) begin
-          kernel_addr <= kernel_addr + SUM_AT_ONCE;
-          if ((input_addr + SUM_AT_ONCE) >= cur_buffer_size) begin
-            input_addr <= input_addr + SUM_AT_ONCE - cur_buffer_size;
-          end else begin
-            input_addr <= input_addr + SUM_AT_ONCE;
-          end
-          update_address <= 0;
+        if (load_data) begin
+          sum_input_0  <= input_buffer[input_addr];
+          sum_input_1  <= input_buffer[input_addr+1];
+          sum_input_2  <= input_buffer[input_addr+2];
+          sum_input_3  <= input_buffer[input_addr+3];
+          sum_input_4  <= input_buffer[input_addr+4];
+          sum_input_5  <= input_buffer[input_addr+5];
+          sum_input_6  <= input_buffer[input_addr+6];
+          sum_input_7  <= input_buffer[input_addr+7];
+
+          sum_filter_0 <= filter_buffer[kernel_addr];
+          sum_filter_1 <= filter_buffer[kernel_addr+1];
+          sum_filter_2 <= filter_buffer[kernel_addr+2];
+          sum_filter_3 <= filter_buffer[kernel_addr+3];
+          sum_filter_4 <= filter_buffer[kernel_addr+4];
+          sum_filter_5 <= filter_buffer[kernel_addr+5];
+          sum_filter_6 <= filter_buffer[kernel_addr+6];
+          sum_filter_7 <= filter_buffer[kernel_addr+7];
+
+          load_data    <= 0;
         end else begin
           if (kernel_addr >= cur_buffer_size) begin
             finished_work <= 1;
           end else begin
             acc <= acc + 
-            filter_buffer[kernel_addr     ] * (input_buffer[(input_addr    )] + input_offset) + 
-            filter_buffer[kernel_addr +  1] * (input_buffer[(input_addr + 1)] + input_offset) + 
-            filter_buffer[kernel_addr +  2] * (input_buffer[(input_addr + 2)] + input_offset) + 
-            filter_buffer[kernel_addr +  3] * (input_buffer[(input_addr + 3)] + input_offset) +
-            filter_buffer[kernel_addr +  4] * (input_buffer[(input_addr + 4)] + input_offset) + 
-            filter_buffer[kernel_addr +  5] * (input_buffer[(input_addr + 5)] + input_offset) + 
-            filter_buffer[kernel_addr +  6] * (input_buffer[(input_addr + 6)] + input_offset) + 
-            filter_buffer[kernel_addr +  7] * (input_buffer[(input_addr + 7)] + input_offset);
+                 sum_filter_0 * (sum_input_0 + input_offset) +
+                 sum_filter_1 * (sum_input_1 + input_offset) +
+                 sum_filter_2 * (sum_input_2 + input_offset) +
+                 sum_filter_3 * (sum_input_3 + input_offset) +
+                 sum_filter_4 * (sum_input_4 + input_offset) +
+                 sum_filter_5 * (sum_input_5 + input_offset) +
+                 sum_filter_6 * (sum_input_6 + input_offset) +
+                 sum_filter_7 * (sum_input_7 + input_offset);
+
+            kernel_addr <= kernel_addr + SUM_AT_ONCE;
+            if ((input_addr + SUM_AT_ONCE) >= cur_buffer_size) begin
+              input_addr <= input_addr + SUM_AT_ONCE - cur_buffer_size;
+            end else begin
+              input_addr <= input_addr + SUM_AT_ONCE;
+            end
           end
-          update_address <= 1;
+          load_data <= 1;
         end
 
       end
+
+      // if (!finished_work) begin
+      //   if (update_address) begin
+      //     kernel_addr <= kernel_addr + SUM_AT_ONCE;
+      //     if ((input_addr + SUM_AT_ONCE) >= cur_buffer_size) begin
+      //       input_addr <= input_addr + SUM_AT_ONCE - cur_buffer_size;
+      //     end else begin
+      //       input_addr <= input_addr + SUM_AT_ONCE;
+      //     end
+      //     update_address <= 0;
+      //   end else begin
+      //     if (kernel_addr >= cur_buffer_size) begin
+      //       finished_work <= 1;
+      //     end else begin
+      //       acc <= acc + 
+      //       filter_buffer[kernel_addr     ] * (input_buffer[(input_addr    )] + input_offset) + 
+      //       filter_buffer[kernel_addr +  1] * (input_buffer[(input_addr + 1)] + input_offset) + 
+      //       filter_buffer[kernel_addr +  2] * (input_buffer[(input_addr + 2)] + input_offset) + 
+      //       filter_buffer[kernel_addr +  3] * (input_buffer[(input_addr + 3)] + input_offset) +
+      //       filter_buffer[kernel_addr +  4] * (input_buffer[(input_addr + 4)] + input_offset) + 
+      //       filter_buffer[kernel_addr +  5] * (input_buffer[(input_addr + 5)] + input_offset) + 
+      //       filter_buffer[kernel_addr +  6] * (input_buffer[(input_addr + 6)] + input_offset) + 
+      //       filter_buffer[kernel_addr +  7] * (input_buffer[(input_addr + 7)] + input_offset);
+      //     end
+      //     update_address <= 1;
+      //   end
+
+      // end
 
       case (cmd)
         // Initialize
@@ -140,7 +204,8 @@ module conv1d #(
         6: begin  // Start computation
           acc <= 0;
           finished_work <= 0;
-          update_address <= 0;
+          // update_address <= 0;
+          load_data <= 1;
           kernel_addr <= 0;
           input_addr <= start_filter_x * input_depth;
         end

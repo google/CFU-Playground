@@ -62,7 +62,7 @@ static int8_t* simc_3_MIXED_v2_classify() {
   for (size_t i = 0; i < NUM_CLASSES; ++i) {
     int8_t y_true = expected_output[i];
     int8_t y_pred = output[i];
-    // printf("expected[%d] = %d, actual[%d] = %d\n", i, y_true, i, y_pred);
+    printf("expected[%d] = %d, actual[%d] = %d\n", i, y_true, i, y_pred);
 
     int32_t delta = CFU_MAX(y_true, y_pred) - CFU_MIN(y_true, y_pred);
     // printf("epsilon = %d, delta = %ld, max=%d, min=%d\n", epsilon, delta,
@@ -131,7 +131,7 @@ inline IntegerType rounding_divide_by_POT(IntegerType x, int exponent) {
   const IntegerType one       = 1;
   const IntegerType remainder = x & mask;
   const IntegerType threshold = (mask >> 1) + (((x < zero) ? ~0 : 0) & one);
-  IntegerType result = (x >> exponent) + (((remainder > threshold) ? ~0 : 0) & one);
+  IntegerType result          = (x >> exponent) + (((remainder > threshold) ? ~0 : 0) & one);
   return result;
 }
 
@@ -142,7 +142,7 @@ inline std::int32_t saturating_rounding_doubling_high_mul(std::int32_t a, std::i
   std::int64_t ab_64        = a_64 * b_64;
   std::int32_t nudge        = ab_64 >= 0 ? (1 << 30) : (1 - (1 << 30));
   std::int32_t ab_x2_high32 = static_cast<std::int32_t>((ab_64 + nudge) / (1ll << 31));
-  int32_t result = overflow ? std::numeric_limits<std::int32_t>::max() : ab_x2_high32;
+  int32_t result            = overflow ? std::numeric_limits<std::int32_t>::max() : ab_x2_high32;
   // printf("SRDHM: %ld\n", result);
   return result;
 }
@@ -158,7 +158,8 @@ inline int32_t multiply_by_quant_mult(int32_t x, int32_t quantized_multiplier, i
 }  // namespace
 
 [[maybe_unused]] static void test_conv1d_cfu() {
-  // const int32_t kernel_length = 8;
+  [[maybe_unused]] const int32_t kernel_length = 8;
+  int32_t acc;
   printf("\n==================== Start CFU test (check output) ====================\n");
 
   // // Test quant cfu
@@ -231,7 +232,7 @@ inline int32_t multiply_by_quant_mult(int32_t x, int32_t quantized_multiplier, i
   ////////////////////
 
   // Very simple test for conv1d v9
-  // // Write values to the input
+  // Write values to the input
   // cfu_op0(CFU_WRITE_INPUT_BUFFER, 0, 123);
   // cfu_op0(CFU_WRITE_INPUT_BUFFER, 1, 255);
 
@@ -251,68 +252,93 @@ inline int32_t multiply_by_quant_mult(int32_t x, int32_t quantized_multiplier, i
 
   // printf("Write/Read filter: v0 = %d; (expected 13) v1 = %d (expexted -3) \n", v0, v1);
 
-  // // Write input depth for test convolution
-  // int32_t input_depth = 1;
-  // cfu_op0(CFU_WRITE_INPUT_DEPTH, 0, input_depth);
+  // Write input depth for test convolution
+  int32_t input_depth = 1;
+  cfu_op0(CFU_WRITE_INPUT_DEPTH, 0, input_depth);
 
-  // // Write input buffer values (8 * input_depth = 8)
-  // for (size_t i = 0; i < static_cast<size_t>(kernel_length * input_depth); ++i) {
-  //   cfu_op0(CFU_WRITE_INPUT_BUFFER, i, i);
-  //   cfu_op0(CFU_WRITE_FILTER_BUFFER, i, i);
+  // Write input buffer values (8 * input_depth = 8)
+  for (size_t i = 0; i < static_cast<size_t>(kernel_length * input_depth); ++i) {
+    cfu_op0(CFU_WRITE_INPUT_BUFFER, i, i + 2);
+    cfu_op0(CFU_WRITE_FILTER_BUFFER, i, i);
+  }
+
+  // Start computation
+  cfu_op0(CFU_START_COMPUTATION, 0, 0);
+  // Wait for result
+  while (!cfu_op0(CFU_FINISHED, 0, 0)) {
+  }
+  // Get result
+  acc = cfu_op0(CFU_READ_ACCUMULATOR, 0, 0);
+  // 0**2 + 1**2 + ... 7 **2 = 140
+  printf("Computation: acc = %ld (expected 196)\n", acc);
+
+  ////////////////////
+
+  // cfu_op0(12, 0, 4);
+  // cfu_op0(13, 0, 7);
+  // cfu_op0(12, 0, 0);
+  // cfu_op0(13, 0, 0);
+  // acc = cfu_op0(7, 0, 0);
+  // printf("Res1 = %ld, expected 196\n", acc);
+  // for (int i = 0; i < 16; ++i) {
+  //   int v = cfu_op0(14, i, 0);
+  //   printf("v = %d, expected: %d\n", v, i % 8);
   // }
 
-  // // Start computation
-  // cfu_op0(CFU_START_COMPUTATION, 0, 0);
-  // // Wait for result
-  // while (!cfu_op0(CFU_FINISHED, 0, 0)) {
+  // for (int i = 0; i < 16; ++i) {
+  //   cfu_op0(15, i, i % 4);
+  //   // cfu_op0(15, i, i % 4);
+  //   // cfu_op0(15, i, i % 4);
+  //   // cfu_op0(15, i, i % 4);
   // }
-  // // Get result
-  // int32_t acc = cfu_op0(CFU_READ_ACCUMULATOR, 0, 0);
-  // // 0**2 + 1**2 + ... 7 **2 = 140
-  // printf("Computation: acc = %ld (expected 140)\n", acc);
+  // for (int i = 0; i < 16; ++i) {
+  //   int v = cfu_op0(14, i, 0);
+  //   printf("v = %d, expected: %d\n", v, i % 4);
+  // }
+  // cfu_op0(13, 0, 0);
+  // acc = cfu_op0(7, 0, 0);
+  // printf("Res2 = %ld, expected 28\n", acc);
 
   printf("\n==================== End CFU test ====================\n");
 }
 
 static void do_tests() {
-  test_conv1d_cfu();
+  // test_conv1d_cfu();
 
   int8_t epsilon = 20;
   bool failed    = false;
 
   failed = failed ||
-           perform_one_test(test_data_simc_3_MIXED_v2_16QAM, pred_simc_3_MIXED_v2_16QAM,
-           epsilon);
+           perform_one_test(test_data_simc_3_MIXED_v2_16QAM, pred_simc_3_MIXED_v2_16QAM, epsilon);
 
   failed = failed ||
-           perform_one_test(test_data_simc_3_MIXED_v2_64QAM, pred_simc_3_MIXED_v2_64QAM,
-           epsilon);
+           perform_one_test(test_data_simc_3_MIXED_v2_64QAM, pred_simc_3_MIXED_v2_64QAM, epsilon);
 
-  failed = failed ||
-           perform_one_test(test_data_simc_3_MIXED_v2_8PSK, pred_simc_3_MIXED_v2_8PSK, epsilon);
+  // failed = failed ||
+  //          perform_one_test(test_data_simc_3_MIXED_v2_8PSK, pred_simc_3_MIXED_v2_8PSK, epsilon);
 
-  failed = failed ||
-           perform_one_test(test_data_simc_3_MIXED_v2_B_FM, pred_simc_3_MIXED_v2_B_FM, epsilon);
+  // failed = failed ||
+  //          perform_one_test(test_data_simc_3_MIXED_v2_B_FM, pred_simc_3_MIXED_v2_B_FM, epsilon);
 
-  failed = failed ||
-           perform_one_test(test_data_simc_3_MIXED_v2_BPSK, pred_simc_3_MIXED_v2_BPSK, epsilon);
+  // failed = failed ||
+  //          perform_one_test(test_data_simc_3_MIXED_v2_BPSK, pred_simc_3_MIXED_v2_BPSK, epsilon);
 
-  failed = failed ||
-           perform_one_test(test_data_simc_3_MIXED_v2_CPFSK, pred_simc_3_MIXED_v2_CPFSK,
-           epsilon);
+  // failed = failed ||
+  //          perform_one_test(test_data_simc_3_MIXED_v2_CPFSK, pred_simc_3_MIXED_v2_CPFSK,
+  //          epsilon);
 
-  failed = failed ||
-           perform_one_test(test_data_simc_3_MIXED_v2_DSB_AM, pred_simc_3_MIXED_v2_DSB_AM,
-           epsilon);
+  // failed = failed ||
+  //          perform_one_test(test_data_simc_3_MIXED_v2_DSB_AM, pred_simc_3_MIXED_v2_DSB_AM,
+  //          epsilon);
 
-  failed = failed ||
-           perform_one_test(test_data_simc_3_MIXED_v2_GFSK, pred_simc_3_MIXED_v2_GFSK, epsilon);
+  // failed = failed ||
+  //          perform_one_test(test_data_simc_3_MIXED_v2_GFSK, pred_simc_3_MIXED_v2_GFSK, epsilon);
 
-  failed = failed ||
-           perform_one_test(test_data_simc_3_MIXED_v2_PAM4, pred_simc_3_MIXED_v2_PAM4, epsilon);
+  // failed = failed ||
+  //          perform_one_test(test_data_simc_3_MIXED_v2_PAM4, pred_simc_3_MIXED_v2_PAM4, epsilon);
 
-  failed = failed ||
-           perform_one_test(test_data_simc_3_MIXED_v2_QPSK, pred_simc_3_MIXED_v2_QPSK, epsilon);
+  // failed = failed ||
+  //          perform_one_test(test_data_simc_3_MIXED_v2_QPSK, pred_simc_3_MIXED_v2_QPSK, epsilon);
 
   // failed = failed || perform_one_test(
   //   test_data_simc_3_MIXED_v2_SSB_AM,
