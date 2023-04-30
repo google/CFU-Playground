@@ -8,8 +8,10 @@
 `include "verilog_src/cfu_v9.sv"
 `include "verilog_src/cfu_v11.sv"
 `include "verilog_src/cfu_v11_1.sv"
+`include "verilog_src/cfu_v11_2.sv"
 `include "verilog_src/cfu_v12.sv"
 `include "verilog_src/cfu_v12_1.sv"
+`include "verilog_src/cfu_v12_2.sv"
 `include "verilog_src/cfu_v13.sv"
 
 
