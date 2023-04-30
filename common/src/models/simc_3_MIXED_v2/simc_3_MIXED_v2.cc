@@ -314,37 +314,37 @@ static void do_tests() {
   failed = failed ||
            perform_one_test(test_data_simc_3_MIXED_v2_64QAM, pred_simc_3_MIXED_v2_64QAM, epsilon);
 
-  // failed = failed ||
-  //          perform_one_test(test_data_simc_3_MIXED_v2_8PSK, pred_simc_3_MIXED_v2_8PSK, epsilon);
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_8PSK, pred_simc_3_MIXED_v2_8PSK, epsilon);
 
-  // failed = failed ||
-  //          perform_one_test(test_data_simc_3_MIXED_v2_B_FM, pred_simc_3_MIXED_v2_B_FM, epsilon);
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_B_FM, pred_simc_3_MIXED_v2_B_FM, epsilon);
 
-  // failed = failed ||
-  //          perform_one_test(test_data_simc_3_MIXED_v2_BPSK, pred_simc_3_MIXED_v2_BPSK, epsilon);
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_BPSK, pred_simc_3_MIXED_v2_BPSK, epsilon);
 
-  // failed = failed ||
-  //          perform_one_test(test_data_simc_3_MIXED_v2_CPFSK, pred_simc_3_MIXED_v2_CPFSK,
-  //          epsilon);
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_CPFSK, pred_simc_3_MIXED_v2_CPFSK,
+           epsilon);
 
-  // failed = failed ||
-  //          perform_one_test(test_data_simc_3_MIXED_v2_DSB_AM, pred_simc_3_MIXED_v2_DSB_AM,
-  //          epsilon);
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_DSB_AM, pred_simc_3_MIXED_v2_DSB_AM,
+           epsilon);
 
-  // failed = failed ||
-  //          perform_one_test(test_data_simc_3_MIXED_v2_GFSK, pred_simc_3_MIXED_v2_GFSK, epsilon);
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_GFSK, pred_simc_3_MIXED_v2_GFSK, epsilon);
 
-  // failed = failed ||
-  //          perform_one_test(test_data_simc_3_MIXED_v2_PAM4, pred_simc_3_MIXED_v2_PAM4, epsilon);
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_PAM4, pred_simc_3_MIXED_v2_PAM4, epsilon);
 
-  // failed = failed ||
-  //          perform_one_test(test_data_simc_3_MIXED_v2_QPSK, pred_simc_3_MIXED_v2_QPSK, epsilon);
+  failed = failed ||
+           perform_one_test(test_data_simc_3_MIXED_v2_QPSK, pred_simc_3_MIXED_v2_QPSK, epsilon);
 
-  // failed = failed || perform_one_test(
-  //   test_data_simc_3_MIXED_v2_SSB_AM,
-  //   pred_simc_3_MIXED_v2_SSB_AM,
-  //   epsilon
-  // );
+  failed = failed || perform_one_test(
+    test_data_simc_3_MIXED_v2_SSB_AM,
+    pred_simc_3_MIXED_v2_SSB_AM,
+    epsilon
+  );
 
   if (failed) {
     printf("FAIL simc_3_MIXED_v2 tests failed\n");

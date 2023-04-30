@@ -1,6 +1,8 @@
-`define CFU_VERSION_13
+// `define CFU_VERSION_13
+`define CFU_VERSION_12_2
 // `define CFU_VERSION_12_1
 // `define CFU_VERSION_12
+// `define CFU_VERSION_11_2
 // `define CFU_VERSION_11_1
 // `define CFU_VERSION_11
 // `define CFU_VERSION_9

@@ -1,8 +1,8 @@
+// Uses quant2
 // Differs from v9 by quantation module.
 `include "verilog_src/conf.sv"
-`ifdef CFU_VERSION_11
-
-`include "quant.sv"
+`ifdef CFU_VERSION_11_2
+`include "quant_v2.sv"
 
 module conv1d #(
     parameter BYTE_SIZE  = 8,
@@ -59,8 +59,16 @@ module conv1d #(
   reg [INT32_SIZE-1:0] input_addr;
   reg signed [INT32_SIZE-1:0] acc;
 
+  reg waiting_for_quant = 0;
+  reg start_quant = 0;
+  wire quant_done;
+
   quant QUANT (
+      .clk(clk),
       .acc(acc),
+
+      .start(start_quant),
+      .ret_valid(quant_done),
 
       .bias(bias),
       .output_multiplier(output_multiplier),
@@ -78,29 +86,40 @@ module conv1d #(
     if (en) begin
 
       if (!finished_work) begin
-        if (update_address) begin
-          kernel_addr <= kernel_addr + SUM_AT_ONCE;
-          if ((input_addr + SUM_AT_ONCE) >= cur_buffer_size) begin
-            input_addr <= input_addr + SUM_AT_ONCE - cur_buffer_size;
-          end else begin
-            input_addr <= input_addr + SUM_AT_ONCE;
-          end
-          update_address <= 0;
-        end else begin
-          if (kernel_addr >= cur_buffer_size) begin
+        if (waiting_for_quant) begin
+          start_quant <= 0;
+          if (quant_done) begin
+            // $display("quant  done");
             finished_work <= 1;
-          end else begin
-            acc <= acc + 
-              filter_buffer[kernel_addr     ] * (input_buffer[(input_addr    )] + input_offset) + 
-              filter_buffer[kernel_addr +  1] * (input_buffer[(input_addr + 1)] + input_offset) + 
-              filter_buffer[kernel_addr +  2] * (input_buffer[(input_addr + 2)] + input_offset) + 
-              filter_buffer[kernel_addr +  3] * (input_buffer[(input_addr + 3)] + input_offset) +
-              filter_buffer[kernel_addr +  4] * (input_buffer[(input_addr + 4)] + input_offset) + 
-              filter_buffer[kernel_addr +  5] * (input_buffer[(input_addr + 5)] + input_offset) + 
-              filter_buffer[kernel_addr +  6] * (input_buffer[(input_addr + 6)] + input_offset) + 
-              filter_buffer[kernel_addr +  7] * (input_buffer[(input_addr + 7)] + input_offset);
+            waiting_for_quant <= 0;
           end
-          update_address <= 1;
+        end else begin
+          if (update_address) begin
+            kernel_addr <= kernel_addr + SUM_AT_ONCE;
+            if ((input_addr + SUM_AT_ONCE) >= cur_buffer_size) begin
+              input_addr <= input_addr + SUM_AT_ONCE - cur_buffer_size;
+            end else begin
+              input_addr <= input_addr + SUM_AT_ONCE;
+            end
+            update_address <= 0;
+          end else begin
+            if (kernel_addr >= cur_buffer_size) begin
+              waiting_for_quant <= 1;
+              start_quant <= 1;
+              // finished_work <= 1;
+            end else begin
+              acc <= acc + 
+            filter_buffer[kernel_addr     ] * (input_buffer[(input_addr    )] + input_offset) + 
+            filter_buffer[kernel_addr +  1] * (input_buffer[(input_addr + 1)] + input_offset) + 
+            filter_buffer[kernel_addr +  2] * (input_buffer[(input_addr + 2)] + input_offset) + 
+            filter_buffer[kernel_addr +  3] * (input_buffer[(input_addr + 3)] + input_offset) +
+            filter_buffer[kernel_addr +  4] * (input_buffer[(input_addr + 4)] + input_offset) + 
+            filter_buffer[kernel_addr +  5] * (input_buffer[(input_addr + 5)] + input_offset) + 
+            filter_buffer[kernel_addr +  6] * (input_buffer[(input_addr + 6)] + input_offset) + 
+            filter_buffer[kernel_addr +  7] * (input_buffer[(input_addr + 7)] + input_offset);
+            end
+            update_address <= 1;
+          end
         end
 
       end
