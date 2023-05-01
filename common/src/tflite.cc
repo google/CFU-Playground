@@ -82,7 +82,7 @@ constexpr T const& const_max(const T& x, const T& y, const Args&... rest) {
 constexpr int kTensorArenaSize = const_max<int>(
 
 // My_models_anchor
-#ifdef INCLUDE_MODEL_SIMC_3_MIXED_V2
+#ifdef INCLUDE_MODEL_SIMC_4_RADIOML
     110000,
 #endif
 #ifdef INCLUDE_MODEL_SINE
@@ -283,20 +283,11 @@ void tflite_classify() {
   perf_reset_all_counters();
 
   // perf_set_mcycle is a no-op for some boards, start and end used instead.
-  // fflush(stdout);
-  printf("//measure_time_anchor_start\n");
-  // fflush(stdout);
-
   uint64_t start = perf_get_mcycle64();
   if (kTfLiteOk != interpreter->Invoke()) {
     puts("Invoke failed.");
   }
   uint64_t end = perf_get_mcycle64();
-
-  // fflush(stdout);
-  printf("//measure_time_anchor_end\n");
-  // fflush(stdout);
-
 #ifndef NPROFILE
   printf("\n");
   profiler->LogCsv();
