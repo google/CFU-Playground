@@ -3,7 +3,7 @@
 // Differs from quntation module by writing/reading 
 // 4 values at a time to/from buffers
 `include "verilog_src/conf.sv"
-`ifdef CFU_VERSION_12_2
+`ifdef CFU_VERSION_12_3
 `include "quant_v2.sv"
 
 module conv1d #(
@@ -32,10 +32,10 @@ module conv1d #(
 
   // Buffers
   (* RAM_STYLE="BLOCK" *)
-  reg signed [BYTE_SIZE-1:0] input_buffer[0:BUFFERS_SIZE - 1 + 4];
+  reg signed [BYTE_SIZE-1:0] input_buffer[0:BUFFERS_SIZE - 1];
 
   (* RAM_STYLE="BLOCK" *)
-  reg signed [BYTE_SIZE-1:0] filter_buffer[0:BUFFERS_SIZE - 1 + 4];
+  reg signed [BYTE_SIZE-1:0] filter_buffer[0:BUFFERS_SIZE - 1];
 
   // Parameters
   reg signed [INT32_SIZE-1:0] input_offset = 32'd0;
@@ -51,6 +51,9 @@ module conv1d #(
   reg signed [INT32_SIZE-1:0] output_offset;
 
   wire signed [INT32_SIZE-1:0] quanted_acc;
+
+  reg [7:0] read_write_at_once = 4;
+
 
   // Computation related registers
   reg signed [INT32_SIZE-1:0] start_filter_x = 0;
@@ -170,13 +173,17 @@ module conv1d #(
 
         // Write buffers
         1: begin  // Write input buffer
-          input_buffer[address] <= value[7:0];
+          if (address % 4 != 0) begin
+            $display("!!! Address: %d", address);
+          end
+          input_buffer[address]   <= value[7:0];
           input_buffer[address+1] <= value[15:8];
           input_buffer[address+2] <= value[23:16];
           input_buffer[address+3] <= value[31:24];
+
         end
         2: begin  // Write kernel weights buffer
-          filter_buffer[address] <= value[7:0];
+          filter_buffer[address]   <= value[7:0];
           filter_buffer[address+1] <= value[15:8];
           filter_buffer[address+2] <= value[23:16];
           filter_buffer[address+3] <= value[31:24];
@@ -214,25 +221,55 @@ module conv1d #(
           ret <= finished_work;
         end
 
+        // 10: begin
+        //   ret[7:0] <= input_buffer[address];
+
+        //   if (read_write_at_once > 1) begin
+        //     ret[15:8] <= input_buffer[address+1];
+
+        //     if (read_write_at_once == 4) begin
+        //       ret[23:16] <= input_buffer[address+2];
+        //       ret[31:24] <= input_buffer[address+3];
+        //     end
+        //   end
+        // end
+        // 11: begin
+        //   ret[7:0] <= filter_buffer[address];
+
+        //   if (read_write_at_once > 1) begin
+        //     ret[15:8] <= filter_buffer[address+1];
+
+        //     if (read_write_at_once == 4) begin
+        //       ret[23:16] <= filter_buffer[address+2];
+        //       ret[31:24] <= filter_buffer[address+3];
+        //     end
+        //   end
+        // end
+
         // Quant parameters
-        10: begin
+        12: begin
           bias <= inp1;
         end
-        11: begin
+        13: begin
           output_multiplier <= inp1;
         end
-        12: begin
+        14: begin
           output_shift <= inp1;
         end
-        13: begin
+        15: begin
           output_activation_min <= inp1;
         end
-        14: begin
+        16: begin
           output_activation_max <= inp1;
         end
-        15: begin
+        17: begin
           output_offset <= inp1;
         end
+
+        18: begin
+          read_write_at_once <= inp1;
+        end
+
 
         default: begin
           // $display("!!! DEFAULT case ");

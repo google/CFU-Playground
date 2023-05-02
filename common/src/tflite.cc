@@ -85,6 +85,9 @@ constexpr int kTensorArenaSize = const_max<int>(
 #ifdef INCLUDE_MODEL_SIMC_4_RADIOML
     110000,
 #endif
+#ifdef INCLUDE_MODEL_SIMC_3_MIXED_V2
+    110000,
+#endif
 #ifdef INCLUDE_MODEL_SINE
     2000,
 #endif

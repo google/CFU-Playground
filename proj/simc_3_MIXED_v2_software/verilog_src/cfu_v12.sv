@@ -209,52 +209,27 @@ module conv1d #(
           ret <= finished_work;
         end
 
-        // 10: begin
-        //   ret[7:0] <= input_buffer[address];
-
-        //   if (read_write_at_once > 1) begin
-        //     ret[15:8] <= input_buffer[address+1];
-
-        //     if (read_write_at_once == 4) begin
-        //       ret[23:16] <= input_buffer[address+2];
-        //       ret[31:24] <= input_buffer[address+3];
-        //     end
-        //   end
-        // end
-        // 11: begin
-        //   ret[7:0] <= filter_buffer[address];
-
-        //   if (read_write_at_once > 1) begin
-        //     ret[15:8] <= filter_buffer[address+1];
-
-        //     if (read_write_at_once == 4) begin
-        //       ret[23:16] <= filter_buffer[address+2];
-        //       ret[31:24] <= filter_buffer[address+3];
-        //     end
-        //   end
-        // end
-
         // Quant parameters
-        12: begin
+        10: begin
           bias <= inp1;
         end
-        13: begin
+        11: begin
           output_multiplier <= inp1;
         end
-        14: begin
+        12: begin
           output_shift <= inp1;
         end
-        15: begin
+        13: begin
           output_activation_min <= inp1;
         end
-        16: begin
+        14: begin
           output_activation_max <= inp1;
         end
-        17: begin
+        15: begin
           output_offset <= inp1;
         end
 
-        18: begin
+        16: begin
           read_write_at_once <= inp1;
         end
 

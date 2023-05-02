@@ -61,7 +61,7 @@ inline void ConvPerChannel(const ConvParams& params,
     for (int kernel_x = 0; kernel_x < filter_width; ++kernel_x) {
       for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
         int addr = out_channel * (8 * input_depth) + kernel_x * input_depth + in_channel;
-        cfu_op0(CFU_WRITE_KERNEL_BUFFER, kernel_x * input_depth + in_channel, filter_data[addr]);
+        cfu_op0(CFU_WRITE_FILTER_BUFFER, kernel_x * input_depth + in_channel, filter_data[addr]);
       }
     }
 

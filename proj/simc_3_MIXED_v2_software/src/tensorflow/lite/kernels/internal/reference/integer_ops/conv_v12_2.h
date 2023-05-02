@@ -1,5 +1,5 @@
 #include "conf.h"
-#if CFU_VERSION == 12
+#if CFU_VERSION == 122
 
 #include "cfu_utils.h"
 #include "common.h"
@@ -66,7 +66,6 @@ inline void ConvPerChannel(const ConvParams& params,
     cfu_op0(CFU_WRITE_OUTPUT_MULTIPLIER, 0, output_multiplier[out_channel]);
     cfu_op0(CFU_WRITE_OUTPUT_SHIFT, 0, output_shift[out_channel]);
 
-    cfu_op0(CFU_WRITE_WRITE_AT_ONCE, 0, 4);
 
     // Copy kernel
     for (int kernel_addr = 0; kernel_addr < filter_width * input_depth; kernel_addr += 4) {
@@ -74,12 +73,10 @@ inline void ConvPerChannel(const ConvParams& params,
       int32_t filter_value = *reinterpret_cast<const int32_t*>(filter_data + addr);
       cfu_op0(CFU_WRITE_FILTER_BUFFER, kernel_addr, filter_value);
     }
-    cfu_op0(CFU_WRITE_WRITE_AT_ONCE, 0, 1);
 
     // Copy input - first 8 xs
     int input_cur_x   = -pad_width;
     int write_at_once = (input_depth == 2) ? 2 : 4;
-    cfu_op0(CFU_WRITE_WRITE_AT_ONCE, 0, write_at_once);
 
     for (int filter_x = 0; filter_x < 8; ++filter_x) {
       if (write_at_once == 2) {
@@ -132,10 +129,17 @@ inline void ConvPerChannel(const ConvParams& params,
       if (write_at_once == 2) {
         for (int in_channel = 0; in_channel < input_depth; in_channel += write_at_once) {
           int buffer_addr = start_filter_x * input_depth + in_channel;
-          int16_t value   = min_input_offset2;
-          if ((input_cur_x >= 0) && (input_cur_x < input_width)) {
-            int input_addr = input_cur_x * input_depth + in_channel;
-            value          = *reinterpret_cast<const int16_t*>(input_data + input_addr);
+
+          int32_t value         = min_input_offset4;
+          int16_t* value_16_ptr = reinterpret_cast<int16_t*>(&value);
+
+          if (input_cur_x < input_width) {
+            int input_addr  = input_cur_x * input_depth + in_channel;
+            value_16_ptr[0] = *reinterpret_cast<const int16_t*>(input_data + input_addr);
+            if (input_addr - 7 * input_depth > 0) {
+              value_16_ptr[1] =
+                  *reinterpret_cast<const int16_t*>(input_data + input_addr - 7 * input_depth);
+            }
           }
           cfu_op0(CFU_WRITE_INPUT_BUFFER, buffer_addr, value);
 
@@ -146,7 +150,8 @@ inline void ConvPerChannel(const ConvParams& params,
         for (int in_channel = 0; in_channel < input_depth; in_channel += write_at_once) {
           int buffer_addr = start_filter_x * input_depth + in_channel;
           int32_t value   = min_input_offset4;
-          if ((input_cur_x >= 0) && (input_cur_x < input_width)) {
+          // if ((input_cur_x >= 0) && (input_cur_x < input_width)) {
+          if (input_cur_x < input_width) {
             int input_addr = input_cur_x * input_depth + in_channel;
             value          = *reinterpret_cast<const int32_t*>(input_data + input_addr);
           }
