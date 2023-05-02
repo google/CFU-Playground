@@ -66,7 +66,7 @@ inline void ConvPerChannel(const ConvParams& params,
     cfu_op0(CFU_WRITE_OUTPUT_MULTIPLIER, 0, output_multiplier[out_channel]);
     cfu_op0(CFU_WRITE_OUTPUT_SHIFT, 0, output_shift[out_channel]);
 
-    cfu_op0(18, 0, 4);
+    cfu_op0(CFU_WRITE_WRITE_AT_ONCE, 0, 4);
 
     // Copy kernel
     for (int kernel_addr = 0; kernel_addr < filter_width * input_depth; kernel_addr += 4) {
@@ -74,12 +74,12 @@ inline void ConvPerChannel(const ConvParams& params,
       int32_t filter_value = *reinterpret_cast<const int32_t*>(filter_data + addr);
       cfu_op0(CFU_WRITE_KERNEL_BUFFER, kernel_addr, filter_value);
     }
-    cfu_op0(18, 0, 1);
+    cfu_op0(CFU_WRITE_WRITE_AT_ONCE, 0, 1);
 
     // Copy input - first 8 xs
     int input_cur_x   = -pad_width;
     int write_at_once = (input_depth == 2) ? 2 : 4;
-    cfu_op0(18, 0, write_at_once);
+    cfu_op0(CFU_WRITE_WRITE_AT_ONCE, 0, write_at_once);
 
     for (int filter_x = 0; filter_x < 8; ++filter_x) {
       if (write_at_once == 2) {

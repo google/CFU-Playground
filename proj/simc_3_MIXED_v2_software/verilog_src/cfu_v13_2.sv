@@ -1,5 +1,6 @@
-// Differs from quntation module by writing/reading 
-// 4 values at a time to/from buffers
+// No write_at_once
+// Uses quant 2
+// Async writing to computation
 `include "verilog_src/conf.sv"
 `ifdef CFU_VERSION_13_2
 `include "quant_v2.sv"
@@ -52,8 +53,6 @@ module conv1d #(
 
   wire signed [INT32_SIZE-1:0] quanted_acc;
 
-  reg write_4 = 1;
-
 
   // Computation related registers
   reg signed [INT32_SIZE-1:0] start_filter_x = 0;
@@ -93,7 +92,7 @@ module conv1d #(
         if (waiting_for_quant) begin
           start_quant <= 0;
           if (quant_done) begin
-            // $display("quant  done");
+            // $display("<<<< acc after quant: %d, %d ", quanted_acc, acc);
             finished_work <= 1;
             waiting_for_quant <= 0;
           end
@@ -108,46 +107,47 @@ module conv1d #(
             update_address <= 0;
           end else begin
             if (kernel_addr >= cur_kernel_buffer_size) begin
+              // $display(">>>> acc before quant: %d", acc);
               waiting_for_quant <= 1;
               start_quant <= 1;
               // finished_work <= 1;
             end else begin
               acc <= acc + 
-            filter_buffer[kernel_addr     ] * (input_buffer[(input_addr     )] + input_offset) + 
-            filter_buffer[kernel_addr +  1] * (input_buffer[(input_addr +  1)] + input_offset) +
-            filter_buffer[kernel_addr +  2] * (input_buffer[(input_addr +  2)] + input_offset) + 
-            filter_buffer[kernel_addr +  3] * (input_buffer[(input_addr +  3)] + input_offset) +
-            filter_buffer[kernel_addr +  4] * (input_buffer[(input_addr +  4)] + input_offset) + 
-            filter_buffer[kernel_addr +  5] * (input_buffer[(input_addr +  5)] + input_offset) + 
-            filter_buffer[kernel_addr +  6] * (input_buffer[(input_addr +  6)] + input_offset) + 
-            filter_buffer[kernel_addr +  7] * (input_buffer[(input_addr +  7)] + input_offset);
+                filter_buffer[kernel_addr     ] * (input_buffer[(input_addr     )] + input_offset) + 
+                filter_buffer[kernel_addr +  1] * (input_buffer[(input_addr +  1)] + input_offset) +
+                filter_buffer[kernel_addr +  2] * (input_buffer[(input_addr +  2)] + input_offset) + 
+                filter_buffer[kernel_addr +  3] * (input_buffer[(input_addr +  3)] + input_offset) +
+                filter_buffer[kernel_addr +  4] * (input_buffer[(input_addr +  4)] + input_offset) + 
+                filter_buffer[kernel_addr +  5] * (input_buffer[(input_addr +  5)] + input_offset) + 
+                filter_buffer[kernel_addr +  6] * (input_buffer[(input_addr +  6)] + input_offset) + 
+                filter_buffer[kernel_addr +  7] * (input_buffer[(input_addr +  7)] + input_offset);
 
-              // filter_buffer[kernel_addr +  8] * (input_buffer[(input_addr +  8)] + input_offset) + 
-              // filter_buffer[kernel_addr +  9] * (input_buffer[(input_addr +  9)] + input_offset) +
-              // filter_buffer[kernel_addr + 10] * (input_buffer[(input_addr + 10)] + input_offset) + 
-              // filter_buffer[kernel_addr + 11] * (input_buffer[(input_addr + 11)] + input_offset) +
-              // filter_buffer[kernel_addr + 12] * (input_buffer[(input_addr + 12)] + input_offset) + 
-              // filter_buffer[kernel_addr + 13] * (input_buffer[(input_addr + 13)] + input_offset) + 
-              // filter_buffer[kernel_addr + 14] * (input_buffer[(input_addr + 14)] + input_offset) + 
-              // filter_buffer[kernel_addr + 15] * (input_buffer[(input_addr + 15)] + input_offset) +
+                // filter_buffer[kernel_addr +  8] * (input_buffer[(input_addr +  8)] + input_offset) + 
+                // filter_buffer[kernel_addr +  9] * (input_buffer[(input_addr +  9)] + input_offset) +
+                // filter_buffer[kernel_addr + 10] * (input_buffer[(input_addr + 10)] + input_offset) + 
+                // filter_buffer[kernel_addr + 11] * (input_buffer[(input_addr + 11)] + input_offset) +
+                // filter_buffer[kernel_addr + 12] * (input_buffer[(input_addr + 12)] + input_offset) + 
+                // filter_buffer[kernel_addr + 13] * (input_buffer[(input_addr + 13)] + input_offset) + 
+                // filter_buffer[kernel_addr + 14] * (input_buffer[(input_addr + 14)] + input_offset) + 
+                // filter_buffer[kernel_addr + 15] * (input_buffer[(input_addr + 15)] + input_offset) +
 
-              // filter_buffer[kernel_addr + 16] * (input_buffer[(input_addr + 16)] + input_offset) + 
-              // filter_buffer[kernel_addr + 17] * (input_buffer[(input_addr + 17)] + input_offset) +
-              // filter_buffer[kernel_addr + 18] * (input_buffer[(input_addr + 18)] + input_offset) + 
-              // filter_buffer[kernel_addr + 19] * (input_buffer[(input_addr + 19)] + input_offset) +
-              // filter_buffer[kernel_addr + 20] * (input_buffer[(input_addr + 20)] + input_offset) + 
-              // filter_buffer[kernel_addr + 21] * (input_buffer[(input_addr + 21)] + input_offset) + 
-              // filter_buffer[kernel_addr + 22] * (input_buffer[(input_addr + 22)] + input_offset) + 
-              // filter_buffer[kernel_addr + 23] * (input_buffer[(input_addr + 23)] + input_offset);
+                // filter_buffer[kernel_addr + 16] * (input_buffer[(input_addr + 16)] + input_offset) + 
+                // filter_buffer[kernel_addr + 17] * (input_buffer[(input_addr + 17)] + input_offset) +
+                // filter_buffer[kernel_addr + 18] * (input_buffer[(input_addr + 18)] + input_offset) + 
+                // filter_buffer[kernel_addr + 19] * (input_buffer[(input_addr + 19)] + input_offset) +
+                // filter_buffer[kernel_addr + 20] * (input_buffer[(input_addr + 20)] + input_offset) + 
+                // filter_buffer[kernel_addr + 21] * (input_buffer[(input_addr + 21)] + input_offset) + 
+                // filter_buffer[kernel_addr + 22] * (input_buffer[(input_addr + 22)] + input_offset) + 
+                // filter_buffer[kernel_addr + 23] * (input_buffer[(input_addr + 23)] + input_offset) +
 
-              // filter_buffer[kernel_addr + 24] * (input_buffer[(input_addr + 24)] + input_offset) + 
-              // filter_buffer[kernel_addr + 25] * (input_buffer[(input_addr + 25)] + input_offset) +
-              // filter_buffer[kernel_addr + 26] * (input_buffer[(input_addr + 26)] + input_offset) + 
-              // filter_buffer[kernel_addr + 27] * (input_buffer[(input_addr + 27)] + input_offset) +
-              // filter_buffer[kernel_addr + 28] * (input_buffer[(input_addr + 28)] + input_offset) + 
-              // filter_buffer[kernel_addr + 29] * (input_buffer[(input_addr + 29)] + input_offset) + 
-              // filter_buffer[kernel_addr + 30] * (input_buffer[(input_addr + 30)] + input_offset) + 
-              // filter_buffer[kernel_addr + 31] * (input_buffer[(input_addr + 31)] + input_offset);
+                // filter_buffer[kernel_addr + 24] * (input_buffer[(input_addr + 24)] + input_offset) + 
+                // filter_buffer[kernel_addr + 25] * (input_buffer[(input_addr + 25)] + input_offset) +
+                // filter_buffer[kernel_addr + 26] * (input_buffer[(input_addr + 26)] + input_offset) + 
+                // filter_buffer[kernel_addr + 27] * (input_buffer[(input_addr + 27)] + input_offset) +
+                // filter_buffer[kernel_addr + 28] * (input_buffer[(input_addr + 28)] + input_offset) + 
+                // filter_buffer[kernel_addr + 29] * (input_buffer[(input_addr + 29)] + input_offset) + 
+                // filter_buffer[kernel_addr + 30] * (input_buffer[(input_addr + 30)] + input_offset) + 
+                // filter_buffer[kernel_addr + 31] * (input_buffer[(input_addr + 31)] + input_offset);
             end
             update_address <= 1;
           end
@@ -163,26 +163,16 @@ module conv1d #(
 
         // Write buffers
         1: begin  // Write input buffer
-          input_buffer[address] <= value[7:0];
+          input_buffer[address]   <= value[7:0];
           input_buffer[address+1] <= value[15:8];
-
-          // if (read_write_at_once == 4) begin
-          // input_buffer[address+2] <= (write_4) ? value[23:16] : input_buffer[address+2];
-          // input_buffer[address+3] <= (write_4) ? value[31:24] : input_buffer[address+3];
           input_buffer[address+2] <= value[23:16];
           input_buffer[address+3] <= value[31:24];
-          // end
         end
         2: begin  // Write kernel weights buffer
-          filter_buffer[address] <= value[7:0];
+          filter_buffer[address]   <= value[7:0];
           filter_buffer[address+1] <= value[15:8];
-
-          // if (read_write_at_once == 4) begin
-          // filter_buffer[address+2] <= (write_4) ? value[23:16] : filter_buffer[address+2];
-          // filter_buffer[address+3] <= (write_4) ? value[31:24] : filter_buffer[address+3];
           filter_buffer[address+2] <= value[23:16];
           filter_buffer[address+3] <= value[31:24];
-          // end
         end
 
         // Write parameters
@@ -204,6 +194,36 @@ module conv1d #(
           update_address <= 0;
           kernel_addr <= 0;
           input_addr <= start_filter_x * input_depth;
+
+          // $display("cur_kernel_buffer_size: %d", cur_kernel_buffer_size);
+          // $display("Start filter x: %d", start_filter_x);
+          // $display("input buffer: \n%d - %d - %d - %d\n%d - %d - %d - %d\n%d - %d - %d - %d\n%d - %d - %d - %d\n%d - %d - %d - %d\n%d - %d - %d - %d\n%d - %d - %d - %d\n%d - %d - %d - %d",
+          //          input_buffer[ 0], input_buffer[ 1], input_buffer[ 2], input_buffer[ 3], input_buffer[ 4], 
+          //          input_buffer[ 5], input_buffer[ 6], input_buffer[ 7], input_buffer[ 8], input_buffer[ 9], 
+          //          input_buffer[10], input_buffer[11], input_buffer[12], input_buffer[13], input_buffer[14], 
+          //          input_buffer[15], input_buffer[16], input_buffer[17], input_buffer[18], input_buffer[19],
+          //          input_buffer[20], input_buffer[21], input_buffer[22], input_buffer[23], input_buffer[24], 
+          //          input_buffer[25], input_buffer[26], input_buffer[27], input_buffer[28], input_buffer[29], 
+          //          input_buffer[30], input_buffer[31] 
+          //          );
+          // $display("filter buffer: \n%d - %d - %d - %d\n%d - %d - %d - %d\n%d - %d - %d - %d\n%d - %d - %d - %d\n%d - %d - %d - %d\n%d - %d - %d - %d\n%d - %d - %d - %d\n%d - %d - %d - %d",
+          //          filter_buffer[ 0], filter_buffer[ 1], filter_buffer[ 2], filter_buffer[ 3], filter_buffer[ 4], 
+          //          filter_buffer[ 5], filter_buffer[ 6], filter_buffer[ 7], filter_buffer[ 8], filter_buffer[ 9], 
+          //          filter_buffer[10], filter_buffer[11], filter_buffer[12], filter_buffer[13], filter_buffer[14], 
+          //          filter_buffer[15], filter_buffer[16], filter_buffer[17], filter_buffer[18], filter_buffer[19],
+          //          filter_buffer[20], filter_buffer[21], filter_buffer[22], filter_buffer[23], filter_buffer[24], 
+          //          filter_buffer[25], filter_buffer[26], filter_buffer[27], filter_buffer[28], filter_buffer[29], 
+          //          filter_buffer[30], filter_buffer[31] 
+          //          );
+          // $display("acc0=%d", 
+          //       filter_buffer[0] * (input_buffer[0] + input_offset) + 
+          //       filter_buffer[1] * (input_buffer[1] + input_offset) +
+          //       filter_buffer[2] * (input_buffer[2] + input_offset) + 
+          //       filter_buffer[3] * (input_buffer[3] + input_offset) +
+          //       filter_buffer[4] * (input_buffer[4] + input_offset) + 
+          //       filter_buffer[5] * (input_buffer[5] + input_offset) + 
+          //       filter_buffer[6] * (input_buffer[6] + input_offset) + 
+          //       filter_buffer[7] * (input_buffer[7] + input_offset));
         end
 
         7: begin  // get acumulator
@@ -217,55 +237,25 @@ module conv1d #(
           ret <= finished_work;
         end
 
-        // 10: begin
-        //   ret[7:0] <= input_buffer[address];
-
-        //   if (read_write_at_once > 1) begin
-        //     ret[15:8] <= input_buffer[address+1];
-
-        //     if (read_write_at_once == 4) begin
-        //       ret[23:16] <= input_buffer[address+2];
-        //       ret[31:24] <= input_buffer[address+3];
-        //     end
-        //   end
-        // end
-        // 11: begin
-        //   ret[7:0] <= filter_buffer[address];
-
-        //   if (read_write_at_once > 1) begin
-        //     ret[15:8] <= filter_buffer[address+1];
-
-        //     if (read_write_at_once == 4) begin
-        //       ret[23:16] <= filter_buffer[address+2];
-        //       ret[31:24] <= filter_buffer[address+3];
-        //     end
-        //   end
-        // end
-
         // Quant parameters
-        12: begin
+        10: begin
           bias <= inp1;
         end
-        13: begin
+        11: begin
           output_multiplier <= inp1;
         end
-        14: begin
+        12: begin
           output_shift <= inp1;
         end
-        15: begin
+        13: begin
           output_activation_min <= inp1;
         end
-        16: begin
+        14: begin
           output_activation_max <= inp1;
         end
-        17: begin
+        15: begin
           output_offset <= inp1;
         end
-
-        18: begin
-          write_4 <= inp1;
-        end
-
 
         default: begin
           // $display("!!! DEFAULT case ");

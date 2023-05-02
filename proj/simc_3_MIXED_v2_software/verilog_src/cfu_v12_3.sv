@@ -1,6 +1,5 @@
 // Uses quant 2
 // Ignored write_at_once
-// Width of buffers is 32 bits
 // Differs from quntation module by writing/reading 
 // 4 values at a time to/from buffers
 `include "verilog_src/conf.sv"
@@ -9,7 +8,6 @@
 
 module conv1d #(
     parameter BYTE_SIZE  = 8,
-    parameter INT16_SIZE = 16,
     parameter INT32_SIZE = 32
 ) (
     input                       clk,
@@ -34,10 +32,10 @@ module conv1d #(
 
   // Buffers
   (* RAM_STYLE="BLOCK" *)
-  reg signed [INT16_SIZE-1:0] input_buffer[0:BUFFERS_SIZE/2 - 1 + 2];
+  reg signed [BYTE_SIZE-1:0] input_buffer[0:BUFFERS_SIZE - 1];
 
   (* RAM_STYLE="BLOCK" *)
-  reg signed [INT16_SIZE-1:0] filter_buffer[0:BUFFERS_SIZE/2 - 1 + 2];
+  reg signed [BYTE_SIZE-1:0] filter_buffer[0:BUFFERS_SIZE - 1];
 
   // Parameters
   reg signed [INT32_SIZE-1:0] input_offset = 32'd0;
@@ -115,14 +113,14 @@ module conv1d #(
               // finished_work <= 1;
             end else begin
               acc <= acc + 
-                filter_buffer[kernel_addr / 2     ][ 7: 0] * (input_buffer[input_addr / 2     ][ 7: 0] + input_offset) + 
-                filter_buffer[kernel_addr / 2     ][15: 8] * (input_buffer[input_addr / 2     ][15: 8] + input_offset) + 
-                filter_buffer[kernel_addr / 2 +  1][ 7: 0] * (input_buffer[input_addr / 2 +  1][ 7: 0] + input_offset) + 
-                filter_buffer[kernel_addr / 2 +  1][15: 8] * (input_buffer[input_addr / 2 +  1][15: 8] + input_offset) +
-                filter_buffer[kernel_addr / 2 +  2][ 7: 0] * (input_buffer[input_addr / 2 +  2][ 7: 0] + input_offset) + 
-                filter_buffer[kernel_addr / 2 +  2][15: 8] * (input_buffer[input_addr / 2 +  2][15: 8] + input_offset) + 
-                filter_buffer[kernel_addr / 2 +  3][ 7: 0] * (input_buffer[input_addr / 2 +  3][ 7: 0] + input_offset) + 
-                filter_buffer[kernel_addr / 2 +  3][15: 8] * (input_buffer[input_addr / 2 +  3][15: 8] + input_offset);
+              filter_buffer[kernel_addr     ] * (input_buffer[(input_addr    )] + input_offset) + 
+              filter_buffer[kernel_addr +  1] * (input_buffer[(input_addr + 1)] + input_offset) + 
+              filter_buffer[kernel_addr +  2] * (input_buffer[(input_addr + 2)] + input_offset) + 
+              filter_buffer[kernel_addr +  3] * (input_buffer[(input_addr + 3)] + input_offset) +
+              filter_buffer[kernel_addr +  4] * (input_buffer[(input_addr + 4)] + input_offset) + 
+              filter_buffer[kernel_addr +  5] * (input_buffer[(input_addr + 5)] + input_offset) + 
+              filter_buffer[kernel_addr +  6] * (input_buffer[(input_addr + 6)] + input_offset) + 
+              filter_buffer[kernel_addr +  7] * (input_buffer[(input_addr + 7)] + input_offset);
               // acc <= acc + 
               //   filter_buffer[kernel_addr     ] * (input_buffer[(input_addr     )] + input_offset) + 
               //   filter_buffer[kernel_addr +  1] * (input_buffer[(input_addr +  1)] + input_offset) +
@@ -175,12 +173,20 @@ module conv1d #(
 
         // Write buffers
         1: begin  // Write input buffer
-          input_buffer[address/2    ] <= value[15:0];
-          input_buffer[address/2 + 1] <= value[31:16];
+          if (address % 4 != 0) begin
+            $display("!!! Address: %d", address);
+          end
+          input_buffer[address]   <= value[7:0];
+          input_buffer[address+1] <= value[15:8];
+          input_buffer[address+2] <= value[23:16];
+          input_buffer[address+3] <= value[31:24];
+
         end
         2: begin  // Write kernel weights buffer
-          filter_buffer[address/2    ] <= value[15:0];
-          filter_buffer[address/2 + 1] <= value[31:16];
+          filter_buffer[address]   <= value[7:0];
+          filter_buffer[address+1] <= value[15:8];
+          filter_buffer[address+2] <= value[23:16];
+          filter_buffer[address+3] <= value[31:24];
         end
 
         // Write parameters
@@ -216,8 +222,7 @@ module conv1d #(
         end
 
         // 10: begin
-        //   ret[7:0] <= input_buffer[address/2][7:0];
-        //   ret[15:8] <= input_buffer[address/2];
+        //   ret[7:0] <= input_buffer[address];
 
         //   if (read_write_at_once > 1) begin
         //     ret[15:8] <= input_buffer[address+1];

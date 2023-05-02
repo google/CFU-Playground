@@ -52,9 +52,6 @@ module conv1d #(
 
   wire signed [INT32_SIZE-1:0] quanted_acc;
 
-  reg [7:0] read_write_at_once = 4;
-
-
   // Computation related registers
   reg signed [INT32_SIZE-1:0] start_filter_x = 0;
   reg finished_work = 1'b1;
@@ -175,25 +172,14 @@ module conv1d #(
         1: begin  // Write input buffer
           input_buffer[address] <= value[7:0];
           input_buffer[address+1] <= value[15:8];
-
-          // if (read_write_at_once == 4) begin
-          // input_buffer[address+2] <= (read_write_at_once == 4) ? value[23:16] : input_buffer[address+2];
-          // input_buffer[address+3] <= (read_write_at_once == 4) ? value[31:24] : input_buffer[address+3];
           input_buffer[address+2] <= value[23:16];
           input_buffer[address+3] <= value[31:24];
-          // end
-
         end
         2: begin  // Write kernel weights buffer
           filter_buffer[address] <= value[7:0];
           filter_buffer[address+1] <= value[15:8];
-
-          // if (read_write_at_once == 4) begin
-          // filter_buffer[address+2] <= (read_write_at_once == 4) ? value[23:16] : filter_buffer[address+2];
-          // filter_buffer[address+3] <= (read_write_at_once == 4) ? value[31:24] : filter_buffer[address+3];
           filter_buffer[address+2] <= value[23:16];
           filter_buffer[address+3] <= value[31:24];
-          // end
         end
 
         // Write parameters
@@ -228,55 +214,25 @@ module conv1d #(
           ret <= finished_work;
         end
 
-        // 10: begin
-        //   ret[7:0] <= input_buffer[address];
-
-        //   if (read_write_at_once > 1) begin
-        //     ret[15:8] <= input_buffer[address+1];
-
-        //     if (read_write_at_once == 4) begin
-        //       ret[23:16] <= input_buffer[address+2];
-        //       ret[31:24] <= input_buffer[address+3];
-        //     end
-        //   end
-        // end
-        // 11: begin
-        //   ret[7:0] <= filter_buffer[address];
-
-        //   if (read_write_at_once > 1) begin
-        //     ret[15:8] <= filter_buffer[address+1];
-
-        //     if (read_write_at_once == 4) begin
-        //       ret[23:16] <= filter_buffer[address+2];
-        //       ret[31:24] <= filter_buffer[address+3];
-        //     end
-        //   end
-        // end
-
         // Quant parameters
-        12: begin
+        10: begin
           bias <= inp1;
         end
-        13: begin
+        11: begin
           output_multiplier <= inp1;
         end
-        14: begin
+        12: begin
           output_shift <= inp1;
         end
-        15: begin
+        13: begin
           output_activation_min <= inp1;
         end
-        16: begin
+        14: begin
           output_activation_max <= inp1;
         end
-        17: begin
+        15: begin
           output_offset <= inp1;
         end
-
-        18: begin
-          read_write_at_once <= inp1;
-        end
-
 
         default: begin
           // $display("!!! DEFAULT case ");
