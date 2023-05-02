@@ -36,6 +36,7 @@ inline void ConvPerChannel(const ConvParams& params,
 
   for (int i = 0; i < sum_at_once * 8; i += 4) {
     cfu_op0(CFU_WRITE_INPUT_BUFFER, i, min_input_offset4);
+    cfu_op0(CFU_WRITE_FILTER_BUFFER, i, 0);
   }
 
   const int pad_width = 3;
@@ -88,14 +89,14 @@ inline void ConvPerChannel(const ConvParams& params,
         // value_16_ptr[1]       = *reinterpret_cast<const int16_t*>(filter_data + addr);
         // int32_t value = *reinterpret_cast<const int16_t*>(filter_data + addr);
         // int32_t filter_value = *reinterpret_cast<const int32_t*>(filter_data + addr);
-        cfu_op0(CFU_WRITE_KERNEL_BUFFER, kernel_addr * buffer_addr_multiplier, value);
+        cfu_op0(CFU_WRITE_FILTER_BUFFER, kernel_addr * buffer_addr_multiplier, value);
         // printf("filter[%d] = %ld\n", kernel_addr * 2, value);
       }
     } else {
       for (int kernel_addr = 0; kernel_addr < filter_width * input_depth; kernel_addr += 4) {
         int addr             = out_channel * (8 * input_depth) + kernel_addr;
         int32_t filter_value = *reinterpret_cast<const int32_t*>(filter_data + addr);
-        cfu_op0(CFU_WRITE_KERNEL_BUFFER, kernel_addr, filter_value);
+        cfu_op0(CFU_WRITE_FILTER_BUFFER, kernel_addr, filter_value);
         // printf("filter[%d] = %ld\n", kernel_addr, filter_value);
       }
     }
@@ -206,11 +207,11 @@ inline void ConvPerChannel(const ConvParams& params,
       output_data[addr] = static_cast<int8_t>(acc);
 
       // if (input_depth == 32) {
-      //   if (out_x < 10) {
-      //     printf("acc: %ld\n", acc);
-      //   } else {
-      //     abort();
-      //   }
+        // if (out_x < 10) {
+        //   printf("acc: %ld\n", acc);
+        // } else {
+        //   abort();
+        // }
       // }
 
       ++input_cur_x;

@@ -41,6 +41,7 @@ inline void ConvPerChannel(const ConvParams& params,
   // output_shaoe = 1 x 1 x output_width x output_channels
 
   // Original convolution code
+  int counter = 0;
   for (int out_x = 0; out_x < output_width; ++out_x) {
     const int in_x_origin = out_x - pad_width;
     for (int out_channel = 0; out_channel < output_depth; ++out_channel) {
@@ -61,16 +62,29 @@ inline void ConvPerChannel(const ConvParams& params,
               filter_data[out_channel * (8 * input_depth) + filter_x * input_depth + in_channel];
 
           acc += filter_val * (input_val + input_offset);
+          // if (out_channel == 0)
+          // printf("acc += %ld * (%ld + %ld)\n", filter_val, input_val, input_offset);
         }
       }
+      if (input_depth == 32 && out_channel == 0)
+        printf(">>>> acc before quant: %ld\n", acc);
       if (bias_data) {
         acc += bias_data[out_channel];
       }
       acc = multiply_by_quant_mult(acc, output_multiplier[out_channel], output_shift[out_channel]);
 
       acc += output_offset;
-      acc               = std::max(acc, output_activation_min);
-      acc               = std::min(acc, output_activation_max);
+      acc = std::max(acc, output_activation_min);
+      acc = std::min(acc, output_activation_max);
+      if (input_depth == 32) {
+        if (out_channel == 0)
+          printf("  <<<< acc after quant: %ld\n", acc);
+        if (out_channel == 0)
+          ++counter;
+        if (counter >= 10) {
+          abort();
+        }
+      }
       int addr          = out_x * output_depth + out_channel;
       output_data[addr] = static_cast<int8_t>(acc);
     }

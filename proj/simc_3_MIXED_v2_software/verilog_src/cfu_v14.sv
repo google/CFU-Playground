@@ -25,9 +25,10 @@ module conv1d #(
 
   // localparam SUM_AT_ONCE = 4;
   // localparam SUM_AT_ONCE = 8;
-  localparam SUM_AT_ONCE = 16;
+  // localparam SUM_AT_ONCE = 16;
   // localparam SUM_AT_ONCE = 24;
-  // localparam SUM_AT_ONCE = 32;
+  localparam SUM_AT_ONCE = 32;
+  // localparam SUM_AT_ONCE = 64;
   localparam BUFFERS_SIZE = KERNEL_LENGTH * MAX_INPUT_CHANNELS;
   localparam INPUT_BUFFER_SIZE = (BUFFERS_SIZE + MAX_INPUT_CHANNELS) / 4;
   localparam FILTER_BUFFER_SIZE = BUFFERS_SIZE / 4;
@@ -103,7 +104,7 @@ module conv1d #(
           if (quant_done) begin
 
             // if (input_depth == 32) begin
-            //   $display("<<<< acc after quant: %d, before quant: %d ", quanted_acc, acc);
+              // $display("<<<< acc after quant: %d, before quant: %d ", quanted_acc, acc);
             // end
 
             finished_work <= 1;
@@ -153,25 +154,61 @@ module conv1d #(
                 $signed(filter_buffer[kernel_addr / 4 + 3][ 7: 0]) * ($signed(input_buffer[(input_addr / 4 + 3)][ 7: 0]) + input_offset) + 
                 $signed(filter_buffer[kernel_addr / 4 + 3][15: 8]) * ($signed(input_buffer[(input_addr / 4 + 3)][15: 8]) + input_offset) + 
                 $signed(filter_buffer[kernel_addr / 4 + 3][23:16]) * ($signed(input_buffer[(input_addr / 4 + 3)][23:16]) + input_offset) + 
-                $signed(filter_buffer[kernel_addr / 4 + 3][31:24]) * ($signed(input_buffer[(input_addr / 4 + 3)][31:24]) + input_offset);
+                $signed(filter_buffer[kernel_addr / 4 + 3][31:24]) * ($signed(input_buffer[(input_addr / 4 + 3)][31:24]) + input_offset) +
 
-                // $signed(filter_buffer[kernel_addr / 4 + 4][ 7: 0]) * ($signed(input_buffer[(input_addr / 4 + 4)][ 7: 0]) + input_offset) + 
-                // $signed(filter_buffer[kernel_addr / 4 + 4][15: 8]) * ($signed(input_buffer[(input_addr / 4 + 4)][15: 8]) + input_offset) +
-                // $signed(filter_buffer[kernel_addr / 4 + 4][23:16]) * ($signed(input_buffer[(input_addr / 4 + 4)][23:16]) + input_offset) + 
-                // $signed(filter_buffer[kernel_addr / 4 + 4][31:24]) * ($signed(input_buffer[(input_addr / 4 + 4)][31:24]) + input_offset) +
-                // $signed(filter_buffer[kernel_addr / 4 + 5][ 7: 0]) * ($signed(input_buffer[(input_addr / 4 + 5)][ 7: 0]) + input_offset) + 
-                // $signed(filter_buffer[kernel_addr / 4 + 5][15: 8]) * ($signed(input_buffer[(input_addr / 4 + 5)][15: 8]) + input_offset) + 
-                // $signed(filter_buffer[kernel_addr / 4 + 5][23:16]) * ($signed(input_buffer[(input_addr / 4 + 5)][23:16]) + input_offset) + 
-                // $signed(filter_buffer[kernel_addr / 4 + 5][31:24]) * ($signed(input_buffer[(input_addr / 4 + 5)][31:24]) + input_offset) +
+                $signed(filter_buffer[kernel_addr / 4 + 4][ 7: 0]) * ($signed(input_buffer[(input_addr / 4 + 4)][ 7: 0]) + input_offset) + 
+                $signed(filter_buffer[kernel_addr / 4 + 4][15: 8]) * ($signed(input_buffer[(input_addr / 4 + 4)][15: 8]) + input_offset) +
+                $signed(filter_buffer[kernel_addr / 4 + 4][23:16]) * ($signed(input_buffer[(input_addr / 4 + 4)][23:16]) + input_offset) + 
+                $signed(filter_buffer[kernel_addr / 4 + 4][31:24]) * ($signed(input_buffer[(input_addr / 4 + 4)][31:24]) + input_offset) +
+                $signed(filter_buffer[kernel_addr / 4 + 5][ 7: 0]) * ($signed(input_buffer[(input_addr / 4 + 5)][ 7: 0]) + input_offset) + 
+                $signed(filter_buffer[kernel_addr / 4 + 5][15: 8]) * ($signed(input_buffer[(input_addr / 4 + 5)][15: 8]) + input_offset) + 
+                $signed(filter_buffer[kernel_addr / 4 + 5][23:16]) * ($signed(input_buffer[(input_addr / 4 + 5)][23:16]) + input_offset) + 
+                $signed(filter_buffer[kernel_addr / 4 + 5][31:24]) * ($signed(input_buffer[(input_addr / 4 + 5)][31:24]) + input_offset) +
 
-                // $signed(filter_buffer[kernel_addr / 4 + 6][ 7: 0]) * ($signed(input_buffer[(input_addr / 4 + 6)][ 7: 0]) + input_offset) + 
-                // $signed(filter_buffer[kernel_addr / 4 + 6][15: 8]) * ($signed(input_buffer[(input_addr / 4 + 6)][15: 8]) + input_offset) +
-                // $signed(filter_buffer[kernel_addr / 4 + 6][23:16]) * ($signed(input_buffer[(input_addr / 4 + 6)][23:16]) + input_offset) + 
-                // $signed(filter_buffer[kernel_addr / 4 + 6][31:24]) * ($signed(input_buffer[(input_addr / 4 + 6)][31:24]) + input_offset) +
-                // $signed(filter_buffer[kernel_addr / 4 + 7][ 7: 0]) * ($signed(input_buffer[(input_addr / 4 + 7)][ 7: 0]) + input_offset) + 
-                // $signed(filter_buffer[kernel_addr / 4 + 7][15: 8]) * ($signed(input_buffer[(input_addr / 4 + 7)][15: 8]) + input_offset) + 
-                // $signed(filter_buffer[kernel_addr / 4 + 7][23:16]) * ($signed(input_buffer[(input_addr / 4 + 7)][23:16]) + input_offset) + 
-                // $signed(filter_buffer[kernel_addr / 4 + 7][31:24]) * ($signed(input_buffer[(input_addr / 4 + 7)][31:24]) + input_offset);
+                $signed(filter_buffer[kernel_addr / 4 + 6][ 7: 0]) * ($signed(input_buffer[(input_addr / 4 + 6)][ 7: 0]) + input_offset) + 
+                $signed(filter_buffer[kernel_addr / 4 + 6][15: 8]) * ($signed(input_buffer[(input_addr / 4 + 6)][15: 8]) + input_offset) +
+                $signed(filter_buffer[kernel_addr / 4 + 6][23:16]) * ($signed(input_buffer[(input_addr / 4 + 6)][23:16]) + input_offset) + 
+                $signed(filter_buffer[kernel_addr / 4 + 6][31:24]) * ($signed(input_buffer[(input_addr / 4 + 6)][31:24]) + input_offset) +
+                $signed(filter_buffer[kernel_addr / 4 + 7][ 7: 0]) * ($signed(input_buffer[(input_addr / 4 + 7)][ 7: 0]) + input_offset) + 
+                $signed(filter_buffer[kernel_addr / 4 + 7][15: 8]) * ($signed(input_buffer[(input_addr / 4 + 7)][15: 8]) + input_offset) + 
+                $signed(filter_buffer[kernel_addr / 4 + 7][23:16]) * ($signed(input_buffer[(input_addr / 4 + 7)][23:16]) + input_offset) + 
+                $signed(filter_buffer[kernel_addr / 4 + 7][31:24]) * ($signed(input_buffer[(input_addr / 4 + 7)][31:24]) + input_offset);
+
+                // $signed(filter_buffer[kernel_addr / 4 + 8][ 7: 0]) * ($signed(input_buffer[(input_addr / 4 + 8)][ 7: 0]) + input_offset) + 
+                // $signed(filter_buffer[kernel_addr / 4 + 8][15: 8]) * ($signed(input_buffer[(input_addr / 4 + 8)][15: 8]) + input_offset) +
+                // $signed(filter_buffer[kernel_addr / 4 + 8][23:16]) * ($signed(input_buffer[(input_addr / 4 + 8)][23:16]) + input_offset) + 
+                // $signed(filter_buffer[kernel_addr / 4 + 8][31:24]) * ($signed(input_buffer[(input_addr / 4 + 8)][31:24]) + input_offset) +
+                // $signed(filter_buffer[kernel_addr / 4 + 9][ 7: 0]) * ($signed(input_buffer[(input_addr / 4 + 9)][ 7: 0]) + input_offset) + 
+                // $signed(filter_buffer[kernel_addr / 4 + 9][15: 8]) * ($signed(input_buffer[(input_addr / 4 + 9)][15: 8]) + input_offset) + 
+                // $signed(filter_buffer[kernel_addr / 4 + 9][23:16]) * ($signed(input_buffer[(input_addr / 4 + 9)][23:16]) + input_offset) + 
+                // $signed(filter_buffer[kernel_addr / 4 + 9][31:24]) * ($signed(input_buffer[(input_addr / 4 + 9)][31:24]) + input_offset) +
+
+                // $signed(filter_buffer[kernel_addr / 4 +10][ 7: 0]) * ($signed(input_buffer[(input_addr / 4 +10)][ 7: 0]) + input_offset) + 
+                // $signed(filter_buffer[kernel_addr / 4 +10][15: 8]) * ($signed(input_buffer[(input_addr / 4 +10)][15: 8]) + input_offset) +
+                // $signed(filter_buffer[kernel_addr / 4 +10][23:16]) * ($signed(input_buffer[(input_addr / 4 +10)][23:16]) + input_offset) + 
+                // $signed(filter_buffer[kernel_addr / 4 +10][31:24]) * ($signed(input_buffer[(input_addr / 4 +10)][31:24]) + input_offset) +
+                // $signed(filter_buffer[kernel_addr / 4 +11][ 7: 0]) * ($signed(input_buffer[(input_addr / 4 +11)][ 7: 0]) + input_offset) + 
+                // $signed(filter_buffer[kernel_addr / 4 +11][15: 8]) * ($signed(input_buffer[(input_addr / 4 +11)][15: 8]) + input_offset) + 
+                // $signed(filter_buffer[kernel_addr / 4 +11][23:16]) * ($signed(input_buffer[(input_addr / 4 +11)][23:16]) + input_offset) + 
+                // $signed(filter_buffer[kernel_addr / 4 +11][31:24]) * ($signed(input_buffer[(input_addr / 4 +11)][31:24]) + input_offset) +
+
+                // $signed(filter_buffer[kernel_addr / 4 +12][ 7: 0]) * ($signed(input_buffer[(input_addr / 4 +12)][ 7: 0]) + input_offset) + 
+                // $signed(filter_buffer[kernel_addr / 4 +12][15: 8]) * ($signed(input_buffer[(input_addr / 4 +12)][15: 8]) + input_offset) +
+                // $signed(filter_buffer[kernel_addr / 4 +12][23:16]) * ($signed(input_buffer[(input_addr / 4 +12)][23:16]) + input_offset) + 
+                // $signed(filter_buffer[kernel_addr / 4 +12][31:24]) * ($signed(input_buffer[(input_addr / 4 +12)][31:24]) + input_offset) +
+                // $signed(filter_buffer[kernel_addr / 4 +13][ 7: 0]) * ($signed(input_buffer[(input_addr / 4 +13)][ 7: 0]) + input_offset) + 
+                // $signed(filter_buffer[kernel_addr / 4 +13][15: 8]) * ($signed(input_buffer[(input_addr / 4 +13)][15: 8]) + input_offset) + 
+                // $signed(filter_buffer[kernel_addr / 4 +13][23:16]) * ($signed(input_buffer[(input_addr / 4 +13)][23:16]) + input_offset) + 
+                // $signed(filter_buffer[kernel_addr / 4 +13][31:24]) * ($signed(input_buffer[(input_addr / 4 +13)][31:24]) + input_offset) +
+
+                // $signed(filter_buffer[kernel_addr / 4 +14][ 7: 0]) * ($signed(input_buffer[(input_addr / 4 +14)][ 7: 0]) + input_offset) + 
+                // $signed(filter_buffer[kernel_addr / 4 +14][15: 8]) * ($signed(input_buffer[(input_addr / 4 +14)][15: 8]) + input_offset) +
+                // $signed(filter_buffer[kernel_addr / 4 +14][23:16]) * ($signed(input_buffer[(input_addr / 4 +14)][23:16]) + input_offset) + 
+                // $signed(filter_buffer[kernel_addr / 4 +14][31:24]) * ($signed(input_buffer[(input_addr / 4 +14)][31:24]) + input_offset) +
+                // $signed(filter_buffer[kernel_addr / 4 +15][ 7: 0]) * ($signed(input_buffer[(input_addr / 4 +15)][ 7: 0]) + input_offset) + 
+                // $signed(filter_buffer[kernel_addr / 4 +15][15: 8]) * ($signed(input_buffer[(input_addr / 4 +15)][15: 8]) + input_offset) + 
+                // $signed(filter_buffer[kernel_addr / 4 +15][23:16]) * ($signed(input_buffer[(input_addr / 4 +15)][23:16]) + input_offset) + 
+                // $signed(filter_buffer[kernel_addr / 4 +15][31:24]) * ($signed(input_buffer[(input_addr / 4 +15)][31:24]) + input_offset);
 
             end
             update_address <= 1;
