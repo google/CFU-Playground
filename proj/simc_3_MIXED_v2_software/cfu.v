@@ -58,14 +58,6 @@ module Cfu (
       // Waiting to hand off response to CPU.
       rsp_valid <= ~rsp_ready;
     end else if (cmd_valid) begin
-      // if (wait_reg) begin
-      //   wait_reg <= 0;
-      //   rsp_valid <= 0;
-      // end else begin
-      //   wait_reg <= 1;
-      //   rsp_valid <= output_buffer_valid;
-      // end
-
       rsp_valid <= output_buffer_valid;
     end
   end
