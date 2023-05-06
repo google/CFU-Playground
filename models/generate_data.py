@@ -8,17 +8,17 @@ from tools.data import (
 from argparse import ArgumentParser
 
 modulations = [
-    # "16QAM",
-    # "64QAM",
-    # "8PSK",
-    "B-FM",
-    "BPSK",
-    "CPFSK",
-    "DSB-AM",
-    "GFSK",
-    "PAM4",
-    "QPSK",
-    "SSB-AM",
+    "16QAM",
+    "64QAM",
+    "8PSK",
+    # "B-FM",
+    # "BPSK",
+    # "CPFSK",
+    # "DSB-AM",
+    # "GFSK",
+    # "PAM4",
+    # "QPSK",
+    # "SSB-AM",
 ]
 
 if __name__ == "__main__":
@@ -74,8 +74,8 @@ if __name__ == "__main__":
     # )
 
     gen_config = DataSIM_v2_Config(
-        frames_per_mod_type=200,
-        # frames_per_mod_type=30_000,
+        # frames_per_mod_type=200,
+        frames_per_mod_type=180_000,
         SNR_RANGE=(-30, 30.0),
         fs=200e3,
         sps=8.0,

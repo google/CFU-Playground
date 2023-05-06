@@ -5,7 +5,9 @@ module conv1d #(
     parameter BYTE_SIZE  = 8,
     parameter INT32_SIZE = 32
 ) (
-    input                       clk,
+    input clk,
+    input en,
+
     input      [           6:0] cmd,
     input      [INT32_SIZE-1:0] inp0,
     input      [INT32_SIZE-1:0] inp1,
@@ -32,79 +34,82 @@ module conv1d #(
   reg signed [INT32_SIZE-1:0] acc = 0;
 
   always @(posedge clk) begin
-    case (cmd)
-      // Initialize
-      0: begin  // Reset module
-        // Fill input with zeros
-        // for (
-        //     reg [INT32_SIZE-1:0] in_idx = 0;
-        //     in_idx < MAX_INPUT_SIZE * MAX_INPUT_CHANNELS;
-        //     in_idx = in_idx + 1
-        // ) begin
-        //   input_buffer[in_idx] = 0;
-        // end
+    if (en) begin
 
-        // // Fill kernel_weights_buffer with zeros
-        // for (
-        //     reg [INT32_SIZE-1:0] kernel_idx = 0;
-        //     kernel_idx < KERNEL_LENGTH * MAX_INPUT_CHANNELS;
-        //     kernel_idx = kernel_idx + 1
-        // ) begin
-        //   kernel_weights_buffer[kernel_idx] = 0;
-        // end
-      end
+      case (cmd)
+        // Initialize
+        0: begin  // Reset module
+          // Fill input with zeros
+          // for (
+          //     reg [INT32_SIZE-1:0] in_idx = 0;
+          //     in_idx < MAX_INPUT_SIZE * MAX_INPUT_CHANNELS;
+          //     in_idx = in_idx + 1
+          // ) begin
+          //   input_buffer[in_idx] = 0;
+          // end
 
-      // Write buffers
-      10: begin  // Write input buffer
-        input_buffer[address] <= value[7:0];
-      end
-      11: begin  // Write kernel weights buffer
-        kernel_weights_buffer[address] <= value[7:0];
-      end
+          // // Fill kernel_weights_buffer with zeros
+          // for (
+          //     reg [INT32_SIZE-1:0] kernel_idx = 0;
+          //     kernel_idx < KERNEL_LENGTH * MAX_INPUT_CHANNELS;
+          //     kernel_idx = kernel_idx + 1
+          // ) begin
+          //   kernel_weights_buffer[kernel_idx] = 0;
+          // end
+        end
 
-      // Read buffers
-      13: begin
-        ret[7 : 0] <= input_buffer[address];
-      end
-      14: begin
-        ret[7 : 0] <= kernel_weights_buffer[address];
-      end
+        // Write buffers
+        10: begin  // Write input buffer
+          input_buffer[address] <= value[7:0];
+        end
+        11: begin  // Write kernel weights buffer
+          kernel_weights_buffer[address] <= value[7:0];
+        end
 
-      // Write parameters
-      20: begin
-        input_offset <= value;
-      end
+        // Read buffers
+        13: begin
+          ret[7 : 0] <= input_buffer[address];
+        end
+        14: begin
+          ret[7 : 0] <= kernel_weights_buffer[address];
+        end
 
-      25: begin
-        input_output_width <= value;
-      end
-      26: begin
-        input_depth <= value;
-      end
+        // Write parameters
+        20: begin
+          input_offset <= value;
+        end
 
-      41: begin
-        acc = 0;
-        for (
-            reg signed [INT32_SIZE-1:0] filter_x = 0; filter_x < 8; filter_x = filter_x + 1
-        ) begin
+        25: begin
+          input_output_width <= value;
+        end
+        26: begin
+          input_depth <= value;
+        end
+
+        41: begin
+          acc = 0;
           for (
-              reg signed [INT32_SIZE-1:0] in_channel = 0;
-              in_channel < input_depth;
-              in_channel = in_channel + 1
+              reg signed [INT32_SIZE-1:0] filter_x = 0; filter_x < 8; filter_x = filter_x + 1
           ) begin
-            acc += kernel_weights_buffer[filter_x * input_depth + in_channel] 
+            for (
+                reg signed [INT32_SIZE-1:0] in_channel = 0;
+                in_channel < input_depth;
+                in_channel = in_channel + 1
+            ) begin
+              acc += kernel_weights_buffer[filter_x * input_depth + in_channel] 
                         * (input_buffer[((filter_x + start_filter_x) % 8) * input_depth + in_channel] 
                             + input_offset);
+            end
           end
         end
-      end
-      43: begin
-        ret <= acc;
-      end
-      44: begin
-        start_filter_x <= value;
-      end
-    endcase
+        43: begin
+          ret <= acc;
+        end
+        44: begin
+          start_filter_x <= value;
+        end
+      endcase
+    end
   end
 
 endmodule

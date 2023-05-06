@@ -42,7 +42,7 @@ static void simc_3_MIXED_v2_init(void) {
 
 // Run classification, after input has been loaded
 static int8_t* simc_3_MIXED_v2_classify() {
-  printf("Running simc_3_MIXED_v2 model classification\n");
+  // printf("Running simc_3_MIXED_v2 model classification\n");
   tflite_classify();
 
   // Process the inference results.
@@ -62,7 +62,7 @@ static int8_t* simc_3_MIXED_v2_classify() {
   for (size_t i = 0; i < NUM_CLASSES; ++i) {
     int8_t y_true = expected_output[i];
     int8_t y_pred = output[i];
-    printf("expected[%d] = %d, actual[%d] = %d\n", i, y_true, i, y_pred);
+    // printf("expected[%d] = %d, actual[%d] = %d\n", i, y_true, i, y_pred);
 
     int32_t delta = CFU_MAX(y_true, y_pred) - CFU_MIN(y_true, y_pred);
     // printf("epsilon = %d, delta = %ld, max=%d, min=%d\n", epsilon, delta,
