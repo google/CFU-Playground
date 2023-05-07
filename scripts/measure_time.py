@@ -53,9 +53,16 @@ def main(verbose: bool, n_measurements: int):
     thread.start()
 
     with serial.Serial("/dev/ttyUSB1", 1843200, timeout=10000) as ser:
-        for _ in range(n_measurements):
-            print("G")
-            ser.write("g".encode())
+        input("Press any key to continue... ")
+        print("1")
+        ser.write("1".encode())
+        print("1")
+        ser.write("1".encode())
+        print("g")
+        ser.write("g".encode())
+        # for _ in range(n_measurements):
+        #     print("g")
+        #     ser.write("g".encode())
             
     thread.join()
 
