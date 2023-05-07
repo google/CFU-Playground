@@ -109,7 +109,7 @@ def make_snr_to_acc(results: Dict, save_path=None):
         plt.savefig(f'{save_path}/snr_to_acc_test.{FIG_EXTENSION}')
 
 
-def update_resutls(results: Dict, save_path=None):
+def update_results(results: Dict, save_path=None):
     snr_to_acc_test = results["snr_to_acc_test"]
     results["Accuracy Average"] = results["cls_to_acc_test"]["Overall"]
     results["Accuracy snr 0"] = snr_to_acc_test["0"]
@@ -120,7 +120,7 @@ def update_resutls(results: Dict, save_path=None):
     if save_path is not None:
         with open(f"{save_path}/results.json", 'w') as res_file:
             json.dump(results, res_file, indent=4)
-
+    
 
 
 def make_plots(result_dir: str, dataset: str, save_path: str):
@@ -144,7 +144,7 @@ def make_plots(result_dir: str, dataset: str, save_path: str):
     make_history(results, save_path=save_path)
     make_confusion_matrix(results, save_path=save_path)
     make_snr_to_acc(results, save_path=save_path)
-    update_resutls(results, save_path=save_path)
+    update_results(results, save_path=save_path)
 
 
 if __name__ == "__main__":
