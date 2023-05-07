@@ -42,7 +42,7 @@ median: 299637320.0
 std: 9986.24317716069
 
 ///////////////////////////////////////////////
-// CFU V5 (V1)  
+// CFU V5 (((V1)))  
 // - input is fully copied to the buffer
 // - Iterating over output channel in in the code, filter is copied for each out_channel
 // - accs are computed for each input_x, and saved to output buffer
@@ -66,7 +66,7 @@ median: 10403710.0
 std: 9986.24317716069
 
 ///////////////////////////////////////////////
-// CFU V6 (V2)
+// CFU V6 (V1)
 // - Same as v5, just a little cleaned up verilog code
 ///////////////////////////////////////////////
 10M (     10415139 )  cycles total
@@ -86,7 +86,7 @@ median: 10403674.0
 std: 9986.24317716069
 
 ///////////////////////////////////////////////
-// CFU V7 (V3)
+// CFU V7 (V2)
 // - iteration over x is moved to code
 // - For each output_x input_buffer is filled from beginning
 // - output buffer is removed 
@@ -108,7 +108,7 @@ median: 33468259.0
 std: 12439.103280773581
 
 ///////////////////////////////////////////////
-// CFU V8 (V4)
+// CFU V8 (V3)
 // - Input buffer is used as ring buffer
 // - Computation is pipelined
 ///////////////////////////////////////////////
@@ -129,7 +129,7 @@ median: 59482353.0
 std: 12468.122263470932
 
 ///////////////////////////////////////////////
-// CFU V9 (V5)
+// CFU V9 (V4)
 // - Removed mod - added update address phase
 // - Remove all non-blocking assignments
 ///////////////////////////////////////////////
