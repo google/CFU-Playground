@@ -173,9 +173,9 @@ module conv1d #(
 
         // Write buffers
         1: begin  // Write input buffer
-          if (address % 4 != 0) begin
-            $display("!!! Address: %d", address);
-          end
+          // if (address % 4 != 0) begin
+          //   $display("!!! Address: %d", address);
+          // end
           input_buffer[address]   <= value[7:0];
           input_buffer[address+1] <= value[15:8];
           input_buffer[address+2] <= value[23:16];

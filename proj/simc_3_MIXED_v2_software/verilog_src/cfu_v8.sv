@@ -6,6 +6,7 @@ module conv1d #(
     parameter INT32_SIZE = 32
 ) (
     input                       clk,
+    input                       en,
     input      [           6:0] cmd,
     input      [INT32_SIZE-1:0] inp0,
     input      [INT32_SIZE-1:0] inp1,
@@ -44,11 +45,12 @@ module conv1d #(
   reg signed [INT32_SIZE-1:0] acc = 0;
 
   always @(posedge clk) begin
-    if (!finished_work) begin
-      if (addr_counter >= BUFFERS_SIZE) begin
-        finished_work = 1;
-      end else begin
-        acc <= acc + 
+    if (en) begin
+      if (!finished_work) begin
+        if (addr_counter >= BUFFERS_SIZE) begin
+          finished_work = 1;
+        end else begin
+          acc <= acc + 
           kernel_weights_buffer[addr_counter     ] * (input_buffer[(addr_counter +      start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
           kernel_weights_buffer[addr_counter +  1] * (input_buffer[(addr_counter +  1 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) + 
           kernel_weights_buffer[addr_counter +  2] * (input_buffer[(addr_counter +  2 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset) +
@@ -86,58 +88,59 @@ module conv1d #(
           // kernel_weights_buffer[addr_counter + 31] * (input_buffer[(addr_counter + 31 + start_filter_x * input_depth) % (8 * input_depth)] + input_offset);
 
 
-        addr_counter = addr_counter + SUM_AT_ONCE;
+          addr_counter = addr_counter + SUM_AT_ONCE;
+        end
+
+
       end
 
+      case (cmd)
+        // Initialize
+        0: begin  // Reset module
+          // Fill input with zeros
+        end
 
+        // Write buffers
+        1: begin  // Write input buffer
+          input_buffer[address] <= value[7:0];
+        end
+        2: begin  // Write kernel weights buffer
+          kernel_weights_buffer[address] <= value[7:0];
+        end
+
+        // Write parameters
+        3: begin
+          input_offset <= value;
+        end
+
+        4: begin
+          input_output_width <= value;
+        end
+        5: begin
+          input_depth <= value;
+        end
+
+        6: begin  // Start computation
+          acc <= 0;
+          finished_work = 0;
+          addr_counter  = 0;
+        end
+
+        7: begin  // get acumulator
+          ret <= acc;
+        end
+        8: begin  // Write start x in input ring buffer 
+          start_filter_x <= value;
+        end
+        9: begin  // Check if computation is done
+          ret <= finished_work;
+        end
+        default: begin
+          // $display("!!! DEFAULT case ");
+          ret <= 0;
+        end
+      endcase
     end
-
-    case (cmd)
-      // Initialize
-      0: begin  // Reset module
-        // Fill input with zeros
-      end
-
-      // Write buffers
-      1: begin  // Write input buffer
-        input_buffer[address] <= value[7:0];
-      end
-      2: begin  // Write kernel weights buffer
-        kernel_weights_buffer[address] <= value[7:0];
-      end
-
-      // Write parameters
-      3: begin
-        input_offset <= value;
-      end
-
-      4: begin
-        input_output_width <= value;
-      end
-      5: begin
-        input_depth <= value;
-      end
-
-      6: begin  // Start computation
-        acc <= 0;
-        finished_work = 0;
-        addr_counter  = 0;
-      end
-
-      7: begin  // get acumulator
-        ret <= acc;
-      end
-      8: begin  // Write start x in input ring buffer 
-        start_filter_x <= value;
-      end
-      9: begin  // Check if computation is done
-        ret <= finished_work;
-      end
-      default: begin
-        // $display("!!! DEFAULT case ");
-        ret <= 0;
-      end
-    endcase
   end
 
 endmodule

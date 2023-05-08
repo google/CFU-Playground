@@ -221,7 +221,7 @@ void tflite_set_input_zeros_float() {
 void tflite_set_input(const void* data) {
   auto input = interpreter->input(0);
   memcpy(input->data.int8, data, input->bytes);
-  printf("Copied %d bytes at %p\n", input->bytes, input->data.int8);
+  // printf("Copied %d bytes at %p\n", input->bytes, input->data.int8);
 }
 
 void tflite_set_input_unsigned(const unsigned char* data) {

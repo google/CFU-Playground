@@ -1,4 +1,3 @@
-// Differs from quntation module by writing/reading 
 // 4 values at a time to/from buffers
 `include "verilog_src/conf.sv"
 `ifdef CFU_VERSION_12
