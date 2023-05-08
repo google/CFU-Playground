@@ -248,6 +248,28 @@ def load_data_simc_v1(classes, path=Path("train_data"), model_dtype=np.float32, 
     print(f"[debug] Loaded train data with size {n_data} in {after - before}s")
     return np.array(labels), np.expand_dims(np.array(data), axis=1)
 
+def load_data_simc_v2(classes, path=Path("train_data"), model_dtype=np.float32, frames_per_mod=-1) -> Tuple[np.ndarray, np.ndarray]:
+    before = time.time()
+    # train_data = {}
+    labels = []
+    data = []
+
+    n_data = 0
+    for cl_idx, cl in enumerate(tqdm(classes)):
+        # mat_files = glob.glob(f"{path}/*{cl}*.mat")
+        for idx in range(frames_per_mod):
+            mat_file = path / f"frame{cl}{idx}.mat"
+        # for mat_idx, mat_file in enumerate(mat_files):
+            np_data = io.loadmat(str(mat_file))["frame"]
+            np_data = preprocess_raw_data(np_data, model_dtype)
+            n_data += len(np_data)
+
+            labels.append(cl_idx)
+            data.append(np_data)
+    after = time.time()
+    print(f"[debug] Loaded train data with size {n_data} in {after - before}s")
+    return np.array(labels), np.expand_dims(np.array(data), axis=1)
+
 
 def _postprocess_radioml_v1(raw_ds: Dict, to_1024: bool, transpose: bool, minimum_snr: int):
     ds_keys = [k for k in raw_ds.keys() if k[1] >= minimum_snr]
