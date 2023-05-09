@@ -1,2 +1,4 @@
 models/signal_modulation_classification_1/data/test_data filter=lfs diff=lfs merge=lfs -text
 models/signal_modulation_classification_1/data/train_data filter=lfs diff=lfs merge=lfs -text
+models_plots/CNN_radio_ML/ filter=lfs diff=lfs merge=lfs -text
+models_plots/encoder_radio_ML/ filter=lfs diff=lfs merge=lfs -text

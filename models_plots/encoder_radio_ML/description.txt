@@ -1,0 +1,25 @@
+default_cnn_conf = ConvolutionConfiguration(
+    output_channels=[32], kernel_sizes=[9], paddings=["same"]
+)
+default_encoder_conf = EncoderLayersConfiguration(h=4, d_k=32, d_v=32, d_model=32, d_ff=128, n=4)
+default_dense_conf = DenseConfiguration(sizes=[128])
+default_avg_size = 32
+
+configs = [
+    # Different kernel sizes
+    [ConvolutionConfiguration(output_channels=[32], kernel_sizes=[3], paddings=["same"]), default_encoder_conf, default_dense_conf, default_avg_size, "k=3"],
+    [ConvolutionConfiguration(output_channels=[32], kernel_sizes=[9], paddings=["same"]), default_encoder_conf, default_dense_conf, default_avg_size, "k=9],
+    [ConvolutionConfiguration(output_channels=[32], kernel_sizes=[17], paddings=["same"]), default_encoder_conf, default_dense_conf, default_avg_size, "k=17"],
+    [ConvolutionConfiguration(output_channels=[32], kernel_sizes=[33], paddings=["same"]), default_encoder_conf, default_dense_conf, default_avg_size, "k=33"],
+    [ConvolutionConfiguration(output_channels=[32], kernel_sizes=[65], paddings=["same"]), default_encoder_conf, default_dense_conf, default_avg_size, "k=65"],
+
+    # Different number of encoder layers
+    [default_cnn_conf, EncoderLayersConfiguration(h=4, d_k=32, d_v=32, d_model=32, d_ff=128, n=2), default_dense_conf, default_avg_size, "encoder n=2"],
+    [default_cnn_conf, EncoderLayersConfiguration(h=4, d_k=32, d_v=32, d_model=32, d_ff=128, n=6), default_dense_conf, default_avg_size, "encoder n=6"],
+    [default_cnn_conf, EncoderLayersConfiguration(h=4, d_k=32, d_v=32, d_model=32, d_ff=128, n=8), default_dense_conf, default_avg_size, "encoder n=8"],
+
+    # Different sizes of d_model
+    [ConvolutionConfiguration(output_channels=[64], kernel_sizes=[9], paddings=["same"]),  EncoderLayersConfiguration(h=4, d_k=32, d_v=32, d_model=64, d_ff=128, n=4), default_dense_conf, default_avg_size, "d_model=64"],
+    [ConvolutionConfiguration(output_channels=[128], kernel_sizes=[9], paddings=["same"]),  EncoderLayersConfiguration(h=4, d_k=32, d_v=32, d_model=128, d_ff=128, n=4), default_dense_conf, default_avg_size, "d_model=128"],
+    [ConvolutionConfiguration(output_channels=[256], kernel_sizes=[9], paddings=["same"]),  EncoderLayersConfiguration(h=4, d_k=32, d_v=32, d_model=256, d_ff=128, n=4), default_dense_conf, default_avg_size, "d_model=256"],
+]
