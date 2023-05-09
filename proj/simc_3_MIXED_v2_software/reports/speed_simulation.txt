@@ -150,11 +150,11 @@ median: 49797170.0
 std: 11612.894352385603
 
 ///////////////////////////////////////////////
-// CFU V10 (V6)
+SKIP // CFU V10 (xxx)
 ///////////////////////////////////////////////
 
 ///////////////////////////////////////////////
-// CFU V11 (V7)
+// CFU V11 (V5)
 // - Add combinatoric quantization
 ///////////////////////////////////////////////
 45M (     44552519 )  cycles total
@@ -174,7 +174,7 @@ median: 44546408.0
 std: 4298.674135395012
 
 ///////////////////////////////////////////////
-// CFU V11.1 (V7.1)
+// CFU V11.1 (V5.1)
 // - Differs from v11 by loading data from buffers to intermediate registers - useless
 ///////////////////////////////////////////////
 45M (     44753223 )  cycles total
@@ -194,7 +194,7 @@ median: 44747112.0
 std: 4294.419178730067
 
 ///////////////////////////////////////////////
-// CFU V11.2 (V7.2)
+// CFU V11.2 (V5.2)
 // - Uses pipelined asynchronous quantization
 ///////////////////////////////////////////////
 45M (     45154631 )  cycles total
@@ -215,7 +215,7 @@ std: 4298.674135395012
 
 
 ///////////////////////////////////////////////
-// CFU V12 (V8)
+// CFU V12 (V6.0)
 // - Write 4 values at a time (Note - conditional writes)
 // - Quantization is combinatorical
 ///////////////////////////////////////////////
@@ -236,7 +236,7 @@ median: 28197059.0
 std: 4298.674135395012
 
 ///////////////////////////////////////////////
-// CFU V12.2 (V8.2)
+// CFU V12.2 (V6.1)
 // - Uses pipelined quantization
 // - Removed conditional writing
 ///////////////////////////////////////////////
@@ -257,7 +257,7 @@ median: 29194879.0
 std: 4300.899277481551
 
 ///////////////////////////////////////////////
-// CFU V13 (V9)
+// CFU V13 (V7)
 // - Async writing / computation
 // - Returned conditional writing
 // - Combinatorical quantization
@@ -279,7 +279,7 @@ median: 26457779.0
 std: 4298.674135395012
 
 ///////////////////////////////////////////////
-// CFU V13.2 (V9.2)
+// CFU V13.2 (v7.1)
 // - pipelined quantization
 // - Removed conditional writing
 ///////////////////////////////////////////////
@@ -301,7 +301,7 @@ std: 4300.899277481551
 
 
 ///////////////////////////////////////////////
-// CFU V14 (V10)
+// CFU V14 (V8.2)
 // - Make memory width 32bit
 ///////////////////////////////////////////////
 29M (     28745877 )  cycles total
@@ -321,17 +321,24 @@ median: 28739766.0
 std: 4298.674135395012
 
 
-// V14 1 computation per cycle
+// CFU V14(x1)
 ................   139M (    138840456 )  cycles total
-// V14 2 computation per cycle
+[138840456]
+// CFU V14(x2)
 ................    76M (     75927431 )  cycles total
-// V14 4 computation per cycle
+[75927431]
+// CFU V14(x4)
 ................    44M (     44474325 )  cycles total
-// V14 8 computation per cycle
+[44474325]
+// CFU V14(x8)
 ................    29M (     28745877 )  cycles total
-// V14 16 computation per cycle
+[28745877]
+// CFU V14(x16)
 ................    21M (     20881941 )  cycles total
-// V14 24 computation per cycle
+[20881941]
+// CFU V14(x24)
 ................    18M (     18335081 )  cycles total
-// V14 32 computation per cycle
+[18335081]
+// CFU V14(x32)
 ................    17M (     16950459 )  cycles total
+[16950459]

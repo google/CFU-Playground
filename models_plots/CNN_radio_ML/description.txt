@@ -1,0 +1,22 @@
+default_cnn_conf = ConvolutionConfiguration(output_channels=[32, 48, 64, 96, 128, 192], kernel_sizes=[8, 8, 8, 8, 8, 8], paddings=["same", "same", "same", "same", "same", "same"], max_pool_sizes=[1, 1, 2, 1, 2, 1])
+default_dense_conf = DenseConfiguration(sizes=[])
+default_avg_size = 32
+
+configs = [
+    # # Different kernel sizes
+    [ConvolutionConfiguration(output_channels=[32, 48, 64, 96, 128, 192], kernel_sizes=[3, 3, 3, 3, 3, 3], paddings=["same", "same", "same", "same", "same", "same"], max_pool_sizes=[1, 1, 2, 1, 2, 1]), default_dense_conf, default_avg_size, "k=3"],
+    [default_cnn_conf, default_dense_conf, default_avg_size, "Default_medium"],
+    [ConvolutionConfiguration(output_channels=[32, 48, 64, 96, 128, 192], kernel_sizes=[17, 17, 17, 17, 17, 17], paddings=["same", "same", "same", "same", "same", "same"], max_pool_sizes=[1, 1, 2, 1, 2, 1]), default_dense_conf, default_avg_size, "k=17"],
+    [ConvolutionConfiguration(output_channels=[32, 48, 64, 96, 128, 192], kernel_sizes=[33, 33, 33, 33, 33, 33], paddings=["same", "same", "same", "same", "same", "same"], max_pool_sizes=[1, 1, 2, 1, 2, 1]), default_dense_conf, default_avg_size, "k=33"],
+    [ConvolutionConfiguration(output_channels=[32, 48, 64, 96, 128, 192], kernel_sizes=[65, 65, 65, 65, 65, 65], paddings=["same", "same", "same", "same", "same", "same"], max_pool_sizes=[1, 1, 2, 1, 2, 1]), default_dense_conf, default_avg_size, "k=65"],
+
+    # Different Width of encoder layers
+    [ConvolutionConfiguration(output_channels=[16, 16, 32, 32, 64, 64], kernel_sizes=[8, 8, 8, 8, 8, 8], paddings=["same", "same", "same", "same", "same", "same"], max_pool_sizes=[1, 1, 2, 1, 2, 1]), default_dense_conf, default_avg_size, "output_channels=[16, 16, 32, 32, 64, 64]"],
+    [ConvolutionConfiguration(output_channels=[32, 32, 48, 64, 64, 96], kernel_sizes=[8, 8, 8, 8, 8, 8], paddings=["same", "same", "same", "same", "same", "same"], max_pool_sizes=[1, 1, 2, 1, 2, 1]), default_dense_conf, default_avg_size, "output_channels=[32, 32, 48, 64, 64, 96]"],
+    [ConvolutionConfiguration(output_channels=[64, 64, 128, 192, 192, 256], kernel_sizes=[8, 8, 8, 8, 8, 8], paddings=["same", "same", "same", "same", "same", "same"], max_pool_sizes=[1, 1, 2, 1, 2, 1]), default_dense_conf, default_avg_size, "output_channels=[64, 64, 128, 192, 192, 256]"],
+
+
+    # Different depth of model
+    [ConvolutionConfiguration(output_channels=[32, 48, 64], kernel_sizes=[8, 8, 8], paddings=["same", "same", "same"], max_pool_sizes=[1, 2, 2]), default_dense_conf, default_avg_size, "output_channels=[32, 48, 64]__max_pool_sizes=[1, 2, 2]"],
+    [ConvolutionConfiguration(output_channels=[32, 48, 64, 96, 128, 192, 256, 512], kernel_sizes=[8, 8, 8, 8, 8, 8, 8, 8], paddings=["same", "same", "same", "same", "same", "same", "same", "same"], max_pool_sizes=[1, 1, 2, 1, 2, 1, 2, 1]), default_dense_conf, 16, "output_channels=[32, 48, 64, 96, 128, 192, 256, 512]__max_pool_sizes=[1, 1, 2, 1, 2, 1, 2, 1]__avg_size=16"],
+]
