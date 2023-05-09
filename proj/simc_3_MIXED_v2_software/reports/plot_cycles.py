@@ -108,18 +108,31 @@ data = {
         45156469,
     ],
     "V6.0": [
-        28203170,
-        28194502,
-        28202042,
-        28195756,
-        28197059,
-        28193247,
-        28205765,
-        28194939,
-        28195842,
-        28197497,
-        28205008,
+        28805282,
+        28796614,
+        28804154,
+        28797868,
+        28799171,
+        28795359,
+        28807877,
+        28797051,
+        28797954,
+        28799609,
+        28807120,
     ],
+    # "V6.0": [         // Doesn't use quant v2
+    #     28203170,
+    #     28194502,
+    #     28202042,
+    #     28195756,
+    #     28197059,
+    #     28193247,
+    #     28205765,
+    #     28194939,
+    #     28195842,
+    #     28197497,
+    #     28205008,
+    # ],
     "V6.1": [
         29200999,
         29192343,
@@ -133,20 +146,20 @@ data = {
         29195334,
         29202857,
     ],
+    # "V7.0": [         // Doesn't use quant_2 and uses conditional write size
+    #     26463890,
+    #     26455222,
+    #     26462762,
+    #     26456476,
+    #     26457779,
+    #     26453967,
+    #     26466485,
+    #     26455659,
+    #     26456562,
+    #     26458217,
+    #     26465728,
+    # ],
     "V7.0": [
-        26463890,
-        26455222,
-        26462762,
-        26456476,
-        26457779,
-        26453967,
-        26466485,
-        26455659,
-        26456562,
-        26458217,
-        26465728,
-    ],
-    "V7.1": [
         27624493,
         27615837,
         27623381,
@@ -193,17 +206,17 @@ def main():
     fig, ax = plt.subplots()
 
     # creating the bar plot
-    bars = plt.bar(versions, cycles, color="#63A8D3", width=.8)
+    bars = plt.bar(versions, cycles, color="#63A8D3", width=0.8)
 
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['left'].set_visible(False)
-    ax.spines['bottom'].set_color('#DDDDDD')
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.spines["left"].set_visible(False)
+    ax.spines["bottom"].set_color("#DDDDDD")
 
     # ax.tick_params(bottom=False, left=False)
 
     ax.set_axisbelow(True)
-    ax.yaxis.grid(True, color='#DDDDDD')
+    ax.yaxis.grid(True, color="#DDDDDD")
     ax.xaxis.grid(False)
 
     plt.xlabel("Implementation versions")
@@ -216,9 +229,9 @@ def main():
             bar.get_x() + bar.get_width() / 2,
             bar.get_height() + 1e6,
             "%.1fM" % (bar.get_height() / 1e6),
-            horizontalalignment='center',
+            horizontalalignment="center",
             color=bar_color,
-            weight='bold'
+            weight="bold",
         )
 
     plt.show()
