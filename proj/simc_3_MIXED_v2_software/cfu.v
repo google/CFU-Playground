@@ -1,6 +1,7 @@
 // `include "cfu_full_v9.v"
 // `include "cfu_full_v111.v"
 
+`include "verilog_src/cfu_v0.sv"
 `include "verilog_src/cfu_v5.sv"
 `include "verilog_src/cfu_v6.sv"
 `include "verilog_src/cfu_v7.sv"
