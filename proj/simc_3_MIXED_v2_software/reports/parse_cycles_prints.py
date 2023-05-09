@@ -22,16 +22,16 @@ def parse_cycles_prints(prints: str):
 
 if __name__ == "__main__":
     s = """
-................    44M (     44066395 )  cycles total
-................    44M (     44050925 )  cycles total
-................    44M (     44065681 )  cycles total
-................    44M (     44039586 )  cycles total
-................    44M (     44052470 )  cycles total
-................    44M (     44046530 )  cycles total
-................    44M (     44062859 )  cycles total
-................    44M (     44044245 )  cycles total
-................    44M (     44050134 )  cycles total
-................    44M (     44066152 )  cycles total
-................    44M (     44060297 )  cycles total   
+................    41M (     40583695 )  cycles total
+................    41M (     40567002 )  cycles total
+................    41M (     40582041 )  cycles total
+................    41M (     40555946 )  cycles total
+................    41M (     40563943 )  cycles total
+................    41M (     40563547 )  cycles total
+................    41M (     40579219 )  cycles total
+................    41M (     40560135 )  cycles total
+................    41M (     40560902 )  cycles total
+................    41M (     40575462 )  cycles total
+................    41M (     40577624 )  cycles total   
     """
     parse_cycles_prints(s)
