@@ -49,7 +49,7 @@ Max-Min (sec): 0.048689842224121094
 STD (sec):     0.020084062475670742
 
 ///////////////////////////////////////////////
-// CFU V9 (V4)
+// CFU V9 (V4.0)
 // - Removed mod - added update address phase
 // - Remove all non-blocking assignments
 ///////////////////////////////////////////////
@@ -78,12 +78,12 @@ Max-Min (sec): 0.020491838455200195
 STD (sec):     0.008019084014475744
 
 ///////////////////////////////////////////////
-// CFU V10 (V6)
+SKIP // CFU V10 (V6)
 ///////////////////////////////////////////////
 
 
 ///////////////////////////////////////////////
-// CFU V11 (V5)
+// CFU V11 (V5.0)
 // - Add combinatoric quantization
 ///////////////////////////////////////////////
 
@@ -111,7 +111,7 @@ STD (sec):     0.007823603248136437
 
 
 ///////////////////////////////////////////////
-// CFU V11.1 (xxx)
+SKIP // CFU V11.1 (xxx)
 // - Differs from v11 by loading data from buffers to intermediate registers - useless
 ///////////////////////////////////////////////
 
@@ -166,7 +166,7 @@ STD (sec):     0.004716807263776187
 
 
 ///////////////////////////////////////////////
-// CFU V12 (V6)
+SKIP // CFU V12 (V6)
 // - Write 4 values at a time (Note - conditional writes)
 // - Quantization is combinatorical
 ///////////////////////////////////////////////
@@ -206,7 +206,7 @@ STD (sec):     0.001572650517919978
 
 
 ///////////////////////////////////////////////
-// CFU V13 (xxx)
+SKIP // CFU V13 (xxx)
 // - Async writing / computation
 // - Returned conditional writing
 // - Combinatorical quantization
@@ -218,7 +218,7 @@ ERROR: [DRC UTLZ-1] Resource utilization: LUT6 over-utilized in Top Level Design
 ERROR: [DRC UTLZ-1] Resource utilization: Slice LUTs over-utilized in Top Level Design (This design requires more Slice LUTs cells than are available in the target device. This design requires 150806 of such cell types but only 63400 compatible sites are available in the target device. Please analyze your synthesis results and constraints to ensure the design is mapped to Xilinx primitives as expected. If so, please consider targeting a larger device. Please set tcl parameter "drc.disableLUTOverUtilError" to 1 to change this error to warning.)
 
 ///////////////////////////////////////////////
-// CFU V13.2 (v7)
+// CFU V13.2 (v7.0)
 // - pipelined quantization
 // - Removed conditional writing
 ///////////////////////////////////////////////
@@ -235,7 +235,7 @@ STD (sec):     0.004894079828138783
 
 
 ///////////////////////////////////////////////
-// CFU V14 (V10)
+// CFU V14 (V8.0)
 // - Make memory width 32bit
 ///////////////////////////////////////////////
 [70107097, 70088996, 70103962, 70081439, 70089759, 70088734, 70103388, 70022851, 70023791, 70032091, 70038780]
@@ -249,7 +249,7 @@ Max (sec):     2.3358139991760254
 Max-Min (sec): 0.01647210121154785
 STD (sec):     0.004836314566647853
 
-// V14 1 computation per cycle
+// CFU V14 1 computation per cycle
 [345659071, 345657867, 345656221, 345655741, 345657580, 345658877, 345656454, 345658990, 345656419, 345657632, 345655281]
 mean: 345657284.8181818
 median: 345657580.0
@@ -261,7 +261,7 @@ Max (sec):     11.519783735275269
 Max-Min (sec): 0.0023703575134277344
 STD (sec):     0.0006451303759703955
 
-// V14 2 computation per cycle
+// CFU V14 2 computation per cycle
 [187807435, 187806722, 187804371, 187801071, 187805495, 187807497, 187802724, 187808363, 187805509, 187807945, 187802961]
 mean: 187805463.0
 median: 187805509.0
@@ -273,7 +273,7 @@ Max (sec):     6.26911187171936
 Max-Min (sec): 0.0171048641204834
 STD (sec):     0.004557668840644285
 
-// V14 4 computation per cycle
+// CFU V14 4 computation per cycle
 [109606720, 109587442, 109604596, 109578736, 109586733, 109586572, 109602244, 109583160, 109583927, 109593552, 109600649]
 mean: 109592211.9090909
 median: 109587442.0
@@ -285,7 +285,7 @@ Max (sec):     3.6631507873535156
 Max-Min (sec): 0.01599287986755371
 STD (sec):     0.007073802637446255
 
-// V14 8 computation per cycle
+// CFU V14 8 computation per cycle
 [70107097, 70088996, 70103962, 70081439, 70089759, 70088734, 70103388, 70022851, 70023791, 70032091, 70038780]
 mean: 70070989.81818181
 median: 70088734.0
@@ -297,7 +297,7 @@ Max (sec):     2.3358139991760254
 Max-Min (sec): 0.01647210121154785
 STD (sec):     0.004836314566647853
 
-// V14 16 computation per cycle
+// CFU V14 16 computation per cycle
 [50291780, 50272737, 50289656, 50263796, 50271793, 50271632, 50287304, 50268220, 50269222, 50278612, 50285709]
 mean: 50277314.63636363
 median: 50272737.0
@@ -309,7 +309,7 @@ Max (sec):     1.6800312995910645
 Max-Min (sec): 0.016753673553466797
 STD (sec):     0.007269234123300426
 
-// V14 24 computation per cycle
+// CFU V14 24 computation per cycle
 [44066395, 44050925, 44065681, 44039586, 44052470, 44046530, 44062859, 44044245, 44050134, 44066152, 44060297]
 mean: 44055024.90909091
 median: 44052470.0
@@ -321,4 +321,14 @@ Max (sec):     1.4718623161315918
 Max-Min (sec): 0.01669454574584961
 STD (sec):     0.007251016374745294
 
-// V14 32 computation per cycle
+// CFU V14 32 computation per cycle
+[40583695, 40567002, 40582041, 40555946, 40563943, 40563547, 40579219, 40560135, 40560902, 40575462, 40577624]
+mean: 40569956.0
+median: 40567002.0
+std: 9392.402142157245
+
+Mean (sec):    1.3512747764587403
+Min (sec):     1.3434813022613525
+Max (sec):     1.3597338199615479
+Max-Min (sec): 0.016252517700195312
+STD (sec):     0.007615466950355332
