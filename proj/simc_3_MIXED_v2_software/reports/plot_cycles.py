@@ -201,6 +201,19 @@ hardware_data = {
 }
 
 simulation_data = {
+    "ORIGINAL_NO_QUANT": [
+        4146482209,
+        4124195519,
+        4283585858,
+        4029954626,
+        4287531672,
+        4095681454,
+        4286648373,
+        4213735836,
+        4283620935,
+        4189651281,
+        4061753762,
+    ],
     # "ORIGINAL": [
     #     406868334,
     #     406834202,
@@ -398,13 +411,15 @@ generate_pgf = True
 
 if generate_pgf:
     matplotlib.use("pgf")
-    matplotlib.rcParams.update({
-        "pgf.texsystem": "pdflatex",
-        'font.family': 'serif',
-        'font.size': 7,
-        'text.usetex': True,
-        'pgf.rcfonts': False,
-    })
+    matplotlib.rcParams.update(
+        {
+            "pgf.texsystem": "pdflatex",
+            "font.family": "serif",
+            "font.size": 7,
+            "text.usetex": True,
+            "pgf.rcfonts": False,
+        }
+    )
 
 
 def main():
