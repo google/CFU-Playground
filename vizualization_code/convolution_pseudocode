@@ -1,0 +1,23 @@
+Conv2D() {
+  for (int batch in 0..batches) {
+    for (int out_y in 0..output_height) {
+      for (int out_x in 0..output_width) {
+        for (int out_channel in 0..output_depth) {
+          int32_t acc = 0;
+          for (int filter_y in 0..filter_height) {
+            for (int filter_x in 0..filter_width) {
+              for (int in_channel in 0..filter_input_depth) {
+                int8_t input_val  = input_data[Offset(...)];
+                int8_t filter_val = filter_data[Offset(...)];
+                acc += filter_val * (input_val + input_offset);
+              }
+            }
+          }
+          acc += bias_data[Offset(...)]
+          acc = postprocess(acc);
+          output_data[Offset(...)] = cast<int8_t>(acc);
+        }
+      }
+    }
+  }
+}
