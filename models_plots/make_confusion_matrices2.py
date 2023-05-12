@@ -6,16 +6,20 @@ import os
 from sklearn.metrics import ConfusionMatrixDisplay
 import matplotlib
 
-matplotlib.use("pgf")
-matplotlib.rcParams.update(
-    {
-        "pgf.texsystem": "pdflatex",
-        "font.family": "serif",
-        # 'font.size': 4,
-        "text.usetex": True,
-        "pgf.rcfonts": False,
-    }
-)
+generate_pgf = True
+
+if generate_pgf:
+    matplotlib.use("pgf")
+    matplotlib.rcParams.update(
+        {
+            "pgf.texsystem": "pdflatex",
+            "font.family": "serif",
+            # 'font.size': 4,
+            "text.usetex": True,
+            "pgf.rcfonts": False,
+        }
+    )
+    sns.set(rc={'text.usetex': True})
 
 
 dataset = "radioML"
@@ -81,10 +85,10 @@ for i, experiment in enumerate(experiments):
 
     confusion_matrix = np.array(results["cm_test"])
 
-    # fig = plt.figure(figsize=(2.5, 2.5))
+    # fig = plt.figure(figsize=(5, 4))
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
-    ax.set_title(labels_latex[i])
+    # ax.set_title(labels_latex[i])
 
     sns.heatmap(
         confusion_matrix,
@@ -96,9 +100,12 @@ for i, experiment in enumerate(experiments):
         fmt="g",
     )
 
-    # Add labels to the x-axis and y-axis
-    ax.set_xlabel("Predicted")
-    ax.set_ylabel("True")
-    plt.savefig(f"confusion_matrix_{labels[i]}.pgf")
+    plt.xticks(rotation=45) 
 
-    # plt.show()
+    # Add labels to the x-axis and y-axis
+    # ax.set_xlabel("Predicted")
+    # ax.set_ylabel("True")
+    if generate_pgf:
+        plt.savefig(f"confusion_matrix_{labels[i]}.pgf")
+    else:
+        plt.show()
