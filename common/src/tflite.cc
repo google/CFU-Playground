@@ -82,10 +82,10 @@ constexpr T const& const_max(const T& x, const T& y, const Args&... rest) {
 constexpr int kTensorArenaSize = const_max<int>(
 
 // My_models_anchor
-#ifdef INCLUDE_MODEL_SIMC_4_RADIOML
+#ifdef INCLUDE_MODEL_SIMC_3_MIXED_V2_NO_QUANT
     110000,
 #endif
-#ifdef INCLUDE_MODEL_SIMC_3_MIXED_V2
+#ifdef INCLUDE_MODEL_SIMC_4_RADIOML
     110000,
 #endif
 #ifdef INCLUDE_MODEL_SINE
@@ -221,7 +221,7 @@ void tflite_set_input_zeros_float() {
 void tflite_set_input(const void* data) {
   auto input = interpreter->input(0);
   memcpy(input->data.int8, data, input->bytes);
-  // printf("Copied %d bytes at %p\n", input->bytes, input->data.int8);
+  printf("Copied %d bytes at %p\n", input->bytes, input->data.int8);
 }
 
 void tflite_set_input_unsigned(const unsigned char* data) {

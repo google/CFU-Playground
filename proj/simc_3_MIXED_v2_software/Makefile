@@ -29,6 +29,7 @@ DEFINES += NPROFILE
 # Uncomment to include specified model in built binary
 # DEFINES += INCLUDE_MODEL_PDTI8
 DEFINES += INCLUDE_MODEL_SIMC_3_MIXED_V2
+DEFINEs += INCLUDE_MODEL_SIMC_3_MIXED_V2_NO_QUANT
 
 # Uncomment to include all TFLM examples (pdti8, micro_speech, magic_wand)
 #DEFINES += INCLUDE_ALL_TFLM_EXAMPLES
