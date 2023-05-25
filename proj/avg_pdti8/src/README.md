@@ -9,5 +9,5 @@ For example:
     *   to replace the integer 2D convolution implementation, you could create a
         file with the path:
 
-        tensorflow/lite/kernels/interal/reference/integer_ops/conv.h.
+        tensorflow/lite/kernels/internal/reference/integer_ops/conv.h.
 
