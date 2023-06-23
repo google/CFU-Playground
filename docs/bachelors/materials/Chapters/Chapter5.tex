@@ -1,0 +1,338 @@
+%----------------------------------------------------------------------------------------
+%	Accelerator design
+%----------------------------------------------------------------------------------------
+\todo{
+- multiplication pipelining diagram
+- find out why cfu v7 didn't give speed up on board
+- change wide bars to 2 smaller bars
+
+- Rerun v8.0 with updated code
+- Rerun v7.0 for hardware (added quant2)
+- Find out why 7.0 slower, and reason for little improvement in simulation
+
+% - check if possible to draw a diagram from Verilog
+- Fit accumulation computation per cycle to the law of 
+- analyze power consumption raise
+}
+
+\chapter{Accelerator design} \label{Chapter 5}
+
+\section{Accelerator development tools }
+
+\subsection{CFU-Playground}
+
+As mentioned in Chapter~\ref{Chapter 3}, CFU-Playground is used to experiment with the hardware acceleration of the model deployed in TFLM. After training and evaluating the model, it should be converted to TF lite model and optionally quantized. Since TFLM doesn't assume the availability of dynamic memory must be exported as a statically sized C array. 
+
+The model is exported with some test data and expected output so that it can be tested that model with the accelerator produces correct results. CFU-Playground implements a simple Terminal User Interface (TUI) menu where users can choose what they want to run on the processor. So the developer has to add a menu entry where model inference on test data is started, and model output is compared with the expected output.
+
+CFU extension~\cite{risc_v_cfu} implemented for VexRiscV softcore is used to implement custom hardware logic that can be used as a regular R-format instruction. CFU can be implemented using Verilog or its extension SystemVerilog HDL and Amaranth -- \textquote{Toolchain for developing hardware based on synchronous digital logic using the Python programming language}~\cite{amaranth}. SystemVerilog was chosen since it gives more control, and it's easier to understand how Verilog code is synthesized to search for design bottlenecks.  
+
+Simulation is conducted in Renode~\cite{renode} simulator. Renode itself is not a hardware simulator, it simulates ISA. This makes it much quicker, but less accurate at the same time. Also, it allows to co-simulated Verilog design in Verilator, which allows to completely simulate VexRiscV CPU in tandem with custom CFU. 
+
+\subsection{FPGA board specification}
+The FPGA board used in this project is Xilinx Arty A7-100T. It is officially supported by CFU-Playground, as mentioned in \url{https://github.com/google/CFU-Playground/wiki/Supported-Boards} project Wiki on GitHub. Some of the board specifications are depicted in Table~\ref{table:arty_specs}.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{| c | c |} 
+ \hline \\[-1em]
+    & Arty A7-100T \\ [1ex]
+    \hline
+    Look-up Tables (LUTs) & 15,850 \\ [1ex]
+    Flip-Flops  &  126,800  \\ [1ex]
+    Block RAM & 4,860 KBits \\ [1ex]
+    DSP slices & 240 \\ [1ex]
+    DDR3L RAM & 256MB, 16-bit bus @ 667MHz \\ [1ex]
+    Ethernet & 10/100 Mbps \\ [1ex]
+    Internal clock & 450MHz \\ [1ex]
+ \hline
+\end{tabular}
+\caption{Arty A7-100T specification according to official \href{https://digilent.com/reference/programmable-logic/arty-a7/start}{distributor}}
+\label{table:arty_specs}
+\end{table}
+
+\todo{
+- Explain CFU-CPU communication again
+- Explain what tools are used to develop hardware design (Verilog, Renode)
+- Mention FPGA used, its specs
+- Mention how tensorflow lite micro code is modified
+}
+
+\section{Model profiling}
+
+One of the advantages of TFLM is its flexibility. Since it is open-source, the developer can modify the source code to optimize the framework for their specific use case, such as adding support for custom hardware accelerators. CFU-Playground provides a simple function that gives an interface to the clock counter in soft-core. Since clock frequency is constant in this processor, clock counters can be directly mapped to execution time. By default, CFU-Playgtound measures clock counts for each layer of the model. But, if needed, the user can measure how much clock counts are spent on some particular piece of code to find hotspots. We decided to profile the CNN model with 6 convolutional layers (\verb|CNN_1|), depicted in ~\ref{fig:cnn_1}. For example, Table~\ref{table:cycles_per_layer} depicts clock cycles spent in each layer. Obviously that the absolute majority of time is spent in a 2-dimensional convolution. 
+
+\begin{table}[h!]   
+\centering
+% \begin{tabular}{| c | c | c | c | c |} 
+\begin{tabular}{| c | c | c |} 
+ \hline \\[-1em]
+    % Layer name & Cycles (Simulation) & Cycles share (\%) & Cycles (Hardware) & Cycles share (Hardware) (\%) \\ [1ex]
+    Layer name & Cycles share (Simulation) & Cycles share (Hardware) \\ [1ex]
+    \hline
+
+     CONV\_2D & 99.310\% & 99.416\% \\  [1ex]
+     MAX\_POOL\_2D & 0.672\% & 0.563\% \\  [1ex]
+     SOFTMAX & 0.002\% & 0.004\% \\  [1ex]
+     AVERAGE\_POOL\_2D & 0.010\% & 0.011\% \\  [1ex]
+     RESHAPE & \num{2.5e-4}\% & \num{9.4e-4}\% \\  [1ex]
+     FULLY\_CONNECTED & 0.005\% & 0.005\% \\  [1ex]
+    
+ \hline
+\end{tabular}
+\caption{Cycles spent in different layers of CNN\_1}
+\label{table:cycles_per_layer}
+\end{table}
+
+Listing~\ref{lst:conv2d-pseudocode} depicts the pseudo-code of Conv2D in TFLM that doesn't consider implementation details. Most of the time is spent in the inner loop that calculates the accumulator -- this is a hotspot of this model.
+
+
+\begin{minipage}{\textwidth}
+\lstinputlisting[
+    label={lst:conv2d-pseudocode}, 
+    basicstyle=\small\ttfamily, 
+    tabsize=4, numbers=left, 
+    numberstyle=\tiny\color{black}, 
+    caption={2-dimensional convolution pseudo code}
+    ]
+    {
+        Code/convolution_pseudocode
+    }
+\end{minipage}
+
+\section{Experiments}
+
+\subsection{Software optimizations} \label{software_optimization}
+
+A model can be optionally quantized. As shown in Tab.~\ref{table:quant_performance}, quantization doesn't degrade \verb|CNN_1| performance much, so there is no actual need for using an original model with floating point weights in this case. Nonetheless, some models may be worsened more by quantization~\cite{quantization_survey}, so it worth understand the speed gain from quantization. As shown in Fig.~\ref{fig:software_optimization}, the speedup is $\sim$8 times in simulation and $\sim$10.3 times in hardware.
+
+\begin{figure}
+    \begin{center}
+    \scalebox{0.8}{
+        \input{graphic/cycle_bars_computation_software.pgf}
+    }
+    \end{center}
+    \caption{Software optimizations of CNN\_1.}
+    \label{fig:software_optimization}
+\end{figure}
+
+We start with software optimizations. Since we plan to optimize only this deployed model -- \verb|CNN_1|, we can remove some degree of generalization in Conv2D implementations. For example, we know that even though a 2-dimensional convolution layer is used for the model, data is actually 1-dimensional. That's why we can remove two cycles -- over filter's \verb|y| coordinate and input's \verb|y| coordinate. Also, some convolution parameters are constant in this model, such as \verb|filter_width|, \verb|min/max_activation|, etc. CFU-Playground provides convenient functions to detect if some variable changes from call to call of the layer. Other optimization techniques, like loop unrolling, can produce considerable speed up, as shown in Figure~\ref{fig:software_optimization}. Overall we managed to speed up code by 26.4\% in simulation and 34.7\% in hardware with just code simplification and optimization. Note that most optimizations consider specifics of this concrete model and can't be applied in general cases. As shown in Figure~\ref{fig:cfu_inference_time}, software acceleration accelerates inference time from 24.9s to 16.2s on the FPGA board.
+
+\subsection{Software CFU}
+
+Designing and developing an efficient custom accelerator for neural networks requires careful consideration of many factors. It is almost impossible to design an optimal accelerator immediately without testing, debugging, and fine-tuning. That's why iterative development can be a more effective approach. By starting with a basic design and testing it, we can identify bottlenecks and inefficiencies and improve the design. This approach allows for faster development, and the resulting accelerator can better match the application's needs.
+
+That's why we start from the na\"{i}ve implementation that is easy to implement and is very similar to software implementation. Such an accelerator is quick in the simulator but impossible to synthesize for obvious reasons. Then we can iteratively add new features to the design to make it more effective regarding resource utilization and timing constraints. Timing constraints are limitations imposed by signals that must be propagated between flip-flops through some combinational logic. 
+
+CFU access interface in CFU-Playground is provided by 8 \verb|cfu_op0-7| functions for each \verb|funct3| on Figure~\ref{fig:r-format}. Each such function has 3 inputs -- 7-bit number to encode command (\verb|funct7|), and two 32-bit inputs: \verb|rs1| and \verb|rs2| on Figure~\ref{fig:r-format}. Such API allows one to first implement CFU logic in software, which is considerably quicker and easier than designing it immediately with HDL. Converting such software to CFU is easier since SystemVerilog provides mathematical primitives similar to those in the C++ programming language used to write programs in CFU-Playground. 
+
+\subsection{CPU-CFU interface}
+ 
+CPU-CFU interface and communication protocol were mentioned in Chapter~\ref{Chapter 2}. There are different ways to design CFU behavior based on this protocol. For example, CFU can be completely combinatoric; it can stall the CPU while executing; It can be asynchronous, with the possibility of making the CPU wait for the result, etc. More cases with timing diagrams are described in the official CFU-Playground documentation: \url{https://cfu-playground.readthedocs.io/en/latest/interface.html}. It was decided to make CFU completely asynchronous, e.g., always returning something to the CPU. This enables better potential CPU utilization, and if the CPU wants to get the CFU computation result, it can check the computation status and, if it is done, get a result. Verilog code that implements such protocol and abstracts CFU logic from the interface depicted below, Listing~\ref{lst:cfu-interface}. 
+
+\lstinputlisting[style={verilog-style}, language=Verilog, firstline=19, lastline=57, label={lst:cfu-interface}, caption={CFU interface}]{Code/cfu_interface.v}
+
+\subsection{Accelerator building blocks}
+
+The main idea of the accelerator developed in this thesis is to intervene in a convolution code, and ''outsource'' computations to the CFU. The majority of computations in convolution is multiply-accumulate. All further developed accelerators consist of 3 main parts: input/filter buffers, parameters registers, and computation logic.
+
+\subsubsection{Memory buffers}
+
+Buffers are required since, as mentioned in Chapter~\ref{Chapter 2}, CFU doesn't have permission to access the CPU's RAM. So processing data must be copied to some buffers accessible by CFU. This is a huge performance limiter, but the relative simplicity of CFU development may justify it in some applications. For Xilinx FPGA boards, it is worth utilizing block RAM (\url{https://docs.xilinx.com/r/en-US/am007-versal-memory/Block-RAM-Summary}). This memory is quick but very limited in size. One of the main features of block RAM is that it has 1 clock edge delay, making latency extremely small. As shown in Tab.~\ref{table:arty_specs}, Arty A7-100T has 4860Kbits of block RAM. 
+
+
+\subsubsection{Parameter registers}
+Even though many parameters are constant due to the architecture of the accelerated network, many parameters need to be saved to registers inside CFU so that they can be effectively used in calculations. So different \verb|funct7| opcode should encode what parameter to save. Such parameters are \verb|input_offset| -- is added to input value when calculating convolution, \verb|input_depth| -- number of input channels, used to calculate effective buffer size of calculations, \verb|output_activation_max|, \verb|output_activation_min| -- used for quantization, etc. 
+
+
+\subsubsection{Computation logic}
+
+This is a core part of the accelerator. This is where most of the changes will occur. Basically, convolution requires only 2 operators -- multiplication and addition. As mentioned in~\ref{quantization}, full integer quantization is used, so the accumulation result must be squeezed back to an 8-bit integer using a particular algorithm is used in TFLM. It requires different logical operations, such as right/left bit shift, logical \verb|and|/\verb|or|, division. Different approaches to accelerating will be described in the next section. 
+
+\subsection{Iterative development}
+
+\subsubsection{Naive accelerator CFU\_V1}
+
+The first accelerator \verb|CFU_V1| works in the following way. Input is completely copied to CFU's input buffer beforehand. In convolution code, there is an iteration over output channels. For each such channel, input is convolved with a filter of size (8 x \verb|input_channel|). So, a filter is copied to CFU's filter buffer for each output channel. After that, computation is started -- CFU iterates over \verb|output_x|, over \verb|filter_x|, and saves all accumulators to the output buffer. CPU reads these results, quantizes them, and saves them to the output array. As shown in Figure~\ref{fig:cfu_cycles_evolution}, this design is the quickest and speeds up code by $\sim$40.5 times (relative to the original convolution code) in the simulator. Unfortunately, this design is completely unsynthesizable for a few reasons: 
+\begin{itemize}
+    \item Input buffer is of size 1024 x 128, and has width of 8-bits. 1024 -- number of samples in the input frame, 128 -- maximum number of input channels in the model. Filter buffer is of size 8 x 128 -- 8 width of the filter. The output buffer size is 1024. Summing up, this design requires (1024 * (128 + 8 + 1)) * 8 bits = 1.12Mbits, which is more than 23\% of all theoretically available block RAM on the FPGA~\ref{table:arty_specs} we use in this project. This design is non-synthesizable in practice since some memory is already used in the soft-core.
+    \item All computations are done in 1 clock cycle. According to Figure~\ref{fig:cnn_1}, the maximum effective size of the input is (1024 x 32). So that is 1024 * 32 * 8 = 262144 multiplications and 262144 * 2 additions of 32-bit integers per cycle, which is impossible even with modern ASICs due to the timing restrictions.
+    \item Since data for computations is read from block RAM, that's also a 262144 * 2 accesses to memory per cycle, making this design impossible not only because of timing constraints but also resource constraints. 
+\end{itemize}
+
+\subsubsection{CFU\_V2}
+One way to fix the problems mentioned in the previous subsection is to decrease the input buffer size. Since the input buffer can't be copied fully to the CFU's buffer, it has to be copied in a cycle in a CPU code. This way, iteration over output x is moved to the code, and CFU computes only one convolution of filter and slice of input of size up to $8 \cdot 128$. Also, since iteration over output x is moved to the code, this eliminates the output buffer. Only one 32-bit register is required to accumulate convolution. 
+
+\subsubsection{CFU\_V3}
+The next upgrade is to make the input buffer a ring buffer. This decreases copied data by a factor of 8 since only one row is copied instead of 8 for each iteration over output x. This decreases the number of clock cycles for inference. Also, \verb|CFU_V3| divides computation into multiple clock cycles. After the CPU starts computation, CFU moves to the ''computational state'', and at each clock cycle, accumulates, multiplies, and adds 8 values from the input and filter buffer to the accumulator. This fixes timing constraints but decreases inference speed by a lot. That is why \verb|CFU_V3| is noticeably slower. Eight multiply-accumulate was chosen arbitrarily, and later, the number of computations per cycle will be examined in greater detail. 
+
+Unfortunately, \verb|CFU_V3| is not synthesizable. The reasons are:
+\begin{itemize}
+    \item Extensive usage of blocking assignments. Blocking assignments in Verilog guarantees the order execution of lines of code. This requires much more hardware to be implemented. The main reason for blocking assignments usage is that in the \verb|CFU_V3| implementation address is updated in the same cycle as an accumulator. This requires a guarantee that address is finished updating before computation begins.
+    \item Extensive usage of division remainder. This was convenient for the ring buffer, but the remainder division is a relatively slow operation, which makes timing constraints much worse.
+\end{itemize}
+
+\subsubsection{CFU\_V4}
+
+Blocking assignments can be removed by adding a new CFU state to update the address. So, while CFU is in a ''computational state'', the multiply-accumulate (computation) is done during the first clock edge. During the second clock edge, addresses for current input and filter values in buffers are updated. Division remainder can be deleted by conditional updating -- if the input buffer address is bigger than the effective input buffer size, it is set to zero. Such logic requires much less hardware for synthesizing since if-statement is synthesized into multiplexers. 
+
+\verb|CFU_V4| is, in fact, synthesizable, and it correctly works on the FPGA. Acceleration can be seen in Figure~\ref{fig:cfu_cycles_evolution} -- $\sim$7.83x (relative to the ''original'' quantized convolution code).
+
+\subsubsection{CFU\_V5}
+
+\begin{minipage}{\textwidth}
+\lstinputlisting[
+    label={lst:quant-pseudocode}, 
+    basicstyle=\small\ttfamily, 
+    tabsize=4, numbers=left, 
+    numberstyle=\tiny\color{black}, 
+    caption={Quantization pseudocode}
+    ]
+    {
+        Code/quantization_pseudocode
+    }
+\end{minipage}
+
+Next upgrade -- move post-processing to the CFU. Post-processing consists of adding bias to the accumulated value and fitting it in an 8-bit integer (quantization). The pseudocode for how the accumulator is quantized is depicted in Listing~\ref{lst:quant-pseudocode}. \verb|CFU_V5| implements bias and quantization post-processing as combinatorial logic. Unfortunately, such design doesn't meet timing constraints. Profiling has shown that the reason is the multiplication of two 64-bit numbers (Listing~\ref{lst:quant-pseudocode}, line: 10). 
+
+Timings problems usually are solved via ''Pipelining.'', e.g., an operation is split into smaller parts executed during a few clock cycles. It was already applied in \verb|CFU_V3| when computation was split into many clock edges. 
+% Multiplication pipelining is similar to the column multiplication method, as shown in Figure~\todo{}. 
+\verb|CFU_V5.1| implements multiplication pipelining in post-processing. As expected, such CFU is a bit slower compared to \verb|CFU_V5.0|. 
+
+\subsubsection{CFU\_V6} \label{cfu_v6}
+The next upgrade involves utilizing CFU input size. There is a lot of data copying to CFU's buffers. Since the model is quantized, input and weights are quantized, e.g., have a size of 8 bits. All previous CFUs were copying one 8-bit value at a time, but CFU inputs have a size of 32 bits. That means that theoretically, data copying can be accelerated four times. The same data layout inside CFU's buffers and input/filter data simplifies the implementation of this feature.
+
+Unfortunately, not all data in this network is aligned on 32 bits. Firstly, this was fixed by adding a special register that configures how many bytes (1-4) should be written to the buffer simultaneously. This solution requires little accelerator and convolution code changes, but it is not synthesizable because it requires too many LUT tables. 
+
+Conditional write size was removed in \verb|CFU_V6.1|, but there was still a possibility to write to any address (not multiple of 4). In other words, when writing 32bit input to address \verb|addr|, 4 consecutive bytes are written to memory addresses \verb|addr|, \verb|addr + 1|, \verb|addr + 2|, \verb|addr + 3|. This approach requires some convolution code changes and still requires a lot of FPGA resources, as shown in Figure~\ref{fig:resource_utilization}, but it is synthesizable. This is one of the most effective accelerating features giving 1.55x speed up relative to the previous version and 13.9x from the original quantized model. 
+
+\subsubsection{CFU\_V7}
+A feature introduced in \verb|CFU_V7| is asynchronous memory copying. It is possible to copy data to the CFU buffer while it is still doing computation. This can be achieved by increasing the input buffer from 8x128 to 9x128. While CFU convolves up to 8x128 values from input with filter, CPU can write next row. This eliminates the need for synchronization since such implementation has no critical sections, and the input buffer size increase is not noticeable. Unfortunately, this improvement gives a minor speedup -- 5.5\% in simulation.
+% This is caused by~\todo{Memory writing or computation takes the most time, find out which one}
+
+\subsubsection{CFU\_V8}
+Resources utilization for \verb|CFU_V6| and \verb|CFU_V7| increased dramatically. A probable reason is that since 4 values are written simultaneously, 4-port memory is synthesized, which requires considerably more FPGA resources. In \verb|CFU_V8|, 4 port memory with a width of 8 bits is replaced with 1 port memory with a width of 32 bits. This decreased FPGA resource utilization dramatically but made the accelerator a bit slower compared to \verb|CFU_V7| -- 4\% in simulation. The final design's functional diagram is depicted in Figure~\ref{fig:cfu_v8_functional_diagram}, and the state machine in Figure~\ref{fig:cfu_v8_state_machine}.
+
+\begin{figure}[h!]
+\centering
+\caption{ CFU\_V8.0 Functional diagram }
+\includesvg[width=1.0\textwidth]{graphic/cfu_v8_6.svg}
+\label{fig:cfu_v8_functional_diagram}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\caption{ CFU\_V8.0 State machine }
+\includesvg[width=0.6\textwidth]{graphic/State_machine.svg}
+\label{fig:cfu_v8_state_machine}
+\end{figure}
+
+
+\section{Results}
+
+
+\subsection{Computations per cycle}
+As mentioned above, the computation stage is pipelined. It can be configured how many multiply-accumulate operations are conducted during one cycle. Unfortunately, speeding up is not linear, as shown in Figure~\ref{fig:cfu_cycles_computation}. The reason is probably data copying, which makes the problem more I/O bound as the speed of accelerator computation grows. 
+
+\begin{figure}[h!]
+    \begin{center}
+    \scalebox{1.0}{
+        \input{graphic/cycle_bars_computation_per_cycle.pgf}
+    }
+    \end{center}
+    \caption{Scaling of CFU V8.0 -- multiply-accelerate per clock cycle}
+    \label{fig:cfu_cycles_computation}
+\end{figure}
+
+\subsection{Resource utilization} \label{resource_utilization}
+The main resources of Arty A7-100T are Lookup Tables (LUTs), Flip-Flops (FFs), BRAM -- block RAM, LUT RAM, and DSP blocks -- Digital Signal Processing block, as shown in Fig.~\ref{fig:fpga_diagram}. Lookup Table is a core part of any FPGA and is basically SRAM combined with a multiplexer that can be programmed to implement any boolean function. Flip-Flops are building blocks of any asynchronous logic since they allow the design to store state. LUT RAM -- a way to add more memory to FPGA design by utilizing SRAM that is used for LUTs programming. Finally, DSP -- is a block that can implement multiply, multiply-add, and multiply-accumulate functions. 
+
+\begin{figure}[h!]
+    \begin{center}
+    \scalebox{0.8}{
+        \input{graphic/resource_utilization.pgf}
+    }
+    \end{center}
+    \caption{Resource utilization, \%.}
+    \label{fig:resource_utilization}
+\end{figure}
+
+As expected, LUT usage and DSP usage grow with the scaling of \verb|CFU_V8.0|. Since most operations in convolution are multiply-accumulate, DSP utilization is growing quicker than other resources. Clear outlier are \verb|CFU_V6.1| and \verb|CFU_V7.0|. As mentioned in~\ref{cfu_v6}, the reason is writing 4 values simultaneously to the input and filter buffers. This requires 4-port memory, which is resource intensive design. Plenty of available resources are left, leaving much room for future improvements. 
+
+\subsection{Power consumption}
+Figure~\ref{fig:cfu_power_consumption} depicts different CFU versions of power consumption in Watts. Different designs consume different amounts of power. Clearly, there is a correlation between the complexity of CFU design and power consumption. Just like resource utilization subsection~\ref{resource_utilization}, \verb|CFU_V6.1| and \verb|CFU_V7.0| are outliers due to non-optimal block RAM utilization.
+
+\begin{figure}[h!]
+    \begin{center}
+    \scalebox{0.8}{
+        \input{graphic/power_consumption.pgf}
+    }
+    \end{center}
+    \caption{Power consumption of different CFU versions.}
+    \label{fig:cfu_power_consumption}
+\end{figure}
+
+\begin{figure}[h!]
+    \begin{center}
+     \scalebox{0.8}{
+        \input{graphic/cycle_bars_evolution.pgf}
+     }
+    \end{center}
+    \caption{Evolution of CFU accelerator -- Cycles per inference of CNN\_1.}
+    \label{fig:cfu_cycles_evolution}
+\end{figure}
+
+
+\subsection{Speedup}
+Software optimization can give a noticeable inference time speedup. Figure~\ref{fig:software_optimization} shows that quantization gives a huge performance boost (x8 in hardware and x10.3 in simulation). Other software optimizations of the quantized model gave an additional x1.53 speed up for hardware inference. 
+
+The iterative development approach was chosen to implement the CFU accelerator for the CNN model. Figure~\ref{fig:cfu_cycles_evolution} depicts progress in terms of clock cycles, and Figure~\ref{fig:cfu_inference_time} depicts progress in inference time. The system clock was 30MHz when calculating inference time in seconds. Best CFU accelerates model inference 24 times in the simulator and 18.5 times in hardware in terms of clock cycles, compared to the original quantized model. If compared with an original model without quantization, then the speed up is x148 times. Inference time was reduced from 200.66s / 24.94s (without/with quantization) to 1.35s.
+
+
+\begin{figure}[h!]
+    \begin{center}
+    \scalebox{1.0}{
+        \input{graphic/inference_time.pgf}
+    }
+    \end{center}
+    \caption{CNN\_1 Inference time with different\\''ORIG'' stands for original, ''SIMP'' for simplified convolution code.}
+    \label{fig:cfu_inference_time}
+\end{figure}
+
+
+
+% Neglecting some details, final accelerated convolution works in the following way:
+% \begin{lstlisting}[
+%     basicstyle=\small\ttfamily, 
+%     tabsize=4, 
+%     numbers=left, 
+%     numberstyle=\tiny\color{black},
+%     caption={Convolution procedure with CFU\_V8.0}
+%     ]
+% Configure CFU with convolution parameters
+% For each output channel:
+%     Copy filter of size (filter_width x input_channels) to filter buffer
+%     Copy input slice (filter_width x input_channels) to input buffer
+%     Reconfigure quantization parameters    
+%     For each output x:
+%         Start convolution of kernel buffer and input slice
+%         Copy the next input row to the input buffer
+%         Wait for result
+%         Save the result to the output array
+%         Update ring buffer pointer
+        
+% \end{lstlisting}
+
+\todo{
+- (maybe) describe experiments with CPU
+}
+
+% \subsection{Final accelerator overview}
+
+% \todo{
+% - Go over 
+% }
+
+% \subsection{}
+
+% \subsection{}

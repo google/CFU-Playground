@@ -17,7 +17,7 @@
 export DEFINES :=
 
 # Uncomment this line to use software defined CFU functions in software_cfu.cc
-#DEFINES += CFU_SOFTWARE_DEFINED
+# DEFINES += CFU_SOFTWARE_DEFINED
 
 # Uncomment this line to skip debug code (large effect on performance)
 DEFINES += NDEBUG
@@ -29,16 +29,18 @@ DEFINES += NPROFILE
 # Uncomment to include specified model in built binary
 # DEFINES += INCLUDE_MODEL_PDTI8
 DEFINES += INCLUDE_MODEL_SIMC_3_MIXED_V2
+DEFINES += INCLUDE_MODEL_SIMC_3_MIXED_V2_NO_QUANT
 
 # Uncomment to include all TFLM examples (pdti8, micro_speech, magic_wand)
 #DEFINES += INCLUDE_ALL_TFLM_EXAMPLES
 
 export EXTRA_LITEX_ARGS
 EXTRA_LITEX_ARGS += --variant=a7-100
-EXTRA_LITEX_ARGS += --sys-clk-freq=40000000
+EXTRA_LITEX_ARGS += --sys-clk-freq=30000000
 
 TARGET=digilent_arty
-USE_SYMBIFLOW=1
+# USE_SYMBIFLOW=1
+USE_VIVADO=1
 BUILD_JOBS=16
 
 # Uncomment this line to include the ASCII animated donut demo.

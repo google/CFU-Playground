@@ -1,0 +1,113 @@
+%----------------------------------------------------------------------------------------
+% Appendix B
+%----------------------------------------------------------------------------------------
+\chapter{} \label{Appendix_B}
+
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{| c  c  c  c  c  c |} 
+ \hline \\[-1em]
+ Label & Filter Size & Avg Acc & Max Acc & Avg Acc SNR>0 & n\_parameters \\ [1ex]
+    CNN\_0 & 3 & 55.6\% & 85.0\% & 83.5\% & 147K \\ [1ex]
+    CNN\_1 & 8 & 57.6\% & 86.2\% & 84.9\% & 386K \\ [1ex]
+    CNN\_2 & 17 & 57.8\% & 86.2\% & 84.9\% & 815K \\ [1ex]
+    CNN\_3 & 33 & 57.5\% & 85.8\% & 84.2\% & 1578K \\ [1ex]
+    CNN\_4 & 65 & 53.7\% & 79.9\% & 77.7\% & 3104K \\ [1ex]
+    % CNN\_5 & 55.1\% & 82.6\% & 80.8\% & 65K \\ [1ex]
+    % CNN\_6 & 56.4\% & 84.9\% & 83.3\% & 130K \\ [1ex]
+    % CNN\_7 & 58.2\% & 86.2\% & 85.4\% & 991K \\ [1ex]
+    % CNN\_8 & 51.9\% & 79.6\% & 76.5\% & 38K \\ [1ex]
+    % CNN\_9 & 59.0\% & 87.5\% & 86.2\% & 1835K \\ [1ex]
+ % CNN\_0 & 100\% & 100\% & 100\% & 100 \\ [1ex]
+ % CNN\_1 & 100\% & 100\% & 100\% & 100\\ [1ex]
+ \hline
+\end{tabular}
+\caption{CNN: Filter size}
+\label{table:cnn_filter_size}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{| c  c  c  c  c  c |} 
+ \hline \\[-1em]
+ Label & Output Channels & Avg Acc & Max Acc & Avg Acc SNR>0 & n\_parameters \\ [1ex]  \\[-1em]
+    CNN\_5 & \makecell{[16, 16, 32, \\ 32, 64, 64]} & 55.6\% & 82.6\% & 80.8\% & 65K \\ [1ex]  \\[-1em]
+    CNN\_6 & \makecell{[32, 32, 48, \\ 64, 64, 96]} & 56.4\% & 84.9\% & 83.3\% & 130K \\ [1ex]  \\[-1em]
+    CNN\_1 & \makecell{[32, 48, 64, \\ 96, 128, 192]} & 57.6\% & 86.2\% & 84.9\% & 386K \\ [1ex]  \\[-1em]
+    CNN\_7 & \makecell{[64, 64, 128, \\ 192, 192, 256]} & 58.2\% & 86.2\% & 85.4\% & 991K \\ [1ex]
+ \hline
+\end{tabular}
+\caption{CNN: Model width}
+\label{table:cnn_model_width}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{| c  c  c  c  c  c |} 
+ \hline \\[-1em]
+ Label & Output Channels & Avg Acc & Max Acc & Avg Acc SNR>0 & n\_parameters \\ [1ex]
+    CNN\_8 & [32, 48, 64] & 51.9\% & 79.6\% & 76.5\% & 38K \\ [1ex]
+    CNN\_1 & \makecell{[32, 48, 64, \\ 96, 128, 192]} & 57.6\% & 86.2\% & 84.9\% & 386K \\ [1ex]
+    CNN\_9 & \makecell{[32, 48, 64, 96, \\ 128, 192, 256, 512]} & 59.0\% & 87.5\% & 86.2\% & 1835K \\ [1ex]
+\hline
+\end{tabular}
+\caption{CNN: Model depth}
+\label{table:cnn_model_depth}
+\end{table}
+
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{| c  c  c  c  c  c |} 
+ \hline \\[-1em]
+ Label & Filter Size & Avg Acc & Max Acc & Avg Acc SNR>0 & n\_parameters \\ [1ex]  \\[-1em]
+    ENC\_0 & 3 & 57.6\% & 88.1\% & 86.9\% & 68.0K \\ [1ex]
+    ENC\_1 & 9 & 60.6\% & 90.2\% & 89.7\% & 69K \\ [1ex]
+    ENC\_2 & 17 & 60.7\% & 90.6\% & 89.3\% & 69K \\ [1ex]
+    ENC\_3 & 33 & 61.3\% & 91.3\% & 89.9\% & 70K \\ [1ex]
+    ENC\_4 & 65 & 61.2\% & 90.5\% & 89.9\% & 72K \\ [1ex]
+    
+    % ENC\_5 & 60.0\% & 89.1\% & 88.0\% & 43.0K \\ [1ex]
+    % ENC\_6 & 60.6\% & 91.2\% & 89.7\% & 94.0K \\ [1ex]
+    % ENC\_7 & 60.4\% & 90.9\% & 89.3\% & 120.0K \\ [1ex]
+    % ENC\_8 & 60.9\% & 91.0\% & 89.9\% & 136.0K \\ [1ex]
+    % ENC\_9 & 61.1\% & 91.8\% & 90.3\% & 270.0K \\ [1ex]
+    % ENC\_10 & 60.7\% & 91.7\% & 90.1\% & 537.0K \\ [1ex]
+\hline
+\end{tabular}
+\caption{Encoder: Filter size}
+\label{table:encoder_filter_size}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{| c  c  c  c  c  c |} 
+ \hline \\[-1em]
+ Label & Encoder Depth & Avg Acc & Max Acc & Avg Acc SNR>0 & n\_parameters \\ [1ex]  \\[-1em]    
+    ENC\_5 & 2 & 60.0\% & 89.1\% & 88.0\% & 43K \\ [1ex]
+    ENC\_1 & 4 & 60.6\% & 90.2\% & 89.7\% & 69K \\ [1ex]
+    ENC\_6 & 6 & 60.6\% & 91.2\% & 89.7\% & 94K \\ [1ex]
+    ENC\_7 & 8 & 60.4\% & 90.9\% & 89.3\% & 120K \\ [1ex]
+\hline
+\end{tabular}
+\caption{Encoder: Encoder depth}
+\label{table:encoder_encoder_depth}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{| c  c  c  c  c  c |} 
+ \hline \\[-1em]
+ Label & Encoder width & Avg Acc & Max Acc & Avg Acc SNR>0 & n\_parameters \\ [1ex]  \\[-1em]
+    ENC\_1 & 32 & 60.6\% & 90.2\% & 89.7\% & 69K \\ [1ex]
+    ENC\_8 & 64 & 60.9\% & 91.0\% & 89.9\% & 136K \\ [1ex]
+    ENC\_9 & 128 & 61.1\% & 91.8\% & 90.3\% & 270K \\ [1ex]
+    ENC\_10 & 256 & 60.7\% & 91.7\% & 90.1\% & 537K \\ [1ex]
+\hline
+\end{tabular}
+\caption{Encoder: Encoder width}
+\label{table:encoder_width}
+\end{table}
+
+
