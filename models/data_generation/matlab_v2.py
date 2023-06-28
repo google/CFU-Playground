@@ -134,7 +134,7 @@ def preprocess_raw_data(samples: np.ndarray, model_dtype=np.float32) -> np.ndarr
 
 
 def load_data_simc_v2(
-    classes, path=Path("train_data"), model_dtype=np.float32, frames_per_mod=-1
+    classes, path=Path("train_data"), model_dtype=np.float32, frames_per_mod=-1, *args, **kwargs
 ) -> Tuple[np.ndarray, np.ndarray]:
     before = time.time()
     # train_data = {}
