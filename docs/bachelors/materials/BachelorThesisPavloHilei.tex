@@ -1,0 +1,433 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Bachelor/Master Thesis 
+% LaTeX Template
+% Version 2.5 (27/8/17)
+%
+% This template was downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Version 2.x major modifications by:
+% Vel (vel@latextemplates.com)
+%
+% This template is based on a template by:
+% Steve Gunn (http://users.ecs.soton.ac.uk/srg/softwaretools/document/templates/)
+% Sunil Patel (http://www.sunilpatel.co.uk/thesis-template/)
+%
+% Template license:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[
+11pt, % The default document font size, options: 10pt, 11pt, 12pt
+oneside, % Two side (alternating margins) for binding by default, uncomment to switch to one side
+english, % ngerman for German
+singlespacing, % Single line spacing, alternatives: onehalfspacing or doublespacing
+%draft, % Uncomment to enable draft mode (no pictures, no links, overfull hboxes indicated)
+%nolistspacing, % If the document is onehalfspacing or doublespacing, uncomment this to set spacing in lists to single
+%liststotoc, % Uncomment to add the list of figures/tables/etc to the table of contents
+%toctotoc, % Uncomment to add the main table of contents to the table of contents
+%parskip, % Uncomment to add space between paragraphs
+%nohyperref, % Uncomment to not load the hyperref package
+headsepline, % Uncomment to get a line under the header
+%chapterinoneline, % Uncomment to place the chapter title next to the number on one line
+%consistentlayout, % Uncomment to change the layout of the declaration, abstract and acknowledgements pages to match the default layout
+]{BachelorMasterThesis} % The class file specifying the document structure
+
+\usepackage[utf8]{inputenc} % Required for inputting international characters
+\usepackage[T1]{fontenc} % Output font encoding for international characters
+\usepackage{mathpazo} % Use the Palatino font by default
+% \usepackage[backend=bibtex,style=authoryear,natbib=true]{biblatex} % Use the bibtex backend with the authoryear citation style (which resembles APA)
+% \usepackage[backend=bibtex,style=numeric,natbib=true]{biblatex} % Use the bibtex backend with the authoryear citation style (which resembles APA)
+\usepackage[backend=biber,style=numeric,natbib=true]{biblatex} % Use the bibtex backend with the authoryear citation style (which resembles APA)
+\usepackage{makecell}
+\usepackage{hyperref}
+\usepackage{listings}
+% \usepackage{subfig}
+\usepackage{svg}
+\usepackage{wrapfig}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{cleveref}
+
+% listings configuration
+\definecolor{vgreen}{RGB}{104,180,104}
+\definecolor{vblue}{RGB}{49,49,255}
+\definecolor{vorange}{RGB}{255,143,102}
+
+\lstdefinestyle{verilog-style}
+{
+    language=Verilog,
+    basicstyle=\small\ttfamily,
+    keywordstyle=\color{vblue},
+    identifierstyle=\color{black},
+    commentstyle=\color{vgreen},
+    numbers=left,
+    numberstyle=\tiny\color{black},
+    numbersep=10pt,
+    tabsize=8,
+    literate=*{:}{{\textcolor{black}{:}}}1
+}
+
+\newcommand\colorIndex[1]{[\textcolor{vorange}{#1}]}
+\lstset{
+    literate={~} {$\sim$}{1}
+}
+
+
+\addbibresource{bibliography.bib} % The filename of the bibliography
+
+\usepackage[autostyle=true]{csquotes} % Required to generate language-dependent quotes in the bibliography
+% \usepackage{graphicx}
+
+% \usepackage{xcolor}
+\graphicspath{ {./graphic/} }
+
+\newcommand{\hidden}[1]{}
+\newcommand{\todo}[1]{}
+
+%----------------------------------------------------------------------------------------
+%	MARGIN SETTINGS
+%----------------------------------------------------------------------------------------
+
+\geometry{
+	paper=a4paper, % Change to letterpaper for US letter
+	inner=2.5cm, % Inner margin
+	outer=3.8cm, % Outer margin
+	bindingoffset=.5cm, % Binding offset
+	top=1.5cm, % Top margin
+	bottom=1.5cm, % Bottom margin
+	%showframe, % Uncomment to show how the type block is set on the page
+}
+
+%----------------------------------------------------------------------------------------
+%	THESIS INFORMATION
+%----------------------------------------------------------------------------------------
+
+\thesistitle{Efficient RISC-V SIMD extension for AI inference acceleration} % Your thesis title, this is used in the title and abstract, print it elsewhere with \ttitle
+\supervisor{Oleg \textsc{Farenyuk}} % Your supervisor's name, this is used in the title page, print it elsewhere with \supname
+\examiner{} % Your examiner's name, this is not currently used anywhere in the template, print it elsewhere with \examname
+\degree{Bachelor of Science} % Your degree name, this is used in the title page and abstract, print it elsewhere with \degreename
+\author{Pavlo \textsc{Hilei}} % Your name, this is used in the title page and abstract, print it elsewhere with \authorname
+\addresses{} % Your address, this is not currently used anywhere in the template, print it elsewhere with \addressname
+
+\subject{Computer Science} % Your subject area, this is not currently used anywhere in the template, print it elsewhere with \subjectname
+\keywords{} % Keywords for your thesis, this is not currently used anywhere in the template, print it elsewhere with \keywordnames
+\university{\href{http://www.ucu.edu.ua}{Ukrainian Catholic University}} % Your university's name and URL, this is used in the title page and abstract, print it elsewhere with \univname
+\department{\href{http://apps.ucu.edu.ua}{Faculty of Applied Sciences}} % Your department's name and URL, this is used in the title page and abstract, print it elsewhere with \deptname
+\group{\href{http://apps.ucu.edu.ua}{Department of Computer Sciences and Information Technologies}} % Your research group's name and URL, this is used in the title page, print it elsewhere with \groupname
+\faculty{\href{http://apps.ucu.edu.ua}{}} % Your faculty's name and URL, this is used in the title page and abstract, print it elsewhere with \facname
+
+\AtBeginDocument{
+\hypersetup{pdftitle=\ttitle} % Set the PDF's title to your title
+\hypersetup{pdfauthor=\authorname} % Set the PDF's author to your name
+\hypersetup{pdfkeywords=\keywordnames} % Set the PDF's keywords to your keywords
+}
+
+\begin{document}
+
+\frontmatter % Use roman page numbering style (i, ii, iii, iv...) for the pre-content pages
+
+\pagestyle{plain} % Default to the plain heading style until the thesis style is called for the body content
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\begin{titlepage}
+\begin{center}
+
+\vspace*{.03\textheight}
+{\scshape\LARGE \univname\par}\vspace{1.5cm} % University name
+\textsc{\Large Bachelor Thesis}\\[0.5cm] % Thesis type
+
+\HRule \\[0.4cm] % Horizontal line
+{\huge \bfseries \ttitle\par}\vspace{0.4cm} % Thesis title
+\HRule \\[1.5cm] % Horizontal line
+ 
+\begin{minipage}[t]{0.4\textwidth}
+\begin{flushleft} \large
+\emph{Author:}\\
+{\authorname} % Author name - remove the \href bracket to remove the link
+\end{flushleft}
+\end{minipage}
+\begin{minipage}[t]{0.4\textwidth}
+\begin{flushright} \large
+\emph{Supervisor:} \\
+{\supname} % Supervisor name - remove the \href bracket to remove the link  
+\end{flushright}
+\end{minipage}\\[3cm]
+ 
+\vfill
+
+\large \textit{A thesis submitted in fulfillment of the requirements\\ for the degree of \degreename}\\[0.3cm] % University requirement text
+\textit{in the}\\[0.4cm]
+\groupname\\\deptname\\[2cm] % Research group name and department name
+ 
+\vfill
+\includegraphics[height=5cm]{UCU-Apps.png} % University/department logo - uncomment to place it
+
+\vfill
+{\large Lviv 2023}\\[4cm] % Date
+ 
+\vfill
+\end{center}
+\end{titlepage}
+
+%----------------------------------------------------------------------------------------
+%	DECLARATION PAGE
+%----------------------------------------------------------------------------------------
+
+\begin{declaration}
+\addchaptertocentry{\authorshipname} % Add the declaration to the table of contents
+\noindent I, \authorname, declare that this thesis titled, \enquote{\ttitle} and the work presented in it are my own. I confirm that:
+
+\begin{itemize} 
+\item This work was done wholly or mainly while in candidature for a research degree at this University.
+\item Where any part of this thesis has previously been submitted for a degree or any other qualification at this University or any other institution, this has been clearly stated.
+\item Where I have consulted the published work of others, this is always clearly attributed.
+\item Where I have quoted from the work of others, the source is always given. With the exception of such quotations, this thesis is entirely my own work.
+\item I have acknowledged all main sources of help.
+\item Where the thesis is based on work done by myself jointly with others, I have made clear exactly what was done by others and what I have contributed myself.\\
+\end{itemize}
+ 
+\noindent Signed:\\
+\rule[0.5em]{25em}{0.5pt} % This prints a line for the signature
+ 
+\noindent Date:\\
+\rule[0.5em]{25em}{0.5pt} % This prints a line to write the date
+\end{declaration}
+
+\cleardoublepage
+
+%----------------------------------------------------------------------------------------
+%	QUOTATION PAGE
+%----------------------------------------------------------------------------------------
+
+\vspace*{0.2\textheight}
+
+\noindent\enquote{\itshape  Okay, Houston... we’ve had a problem here.}\bigbreak
+
+\hfill Jack Swigert
+
+%----------------------------------------------------------------------------------------
+%	ABSTRACT PAGE
+%----------------------------------------------------------------------------------------
+
+\begin{abstract}
+\addchaptertocentry{\abstractname} % Add the abstract to the table of contents
+
+Machine learning has become a popular approach for solving complex problems; however, deploying deep learning models in real-life applications poses challenges due to their computational requirements. Edge computing offers a promising solution, but running large models on resource-constrained embedded devices often necessitates software and hardware optimizations. In this thesis, we focus on hardware acceleration using a Custom Function Unit (CFU) extension for a RISC-V processor. Through an iterative development process, we design an accelerator for the convolutional layer and evaluate it in simulation and hardware implementation. We address the automatic modulation classification problem and develop deep neural networks to solve this task. Furthermore, we apply the developed CFU to accelerate the inference of a convolutional neural network (CNN) used for wireless signal modulation classification. We achieve acceleration of x148, compared to the original model, and x18.5, compared to the original model with applied quantization. By combining software and hardware optimizations, our research contributes to enabling the efficient deployment of deep learning models on edge devices.
+
+
+
+\end{abstract}
+
+%----------------------------------------------------------------------------------------
+%	ACKNOWLEDGEMENTS
+%----------------------------------------------------------------------------------------
+
+\begin{acknowledgements}
+\addchaptertocentry{\acknowledgementname} % Add the acknowledgements to the table of contents
+I would like to express my heartfelt gratitude to my supervisor Oleg Farenyuk for his invaluable guidance, unwavering support, and dedication throughout the entire duration of this project and my years of study.
+
+A special word of thanks goes to Ievgen Korotkyi, Associate Professor at the Department of Electronic Computational Equipment Design, Igor Sikorsky Kyiv Polytechnic Institute. His mentorship, insightful discussions, and assistance in overcoming various challenges have been extremely valuable to the development and execution of this project.
+
+I would also like to extend my appreciation to the Ukrainian Catholic University and all the academic staff who have been instrumental in my education, providing me with a nurturing environment and the necessary resources to enhance my learning and professional growth.
+
+Lastly, I am deeply grateful to my family and friends I met at UCU. Their support and encouragement have contributed to my personal and academic journey.
+
+\end{acknowledgements}
+
+%----------------------------------------------------------------------------------------
+%	LIST OF CONTENTS/FIGURES/TABLES PAGES
+%----------------------------------------------------------------------------------------
+
+\tableofcontents % Prints the main table of contents
+
+\listoffigures % Prints the list of figures
+
+\listoftables % Prints the list of tables
+
+%----------------------------------------------------------------------------------------
+%	ABBREVIATIONS
+%----------------------------------------------------------------------------------------
+
+\begin{abbreviations}{ll} % Include a list of abbreviations (a table of two columns)
+
+% \textbf{LAH} & \textbf{L}ist \textbf{A}bbreviations \textbf{H}ere\\
+% \textbf{WSF} & \textbf{W}hat (it) \textbf{S}tands \textbf{F}or\\
+
+\textbf{AI} & \textbf{A}rtificial \textbf{I}ntelligence\\
+\textbf{AM} & \textbf{A}mplitude \textbf{M}odulation\\
+\textbf{AMR} & \textbf{A}utomatic \textbf{M}odulation \textbf{R}ecognition\\
+\textbf{ASIC} & \textbf{A}pplication \textbf{S}pecific \textbf{I}ntagrated \textbf{C}ircuit\\
+\textbf{CFU} & \textbf{C}ustom \textbf{F}unction \textbf{U}nit\\
+\textbf{CLB} & \textbf{C}onfigurable \textbf{L}ogic \textbf{B}lock\\
+\textbf{CLB} & \textbf{C}onfigurable \textbf{L}ogic \textbf{B}lock \\
+\textbf{CLDNN} & \textbf{C}onvolutional \textbf{L}ong \textbf{S}hort-term \textbf{D}eep \textbf{N}eural \textbf{N}etwork\\
+\textbf{CNN} & \textbf{C}onvolutional \textbf{N}eural \textbf{N}etwork\\
+\textbf{CPU} & \textbf{C}entral \textbf{P}rocessing \textbf{U}nit\\
+\textbf{DNN} & \textbf{D}eep \textbf{N}eural \textbf{N}etwork\\
+\textbf{FM} & \textbf{F}requency \textbf{M}odulation\\
+\textbf{FPGA} & \textbf{F}ield \textbf{P}rogrammable \textbf{G}ate \textbf{A}rray\\
+\textbf{FSK} & \textbf{F}requency \textbf{S}hift \textbf{K}eying\\
+\textbf{FSK} & \textbf{F}requency \textbf{S}hift \textbf{K}eying\\
+\textbf{GPU} & \textbf{G}raphics \textbf{P}rocessing \textbf{U}nit\\
+\textbf{HDL} & \textbf{H}ardware \textbf{D}escription \textbf{L}anguage\\
+\textbf{I/O} & \textbf{I}nput/\textbf{O}utput\\
+\textbf{IQ} & \textbf{I}n-phase and \textbf{Q}uadrature \\
+\textbf{ISA} & \textbf{I}nstruction \textbf{S}et \textbf{A}rchitecture\\
+\textbf{IoT} & \textbf{I}nternet \textbf{o}f \textbf{T}hings\\
+\textbf{LDA} & \textbf{L}inear \textbf{D}iscriminant \textbf{A}nalysis\\
+\textbf{LSTM} &  \textbf{L}ong \textbf{S}hort-\textbf{t}erm \textbf{M}emory\\
+\textbf{LUT} & \textbf{L}ook\textbf{U}p \textbf{T}able\\
+\textbf{LUT} & \textbf{L}ookup \textbf{T}able \\
+\textbf{ML} & \textbf{M}achine \textbf{L}earning\\
+\textbf{NLP} & \textbf{N}atural \textbf{L}anguage \textbf{P}rocessing\\
+\textbf{NPU} & \textbf{N}eural \textbf{P}rocessing \textbf{U}nit \textbf{A}rray\\
+\textbf{PE} & \textbf{P}rocessor \textbf{E}ngine\\
+\textbf{PM} & \textbf{P}hase \textbf{M}odulation\\
+\textbf{PSK} & \textbf{P}hase \textbf{S}hift \textbf{K}eying\\
+\textbf{QAM} & \textbf{Q}uadrature \textbf{A}mplitude \textbf{M}odulation\\
+\textbf{RNN} & \textbf{R}ecurrent \textbf{N}eural \textbf{N}etwork\\
+\textbf{SNR} & \textbf{S}ignal-to-\textbf{n}oise \textbf{r}atio\\
+\textbf{SVD} & \textbf{S}ingular \textbf{V}alue \textbf{D}ecomposition\\
+\textbf{SVM} & \textbf{S}upport \textbf{V}ector \textbf{M}achines\\
+\textbf{SoC} & \textbf{S}ystem \textbf{o}n \textbf{C}hip\\
+\textbf{TF} & \textbf{T}ensor\textbf{f}low\\
+\textbf{TFLM} & \textbf{T}ensor\textbf{f}low \textbf{L}ite \textbf{M}icro\\
+\textbf{TPU} & \textbf{T}ensor \textbf{P}rocessing \textbf{U}nit \textbf{A}rray\\
+
+% \textbf{CPU} & \textbf{G}raphics \textbf{P}rocessing \textbf{U}nit\\
+% \textbf{CFU} & \textbf{C}ustom \textbf{F}unction \textbf{U}nit\\
+% \textbf{ML} & \textbf{M}achine \textbf{L}earning\\
+% \textbf{AI} & \textbf{A}rtificial \textbf{I}ntelligence\\
+% \textbf{TFLM} & \textbf{T}ensor\textbf{f}low \textbf{L}ite \textbf{M}icro\\
+% \textbf{TF} & \textbf{T}ensor\textbf{f}low\\
+% \textbf{IoT} & \textbf{I}nternet \textbf{o}f \textbf{T}hings\\
+% \textbf{AMR} & \textbf{A}utomatic \textbf{M}odulation \textbf{R}ecognition\\
+% \textbf{IQ} & \textbf{I}n-phase and \textbf{Q}uadrature \\
+
+% \textbf{FPGA} & \textbf{F}ield \textbf{P}rogrammable \textbf{G}ate \textbf{A}rray\\
+% \textbf{LUT} & \textbf{L}ook\textbf{U}p \textbf{T}able\\
+% \textbf{CLB} & \textbf{C}onfigurable \textbf{L}ogic \textbf{B}lock\\
+% \textbf{HDL} & \textbf{H}ardware \textbf{D}escription \textbf{L}anguage\\
+% \textbf{ISA} & \textbf{I}nstruction \textbf{S}et \textbf{A}rchitecture\\
+% \textbf{CLB} & \textbf{C}onfigurable \textbf{L}ogic \textbf{B}lock \\
+% \textbf{I/O} & \textbf{I}nput/\textbf{O}utput\\
+% \textbf{LUT} & \textbf{L}ookup \textbf{T}able \\
+% \textbf{SoC} & \textbf{S}ystem \textbf{o}n \textbf{C}hip\\
+
+
+% \textbf{TPU} & \textbf{T}ensor \textbf{P}rocessing \textbf{U}nit \textbf{A}rray\\
+% \textbf{GPU} & \textbf{C}entral \textbf{P}rocessing \textbf{U}nit\\
+% \textbf{PE} & \textbf{P}rocessor \textbf{E}ngine\\
+% \textbf{NPU} & \textbf{N}eural \textbf{P}rocessing \textbf{U}nit \textbf{A}rray\\
+% \textbf{ASIC} & \textbf{A}pplication \textbf{S}pecific \textbf{I}ntagrated \textbf{C}ircuit\\
+
+
+% \textbf{CNN} & \textbf{C}onvolutional \textbf{N}eural \textbf{N}etwork\\
+% \textbf{DNN} & \textbf{D}eep \textbf{N}eural \textbf{N}etwork\\
+% \textbf{RNN} & \textbf{R}ecurrent \textbf{N}eural \textbf{N}etwork\\
+% \textbf{LSTM} &  \textbf{L}ong \textbf{S}hort-\textbf{t}erm \textbf{M}emory\\
+% \textbf{CLDNN} & \textbf{C}onvolutional \textbf{L}ong \textbf{S}hort-term \textbf{D}eep \textbf{N}eural \textbf{N}etwork\\
+% \textbf{NLP} & \textbf{N}atural \textbf{L}anguage \textbf{P}rocessing\\
+
+% \textbf{AM} & \textbf{A}mplitude \textbf{M}odulation\\
+% \textbf{FM} & \textbf{F}requency \textbf{M}odulation\\
+% \textbf{PM} & \textbf{P}hase \textbf{M}odulation\\
+% \textbf{FSK} & \textbf{F}requency \textbf{S}hift \textbf{K}eying\\
+% \textbf{PSK} & \textbf{P}hase \textbf{S}hift \textbf{K}eying\\
+% \textbf{FSK} & \textbf{F}requency \textbf{S}hift \textbf{K}eying\\
+% \textbf{QAM} & \textbf{Q}uadrature \textbf{A}mplitude \textbf{M}odulation\\
+
+% \textbf{LDA} & \textbf{L}inear \textbf{D}iscriminant \textbf{A}nalysis\\
+% \textbf{SVD} & \textbf{S}ingular \textbf{V}alue \textbf{D}ecomposition\\
+% \textbf{SVM} & \textbf{S}upport \textbf{V}ector \textbf{M}achines\\
+
+% \textbf{SNR} & \textbf{S}ignal-to-\textbf{n}oise \textbf{r}atio\\
+
+\end{abbreviations}
+
+%----------------------------------------------------------------------------------------
+%	PHYSICAL CONSTANTS/OTHER DEFINITIONS
+%----------------------------------------------------------------------------------------
+
+% \begin{constants}{lr@{${}={}$}l} % The list of physical constants is a three column table
+
+% % The \SI{}{} command is provided by the siunitx package, see its documentation for instructions on how to use it
+
+% Speed of Light & $c_{0}$ & \SI{2.99792458e8}{\meter\per\second} (exact)\\
+% %Constant Name & $Symbol$ & $Constant Value$ with units\\
+
+% \end{constants}
+
+%----------------------------------------------------------------------------------------
+%	SYMBOLS
+%----------------------------------------------------------------------------------------
+
+% \begin{symbols}{lll} % Include a list of Symbols (a three column table)
+
+% $a$ & distance & \si{\meter} \\
+% $P$ & power & \si{\watt} (\si{\joule\per\second}) \\
+% %Symbol & Name & Unit \\
+
+% \addlinespace % Gap to separate the Roman symbols from the Greek
+
+% $\omega$ & angular frequency & \si{\radian} \\
+
+% \end{symbols}
+
+%----------------------------------------------------------------------------------------
+%	DEDICATION
+%----------------------------------------------------------------------------------------
+
+% \dedicatory{For/Dedicated to/To my\ldots} 
+
+%----------------------------------------------------------------------------------------
+%	THESIS CONTENT - CHAPTERS
+%----------------------------------------------------------------------------------------
+
+\mainmatter % Begin numeric (1,2,3...) page numbering
+
+\pagestyle{thesis} % Return the page headers back to the "thesis" style
+
+% Include the chapters of the thesis as separate files from the Chapters folder
+% Uncomment the lines as you write the chapters
+
+\include{Chapters/Chapter1}
+\include{Chapters/Chapter2} 
+\include{Chapters/Chapter3}
+\include{Chapters/Chapter4} 
+\include{Chapters/Chapter5} 
+\include{Chapters/Chapter6} 
+% \include{Chapters/Chapter7} 
+
+%----------------------------------------------------------------------------------------
+%	THESIS CONTENT - APPENDICES
+%----------------------------------------------------------------------------------------
+
+\appendix % Cue to tell LaTeX that the following "chapters" are Appendices
+
+% Include the appendices of the thesis as separate files from the Appendices folder
+% Uncomment the lines as you write the Appendices
+
+\include{Appendices/AppendixA}
+\include{Appendices/AppendixB}
+\include{Appendices/AppendixC}
+\include{Appendices/AppendixD}
+
+%----------------------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+
+\printbibliography[heading=bibintoc]
+
+%----------------------------------------------------------------------------------------
+
+\end{document}  

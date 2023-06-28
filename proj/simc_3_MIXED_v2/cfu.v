@@ -1,60 +1,66 @@
+// `include "cfu_full_v9.v"
+// `include "cfu_full_v111.v"
+
+`include "verilog_src/cfu_v0.sv"
+`include "verilog_src/cfu_v5.sv"
+`include "verilog_src/cfu_v6.sv"
+`include "verilog_src/cfu_v7.sv"
+`include "verilog_src/cfu_v8.sv"
+`include "verilog_src/cfu_v9.sv"
+`include "verilog_src/cfu_v11.sv"
+`include "verilog_src/cfu_v11_1.sv"
+`include "verilog_src/cfu_v11_2.sv"
+`include "verilog_src/cfu_v12.sv"
+`include "verilog_src/cfu_v12_05.sv"
+`include "verilog_src/cfu_v12_1.sv"
+`include "verilog_src/cfu_v12_2.sv"
+`include "verilog_src/cfu_v12_3.sv"
+`include "verilog_src/cfu_v13.sv"
+`include "verilog_src/cfu_v13_2.sv"
+`include "verilog_src/cfu_v14.sv"
+`include "verilog_src/cfu_v14_1.sv"
+
+
 module Cfu (
-  input               cmd_valid,
-  output              cmd_ready,
-  input      [9:0]    cmd_payload_function_id,
-  input      [31:0]   cmd_payload_inputs_0,
-  input      [31:0]   cmd_payload_inputs_1,
-  output reg          rsp_valid,
-  input               rsp_ready,
-  output reg [31:0]   rsp_payload_outputs_0,
-  input               reset,
-  input               clk
+    input              cmd_valid,
+    output             cmd_ready,
+    input       [ 9:0] cmd_payload_function_id,
+    input       [31:0] cmd_payload_inputs_0,
+    input       [31:0] cmd_payload_inputs_1,
+    output reg         rsp_valid,
+    input              rsp_ready,
+    output wire [31:0] rsp_payload_outputs_0,
+    input              reset,
+    input              clk
 );
-  // localparam InputOffset = $signed(9'd128);
-  reg signed [8:0] input_offset = 128;
-  
+  wire output_buffer_valid;
+
   wire [6:0] funct7;
   assign funct7 = cmd_payload_function_id[9:3];
+  // reg wait_reg = 0;
+  wire [31:0] ret;
 
-  // SIMD multiply step:
-  wire signed [15:0] prod_0, prod_1, prod_2, prod_3;
-  assign prod_0 =  ($signed(cmd_payload_inputs_0[7 : 0]) + input_offset)
-                  * $signed(cmd_payload_inputs_1[7 : 0]);
-  assign prod_1 =  ($signed(cmd_payload_inputs_0[15: 8]) + input_offset)
-                  * $signed(cmd_payload_inputs_1[15: 8]);
-  assign prod_2 =  ($signed(cmd_payload_inputs_0[23:16]) + input_offset)
-                  * $signed(cmd_payload_inputs_1[23:16]);
-  assign prod_3 =  ($signed(cmd_payload_inputs_0[31:24]) + input_offset)
-                  * $signed(cmd_payload_inputs_1[31:24]);
-
-  wire signed [31:0] sum_prods;
-  assign sum_prods = prod_0 + prod_1 + prod_2 + prod_3;
+  conv1d CONV_1D (
+      .clk(clk),
+      .en(cmd_valid),
+      .cmd(funct7),
+      .inp0(cmd_payload_inputs_0),
+      .inp1(cmd_payload_inputs_1),
+      .ret(rsp_payload_outputs_0),
+      .output_buffer_valid(output_buffer_valid)
+  );
 
   // Only not ready for a command when we have a response.
   assign cmd_ready = ~rsp_valid;
 
   always @(posedge clk) begin
     if (reset) begin
-      rsp_payload_outputs_0 <= 32'b0;
       rsp_valid <= 1'b0;
     end else if (rsp_valid) begin
       // Waiting to hand off response to CPU.
       rsp_valid <= ~rsp_ready;
     end else if (cmd_valid) begin
-      rsp_valid <= 1'b1;
-      // Accumulate step:
-      if (funct7 == 0) begin
-        rsp_payload_outputs_0 <= rsp_payload_outputs_0 + sum_prods;
-      end else if (funct7 == 1) begin
-        rsp_payload_outputs_0 <= 32'b0;
-      end else if (funct7 == 2) begin
-        input_offset <= cmd_payload_inputs_0;
-      end else begin
-        rsp_payload_outputs_0 <= input_offset;
-      end
-      // rsp_payload_outputs_0 <= |cmd_payload_function_id[9:3]
-      //     ? 32'b0
-      //     : rsp_payload_outputs_0 + sum_prods;
+      rsp_valid <= output_buffer_valid;
     end
   end
 endmodule

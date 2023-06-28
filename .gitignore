@@ -106,3 +106,6 @@ env
 build_Debug
 build_Release
 models/tflite-micro
+.Xil
+models/mixed_v2_-30-30_30k/
+models/mixed_v2_0-30_30k/

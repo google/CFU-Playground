@@ -1,0 +1,288 @@
+%----------------------------------------------------------------------------------------
+%	Classification model
+%----------------------------------------------------------------------------------------
+
+\todo{
+- Make a plot of CPU, GPU speed comparison, size in parameters and Mbytes - CNN_1,9, ENC_3,9
+- Dataset vizualization - PlotTimeDomain, Spectrogram
+- Rerun quantization on better performing Cnn1:mixed_v2 0-30
+- take sources from attention is all you need
+- reevaluate model trained on [0:30] on [-30;30] to show that for worse SNR, they perform worse
+}
+
+\chapter{Classification model} \label{Chapter 4}
+
+\section{Modulation Recognition Method Based on\\ Deep Learning}
+
+As mentioned in Chapter~\ref{Chapter 2}, Automatic Modulation Recognition (AMR) refers to identifying the modulation scheme used to transmit a signal. In other words, given the received signal, the model should classify the modulation scheme used to encode information on a carrier signal. In terms of deep learning, this is a typical supervised classification model. It is very challenging to extract informative features for modulation classification due to noise, interference, fading, and other factors that disrupt the signal. Therefore, deep learning has emerged as a powerful tool in AMR, enabling reliable modulation classification even under challenging noise conditions. 
+
+Numerous model architectures were applied to this problem. The most common architectures were mentioned in Chapter~\ref{Chapter 2}. In this thesis, we develop, fine-tune, and evaluate the convolutional neural network and transformer model. They are compared in terms of accuracy, sensitivity to noise, speed, and number of parameters. 
+
+\section{Dataset}
+
+As mentioned in Chapter~\ref{Chapter 2}, there are different ways to prepare data for classification, like constellation map~\cite{vgg_simc} as 2-dimensional image input to the model, eye diagram as a 2-dimensional image~\cite{eye_diagram_simc}, Time-frequency diagram~\cite{time_freq_diagram_simc}, etc. In this thesis, we will use the IQ sequence to present input for the model. Models are trained on two datasets - RadioML~\cite{cnn_dnn_simc} and Matlab~\cite{matlab_model} dataset. Models are trained and selected on RadioML 2016.10a. Then two best CNNs and two best transformers are trained and compared on RadioML 2016.10a, RadioML 2016.10b, and Matlab dataset.
+
+\subsection{RadioML}
+
+The dataset proposed by~\cite{cnn_dnn_simc} is widely used by different authors for AMR. RadioML 2016.10 data is synthetically generated with GNU Radio. It comprises 11 modulations: Digital: BPSK, QPSK, 8PSK, 16QAM, 64QAM, BFSK, CPFSK, PAM4, and analog: WB-FM, AM-SSB, and AM-DSB. Approximately eight samples per symbol are used, and the sampling rate is \num{1e6} samples/s. Each frame consists of 128 samples. Randomly generated bits are modulated using one of the 11 modulations mentioned before. After that, a pulse-shaping filter (root-raised cosine) is applied. It is crucial to simulate noise factors to get realistic data for model training. The following impairments are applied: 
+\begin{itemize}
+    \item Flat white Gaussian noise caused by thermal noise.
+    \item Timing offset, sample rate offset, carrier frequency offset, and phase difference.
+    \item Multi-path fading - simulation of the environment where the signal can reflect from buildings, vehicles, trees, and other objects. This causes random amplitude, delay, Doppler effect, and interference of signal with itself
+\end{itemize}
+
+There are two variations of the RadioML dataset - RadioML 2016.10a and RadioML 2016.10b. They differ in size, and RadioML 2016.10b doesn't have an ''AM-SSB'' class. 
+
+\subsection{Matlab dataset}
+
+Also, we decided to generate a dataset based on the code provided in the Matlab documentation example of Deep Learning Toolbox~\cite{matlab_model}. Similarly, a square-root raised cosine pulse shaping filter is applied to the modulated signal. Then Rician multi-path channel simulation is used to simulate multi-path fading. Frequency offset, sampling time drift, and Gaussian noise are also added to the signal. The sampling rate is \num{2e5}. Two variations of the Matlab dataset were generated: with SNR in the range [-30:29] and [0:29], to understand the impact of different noise levels in the dataset on model performance. A comparison of RadioML and Matlab datasets can be found in Tab.~\ref{table:datasets}.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{| c | c | c |} 
+ \hline
+ Parameter Name & Parameter Value (RadioML) & Parameter Value (Matlab) \\ %[0.5ex] 
+ \hline
+ % \hline
+ Modulations & \makecell{BPSK, QPSK, 8PSK, 16QAM, \\64QAM, BFSK,  CPFSK, PAM4, \\WB-FM, AM-SSB, AM-DSB} & \makecell{BPSK, QPSK, 8PSK, 16QAM, \\64QAM, PAM4, GFSK, CPFSK, \\B-FM, AM-DSB, AM-SSB} \\
+ & & \\
+ % \hline
+ SNR Range & [-20dB : 18dB : 2dB] & [0/-30dB : 29dB : 1dB] \\
+
+ % \hline
+ Samples per frame & 128 & 1024\\
+ % \hline
+ Sampling frequency & \num{1e6} & \num{2e5}\\
+ % \hline
+ Signal format & In-phase and quadrature(IQ) & In-phase and quadrature(IQ)\\  
+ % \hline
+ Number of frames & 220K (a), 1200K (b) & 330K \\ [1ex] 
+ \hline
+\end{tabular}
+\caption{Datasets comparison}
+\label{table:datasets}
+\end{table}
+
+\section{CNN}
+As mentioned in Chapter~\ref{Chapter 2}, Convolutional Neural Networks (CNNs) are deep neural networks that have shown remarkable performance in many problems. One of the main features of CNNs is their ability to learn hierarchical representations of data. This is achieved by applying convolutional filters to the input data, each capturing increasingly complex patterns~\cite{cnn_intro}. In signal processing, CNNs can extract features from signals, such as the time-varying waveform of a radio signal. The hierarchical nature of CNNs is particularly useful in this context, as it allows the network to learn features at multiple scales, capturing fine and coarse signal details. Filters can detect patterns regardless of their location in the input (shift invariance)~\cite{cnn_radio}.
+    
+Input data has shape (128/1024, 2) -- 128 samples per frame for the RadioML dataset, and 1024 for the Matlab dataset, respectively, each consisting of two numbers -- In-phase and quadrature components. IQ components are interpreted as channels, and the input dimension for the first convolution layer is 128. The model architecture consists of \verb|N| consecutive Convolution layers and a Dense layer at the end for classification. Some of the convolutional layers are followed by Max pooling to reduce the dimensionality of the input representation, making the network more efficient by reducing the number of parameters and computations required~\cite{max_pooling}. Batch Normalization is used after each convolutional layer. It provides several benefits, including increased training speed, reduced sensitivity to the initial weights, and improved generalization performance. Also, it can act as a regularizer, reducing overfitting by adding noise to the activations of each mini-batch~\cite{batch_normalization}. ReLU is used as an activation function between layers. As mentioned in the section \ref{training}, some hyperparameters were tuned. Initial CNN (\verb|CNN_1|) from which other CNNs are derived is depicted in Figure~\ref{fig:cnn_1}.
+% https://github.com/tensorflow/tflite-micro/blob/main/tensorflow/lite/micro/all_ops_resolver.cc
+
+% \subsection{Training}
+
+% \todo{
+% - Explain how the model was trained (number of epochs, batch size, the hardware used, time of training, train val test split, loss function)
+% - Make a training plot of average accuracy, loss function
+% - Explain what hyperparameters were tuned
+% }
+
+% \subsection{Evaluation}
+
+% \todo{
+% - Explain what changes to the architecture make a difference and what doesn't;
+% - Make a table of Average, Best (SNR=18) accuracy to hyperparameters
+% - Make a confusion matrix, and SNR to accuracy of the best model
+% }
+
+\section{Transformer based model}
+
+The transformer neural network architecture has revolutionized the field of NLP~\cite{transformer_nlp_applications}, but it has also been successfully applied in other domains, including signal processing. The transformer neural network architecture consists of an encoder and a decoder, where each layer of the encoder and decoder consists of multi-head attention and fully connected layers. Multi-head attention allows the model to simultaneously attend to different parts of the input signal. This is useful in signal processing since it enables the model to capture complex temporal relationships between signal parts. The transformer architecture also has the benefit of being highly parallelizable~\cite{attention_is_all_you_need}, which makes it well-suited for hardware acceleration.
+
+In this thesis, we use only the encoder part of the transformer, so the transformer model is also referenced as ''encoder'' in this thesis. The reason is that purpose of the encoder is to extract important features from the signal, just like convolutional layers. The encoder layer consists of multi-head attention and a fully connected layer. There are two residual connections connecting multi-head attention output with layer input and output, depicted in Figure~\ref{fig:encoder}. Multiple encoder layers are stacked to extract more features. 
+
+Multi-head attention was proposed in ''Attention is all you need''~\cite{attention_is_all_you_need}. The input sequence is transformed into three smaller vectors: query, key, and value, see Fig.~\ref{fig:multi_head_attention}, by projecting them to lower-dimensional spaces by multiplying with weight matrices. Each query vector is compared to every key vector to obtain a set of attention scores that are scaled and normalized~\ref{fig:scaled_dot_product}. These attention scores are then used to weigh the value vectors. Weighted vectors are concatenated and transformed back to the original dimensionality. In the original paper~\cite{attention_is_all_you_need}, positional embedding is used to encode positional relationships between samples. But, as explained in~\cite{glu_transormer}, there is no need for positional embeddings when working with wireless signals since it already contains location information. 
+
+The following neural network architecture was used: one convolutional layer extracts the feature matrix and increases the channel dimension to \verb|W|. The output of convolutional layers is fed to \verb|N| encoder layers, and their output is fed to a small dense layer to make the classification. Dropout is used as a regularization method. Encoder is depicted in Fig.~\ref{fig:encoder_model}.
+
+\begin{figure}
+     \centering
+     \begin{subfigure}[b]{0.3\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{graphic/scaled-dot.png}
+         \caption{Scaled Dot-Product Attention}
+         \label{fig:scaled_dot_product}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.3\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{graphic/attention.png}
+         \caption{Multi-Head Attention}
+         \label{fig:multi_head_attention}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.3\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{graphic/encoder.png}
+         \caption{Transformer encoder}
+         \label{fig:encoder}
+     \end{subfigure}
+        \caption{Core parts of transformer model~\cite{attention_is_all_you_need}}
+        \label{fig:transformer_core}
+\end{figure}
+
+\section{Training} \label{training}
+
+Models were implemented and trained with the Keras library~\cite{keras} based on the TensorFlow framework. Nvidia GPU (RTX 3070Ti Mobile, Ampere architecture) was used to accelerate training. CNN networks were trained for 16 epochs with a batch size of 256 on RadioML 2016.10a. Transformers were trained for 40 epochs with a batch size of 128 on the same dataset. A smaller dataset subset (RadioML 2016.10a) was used to select the best hyperparameters and RadioML 2016.10b and Matlab were used to train the best models. Adam optimizer with a base learning rate of 0.001 was used as the optimizer algorithm. For models with more parameters, the learning rate has to be lowered. 
+
+For convolutional networks, it was discovered that decreasing the learning rate by a factor of 10 after the 8th epoch showed better convergence of the models. Also, the transformer models tend to converge much slower, and learning rate decay or different optimizer algorithms didn't help to fix that problem. That's why they require much more epochs. The cross-entropy loss function was used for all models in this thesis. 
+
+Tables depicting hyper-parameters tuning~\cref{table:cnn_filter_size,table:cnn_model_depth,table:cnn_model_width,table:encoder_filter_size,table:encoder_encoder_depth,table:encoder_width} have columns ''Avg Acc'', ''Max Acc'', ''Avg Acc SNR>0'', ''n\_parameters'', meaning Average accuracy, Maximum accuracy, Average accuracy for SNR > 0, and the number of parameters respectfully.
+
+\subsection{CNN tuning}
+
+Different hyper-parameters were tested to get the best performance and speed of the network:
+\begin{itemize}
+    \item Filter size -- Table~\ref{table:cnn_filter_size}.
+    \item Model depth -- number of CNN layers -- Table~\ref{table:cnn_model_depth}. The ''Output Channels'' column means the number of output channels on each convolutional layer.
+    \item Model width -- number of channels in CNN layers -- Table~\ref{table:cnn_model_width}.
+\end{itemize}
+
+\subsection{Transformer tuning}
+
+\begin{figure}[t]
+\centering
+\caption{ Transformer Model: Matlab Dataset\\W -- encoder width, N -- encoder depth}
+% \includegraphics[width=0.9\textwidth]{ask.png}
+\includesvg[width=1.0\textwidth]{graphic/transformer.svg}
+\label{fig:encoder_model}
+\end{figure}
+
+The main hyper-parameters that were tried with transformer models are: 
+\begin{itemize}
+    \item Number of encoder layers -- Table~\ref{table:encoder_encoder_depth}.
+    \item Size of the filter of first convolutional layer -- Table~\ref{table:encoder_filter_size}.
+    \item Size of encoder layer (size of one sample vector representation) -- Table~\ref{table:encoder_width}.
+    % \item Size of query, key, value vectors TODO:!
+\end{itemize}
+
+
+\begin{figure}[t]
+\centering
+\caption{ CNN\_1: Matlab Dataset }
+% \includegraphics[width=0.9\textwidth]{ask.png}
+\includesvg[width=1.2\textwidth]{graphic/CNN_1_5.svg}
+\label{fig:cnn_1}
+\end{figure}
+
+\section{Evaluation}
+
+The main metric usually used in AMR is average accuracy. Also, it is very important to understand how the model performs depending on the noise level. Usually, this is shown via signal-to-noise ratio (SNR) to accuracy plot. Another essential factor for model evaluation is accuracy per class. The best CNN and encoder performance can be seen on the confusion matrices in~\cref{fig:confusion_matrix_radioml_16_a,fig:confusion_matrix_radioml_16_b,fig:confusion_matrix_matlab_0_29,fig:confusion_matrix_matlab_-30_29}.
+
+As shown in Tab.~\ref{table:cnn_filter_size}, filter size doesn't influence performance much. But very small or big kernel sizes decrease the model's average accuracy. For CNNs, as expected, the bigger model, the better performance, unlike the encoder, which performs worse when it has depth > 6 and width > 128. From our experiments, we see that CNNs tend to overfit more than encoders.
+
+The model size and inference time are other essential metrics in this thesis's scope. It turns out that the transformer model can achieve noticeably better accuracy than CNN with a much smaller number of parameters. For example, \verb|ENC_3| has $\approx 5.5$ times fewer parameters but has better (3.7\%) average accuracy than \verb|CNN_1|. But, as shown in Tab.~\ref{table:latency_size} that compares CNN and transformer models latency and size, even though the number of parameters of the encoder is much smaller, it is still considerably slower than a corresponding CNN model on both GPU and CPU. Also, the actual size of the models is not proportional to the number of parameters.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{| c  c  c  c  c|} 
+ \hline \\[-1em]
+ Model & Dataset & Latency, CPU &  Size & n\_parameters \\ [1ex]  \\[-1em]  
+ \hline
+    CNN\_1 & RadioML2016.10a & 1.39ms & 1.54Mb & 386K\\ [1ex]
+    ENC\_3 & RadioML2016.10a & 12.56ms & 0.41Mb & 70K\\ [1ex]
+
+\hline
+\end{tabular}
+\caption{Models latency and size.\\Latency calculated on Intel Core I7-12700H.\\Models are converted to TF lite}.
+\label{table:latency_size}
+\end{table}
+
+Tab.~\ref{table:best_models_different_datasets} shows metrics of two best CNNs and two best encoders on different datasets. SNR to the accuracy of models trained on RadioML2010.10a and RadioML2010.10b is shown in~\cref{fig:snr_to_acc_radioML_a,fig:snr_to_acc_radioML_b}. Most models improve average accuracy by 2-6\% when trained on bigger RadioML2010.10b, compared to  RadioML2010.10a. An exception is a \verb|ENC_3|, which actually performed worse on a bigger dataset. CNNs improved more than encoders on bigger datasets. Both facts can be explained by the fact that encoders have a much smaller amount of parameters, so when trained on a bigger dataset that has more variable data, they struggle to learn to extract features from data. This hypothesis is supported by the fact that \verb|ENC_9| has more parameters (270K vs 70K) and improved performance on a bigger dataset, unlike \verb|ENC_3|.
+
+Another observation on the Matlab dataset is that models performed much differently when trained on a dataset with ''good'' data -- SNR > 0, and noisy data -- SNR in the range [-30:29]. A model trained on noisy data (Matlab[-30:29]) doesn't perform as well on ''good'' SNRs as a model trained on Matlab[0:30], which means that if it is known that the application, where the model is deployed usually features good signal-to-noise ratio, it's worth to train a model on the dataset with better SNR. ~\cref{fig:snr_to_acc_matlab_0_29,fig:snr_to_acc_matlab_-30_29} depict SNR to the accuracy of models trained on different datasets respectfully.
+
+
+\begin{figure}[h!]
+    \begin{center}
+        \input{graphic/snr_to_acc_radioml_a.pgf}
+    \end{center}
+    \caption{SNR to accuracy plot for two best CNNs and encoders on RadioML2016.10a dataset}.
+    \label{fig:snr_to_acc_radioML_a}
+\end{figure}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{| c  c  c  c  c |} 
+ \hline \\[-1em]
+ Model & Dataset & Avg Acc & Max Acc & Avg Acc SNR>0 \\ [1ex]  \\[-1em]  
+ \hline
+    CNN\_1 & RadioML2016.10a & 57.6\% & 86.2\% & 84.9\%\\ [1ex]
+    CNN\_9 & RadioML2016.10a & 59.0\% & 87.5\% & 86.2\%\\ [1ex]
+
+    \hline
+    ENC\_3 & RadioML2016.10a & 61.3\% & 91.3\% & 89.9\%\\ [1ex]
+    ENC\_9 & RadioML2016.10a & 61.1\% & 91.8\% & 90.3\%\\ [1ex]
+
+    \hline
+    CNN\_1 & RadioML2016.10b & 63.6\% & 93.5\% & 92.8\%\\ [1ex]
+    CNN\_9 & RadioML2016.10b & 63.7\% & 93.4\% & 92.7\%\\ [1ex]
+
+    \hline
+    ENC\_3 & RadioML2016.10b & 60.1\% & 91.6\% & 90.8\%\\ [1ex]
+    ENC\_9 & RadioML2016.10b & 63.3\% & 93.3\% & 92.2\%\\ [1ex]
+
+    \hline
+    CNN\_1 & Matlab:SNR[0:29] & 91.0\% & 93.1\% & 91.0\%\\ [1ex]
+    CNN\_9 & Matlab:SNR[0:29] & 90.5\% & 92.1\% & 90.5\%\\ [1ex]
+
+    \hline
+    ENC\_3 & Matlab:SNR[0:29] & 92.1\% & 93.7\% & 92.2\%\\ [1ex]
+    ENC\_9 & Matlab:SNR[0:29] & 90.7\% & 92.2\% & 90.7\%\\ [1ex]
+
+    \hline
+    CNN\_1 & Matlab:SNR[-30:29] & 47.1\% & 86.3\% & 74.9\%\\ [1ex]
+    CNN\_9 & Matlab:SNR[-30:29] & 48.0\% & 89.5\% & 76.7\%\\ [1ex]
+
+    \hline
+    ENC\_3 & Matlab:SNR[-30:29] & 49.2\% & 89.9\% & 78.2\%\\ [1ex]
+    ENC\_9 & Matlab:SNR[-30:29] & 48.3\% & 93.2\% & 77.4\%\\ [1ex]
+
+\hline
+\end{tabular}
+\caption{Models performance when trained and evaluated on different datasets.}
+\label{table:best_models_different_datasets}
+\end{table}
+
+\begin{figure}[h!]
+    \begin{center}
+        \input{graphic/snr_to_acc_radioml_b.pgf}
+    \end{center}
+    \caption{SNR to accuracy plot for two best CNNs and encoders on RadioML2016.10b dataset.}
+    \label{fig:snr_to_acc_radioML_b}
+\end{figure}
+
+% \section{Models Comparison}
+
+\section{Quantization} \label{quantization}
+
+AI model quantization is a technique that aims to reduce the model's size while maintaining its performance. The process involves converting high-precision floating-point parameters to low-precision fixed-point integers or other data types. The reduced precision helps reduce the model's memory requirements, enabling it to be deployed on embedded devices with limited resources, such as smartphones, IoT devices, and microcontrollers.
+
+One of the main benefits of quantization is improved model speed. Using lower precision data types makes the model inference time much faster. Another benefit is reduced power consumption, which is important for battery-powered devices. However, model quantization may lead to decreased accuracy due to the loss of precision.
+
+TensorFlow Lite (TF lite) is a framework that supports quantization for neural network models. It provides tools for post-training quantization to improve model efficiency and speed. It provides three quantization approaches: dynamic range quantization, full integer quantization, and float16 quantization. Dynamic range quantization converts model weights from usual single precision floating points to 8-bit integers, but some calculations and layer outputs are still floating points. Full integer quantization removes completely floating point operations from the model. According to TensorFlow Lite documentation~\cite{tf_lite_quantization}, the model quantized in such a way is 4x smaller and 3x+ faster with little loss in accuracy. One of the key features of TF lite is that it can apply quantization to the network trained with a regular TensorFlow, which makes model development and subsequent deployment quicker. TF lite uses a quantization algorithm implemented in~\cite{gemmlowp}.
+
+Full integer quantization was chosen in this project. A comparison of the speed and accuracy of original and quantized models can be seen in Tab.~\ref{table:quant_performance}. %The model's performance without quantization in Tab.~\ref{table:quant_performance} differs slightly from Tab.~\ref{table:best_models_different_datasets} because it was trained with a different batch size.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{| c  c  c  c |} 
+ \hline \\[-1em]
+ Model & Avg Acc & Max Acc & Avg Acc SNR>0 \\ [1ex]  \\[-1em]    
+    CNN                 & 90.63\% & 92.17\% & 90.61\%\\ [1ex]
+    CNN + quantization  & 90.58\% & 92.22\% & 90.55\%\\ [1ex]
+\hline
+\end{tabular}
+\caption{Impact of full integer quantization on model performance.}
+\label{table:quant_performance}
+\end{table}
+
+\section{Conclusion}
+
+CNN and transformer models were developed, trained, and evaluated in this thesis project. Models were trained on two datasets -- RadioML2016.10~\cite{cnn_dnn_simc} and Matlab~\cite{matlab_model}. The impact of some parameters of datasets on model performance is analyzed. Different hyperparameters were optimized in both CNNs and Transformers to get the best performances. Models are compared in terms of average accuracy, accuracy per class, and accuracy per SNR. We have achieved up to 63.6\% average accuracy over the SNR range of [-20:18] and 92.8\% average accuracy over the SNR range of [0:18] with a CNN trained on RadioML 2016.10b. Also, inference times and the number of parameters are compared.
+
+It appears that transformer models, on average, perform slightly better for this task than CNN, but it is also much longer to train and evaluate it. Also, generally, CNNs are easy to scale -- more parameters -- better accuracy if overfit is prevented with regularization, but the configuration of the encoder should be selected more carefully. 
+
+% It is also more challenging to explain Transformer, which can be important in some applications. \todo{not sure - verify}
+
+The long inference time and the complexity of the transformers are the main reasons why we decided to focus on CNN in our work and leave the transformers for future work. \verb|CNN_1:Matlab[0:29]| is chosen as a CNN network to accelerate in the next Chapter.
