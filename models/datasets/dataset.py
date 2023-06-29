@@ -1,6 +1,6 @@
 import numpy as np
-from abc import abstractmethod, ABC, abstractstaticmethod, abstractclassmethod
-from models.tools.utils import is_tuple
+from abc import abstractmethod, ABC
+from tools.utils import is_tuple
 from typing import List, Optional, Tuple
 from .utils import SplittedDataset, split_train_val_test
 
@@ -13,7 +13,9 @@ class Dataset(ABC):
         self._data: Optional[np.ndarray] = None
         self._labels: Optional[np.ndarray] = None
 
-    def load(self, how_or_where, *args, **kwargs):
+    def load(self, how_or_where, *args, force=False, **kwargs):
+        if not force and self._labels is not None and self._data is not None:
+            return
         if is_tuple(how_or_where, 2, str):
             self._labels, self._data = np.load(how_or_where[0]), np.load(how_or_where[1])
         raise TypeError(f"load argument has bad type: {type(how_or_where)}")

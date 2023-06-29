@@ -1,10 +1,8 @@
 from pathlib import Path
-from tools.data import (
-    generate_data_simc_v1,
-    DataSIM_v1_Config,
-    generate_data_simc_v2,
-    DataSIM_v2_Config,
-)
+
+from data_generation.matlab_v2 import generate_data_simc_v2, DataSIM_v2_Config
+from data_generation.matlab_v1 import generate_data_simc_v1, DataSIM_v1_Config
+
 from argparse import ArgumentParser
 
 modulations = [

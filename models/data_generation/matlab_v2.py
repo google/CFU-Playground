@@ -7,10 +7,7 @@ from typing import List, Tuple
 from pathlib import Path
 import os
 
-import numpy as np
-from scipy import io
-from tqdm import tqdm
-from models.tools.logger import logger
+from tools.logger import logger
 
 import time
 from tools.matlab_helpers import get_engine
@@ -125,34 +122,3 @@ def generate_data_simc_v2(
 
             print(f"[debug] Done in {time.time() - before}s")
     print(f"[debug] Data generation with size {n_data} done in {time.time() - begin}s")
-
-
-def preprocess_raw_data(samples: np.ndarray, model_dtype=np.float32) -> np.ndarray:
-    I = np.real(samples)
-    Q = np.imag(samples)
-    return np.hstack([I, Q]).astype(model_dtype)
-
-
-def load_data_simc_v2(
-    classes, path=Path("train_data"), model_dtype=np.float32, frames_per_mod=-1, *args, **kwargs
-) -> Tuple[np.ndarray, np.ndarray]:
-    before = time.time()
-    # train_data = {}
-    labels = []
-    data = []
-
-    n_data = 0
-    for cl_idx, cl in enumerate(tqdm(classes)):
-        # mat_files = glob.glob(f"{path}/*{cl}*.mat")
-        for idx in range(frames_per_mod):
-            mat_file = path / f"frame{cl}{idx}.mat"
-            # for mat_idx, mat_file in enumerate(mat_files):
-            np_data = io.loadmat(str(mat_file))["frame"]
-            np_data = preprocess_raw_data(np_data, model_dtype)
-            n_data += len(np_data)
-
-            labels.append(cl_idx)
-            data.append(np_data)
-    after = time.time()
-    print(f"[debug] Loaded train data with size {n_data} in {after - before}s")
-    return np.array(labels), np.expand_dims(np.array(data), axis=1)

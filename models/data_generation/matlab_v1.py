@@ -6,12 +6,11 @@ import glob
 from typing import Dict, List, Optional, Tuple
 from pathlib import Path
 import os
-import pickle
 
 import numpy as np
 from scipy import io
 from tqdm import tqdm
-from models.tools.logger import logger
+from tools.logger import logger
 import time
 from tools.matlab_helpers import get_engine
 import matlab
@@ -154,69 +153,3 @@ def load_data_simc_v1(
     return np.array(labels), np.expand_dims(np.array(data), axis=1)
 
 
-def _postprocess_radioml_v1(raw_ds: Dict, to_1024: bool, transpose: bool, minimum_snr: int):
-    ds_keys = [k for k in raw_ds.keys() if k[1] >= minimum_snr]
-    classes = list(set(map(lambda v: v[0], ds_keys)))
-    class_name_to_class_idx = {name: idx for idx, name in enumerate(classes)}
-
-    frames_per_modulation = raw_ds[ds_keys[0]].shape[0]  # 100
-
-    # 220 * 1000 // 8
-    ds_size = len(ds_keys) * frames_per_modulation
-    if to_1024:
-        ds_size //= 8
-
-    if transpose:
-        data = np.empty((ds_size, 1, 1024, 2)) if to_1024 else np.empty((ds_size, 1, 128, 2))
-    else:
-        data = np.empty((ds_size, 1, 2, 1024)) if to_1024 else np.empty((ds_size, 1, 2, 128))
-
-    labels = np.empty((ds_size,), dtype=np.uint8)
-
-    cur_idx = 0
-    for (class_name, snr), raw_data in raw_ds.items():
-        if snr < minimum_snr:
-            continue
-        if to_1024:
-            for frame_idx in range(0, len(raw_data), 8):
-                frame_1024 = np.hstack([raw_data[idx] for idx in range(frame_idx, frame_idx + 8)])
-                # print(frame_1024.shape)
-                data[cur_idx] = (
-                    np.transpose(frame_1024).reshape((1, 1024, 2))
-                    if transpose
-                    else frame_1024.reshape(1, 2, 1024)
-                )
-                # data[cur_idx] = frame_1024.reshape((1, 1024, 2))
-                labels[cur_idx] = class_name_to_class_idx[class_name]
-                cur_idx += 1
-                # break
-        else:
-            for frame_idx in range(0, len(raw_data)):
-                frame = raw_data[frame_idx]
-                data[cur_idx] = (
-                    np.transpose(frame).reshape((1, 128, 2))
-                    if transpose
-                    else frame.reshape(1, 2, 128)
-                )
-                labels[cur_idx] = class_name_to_class_idx[class_name]
-                cur_idx += 1
-    return labels, data, classes
-
-
-# Returns {(modulation, snr): frames}               if not postprocess
-#         (labels, frames, classes)                 if postprocess
-def load_data_radioml_v1(
-    ds_path: str, postprocess=True, to_1024=True, transpose=True, minimum_snr: Optional[int] = None
-):
-    with open(ds_path, "rb") as crmrn_file:
-        raw_ds = pickle.load(crmrn_file, encoding="bytes")
-    decoded_raw_ds = {}
-    for (class_name_bytes, snr), raw_data in raw_ds.items():
-        decoded_raw_ds[(class_name_bytes.decode("utf-8"), snr)] = raw_data
-    raw_ds = decoded_raw_ds
-
-    if not postprocess:
-        return raw_ds
-    if minimum_snr is None:
-        minimum_snr = -100
-    return _postprocess_radioml_v1(raw_ds, to_1024, transpose, minimum_snr)
