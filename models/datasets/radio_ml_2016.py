@@ -25,10 +25,12 @@ class RadioML2016(SignalModulationDataset):
             return
 
         if is_str(val):
-            self._labels, self._data, self._modulations, raw_ds = self.Detail.load_data_radioml_v1(
-                val, *args, postprocess=True, **kwargs
-            )
-            self._snrs = self.Detail.raw_ds_to_snrs(np.arange(0, len(self._labels)), raw_ds)
+            (
+                self._labels,
+                self._data,
+                self._modulations,
+                self._snrs,
+            ) = self.Detail.load_data_radioml_v1(val, *args, postprocess=True, **kwargs)
             return
 
         raise TypeError(f"load argument has bad type: {type(val)}")
@@ -46,6 +48,7 @@ class RadioML2016(SignalModulationDataset):
         def _postprocess_radioml_v1(raw_ds: Dict, to_1024: bool, transpose: bool, minimum_snr: int):
             ds_keys = [k for k in raw_ds.keys() if k[1] >= minimum_snr]
             classes = list(set(map(lambda v: v[0], ds_keys)))
+            classes.sort()  # make sure order is always the same
             class_name_to_class_idx = {name: idx for idx, name in enumerate(classes)}
 
             frames_per_modulation = raw_ds[ds_keys[0]].shape[0]  # 1000
@@ -65,6 +68,7 @@ class RadioML2016(SignalModulationDataset):
                 )
 
             labels = np.empty((ds_size,), dtype=np.uint8)
+            snrs = np.empty_like(labels, dtype=np.int8)
 
             cur_idx = 0
             for (class_name, snr), raw_data in raw_ds.items():
@@ -83,6 +87,7 @@ class RadioML2016(SignalModulationDataset):
                         )
                         # data[cur_idx] = frame_1024.reshape((1, 1024, 2))
                         labels[cur_idx] = class_name_to_class_idx[class_name]
+                        snrs[cur_idx] = snr
                         cur_idx += 1
                         # break
                 else:
@@ -94,15 +99,9 @@ class RadioML2016(SignalModulationDataset):
                             else frame.reshape(1, 2, 128)
                         )
                         labels[cur_idx] = class_name_to_class_idx[class_name]
+                        snrs[cur_idx] = snr
                         cur_idx += 1
-            return labels, data, classes
-
-        @staticmethod
-        def raw_ds_to_snrs(indecies: np.ndarray, raw_ds: Dict):
-            samples_per_snr_per_modulation = raw_ds[list(raw_ds.keys())[0]].shape[0]  # 1000
-            snrs_sequence = [k[1] for k in raw_ds.keys()]
-            snrs = [snrs_sequence[idx // samples_per_snr_per_modulation] for idx in indecies]
-            return np.array(snrs)
+            return labels, data, classes, snrs
 
         # Returns {(modulation, snr): frames}               if not postprocess
         #         (labels, frames, classes)                 if postprocess
@@ -126,9 +125,6 @@ class RadioML2016(SignalModulationDataset):
             if minimum_snr is None:
                 minimum_snr = -10000
 
-            return (
-                *RadioML2016.Detail._postprocess_radioml_v1(
-                    raw_ds, to_1024, transpose, minimum_snr
-                ),
-                raw_ds,
+            return RadioML2016.Detail._postprocess_radioml_v1(
+                raw_ds, to_1024, transpose, minimum_snr
             )

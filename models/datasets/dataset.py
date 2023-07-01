@@ -2,14 +2,14 @@ import numpy as np
 from abc import abstractmethod, ABC
 from tools.utils import is_tuple
 from typing import List, Optional, Tuple
-from .utils import SplittedDataset, split_train_val_test
+from .utils import SplittedDataset, SplittedIndecies, split_train_val_test
 
 
 class Dataset(ABC):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__()
         self._splitted_ds: Optional[SplittedDataset] = None
-        self._splitted_indecies: Optional[Tuple[np.ndarray, np.ndarray, np.ndarray]] = None
+        self._splitted_indecies: Optional[SplittedIndecies] = None
         self._data: Optional[np.ndarray] = None
         self._labels: Optional[np.ndarray] = None
 
@@ -30,19 +30,19 @@ class Dataset(ABC):
         del self._data
         del self._labels
 
-    def get_labels(self, *args, **kwargs):
+    def get_labels(self, *args, **kwargs) -> np.ndarray:
         if self._labels is None:
             raise RuntimeError("Can't get labels: labels were not loaded")
         return self._labels
 
-    def get_data(self, *args, **kwargs):
+    def get_data(self, *args, **kwargs) -> np.ndarray:
         if self._data is None:
             raise RuntimeError("Can't get data: data was not loaded")
         return self._data
 
     def split_train_val_test(
         self, train_perc: float, val_perc: float, force_resplit=False, *args, **kwargs
-    ):
+    ) -> SplittedDataset:
         if self._data is None or self._labels is None:
             raise RuntimeError("Can't splt: data or labels were not loaded")
         if self._splitted_ds is None or force_resplit:
@@ -51,7 +51,7 @@ class Dataset(ABC):
             )
         return self._splitted_ds
 
-    def get_split_indecies(self, *args, **kwargs):
+    def get_split_indecies(self, *args, **kwargs) -> SplittedIndecies:
         if self._splitted_indecies is None:
             raise RuntimeError("dataset is not splitted")
         return self._splitted_indecies

@@ -16,6 +16,16 @@ class SplittedDataset:
     test: DataLabelsPair
 
 
+@dataclass
+class SplittedIndecies:
+    train: np.ndarray
+    val: np.ndarray
+    test: np.ndarray
+    
+    def to_tuple(self):
+        return self.train, self.val, self.test
+
+
 def get_split_indecies(
     data: np.ndarray, labels: np.ndarray, train_perc: float, val_perc: float
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -30,7 +40,7 @@ def get_split_indecies(
         random_indecies,
         [int(ds_size * train_perc), int(ds_size * (train_perc + val_perc)), ds_size],
     )
-    return train_indecies, validation_indecies, test_indecies
+    return SplittedIndecies(train_indecies, validation_indecies, test_indecies)
 
 
 def split_train_val_test(
@@ -38,7 +48,7 @@ def split_train_val_test(
 ) -> Tuple[SplittedDataset, Tuple[np.ndarray, np.ndarray, np.ndarray]]:
     train_indecies, validation_indecies, test_indecies = get_split_indecies(
         data, labels, train_perc, val_perc
-    )
+    ).to_tuple()
 
     train_data, train_labels = data[train_indecies], labels[train_indecies]
     validation_data, validation_labels = data[validation_indecies], labels[validation_indecies]
@@ -48,4 +58,4 @@ def split_train_val_test(
         DataLabelsPair(train_data, train_labels),
         DataLabelsPair(validation_data, validation_labels),
         DataLabelsPair(test_data, test_labels),
-    ), (train_indecies, validation_indecies, test_indecies)
+    ), SplittedIndecies(train_indecies, validation_indecies, test_indecies)
