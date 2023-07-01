@@ -18,12 +18,14 @@ class Dataset(ABC):
             return
         if is_tuple(how_or_where, 2, str):
             self._labels, self._data = np.load(how_or_where[0]), np.load(how_or_where[1])
+            return
         raise TypeError(f"load argument has bad type: {type(how_or_where)}")
 
     def dump(self, how_or_where, *args, **kwargs):
         if is_tuple(how_or_where, 2, str):
             np.save(how_or_where[0], self._labels)
             np.save(how_or_where[1], self._data)
+            return
         raise TypeError(f"dump argument has bad type: {type(how_or_where)}")
 
     def unload(self, *args, **kwargs):

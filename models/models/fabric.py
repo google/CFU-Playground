@@ -7,11 +7,19 @@ from models.encoder_transformer.encoder_transformer_1d_v1 import (
     EncoderLayerConfiguration,
     make_encoder_transformer_1d_v1 as __make_encoder_transformer_1d_v1,
 )
+from enum import Enum
+
+
+class ModelName(Enum):
+    CNN_1D_V010 = (0,)
+    CNN_1D_V012 = (1,)
+    ENCODER_TRANSFORMER_1D_V010 = (2,)
+
 
 __models = {
-    "cnn_1d_v1.0": __make_cnn_1d_v010,
-    "cnn_1d_v1.2": __make_cnn_1d_v012,
-    "encoder_transformer_1d_v1": __make_encoder_transformer_1d_v1,
+    ModelName.CNN_1D_V010: __make_cnn_1d_v010,
+    ModelName.CNN_1D_V012: __make_cnn_1d_v012,
+    ModelName.ENCODER_TRANSFORMER_1D_V010: __make_encoder_transformer_1d_v1,
 }
 
 

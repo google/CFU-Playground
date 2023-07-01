@@ -60,11 +60,11 @@ class RadioML2016(SignalModulationDataset):
 
             if transpose:
                 data = (
-                    np.empty((ds_size, 1, 1024, 2)) if to_1024 else np.empty((ds_size, 1, 128, 2))
+                    np.empty((ds_size, 1024, 2)) if to_1024 else np.empty((ds_size, 128, 2))
                 )
             else:
                 data = (
-                    np.empty((ds_size, 1, 2, 1024)) if to_1024 else np.empty((ds_size, 1, 2, 128))
+                    np.empty((ds_size, 2, 1024)) if to_1024 else np.empty((ds_size, 2, 128))
                 )
 
             labels = np.empty((ds_size,), dtype=np.uint8)
@@ -81,9 +81,9 @@ class RadioML2016(SignalModulationDataset):
                         )
                         # print(frame_1024.shape)
                         data[cur_idx] = (
-                            np.transpose(frame_1024).reshape((1, 1024, 2))
+                            np.transpose(frame_1024).reshape((1024, 2))
                             if transpose
-                            else frame_1024.reshape(1, 2, 1024)
+                            else frame_1024.reshape(2, 1024)
                         )
                         # data[cur_idx] = frame_1024.reshape((1, 1024, 2))
                         labels[cur_idx] = class_name_to_class_idx[class_name]
@@ -94,9 +94,9 @@ class RadioML2016(SignalModulationDataset):
                     for frame_idx in range(0, len(raw_data)):
                         frame = raw_data[frame_idx]
                         data[cur_idx] = (
-                            np.transpose(frame).reshape((1, 128, 2))
+                            np.transpose(frame).reshape((128, 2))
                             if transpose
-                            else frame.reshape(1, 2, 128)
+                            else frame.reshape(2, 128)
                         )
                         labels[cur_idx] = class_name_to_class_idx[class_name]
                         snrs[cur_idx] = snr

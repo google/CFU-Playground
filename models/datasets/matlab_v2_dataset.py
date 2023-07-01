@@ -95,4 +95,4 @@ class MatlabV2(SignalModulationDataset):
                     data.append(np_data)
             after = time.time()
             print(f"[debug] Loaded train data with size {n_data} in {after - before}s")
-            return np.array(labels), np.expand_dims(np.array(data), axis=1)
+            return np.array(labels), np.squeeze(np.array(data))
