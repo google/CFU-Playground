@@ -8,6 +8,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 
 from models.fabric import ModelName, load_model_configuration, make_sigmod_model
+from datasets.fabric import DatasetName
 
 
 def _dump_results(where: str, results: Dict[str, Any]):
@@ -27,6 +28,9 @@ def dump_results(
     model: Model,
     model_config: Any,
     model_name: ModelName,
+    dataset_name: DatasetName,
+    dataset_path: str,
+    dataset_params: Optional[Dict] = None,
     train_history: Optional[Dict] = None,
     cm_val: Optional[np.ndarray] = None,
     cls_to_acc_val: Optional[Dict] = None,
@@ -40,13 +44,17 @@ def dump_results(
         "model_configuration": model_config.to_dict(),
         "model_name": model_name.name,
         "n_parameters": get_model_parameters(model),
+        "dataset_name": dataset_name.name,
+        "dataset_path": dataset_path,
     }
 
     def add_value(name, value):
         if value is not None:
             results[name] = value
 
+    add_value("dataset_params", dataset_params)
     add_value("train_history", train_history)
+    
     add_value("cm_val", cm_val if cm_val is None else cm_val.tolist())
     add_value("cls_to_acc_val", cls_to_acc_val)
     add_value("snr_to_acc_val", snr_to_acc_val)
@@ -56,7 +64,7 @@ def dump_results(
     add_value("snr_to_acc_test", snr_to_acc_test)
 
     if dump_model:
-        model_weights_path = os.path.join(where, "model_weights")
+        model_weights_path = os.path.abspath(os.path.join(where, "model_weights"))
         model.save_weights(model_weights_path)
         results["path_to_weights"] = model_weights_path
 
