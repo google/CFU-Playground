@@ -1,4 +1,4 @@
-name: cfu
+name: pasha2
 channels:
   - conda-forge
   - defaults
@@ -8,125 +8,107 @@ dependencies:
   - asttokens=2.2.1=pyhd8ed1ab_0
   - backcall=0.2.0=pyh9f0ad1d_0
   - backports=1.0=pyhd8ed1ab_3
-  - backports.functools_lru_cache=1.6.4=pyhd8ed1ab_0
-  - black=23.3.0=py38h06a4308_0
-  - ca-certificates=2023.01.10=h06a4308_0
-  - click=8.0.4=py38h06a4308_0
+  - backports.functools_lru_cache=1.6.5=pyhd8ed1ab_0
+  - ca-certificates=2023.5.7=hbcca054_0
+  - cudatoolkit=11.8.0=h6a678d5_0
   - debugpy=1.5.1=py38h295c915_0
   - decorator=5.1.1=pyhd8ed1ab_0
   - entrypoints=0.4=pyhd8ed1ab_0
   - executing=1.2.0=pyhd8ed1ab_0
   - ipykernel=6.15.0=pyh210e3f2_0
+  - ipython=8.12.0=pyh41d4057_0
   - jedi=0.18.2=pyhd8ed1ab_0
   - jupyter_client=7.0.6=pyhd8ed1ab_0
-  - jupyter_core=5.3.0=py38h578d9bd_0
+  - jupyter_core=4.12.0=py38h578d9bd_0
   - ld_impl_linux-64=2.38=h1181459_1
-  - libffi=3.4.2=h6a678d5_6
+  - libffi=3.4.4=h6a678d5_0
   - libgcc-ng=11.2.0=h1234567_1
   - libgomp=11.2.0=h1234567_1
   - libsodium=1.0.18=h36c2ea0_1
   - libstdcxx-ng=11.2.0=h1234567_1
   - matplotlib-inline=0.1.6=pyhd8ed1ab_0
-  - mypy_extensions=0.4.3=py38h06a4308_1
   - ncurses=6.4=h6a678d5_0
   - nest-asyncio=1.5.6=pyhd8ed1ab_0
-  - openssl=1.1.1t=h7f8727e_0
+  - openssl=3.0.9=h7f8727e_0
   - packaging=23.1=pyhd8ed1ab_0
   - parso=0.8.3=pyhd8ed1ab_0
-  - pathspec=0.10.3=py38h06a4308_0
   - pexpect=4.8.0=pyh1a96a4e_2
   - pickleshare=0.7.5=py_1003
-  - pip=23.0.1=py38h06a4308_0
-  - platformdirs=3.5.0=pyhd8ed1ab_0
+  - pip=23.1.2=py38h06a4308_0
   - prompt-toolkit=3.0.38=pyha770c72_0
+  - prompt_toolkit=3.0.38=hd8ed1ab_0
   - psutil=5.9.0=py38h5eee18b_0
   - ptyprocess=0.7.0=pyhd3deb0d_0
   - pure_eval=0.2.2=pyhd8ed1ab_0
   - pygments=2.15.1=pyhd8ed1ab_0
-  - python=3.8.16=h7a1cb2a_3
+  - python=3.8.16=h955ad1f_4
   - python-dateutil=2.8.2=pyhd8ed1ab_0
   - python_abi=3.8=2_cp38
   - pyzmq=19.0.2=py38ha71036d_2
   - readline=8.2=h5eee18b_0
-  - setuptools=66.0.0=py38h06a4308_0
+  - setuptools=67.8.0=py38h06a4308_0
   - six=1.16.0=pyh6c4a22f_0
   - sqlite=3.41.2=h5eee18b_0
   - stack_data=0.6.2=pyhd8ed1ab_0
   - tk=8.6.12=h1ccaba5_0
-  - tomli=2.0.1=py38h06a4308_0
   - tornado=6.1=py38h0a891b7_3
   - traitlets=5.9.0=pyhd8ed1ab_0
-  - typing-extensions=4.5.0=hd8ed1ab_0
-  - typing_extensions=4.5.0=pyha770c72_0
+  - typing_extensions=4.6.3=pyha770c72_0
   - wcwidth=0.2.6=pyhd8ed1ab_0
   - wheel=0.38.4=py38h06a4308_0
-  - xz=5.2.10=h5eee18b_1
+  - xz=5.4.2=h5eee18b_0
   - zeromq=4.3.4=h9c3ff4c_1
   - zlib=1.2.13=h5eee18b_0
   - pip:
-    - absl-py==1.4.0
-    - astunparse==1.6.3
-    - cachetools==5.3.0
-    - certifi==2022.12.7
-    - charset-normalizer==3.1.0
-    - contourpy==1.0.7
-    - cycler==0.11.0
-    - flatbuffers==23.3.3
-    - fonttools==4.39.3
-    - gast==0.4.0
-    - google-auth==2.17.3
-    - google-auth-oauthlib==1.0.0
-    - google-pasta==0.2.0
-    - grpcio==1.54.0
-    - h5py==3.8.0
-    - idna==3.4
-    - importlib-metadata==6.6.0
-    - importlib-resources==5.12.0
-    - ipython==8.12.1
-    - jax==0.4.8
-    - jinja2==3.1.2
-    - joblib==1.2.0
-    - keras==2.12.0
-    - kiwisolver==1.4.4
-    - libclang==16.0.0
-    - markdown==3.4.3
-    - markupsafe==2.1.2
-    - matlab==0.1
-    - matlabengine==9.14.2
-    - matplotlib==3.7.1
-    - ml-dtypes==0.1.0
-    - numpy==1.23.5
-    - nvidia-cublas-cu12==12.1.3.1
-    - nvidia-cuda-runtime-cu12==12.1.105
-    - nvidia-cudnn-cu12==8.9.0.131
-    - oauthlib==3.2.2
-    - opt-einsum==3.3.0
-    - pandas==2.0.1
-    - pillow==9.5.0
-    - protobuf==4.22.3
-    - pyasn1==0.5.0
-    - pyasn1-modules==0.3.0
-    - pyparsing==3.0.9
-    - pytz==2023.3
-    - requests==2.29.0
-    - requests-oauthlib==1.3.1
-    - rsa==4.9
-    - scikit-learn==1.2.2
-    - scipy==1.10.1
-    - seaborn==0.12.2
-    - tensorboard==2.12.2
-    - tensorboard-data-server==0.7.0
-    - tensorboard-plugin-wit==1.8.1
-    - tensorflow==2.12.0
-    - tensorflow-estimator==2.12.0
-    - tensorflow-io-gcs-filesystem==0.32.0
-    - tensorrt==8.6.0
-    - termcolor==2.3.0
-    - threadpoolctl==3.1.0
-    - tqdm==4.65.0
-    - tzdata==2023.3
-    - urllib3==1.26.15
-    - werkzeug==2.3.2
-    - wrapt==1.14.1
-    - zipp==3.15.0
-prefix: /root/anaconda3/envs/cfu
+      - absl-py==1.4.0
+      - astunparse==1.6.3
+      - cachetools==5.3.1
+      - certifi==2023.5.7
+      - charset-normalizer==3.1.0
+      - flatbuffers==23.5.26
+      - gast==0.4.0
+      - google-auth==2.21.0
+      - google-auth-oauthlib==1.0.0
+      - google-pasta==0.2.0
+      - grpcio==1.56.0
+      - h5py==3.9.0
+      - idna==3.4
+      - importlib-metadata==6.7.0
+      - jax==0.4.13
+      - joblib==1.3.1
+      - keras==2.12.0
+      - libclang==16.0.0
+      - markdown==3.4.3
+      - markupsafe==2.1.3
+      - matlabengine==9.14.3
+      - ml-dtypes==0.2.0
+      - numpy==1.23.5
+      - nvidia-cublas-cu11==11.11.3.6
+      - nvidia-cudnn-cu11==8.6.0.163
+      - oauthlib==3.2.2
+      - opt-einsum==3.3.0
+      - pandas==2.0.3
+      - pillow==9.5.0
+      - protobuf==4.23.3
+      - pyasn1==0.5.0
+      - pyasn1-modules==0.3.0
+      - pytz==2023.3
+      - requests==2.31.0
+      - requests-oauthlib==1.3.1
+      - rsa==4.9
+      - scikit-learn==1.3.0
+      - scipy==1.10.1
+      - seaborn==0.12.2
+      - tensorboard==2.12.3
+      - tensorboard-data-server==0.7.1
+      - tensorflow==2.12.0
+      - tensorflow-estimator==2.12.0
+      - tensorflow-io-gcs-filesystem==0.32.0
+      - termcolor==2.3.0
+      - threadpoolctl==3.1.0
+      - tqdm==4.65.0
+      - tzdata==2023.3
+      - urllib3==1.26.16
+      - werkzeug==2.3.6
+      - wrapt==1.14.1
+prefix: /home/phile/anaconda3/envs/article
