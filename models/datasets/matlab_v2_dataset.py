@@ -3,7 +3,6 @@ import time
 from datasets.dataset import SignalModulationDataset
 from tools.utils import is_str, some_are_nones
 import numpy as np
-from pathlib import Path
 from tqdm import tqdm
 from scipy import io
 import os

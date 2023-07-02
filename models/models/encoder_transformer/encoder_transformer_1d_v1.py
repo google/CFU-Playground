@@ -4,6 +4,7 @@ from tensorflow import keras
 from tensorflow.keras import layers
 from models.layers.encoder import SigModEncoder
 from models.models_common import make_dense_relu_layer as __make_dense_relu_layer
+from ..configuration_utils import ConfigurationUtils
 from typing import Union
 
 
@@ -17,7 +18,7 @@ class EncoderLayerConfiguration:
     n: int 
     
 @dataclass
-class EncoderTransformerConfiguration:
+class EncoderTransformerConfiguration(ConfigurationUtils):
     input_shape: List[int]
 
     cnn_output_channels: List[int]
@@ -31,6 +32,8 @@ class EncoderTransformerConfiguration:
     avg_size: int
     
     n_classes: int
+    
+    name = "encoder_transformer_1d_v01x"
 
 
 def _create_convolution_layer(

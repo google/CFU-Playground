@@ -51,7 +51,7 @@ def snr_to_metric_evaluation(
     snrs: np.ndarray,
     verbose=True,
     metric=accuracy_score,
-) -> Dict[int, float]:
+) -> Dict[float, float]:
     """
     Evaluates model on different snrs
 
@@ -69,5 +69,5 @@ def snr_to_metric_evaluation(
         cur_pred_labels = np.argmax(cur_pred, axis=1)
         acc = metric(cur_labels, cur_pred_labels)
         verbose and print(f"SNR: {snr} -- Overall test accuracy: {acc}")
-        snr_to_acc[snr] = acc
+        snr_to_acc[float(snr)] = float(acc)
     return snr_to_acc

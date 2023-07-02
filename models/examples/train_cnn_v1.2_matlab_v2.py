@@ -12,7 +12,6 @@ def main():
     train_model(
         TrainConfiguration(
             dataset=DatasetName.MATLAB_V2,
-            # dataset_path="data/simc_v2_30k_fpm_0_30_snr/",
             dataset_path=(
                 "data/simc_v2_30k_fpm_0_30_snrs_labels.npy",
                 "data/simc_v2_30k_fpm_0_30_snrs_data.npy",
