@@ -1,7 +1,9 @@
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 import tensorflow as tf
-tf.get_logger().setLevel('ERROR')
+
+tf.get_logger().setLevel("ERROR")
 
 from typing import Dict
 import matplotlib.pyplot as plt
@@ -21,7 +23,9 @@ from datasets.fabric import make_sigmod_ds, DatasetName
 
 import matplotlib
 
-FIG_EXTENSION="pgf"
+# Don't change, use --save_png
+FIG_EXTENSION = "pgf"
+
 
 def save_plot(save_path: str):
     if save_path is None:
@@ -29,6 +33,35 @@ def save_plot(save_path: str):
     else:
         plt.savefig(save_path)
 
+
+class __DatasetCache:
+    dataset = None
+    dataset_name = None
+    dataset_path = None
+
+
+ds_cache = __DatasetCache()
+
+
+def get_modulations(results: Dict):
+    dataset_name = results["dataset_name"]
+    dataset_path = results["dataset_path"]
+    print(f"Dataset: name: {dataset_name}, path: {dataset_path}")
+
+    if ds_cache.dataset is not None and (
+        ds_cache.dataset_name == dataset_name and ds_cache.dataset_path == dataset_path
+    ):
+        return ds_cache.dataset.get_modulations()
+
+    dataset = make_sigmod_ds(DatasetName[dataset_name])
+    dataset_params = {} if "dataset_params" not in results else results["dataset_params"]
+    dataset.load(dataset_path, **dataset_params)
+
+    ds_cache.dataset = dataset
+    ds_cache.dataset_name = dataset_name
+    ds_cache.dataset_path = dataset_path
+
+    return dataset.get_modulations()
 
 
 def make_history(results: Dict, save_path=None):
@@ -51,35 +84,28 @@ def make_history(results: Dict, save_path=None):
     plt.plot(epochs_range, val_loss, label="Validation Loss")
     plt.legend(loc="upper right")
     plt.title("Training and Validation Loss")
-    save_plot(f'{save_path}/history.{FIG_EXTENSION}')
+    save_plot(f"{save_path}/history.{FIG_EXTENSION}")
 
 
 def make_confusion_matrix(results: Dict, save_path=None):
     cm_val = results["cm_val"]
     cm_test = results["cm_test"]
-    
-    dataset_name = results["dataset_name"]
-    dataset_path = results["dataset_path"]
-    print(f"Dataset: name: {dataset_name}, path: {dataset_path}")
-    dataset = make_sigmod_ds(DatasetName[dataset_name])
-    dataset_params = {} if "dataset_params" not in results else results["dataset_params"]
-    dataset.load(dataset_path, **dataset_params)
-    modulations = dataset.get_modulations()
+
+    modulations = get_modulations(results)
     print("Modulations:")
     pprint(modulations)
-
 
     df_cm_val = pd.DataFrame(cm_val, index=modulations, columns=modulations)
     plt.figure(figsize=(10, 7))
     sn.heatmap(df_cm_val, annot=True)
     plt.title("Confusion matrix - validation data")
-    save_plot(f'{save_path}/confusion_matrix_validation.{FIG_EXTENSION}')
+    save_plot(f"{save_path}/confusion_matrix_validation.{FIG_EXTENSION}")
 
     df_cm_test = pd.DataFrame(cm_test, index=modulations, columns=modulations)
     plt.figure(figsize=(10, 7))
     sn.heatmap(df_cm_test, annot=True)
     plt.title("Confusion matrix - test data")
-    save_plot(f'{save_path}/confusion_matrix_test.{FIG_EXTENSION}')
+    save_plot(f"{save_path}/confusion_matrix_test.{FIG_EXTENSION}")
 
 
 def make_snr_to_acc(results: Dict, save_path=None):
@@ -90,7 +116,7 @@ def make_snr_to_acc(results: Dict, save_path=None):
     plt.title("SNR to accuracy - validation data")
     plt.ylabel("Accuracy")
     plt.xlabel("Signal-to-Noise")
-    save_plot(f'{save_path}/snr_to_acc_validation.{FIG_EXTENSION}')
+    save_plot(f"{save_path}/snr_to_acc_validation.{FIG_EXTENSION}")
 
     plt.clf()
     snr_to_acc_test = results["snr_to_acc_test"]
@@ -99,7 +125,7 @@ def make_snr_to_acc(results: Dict, save_path=None):
     plt.title("SNR to accuracy - test data")
     plt.ylabel("Accuracy")
     plt.xlabel("Signal-to-Noise")
-    save_plot(f'{save_path}/snr_to_acc_test.{FIG_EXTENSION}')
+    save_plot(f"{save_path}/snr_to_acc_test.{FIG_EXTENSION}")
 
 
 def update_results(results: Dict, save_path=None):
@@ -108,12 +134,13 @@ def update_results(results: Dict, save_path=None):
     results["Accuracy snr 0"] = snr_to_acc_test["0.0"]
     results["Accuracy snr 18"] = snr_to_acc_test["18.0"]
     results["Accuracy Maximum"] = max(list(snr_to_acc_test.values()))
-    results["Accuracy snr 0+ Average"] = np.mean([snr_to_acc_test[v] for v in snr_to_acc_test if float(v) > 0])
-    
+    results["Accuracy snr 0+ Average"] = np.mean(
+        [snr_to_acc_test[v] for v in snr_to_acc_test if float(v) > 0]
+    )
+
     # if save_path is not None:
     #     with open(f"{save_path}/results.json", 'w') as res_file:
     #         json.dump(results, res_file, indent=4)
-    
 
 
 def make_plots(result_dir: str, save_path: str, save_png: bool):
@@ -125,12 +152,14 @@ def make_plots(result_dir: str, save_path: str, save_png: bool):
     if save_path is not None:
         if not save_png:
             matplotlib.use("pgf")
-            matplotlib.rcParams.update({
-                "pgf.texsystem": "pdflatex",
-                'font.family': 'serif',
-                'text.usetex': True,
-                'pgf.rcfonts': False,
-            })
+            matplotlib.rcParams.update(
+                {
+                    "pgf.texsystem": "pdflatex",
+                    "font.family": "serif",
+                    "text.usetex": True,
+                    "pgf.rcfonts": False,
+                }
+            )
         else:
             global FIG_EXTENSION
             FIG_EXTENSION = "png"
