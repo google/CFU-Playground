@@ -201,18 +201,33 @@ endif
 
 BUILD_JOBS ?= $(shell nproc)
 
+
+# The purpose of cp_resources is to guarantee same acceleration sources are used
+.PHONY: cp_sources
+cp_sources:
+	cp -r $(CUR_PROJECT_DIR)/../../verilog/verilog_src $(PROJ_DIR)
+	cp -r $(CUR_PROJECT_DIR)/../../verilog/cfu.v $(CFU_VERILOG)
+	cp -r $(CUR_PROJECT_DIR)/../../acceleration_src/src $(PROJ_DIR)
+
+.PHONY: clean_sources
+clean_sources:
+	../clean_up.sh $(PROJ_DIR)
+
 .PHONY:	renode
 renode: renode-scripts
 	@echo Running interactively under renode
 	pushd $(BUILD_DIR)/renode/ && $(RENODE_DIR)/renode -e "s @$(TARGET).resc" && popd
+	../clean_up.sh $(PROJ_DIR)
 
 .PHONY:	renode-headless
 renode-headless: renode-scripts
 	pushd $(BUILD_DIR)/renode/ && $(RENODE_DIR)/renode --console --disable-xwt --hide-log -e "s @$(TARGET).resc ; uart_connect sysbus.uart" && popd
+	../clean_up.sh $(PROJ_DIR)
 
 .PHONY:	renode-test
 renode-test: renode-scripts
 	$(RENODE_DIR)/renode-test $(BUILD_DIR)/renode/$(TARGET).robot
+	../clean_up.sh $(PROJ_DIR)
 
 .PHONY: renode-scripts
 renode-scripts: $(SOFTWARE_ELF)
@@ -233,11 +248,12 @@ clean:
 	$(SIM_MK) clean
 	@echo Removing $(BUILD_DIR)
 	$(RM) $(BUILD_DIR)
+	../clean_up.sh $(PROJ_DIR)
 
 .PHONY: software
 software: $(SOFTWARE_BIN)
 
-$(SOFTWARE_BIN) $(SOFTWARE_ELF): litex-software build-dir
+$(SOFTWARE_BIN) $(SOFTWARE_ELF): cp_sources litex-software build-dir
 	$(MAKE) -C $(BUILD_DIR) all -j $(BUILD_JOBS)
 
 # Always run cfu_gen when it exists
@@ -318,6 +334,7 @@ ifneq 'sim' '$(PLATFORM)'
 # $(PLATFORM) == 'common_soc' or 'hps'
 prog: $(CFU_VERILOG)
 	$(SOC_MK) prog
+	../clean_up.sh $(PROJ_DIR)
 
 bitstream: $(CFU_VERILOG)
 	$(SOC_MK) bitstream
@@ -347,6 +364,7 @@ load: $(SOFTWARE_BIN)
 	@echo Running interactively on HPS Board
 	$(CFU_ROOT)/scripts/hps_prog $(SOFTWARE_BIN) program
 	$(LXTERM) --speed 115200 $(TTY)
+	../clean_up.sh $(PROJ_DIR)
 
 connect:
 	@echo Connecting to HPS Board

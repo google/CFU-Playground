@@ -47,5 +47,7 @@ BUILD_JOBS=16
 # Uncomment this line to include the ASCII animated donut demo.
 # DEFINES += DONUT_DEMO
 
+CUR_MAKEFILE_DIR := $(abspath $(lastword $(MAKEFILE_LIST)))
+CUR_PROJECT_DIR := $(patsubst %/,%,$(dir $(CUR_MAKEFILE_DIR)))
 
 include ../proj.mk
