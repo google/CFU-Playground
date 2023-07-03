@@ -5,7 +5,7 @@ import os
 from sklearn.metrics import ConfusionMatrixDisplay
 import matplotlib
 import sys
-from make_plots import get_modulations, save_plot
+from utils import get_modulations, save_plot
 from argparse import ArgumentParser
 
 # TODO: ugly

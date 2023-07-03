@@ -4,7 +4,7 @@ import os
 import matplotlib
 import numpy as np
 from argparse import ArgumentParser
-from make_plots import save_plot
+from utils import save_plot
 import sys
 from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
 from mpl_toolkits.axes_grid1.inset_locator import mark_inset
