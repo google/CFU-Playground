@@ -45,7 +45,7 @@ def to_tf_lite(
     return model_tflite
 
 
-def predict_tflite(tflite_model, x_test):
+def predict_tflite(tflite_model, x_test, *args, **kwargs):
     # Prepare the test data
     x_test_ = x_test.copy()
     x_test_ = x_test_.astype(np.float32)
@@ -76,7 +76,7 @@ def predict_tflite(tflite_model, x_test):
         y_pred = y_pred.astype(np.float32)
         y_pred = (y_pred - output_zero_point) * output_scale
 
-    return y_pred
+    return np.squeeze(y_pred)
 
 
 def export_tf_lite_micto_model_form(
@@ -89,11 +89,12 @@ def export_tf_lite_micto_model_form(
     elif isinstance(tf_lite_model, str):
         tf_lite_model_path = tf_lite_model
     else:
-        raise RuntimeError("tf_lite_model should be string-path of tflite model (bytes)")
+        raise RuntimeError("tf_lite_model should be string-path or tflite model (bytes)")
 
     if model_name is None:
         model_name = tflm_model_path.replace("/", "_").replace(".", "_")
-    os.system(f"/development/RISC-V-SIMD-extension-for-the-AI-workload/custom_bin/xxd -i -n {model_name}_model {tf_lite_model_path} > {tflm_model_path}")
+    # os.system(f"/development/RISC-V-SIMD-extension-for-the-AI-workload/custom_bin/xxd -i -n {model_name}_model {tf_lite_model_path} > {tflm_model_path}")
+    os.system(f"xxd -i -n {model_name}_model {tf_lite_model_path} > {tflm_model_path}")
 
     if isinstance(tf_lite_model, bytes):
         os.remove(tf_lite_model_path)

@@ -6,6 +6,10 @@ from typing import List, Tuple, Dict
 import seaborn as sn
 
 
+def default_predict(model, data, *args, **kwargs):
+    return model.predict(data, *args, **kwargs)
+
+
 def metric_evaluation(
     model,
     data: np.ndarray,
@@ -13,6 +17,9 @@ def metric_evaluation(
     modulations: List[str],
     verbose=True,
     metric=accuracy_score,
+    predict_func=default_predict,
+    predict_args=None,
+    predict_kwargs=None,
 ) -> Tuple[np.ndarray, Dict[str, float]]:
     """
     Evaluates model with given metric
@@ -20,7 +27,12 @@ def metric_evaluation(
     Returns:
         Tuple[np.ndarray, Dict[str, float]]: confusions matrix and dict with modulation -> accuracy
     """
-    preds = model.predict(data)
+    # preds = model.predict(data)
+    predict_args = [] if predict_args is None else predict_args
+    predict_kwargs = {"verbose": 0} if predict_kwargs is None else predict_kwargs
+    preds = predict_func(model, data, *predict_args, **predict_kwargs)
+    print(f"Preds shape: {preds.shape}")
+
     pred_labels = np.argmax(preds, axis=1)
 
     cls_to_acc = {"Overall": metric(labels, pred_labels)}
@@ -51,6 +63,9 @@ def snr_to_metric_evaluation(
     snrs: np.ndarray,
     verbose=True,
     metric=accuracy_score,
+    predict_func=default_predict,
+    predict_args=None,
+    predict_kwargs=None,
 ) -> Dict[float, float]:
     """
     Evaluates model on different snrs
@@ -58,13 +73,16 @@ def snr_to_metric_evaluation(
     Returns:
         Dict[str]: Dict snr -> accuracy
     """
+    predict_args = [] if predict_args is None else predict_args
+    predict_kwargs = {"verbose": 0} if predict_kwargs is None else predict_kwargs
+
     snr_to_acc = {}
     # for snr in range(min(snrs), max(snrs) + 2, 2):
     for snr in sorted(np.unique(snrs)):
         cur_indecies = np.where(snrs == snr)[0]
         cur_data = data[cur_indecies]
         cur_labels = labels[cur_indecies]
-        cur_pred = model.predict(cur_data, verbose=0)
+        cur_pred = predict_func(model, cur_data, *predict_args, **predict_kwargs)
 
         cur_pred_labels = np.argmax(cur_pred, axis=1)
         acc = metric(cur_labels, cur_pred_labels)
