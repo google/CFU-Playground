@@ -79,13 +79,13 @@ def predict_tflite(tflite_model, x_test, *args, **kwargs):
     return np.squeeze(y_pred)
 
 
-def export_tf_lite_micto_model_form(
+def export_tf_lite_micro_model(
     tf_lite_model: Union[str, bytes], tflm_model_path: str, model_name=None
 ):
+    # Dump model to file if it is not dumped already
     if isinstance(tf_lite_model, bytes):
         tf_lite_model_path = f"temp_{model_name}.tflite"
         open(tf_lite_model_path, "wb").write(tf_lite_model)
-
     elif isinstance(tf_lite_model, str):
         tf_lite_model_path = tf_lite_model
     else:
@@ -93,9 +93,33 @@ def export_tf_lite_micto_model_form(
 
     if model_name is None:
         model_name = tflm_model_path.replace("/", "_").replace(".", "_")
-    # os.system(f"/development/RISC-V-SIMD-extension-for-the-AI-workload/custom_bin/xxd -i -n {model_name}_model {tf_lite_model_path} > {tflm_model_path}")
-    os.system(f"xxd -i -n {model_name}_model {tf_lite_model_path} > {tflm_model_path}")
+    # os.system(f"{_Tools.XXD_PATH} -i -n {model_name}_model {tf_lite_model_path} > {tflm_model_path}")
+    os.system(f"xxd -i {tf_lite_model_path}  {tflm_model_path}")
 
+    def rename_model_array(model_path: str, model_name: str):
+        with open(model_path, "r") as model_file:
+            content = model_file.read()
+        content = content.split("\n")
+        # Model array name
+        first_line = content[0]
+        first_line = first_line.split(" ")
+        first_line[2] = f"{model_name}[]"
+        
+        # Model array length name
+        last_line = content[-2]
+        last_line = last_line.split(" ")
+        last_line[2] = f"{model_name}_len" 
+
+        content[0] = " ".join(first_line)
+        content[-2] = " ".join(last_line)
+        content = "\n".join(content)
+        with open(model_path, "w") as model_file:
+            model_file.write(content)
+
+    rename_model_array(tflm_model_path, f"{model_name}_model")
+    # os.system(f"xxd -i {model_name}_model {tf_lite_model_path} > {tflm_model_path}")
+
+    # Clean up dumped model
     if isinstance(tf_lite_model, bytes):
         os.remove(tf_lite_model_path)
 
@@ -139,7 +163,6 @@ def export_test_data(
                         pred = pred / output_scale + output_zero_point
                         pred = pred.astype(output_details["dtype"])
 
-
                 data_str = _Tools.np_to_c_array(
                     data, arr_name=f"test_data_{model_name}_{cl}".replace("-", "_")
                 )
@@ -154,9 +177,10 @@ def export_test_data(
 
 class _Tools:
     TEMPLATES_PATH = Path(__file__).resolve().parent / "templates"
-    CFU_SRC_PATH = Path(__file__).resolve().parent.parent.parent / "common" / "src"
-    CFU_ROOT = Path(__file__).resolve().parent.parent.parent
-    ANCHOR = "// My_models_anchor"
+    CFU_ROOT = Path(__file__).resolve().parent.parent
+    CFU_COMMON_SRC_PATH = CFU_ROOT / "common" / "src"
+    XXD_PATH = CFU_ROOT / "custom_bin" / "xxd"
+    DEFAULT_ANCHOR = "// My_models_anchor"
 
     @staticmethod
     def np_to_c_array(arr: np.ndarray, arr_name="arr") -> str:
@@ -193,7 +217,7 @@ class _Tools:
             res_path = file_path
         with open(res_path, "w") as f:
             f.write(updated_file_content)
-    
+
     class _TestData:
         def __init__(self, y, pred) -> None:
             self.y = y
@@ -210,7 +234,7 @@ def deploy_model_tflite(
     apply_quantization=False,
     arena_size=110_000,
     create_cfu_playground_proj=False,
-    proj_template="proj_template",
+    proj_template="template",
 ):
     # Output files
     model_header = f"{model_name}_model.h"
@@ -219,7 +243,7 @@ def deploy_model_tflite(
     model_test_src = f"{model_name}.cc"
 
     # Export model to model file
-    export_tf_lite_micto_model_form(tf_lite_model, model_header, model_name=model_name)
+    export_tf_lite_micro_model(tf_lite_model, model_header, model_name=model_name)
 
     # Export test data and outputs to file
     export_test_data(
@@ -254,7 +278,7 @@ def deploy_model_tflite(
         "model_name_upper": model_name.upper(),
         "apply_quantization": apply_quantization,
         "num_classes": str(num_classes),
-        "epsilon": str(epsilon), #if not apply_quantization else "0",
+        "epsilon": str(epsilon),  # if not apply_quantization else "0",
         "test_data": test_data_names,
         "output_type": "int8_t" if apply_quantization else "float",
         "input_type": "int8_t" if apply_quantization else "float",
@@ -268,7 +292,7 @@ def deploy_model_tflite(
         model_cc_file.write(model_cc_template.render(context))
 
     # Move model files to sources
-    model_path = _Tools.CFU_SRC_PATH / "models" / model_name
+    model_path = _Tools.CFU_COMMON_SRC_PATH / "models" / model_name
     if not model_path.exists():
         model_path.mkdir()
 
@@ -283,32 +307,33 @@ def deploy_model_tflite(
     {arena_size},
 #endif
 """
-    tflite_cc_file = _Tools.CFU_SRC_PATH / "tflite.cc"
-    tflite_cc_file_bak = _Tools.CFU_SRC_PATH / "tflite.cc.bak"
+    tflite_cc_file = _Tools.CFU_COMMON_SRC_PATH / "tflite.cc"
+    tflite_cc_bak_file = _Tools.CFU_COMMON_SRC_PATH / "tflite.cc.bak"
     _Tools.add_after_line(
-        tflite_cc_file_bak,
-        line=_Tools.ANCHOR,
+        tflite_cc_bak_file,
+        line=_Tools.DEFAULT_ANCHOR,
         add_what=add_arena_size_str,
         res_path=tflite_cc_file,
     )
 
     # Update models.c file
+    # 1. model menu
     add_model_menu_str = f"""\
 #if defined(INCLUDE_MODEL_{model_name.upper()}) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
         MENU_ITEM(AUTO_INC_CHAR, "{model_name}", {model_name}_menu),
-#endif        
+#endif
 """
-    models_file = _Tools.CFU_SRC_PATH / "models" / "models.c"
-    models_file_bak = _Tools.CFU_SRC_PATH / "models" / "models.c.bak"
+    models_file = _Tools.CFU_COMMON_SRC_PATH / "models" / "models.c"
+    models_file_bak = _Tools.CFU_COMMON_SRC_PATH / "models" / "models.c.bak"
     _Tools.add_after_line(
         models_file_bak,
-        line=_Tools.ANCHOR,
+        line=_Tools.DEFAULT_ANCHOR,
         add_what=add_model_menu_str,
         res_path=models_file,
     )
 
-    models_file = _Tools.CFU_SRC_PATH / "models" / "models.c"
-    models_file_bak = _Tools.CFU_SRC_PATH / "models" / "models.c"
+    models_file = _Tools.CFU_COMMON_SRC_PATH / "models" / "models.c"
+    models_file_bak = _Tools.CFU_COMMON_SRC_PATH / "models" / "models.c"
     _Tools.add_after_line(
         models_file_bak,
         line="// My models include anchor",
@@ -319,14 +344,12 @@ def deploy_model_tflite(
     if create_cfu_playground_proj:
         proj_dir = _Tools.CFU_ROOT / "proj" / model_name
         template_dir = _Tools.CFU_ROOT / "proj" / proj_template
-        if not proj_dir.exists():
-            shutil.copytree(template_dir, proj_dir)
-            _Tools.add_after_line(
-                template_dir / "Makefile",
-                line="DEFINES += INCLUDE_MODEL_PDTI8",
-                add_what=f"DEFINES += INCLUDE_MODEL_{model_name.upper()}\n",
-                res_path=proj_dir / "Makefile",
-            )
-
-        else:
-            print(f"[Warning] proj directory already exists: {proj_dir}")
+        if proj_dir.exists():
+            raise RuntimeError("project directory already exists")
+        shutil.copytree(template_dir, proj_dir)
+        _Tools.add_after_line(
+            template_dir / "Makefile",
+            line="# Models defines anchor",
+            add_what=f"DEFINES += INCLUDE_MODEL_{model_name.upper()}\n",
+            res_path=proj_dir / "Makefile",
+        )

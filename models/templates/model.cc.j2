@@ -9,9 +9,6 @@
 #include "tensorflow/lite/micro/examples/person_detection/no_person_image_data.h"
 #include "tensorflow/lite/micro/examples/person_detection/person_image_data.h"
 #include "playground_util/models_utils.h"
-// {% if apply_quantization %}
-// #include "playground_util/models_utils.h"
-// {% endif %}
 #include "tflite.h"
 
 extern "C" {
@@ -30,10 +27,6 @@ extern "C" {
 static void {{ model_name }}_init(void) { 
     tflite_load_model({{ model_name }}_model, {{ model_name }}_model_len); 
 }
-
-// {% if apply_quantization %}
-// float dequantized_output[{{ num_classes }}];
-// {% endif %}
 
 // Run classification, after input has been loaded
 static {{ output_type }} *{{ model_name }}_classify() {

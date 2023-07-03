@@ -1,0 +1,353 @@
+///////////////////////////////////////////////
+// ORIGINAL code
+///////////////////////////////////////////////
+
+407M (    406868334 )  cycles total
+407M (    406834202 )  cycles total
+407M (    406864454 )  cycles total
+407M (    406844009 )  cycles total
+407M (    406855054 )  cycles total
+407M (    406822341 )  cycles total
+407M (    406850857 )  cycles total
+407M (    406852222 )  cycles total
+407M (    406856174 )  cycles total
+407M (    406855463 )  cycles total
+407M (    406853331 )  cycles total
+
+[406868334, 406834202, 406864454, 406844009, 406855054, 406822341, 406850857, 406852222, 406856174, 406855463, 406853331]
+mean: 406850585.54545456 
+median: 406853331.0 
+std: 12439.103280773581 
+
+///////////////////////////////////////////////
+// SIMPLIFIED code
+///////////////////////////////////////////////
+
+300M (    299648785 )  cycles total
+300M (    299621112 )  cycles total
+300M (    299645610 )  cycles total
+300M (    299628720 )  cycles total
+300M (    299637320 )  cycles total
+300M (    299611894 )  cycles total
+300M (    299636333 )  cycles total
+300M (    299634728 )  cycles total
+300M (    299637876 )  cycles total
+300M (    299637777 )  cycles total
+300M (    299638030 )  cycles total
+
+
+[299648785, 299621112, 299645610, 299628720, 299637320, 299611894, 299636333, 299634728, 299637876, 299637777, 299638030]
+mean: 299634380.45454544
+median: 299637320.0
+std: 9986.24317716069
+
+///////////////////////////////////////////////
+// CFU V5 (((V1)))  
+// - input is fully copied to the buffer
+// - Iterating over output channel in in the code, filter is copied for each out_channel
+// - accs are computed for each input_x, and saved to output buffer
+// - computation is done in one clock cycle
+// - Code reads output buffer, makes quantization and saves result
+///////////////////////////////////////////////
+10M (     10415175 )  cycles total
+10M (     10387502 )  cycles total
+10M (     10412000 )  cycles total
+10M (     10395110 )  cycles total
+10M (     10403710 )  cycles total
+10M (     10378284 )  cycles total
+10M (     10402723 )  cycles total
+10M (     10401118 )  cycles total
+10M (     10404266 )  cycles total
+10M (     10404167 )  cycles total
+10M (     10404420 )  cycles total
+[10415175, 10387502, 10412000, 10395110, 10403710, 10378284, 10402723, 10401118, 10404266, 10404167, 10404420]
+mean: 10400770.454545455
+median: 10403710.0
+std: 9986.24317716069
+
+///////////////////////////////////////////////
+// CFU V6 (V1)
+// - Same as v5, just a little cleaned up verilog code
+///////////////////////////////////////////////
+10M (     10415139 )  cycles total
+10M (     10387466 )  cycles total
+10M (     10411964 )  cycles total
+10M (     10395074 )  cycles total
+10M (     10403674 )  cycles total
+10M (     10378248 )  cycles total
+10M (     10402687 )  cycles total
+10M (     10401082 )  cycles total
+10M (     10404230 )  cycles total
+10M (     10404131 )  cycles total
+10M (     10404384 )  cycles total
+[10415139, 10387466, 10411964, 10395074, 10403674, 10378248, 10402687, 10401082, 10404230, 10404131, 10404384]
+mean: 10400734.454545455
+median: 10403674.0
+std: 9986.24317716069
+
+///////////////////////////////////////////////
+// CFU V7 (V2)
+// - iteration over x is moved to code
+// - For each output_x input_buffer is filled from beginning
+// - output buffer is removed 
+///////////////////////////////////////////////
+33M (     33483262 )  cycles total
+33M (     33449130 )  cycles total
+33M (     33479382 )  cycles total
+33M (     33458937 )  cycles total
+33M (     33469982 )  cycles total
+33M (     33437269 )  cycles total
+33M (     33465785 )  cycles total
+33M (     33467150 )  cycles total
+33M (     33471102 )  cycles total
+33M (     33470391 )  cycles total
+33M (     33468259 )  cycles total
+[33483262, 33449130, 33479382, 33458937, 33469982, 33437269, 33465785, 33467150, 33471102, 33470391, 33468259]
+mean: 33465513.545454547
+median: 33468259.0
+std: 12439.103280773581
+
+///////////////////////////////////////////////
+// CFU V8 (V3)
+// - Input buffer is used as ring buffer
+// - Computation is pipelined
+///////////////////////////////////////////////
+59M (     59497356 )  cycles total
+59M (     59463224 )  cycles total
+59M (     59493760 )  cycles total
+59M (     59473031 )  cycles total
+59M (     59484076 )  cycles total
+59M (     59451363 )  cycles total
+59M (     59479879 )  cycles total
+59M (     59481244 )  cycles total
+59M (     59485196 )  cycles total
+59M (     59484485 )  cycles total
+59M (     59482353 )  cycles total
+[59497356, 59463224, 59493760, 59473031, 59484076, 59451363, 59479879, 59481244, 59485196, 59484485, 59482353]
+mean: 59479633.36363637
+median: 59482353.0
+std: 12468.122263470932
+
+///////////////////////////////////////////////
+// CFU V9 (V4)
+// - Removed mod - added update address phase
+// - Remove all non-blocking assignments
+///////////////////////////////////////////////
+50M (     49810757 )  cycles total
+50M (     49778778 )  cycles total
+50M (     49807112 )  cycles total
+50M (     49787852 )  cycles total
+50M (     49798082 )  cycles total
+50M (     49767798 )  cycles total
+50M (     49794955 )  cycles total
+50M (     49795330 )  cycles total
+50M (     49799014 )  cycles total
+50M (     49798507 )  cycles total
+50M (     49797170 )  cycles total
+[49810757, 49778778, 49807112, 49787852, 49798082, 49767798, 49794955, 49795330, 49799014, 49798507, 49797170]
+mean: 49794123.18181818
+median: 49797170.0
+std: 11612.894352385603
+
+///////////////////////////////////////////////
+SKIP // CFU V10 (xxx)
+///////////////////////////////////////////////
+
+///////////////////////////////////////////////
+// CFU V11 (V5)
+// - Add combinatoric quantization
+///////////////////////////////////////////////
+45M (     44552519 )  cycles total
+45M (     44543851 )  cycles total
+45M (     44551391 )  cycles total
+45M (     44545105 )  cycles total
+45M (     44546408 )  cycles total
+45M (     44542596 )  cycles total
+45M (     44555114 )  cycles total
+45M (     44544288 )  cycles total
+45M (     44545191 )  cycles total
+45M (     44546846 )  cycles total
+45M (     44554357 )  cycles total
+[44552519, 44543851, 44551391, 44545105, 44546408, 44542596, 44555114, 44544288, 44545191, 44546846, 44554357]
+mean: 44547969.63636363
+median: 44546408.0
+std: 4298.674135395012
+
+///////////////////////////////////////////////
+// CFU V11.1 (V5.1)
+// - Differs from v11 by loading data from buffers to intermediate registers - useless
+///////////////////////////////////////////////
+45M (     44753223 )  cycles total
+45M (     44744555 )  cycles total
+45M (     44752095 )  cycles total
+45M (     44745880 )  cycles total
+45M (     44747112 )  cycles total
+45M (     44743300 )  cycles total
+45M (     44755818 )  cycles total
+45M (     44744992 )  cycles total
+45M (     44745895 )  cycles total
+45M (     44747550 )  cycles total
+45M (     44755061 )  cycles total
+[44753223, 44744555, 44752095, 44745880, 44747112, 44743300, 44755818, 44744992, 44745895, 44747550, 44755061]
+mean: 44748680.09090909
+median: 44747112.0
+std: 4294.419178730067
+
+///////////////////////////////////////////////
+// CFU V11.2 (V5.2)
+// - Uses pipelined asynchronous quantization
+///////////////////////////////////////////////
+45M (     45154631 )  cycles total
+45M (     45145963 )  cycles total
+45M (     45153503 )  cycles total
+45M (     45147217 )  cycles total
+45M (     45148520 )  cycles total
+45M (     45144708 )  cycles total
+45M (     45157226 )  cycles total
+45M (     45146400 )  cycles total
+45M (     45147303 )  cycles total
+45M (     45148958 )  cycles total
+45M (     45156469 )  cycles total
+[45154631, 45145963, 45153503, 45147217, 45148520, 45144708, 45157226, 45146400, 45147303, 45148958, 45156469]
+mean: 45150081.63636363
+median: 45148520.0
+std: 4298.674135395012
+
+
+///////////////////////////////////////////////
+// CFU V12 (V6.0)
+// - Write 4 values at a time (Note - conditional writes)
+// - Quantization is combinatorical
+///////////////////////////////////////////////
+28M (     28203170 )  cycles total
+28M (     28194502 )  cycles total
+28M (     28202042 )  cycles total
+28M (     28195756 )  cycles total
+28M (     28197059 )  cycles total
+28M (     28193247 )  cycles total
+28M (     28205765 )  cycles total
+28M (     28194939 )  cycles total
+28M (     28195842 )  cycles total
+28M (     28197497 )  cycles total
+28M (     28205008 )  cycles total
+[28203170, 28194502, 28202042, 28195756, 28197059, 28193247, 28205765, 28194939, 28195842, 28197497, 28205008]
+mean: 28198620.636363637
+median: 28197059.0
+std: 4298.674135395012
+
+///////////////////////////////////////////////
+// CFU V12 (V6.05)
+// - same as V6.0, but uses quant 2
+///////////////////////////////////////////////
+[28805282, 28796614, 28804154, 28797868, 28799171, 28795359, 28807877, 28797051, 28797954, 28799609, 28807120]
+mean: 28800732.636363637
+median: 28799171.0
+std: 4298.674135395012
+
+///////////////////////////////////////////////
+// CFU V12.2 (V6.1)
+// - Uses pipelined quantization
+// - Removed conditional writing
+///////////////////////////////////////////////
+29M (     29200999 )  cycles total
+29M (     29192343 )  cycles total
+29M (     29199887 )  cycles total
+29M (     29193620 )  cycles total
+29M (     29194879 )  cycles total
+29M (     29191076 )  cycles total
+29M (     29203605 )  cycles total
+29M (     29192772 )  cycles total
+29M (     29193670 )  cycles total
+29M (     29195334 )  cycles total
+29M (     29202857 )  cycles total
+[29200999, 29192343, 29199887, 29193620, 29194879, 29191076, 29203605, 29192772, 29193670, 29195334, 29202857]
+mean: 29196458.363636363
+median: 29194879.0
+std: 4300.899277481551
+
+///////////////////////////////////////////////
+SKIP // CFU V13 (V7)
+// - Async writing / computation
+// - Returned conditional writing
+// - Combinatorical quantization
+///////////////////////////////////////////////
+26M (     26463890 )  cycles total
+26M (     26455222 )  cycles total
+26M (     26462762 )  cycles total
+26M (     26456476 )  cycles total
+26M (     26457779 )  cycles total
+26M (     26453967 )  cycles total
+26M (     26466485 )  cycles total
+26M (     26455659 )  cycles total
+26M (     26456562 )  cycles total
+26M (     26458217 )  cycles total
+26M (     26465728 )  cycles total
+[26463890, 26455222, 26462762, 26456476, 26457779, 26453967, 26466485, 26455659, 26456562, 26458217, 26465728]
+mean: 26459340.636363637
+median: 26457779.0
+std: 4298.674135395012
+
+///////////////////////////////////////////////
+// CFU V13.2 (v7.0)
+// - pipelined quantization
+// - Removed conditional writing
+///////////////////////////////////////////////
+28M (     27624493 )  cycles total
+28M (     27615837 )  cycles total
+28M (     27623381 )  cycles total
+28M (     27617114 )  cycles total
+28M (     27618373 )  cycles total
+28M (     27614570 )  cycles total
+28M (     27627099 )  cycles total
+28M (     27616266 )  cycles total
+28M (     27617164 )  cycles total
+28M (     27618828 )  cycles total
+28M (     27626351 )  cycles total
+[27624493, 27615837, 27623381, 27617114, 27618373, 27614570, 27627099, 27616266, 27617164, 27618828, 27626351]
+mean: 27619952.363636363
+median: 27618373.0
+std: 4300.899277481551
+
+
+///////////////////////////////////////////////
+// CFU V14 (V8.0)
+// - Make memory width 32bit
+///////////////////////////////////////////////
+29M (     28745877 )  cycles total
+29M (     28737209 )  cycles total
+29M (     28744749 )  cycles total
+29M (     28738463 )  cycles total
+29M (     28739766 )  cycles total
+29M (     28735954 )  cycles total
+29M (     28748472 )  cycles total
+29M (     28737646 )  cycles total
+29M (     28738549 )  cycles total
+29M (     28740204 )  cycles total
+29M (     28747715 )  cycles total
+[28745877, 28737209, 28744749, 28738463, 28739766, 28735954, 28748472, 28737646, 28738549, 28740204, 28747715]
+mean: 28741327.636363637
+median: 28739766.0
+std: 4298.674135395012
+
+
+// CFU V14(x1)
+................   139M (    138840456 )  cycles total
+[138840456]
+// CFU V14(x2)
+................    76M (     75927431 )  cycles total
+[75927431]
+// CFU V14(x4)
+................    44M (     44474325 )  cycles total
+[44474325]
+// CFU V14(x8)
+................    29M (     28745877 )  cycles total
+[28745877]
+// CFU V14(x16)
+................    21M (     20881941 )  cycles total
+[20881941]
+// CFU V14(x24)
+................    18M (     18335081 )  cycles total
+[18335081]
+// CFU V14(x32)
+................    17M (     16950459 )  cycles total
+[16950459]

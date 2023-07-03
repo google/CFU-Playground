@@ -30,9 +30,7 @@
 #include "models/pdti8/pdti8.h"
 
 // My models include anchor
-#include "models/simc_4_radioml/simc_4_radioml.h"
-#include "models/simc_3_MIXED_v2/simc_3_MIXED_v2.h"
-#include "models/simc_3_MIXED_v2_no_quant/simc_3_MIXED_v2_no_quant.h"
+#include "models/cnn_1d_v012_radioml/cnn_1d_v012_radioml.h"
 #include "models/sine/sine.h"
 
 inline void no_menu() {}
@@ -48,19 +46,15 @@ static struct Menu MENU = {
     {
 
 // My_models_anchor
+#if defined(INCLUDE_MODEL_CNN_1D_V012_RADIOML) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
+        MENU_ITEM(AUTO_INC_CHAR, "cnn_1d_v012_radioml", cnn_1d_v012_radioml_menu),
+#endif
 #if defined(INCLUDE_MODEL_SIMC_3_MIXED_V2_NO_QUANT) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
         MENU_ITEM(AUTO_INC_CHAR, "simc_3_MIXED_v2_no_quant", simc_3_MIXED_v2_no_quant_menu),
-#endif    
-#if defined(INCLUDE_MODEL_SIMC_4_RADIOML) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
-        MENU_ITEM(AUTO_INC_CHAR, "simc_4_radioml", simc_4_radioml_menu),
-#endif  
+#endif
 #if defined(INCLUDE_MODEL_SIMC_3_MIXED_V2) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
         MENU_ITEM(AUTO_INC_CHAR, "Signal modulation classification model 3", simc_3_MIXED_v2_menu),
 #endif  
-#if defined(INCLUDE_MODEL_SIGNAL_MODULATION_2) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
-        MENU_ITEM(AUTO_INC_CHAR, "Signal modulation classification model 2", signal_modulation_2_menu),
-#endif
-
 #if defined(INCLUDE_MODEL_SINE) || defined(INCLUDE_ALL_TFLM_EXAMPLES)
         MENU_ITEM(AUTO_INC_CHAR, "Primitive sine model", sine_menu),
 #endif
