@@ -55,19 +55,19 @@ static struct Menu MENU = {
 #if defined(INCLUDE_MODEL_HPS)
         MENU_ITEM(AUTO_INC_CHAR, "HPS models", hps_model_menu),
 #endif
-#if defined(INLCUDE_MODEL_MLCOMMONS_TINY_V01_ANOMD)
+#if defined(INCLUDE_MODEL_MLCOMMONS_TINY_V01_ANOMD)
         MENU_ITEM(AUTO_INC_CHAR, "MLCommons Tiny V0.1 Anomaly Detection",
                   mlcommons_tiny_v01_anomd_menu),
 #endif
-#if defined(INLCUDE_MODEL_MLCOMMONS_TINY_V01_IMGC)
+#if defined(INCLUDE_MODEL_MLCOMMONS_TINY_V01_IMGC)
         MENU_ITEM(AUTO_INC_CHAR, "MLCommons Tiny V0.1 Image Classification",
                   mlcommons_tiny_v01_imgc_menu),
 #endif
-#if defined(INLCUDE_MODEL_MLCOMMONS_TINY_V01_KWS)
+#if defined(INCLUDE_MODEL_MLCOMMONS_TINY_V01_KWS)
         MENU_ITEM(AUTO_INC_CHAR, "MLCommons Tiny V0.1 Keyword Spotting",
                   mlcommons_tiny_v01_kws_menu),
 #endif
-#if defined(INLCUDE_MODEL_MLCOMMONS_TINY_V01_VWW)
+#if defined(INCLUDE_MODEL_MLCOMMONS_TINY_V01_VWW)
         MENU_ITEM(AUTO_INC_CHAR, "MLCommons Tiny V0.1 Visual Wake Words",
                   mlcommons_tiny_v01_vww_menu),
 #endif

@@ -95,16 +95,16 @@ constexpr int kTensorArenaSize = const_max<int>(
 #ifdef INCLUDE_MODEL_HPS
     256 * 1024,
 #endif
-#ifdef INLCUDE_MODEL_MLCOMMONS_TINY_V01_ANOMD
+#ifdef INCLUDE_MODEL_MLCOMMONS_TINY_V01_ANOMD
     3 * 1024,
 #endif
-#ifdef INLCUDE_MODEL_MLCOMMONS_TINY_V01_IMGC
+#ifdef INCLUDE_MODEL_MLCOMMONS_TINY_V01_IMGC
     53 * 1024,
 #endif
-#ifdef INLCUDE_MODEL_MLCOMMONS_TINY_V01_KWS
+#ifdef INCLUDE_MODEL_MLCOMMONS_TINY_V01_KWS
     23 * 1024,
 #endif
-#ifdef INLCUDE_MODEL_MLCOMMONS_TINY_V01_VWW
+#ifdef INCLUDE_MODEL_MLCOMMONS_TINY_V01_VWW
     99 * 1024,
 #endif
     0 /* When no models defined, we don't need a tensor arena. */
