@@ -66,7 +66,10 @@ def get_cycle_count():
      
     cycles = sys.float_info.max 
     cycles_found = False
+    test_passing = True
     for line in lines:
+        if 'FAIL' in line and 'test' in line and 'failed' in line:
+            test_passing = False
         if 'cycles total' in line:
             cycles_list = [float(s) for s in line.split() if s.isdigit()]
             cur_cycles = cycles_list[0] 
@@ -76,15 +79,17 @@ def get_cycle_count():
             else:
                 cycles = cur_cycles if cur_cycles > cycles else cycles
 
-    return cycles
+    return (test_passing, cycles)
 
             
-def run_config(variant, target):
+def run_config(variant, target="digilent_arty", workload="pdti8"):
     
     # Generate bitstream and run simulation for given CPU variant and return metric results
     cycles = None
     cells  = None
     run_succeeds = False 
+    test_passed = False
+    update_workload(workload)
     while not run_succeeds:
         EXTRA_LITEX_ARGS = 'EXTRA_LITEX_ARGS="--cpu-variant=' + variant +'"'
         subprocess.run(['make', 'clean']) 
@@ -94,7 +99,7 @@ def run_config(variant, target):
         outfile  = open(filename, "w")
         workload = subprocess.run(workload_cmd, stdout=outfile)
         try:
-            cycles = get_cycle_count()
+            test_passed, cycles = get_cycle_count()
             run_succeeds = True
         except UnicodeDecodeError:
             run_succeeds = False
@@ -103,16 +108,50 @@ def run_config(variant, target):
     # Remove any copied tf source overlay for next run
     if os.path.exists("./src/tensorflow"):
         subprocess.run(['rm', '-rf', './src/tensorflow'])
+    
+    # Check to see if the workload / benchmark test still passing (i.e. hw and sw are both functionally correct)
+    if test_passed:
+        return (cycles, cells)
+    else: # if test failing return large number to make sample invalid
+        print("Simulation completed but program test failed! Modifications need to be made to CFU HW or SW.")
+        return (float('inf'), float('inf'))
 
-    return (cycles, cells)
+
+def update_workload(workload="pdti8", makefile_path="./Makefile"):
+    if not os.path.isfile(makefile_path):
+        print("Makefile not found.")
+        exit() 
+
+    with open(makefile_path, "r") as file:
+        lines = file.readlines()
+
+    new_lines = []
+    embench_workload = False
+    for line in lines:
+        if workload.lower() in line.lower():
+            embench_workload = "EMBENCH" in line
+            if "#DEFINES" in line:
+                line = line.replace("#DEFINES", "DEFINES") 
+        elif ("INCLUDE_MODEL_" in line or "INCLUDE_EMBENCH_" in line) and "#DEFINES" not in line:
+            line = line.replace("DEFINES", "#DEFINES") 
+        elif "MENU_CHAR_SEQUENCE" in line:
+            if embench_workload:
+                line = "DEFINES += MENU_CHAR_SEQUENCE='\"81xQ\"'\n"  
+            else: # TinyML model workload golden tests
+                line = "DEFINES += MENU_CHAR_SEQUENCE='\"11gxxQ\"'\n"  
+        new_lines.append(line)
+
+    with open(makefile_path, "w") as file:
+        file.writelines(new_lines)
 
     
 def dse(csrPluginConfig, bypass, cfu, dCacheSize, hardwareDiv, 
-        iCacheSize, mulDiv, prediction, safe, singleCycleShift, singleCycleMulDiv, target):
+        iCacheSize, mulDiv, prediction, safe, singleCycleShift, 
+        singleCycleMulDiv, target="digilent_arty", workload="pdti8"):
 
     variant = make_variant_string(csrPluginConfig, bypass, cfu, dCacheSize, hardwareDiv, 
         iCacheSize, mulDiv, prediction, safe, singleCycleShift, singleCycleMulDiv)
-    cycles, cells = run_config(variant, target)
+    cycles, cells = run_config(variant, target, workload)
    
     print("NUMBER OF CYCLES: "  + str(cycles))
     print("NUMBER OF CELLS:  "  + str(cells))
@@ -123,7 +162,7 @@ def dse(csrPluginConfig, bypass, cfu, dCacheSize, hardwareDiv,
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 :
-        # Used for running dse vis cmd line
+        # Used for running dse via cmd line
         # Sample command that would be equivalent to default params:
         # ./dse_framework.py mcycle True False 4096 True 4096 True none True True True 
         csrPluginConfig   = sys.argv[1]
@@ -138,6 +177,7 @@ if __name__ == "__main__":
         singleCycleShift  = True if sys.argv[10] == "True" else False
         singleCycleMulDiv = True if sys.argv[11] == "True" else False
         TARGET            = "digilent_arty"  
+        WORKLOAD          = "pdti8"
     else:
         # Sample example of how to use dse framework
         csrPluginConfig="mcycle"
@@ -152,6 +192,7 @@ if __name__ == "__main__":
         singleCycleShift=True
         singleCycleMulDiv=True
         TARGET = "digilent_arty"  
+        WORKLOAD = "pdti8"
     
     dse(csrPluginConfig, bypass, cfu, dCacheSize, hardwareDiv, iCacheSize, 
-        mulDiv, prediction, safe, singleCycleShift, singleCycleMulDiv, TARGET)
+        mulDiv, prediction, safe, singleCycleShift, singleCycleMulDiv, TARGET, WORKLOAD)

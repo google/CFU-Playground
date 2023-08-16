@@ -45,16 +45,16 @@ DEFINES += INCLUDE_MODEL_MICRO_SPEECH
 #DEFINES += INCLUDE_MODEL_MNV2
 
 # Uncomment to include  mlcommons tiny v0.1 v0.1 anomaly detection in built binary
-#DEFINES += INLCUDE_MODEL_MLCOMMONS_TINY_V01_ANOMD
+#DEFINES += INCLUDE_MODEL_MLCOMMONS_TINY_V01_ANOMD
 
 # Uncomment to include  mlcommons tiny v0.1 v0.1 image classification in built binary
-#DEFINES += INLCUDE_MODEL_MLCOMMONS_TINY_V01_IMGC
+#DEFINES += INCLUDE_MODEL_MLCOMMONS_TINY_V01_IMGC
 
 # Uncomment to include  mlcommons tiny v0.1 v0.1 keyword spotting in built binary
-#DEFINES += INLCUDE_MODEL_MLCOMMONS_TINY_V01_KWS
+#DEFINES += INCLUDE_MODEL_MLCOMMONS_TINY_V01_KWS
 
 # Uncomment to include  mlcommons tiny v0.1 v0.1 visual wake words in built binary
-#DEFINES += INLCUDE_MODEL_MLCOMMONS_TINY_V01_VWW
+#DEFINES += INCLUDE_MODEL_MLCOMMONS_TINY_V01_VWW
 
 # Uncomment to include all TFLM examples (pdti8, micro_speech, magic_wand)
 #DEFINES += INCLUDE_ALL_TFLM_EXAMPLES

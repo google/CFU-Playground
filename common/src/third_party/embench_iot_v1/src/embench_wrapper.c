@@ -26,10 +26,10 @@
 #define GET_TIMER()   perf_get_litex_timer()
 #define PRINT_PERF(a, b)  printf("Spent %llu cycles\n", a - b) 
 #else // default timer to use is mcycle
-#define TIMER_TYPE    unsigned int
-#define RESET_TIMER() /* no reset for mcycle */
-#define GET_TIMER()   perf_get_mcycle() 
-#define PRINT_PERF(a, b)  printf("Spent %u cycles\n", b - a) 
+#define TIMER_TYPE    uint64_t
+#define RESET_TIMER() perf_reset_all_counters() 
+#define GET_TIMER()   perf_get_mcycle64() 
+#define PRINT_PERF(a, b)  perf_print_all_counters(); perf_print_value(b - a); printf(" cycles total\n")
 #endif
 
 
@@ -45,7 +45,7 @@ void embench_wrapper_##benchname () \
   result = benchmark_##benchname (); \
   TIMER_TYPE end = GET_TIMER(); \
   correct = verify_benchmark_##benchname (result); \
-  printf("%s\n", correct ? "OK  Benchmark result verified" : "FAIL  Benchmark result incorrect"); \
+  printf("%s\n", correct ? "OK  Benchmark test passed" : "FAIL  Benchmark test failed"); \
   PRINT_PERF(start, end); \
 }
 

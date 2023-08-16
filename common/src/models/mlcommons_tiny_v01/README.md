@@ -19,7 +19,7 @@ not implemented in the tests -- rather a 32-bit xor reduction is used to check
 for output equivalence to expected results.
 
 > To include this model in your project, define the identifier
-> `INLCUDE_MODEL_MLCOMMONS_TINY_V01_ANOMD`.
+> `INCLUDE_MODEL_MLCOMMONS_TINY_V01_ANOMD`.
 
 ### Image Classification
 
@@ -30,7 +30,7 @@ Inputs to the tests have already been quantized, and are located in
 `imgc/test_data`.
 
 > To include this model in your project, define the identifier
-> `INLCUDE_MODEL_MLCOMMONS_TINY_V01_IMGC`.
+> `INCLUDE_MODEL_MLCOMMONS_TINY_V01_IMGC`.
 
 ### Keyword Spotting
 
@@ -41,7 +41,7 @@ Inputs to the tests do not need to be quantized and are located in
 `kws/test_data`.
 
 > To include this model in your project, define the identifier
-> `INLCUDE_MODEL_MLCOMMONS_TINY_V01_KWS`.
+> `INCLUDE_MODEL_MLCOMMONS_TINY_V01_KWS`.
 
 ### Visual Wake Words
 
@@ -52,4 +52,4 @@ Inputs to the tests have already been quantized, and are located in
 `vww/test_data`.
 
 > To include this model in your project, define the identifier
-> `INLCUDE_MODEL_MLCOMMONS_TINY_V01_VWW`.
+> `INCLUDE_MODEL_MLCOMMONS_TINY_V01_VWW`.
