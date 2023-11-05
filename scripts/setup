@@ -129,6 +129,7 @@ if [ ! -e "${VIL_DIR}" ]; then
     wget -O ${VIL_DIR}/src/renode_cfu.cpp https://raw.githubusercontent.com/renode/renode/${RENODE_VERSION_SHA}/src/Plugins/VerilatorPlugin/VerilatorIntegrationLibrary/src/renode_cfu.cpp
     wget -O ${VIL_DIR}/src/renode_cfu.h https://raw.githubusercontent.com/renode/renode/${RENODE_VERSION_SHA}/src/Plugins/VerilatorPlugin/VerilatorIntegrationLibrary/src/renode_cfu.h
     wget -O ${VIL_DIR}/src/renode.h https://raw.githubusercontent.com/renode/renode/${RENODE_VERSION_SHA}/src/Plugins/VerilatorPlugin/VerilatorIntegrationLibrary/src/renode.h
+    wget -O ${VIL_DIR}/src/renode_action_enumerators.txt https://raw.githubusercontent.com/renode/renode/${RENODE_VERSION_SHA}/src/Plugins/VerilatorPlugin/VerilatorIntegrationLibrary/src/renode_action_enumerators.txt
     wget -O ${VIL_DIR}/src/buses/cfu.cpp https://raw.githubusercontent.com/renode/renode/${RENODE_VERSION_SHA}/src/Plugins/VerilatorPlugin/VerilatorIntegrationLibrary/src/buses/cfu.cpp
     wget -O ${VIL_DIR}/src/buses/cfu.h https://raw.githubusercontent.com/renode/renode/${RENODE_VERSION_SHA}/src/Plugins/VerilatorPlugin/VerilatorIntegrationLibrary/src/buses/cfu.h
     wget -O ${VIL_DIR}/src/buses/bus.h https://raw.githubusercontent.com/renode/renode/${RENODE_VERSION_SHA}/src/Plugins/VerilatorPlugin/VerilatorIntegrationLibrary/src/buses/bus.h
