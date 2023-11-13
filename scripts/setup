@@ -115,13 +115,17 @@ elif ! ${RENODE_DIR}/renode --version | grep "${RENODE_VERSION_NO}.*${RENODE_VER
     echo "Warning: Your Renode version (in ${RENODE_DIR}) does not match the required one (${RENODE_VERSION})"
 fi
 
+# After this commit, a dependency on 'tlib' was added that we don't support here.
+# This caused issue #805.  Pinning to this version fixes it.
+RENODE_INFRA_VERSION_SHA=509a073
+
 # Get necessary files from Renode VerilatorPlugin to build CFU library for Renode tests
 # It is a temporary workaround as long as the sources are not present in Renode portable
 VIL_DIR=${RENODE_DIR}/verilator-integration-library
 if [ ! -e "${VIL_DIR}" ]; then
     mkdir -p ${VIL_DIR}/src/buses
-    wget -O ${VIL_DIR}/renode_imports.h https://raw.githubusercontent.com/renode/renode-infrastructure/master/src/Emulator/Cores/renode/include/renode_imports.h
-    wget -O ${VIL_DIR}/renode_imports_generated.h https://raw.githubusercontent.com/renode/renode-infrastructure/master/src/Emulator/Cores/renode/include/renode_imports_generated.h
+    wget -O ${VIL_DIR}/renode_imports.h https://raw.githubusercontent.com/renode/renode-infrastructure/${RENODE_INFRA_VERSION_SHA}/src/Emulator/Cores/renode/include/renode_imports.h
+    wget -O ${VIL_DIR}/renode_imports_generated.h https://raw.githubusercontent.com/renode/renode-infrastructure/${RENODE_INFRA_VERSION_SHA}/src/Emulator/Cores/renode/include/renode_imports_generated.h
     wget -O ${VIL_DIR}/src/renode_cfu.cpp https://raw.githubusercontent.com/renode/renode/${RENODE_VERSION_SHA}/src/Plugins/VerilatorPlugin/VerilatorIntegrationLibrary/src/renode_cfu.cpp
     wget -O ${VIL_DIR}/src/renode_cfu.h https://raw.githubusercontent.com/renode/renode/${RENODE_VERSION_SHA}/src/Plugins/VerilatorPlugin/VerilatorIntegrationLibrary/src/renode_cfu.h
     wget -O ${VIL_DIR}/src/renode.h https://raw.githubusercontent.com/renode/renode/${RENODE_VERSION_SHA}/src/Plugins/VerilatorPlugin/VerilatorIntegrationLibrary/src/renode.h
