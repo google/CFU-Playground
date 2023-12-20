@@ -12,7 +12,8 @@ dependencies:
   - litex-hub::nextpnr-ecp5
   - litex-hub::nextpnr-ice40
   - litex-hub::iceprog
-  - litex-hub::yosys
+# Temporarily pin Yosys until symbiflow-yosys-plugins catches up
+  - litex-hub::yosys=0.33_11_g31ee566ec=20230724_080446_py37
   - litex-hub::symbiflow-yosys-plugins
   - libevent
   - json-c
