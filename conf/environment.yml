@@ -13,7 +13,8 @@ dependencies:
   - litex-hub::nextpnr-ice40
   - litex-hub::iceprog
 # Temporarily pin Yosys until symbiflow-yosys-plugins catches up
-  - litex-hub::yosys=0.33_11_g31ee566ec=20230724_080446_py37
+#   AND https://github.com/YosysHQ/yosys/issues/4081 is resolved
+  - litex-hub::yosys=0.29_35_g57c9eb70f=20230524_010725_py37
   - litex-hub::symbiflow-yosys-plugins
   - libevent
   - json-c
