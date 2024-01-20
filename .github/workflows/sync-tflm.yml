@@ -48,10 +48,10 @@ jobs:
 
           if [ -n "$(git status --porcelain)" ]; then
             git commit -sm "Sync from tflite-micro at $TFLM_SHA."
-            echo "::set-output name=committed::true"
+            echo "committed=true" >> "$GITHUB_OUTPUT"
           else
             echo "::notice title=Early exit::TFLM is up to date."
-            echo "::set-output name=committed::false"
+            echo "committed=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Create Pull Request

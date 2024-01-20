@@ -50,7 +50,7 @@ jobs:
       id: setup-matrix-combinations
       run: |
         export MATRIX_PARAMS=$(./.github/scripts/generate_ci_matrix.py)
-        echo "::set-output name=matrix-combinations::{\"include\":$MATRIX_PARAMS}"
+        echo "matrix-combinations={\"include\":$MATRIX_PARAMS}" >> "$GITHUB_OUTPUT"
 
     - name: Setup environment
       run: |
