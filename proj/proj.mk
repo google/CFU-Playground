@@ -395,4 +395,4 @@ pytest:
 .PHONY: cfu-asic
 cfu-asic:
 	@echo Working on Dummy POC for Openlane Integration into CFU Playground
-	cd $(SOC_DIR)/openlane/ && make mount && ./flow.tcl -design spm
+	cp cfu.v $(SOC_DIR)/openlane/cfu_verilog_files  && cd $(SOC_DIR)/openlane/ && make mount 
