@@ -51,10 +51,10 @@ jobs:
 
             RENODE_SHA=${RENODE_VERSION#*git}
             git commit -sm "Update Renode to $RENODE_SHA."
-            echo "::set-output name=committed::true"
+            echo "committed=true" >> "$GITHUB_OUTPUT"
           else
             echo "::notice title=Early exit::Renode is up to date."
-            echo "::set-output name=committed::false"
+            echo "committed=false" >> "$GITHUB_OUTPUT"
           fi
 
           rm renode-latest.linux-portable.tar.gz
