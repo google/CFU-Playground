@@ -64,6 +64,7 @@ SHARED_FLAGS := \
 	-I$(SRC_DIR)/third_party/kissfft \
 	-I$(SOC_SOFTWARE_DIR)/include \
 	-I$(SOC_SOFTWARE_DIR)/libc \
+	-I$(LIBC_DIR)/tinystdio \
 	-I$(LIBC_DIR)/include \
     -I$(LITEX_HW_DIR) \
     -I$(VEX_SRC_DIR) \
