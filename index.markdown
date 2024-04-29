@@ -47,8 +47,8 @@ title: Home
 
 # Publications, Posters and Presentations
 <h3>
-  <a href="https://arxiv.org/abs/2201.01863">
-      Paper
+  <a href="https://scholar.google.com/citations?view_op=view_citation&hl=en&user=7as3AmIAAAAJ&citation_for_view=7as3AmIAAAAJ:u5HHmVD_uO8C">
+      ISPASS Publication | 2023
   </a>
 </h3>
 <h3>
