@@ -29,7 +29,7 @@ on:
       - 'AUTHORS'
 jobs:
   setup-matrix:
-    runs-on: ubuntu-20.04
+    runs-on: 'ubuntu-24.04'
     outputs:
       matrix-combinations: ${{ steps.setup-matrix-combinations.outputs.matrix-combinations }}
 
@@ -93,7 +93,7 @@ jobs:
 
 
   test-projects:
-    runs-on: ubuntu-20.04
+    runs-on: 'ubuntu-24.04'
     continue-on-error: True
     needs: setup-matrix
     strategy:
