@@ -147,9 +147,14 @@ jobs:
 
     - name: Build sample & generate Renode scripts
       run:
-        pwd && source environment && cd proj/${{ matrix.proj_name }} &&
-        make ${{ matrix.build_params }} PLATFORM=${{ matrix.platform }} TARGET=${{ matrix.target }} -j8 software &&
-        make renode-scripts ${{ matrix.build_params }} PLATFORM=${{ matrix.platform }} TARGET=${{ matrix.target }}
+        pwd && source environment && cd proj/${MATRIX_PROJ_NAME} &&
+        make ${MATRIX_BUILD_PARAMS} PLATFORM=${MATRIX_PLATFORM} TARGET=${MATRIX_TARGET} -j8 software &&
+        make renode-scripts ${MATRIX_BUILD_PARAMS} PLATFORM=${MATRIX_PLATFORM} TARGET=${MATRIX_TARGET}
+      env:
+        MATRIX_PROJ_NAME: ${{ matrix.proj_name }}
+        MATRIX_BUILD_PARAMS: ${{ matrix.build_params }}
+        MATRIX_PLATFORM: ${{ matrix.platform }}
+        MATRIX_TARGET: ${{ matrix.target }}
 
     - name: Run tests
       timeout-minutes: 15
