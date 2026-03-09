@@ -99,7 +99,7 @@ constexpr int kTensorArenaSize = const_max<int>(
     3 * 1024,
 #endif
 #ifdef INCLUDE_MODEL_MLCOMMONS_TINY_V01_IMGC
-    53 * 1024,
+    54 * 1024,
 #endif
 #ifdef INCLUDE_MODEL_MLCOMMONS_TINY_V01_KWS
     23 * 1024,
