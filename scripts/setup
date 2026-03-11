@@ -81,7 +81,7 @@ if [ ${#missing[@]} -gt 0 ]; then
             $_sudo apt install -y "${missing[@]}"
         else
             echo -n "Install [y]/n? " >&2
-            answer=$(read)
+            read answer
             if [ "$answer" == "y" -o -z "$answer" ]; then
                 $_sudo apt update
                 $_sudo apt install "${missing[@]}"
